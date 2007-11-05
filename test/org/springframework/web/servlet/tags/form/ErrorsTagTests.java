@@ -365,7 +365,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		this.tag.doEndTag();
 		String output = getOutput();
 		assertBlockTagContains(output, "object error");
-		assertFalse(output.contains("field error"));
+		assertFalse(output.indexOf("field error") != -1);
 	}
 
 	protected void exposeBindingResult(Errors errors) {
