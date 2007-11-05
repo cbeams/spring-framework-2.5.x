@@ -150,15 +150,15 @@ public abstract class AnnotationUtils {
 			return annotation;
 		}
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			annotation = ifc.getAnnotation(annotationType);
+			annotation = findAnnotation(ifc, annotationType);
 			if (annotation != null) {
 				return annotation;
 			}
 		}
-		if (!Object.class.equals(clazz.getSuperclass())) {
-			return findAnnotation(clazz.getSuperclass(), annotationType);
+		if (clazz.getSuperclass() == null || Object.class.equals(clazz.getSuperclass())) {
+			return null;
 		}
-		return null;
+		return findAnnotation(clazz.getSuperclass(), annotationType);
 	}
 
 	/**

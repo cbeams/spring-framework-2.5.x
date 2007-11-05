@@ -116,6 +116,10 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 		doTestTranslationNeededForTheseExceptions(new MyInterfaceStereotypedRepositoryInterfaceImpl());
 	}
 
+	public void testTranslationNeededForTheseExceptionsOnInheritedInterface() {
+		doTestTranslationNeededForTheseExceptions(new MyInterfaceInheritedStereotypedRepositoryInterfaceImpl());
+	}
+
 	private void doTestTranslationNeededForTheseExceptions(RepositoryInterfaceImpl target) {
 		RepositoryInterface ri = createProxy(target);
 
@@ -189,6 +193,15 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 
 	public static class MyInterfaceStereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl
 			implements StereotypedInterface {
+	}
+
+
+	public interface StereotypedInheritingInterface extends StereotypedInterface {
+	}
+
+
+	public static class MyInterfaceInheritedStereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl
+			implements StereotypedInheritingInterface {
 	}
 
 }
