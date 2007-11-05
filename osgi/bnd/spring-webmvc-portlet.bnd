@@ -1,5 +1,5 @@
 Export-Package: org.springframework*;version=${spring-version}
-Import-Package: org.apache.commons.logging*,javax.servlet*, javax.portlet*, *;resolution:=optional
+Import-Package: org.apache.commons.logging*, *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-webmvc-portlet
