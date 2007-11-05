@@ -3440,7 +3440,7 @@ jdbc.password=root]]></programlisting>
 				to always override, one to let it <emphasis>never</emphasis> override and
 				one to let it override only if the property cannot be found in the
 				properties file specified. Please consult the Javadoc for the
-				<classname>PropertiesPlaceholderConfigurer</classname> for more information.</para>
+				<classname>PropertyPlaceholderConfigurer</classname> for more information.</para>
 				<tip>
 					<title>Class name substitution</title>
 					<para>The <classname>PropertyPlaceholderConfigurer</classname>
