@@ -3455,7 +3455,6 @@ public class ClinicController {
 
 	private final Clinic clinic;
 
-
 	@Autowired
 	public ClinicController(Clinic clinic) {
 		this.clinic = clinic;
@@ -3463,10 +3462,9 @@ public class ClinicController {
 
 	/**
 	 * Custom handler for the welcome view.
-	 * &lt;p&gt;
 	 * Note that this handler relies on the RequestToViewNameTranslator to
 	 * determine the logical view name based on the request URL: "/welcome.do"
-	 * -&amp;gt; "welcome".
+	 * -&gt; "welcome".
 	 */
 	<emphasis role="bold">@RequestMapping("/welcome.do")</emphasis>
 	public void welcomeHandler() {
@@ -3474,11 +3472,10 @@ public class ClinicController {
 
 	/**
 	 * Custom handler for displaying vets.
-	 * &lt;p&gt;
 	 * Note that this handler returns a plain {@link ModelMap} object instead of
 	 * a ModelAndView, thus leveraging convention-based model attribute names.
 	 * It relies on the RequestToViewNameTranslator to determine the logical
-	 * view name based on the request URL: "/vets.do" -&amp;gt; "vets".
+	 * view name based on the request URL: "/vets.do" -&gt; "vets".
 	 *
 	 * @return a ModelMap with the model attributes for the view
 	 */
@@ -3489,11 +3486,10 @@ public class ClinicController {
 
 	/**
 	 * Custom handler for displaying an owner.
-	 * &lt;p&gt;
 	 * Note that this handler returns a plain {@link ModelMap} object instead of
 	 * a ModelAndView, thus leveraging convention-based model attribute names.
 	 * It relies on the RequestToViewNameTranslator to determine the logical
-	 * view name based on the request URL: "/owner.do" -&amp;gt; "owner".
+	 * view name based on the request URL: "/owner.do" -&gt; "owner".
 	 *
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
@@ -3538,8 +3534,8 @@ public class ClinicController {
           </listitem>
 
           <listitem>
-            <para><classname>RequestParam</classname> annotated parameters for
-            access to specific request parameters.</para>
+            <para><classname>@RequestParam</classname> annotated parameters
+            for access to specific request parameters.</para>
           </listitem>
 
           <listitem>
@@ -3597,7 +3593,7 @@ public class ClinicController {
 @SessionAttributes("pet")
 public class EditPetForm {
 
-...
+    <lineannotation>// ...</lineannotation>
 
 	@RequestMapping(type = "GET")
 	public String setupForm(<emphasis role="bold">@RequestParam("petId") int petId</emphasis>, ModelMap model) {
@@ -3606,7 +3602,7 @@ public class EditPetForm {
 		return "petForm";
 	}
 
-...
+    <lineannotation>// ...</lineannotation>
 </programlisting>
 
       <para>Parameters using this annotation are required by default, but you
@@ -3645,7 +3641,7 @@ public class EditPetForm {
 @SessionAttributes("pet")
 public class EditPetForm {
 
-...
+	<lineannotation>// ...</lineannotation>
 
 	<emphasis role="bold">@ModelAttribute("types")</emphasis>
 	public Collection&lt;PetType&gt; populatePetTypes() {
@@ -3674,9 +3670,9 @@ public class EditPetForm {
       <title>Specifying attributes to store in a Session with
       <classname>@SessionAttributes</classname></title>
 
-      <para>The type-level <classname>@SessionAttributes</classname> annotation
-      declares session attributes used by a specific handler. This will
-      typically list the names of model attributes which should be
+      <para>The type-level <classname>@SessionAttributes</classname>
+      annotation declares session attributes used by a specific handler. This
+      will typically list the names of model attributes which should be
       transparently stored in the session or some conversational storage,
       serving as form-backing beans between subsequent requests.</para>
 
@@ -3687,36 +3683,90 @@ public class EditPetForm {
 @RequestMapping("/editPet.do")
 <emphasis role="bold">@SessionAttributes("pet")</emphasis>
 public class EditPetForm {
-
-...
-
+    <lineannotation>// ...</lineannotation>
 }
 </programlisting>
     </section>
 
-    <section id="mvc-ann-adapter">
-      <title>Customizing the
-      <classname>AnnotationMethodHandlerAdapter</classname></title>
+    <section id="mvc-ann-webdatabinder">
+      <title>Customizing <classname>WebDataBinder</classname>
+      initialization</title>
 
-      <para>To enable customization of request parameter binding with
-      PropertyEditors, etc., you can provide a custom bean configuration for
-      an <classname>AnnotationMethodHandlerAdapter</classname> thus overriding
-      the default configuration.</para>
+      <para>To customize request parameter binding with PropertyEditors, etc.
+      via Spring's <classname>WebDataBinder</classname>, you can either use
+      <interfacename>@InitBinder</interfacename>-annotated methods within your
+      controller or externalize your configuration by providing a custom
+      <interfacename>WebBindingInitializer</interfacename>.</para>
 
-      <para>The following example from the PetClinic application shows a
-      configuration using a custom implementation of the
-      <interfacename>WebBindingInitializer</interfacename> interface,
-      <classname>org.springframework.samples.petclinic.web.ClinicBindingInitializer</classname>,
-      which configures PropertyEditors required by several of the PetClinic
-      controllers.</para>
+      <section id="mvc-ann-initbinder">
+        <title>Customizing data binding with
+        <interfacename>@InitBinder</interfacename></title>
 
-      <programlisting>&lt;bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"&gt;
+        <para>Annotating controller methods with
+        <interfacename>@InitBinder</interfacename> allows you to configure web
+        data binding directly within your controller class.
+        <interfacename>@InitBinder</interfacename> identifies methods which
+        initialize the <classname>WebDataBinder</classname> which will be used
+        for populating command and form object arguments of annotated handler
+        methods.</para>
+
+        <para>Such init-binder methods support all arguments that
+        <interfacename>@RequestMapping</interfacename> supports, except for
+        command/form objects and corresponding validation result objects.
+        Init-binder methods must not have a return value. Thus, they are
+        usually declared as <literal>void</literal>. Typical arguments include
+        <classname>WebDataBinder</classname> in combination with
+        <interfacename>WebRequest</interfacename> or
+        <classname>java.util.Locale</classname>, allowing code to register
+        context-specific editors.</para>
+
+        <para>The following example demonstrates the use of
+        <interfacename>@InitBinder</interfacename> for configuring a
+        <classname>CustomDateEditor</classname> for all
+        <classname>java.util.Date</classname> form properties.</para>
+
+        <programlisting>@Controller
+public class MyFormController {
+
+    <emphasis role="bold">@InitBinder</emphasis>
+    public void initBinder(WebDataBinder binder) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+    }
+
+    <lineannotation>// ...</lineannotation>
+}
+
+</programlisting>
+      </section>
+
+      <section id="mvc-ann-webbindinginitializer">
+        <title>Configuring a custom
+        <interfacename>WebBindingInitializer</interfacename></title>
+
+        <para>To externalize data binding initialization, you can provide a
+        custom implementation of the
+        <interfacename>WebBindingInitializer</interfacename> interface, which
+        you then enable by supplying a custom bean configuration for an
+        <classname>AnnotationMethodHandlerAdapter</classname>, thus overriding
+        the default configuration.</para>
+
+        <para>The following example from the PetClinic application shows a
+        configuration using a custom implementation of the
+        <interfacename>WebBindingInitializer</interfacename> interface,
+        <classname>org.springframework.samples.petclinic.web.ClinicBindingInitializer</classname>,
+        which configures PropertyEditors required by several of the PetClinic
+        controllers.</para>
+
+        <programlisting>&lt;bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"&gt;
     &lt;property name="cacheSeconds" value="0" /&gt;
     &lt;property name="webBindingInitializer"&gt;
         &lt;bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer" /&gt;
     &lt;/property&gt;
 &lt;/bean&gt;
 </programlisting>
+      </section>
     </section>
   </section>
 
