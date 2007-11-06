@@ -46,8 +46,8 @@ import java.lang.annotation.Target;
  * to the request's content.
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content.
- * <li>{@link RequestParam} annotated parameters for access to specific
- * request parameters.
+ * <li>{@link RequestParam @RequestParam} annotated parameters for access to
+ * specific request parameters.
  * <li>{@link java.util.Map} / {@link org.springframework.ui.ModelMap} for
  * enriching the implicit model that will be exposed to the web view.
  * <li>Command/form objects to bind parameters to: as bean properties or fields,
