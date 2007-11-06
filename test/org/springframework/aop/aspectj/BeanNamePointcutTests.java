@@ -51,8 +51,10 @@ public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringCont
 
 	public void testMatchingBeanName() {
 		assertTrue("Matching bean must be advised (proxied)", this.testBean1 instanceof Advised);
+		// Call two methods to test for SPR-3953-like condition
 		this.testBean1.setAge(20);
-		assertEquals("Advice not executed: must have been", 1, this.counterAspect.getCount());
+		this.testBean1.setName("");
+		assertEquals("Advice not executed: must have been", 2, this.counterAspect.getCount());
 	}
 
 	public void testNonMatchingBeanName() {

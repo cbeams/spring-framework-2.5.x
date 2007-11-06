@@ -54,8 +54,10 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 
 	public void testMatchingBeanName() {
 		assertTrue("Expected a proxy", testBean1 instanceof Advised);
+		// Call two methods to test for SPR-3953-like condition
 		testBean1.setAge(20);
-		assertEquals(1, counterAspect.count);
+		testBean1.setName("");
+		assertEquals(2, counterAspect.count);
 	}
 
 	public void testNonMatchingBeanName() {
@@ -86,7 +88,7 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 
 		int count;
 
-		@Before("execution(* setAge(..)) && bean(testBean1)")
+		@Before("execution(* set*(..)) && bean(testBean1)")
 		public void increment1ForAnonymousPointcut() {
 			count++;
 		}

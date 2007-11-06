@@ -448,6 +448,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * Matcher class for the BeanNamePointcutDesignatorHandler.
+	 * 
+	 * Static and dynamic match tests for this matcher always return true, 
+	 * since the matching decision is made at the proxy creation time.
 	 */
 	private class BeanNameContextMatcher implements ContextBasedMatcher {
 
@@ -466,11 +469,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		public boolean matchesDynamically(MatchingContext context) {
-			return contextMatch();
+			return true;
 		}
 
 		public FuzzyBoolean matchesStatically(MatchingContext context) {
-			return FuzzyBoolean.fromBoolean(contextMatch());
+			return FuzzyBoolean.YES;
 		}
 
 		public boolean mayNeedDynamicTest() {

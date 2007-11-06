@@ -7,7 +7,7 @@
 
 	<aop:config>
 		<aop:aspect id="beanNameMatchingTest" ref="counterAspect">
-			<aop:pointcut id="bean1Operation" expression="execution(* setAge(..)) and bean(testBean1)"/>
+			<aop:pointcut id="bean1Operation" expression="execution(* set*(..)) and bean(testBean1)"/>
 			<aop:before pointcut-ref="bean1Operation" method="increment()"/>
 
 			<aop:pointcut id="nestedBeanOperation" expression="execution(* getCompany(..)) and bean(*)"/>
