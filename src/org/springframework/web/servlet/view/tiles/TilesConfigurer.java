@@ -114,6 +114,7 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 
 		// initialize the configuration for the definitions factory
 		DefinitionsFactoryConfig factoryConfig = new DefinitionsFactoryConfig();
+		factoryConfig.setFactoryName("");
 		factoryConfig.setFactoryClassname(this.factoryClass.getName());
 		factoryConfig.setParserValidate(this.validateDefinitions);
 
