@@ -365,12 +365,13 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #getExporterParameter(Object)
 	 */
 	protected final void convertExporterParameters() {
-		if (this.exporterParameters != null && !this.exporterParameters.isEmpty()) {
+		if (!CollectionUtils.isEmpty(this.exporterParameters)) {
 			this.convertedExporterParameters = new HashMap(this.exporterParameters.size());
 			for (Iterator it = this.exporterParameters.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				JRExporterParameter exporterParameter = getExporterParameter(entry.getKey());
-				this.convertedExporterParameters.put(exporterParameter, convertParameterValue(exporterParameter, entry.getValue()));
+				this.convertedExporterParameters.put(
+						exporterParameter, convertParameterValue(exporterParameter, entry.getValue()));
 			}
 		}
 	}
@@ -382,6 +383,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * "false" into corresponding <code>Boolean</code> objects, and tries to convert
 	 * String values that start with a digit into <code>Integer</code> objects
 	 * (simply keeping them as String if number conversion fails).
+	 * @param parameter the parameter key
+	 * @param value the parameter value
+	 * @return the converted parameter value
 	 */
 	protected Object convertParameterValue(JRExporterParameter parameter, Object value) {
 		if (value instanceof String) {
@@ -644,7 +648,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 					try {
 						con.close();
 					}
-					catch (SQLException ex) {
+					catch (Throwable ex) {
 						logger.debug("Could not close JDBC Connection", ex);
 					}
 				}
