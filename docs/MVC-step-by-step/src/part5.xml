@@ -55,7 +55,7 @@
     running one of these startup scripts.</para>
   </section>
 
-  <section>
+  <section id="step5.2">
     <title>Create table and test data scripts</title>
 
     <para>First, lets review the SQL statement needed to create the table. We
@@ -83,7 +83,7 @@ INSERT INTO products (id, description, price) values(3, 'Chair', 22.81);</progra
     script so that we can run these SQL scripts.</para>
   </section>
 
-  <section>
+  <section id="step5.3">
     <title>Add Ant tasks to run scripts and load test data</title>
 
     <para>We will create tables and populate them with test data using Ant's
@@ -205,7 +205,7 @@ db.pw=</emphasis></programlisting>
     printData'</classname> to prepare the test data we will use later.</para>
   </section>
 
-  <section id="step5.2">
+  <section id="step5.4">
     <title>Create a Data Access Object (DAO) implementation for JDBC</title>
 
     <para>Begin with creating a new
@@ -391,7 +391,7 @@ public class Product implements Serializable {
     persistence layer.</filename></para>
   </section>
 
-  <section id="step5.2">
+  <section id="step5.5">
     <title>Inplement unit test for JDBC DAO implementation</title>
 
     <para>Time to add tests for the JDBC DAO implementation. Spring provides
