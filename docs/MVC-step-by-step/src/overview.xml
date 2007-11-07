@@ -40,10 +40,6 @@
       </listitem>
 
       <listitem>
-        <para>Data access with the Java Persistence API (JPA)</para>
-      </listitem>
-
-      <listitem>
         <para>Unit and integration testing</para>
       </listitem>
 
@@ -128,8 +124,8 @@
     introduced, starting with the Spring Web MVC framework. We will use Spring
     Web MVC to display the inventoried stock, which will involve writing some
     simple Java classes and some JSPs. We will then move onto introducing
-    persistent data access into our application, using your choice of either
-    JDBC or JPA.</para>
+    persistent data access into our application, using Spring's Simple JDBC
+    support.</para>
 
     <para>By the time we have finished all of the steps in the tutorial, we
     will have an application that does basic inventory management, including

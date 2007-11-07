@@ -2,43 +2,517 @@
 <chapter id="part5">
   <title>Implementing Database Persistence [UNDER CONSTRUCTION]</title>
 
-  <para>This is Chapter 4 of a step-by-step account of how to develop a web
-  application from scratch using the Spring Framework. In Chapter 1 we
-  configured the environment and set up a basic application that we will build
-  upon. Chapter 2 improved the application in several ways. Chapter 3 added
-  some unit tests to the application and we also added a Form for performing a
-  price increase. In Chapter 4 it is time to deal with database persistence.
-  We saw in the earlier parts how we loaded some business objects using bean
-  definitions in a configuration file. It is obvious that this would never
-  work in real life – whenever we re-start the server we are back to the
-  original prices. We need to add code to actually persist these changes to a
-  database.</para>
+  <para>This is Part 5 of a step-by-step account of how to develop a web
+  application from scratch using the Spring Framework. In <link
+  linkend="part1">Part 1</link> we configured the environment and set up a
+  basic application. In <link linkend="part2">Part 2</link> we refined the
+  application that we will build upon. <link linkend="part3">Part 3</link>
+  added all the business logic and unit tests and <link linkend="part4">Part
+  4</link> developed the web interface. It is now time to introduce database
+  persistence. We saw in the earlier parts how we loaded some business objects
+  using bean definitions in a configuration file. It is obvious that this
+  would never work in real life – whenever we re-start the server we are back
+  to the original prices. We need to add code to actually persist these
+  changes to a database.</para>
 
   <section id="step5.1">
-    <title>Add Ant tasks to create and load test data</title>
+    <title>Create database startup script</title>
 
-    <para>Before we can start developing the persistence code, we should
-    create the database tables that we need for our development and testing.
-    We also need a database. I am planning on using HSQL, which is a good open
-    source database written in Java. This database is distributed with Spring,
-    so we can just copy the jar file to the web apps lib directory. Copy
-    spring-framework-1.2/lib/hsqldb/hsqldb.jar to springapp/war/WEB-INF/lib/.
-    I am planning on using HSQL in a standalone mode to begin with. That way
-    we don't have to worry about starting up a separate database server every
-    time we use it. The URL we specify for connecting to HSQL controls the
-    mode that the database is running in. To be able to run some Ant tasks for
-    the database we have to add some database properties to the build
-    properties file.</para>
+    <para>Before we can start developing the persistence code, we need a
+    database. I am planning on using HSQL, which is a good open source
+    database written in Java. This database is distributed with Spring, so we
+    can just copy the jar file to the web apps lib directory. Copy <filename
+    class="libraryfile">hsqldb.jar</filename> from the <filename
+    class="directory">'spring-framework-2.5/lib/hsqldb'</filename> directory
+    to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
+    directory. I am planning on using HSQL in a standalone mode. That means we
+    will have to start up a separate database server every time we use it, but
+    it gives us easier access to see changes made to the database.</para>
+
+    <para>We need a script or batch file to start the database. Create a
+    <filename class="directory">'db'</filename> directory under the main
+    <filename class="directory">'springapp'</filename> directory. This new
+    directory will contain the datbase files. Now, let's and add a startup
+    script:</para>
+
+    <para>For Linux/Mac OS X add:</para>
+
+    <para><filename>'springapp/db/server.sh'</filename>:</para>
+
+    <programlisting>java -classpath ../war/WEB-INF/lib/hsqldb.jar org.hsqldb.Server -database test</programlisting>
+
+    <para>Don't forget tp change the execute permission by runnning
+    <classname>'chmod +x server.sh'</classname>.</para>
+
+    <para>For Windows add:</para>
+
+    <para><filename>'springapp/db/server.bat'</filename>:</para>
+
+    <programlisting>java -classpath ..\war\WEB-INF\lib\hsqldb.jar org.hsqldb.Server -database test</programlisting>
+
+    <para>Now you can open a command window, change to the
+    <classname>'springapp/db'</classname> directory and start the database by
+    running one of these startup scripts.</para>
+  </section>
+
+  <section>
+    <title>Create table and test data scripts</title>
+
+    <para>First, lets review the SQL statement needed to create the table. We
+    create the file 'create_products.sql' in the db directory.</para>
+
+    <para><filename>'springapp/db/create_products.sql'</filename>:</para>
+
+    <programlisting>CREATE TABLE products (
+  id INTEGER NOT NULL PRIMARY KEY,
+  description varchar(255),
+  price decimal(15,2)
+);
+CREATE INDEX products_description ON products(description);</programlisting>
+
+    <para>Now we need to add our test data. Create the file 'load_data.sql' in
+    the db directory.</para>
+
+    <para><filename>'springapp/db/load_data.sql'</filename>:</para>
+
+    <programlisting>INSERT INTO products (id, description, price) values(1, 'Lamp', 5.78);
+INSERT INTO products (id, description, price) values(2, 'Table', 75.29);
+INSERT INTO products (id, description, price) values(3, 'Chair', 22.81);</programlisting>
+
+    <para>In the following section we will add some Ant targets to the build
+    script so that we can run these SQL scripts.</para>
+  </section>
+
+  <section>
+    <title>Add Ant tasks to run scripts and load test data</title>
+
+    <para>We will create tables and populate them with test data using Ant's
+    built-in "sql" task. To use this we need to add some database connection
+    properties to the build properties file.</para>
+
+    <para><filename>'springapp/build.properties'</filename>:</para>
+
+    <programlisting># Ant properties for building the springapp
+
+appserver.home=${user.home}/apache-tomcat-6.0.14
+# for Tomcat 5 use $appserver.home}/server/lib
+# for Tomcat 6 use $appserver.home}/lib
+appserver.lib=${appserver.home}/lib
+
+deploy.path=${appserver.home}/webapps
+
+tomcat.manager.url=http://localhost:8080/manager
+tomcat.manager.username=tomcat
+tomcat.manager.password=s3cret
+
+<emphasis role="bold">db.driver=org.hsqldb.jdbcDriver
+db.url=jdbc:hsqldb:hsql://localhost
+db.user=sa
+db.pw=</emphasis></programlisting>
+
+    <para>Next we add the targets we need to the build script. There are
+    targets to create and delete tables and to load and delete test
+    data.</para>
+
+    <para><filename>Add the following targets to
+    'springapp/build.xml'</filename>:</para>
+
+    <programlisting><emphasis role="bold">
+    &lt;target name="createTables"&gt;
+        &lt;echo message="CREATE TABLES USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"
+             src="db/create_products.sql"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="dropTables"&gt;
+        &lt;echo message="DROP TABLES USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        DROP TABLE products;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="loadData"&gt;
+        &lt;echo message="LOAD DATA USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"
+             src="db/load_data.sql"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="printData"&gt;
+        &lt;echo message="PRINT DATA USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"
+             print="true"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        SELECT * FROM products;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="clearData"&gt;
+        &lt;echo message="CLEAR DATA USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        DELETE FROM products;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="shutdownDb"&gt;
+        &lt;echo message="SHUT DOWN DATABASE USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        SHUTDOWN;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+</emphasis></programlisting>
+
+    <para>Now you can execute <classname>'ant createTables loadData
+    printData'</classname> to prepare the test data we will use later.</para>
   </section>
 
   <section id="step5.2">
     <title>Create a Data Access Object (DAO) implementation for JDBC</title>
 
-    <para>I begin with creating a new 'springapp/src/db' directory to contain
-    any classes that are used for database access. In this directory I create
-    a new interface called 'ProductManagerDao.java'. This will be the
-    interface that defines the functionality that the DAO implementation
-    classes will provide – we could choose to have more than one
-    implementation.</para>
+    <para>Begin with creating a new
+    <classname>'springapp/src/repository'</classname> directory to contain any
+    classes that are used for database access. In this directory I create a
+    new interface called <classname>'ProductDao.java</classname>'. This will
+    be the interface that defines the functionality that the DAO
+    implementation classes will provide – we could choose to have more than
+    one implementation some day.</para>
+
+    <para><filename>'springapp/src/springapp/repository/ProductDao.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.util.List;
+
+import springapp.domain.Product;
+
+public interface ProductDao {
+
+    public List&lt;Product&gt; getProductList();
+
+    public void saveProduct(Product prod);
+
+}</programlisting>
+
+    <para>I'll follow this with a class called
+    '<classname>JdbcProductDao.java</classname>' that will be the JDBC
+    implementation of this interface. Spring provides a JDBC abstraction
+    framework that we will make use of. The biggest difference between using
+    straight JDBC and Spring's JDBC framework is that you don't have to worry
+    about opening and closing the connection or any statements. It is all
+    handled for you. Another advantage is that you won't have to catch any
+    exceptions, unless you want to. Spring wraps all SQLExceptions in it's own
+    unchecked exception hierarchy inheriting from DataAccessException. If you
+    want to you can catch this exception, but since most database exceptions
+    are impossible to recover from anyway, you might as well just let the
+    exception propagate up to a higher level. The class
+    <classname>SimpleJdbcDaoSupport</classname> provides convenient access to
+    an already configured <classname>SimpleJdbcTemplate</classname>, so we
+    extend this class. All we will have to provide in the application context
+    is a configured <classname>DataSource</classname>.</para>
+
+    <para><filename>'springapp/src/springapp/repository/JdbcProductDao.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
+
+import springapp.domain.Product;
+
+public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+
+    public List&lt;Product&gt; getProductList() {
+        logger.info("Getting products!");
+        List&lt;Product&gt; products = getSimpleJdbcTemplate().query("select id, description, price from products", 
+            new ProductMapper());
+        return products;
+    }
+
+    public void saveProduct(Product prod) {
+        logger.info("Saving product: " + prod.getDescription());
+        int count = getSimpleJdbcTemplate().update(
+            "update product set description = :description, price = :price where id = :id",
+            new MapSqlParameterSource().addValue("description", prod.getDescription())
+                .addValue("price", prod.getPrice())
+                .addValue("id", prod.getId()));
+        logger.info("Rows affected: " + count);
+    }
+    
+    private static class ProductMapper implements ParameterizedRowMapper&lt;Product&gt; {
+
+        public Product mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Product prod = new Product();
+            prod.setId(rs.getInt("id"));
+            prod.setDescription(rs.getString("description"));
+            prod.setPrice(new Double(rs.getDouble("price")));
+            return prod;
+        }
+
+    }
+
+}</programlisting>
+
+    <para>Let's go over the two DAO methods in this class. Since we are
+    extending <classname>SimpleJdbcSupport</classname> we get a
+    <classname>SimpleJdbcTemplate</classname> prepared and ready to use. This
+    is accessed by callng the <classname>getSimpleJdbc()</classname> method.
+    </para>
+
+    <para>The first method, <classname>getProductList()</classname> executes a
+    query using the <classname>SimpleJdbcTemplate</classname>. We simply
+    provide the SQL statement and a class that can handle the mapping between
+    the <classname>ResultSet</classname> and the
+    <classname>Product</classname> class. In our case the row mapper is a
+    class named <classname>ProductMapper</classname> that we define as an
+    inner class of the DAO. This class will sofar not be used outside of the
+    DAO so making it an inner clas works well.</para>
+
+    <para>The ProductMapper implements the
+    <classname>ParameterizedRowMapper</classname> interface that defines a
+    single method named <classname>mapRow</classname> that must be
+    implemented. This method will map the data from each row into a class that
+    represents the entity you are retrieving in your query. Since the
+    <classname>RowMapper</classname> is parameterized, the
+    <classname>mapRow</classname> method returns the actual type that s
+    created.</para>
+
+    <para>The second method saveProduct is also using the
+    <classname>SimplJdbcTemplate</classname>. This time we are calling the
+    <classname>update</classname> method passing in an SQL statement together
+    with the parameter values in the form of a
+    <classname>MapSqlParameterSource</classname>. Using a
+    <classname>MapSqlParameterSource</classname> allows us to use named
+    parameters instead of the typical "?" placeolders that you are used to
+    from writing plain JDBC. The named parameters makes your code more
+    explicit and you avoid problems caused by parameters being set out of
+    order etc. The update method does return the count of rows
+    affected.</para>
+
+    <para>We need to store the value of the primary key for each product in
+    the Product class. This key will be used when I persist any changes to the
+    object back to the database. To hold this key I add a private field named
+    'id' complete with setters and getters to Product.java.</para>
+
+    <para><filename>'springapp/src/springapp/domain/Product.java'</filename>:</para>
+
+    <programlisting>package springapp.domain;
+
+import java.io.Serializable;
+
+public class Product implements Serializable {
+
+<emphasis role="bold">    private int id;
+</emphasis>    private String description;
+    private Double price;
+    
+<emphasis role="bold">    public void setId(int i) {
+        id = i;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+</emphasis>    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public Double getPrice() {
+        return price;
+    }
+    
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+    
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Description: " + description + ";");
+        buffer.append("Price: " + price);
+        return buffer.toString();
+    }
+}</programlisting>
+
+    <para><filename>This completes the Simple JDBC implementation of our
+    persistence layer.</filename></para>
+  </section>
+
+  <section id="step5.2">
+    <title>Inplement unit test for JDBC DAO implementation</title>
+
+    <para>Time to add tests for the JDBC DAO implementation. Spring provides
+    an extenive testing framework that supports JUnit 3.8 and 4 as well as
+    TestNG. We can't cover all of that in this guide but we will show a simple
+    implementation of the JUnit 3.8 specific support.</para>
+
+    <para><filename>'springapp/test/springapp/domain/JdbcProductDaoTests.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.util.List;
+
+public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringContextTests {
+
+    private ProductDao productDao;
+
+    
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    @Override
+    protected String[] getConfigLocations() {
+        return new String[] {"classpath:test-context.xml"};
+    }
+
+    @Override
+    protected void onSetUpInTransaction() throws Exception {
+        super.deleteFromTables(new String[] {"products"});
+        super.executeSqlScript("file:db/load_data.sql", true);
+    }
+
+    public void testGetProductList() {
+        
+        List&lt;Product&gt; products = productDao.getProductList();
+        
+        assertEquals("wrong number of products?", 3, products.size());
+        
+    }
+    
+    public void testSaveProduct() {
+        
+        List&lt;Product&gt; products = productDao.getProductList();
+        
+        for (Product p : products) {
+            p.setPrice(200.12);
+            productDao.saveProduct(p);
+        }
+        
+        List&lt;Product&gt; updatedProducts = productDao.getProductList();
+        for (Product p : updatedProducts) {
+            assertEquals("wrong price of product?", 200.12, p.getPrice());
+        }
+
+    }
+
+}</programlisting>
+
+    <para>? ...</para>
+
+    <para><filename>'springapp/src/springapp/repository/JdbcProductDao.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
+
+import springapp.domain.Product;
+
+public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+
+    public List&lt;Product&gt; getProductList() {
+        logger.info("Getting products!");
+        List&lt;Product&gt; products = getSimpleJdbcTemplate().query("select id, description, price from products", 
+            new ProductMapper());
+        return products;
+    }
+
+    public void saveProduct(Product prod) {
+        logger.info("Saving product: " + prod.getDescription());
+        int count = getSimpleJdbcTemplate().update(
+            "update product set description = :description, price = :price where id = :id",
+            new MapSqlParameterSource().addValue("description", prod.getDescription())
+                .addValue("price", prod.getPrice())
+                .addValue("id", prod.getId()));
+        logger.info("Rows affected: " + count);
+    }
+    
+    private static class ProductMapper implements ParameterizedRowMapper&lt;Product&gt; {
+
+        public Product mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Product prod = new Product();
+            prod.setId(rs.getInt("id"));
+            prod.setDescription(rs.getString("description"));
+            prod.setPrice(new Double(rs.getDouble("price")));
+            return prod;
+        }
+
+    }
+
+}</programlisting>
+
+    <para>Let's </para>
+
+    <para><filename>'springapp/build.xml'</filename>:</para>
+
+    <programlisting>...
+</programlisting>
+
+    <para>Time to run this test...</para>
   </section>
 </chapter>
