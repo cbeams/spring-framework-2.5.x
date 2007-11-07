@@ -114,8 +114,11 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * expressions in a JSP 2.0 page, as well as in JSTL's <code>c:out</code>
 	 * value expressions.
 	 * <p>Default is "false". Switch this flag on to transparently expose all
-	 * Spring beans in the request attribute namespace. The {@link JstlView}
-	 * subclass sets this flag to "true" by default.
+	 * Spring beans in the request attribute namespace.
+	 * <p><b>NOTE:</b> Context beans will override any custom request or session
+	 * attributes of the same name that have been manually added. However, model
+	 * attributes (as explicitly exposed to this view) of the same name will
+	 * always override context beans.
 	 * @see #getRequestToExpose
 	 */
 	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
@@ -130,28 +133,28 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	protected void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
+		// Determine which request handle to expose to the RequestDispatcher.
+		HttpServletRequest requestToExpose = getRequestToExpose(request);
+
 		// Expose the model object as request attributes.
-		exposeModelAsRequestAttributes(model, request);
+		exposeModelAsRequestAttributes(model, requestToExpose);
 
 		// Expose helpers as request attributes, if any.
-		exposeHelpers(request);
+		exposeHelpers(requestToExpose);
 
 		// Determine the path for the request dispatcher.
-		String dispatcherPath = prepareForRendering(request, response);
+		String dispatcherPath = prepareForRendering(requestToExpose, response);
 
 		// Forward to the resource (typically a JSP).
 		// Note: The JSP is supposed to determine the content type itself.
-		RequestDispatcher rd = request.getRequestDispatcher(dispatcherPath);
+		RequestDispatcher rd = requestToExpose.getRequestDispatcher(dispatcherPath);
 		if (rd == null) {
 			throw new ServletException(
 					"Could not get RequestDispatcher for [" + getUrl() + "]: check that this file exists within your WAR");
 		}
 
-		// Determine which request handle to expose to the RequestDispatcher.
-		HttpServletRequest requestToExpose = getRequestToExpose(request);
-
 		// If already included or response already committed, perform include, else forward.
-		if (useInclude(request, response)) {
+		if (useInclude(requestToExpose, response)) {
 			rd.include(requestToExpose, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
@@ -159,7 +162,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		}
 
 		else {
-			exposeForwardRequestAttributes(request);
+			exposeForwardRequestAttributes(requestToExpose);
 			rd.forward(requestToExpose, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");

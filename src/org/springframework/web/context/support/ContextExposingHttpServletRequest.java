@@ -16,6 +16,9 @@
 
 package org.springframework.web.context.support;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -32,6 +35,8 @@ import org.springframework.web.context.WebApplicationContext;
 public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper {
 
 	private final WebApplicationContext webApplicationContext;
+
+	private Set explicitAttributes;
 
 
 	/**
@@ -53,12 +58,21 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 
 
 	public Object getAttribute(String name) {
-		if (this.webApplicationContext.containsBean(name)) {
+		if ((this.explicitAttributes == null || !this.explicitAttributes.contains(name)) &&
+				this.webApplicationContext.containsBean(name)) {
 			return this.webApplicationContext.getBean(name);
 		}
 		else {
 			return super.getAttribute(name);
 		}
+	}
+
+	public void setAttribute(String name, Object value) {
+		super.setAttribute(name, value);
+		if (this.explicitAttributes == null) {
+			this.explicitAttributes = new HashSet(8);
+		}
+		this.explicitAttributes.add(name);
 	}
 
 }

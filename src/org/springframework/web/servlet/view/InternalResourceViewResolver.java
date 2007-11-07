@@ -94,8 +94,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * <p>This will make all such beans accessible in plain <code>${...}</code>
 	 * expressions in a JSP 2.0 page, as well as in JSTL's <code>c:out</code>
 	 * value expressions.
-	 * <p>Default is "false" for a standard {@link InternalResourceView} and
-	 * "true" for a {@link JstlView} (used by default if the JSTL API is present).
+	 * <p>Default is "false".
 	 * @see InternalResourceView#setExposeContextBeansAsAttributes
 	 */
 	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
