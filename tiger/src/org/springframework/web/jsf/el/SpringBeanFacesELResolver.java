@@ -72,7 +72,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * @see org.springframework.web.jsf.WebApplicationContextVariableResolver
  * @see org.springframework.web.jsf.FacesContextUtils#getRequiredWebApplicationContext
  */
-public class DelegatingFacesELResolver extends ELResolver {
+public class SpringBeanFacesELResolver extends ELResolver {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -83,12 +83,12 @@ public class DelegatingFacesELResolver extends ELResolver {
 			// Ask Spring root application context.
 			String beanName = property.toString();
 			if (logger.isTraceEnabled()) {
-				logger.trace("Attempting to resolve variable '" + beanName + "' in root WebApplicationContext");
+				logger.trace("Attempting to resolve variable '" + beanName + "' in Spring ApplicationContext");
 			}
 			BeanFactory bf = getBeanFactory(elContext);
 			if (bf.containsBean(beanName)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Successfully resolved variable '" + beanName + "' in root WebApplicationContext");
+					logger.debug("Successfully resolved variable '" + beanName + "' in Spring ApplicationContext");
 				}
 				elContext.setPropertyResolved(true);
 				return bf.getBean(beanName);

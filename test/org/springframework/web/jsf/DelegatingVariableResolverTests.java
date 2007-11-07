@@ -38,11 +38,29 @@ public class DelegatingVariableResolverTests extends TestCase {
 		wac.registerSingleton("var1", TestBean.class, null);
 		wac.refresh();
 		TestBean bean1 = (TestBean) wac.getBean("bean1");
-		TestBean var1 = (TestBean) wac.getBean("var1");
 
 		// We need to override the getWebApplicationContext method here:
 		// FacesContext and ExternalContext are hard to mock.
 		DelegatingVariableResolver resolver = new DelegatingVariableResolver(new OriginalVariableResolver()) {
+			protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {
+				return wac;
+			}
+		};
+		assertEquals(bean1, resolver.resolveVariable(null, "bean1"));
+		assertEquals("val1", resolver.resolveVariable(null, "var1"));
+	}
+
+	public void testSpringBeanVariableResolver() {
+		final StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("bean1", TestBean.class, null);
+		wac.registerSingleton("var1", TestBean.class, null);
+		wac.refresh();
+		TestBean bean1 = (TestBean) wac.getBean("bean1");
+		TestBean var1 = (TestBean) wac.getBean("var1");
+
+		// We need to override the getWebApplicationContext method here:
+		// FacesContext and ExternalContext are hard to mock.
+		SpringBeanVariableResolver resolver = new SpringBeanVariableResolver(new OriginalVariableResolver()) {
 			protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {
 				return wac;
 			}

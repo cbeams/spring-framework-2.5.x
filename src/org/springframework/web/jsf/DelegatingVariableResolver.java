@@ -102,31 +102,48 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * resolve the variable as Spring bean in the root WebApplicationContext.
 	 */
 	public Object resolveVariable(FacesContext facesContext, String name) throws EvaluationException {
-		// Ask Spring root application context.
+		Object value = resolveOriginal(facesContext, name);
+		if (value != null) {
+			return value;
+		}
+		Object bean = resolveSpringBean(facesContext, name);
+		if (bean != null) {
+			return bean;
+		}
+		return null;
+	}
+
+	/**
+	 * Resolve the attribute via the original JSF VariableResolver.
+	 */
+	protected Object resolveOriginal(FacesContext facesContext, String name) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Attempting to resolve variable '" + name + "' in root WebApplicationContext");
+			logger.trace("Attempting to resolve variable '" + name + "' via original VariableResolver");
+		}
+		Object value = getOriginalVariableResolver().resolveVariable(facesContext, name);
+		if (value != null && logger.isDebugEnabled()) {
+			logger.debug("Successfully resolved variable '" + name + "' via original VariableResolver");
+		}
+		return value;
+	}
+
+	/**
+	 * Resolve the attribute as a Spring bean in the ApplicationContext.
+	 */
+	protected Object resolveSpringBean(FacesContext facesContext, String name) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Attempting to resolve variable '" + name + "' in Spring ApplicationContext");
 		}
 		BeanFactory bf = getBeanFactory(facesContext);
 		if (bf.containsBean(name)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Successfully resolved variable '" + name + "' in root WebApplicationContext");
+				logger.debug("Successfully resolved variable '" + name + "' in Spring ApplicationContext");
 			}
 			return bf.getBean(name);
 		}
-
-		// Ask original JSF variable resolver.
-		if (logger.isTraceEnabled()) {
-			logger.trace("Attempting to resolve variable '" + name + "' in via original VariableResolver");
+		else {
+			return null;
 		}
-		Object originalResult = getOriginalVariableResolver().resolveVariable(facesContext, name);
-		if (originalResult != null) {
-			return originalResult;
-		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Could not resolve variable '" + name + "'");
-		}
-		return null;
 	}
 
 	/**

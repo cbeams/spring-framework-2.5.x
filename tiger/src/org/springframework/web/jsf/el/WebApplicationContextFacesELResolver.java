@@ -36,7 +36,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * <code>WebApplicationContext</code> instance under a variable named
  * "webApplicationContext".
  *
- * <p>In contrast to {@link DelegatingFacesELResolver}, this ELResolver variant
+ * <p>In contrast to {@link SpringBeanFacesELResolver}, this ELResolver variant
  * does <i>not</i> resolve JSF variable names as Spring bean names. It rather
  * exposes Spring's root WebApplicationContext <i>itself</i> under a special name,
  * and is able to resolve "webApplicationContext.mySpringManagedBusinessObject"
@@ -52,7 +52,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  *
  * @author Juergen Hoeller
  * @since 2.5
- * @see DelegatingFacesELResolver
+ * @see SpringBeanFacesELResolver
  * @see org.springframework.web.jsf.FacesContextUtils#getWebApplicationContext
  */
 public class WebApplicationContextFacesELResolver extends ELResolver {
