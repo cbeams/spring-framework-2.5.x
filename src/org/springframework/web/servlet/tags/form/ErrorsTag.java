@@ -113,12 +113,19 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Get the value for the HTML '<code>id</code>' attribute.
-	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPropertyPath()}.
-	 * @return the value for the HTML '<code>name</code>' attribute
-	 * @see #getPath()
+	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPropertyPath()}
+	 * or to the model attribute name if the <code>&lt;form:errors/&gt;</code> tag's
+	 * '<code>path</code>' attribute has been omitted.
+	 * @return the value for the HTML '<code>id</code>' attribute
+	 * @see #getPropertyPath()
 	 */
 	protected String autogenerateId() throws JspException {
-		return getPropertyPath() + ".errors";
+		String path = getPropertyPath();
+		if (path.isEmpty()) {
+			path = (String) this.pageContext.getAttribute(
+					FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		}
+		return path + ".errors";
 	}
 
 	/**
