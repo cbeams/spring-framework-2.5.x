@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpServlet;
@@ -89,8 +90,10 @@ public class ContextLoaderTests extends TestCase {
 		final ServletContextListener listener = new ContextLoaderListener() {
 			protected ContextLoader createContextLoader() {
 				return new ContextLoader() {
-					protected void customizeContext(ConfigurableWebApplicationContext context) {
-						assertFalse("The context should not yet have been refreshed.", context.isActive());
+					protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
+						assertNotNull("The ServletContext should not be null.", servletContext);
+						assertEquals("Verifying that we received the expected ServletContext.", sc, servletContext);
+						assertFalse("The ApplicationContext should not yet have been refreshed.", applicationContext.isActive());
 						buffer.append(expectedContents);
 					}
 				};
@@ -163,7 +166,7 @@ public class ContextLoaderTests extends TestCase {
 		ServletContextEvent event = new ServletContextEvent(sc);
 		try {
 			listener.contextInitialized(event);
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// expected

@@ -247,7 +247,7 @@ public class ContextLoader {
 					ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 
-		customizeContext(wac);
+		customizeContext(servletContext, wac);
 
 		wac.refresh();
 		return wac;
@@ -296,10 +296,11 @@ public class ContextLoader {
 	 * to customize the application context.
 	 * </p>
 	 *
-	 * @param context the newly created application context
+	 * @param servletContext the current servlet context
+	 * @param applicationContext the newly created application context
 	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
 	 */
-	protected void customizeContext(final ConfigurableWebApplicationContext context) {
+	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
 		/* no-op */
 	}
 
