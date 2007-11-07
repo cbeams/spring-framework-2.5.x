@@ -17,6 +17,7 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
 
-	private final Set<String> metaAnnotationTypes = new HashSet<String>();
+	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
 
 
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
@@ -55,9 +56,11 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 				try {
 					Class clazz = getClass().getClassLoader().loadClass(className);
 					Annotation[] metaAnnotations = clazz.getAnnotations();
+					Set<String> metaAnnotationTypeNames = new HashSet<String>();
 					for (Annotation metaAnnotation : metaAnnotations) {
-						metaAnnotationTypes.add(metaAnnotation.annotationType().getName());
+						metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
 					}
+					metaAnnotationMap.put(className, metaAnnotationTypeNames);
 				}
 				catch (ClassNotFoundException ex) {
 					// Class not found - can't determine meta-annotations.
@@ -76,12 +79,18 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 		return this.attributesMap.containsKey(annotationType);
 	}
 
-	public Set<String> getMetaAnnotationTypes() {
-		return this.metaAnnotationTypes;
+	public Set<String> getMetaAnnotationTypes(String annotationType) {
+		return this.metaAnnotationMap.get(annotationType);
 	}
 
-	public boolean hasMetaAnnotation(String annotationType) {
-		return this.metaAnnotationTypes.contains(annotationType);
+	public boolean hasMetaAnnotation(String metaAnnotationType) {
+		Collection<Set<String>> allMetaTypes = this.metaAnnotationMap.values();
+		for (Set<String> metaTypes : allMetaTypes) {
+			if (metaTypes.contains(metaAnnotationType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {

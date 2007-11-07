@@ -37,14 +37,29 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 	private final Class<? extends Annotation> annotationType;
 
+	private final boolean considerMetaAnnotations;
+
+
+	/**
+	 * Create a new AnnotationTypeFilter for the given annotation type.
+	 * This filter will also match meta-annotations. To disable the
+	 * meta-annotation matching, use the constructor that accepts a
+	 * '<code>considerMetaAnnotations</code>' argument.
+	 * @param annotationType the annotation type to match
+	 */
+	public AnnotationTypeFilter(Class<? extends Annotation> annotationType) {
+		this(annotationType, true);
+	}
 
 	/**
 	 * Create a new AnnotationTypeFilter for the given annotation type.
 	 * @param annotationType the annotation type to match
+	 * @param considerMetaAnnotations whether to also match on meta-annotations
 	 */
-	public AnnotationTypeFilter(Class<? extends Annotation> annotationType) {
+	public AnnotationTypeFilter(Class<? extends Annotation> annotationType, boolean considerMetaAnnotations) {
 		super(annotationType.isAnnotationPresent(Inherited.class), false);
 		this.annotationType = annotationType;
+		this.considerMetaAnnotations = considerMetaAnnotations;
 	}
 
 
@@ -52,7 +67,7 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	protected boolean matchSelf(MetadataReader metadataReader) {
 		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
 		return metadata.hasAnnotation(this.annotationType.getName()) || 
-				metadata.hasMetaAnnotation(this.annotationType.getName());
+				(this.considerMetaAnnotations && metadata.hasMetaAnnotation(this.annotationType.getName()));
 	}
 
 	@Override

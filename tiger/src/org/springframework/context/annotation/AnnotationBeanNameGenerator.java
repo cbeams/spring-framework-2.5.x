@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.beans.Introspector;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,13 +24,20 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.support.BeanNameGenerator}
  * implementation for bean classes annotated with the
- * {@link org.springframework.stereotype.Component @Component} annotation.
+ * {@link org.springframework.stereotype.Component @Component} annotation
+ * or with another annotation that is itself annotated with
+ * {@link org.springframework.stereotype.Component @Component} as a
+ * meta-annotation. For example, Spring's stereotype annotations (such as
+ * {@link org.springframework.stereotype.Repository @Repository}) are
+ * themselves annotated with 
+ * {@link org.springframework.stereotype.Component @Component}.
  *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
@@ -44,8 +50,13 @@ import org.springframework.util.StringUtils;
  * @since 2.5
  * @see org.springframework.stereotype.Component#value()
  * @see org.springframework.stereotype.Repository#value()
+ * @see org.springframework.stereotype.Service#value()
+ * @see org.springframework.stereotype.Controller#value()
  */
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
+
+	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
+
 
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		if (definition instanceof AnnotatedBeanDefinition) {
@@ -67,12 +78,12 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @return the bean name, or <code>null</code> if none is found
 	 */
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
-		Set<String> types = annotatedDef.getMetadata().getAnnotationTypes();
+		AnnotationMetadata amd = annotatedDef.getMetadata();
+		Set<String> types = amd.getAnnotationTypes();
 		String beanName = null;
-		for (Iterator it = types.iterator(); it.hasNext();) {
-			String type = (String) it.next();
-			if (isStereotypeWithNameValue(type)) {
-				Map<String, Object> attributes = annotatedDef.getMetadata().getAnnotationAttributes(type);
+		for (String type : types) {
+			Map<String, Object> attributes = amd.getAnnotationAttributes(type);
+			if (isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
 				if (attributes != null) {
 					String value = (String) attributes.get("value");
 					if (StringUtils.hasLength(value)) {
@@ -92,10 +103,16 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * Check whether the given annotation is a stereotype that is allowed
 	 * to suggest a component name through its annotation <code>value()</code>.
 	 * @param annotationType the name of the annotation class to check
+	 * @param metaAnnotationTypes the names of meta-annotations on the given annotation
+	 * @param attributes the map of attributes for the given annotation
 	 * @return whether the annotation qualifies as a stereotype with component name
 	 */
-	protected boolean isStereotypeWithNameValue(String annotationType) {
-		return annotationType.startsWith("org.springframework.stereotype.");		
+	protected boolean isStereotypeWithNameValue(String annotationType,
+			Set<String> metaAnnotationTypes, Map<String, Object> attributes) {
+
+		boolean isStereotype = annotationType.equals(COMPONENT_ANNOTATION_CLASSNAME) ||
+				(metaAnnotationTypes != null && metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME));
+		return (isStereotype && attributes != null && attributes.containsKey("value"));
 	}
 
 	/**

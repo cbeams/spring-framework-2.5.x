@@ -47,18 +47,18 @@ public interface AnnotationMetadata extends ClassMetadata {
 
 	/**
 	 * Return the names of all meta-annotation types defined on the
-	 * annotations of the underlying class.
-	 * @return the annotation type names
+	 * given annotation type of the underlying class.
+	 * @return the meta-annotation type names
 	 */
-	Set<String> getMetaAnnotationTypes();
+	Set<String> getMetaAnnotationTypes(String annotationType);
 
 	/**
 	 * Determine whether the underlying class has an annotation that
 	 * is itself annotated with the meta-annotation of the given type.
-	 * @param annotationType the annotation type to look for
+	 * @param metaAnnotationType the meta-annotation type to look for
 	 * @return whether a matching meta-annotation is defined
 	 */
-	boolean hasMetaAnnotation(String annotationType);
+	boolean hasMetaAnnotation(String metaAnnotationType);
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type,

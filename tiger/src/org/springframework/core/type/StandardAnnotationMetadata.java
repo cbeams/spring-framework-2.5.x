@@ -57,16 +57,19 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
-	public Set<String> getMetaAnnotationTypes() {
-		Set<String> types = new HashSet<String>();
+	public Set<String> getMetaAnnotationTypes(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (int i = 0; i < anns.length; i++) {
-			Annotation[] metaAnns = anns[i].annotationType().getAnnotations();
-			for (Annotation meta : metaAnns) {
-				types.add(meta.annotationType().getName());
+			if (anns[i].annotationType().getName().equals(annotationType)) {
+				Set<String> types = new HashSet<String>();
+				Annotation[] metaAnns = anns[i].annotationType().getAnnotations();
+				for (Annotation meta : metaAnns) {
+					types.add(meta.annotationType().getName());
+				}
+				return types;
 			}
 		}
-		return types;
+		return null;
 	}
 
 	public boolean hasMetaAnnotation(String annotationType) {
