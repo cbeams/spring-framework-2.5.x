@@ -18,7 +18,6 @@ package org.springframework.stereotype;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -26,12 +25,12 @@ import java.lang.annotation.Target;
 /**
  * Indicates that an annotated class is a "Service" (e.g. a business service facade).
  *
- * <p>This annotation serves as a specialization of <code>@Component</code>,
+ * <p>This annotation serves as a specialization of {@link Component @Component},
  * allowing for implementation classes to be autodetected through classpath scanning.
  *
  * @author Juergen Hoeller
  * @since 2.5
- * @see org.springframework.stereotype.Component
+ * @see Component
  * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
  */
 @Target({ElementType.TYPE})

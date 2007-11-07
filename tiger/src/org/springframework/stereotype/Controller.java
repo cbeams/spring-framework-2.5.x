@@ -18,7 +18,6 @@ package org.springframework.stereotype;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -26,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Indicates that an annotated class is a "Controller" (e.g. a web controller).
  *
- * <p>This annotation serves as a specialization of <code>@Component</code>,
+ * <p>This annotation serves as a specialization of {@link Component @Component},
  * allowing for implementation classes to be autodetected through classpath scanning.
  * It is typically used in combination with annotated handler methods based on the
  * {@link org.springframework.web.bind.annotation.RequestMapping} annotation.
@@ -34,7 +33,7 @@ import java.lang.annotation.Target;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 2.5
- * @see org.springframework.stereotype.Component
+ * @see Component
  * @see org.springframework.web.bind.annotation.RequestMapping
  * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
  */
