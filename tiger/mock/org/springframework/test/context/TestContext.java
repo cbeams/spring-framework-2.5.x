@@ -188,7 +188,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @throws Exception if an error occurs while building the application
 	 *         context
 	 */
-	protected ApplicationContext buildApplicationContext() throws Exception {
+	private ApplicationContext buildApplicationContext() throws Exception {
 		Assert.notNull(
 				getContextLoader(),
 				"Can not build an ApplicationContext with a NULL 'contextLoader'. Consider annotating your test class with @ContextConfiguration.");
@@ -200,16 +200,13 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * <p>
-	 * Converts the supplied context <code>key</code> to a String.
-	 * </p>
-	 * <p>
-	 * Subclasses can override this to return a String representation of their
-	 * context key for use in caching, logging, etc.
+	 * Converts the supplied context <code>key</code> to a String
+	 * representation for use in caching, logging, etc.
 	 * </p>
 	 *
 	 * @param key the context key to convert to a String.
 	 */
-	protected String contextKeyString(final Serializable key) {
+	private String contextKeyString(final Serializable key) {
 		return ObjectUtils.nullSafeToString(key);
 	}
 
@@ -248,7 +245,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 *
 	 * @return the context cache, never <code>null</code>.
 	 */
-	protected final ContextCache<String, ApplicationContext> getContextCache() {
+	final ContextCache<String, ApplicationContext> getContextCache() {
 		return this.contextCache;
 	}
 
@@ -261,7 +258,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @return the context loader; may be <code>null</code> if the current
 	 *         test context is not configured to use an application context.
 	 */
-	protected final ContextLoader getContextLoader() {
+	final ContextLoader getContextLoader() {
 		return this.contextLoader;
 	}
 
@@ -275,7 +272,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 *         <code>null</code> if the current test context is not configured
 	 *         to use an application context.
 	 */
-	protected final String[] getLocations() {
+	final String[] getLocations() {
 		return this.locations;
 	}
 
@@ -356,7 +353,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @param testException the exception that was thrown in the test method, or
 	 *        <code>null</code> if no exception was thrown.
 	 */
-	public final void updateState(final Object testInstance, final Method testMethod, final Throwable testException) {
+	final void updateState(final Object testInstance, final Method testMethod, final Throwable testException) {
 		synchronized (this) {
 			this.testInstance = testInstance;
 			this.testMethod = testMethod;
