@@ -56,11 +56,13 @@ import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public class ServletAnnotationControllerTests extends TestCase {
 
 	public void testStandardHandleMethod() throws Exception {
+		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -77,6 +79,27 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("test", response.getContentAsString());
 	}
 
+	public void testEmptyParameterListHandleMethod() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(EmptyParameterListHandlerMethodController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/emptyParameterListHandler");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		EmptyParameterListHandlerMethodController.called = false;
+		servlet.service(request, response);
+		assertTrue(EmptyParameterListHandlerMethodController.called);
+		assertEquals("", response.getContentAsString());
+	}
+
 	public void testAdaptedHandleMethods() throws Exception {
 		doTestAdaptedHandleMethods(MyAdaptedController.class);
 	}
@@ -85,7 +108,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 		doTestAdaptedHandleMethods(MyAdaptedController2.class);
 	}
 
-	private void doTestAdaptedHandleMethods(final Class controllerClass) throws Exception {
+	private void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
+		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -124,6 +148,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testFormController() throws Exception {
+		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -144,6 +169,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testCommandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -168,6 +194,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testBinderInitializingCommandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -189,6 +216,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -210,6 +238,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testParameterDispatchingController() throws Exception {
+		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -321,7 +350,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		@RequestMapping("/myPath.do")
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
-				model.addObject("myKey", "myValue");
+				model.addAttribute("myKey", "myValue");
 			}
 			return "myView";
 		}
@@ -331,6 +360,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	@Controller
 	private static class MyCommandProvidingFormController extends MyFormController {
 
+		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
 		private TestBean createTestBean(@RequestParam("defaultName") String name, Map<String, Object> model) {
 			model.put("myKey", "myOriginalValue");
@@ -342,6 +372,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	@Controller
 	private static class MyBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
+		@SuppressWarnings("unused")
 		@InitBinder
 		private void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -354,6 +385,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	@Controller
 	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
+		@SuppressWarnings("unused")
 		@InitBinder("myCommand")
 		private void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -407,6 +439,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 				public String getContentType() {
 					return null;
 				}
+				@SuppressWarnings({ "unchecked", "deprecation" })
 				public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 					TestBean tb = (TestBean) model.get("myCommand");
 					if ("myDefaultName".equals(tb.getName())) {
@@ -421,6 +454,21 @@ public class ServletAnnotationControllerTests extends TestCase {
 							"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
 				}
 			};
+		}
+	}
+
+	@Controller
+	private static class EmptyParameterListHandlerMethodController {
+
+		static boolean called;
+
+		@RequestMapping("/emptyParameterListHandler")
+		public void emptyParameterListHandler() {
+			EmptyParameterListHandlerMethodController.called = true;
+		}
+
+		@RequestMapping("/nonEmptyParameterListHandler")
+		public void nonEmptyParameterListHandler(HttpServletResponse response) {
 		}
 	}
 
