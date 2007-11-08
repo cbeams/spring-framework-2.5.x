@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,25 @@ import junit.framework.TestCase;
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class LabeledEnumTests extends TestCase {
 
 	public void testCodeFound() {
 		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class, new Short((short) 11));
-		Dog borderCollie = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class, new Short((short) 13));
+		Dog borderCollie = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class,
+				new Short((short) 13));
 		assertSame(golden, Dog.GOLDEN_RETRIEVER);
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
+	}
+
+	public void testCodeFoundForAbstractEnums() {
+		ValuedEnum one = (ValuedEnum) StaticLabeledEnumResolver.instance().getLabeledEnumByCode(ValuedEnum.class,
+				new Short((short) 1));
+		ValuedEnum two = (ValuedEnum) StaticLabeledEnumResolver.instance().getLabeledEnumByCode(ValuedEnum.class,
+				new Short((short) 2));
+		assertSame(one, ValuedEnum.ONE);
+		assertSame(two, ValuedEnum.TWO);
 	}
 
 	public void testLabelFound() {
@@ -38,9 +49,19 @@ public class LabeledEnumTests extends TestCase {
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
 
+	public void testLabelFoundForAbstractEnums() {
+		ValuedEnum one = (ValuedEnum) StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(ValuedEnum.class,
+				"one");
+		ValuedEnum two = (ValuedEnum) StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(ValuedEnum.class,
+				"two");
+		assertSame(one, ValuedEnum.ONE);
+		assertSame(two, ValuedEnum.TWO);
+	}
+
 	public void testDoesNotMatchWrongClass() {
 		try {
-			LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class, new Short((short) 1));
+			LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class,
+					new Short((short) 1));
 			fail("Should have failed");
 		}
 		catch (IllegalArgumentException e) {
@@ -54,41 +75,67 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
-	public static class Other extends StaticLabeledEnum {
+	static class Other extends StaticLabeledEnum {
 
-		public static Other THING1 = new Other(1, "Thing1");
+		public static final Other THING1 = new Other(1, "Thing1");
+		public static final Other THING2 = new Other(2, "Thing2");
 
-		public static Other THING2 = new Other(2, "Thing2");
 
-		public Other(int code, String name) {
+		private Other(int code, String name) {
 			super(code, name);
 		}
 	}
 
-
-	public static class Dog extends StaticLabeledEnum {
+	static class Dog extends StaticLabeledEnum {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
-			// must set type to be recognized as a "Dog"
-			public Class getType() {
-				return Dog.class;
-			}
 
 			public String getLabel() {
 				return "Golden Retriever";
 			}
+
+			// Overriding getType() is no longer necessary as of Spring 2.5;
+			// however, this is left here to provide valid testing for
+			// backwards compatibility.
+			public Class getType() {
+				return Dog.class;
+			}
 		};
 
 		public static final Dog BORDER_COLLIE = new Dog(13, "Border Collie");
-
 		public static final Dog WHIPPET = new Dog(14, "Whippet");
 
 		// Ignore this
 		public static final Other THING1 = Other.THING1;
+
 
 		private Dog(int code, String name) {
 			super(code, name);
 		}
 	}
 
+	static abstract class ValuedEnum extends StaticLabeledEnum {
+
+		public static final ValuedEnum ONE = new ValuedEnum(1, "one") {
+
+			public int getValue() {
+				return 1;
+			}
+		};
+
+		public static final ValuedEnum TWO = new ValuedEnum(2, "two") {
+
+			public int getValue() {
+				return 2;
+			}
+		};
+
+
+		private ValuedEnum(int code, String name) {
+			super(code, name);
+		}
+
+		public abstract int getValue();
+
+	}
 }

@@ -16,12 +16,11 @@
 
 package org.springframework.core.enums;
 
-import org.springframework.util.Assert;
-
 /**
  * Abstract base superclass for LabeledEnum implementations.
  *
  * @author Keith Donald
+ * @author Sam Brannen
  * @since 1.2.2
  */
 public abstract class AbstractLabeledEnum implements LabeledEnum {
@@ -33,16 +32,19 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	}
 
 	public Class getType() {
-		return getClass();
+		final Class declaringClass = getClass().getDeclaringClass();
+		return (declaringClass != null) ? getClass() : getClass().getSuperclass();
 	}
 
-
 	public int compareTo(Object obj) {
-		Assert.isTrue(obj instanceof AbstractLabeledEnum, "You may only compare LabeledEnums");
-		LabeledEnum other = (LabeledEnum) obj;
-		Assert.isTrue(this.getType().equals(other.getType()),
-				"You may only compare LabeledEnums of the same type");
-		return this.getCode().compareTo(other.getCode());
+		if (!(obj instanceof AbstractLabeledEnum)) {
+			throw new ClassCastException("You may only compare LabeledEnums");
+		}
+		final AbstractLabeledEnum that = (AbstractLabeledEnum) obj;
+		if (!this.getType().equals(that.getType())) {
+			throw new ClassCastException("You may only compare LabeledEnums of the same type");
+		}
+		return this.getCode().compareTo(that.getCode());
 	}
 
 	public boolean equals(Object obj) {
@@ -63,5 +65,4 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	public String toString() {
 		return getLabel();
 	}
-
 }
