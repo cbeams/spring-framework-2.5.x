@@ -23,18 +23,18 @@ import org.springframework.util.comparator.CompoundComparator;
 import org.springframework.util.comparator.NullSafeComparator;
 
 /**
- * A interface for objects that represent a labled enumeration.
+ * An interface for objects that represent a labeled enumeration.
  * Each such enum instance has the following characteristics:
  *
  * <ul>
  * <li>A type that identifies the enum's class.
- * For example: <code>com.mycompany.util.FileFormat</code>.
+ * For example: <code>com.mycompany.util.FileFormat</code>.</li>
  *
  * <li>A code that uniquely identifies the enum within the context of its type.
- * For example: "CSV". Different classes of codes are possible
- * (Character, Integer, String).
+ * For example: &quot;CSV&quot;. Different classes of codes are possible
+ * (e.g., Character, Integer, String).</li>
  *
- * <li>A descriptive label. For example: "the CSV File Format".
+ * <li>A descriptive label. For example: "the CSV File Format".</li>
  * </ul>
  *
  * @author Keith Donald
@@ -49,7 +49,7 @@ public interface LabeledEnum extends Comparable, Serializable {
 
 	/**
 	 * Return this enumeration's code.
-	 * <p>Each code should be unique within enumeration's of the same type.
+	 * <p>Each code should be unique within enumerations of the same type.
 	 */
 	Comparable getCode();
 
