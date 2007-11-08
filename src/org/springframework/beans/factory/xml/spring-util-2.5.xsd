@@ -184,7 +184,15 @@
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="local-override" type="xsd:boolean"/>
+					<xsd:attribute name="local-override" type="xsd:boolean">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Specifies whether local properties override properties from files.
+	Default is "false": properties from files override local defaults.
+	If set to "true", local properties will override defaults from files.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 					<xsd:attribute name="scope" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
