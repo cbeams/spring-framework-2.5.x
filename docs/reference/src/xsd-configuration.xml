@@ -12,8 +12,8 @@
             approach to authoring Spring XML configuration files. All that you lose
             out on is the opportunity to have more succinct and clearer configuration.
             Regardless of whether the XML configuration is DTD- or Schema-based, in the end
-			it all boils down to the same object model in the container (namely one or
-			more <interfacename>BeanDefinition</interfacename> instances).</para>
+            it all boils down to the same object model in the container (namely one or
+            more <interfacename>BeanDefinition</interfacename> instances).</para>
         </sidebar>
         <para>The central motivation for moving to XML Schema based configuration files was
         to make Spring XML configuration easier. The <emphasis>'classic'</emphasis>
