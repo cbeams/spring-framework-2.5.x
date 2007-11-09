@@ -37,8 +37,8 @@ import org.springframework.web.util.TagUtils;
  * Messages are looked up using the ApplicationContext, and thus should
  * support internationalization.
  *
- * <p>Regards a HTML escaping setting, either on this tag instance,
- * the page level, or the web.xml level. Can also apply JavaScript escaping.
+ * <p>Detects an HTML escaping setting, either on this tag instance, the page level,
+ * or the <code>web.xml</code> level. Can also apply JavaScript escaping.
  *
  * <p>If "code" isn't set or cannot be resolved, "text" will be used as default
  * message. Thus, this tag can also be used for HTML escaping of any texts.
@@ -106,7 +106,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Set the separator to use for splitting an arguments String.
-	 * Default is a comma (",");
+	 * Default is a comma (",").
 	 * @see #setArguments
 	 */
 	public void setArgumentSeparator(String argumentSeparator) {
