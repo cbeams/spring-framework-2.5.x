@@ -166,21 +166,19 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	 * @see javax.portlet.RenderRequest#getWindowState
 	 * @see javax.portlet.WindowState#MINIMIZED
 	 */
-	public void setRenderWhenMinimized(boolean renderWhenMinimized) {
+	public final void setRenderWhenMinimized(boolean renderWhenMinimized) {
 		this.renderWhenMinimized = renderWhenMinimized;
 	}
 
 	/**
 	 * Return whether controller will render when portlet is minimized.
 	 */
-	public boolean isRenderWhenMinimized() {
+	public final boolean isRenderWhenMinimized() {
 		return this.renderWhenMinimized;
 	}
 
 
-	public final void handleActionRequest(ActionRequest request, ActionResponse response)
-			throws Exception {
-
+	public void handleActionRequest(ActionRequest request, ActionResponse response) throws Exception {
 		// Delegate to PortletContentGenerator for checking and preparing.
 		check(request, response);
 
@@ -198,9 +196,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 		handleActionRequestInternal(request, response);
 	}
 
-	public final ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response)
-			throws Exception {
-
+	public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) throws Exception {
 		// If the portlet is minimized and we don't want to render then return null.
 		if (WindowState.MINIMIZED.equals(request.getWindowState()) && !this.renderWhenMinimized) {
 			return null;

@@ -133,7 +133,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	}
 
 
-	public final ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		// Delegate to WebContentGenerator for checking and preparing.
