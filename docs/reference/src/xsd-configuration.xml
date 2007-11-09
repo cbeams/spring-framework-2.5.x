@@ -12,8 +12,8 @@
             approach to authoring Spring XML configuration files. All that you lose
             out on is the opportunity to have more succinct and clearer configuration.
             Regardless of whether the XML configuration is DTD- or Schema-based, in the end
-			it all boils down to the same object model in the container (namely one or
-			more <interfacename>BeanDefinition</interfacename> instances).</para>
+            it all boils down to the same object model in the container (namely one or
+            more <interfacename>BeanDefinition</interfacename> instances).</para>
         </sidebar>
         <para>The central motivation for moving to XML Schema based configuration files was
         to make Spring XML configuration easier. The <emphasis>'classic'</emphasis>
@@ -76,8 +76,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 during development).</para>
             </note>
             <para>The above Spring XML configuration fragment is boilerplate that you can copy and paste
-			(!) and then plug <literal>&lt;bean/&gt;</literal> definitions into like you have always
-			done. However, the entire point of switching over is to
+            (!) and then plug <literal>&lt;bean/&gt;</literal> definitions into like you have always
+            done. However, the entire point of switching over is to
             take advantage of the new Spring 2.0 XML tags since they make configuration easier. The
             section entitled <xref linkend="xsd-config-body-schemas-util"/> demonstrates how you can
             start immediately by using some of the more common utility tags.</para>
