@@ -42,7 +42,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	/**
 	 * The canonical (Singleton) instance of this {@link EmptyTargetSource}.
 	 */
-	public static final EmptyTargetSource INSTANCE = new EmptyTargetSource(null);
+	public static final EmptyTargetSource INSTANCE = new EmptyTargetSource(null, true);
 
 
 	/**
@@ -51,7 +51,17 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * @see #getTargetClass()
 	 */
 	public static EmptyTargetSource forClass(Class targetClass) {
-		return (targetClass == null ? INSTANCE : new EmptyTargetSource(targetClass));
+		return forClass(targetClass, true);
+	}
+
+	/**
+	 * Return an EmptyTargetSource for the given target Class.
+	 * @param targetClass the target Class (may be <code>null</code>)
+	 * @param isStatic whether the TargetSource should be marked as static
+	 * @see #getTargetClass()
+	 */
+	public static EmptyTargetSource forClass(Class targetClass, boolean isStatic) {
+		return (targetClass == null && isStatic ? INSTANCE : new EmptyTargetSource(targetClass, isStatic));
 	}
 
 
@@ -61,15 +71,19 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 
 	private final Class targetClass;
 
+	private final boolean isStatic;
+
 
 	/**
 	 * Create a new instance of the {@link EmptyTargetSource} class.
 	 * <p>This constructor is <code>private</code> to enforce the
 	 * Singleton pattern / factory method pattern.
 	 * @param targetClass the target class to expose (may be <code>null</code>)
+	 * @param isStatic whether the TargetSource is marked as static
 	 */
-	private EmptyTargetSource(Class targetClass) {
+	private EmptyTargetSource(Class targetClass, boolean isStatic) {
 		this.targetClass = targetClass;
+		this.isStatic = isStatic;
 	}
 
 	/**
@@ -83,7 +97,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * Always returns <code>true</code>.
 	 */
 	public boolean isStatic() {
-		return true;
+		return this.isStatic;
 	}
 
 	/**
@@ -105,12 +119,18 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * of no target class, thus protecting the Singleton pattern.
 	 */
 	private Object readResolve() {
-		return (this.targetClass == null ? INSTANCE : this);
+		return (this.targetClass == null && this.isStatic ? INSTANCE : this);
 	}
 
 	public boolean equals(Object other) {
-		return (this == other || (other instanceof EmptyTargetSource &&
-				ObjectUtils.nullSafeEquals(this.targetClass, ((EmptyTargetSource) other).targetClass)));
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof EmptyTargetSource)) {
+			return false;
+		}
+		EmptyTargetSource otherTs = (EmptyTargetSource) other;
+		return (ObjectUtils.nullSafeEquals(this.targetClass, otherTs.targetClass) && this.isStatic == otherTs.isStatic);
 	}
 
 	public int hashCode() {
@@ -119,7 +139,8 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 
 	public String toString() {
 		return "EmptyTargetSource: " +
-				(this.targetClass != null ? "target class [" + this.targetClass + "]" : "no target class");
+				(this.targetClass != null ? "target class [" + this.targetClass.getName() + "]" : "no target class") +
+				", " + (this.isStatic ? "static" : "dynamic");
 	}
 
 }
