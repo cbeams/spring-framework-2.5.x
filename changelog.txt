@@ -6,7 +6,14 @@ http://www.springframework.org
 Changes in version 2.0.8 (2007-12-03)
 -------------------------------------
 
+General
+* various documentation fixes
+
+Package org.springframework.aop
+* fixed garbage collection problem with CGLIB proxies, now holding onto the Advised configuration independent of factory
+
 Package org.springframework.beans
+* DefaultListableBeanFactory freshly resolves autowired arguments even for cached constructors (re-resolving prototypes)
 * fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
 
 Package org.springframework.context
@@ -21,6 +28,8 @@ Package org.springframework.orm
 
 Package org.springframework.web
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
+* AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
+* fixed TilesConfigurer to explicitly set the factory name to empty String by default
 
 
 Changes in version 2.0.7 (2007-10-01)
