@@ -130,14 +130,6 @@ public class RmiSupportTests extends TestCase {
 		doTestRmiProxyFactoryBeanWithExceptionAndRefresh(StubNotFoundException.class);
 	}
 
-	public void testRmiProxyFactoryBeanWithMarshalExceptionAndRefresh() throws Exception {
-		doTestRmiProxyFactoryBeanWithExceptionAndRefresh(MarshalException.class);
-	}
-
-	public void testRmiProxyFactoryBeanWithUnmarshalExceptionAndRefresh() throws Exception {
-		doTestRmiProxyFactoryBeanWithExceptionAndRefresh(UnmarshalException.class);
-	}
-
 	private void doTestRmiProxyFactoryBeanWithExceptionAndRefresh(Class exceptionClass) throws Exception {
 		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
 		factory.setServiceInterface(IRemoteBean.class);
@@ -224,16 +216,6 @@ public class RmiSupportTests extends TestCase {
 				StubNotFoundException.class, RemoteConnectFailureException.class);
 	}
 
-	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndMarshalException() throws Exception {
-		doTestRmiProxyFactoryBeanWithBusinessInterfaceAndException(
-				MarshalException.class, RemoteConnectFailureException.class);
-	}
-
-	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndUnmarshalException() throws Exception {
-		doTestRmiProxyFactoryBeanWithBusinessInterfaceAndException(
-				UnmarshalException.class, RemoteConnectFailureException.class);
-	}
-
 	private void doTestRmiProxyFactoryBeanWithBusinessInterfaceAndException(
 			Class rmiExceptionClass, Class springExceptionClass) throws Exception {
 
@@ -287,16 +269,6 @@ public class RmiSupportTests extends TestCase {
 	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndStubNotFoundExceptionAndRefresh() throws Exception {
 		doTestRmiProxyFactoryBeanWithBusinessInterfaceAndExceptionAndRefresh(
 				StubNotFoundException.class, RemoteConnectFailureException.class);
-	}
-
-	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndMarshalExceptionAndRefresh() throws Exception {
-		doTestRmiProxyFactoryBeanWithBusinessInterfaceAndExceptionAndRefresh(
-				MarshalException.class, RemoteConnectFailureException.class);
-	}
-
-	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndUnmarshalExceptionAndRefresh() throws Exception {
-		doTestRmiProxyFactoryBeanWithBusinessInterfaceAndExceptionAndRefresh(
-				UnmarshalException.class, RemoteConnectFailureException.class);
 	}
 
 	private void doTestRmiProxyFactoryBeanWithBusinessInterfaceAndExceptionAndRefresh(

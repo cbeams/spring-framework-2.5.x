@@ -20,13 +20,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
-import java.rmi.MarshalException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.StubNotFoundException;
 import java.rmi.UnknownHostException;
-import java.rmi.UnmarshalException;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -188,9 +186,8 @@ public abstract class RmiClientInterceptorUtils {
 	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
 	 * <p>Treats RMI's ConnectException, ConnectIOException, UnknownHostException,
-	 * NoSuchObjectException, StubNotFoundException, MarshalException and
-	 * UnmarshalException as connect failure, as well as Oracle's OC4J
-	 * <code>com.evermind.server.rmi.RMIConnectionException</code>
+	 * NoSuchObjectException and StubNotFoundException as connect failure,
+	 * as well as Oracle's OC4J <code>com.evermind.server.rmi.RMIConnectionException</code>
 	 * (which doesn't derive from from any well-known RMI connect exception).
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure
@@ -199,14 +196,11 @@ public abstract class RmiClientInterceptorUtils {
 	 * @see java.rmi.UnknownHostException
 	 * @see java.rmi.NoSuchObjectException
 	 * @see java.rmi.StubNotFoundException
-	 * @see java.rmi.MarshalException
-	 * @see java.rmi.UnmarshalException
 	 */
 	public static boolean isConnectFailure(RemoteException ex) {
 		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
 				ex instanceof UnknownHostException ||
 				ex instanceof NoSuchObjectException || ex instanceof StubNotFoundException ||
-				ex instanceof MarshalException || ex instanceof UnmarshalException ||
 				ORACLE_CONNECTION_EXCEPTION.equals(ex.getClass().getName()));
 	}
 
