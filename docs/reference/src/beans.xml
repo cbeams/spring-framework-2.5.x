@@ -199,9 +199,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 			        keeps container configuration files unaware of the fact that they are
 			        being combined with others. An alternate approach is to use one or more
 			        occurrences of the <literal>&lt;import/&gt;</literal> element to load bean definitions
-			        from another file (or files). Any <literal>&lt;import/&gt;</literal> elements must be
-			        placed before <literal>&lt;bean/&gt;</literal> elements in the file doing the importing. 
-			        Let's look at a sample:</para>
+			        from another file (or files). Let's look at a sample:</para>
 		            <programlisting><![CDATA[<beans>
 
     <import resource="services.xml"/>
