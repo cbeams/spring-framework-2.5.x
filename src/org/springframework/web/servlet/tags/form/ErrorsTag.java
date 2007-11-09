@@ -121,7 +121,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 */
 	protected String autogenerateId() throws JspException {
 		String path = getPropertyPath();
-		if (path.isEmpty()) {
+		if ("".equals(path)) {
 			path = (String) this.pageContext.getAttribute(
 					FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
