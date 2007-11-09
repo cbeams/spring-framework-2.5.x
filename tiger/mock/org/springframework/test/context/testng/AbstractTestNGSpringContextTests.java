@@ -24,8 +24,8 @@ import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -109,14 +109,14 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	/**
 	 * Delegates to the configured {@link TestContextManager} to
 	 * {@link TestContextManager#prepareTestInstance(Object) prepare} this test
-	 * instance prior to execution of any individual test methods, for example
-	 * for injecting dependencies, etc.
+	 * instance prior to execution of any individual tests, for example for
+	 * injecting dependencies, etc.
 	 *
-	 * @throws Throwable if a registered TestExecutionListener throws an
+	 * @throws Exception if a registered TestExecutionListener throws an
 	 *         exception.
 	 */
-	@BeforeClass(groups = { "SpringTestContext" })
-	protected void springTestContextPrepareTestInstance() throws Throwable {
+	@BeforeSuite(groups = { "SpringTestContext" })
+	protected void springTestContextPrepareTestInstance() throws Exception {
 		this.testContextManager.prepareTestInstance(this);
 	}
 
@@ -126,10 +126,10 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * the test method before the actual test is executed.
 	 *
 	 * @param testMethod the test method which is about to be executed.
-	 * @throws Throwable allows all exceptions to propagate.
+	 * @throws Exception allows all exceptions to propagate.
 	 */
 	@BeforeMethod(groups = { "SpringTestContext" })
-	protected void springTestContextBeforeTestMethod(final Method testMethod) throws Throwable {
+	protected void springTestContextBeforeTestMethod(final Method testMethod) throws Exception {
 		this.testContextManager.beforeTestMethod(this, testMethod);
 	}
 
@@ -154,10 +154,10 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 *
 	 * @param testMethod the test method which has just been executed on the
 	 *        test instance.
-	 * @throws Throwable allows all exceptions to propagate.
+	 * @throws Exception allows all exceptions to propagate.
 	 */
 	@AfterMethod(groups = { "SpringTestContext" })
-	protected void springTestContextAfterTestMethod(final Method testMethod) throws Throwable {
+	protected void springTestContextAfterTestMethod(final Method testMethod) throws Exception {
 		try {
 			this.testContextManager.afterTestMethod(this, testMethod, this.testException);
 		}
