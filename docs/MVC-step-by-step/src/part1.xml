@@ -307,13 +307,12 @@ tomcat.manager.password=s3cret</programlisting>
 Buildfile: build.xml
 
 usage:
-
+     [echo] 
      [echo] springapp build file
      [echo] -----------------------------------
-
+     [echo] 
      [echo] Available targets are:
-
-     [echo] clean     --&gt; Clean output dirs
+     [echo] 
      [echo] build     --&gt; Build the application
      [echo] deploy    --&gt; Deploy application as directory
      [echo] deploywar --&gt; Deploy application as a WAR file
@@ -322,7 +321,7 @@ usage:
      [echo] start     --&gt; Start Tomcat application
      [echo] stop      --&gt; Stop Tomcat application
      [echo] list      --&gt; List Tomcat applications
-
+     [echo] 
 
 BUILD SUCCESSFUL
 Total time: 2 seconds</screen>
