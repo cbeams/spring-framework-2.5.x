@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -383,7 +383,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * in case of failure when sending a message
 	 */
 	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
-		Map failedMessages = new HashMap();
+		Map failedMessages = new LinkedHashMap();
 		try {
 			Transport transport = getTransport(getSession());
 			transport.connect(getHost(), getPort(), getUsername(), getPassword());

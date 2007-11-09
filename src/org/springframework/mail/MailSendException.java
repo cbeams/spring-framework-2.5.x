@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.mail;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -31,7 +31,9 @@ import java.util.Map;
  */
 public class MailSendException extends MailException {
 
-	private Map failedMessages = new HashMap();
+	private transient Map failedMessages;
+
+	private Exception[] messageExceptions;
 
 
 	/**
@@ -56,30 +58,49 @@ public class MailSendException extends MailException {
 	 * messages that failed as keys, and the thrown exceptions as values.
 	 * <p>The messages should be the same that were originally passed
 	 * to the invoked send method.
+	 * @param failedMessages Map of failed messages as keys and thrown
+	 * exceptions as values
 	 */
 	public MailSendException(Map failedMessages) {
 		super(null);
-		this.failedMessages.putAll(failedMessages);
+		this.failedMessages = new LinkedHashMap(failedMessages);
+		this.messageExceptions = (Exception[]) failedMessages.values().toArray(new Exception[failedMessages.size()]);
 	}
 
 
 	/**
 	 * Return a Map with the failed messages as keys, and the thrown exceptions
-	 * as values. Note that a general mail server connection failure will not
-	 * result in failed messages being returned here: A message will only be
+	 * as values.
+	 * <p>Note that a general mail server connection failure will not result
+	 * in failed messages being returned here: A message will only be
 	 * contained here if actually sending it was attempted but failed.
 	 * <p>The messages will be the same that were originally passed to the
 	 * invoked send method, that is, SimpleMailMessages in case of using
 	 * the generic MailSender interface.
 	 * <p>In case of sending MimeMessage instances via JavaMailSender,
 	 * the messages will be of type MimeMessage.
+	 * <p><b>NOTE:</b> This Map will not be available after serialization.
+	 * Use {@link #getMessageExceptions()} in such a scenario, which will
+	 * be available after serialization as well.
 	 * @return the Map of failed messages as keys and thrown exceptions as
 	 * values, or an empty Map if no failed messages
 	 * @see SimpleMailMessage
 	 * @see javax.mail.internet.MimeMessage
 	 */
 	public final Map getFailedMessages() {
-		return failedMessages;
+		return (this.failedMessages != null ? this.failedMessages : Collections.EMPTY_MAP);
+	}
+
+	/**
+	 * Return an array with thrown message exceptions.
+	 * <p>Note that a general mail server connection failure will not result
+	 * in failed messages being returned here: A message will only be
+	 * contained here if actually sending it was attempted but failed.
+	 * @return the array of thrown message exceptions,
+	 * or an empty array if no failed messages
+	 */
+	public final Exception[] getMessageExceptions() {
+		return (this.messageExceptions != null ? this.messageExceptions : new Exception[0]);
 	}
 
 
@@ -87,10 +108,10 @@ public class MailSendException extends MailException {
 		StringBuffer sb = new StringBuffer();
 		String superMsg = super.getMessage();
 		sb.append(superMsg != null ? superMsg : "Failed messages: ");
-		for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
-			Throwable subEx = (Throwable) subExs.next();
+		for (int i = 0; i < this.messageExceptions.length; i++) {
+			Exception subEx = this.messageExceptions[i];
 			sb.append(subEx.toString());
-			if (subExs.hasNext()) {
+			if (i < this.messageExceptions.length - 1) {
 				sb.append("; ");
 			}
 		}
@@ -100,46 +121,40 @@ public class MailSendException extends MailException {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getName()).append("; nested exceptions (");
-		sb.append(getFailedMessages().size()).append(") are:");
-		int i = 0;
-		for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
-			Throwable subEx = (Throwable) subExs.next();
-			i++;
-			sb.append('\n').append("Failed message ").append(i).append(": ");
+		sb.append(this.messageExceptions.length).append(") are:");
+		for (int i = 0; i < this.messageExceptions.length; i++) {
+			Exception subEx = this.messageExceptions[i];
+			sb.append('\n').append("Failed message ").append(i + 1).append(": ");
 			sb.append(subEx);
 		}
 		return sb.toString();
 	}
 
 	public void printStackTrace(PrintStream ps) {
-		if (getFailedMessages().isEmpty()) {
+		if (this.messageExceptions.length == 0) {
 			super.printStackTrace(ps);
 		}
 		else {
 			ps.println(getClass().getName() + "; nested exception details (" +
-					getFailedMessages().size() + ") are:");
-			int i = 0;
-			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
-				Throwable subEx = (Throwable) subExs.next();
-				i++;
-				ps.println("Failed message " + i + ":");
+					this.messageExceptions.length + ") are:");
+			for (int i = 0; i < this.messageExceptions.length; i++) {
+				Exception subEx = this.messageExceptions[i];
+				ps.println("Failed message " + (i + 1) + ":");
 				subEx.printStackTrace(ps);
 			}
 		}
 	}
 
 	public void printStackTrace(PrintWriter pw) {
-		if (getFailedMessages().isEmpty()) {
+		if (this.messageExceptions.length == 0) {
 			super.printStackTrace(pw);
 		}
 		else {
 			pw.println(getClass().getName() + "; nested exception details (" +
-					getFailedMessages().size() + ") are:");
-			int i = 0;
-			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
-				Throwable subEx = (Throwable) subExs.next();
-				i++;
-				pw.println("Failed message " + i + ":");
+					this.messageExceptions.length + ") are:");
+			for (int i = 0; i < this.messageExceptions.length; i++) {
+				Exception subEx = this.messageExceptions[i];
+				pw.println("Failed message " + (i + 1) + ":");
 				subEx.printStackTrace(pw);
 			}
 		}
