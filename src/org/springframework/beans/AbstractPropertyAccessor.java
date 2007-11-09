@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Abstract implementation of the {@link PropertyAccessor} interface.
  * Provides base implementations of all convenience methods, with the
- * implementation of actual property access left to subclasses
+ * implementation of actual property access left to subclasses.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -43,7 +43,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	}
 
 	public boolean isExtractOldValueForEditor() {
-		return extractOldValueForEditor;
+		return this.extractOldValueForEditor;
 	}
 
 
