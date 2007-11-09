@@ -459,7 +459,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 
 				// Make sure bean class is actually resolved at this point.
-				Class beanClass = resolveBeanClass(mbd, beanName);
+				resolveBeanClass(mbd, beanName);
 
 				// Prepare method overrides.
 				try {
@@ -470,16 +470,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 							beanName, "Validation of method overrides failed", ex);
 				}
 
-				applyMergedBeanDefinitionPostProcessors(mbd, beanName);
-
 				try {
 					// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-					if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-						Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
-						if (bean != null) {
-							bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
-							return bean;
-						}
+					Object bean = resolveBeforeInstantiation(beanName, mbd);
+					if (bean != null) {
+						return bean;
 					}
 				}
 				catch (Throwable ex) {
@@ -519,6 +514,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
+		Class beanType = (instanceWrapper != null ? instanceWrapper.getWrappedClass() : null);
+
+		// Allow post-processors to modify the merged bean definition.
+		if (!mbd.postProcessed) {
+			applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
+			mbd.postProcessed = true;
+		}
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
@@ -705,13 +707,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Mark this bean as currently in creation, even if just partially.
 				beforeSingletonCreation(beanName);
 				// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-				Class beanClass = resolveBeanClass(mbd, beanName);
-				if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-					Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
-					if (bean != null) {
-						instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
-					}
-				}
+				instance = resolveBeforeInstantiation(beanName, mbd);
 				if (instance == null) {
 					bw = createBeanInstance(beanName, mbd, null);
 					instance = bw.getWrappedInstance();
@@ -750,13 +746,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Mark this bean as currently in creation, even if just partially.
 			beforePrototypeCreation(beanName);
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-			Class beanClass = resolveBeanClass(mbd, beanName);
-			if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-				Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
-				if (bean != null) {
-					instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
-				}
-			}
+			instance = resolveBeforeInstantiation(beanName, mbd);
 			if (instance == null) {
 				BeanWrapper bw = createBeanInstance(beanName, mbd, null);
 				instance = bw.getWrappedInstance();
@@ -777,20 +767,43 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Apply MergedBeanDefinitionPostProcessors to the specified bean definition,
 	 * invoking their <code>postProcessMergedBeanDefinition</code> methods.
 	 * @param mbd the merged bean definition for the bean
+	 * @param beanType the actual type of the managed bean instance
 	 * @param beanName the name of the bean
 	 * @throws BeansException if any post-processing failed
 	 * @see MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition
 	 */
-	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, String beanName)
+	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class beanType, String beanName)
 			throws BeansException {
 
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			if (beanProcessor instanceof MergedBeanDefinitionPostProcessor) {
 				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) beanProcessor;
-				bdp.postProcessMergedBeanDefinition(mbd, beanName);
+				bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
 			}
 		}
+	}
+
+	/**
+	 * Apply before-instantiation post-processors, resolving whether there is a
+	 * before-instantiation shortcut for the specified bean.
+	 * @param beanName the name of the bean
+	 * @param mbd the bean definition for the bean
+	 * @return the shortcut-determined bean instance, or <code>null</code> if none
+	 */
+	protected Object resolveBeforeInstantiation(String beanName, RootBeanDefinition mbd) {
+		Object bean = null;
+		if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
+			// Make sure bean class is actually resolved at this point.
+			if (mbd.hasBeanClass() && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+				bean = applyBeanPostProcessorsBeforeInstantiation(mbd.getBeanClass(), beanName);
+				if (bean != null) {
+					bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+				}
+			}
+			mbd.beforeInstantiationResolved = Boolean.valueOf(bean != null);
+		}
+		return bean;
 	}
 
 	/**
@@ -836,6 +849,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object[] args) {
 		if (mbd.getFactoryMethodName() != null)  {
 			return instantiateUsingFactoryMethod(beanName, mbd, args);
+		}
+
+		// Shortcut when re-creating the same bean...
+		if (mbd.resolvedConstructorOrFactoryMethod != null) {
+			if (mbd.constructorArgumentsResolved) {
+				return autowireConstructor(beanName, mbd, null, args);
+			}
+			else {
+				return instantiateBean(beanName, mbd);
+			}
 		}
 
 		// Need to determine the constructor...

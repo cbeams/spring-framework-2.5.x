@@ -797,38 +797,51 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 
 		else {
-			PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
-			if (pd == null || pd.getWriteMethod() == null) {
-				PropertyMatches matches = PropertyMatches.forProperty(propertyName, getRootClass());
-				throw new NotWritablePropertyException(
-						getRootClass(), this.nestedPath + propertyName,
-						matches.buildErrorMessage(), matches.getPossibleMatches());
+			PropertyDescriptor pd = pv.resolvedDescriptor;
+			if (pd == null || !pd.getWriteMethod().getDeclaringClass().isInstance(this.object)) {
+				pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
+				if (pd == null || pd.getWriteMethod() == null) {
+					PropertyMatches matches = PropertyMatches.forProperty(propertyName, getRootClass());
+					throw new NotWritablePropertyException(
+							getRootClass(), this.nestedPath + propertyName,
+							matches.buildErrorMessage(), matches.getPossibleMatches());
+				}
+				pv.getOriginalPropertyValue().resolvedDescriptor = pd;
 			}
 
 			Object oldValue = null;
-			if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
-				Method readMethod = pd.getReadMethod();
-				if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-					readMethod.setAccessible(true);
-				}
-				try {
-					oldValue = readMethod.invoke(this.object, new Object[0]);
-				}
-				catch (Exception ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not read previous value of property '" + this.nestedPath + propertyName + "'", ex);
-					}
-				}
-			}
-
 			try {
-				Object convertedValue = (pv.isConverted() ? pv.getConvertedValue() :
-						this.typeConverterDelegate.convertIfNecessary(oldValue, pv.getValue(), pd));
+				Object originalValue = pv.getValue();
+				Object valueToApply = originalValue;
+				if (!Boolean.FALSE.equals(pv.conversionNecessary)) {
+					if (pv.isConverted()) {
+						valueToApply = pv.getConvertedValue();
+					}
+					else {
+						if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
+							Method readMethod = pd.getReadMethod();
+							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+								readMethod.setAccessible(true);
+							}
+							try {
+								oldValue = readMethod.invoke(this.object, new Object[0]);
+							}
+							catch (Exception ex) {
+								if (logger.isDebugEnabled()) {
+									logger.debug("Could not read previous value of property '" +
+											this.nestedPath + propertyName + "'", ex);
+								}
+							}
+						}
+						valueToApply = this.typeConverterDelegate.convertIfNecessary(oldValue, originalValue, pd);
+					}
+					pv.getOriginalPropertyValue().conversionNecessary = Boolean.valueOf(valueToApply != originalValue);
+				}
 				Method writeMethod = pd.getWriteMethod();
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 					writeMethod.setAccessible(true);
 				}
-				writeMethod.invoke(this.object, new Object[] {convertedValue});
+				writeMethod.invoke(this.object, new Object[] {valueToApply});
 			}
 			catch (InvocationTargetException ex) {
 				PropertyChangeEvent propertyChangeEvent =

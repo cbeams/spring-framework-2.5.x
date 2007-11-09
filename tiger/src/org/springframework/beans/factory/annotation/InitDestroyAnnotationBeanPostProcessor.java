@@ -107,13 +107,15 @@ public class InitDestroyAnnotationBeanPostProcessor
 	}
 
 
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, String beanName) {
-		LifecycleMetadata metadata = findLifecycleMetadata(beanDefinition.getBeanClass());
-		for (LifecycleElement lifecycleElement : metadata.getInitMethods()) {
-			beanDefinition.registerExternallyManagedInitMethod(lifecycleElement.getMethod().getName());
-		}
-		for (LifecycleElement lifecycleElement : metadata.getDestroyMethods()) {
-			beanDefinition.registerExternallyManagedDestroyMethod(lifecycleElement.getMethod().getName());
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+		if (beanType != null) {
+			LifecycleMetadata metadata = findLifecycleMetadata(beanType);
+			for (LifecycleElement lifecycleElement : metadata.getInitMethods()) {
+				beanDefinition.registerExternallyManagedInitMethod(lifecycleElement.getMethod().getName());
+			}
+			for (LifecycleElement lifecycleElement : metadata.getDestroyMethods()) {
+				beanDefinition.registerExternallyManagedDestroyMethod(lifecycleElement.getMethod().getName());
+			}
 		}
 	}
 

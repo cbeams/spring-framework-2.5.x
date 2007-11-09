@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -57,16 +56,18 @@ public class InjectionMetadata {
 
 
 	public void injectFields(Object target, String beanName) throws Throwable {
-		for (Iterator it = this.resourceFields.iterator(); it.hasNext();) {
-			InjectedElement element = (InjectedElement) it.next();
-			element.inject(target, beanName, null);
+		if (!this.resourceFields.isEmpty()) {
+			for (InjectedElement element : this.resourceFields) {
+				element.inject(target, beanName, null);
+			}
 		}
 	}
 
 	public void injectMethods(Object target, String beanName, PropertyValues pvs) throws Throwable {
-		for (Iterator it = this.resourceMethods.iterator(); it.hasNext();) {
-			InjectedElement element = (InjectedElement) it.next();
-			element.inject(target, beanName, pvs);
+		if (!this.resourceMethods.isEmpty()) {
+			for (InjectedElement element : this.resourceMethods) {
+				element.inject(target, beanName, pvs);
+			}
 		}
 	}
 
@@ -77,15 +78,13 @@ public class InjectionMetadata {
 
 		protected final boolean isField;
 
-		private PropertyDescriptor pd;
+		protected final PropertyDescriptor pd;
 
-		protected InjectedElement(Member member) {
-			this.member = member;
-			this.isField = (member instanceof Field);
-		}
+		protected volatile boolean skip = false;
 
 		protected InjectedElement(Member member, PropertyDescriptor pd) {
-			this(member);
+			this.member = member;
+			this.isField = (member instanceof Field);
 			this.pd = pd;
 		}
 
@@ -115,6 +114,9 @@ public class InjectionMetadata {
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
 		protected void inject(Object target, String requestingBeanName, PropertyValues pvs) throws Throwable {
+			if (this.skip) {
+				return;
+			}
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
@@ -123,6 +125,7 @@ public class InjectionMetadata {
 			else {
 				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
 					// Explicit value provided as part of the bean definition.
+					this.skip = true;
 					return;
 				}
 				try {

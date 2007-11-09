@@ -57,6 +57,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching partly prepared constructor arguments */
 	volatile Object[] preparedConstructorArguments;
 
+	/** Package-visible field that marks the constructor arguments as resolved */
+	volatile boolean constructorArgumentsResolved = false;
+
+	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
+	volatile Boolean beforeInstantiationResolved;
+
+	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
+	volatile boolean postProcessed = false;
+
 
 	/**
 	 * Create a new RootBeanDefinition, to be configured through its bean

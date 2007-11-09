@@ -104,7 +104,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
+	private final Map<Class<?>, Constructor[]> candidateConstructorsCache =
+			new ConcurrentHashMap<Class<?>, Constructor[]>();
+
+	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
 			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
 
 
@@ -167,48 +170,56 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 
 	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
-		Constructor[] rawCandidates = beanClass.getDeclaredConstructors();
-		List candidates = new ArrayList(rawCandidates.length);
-		Constructor requiredConstructor = null;
-		Constructor defaultConstructor = null;
-
-		for (int i = 0; i < rawCandidates.length; i++) {
-			Constructor candidate = rawCandidates[i];
-			Annotation annotation = candidate.getAnnotation(getAutowiredAnnotationType());
-			if (annotation != null) {
-				if (requiredConstructor != null) {
-					throw new BeanCreationException("Invalid autowire-marked constructor: " + candidate +
-							". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
-				}
-				if (candidate.getParameterTypes().length == 0) {
-					throw new IllegalStateException("Autowired annotation requires at least one argument: " + candidate);
-				}
-				boolean required = determineRequiredStatus(annotation);
-				if (required) {
-					if (!candidates.isEmpty()) {
-						throw new BeanCreationException("Invalid autowire-marked constructors: " + candidates +
-								". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
+		// Quick check on the concurrent map first, with minimal locking.
+		Constructor[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
+		if (candidateConstructors == null) {
+			synchronized (this.candidateConstructorsCache) {
+				candidateConstructors = this.candidateConstructorsCache.get(beanClass);
+				if (candidateConstructors == null) {
+					Constructor[] rawCandidates = beanClass.getDeclaredConstructors();
+					List<Constructor> candidates = new ArrayList<Constructor>(rawCandidates.length);
+					Constructor requiredConstructor = null;
+					Constructor defaultConstructor = null;
+					for (int i = 0; i < rawCandidates.length; i++) {
+						Constructor<?> candidate = rawCandidates[i];
+						Annotation annotation = candidate.getAnnotation(getAutowiredAnnotationType());
+						if (annotation != null) {
+							if (requiredConstructor != null) {
+								throw new BeanCreationException("Invalid autowire-marked constructor: " + candidate +
+										". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
+							}
+							if (candidate.getParameterTypes().length == 0) {
+								throw new IllegalStateException("Autowired annotation requires at least one argument: " + candidate);
+							}
+							boolean required = determineRequiredStatus(annotation);
+							if (required) {
+								if (!candidates.isEmpty()) {
+									throw new BeanCreationException("Invalid autowire-marked constructors: " + candidates +
+											". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
+								}
+								requiredConstructor = candidate;
+							}
+							candidates.add(candidate);
+						}
+						else if (candidate.getParameterTypes().length == 0) {
+							defaultConstructor = candidate;
+						}
 					}
-					requiredConstructor = candidate;
+					if (!candidates.isEmpty()) {
+						// Add default constructor to list of optional constructors, as fallback.
+						if (requiredConstructor == null && defaultConstructor != null) {
+							candidates.add(defaultConstructor);
+						}
+						candidateConstructors = (Constructor[]) candidates.toArray(new Constructor[candidates.size()]);
+					}
+					else {
+						candidateConstructors = new Constructor[0];
+					}
+					this.candidateConstructorsCache.put(beanClass, candidateConstructors);
 				}
-				candidates.add(candidate);
-			}
-			else if (candidate.getParameterTypes().length == 0) {
-				defaultConstructor = candidate;
 			}
 		}
-
-		if (!candidates.isEmpty()) {
-			// Add default constructor to list of optional constructors, as fallback.
-			if (requiredConstructor == null && defaultConstructor != null) {
-				candidates.add(defaultConstructor);
-			}
-			return (Constructor[]) candidates.toArray(new Constructor[candidates.size()]);
-		}
-		else {
-			// No annotated candidate constructors found.
-			return null;
-		}
+		return (candidateConstructors.length > 0 ? candidateConstructors : null);
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
@@ -322,25 +333,39 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private final PropertyDescriptor pd;
+		private volatile String beanNameForField;
+
+		private volatile String[] beanNamesForMethod;
 
 		public AutowiredElement(Member member, boolean required, PropertyDescriptor pd) {
-			super(member);
+			super(member, pd);
 			this.required = required;
-			this.pd = pd;
 		}
 
 		@Override
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
-			Set autowiredBeanNames = new LinkedHashSet(4);
-			TypeConverter typeConverter = beanFactory.getTypeConverter();
-
+			if (this.skip) {
+				return;
+			}
 			if (this.isField) {
 				Field field = (Field) this.member;
 				try {
-					Object argument = beanFactory.resolveDependency(
-							new DependencyDescriptor(field, this.required),
-							beanName, autowiredBeanNames, typeConverter);
+					Object argument = null;
+					String determinedBeanName = this.beanNameForField;
+					if (determinedBeanName != null) {
+						argument = beanFactory.getBean(determinedBeanName);
+					}
+					else {
+						Set<String> autowiredBeanNames = new LinkedHashSet<String>(4);
+						TypeConverter typeConverter = beanFactory.getTypeConverter();
+						argument = beanFactory.resolveDependency(
+								new DependencyDescriptor(field, this.required),
+								beanName, autowiredBeanNames, typeConverter);
+						registerDependentBeans(beanName, autowiredBeanNames);
+						if (autowiredBeanNames.size() == 1) {
+							this.beanNameForField = autowiredBeanNames.iterator().next();
+						}
+					}
 					if (argument != null) {
 						ReflectionUtils.makeAccessible(field);
 						field.set(bean, argument);
@@ -353,21 +378,38 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			else {
 				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
 					// Explicit value provided as part of the bean definition.
+					this.skip = true;
 					return;
 				}
 				Method method = (Method) this.member;
 				Object[] arguments = new Object[method.getParameterTypes().length];
 				try {
-					boolean shouldInvoke = true; 
-					for (int i = 0; i < arguments.length; i++) {
-						arguments[i] = beanFactory.resolveDependency(
-								new DependencyDescriptor(new MethodParameter(method, i), this.required),
-								beanName, autowiredBeanNames, typeConverter);
-						if (arguments[i] == null) {
-							shouldInvoke = false;
+					String[] determinedBeanNames = this.beanNamesForMethod;
+					if (determinedBeanNames != null) {
+						for (int i = 0; i < determinedBeanNames.length; i++) {
+							arguments[i] = beanFactory.getBean(determinedBeanNames[i]);
 						}
 					}
-					if (shouldInvoke) {
+					else {
+						Set<String> autowiredBeanNames = new LinkedHashSet<String>(4);
+						TypeConverter typeConverter = beanFactory.getTypeConverter();
+						for (int i = 0; i < arguments.length; i++) {
+							arguments[i] = beanFactory.resolveDependency(
+									new DependencyDescriptor(new MethodParameter(method, i), this.required),
+									beanName, autowiredBeanNames, typeConverter);
+							if (arguments[i] == null) {
+								arguments = null;
+								break;
+							}
+						}
+						if (arguments != null) {
+							registerDependentBeans(beanName, autowiredBeanNames);
+							if (autowiredBeanNames.size() == arguments.length) {
+								this.beanNamesForMethod = autowiredBeanNames.toArray(new String[arguments.length]);
+							}
+						}
+					}
+					if (arguments != null) {
 						ReflectionUtils.makeAccessible(method);
 						method.invoke(bean, arguments);
 					}
@@ -379,7 +421,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					throw new BeanCreationException("Could not autowire method: " + method, ex);
 				}
 			}
+		}
 
+		private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
 			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
 				String autowiredBeanName = (String) it.next();
 				beanFactory.registerDependentBean(autowiredBeanName, beanName);

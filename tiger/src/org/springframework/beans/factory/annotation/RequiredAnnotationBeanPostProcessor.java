@@ -20,7 +20,10 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -64,6 +67,9 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
 	private Class<? extends Annotation> requiredAnnotationType = Required.class;
 
+	/** Cache for validated bean names, skipping re-validation for the same bean */
+	private final Set<String> validatedBeanNames = Collections.synchronizedSet(new HashSet<String>());
+
 
 	/**
 	 * Set the 'required' annotation type, to be used on bean property
@@ -91,14 +97,17 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)
 			throws BeansException {
 
-		List<String> invalidProperties = new ArrayList<String>();
-		for (PropertyDescriptor pd : pds) {
-			if (isRequiredProperty(pd) && !pvs.contains(pd.getName())) {
-				invalidProperties.add(pd.getName());
+		if (!this.validatedBeanNames.contains(beanName)) {
+			List<String> invalidProperties = new ArrayList<String>();
+			for (PropertyDescriptor pd : pds) {
+				if (isRequiredProperty(pd) && !pvs.contains(pd.getName())) {
+					invalidProperties.add(pd.getName());
+				}
 			}
-		}
-		if (!invalidProperties.isEmpty()) {
-			throw new BeanInitializationException(buildExceptionMessage(invalidProperties, beanName));
+			if (!invalidProperties.isEmpty()) {
+				throw new BeanInitializationException(buildExceptionMessage(invalidProperties, beanName));
+			}
+			this.validatedBeanNames.add(beanName);
 		}
 		return pvs;
 	}

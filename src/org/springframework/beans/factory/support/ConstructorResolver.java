@@ -561,6 +561,7 @@ abstract class ConstructorResolver {
 		else {
 			mbd.resolvedConstructorArguments = args.arguments;
 		}
+		mbd.constructorArgumentsResolved = true;
 		return args;
 	}
 
