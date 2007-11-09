@@ -30,12 +30,10 @@ import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
 
 /**
- * Unit and integration tests for the ScriptFactoryPostProcessor class.
- *
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class ScriptFactoryPostProcessorTests extends TestCase {
+public class ScriptFactoryPostProcessorTests extends TestCase {
 
 	private static final String MESSAGE_TEXT = "Bingo";
 
@@ -263,7 +261,7 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 
-	public static final class DefaultMessengerService {
+	public static class DefaultMessengerService {
 
 		private Messenger messenger;
 

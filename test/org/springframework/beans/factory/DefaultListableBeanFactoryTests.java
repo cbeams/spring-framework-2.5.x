@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -2047,6 +2046,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			this.factoryBean = factoryBean;
 		}
 	}
+
 
 	private static class CustomTypeConverter implements TypeConverter {
 

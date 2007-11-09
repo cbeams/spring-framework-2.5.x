@@ -183,11 +183,11 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
+
 	public static class CustomInitDestroyBean {
 
 		final List<String> initMethods = new ArrayList<String>();
 		final List<String> destroyMethods = new ArrayList<String>();
-
 
 		public void customInit() throws Exception {
 			this.initMethods.add("customInit");
@@ -198,8 +198,9 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
-	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean implements InitializingBean,
-			DisposableBean {
+
+	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean
+			implements InitializingBean, DisposableBean {
 
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
@@ -209,6 +210,7 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 			this.destroyMethods.add("destroy");
 		}
 	}
+
 
 	public static class CustomAnnotatedInitDestroyBean extends CustomInitializingDisposableBean {
 
@@ -222,6 +224,7 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 			this.destroyMethods.add("preDestroy");
 		}
 	}
+
 
 	public static class CustomAnnotatedInitDestroyWithShadowedMethodsBean extends CustomInitializingDisposableBean {
 
@@ -238,11 +241,11 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
+
 	public static class AllInOneBean implements InitializingBean, DisposableBean {
 
 		final List<String> initMethods = new ArrayList<String>();
 		final List<String> destroyMethods = new ArrayList<String>();
-
 
 		@PostConstruct
 		public void afterPropertiesSet() throws Exception {
