@@ -14,7 +14,7 @@
 		- but is currently just used within PetClinic's web tier.
 	-->
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
-		p:basename="messages" />
+		p:basename="messages"/>
 
 
 	<!-- ========================= MAPPING DEFINITIONS ========================= -->
@@ -35,9 +35,8 @@
 		- for request parameter binding. It overrides the default AnnotationMethodHandlerAdapter.
 	-->
 	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="cacheSeconds" value="0" />
 		<property name="webBindingInitializer">
-			<bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer" />
+			<bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer"/>
 		</property>
 	</bean>
 
@@ -63,7 +62,7 @@
 		- will be mapped to "/WEB-INF/jsp/vets.jsp".
 	-->
 	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp/"
-		p:suffix=".jsp" />
+		p:suffix=".jsp"/>
 
 
 	<!-- ========================= CONTROLLER DEFINITIONS ========================= -->
@@ -71,6 +70,6 @@
 	<!--
 		- The controllers are autodetected POJOs labeled with the @Controller annotation.
 	-->
-	<context:component-scan base-package="org.springframework.samples.petclinic.web" />
+	<context:component-scan base-package="org.springframework.samples.petclinic.web"/>
 
 </beans>
