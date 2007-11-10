@@ -16,10 +16,12 @@
 
 package org.springframework.context.support;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Special variant of an overriding ClassLoader, used for temporary
@@ -28,47 +30,74 @@ import org.springframework.core.OverridingClassLoader;
  * in order to pick up recently loaded types in the parent ClassLoader.
  *
  * @author Juergen Hoeller
- * @author Ramnivas Laddad
  * @since 2.5
  * @see AbstractApplicationContext
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setTempClassLoader
  */
-class ContextTypeMatchClassLoader extends OverridingClassLoader {
+class ContextTypeMatchClassLoader extends ClassLoader {
+
+	private static Method findLoadedClassMethod;
+
+	static {
+		try {
+			findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] {String.class});
+		}
+		catch (NoSuchMethodException ex) {
+			findLoadedClassMethod = null;
+		}
+	}
+
 
 	/** Cache for byte array per class name */
 	private final Map bytesCache = new HashMap();
 
-	/** Cache for class object per class name */
-	private final Map loadedClasses = new HashMap();
 
 	public ContextTypeMatchClassLoader(ClassLoader parent) {
 		super(parent);
-		excludePackage("org.springframework");
+	}
+
+	public Class loadClass(String name) throws ClassNotFoundException {
+		return new ContextOverridingClassLoader(getParent()).loadClass(name);
 	}
 
 
-	protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
-		// First see if the class has been loaded by this classloader (and not its parent)
-		// Not doing so will lead to a LinkageError upon calling defineClass() 
-		Class loadedClass = (Class)loadedClasses.get(name);
-		if (loadedClass != null) {
-			return loadedClass;
-		}
-		
-		byte[] bytes = (byte[]) this.bytesCache.get(name);
-		if (bytes == null) {
-			bytes = loadBytesForClass(name);
-			if (bytes != null) {
-				this.bytesCache.put(name, bytes);
-			}
-			else {
-				return null;
-			}
+	/**
+	 * ClassLoader to be created for each loaded class.
+	 * Caches class file content but redefines class for each call.
+	 */
+	private class ContextOverridingClassLoader extends OverridingClassLoader {
+
+		public ContextOverridingClassLoader(ClassLoader parent) {
+			super(parent);
+			excludePackage("org.springframework");
 		}
 
-		loadedClass = defineClass(name, bytes, 0, bytes.length);
-		loadedClasses.put(name, loadedClass);
-		return loadedClass;
+		protected boolean isEligibleForOverriding(String className) {
+			if (!super.isEligibleForOverriding(className)) {
+				return false;
+			}
+			if (findLoadedClassMethod != null) {
+				ReflectionUtils.makeAccessible(findLoadedClassMethod);
+				if (ReflectionUtils.invokeMethod(findLoadedClassMethod, getParent(), new Object[] {className}) != null) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
+			byte[] bytes = (byte[]) bytesCache.get(name);
+			if (bytes == null) {
+				bytes = loadBytesForClass(name);
+				if (bytes != null) {
+					bytesCache.put(name, bytes);
+				}
+				else {
+					return null;
+				}
+			}
+			return defineClass(name, bytes, 0, bytes.length);
+		}
 	}
 
 }
