@@ -283,30 +283,31 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 
 		if (tableMeta.size() < 1) {
-			throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName +"'");
-		}
-
-		TableMetaData tmd = null;
-		if (schemaName == null) {
-			tmd = tableMeta.get(userName.toUpperCase());
-			if (tmd == null) {
-				tmd = tableMeta.get("PUBLIC");
-				if (tmd == null) {
-					tmd = tableMeta.get("DBO");
-				}
-				if (tmd == null) {
-					throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the default schema");
-				}
-			}
+			logger.warn("Unable to locate table meta data for '" + tableName +"' -- column names must be provided");
 		}
 		else {
-			tmd = tableMeta.get(schemaName.toUpperCase());
-			if (tmd == null) {
-				throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the '" + schemaName + "' schema");
+			TableMetaData tmd = null;
+			if (schemaName == null) {
+				tmd = tableMeta.get(userName.toUpperCase());
+				if (tmd == null) {
+					tmd = tableMeta.get("PUBLIC");
+					if (tmd == null) {
+						tmd = tableMeta.get("DBO");
+					}
+					if (tmd == null) {
+						throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the default schema");
+					}
+				}
 			}
-		}
+			else {
+				tmd = tableMeta.get(schemaName.toUpperCase());
+				if (tmd == null) {
+					throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the '" + schemaName + "' schema");
+				}
+			}
 
-		processTableColumns(databaseMetaData, tmd);
+			processTableColumns(databaseMetaData, tmd);
+		}
 	}
 
 	/**

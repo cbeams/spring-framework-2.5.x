@@ -18,8 +18,7 @@ package org.springframework.jdbc.core.simple;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -106,7 +105,7 @@ public class SimpleJdbcInsertTests extends TestCase {
 		try {
 			insert.execute(new HashMap());
 			fail("Shouldn't succeed in inserting into table which doesn't exist");
-		} catch (DataAccessResourceFailureException ex) {
+		} catch (InvalidDataAccessApiUsageException ex) {
 			// OK
 		}
 	}
