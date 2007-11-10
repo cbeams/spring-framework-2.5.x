@@ -274,7 +274,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@Controller
 	private static class MyAdaptedController {
 
-		@RequestMapping(value="VIEW", type="ACTION")
+		@RequestMapping("VIEW")
 		public void myHandle(ActionRequest request, ActionResponse response) throws IOException {
 			response.setRenderParameter("test", "value");
 		}
@@ -289,7 +289,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
-		@RequestMapping(value="VIEW", type="RENDER")
+		@RequestMapping("VIEW")
 		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException  {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
@@ -305,8 +305,8 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("EDIT")
-		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2, RenderResponse response) throws IOException  {
-			response.getWriter().write("test-" + p1 + "-" + p2);
+		public void myHandle(@RequestParam("param1") String p1, int param2, RenderResponse response) throws IOException  {
+			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("HELP")
@@ -372,9 +372,9 @@ public class PortletAnnotationControllerTests extends TestCase {
 	private static class MyCommandProvidingFormController extends MyFormController {
 
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(@RequestParam("defaultName") String name, Map<String, Object> model) {
+		private TestBean createTestBean(@RequestParam String defaultName, Map<String, Object> model) {
 			model.put("myKey", "myOriginalValue");
-			return new TestBean(name);
+			return new TestBean(defaultName);
 		}
 	}
 

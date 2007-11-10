@@ -29,6 +29,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.aop.interceptor.SimpleTraceInterceptor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -67,6 +70,27 @@ public class ServletAnnotationControllerTests extends TestCase {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test", response.getContentAsString());
+	}
+
+	public void testProxiedStandardHandleMethod() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
+				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
+				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
+				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -154,6 +178,30 @@ public class ServletAnnotationControllerTests extends TestCase {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("name", "name1");
+		request.addParameter("age", "value2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
+	}
+
+	public void testProxiedFormController() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
+				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
+				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
+				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -320,8 +368,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2, HttpServletResponse response) throws IOException  {
-			response.getWriter().write("test-" + p1 + "-" + p2);
+		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException  {
+			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("/myPath3.do")
@@ -337,7 +385,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 
 	@Controller
-	private static class MyFormController {
+	public static class MyFormController {
 
 		@ModelAttribute("testBeans")
 		public List<TestBean> getTestBeans() {
@@ -362,9 +410,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(@RequestParam("defaultName") String name, Map<String, Object> model) {
+		private TestBean createTestBean(@RequestParam String defaultName, Map<String, Object> model) {
 			model.put("myKey", "myOriginalValue");
-			return new TestBean(name);
+			return new TestBean(defaultName);
 		}
 	}
 

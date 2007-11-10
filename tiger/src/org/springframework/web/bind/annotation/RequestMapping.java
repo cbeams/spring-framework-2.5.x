@@ -110,21 +110,17 @@ public @interface RequestMapping {
 	 * <p>In a Servlet environment: the path mapping URLs (e.g. "/myPath.do")
 	 * <p>In a Portlet environment: the mapped portlet modes (e.g. "EDIT")
 	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used at the type level, all method level mappings inherit
+	 * this primary mapping, narrowing it for a specific handler method.
 	 */
 	String[] value() default {};
 
 	/**
-	 * The type of the mapped request, narrowing the primary mapping.
-	 * By default, the mapping will apply to any type of request.
-	 * <p>In a Servlet environment: the HTTP method to apply to (e.g. "POST")
-	 * <p>In a Portlet environment: the action/render phase (e.g. "ACTION")
-	 * The phase will be inferred from the method signature by default
-	 * (presence of <code>ActionRequest</code> / <code>RenderRequest</code>
-	 * argument, or a <code>String</code> / <code>Map</code> /
-	 * <code>ModelAndView</code> return value which suggests a render method).
-	 * <p><b>Only supported at the method level!</b>
+	 * The HTTP request methods to map to, narrowing the primary mapping:
+	 * GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
+	 * <p><b>Only supported at the handler method level in Servlet environments!</b>
 	 */
-	String type() default "";
+	RequestMethod[] method() default {};
 
 	/**
 	 * The parameters of the mapped request, narrowing the primary mapping.
@@ -133,7 +129,7 @@ public @interface RequestMapping {
 	 * to have the given value. "myParam" style expressions are also supported,
 	 * with such parameters having to be present in the request (allowed to
 	 * have any value).
-	 * <p><b>Only supported at the method level!</b>
+	 * <p><b>Only supported at the handler method level!</b>
 	 */
 	String[] params() default {};
 

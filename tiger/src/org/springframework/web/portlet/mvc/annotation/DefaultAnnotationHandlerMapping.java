@@ -22,6 +22,11 @@ import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -88,20 +93,32 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	protected void detectHandlers() throws BeansException {
 		String[] beanNames = getApplicationContext().getBeanNamesForType(Object.class);
 		for (final String beanName : beanNames) {
-			final Class<?> handlerType = getApplicationContext().getType(beanName);
-			RequestMapping mapping = handlerType.getAnnotation(RequestMapping.class);
+			ApplicationContext context = getApplicationContext();
+			Class<?> handlerType = context.getType(beanName);
+			RequestMapping mapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
+			if (mapping == null && context instanceof ConfigurableApplicationContext &&
+					context.containsBeanDefinition(beanName)) {
+				ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+				BeanDefinition bd = cac.getBeanFactory().getMergedBeanDefinition(beanName);
+				if (bd instanceof AbstractBeanDefinition) {
+					AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+					if (abd.hasBeanClass()) {
+						Class<?> beanClass = abd.getBeanClass();
+						mapping = AnnotationUtils.findAnnotation(beanClass, RequestMapping.class);
+					}
+				}
+			}
 			if (mapping != null) {
-				if (!mapping.type().equals("") || mapping.params().length > 0) {
+				if (mapping.method().length > 0 || mapping.params().length > 0) {
 					throw new IllegalStateException("Only portlet mode value supported for RequestMapping annotation " +
-							"at the type level - map action/render type and/or parameters at the method level! " +
-							"Offending type: " + handlerType);
+							"at the type level - map or parameters at the method level! Offending type: " + handlerType);
 				}
 				String[] modeKeys = mapping.value();
 				for (String modeKey : modeKeys) {
 					registerHandler(new PortletMode(modeKey), beanName);
 				}
 			}
-			else if (handlerType.isAnnotationPresent(Controller.class)) {
+			else if (AnnotationUtils.findAnnotation(handlerType, Controller.class) != null) {
 				ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 					public void doWith(Method method) {
 						RequestMapping mapping = method.getAnnotation(RequestMapping.class);

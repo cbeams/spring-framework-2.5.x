@@ -20,6 +20,11 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -72,21 +77,34 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
 public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 
 	/**
-	 * Checks for presence of the {@link org.springframework.web.bind.annotation.RequestMapping} annotation on the handler class
-	 * and on any of its methods.
+	 * Checks for presence of the {@link org.springframework.web.bind.annotation.RequestMapping}
+	 * annotation on the handler class and on any of its methods.
 	 */
 	protected String[] determineUrlsForHandler(String beanName) {
-		Class<?> handlerType = getApplicationContext().getType(beanName);
-		RequestMapping mapping = handlerType.getAnnotation(RequestMapping.class);
+		ApplicationContext context = getApplicationContext();
+		Class<?> handlerType = context.getType(beanName);
+		RequestMapping mapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
+		if (mapping == null && context instanceof ConfigurableApplicationContext &&
+				context.containsBeanDefinition(beanName)) {
+			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+			BeanDefinition bd = cac.getBeanFactory().getMergedBeanDefinition(beanName);
+			if (bd instanceof AbstractBeanDefinition) {
+				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+				if (abd.hasBeanClass()) {
+					Class<?> beanClass = abd.getBeanClass();
+					mapping = AnnotationUtils.findAnnotation(beanClass, RequestMapping.class);
+				}
+			}
+		}
 		if (mapping != null) {
-			if (!mapping.type().equals("") || mapping.params().length > 0) {
+			if (mapping.method().length > 0 || mapping.params().length > 0) {
 				throw new IllegalStateException("Only path value supported for RequestMapping annotation " +
 						"at the type level - map HTTP method and/or parameters at the method level! " +
 						"Offending type: " + handlerType);
 			}
 			return mapping.value();
 		}
-		else if (handlerType.isAnnotationPresent(Controller.class)) {
+		else if (AnnotationUtils.findAnnotation(handlerType, Controller.class) != null) {
 			final Set<String> urls = new LinkedHashSet<String>();
 			ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {

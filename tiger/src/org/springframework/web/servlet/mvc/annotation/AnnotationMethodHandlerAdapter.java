@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -39,7 +40,9 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -54,6 +57,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
@@ -94,6 +98,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	private final Map<Class<?>, HandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, HandlerMethodResolver>();
+
+	private final Map<Class<?>, Set<String>> sessionAttributeNames =
+			new ConcurrentHashMap<Class<?>, Set<String>>();
 
 
 	/**
@@ -159,50 +166,83 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 
 	public boolean supports(Object handler) {
-		return getMethodResolver(handler.getClass()).hasHandlerMethods();
+		return getMethodResolver(handler).hasHandlerMethods();
 	}
 
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		checkAndPrepare(request, response, false);
+		SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
+		Set<String> sessionAttrNames = null;
+
+		if (sessionAttributes != null) {
+			// Always prevent caching in case of session attribute management.
+			checkAndPrepare(request, response, 0, false);
+			// Prepare cached set of session attributes names.
+			sessionAttrNames = this.sessionAttributeNames.get(handler.getClass());
+			if (sessionAttrNames == null) {
+				synchronized (this.sessionAttributeNames) {
+					sessionAttrNames = this.sessionAttributeNames.get(handler.getClass());
+					if (sessionAttrNames == null) {
+						sessionAttrNames = Collections.synchronizedSet(new HashSet<String>(4));
+						this.sessionAttributeNames.put(handler.getClass(), sessionAttrNames);
+					}
+				}
+			}
+		}
+		else {
+			// Uses configured default cacheSeconds setting.
+			checkAndPrepare(request, response, false);
+		}
 
 		WebRequest webRequest = new ServletWebRequest(request);
-		HandlerMethodResolver methodResolver = getMethodResolver(handler.getClass());
+		HandlerMethodResolver methodResolver = getMethodResolver(handler);
 		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
 		ModelMap implicitModel = new ModelMap();
 		ArgumentsResolver argResolver = new ArgumentsResolver(methodResolver.getInitBinderMethods());
 
 		for (Method attributeMethod : methodResolver.getModelAttributeMethods()) {
-			String attrName = attributeMethod.getAnnotation(ModelAttribute.class).value();
-			if ("".equals(attrName)) {
-				attrName = ClassUtils.getShortNameAsProperty(attributeMethod.getReturnType());
-			}
 			Object[] args = argResolver.resolveArguments(
-					handler, attributeMethod, request, response, webRequest, implicitModel);
+					handler, attributeMethod, request, response, webRequest, implicitModel, sessionAttrNames);
 			ReflectionUtils.makeAccessible(attributeMethod);
 			Object attrValue = ReflectionUtils.invokeMethod(attributeMethod, handler, args);
-			implicitModel.addAttribute(attrName, attrValue);
+			String attrName = attributeMethod.getAnnotation(ModelAttribute.class).value();
+			if ("".equals(attrName)) {
+				implicitModel.addAttribute(attrValue);
+			}
+			else {
+				implicitModel.addAttribute(attrName, attrValue);
+			}
 		}
 
 		Object[] args = argResolver.resolveArguments(
-				handler, handlerMethod, request, response, webRequest, implicitModel);
+				handler, handlerMethod, request, response, webRequest, implicitModel, sessionAttrNames);
 		ReflectionUtils.makeAccessible(handlerMethod);
 		Object result = ReflectionUtils.invokeMethod(handlerMethod, handler, args);
-		ModelAndView mav = argResolver.getModelAndView(result, implicitModel);
+		ModelAndView mav = argResolver.getModelAndView(handlerMethod, result, implicitModel);
 
-		SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 		if (sessionAttributes != null) {
-			for (String attrName : sessionAttributes.value()) {
-				if (argResolver.isProcessingComplete()) {
-					this.sessionAttributeStore.cleanupAttribute(webRequest, attrName);
+			if (argResolver.isProcessingComplete()) {
+				if (sessionAttrNames != null) {
+					for (String attrName : sessionAttrNames) {
+						this.sessionAttributeStore.cleanupAttribute(webRequest, attrName);
+					}
 				}
-				else {
-					// Expose model attributes as session attributes, if required.
-					if (mav.getModel().containsKey(attrName)) {
-						Object modelAttribute = mav.getModel().get(attrName);
-						this.sessionAttributeStore.storeAttribute(webRequest, attrName, modelAttribute);
+			}
+			else {
+				Set sessionAttributeSet = new HashSet();
+				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.value()));
+				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.types()));
+				// Expose model attributes as session attributes, if required.
+				Map<?, ?> model = mav.getModel();
+				for (Map.Entry entry : model.entrySet()) {
+					String attrName = (String) entry.getKey();
+					Object attrValue = entry.getValue();
+					if (sessionAttributeSet.contains(attrName) ||
+							(attrValue != null && sessionAttributeSet.contains(attrValue.getClass()))) {
+						sessionAttrNames.add(attrName);
+						this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
 						String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
 						if (!mav.getModel().containsKey(bindingResultKey)) {
-							ServletRequestDataBinder binder = new ServletRequestDataBinder(modelAttribute, attrName);
+							ServletRequestDataBinder binder = new ServletRequestDataBinder(attrValue, attrName);
 							if (this.webBindingInitializer != null) {
 								this.webBindingInitializer.initBinder(binder, webRequest);
 							}
@@ -220,15 +260,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 
-	private HandlerMethodResolver getMethodResolver(Class<?> handlerType) {
-		HandlerMethodResolver resolver = this.methodResolverCache.get(handlerType);
+	private HandlerMethodResolver getMethodResolver(Object handler) {
+		HandlerMethodResolver resolver = this.methodResolverCache.get(handler.getClass());
 		if (resolver == null) {
-			resolver = new HandlerMethodResolver(handlerType);
-			this.methodResolverCache.put(handlerType, resolver);
+			resolver = new HandlerMethodResolver(handler.getClass());
+			this.methodResolverCache.put(handler.getClass(), resolver);
 		}
 		return resolver;
 	}
-
 
 
 	private class HandlerMethodResolver {
@@ -257,18 +296,21 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		public Method resolveHandlerMethod(HttpServletRequest request) {
 			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-			Map<RequestMapping, Method> targetHandlerMethods = new LinkedHashMap<RequestMapping, Method>();
-			Map<RequestMapping, String> targetPathMatches = new LinkedHashMap<RequestMapping, String>();
+			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
+			Map<RequestMappingInfo, String> targetPathMatches = new LinkedHashMap<RequestMappingInfo, String>();
 			for (Method handlerMethod : this.handlerMethods) {
+				RequestMappingInfo mappingInfo = new RequestMappingInfo();
 				RequestMapping mapping = handlerMethod.getAnnotation(RequestMapping.class);
+				mappingInfo.paths = mapping.value();
+				mappingInfo.methods = mapping.method();
+				mappingInfo.params = mapping.params();
 				boolean match = false;
-				String[] mappedPaths = mapping.value();
-				if (mappedPaths.length > 0) {
-					for (String mappedPath : mappedPaths) {
+				if (mappingInfo.paths.length > 0) {
+					for (String mappedPath : mappingInfo.paths) {
 						if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath, lookupPath)) {
-							if (checkParameters(request, mapping)) {
+							if (checkParameters(request, mappingInfo)) {
 								match = true;
-								targetPathMatches.put(mapping, mappedPath);
+								targetPathMatches.put(mappingInfo, mappedPath);
 							}
 							else {
 								break;
@@ -278,10 +320,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 				else {
 					// No paths specified: parameter match sufficient.
-					match = checkParameters(request, mapping);
+					match = checkParameters(request, mappingInfo);
 				}
 				if (match) {
-					Method oldMappedMethod = targetHandlerMethods.put(mapping, handlerMethod);
+					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
 					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
 						throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" +
 								lookupPath + "': {" + oldMappedMethod + ", " + handlerMethod +
@@ -294,9 +336,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				return targetHandlerMethods.values().iterator().next();
 			}
 			else if (!targetHandlerMethods.isEmpty()) {
-				RequestMapping bestMappingMatch = null;
+				RequestMappingInfo bestMappingMatch = null;
 				String bestPathMatch = null;
-				for (RequestMapping mapping : targetHandlerMethods.keySet()) {
+				for (RequestMappingInfo mapping : targetHandlerMethods.keySet()) {
 					String mappedPath = targetPathMatches.get(mapping);
 					if (bestMappingMatch == null) {
 						bestMappingMatch = mapping;
@@ -305,8 +347,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					else {
 						if ((mappedPath != null && (bestPathMatch == null ||
 								mappedPath.equals(lookupPath) || bestPathMatch.length() < mappedPath.length())) ||
-								("".equals(bestMappingMatch.type()) && !"".equals(mapping.type())) ||
-								bestMappingMatch.params().length < mapping.params().length) {
+								(bestMappingMatch.methods.length == 0 && mapping.methods.length > 0) ||
+								bestMappingMatch.params.length < mapping.params.length) {
 							bestMappingMatch = mapping;
 							bestPathMatch = mappedPath;
 						}
@@ -319,12 +361,16 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 		}
 
-		private boolean checkParameters(HttpServletRequest request, RequestMapping mapping) {
-			if (!mapping.type().equals("") &&
-					!mapping.type().toUpperCase().equals(request.getMethod().toUpperCase())) {
+		private boolean checkParameters(HttpServletRequest request, RequestMappingInfo mapping) {
+			if (mapping.methods.length > 0) {
+				for (RequestMethod type : mapping.methods) {
+					if (type.toString().equals(request.getMethod().toUpperCase())) {
+						return true;
+					}
+				}
 				return false;
 			}
-			String[] params = mapping.params();
+			String[] params = mapping.params;
 			if (params.length > 0) {
 				for (String param : params) {
 					int separator = param.indexOf('=');
@@ -374,15 +420,20 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		@SuppressWarnings("unchecked")
 		public Object[] resolveArguments(
 				Object handler, Method handlerMethod, HttpServletRequest request, HttpServletResponse response,
-				WebRequest webRequest, ModelMap implicitModel) throws ServletException, IOException {
+				WebRequest webRequest, ModelMap implicitModel, Set<String> sessionAttrNames)
+				throws ServletException, IOException {
 
-			Set<String> sessionAttributeSet = null;
 			SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
+			Set sessionAttributeSet = null;
 			if (sessionAttributes != null) {
-				sessionAttributeSet = new HashSet<String>(Arrays.asList(sessionAttributes.value()));
+				sessionAttributeSet = new HashSet();
+				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.value()));
+				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.types()));
 			}
 			SimpleTypeConverter converter = new SimpleTypeConverter();
 			Object[] args = new Object[handlerMethod.getParameterTypes().length];
+			String[] paramNames = null;
+			boolean paramNamesResolved = false;
 			for (int i = 0; i < args.length; i++) {
 				MethodParameter param = new MethodParameter(handlerMethod, i);
 				args[i] = resolveStandardArgument(param.getParameterType(), request, response, webRequest);
@@ -395,37 +446,58 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					}
 				}
 				if (args[i] == null) {
-					boolean resolved = false;
+					boolean isParam = false;
+					String paramName = "";
+					boolean paramRequired = false;
 					String attrName = ClassUtils.getShortNameAsProperty(param.getParameterType());
 					Annotation[] paramAnns = (Annotation[]) param.getParameterAnnotations();
 					for (int j = 0; j < paramAnns.length; j++) {
 						Annotation paramAnn = paramAnns[j];
 						if (RequestParam.class.isInstance(paramAnn)) {
 							RequestParam requestParam = (RequestParam) paramAnn;
-							Object paramValue = null;
-							if (request instanceof MultipartHttpServletRequest) {
-								paramValue = ((MultipartHttpServletRequest) request).getFile(requestParam.value());
-							}
-							if (paramValue == null) {
-								paramValue = request.getParameterValues(requestParam.value());
-							}
-							if (paramValue == null && requestParam.required()) {
-								throw new MissingServletRequestParameterException(
-										requestParam.value(), param.getParameterType().getName());
-							}
-							args[i] = converter.convertIfNecessary(paramValue, param.getParameterType());
-							resolved = true;
+							isParam = true;
+							paramName = requestParam.value();
+							paramRequired = requestParam.required();
 							break;
 						}
 						else if (ModelAttribute.class.isInstance(paramAnn)) {
 							ModelAttribute attr = (ModelAttribute) paramAnn;
-							if (!"".equals(attrName)) {
+							if (!"".equals(attr.value())) {
 								attrName = attr.value();
 							}
 						}
 					}
-					if (!resolved) {
-						if (sessionAttributeSet != null && sessionAttributeSet.contains(attrName) &&
+					if (isParam || BeanUtils.isSimpleProperty(param.getParameterType())) {
+						// Request parameter value...
+						if ("".equals(paramName)) {
+							if (!paramNamesResolved) {
+								ParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
+								paramNames = discoverer.getParameterNames(handlerMethod);
+								paramNamesResolved = true;
+							}
+							if (paramNames == null) {
+								throw new IllegalStateException("No parameter specified for @RequestParam argument " +
+										"of type [" + param.getParameterType().getName() + "], and no parameter name " +
+										"information found in class file either.");
+							}
+							paramName = paramNames[i];
+						}
+						Object paramValue = null;
+						if (request instanceof MultipartHttpServletRequest) {
+							paramValue = ((MultipartHttpServletRequest) request).getFile(paramName);
+						}
+						if (paramValue == null) {
+							paramValue = request.getParameterValues(paramName);
+						}
+						if (paramValue == null && paramRequired) {
+							throw new MissingServletRequestParameterException(paramName, param.getParameterType().getName());
+						}
+						args[i] = converter.convertIfNecessary(paramValue, param.getParameterType());
+					}
+					else {
+						// Bind request parameter onto object...
+						if (sessionAttributeSet != null &&
+								(sessionAttributeSet.contains(attrName) || sessionAttributeSet.contains(param.getParameterType())) &&
 								!implicitModel.containsKey(attrName)) {
 							HttpSession session = request.getSession(false);
 							if (session == null) {
@@ -437,13 +509,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 								throw new HttpSessionRequiredException(
 										"Session attribute '" + attrName + "' required - not found in session");
 							}
+							sessionAttrNames.add(attrName);
 							implicitModel.addAttribute(attrName, sessionAttr);
 						}
-						Object commandObject = implicitModel.get(attrName);
-						if (commandObject == null) {
-							commandObject = BeanUtils.instantiateClass(param.getParameterType());
+						Object bindObject = implicitModel.get(attrName);
+						if (bindObject == null) {
+							bindObject = BeanUtils.instantiateClass(param.getParameterType());
 						}
-						ServletRequestDataBinder binder = new ServletRequestDataBinder(commandObject, attrName);
+						ServletRequestDataBinder binder = new ServletRequestDataBinder(bindObject, attrName);
 						if (webBindingInitializer != null) {
 							webBindingInitializer.initBinder(binder, webRequest);
 						}
@@ -468,7 +541,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 							}
 						}
 						binder.bind(request);
-						args[i] = commandObject;
+						args[i] = bindObject;
 						implicitModel.putAll(binder.getBindingResult().getModel());
 						if (args.length > i + 1 && Errors.class.isAssignableFrom(handlerMethod.getParameterTypes()[i + 1])) {
 							args[i + 1] = binder.getBindingResult();
@@ -527,7 +600,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Object returnValue, ModelMap implicitModel) {
+		public ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ModelMap implicitModel) {
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
 				mav.getModelMap().mergeAttributes(implicitModel);
@@ -549,9 +622,40 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					return null;
 				}
 			}
+			else if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
+				// Assume a single model attribute...
+				String attrName = handlerMethod.getAnnotation(ModelAttribute.class).value();
+				ModelAndView mav = new ModelAndView().addAllObjects(implicitModel);
+				if ("".equals(attrName)) {
+					return mav.addObject(returnValue);
+				}
+				else {
+					return mav.addObject(attrName, returnValue);
+				}
+			}
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
 			}
+		}
+	}
+
+
+	private static class RequestMappingInfo {
+
+		public String[] paths = new String[0];
+
+		public String[] params = new String[0];
+
+		public RequestMethod[] methods = new RequestMethod[0];
+
+		public boolean equals(Object obj) {
+			RequestMappingInfo other = (RequestMappingInfo) obj;
+			return (this.paths.equals(other.paths) && this.params.equals(other.params) &&
+					this.methods.equals(other.methods));
+		}
+
+		public int hashCode() {
+			return (Arrays.hashCode(this.paths) * 29 + Arrays.hashCode(this.params) * 31 + Arrays.hashCode(this.methods));
 		}
 	}
 

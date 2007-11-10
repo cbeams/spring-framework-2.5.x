@@ -42,7 +42,7 @@ public @interface RequestParam {
 	/**
 	 * The request parameter to bind to.
 	 */
-	String value();
+	String value() default "";
 
 	/**
 	 * Whether the parameter is required.
