@@ -85,7 +85,8 @@
     <literal>&lt;c:redirect/&gt;</literal> tag for redirecting to our front
     <interfacename>Controller</interfacename>. This means all requests for
     <filename>'index.jsp'</filename> will go through our application
-    framework.</para>
+    framework. Just delete the current contents of 'index.jsp' and replace it
+    with the following:</para>
 
     <para><filename>'springapp/war/index.jsp'</filename>:</para>
 
@@ -109,8 +110,8 @@
   &lt;head&gt;&lt;title&gt;Hello :: Spring Application&lt;/title&gt;&lt;/head&gt;
   &lt;body&gt;
     &lt;h1&gt;Hello - Spring Application&lt;/h1&gt;
-    &lt;p&gt;Greetings, it is now &lt;c:out value="${now}"/&gt;&lt;/p&gt;
-  &lt;/body&gt;
+<emphasis role="bold">    &lt;p&gt;Greetings, it is now &lt;c:out value="${now}"/&gt;&lt;/p&gt;
+</emphasis>  &lt;/body&gt;
 &lt;/html&gt;</programlisting>
   </section>
 
@@ -138,11 +139,11 @@ public class HelloControllerTests extends TestCase {
     public void testHandleRequestView() throws Exception{
         HelloController controller = new HelloController();
         ModelAndView modelAndView = controller.handleRequest(null, null);
-        assertEquals("WEB-INF/jsp/hello.jsp", modelAndView.getViewName());
-        assertNotNull(modelAndView.getModel());
+<emphasis role="bold">        assertEquals("WEB-INF/jsp/hello.jsp", modelAndView.getViewName());
+</emphasis><emphasis role="bold">        assertNotNull(modelAndView.getModel());
         String nowValue = (String) modelAndView.getModel().get("now");
         assertNotNull(nowValue);
-    }
+</emphasis>    }
 }</programlisting>
 
     <para>Next, we run the Ant <literal>'tests'</literal> target and our test
@@ -208,8 +209,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.util.Date;
-
+<emphasis role="bold">import java.util.Date;
+</emphasis>
 public class HelloController implements Controller {
 
     protected final Log logger = LogFactory.getLog(getClass());
@@ -217,11 +218,11 @@ public class HelloController implements Controller {
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String now = (new Date()).toString();
+<emphasis role="bold">        String now = (new Date()).toString();
         logger.info("Returning hello view with " + now);
 
         return new ModelAndView("WEB-INF/jsp/hello.jsp", "now", now);
-    }
+</emphasis>    }
 
 }</programlisting>
 
@@ -304,8 +305,25 @@ public class HelloController implements Controller {
 
     <para><filename>'springapp/test/springapp/web/HelloControllerTests.java'</filename>:</para>
 
-    <programlisting>assertEquals("hello", modelAndView.getViewName());
-</programlisting>
+    <programlisting>package springapp.web;
+
+import org.springframework.web.servlet.ModelAndView;
+
+import springapp.web.HelloController;
+
+import junit.framework.TestCase;
+
+public class HelloControllerTests extends TestCase {
+
+    public void testHandleRequestView() throws Exception{		
+        HelloController controller = new HelloController();
+        ModelAndView modelAndView = controller.handleRequest(null, null);		
+        assertEquals("hello", modelAndView.getViewName());
+        assertNotNull(modelAndView.getModel());
+<emphasis role="bold">        String nowValue = (String) modelAndView.getModel().get("now");
+</emphasis>        assertNotNull(nowValue);
+    }
+}</programlisting>
 
     <para>We then remove the prefix and suffix from the view name in the
     controller, leaving the controller to reference the view by its logical
