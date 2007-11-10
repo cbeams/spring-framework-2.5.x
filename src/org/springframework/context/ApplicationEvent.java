@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.context;
 import java.util.EventObject;
 
 /**
- * Class to be extended by all application events.
- * Abstract as it doesn't make sense for generic events
- * to be published directly.
+ * Class to be extended by all application events. Abstract as it
+ * doesn't make sense for generic events to be published directly.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -49,7 +48,7 @@ public abstract class ApplicationEvent extends EventObject {
 	 * Return the system time in milliseconds when the event happened.
 	 */
 	public final long getTimestamp() {
-		return timestamp;
+		return this.timestamp;
 	}
 
 }
