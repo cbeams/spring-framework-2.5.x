@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
@@ -46,14 +47,14 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
-	/** HTTP method "HEAD" */
-	public static final String METHOD_HEAD = "HEAD";
-
 	/** HTTP method "GET" */
 	public static final String METHOD_GET = "GET";
 
 	/** HTTP method "POST" */
 	public static final String METHOD_POST = "POST";
+
+	/** HTTP method "HEAD" */
+	public static final String METHOD_HEAD = "HEAD";
 
 
 	private static final String HEADER_PRAGMA = "Pragma";
@@ -78,18 +79,19 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	public WebContentGenerator() {
-		this.supportedMethods.add(METHOD_HEAD);
 		this.supportedMethods.add(METHOD_GET);
 		this.supportedMethods.add(METHOD_POST);
+		this.supportedMethods.add(METHOD_HEAD);
 	}
+
 
 	/**
 	 * Set the HTTP methods that this content generator should support.
 	 * Default is HEAD, GET and POST.
 	 */
 	public final void setSupportedMethods(String[] methods) {
-		if (methods == null || methods.length == 0) {
-			throw new IllegalArgumentException("supportedMethods must not be empty");
+		if (ObjectUtils.isEmpty(methods)) {
+			throw new IllegalArgumentException("'supportedMethods' must not be empty");
 		}
 		this.supportedMethods.clear();
 		for (int i = 0; i < methods.length; i++) {
@@ -147,7 +149,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Return whether the HTTP 1.1 cache-control header is used.
 	 */
 	public final boolean isUseCacheControlHeader() {
-		return useCacheControlHeader;
+		return this.useCacheControlHeader;
 	}
 
 	/**
