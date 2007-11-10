@@ -169,14 +169,14 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the names of any geberated keys
+	 * Get the names of any generated keys
 	 */
 	public String[] getGeneratedKeyNames() {
 		return generatedKeyNames;
 	}
 
 	/**
-	 * Set the names of any geberated keys
+	 * Set the names of any generated keys
 	 */
 	public void setGeneratedKeyNames(String[] generatedKeyNames) {
 		checkIfConfigurationModificationIsAllowed();
