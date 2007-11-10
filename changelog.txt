@@ -3,19 +3,28 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5 RC2 (2007-11-09)
+Changes in version 2.5 RC2 (2007-11-12)
 ---------------------------------------
 
+Package org.springframework.aop
+* fixed garbage collection problem with CGLIB proxies, now holding onto the Advised configuration independent of factory
+
 Package org.springframework.beans
+* DefaultListableBeanFactory now supports autowiring of FactoryBean instances 'by type'
 * revised DefaultListableBeanFactory's exception handling for clearer wrapping of nested exceptions
 * DefaultListableBeanFactory performs bean creation within a PrivilegedAction (for SecurityManager compatibility)
-* DefaultListableBeanFactory now supports autowiring of FactoryBeans 'by type'
+* optimized DefaultListableBeanFactory's invocation of setter methods for re-created bean instances
+* optimized DefaultListableBeanFactory's invocation of post-processor methods
+* AutowiredAnnotationBeanPostProcessor caches determined candidate constructors per bean class
+* RequiredAnnotationBeanPostProcessor caches validated bean names, skipping re-validation for the same bean
+* added bean type argument to MergedBeanDefinitionPostProcessor (for InitDestroyAnnotationBeanPostProcessor)
 
 Package org.springframework.context
 * "context:mbean-export" autodetects WebLogic and WebSphere, performing an appropriate MBeanServer lookup
 * "context:mbean-export" falls back to a simple MBeanExporter on JDK 1.4, detecting standard MBeans
 * introduced "context:mbean-server" configuration element, for setting up a standalone MBeanServer reference
 * "context:load-time-weaver" automatically activates "spring-configured" if AspectJ weaving is enabled
+* "context:load-time-weaver"'s temporary ClassLoader for type matching uses a fully isolated loader for each match
 
 Package org.springframework.dao
 * PersistenceExceptionTranslationAdvisor detects @Repository on interfaces as well
@@ -30,8 +39,16 @@ Package org.springframework.jdbc
 Package org.springframework.jndi
 * "jee:jndi-lookup" supports "default-value" and "default-ref" attributes, translated to a default object
 
+Package org.springframework.mail
+* MailSendExceptions keeps failed messages in a LinkedHashMap, allowing for access in the order of sending
+* added "getMessageExceptions()" accessor to MailSendException, with "getFailedMessages()" being transient now
+
 Package org.springframework.orm
 * fixed Jpa/JdoTransactionManager to correctly suspend and resume even for dialects without JDBC Connection retrieval
+* SqlMapClientTemplate explicitly checks for TransactionAwareDataSourceProxy, avoiding double synchronization
+
+Package org.springframework.remoting
+* RmiClientInterceptor and AbstractSlsbInvokerInterceptor do not consider MarshalException as connect failure anymore
 
 Package org.springframework.stereotype
 * @Component, @Repository, etc are not marked as inherited anymore (i.e. inheritance checks to be performed explicitly)
@@ -45,9 +62,23 @@ Package org.springframework.transaction
 
 Package org.springframework.web
 * ContextLoader provides an opportunity for subclasses to customize the context before calling refresh
+* made AbstractController's handleRequest entry point method non-final (allowing for overriding and CGLIB proxying)
 * AbstractUrlHandlerMapping always takes the first matching path (in case of multiple path patterns of equal length)
 * AnnotationMethodHandlerAdapter for Servlet MVC exposes UrlPathHelper and PathMatcher configuration properties
+* AnnotationMethodHandlerAdapter for Servlet MVC supports MethodNameResolver for resolving default handler methods
 * AnnotationMethodHandlerAdapter for Servlet MVC supports path patterns for @RequestMapping at the method level as well
+* AnnotationMethodHandlerAdapter for Servlet MVC always prevents HTTP caching in case of @SessionAttributes specified
+* reworked @RequestMapping's "type" attribute into "method", accepting strongly typed @RequestMethod enum values
+* revised AnnotationMethodHandlerAdapter's resolution of multiple matching handler methods to take params into account
+* @RequestParam's "value" attribute is not required anymore, defaulting to the method parameter name (if available)
+* added "types" attribute to @SessionAttributes, allowing to enumerate model attributes types instead of names
+* AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
+* InternalResourceView lets explicit model attributes override Spring beans in case of "exposeContextBeansAsAttributes"
+* JstlView does not set "exposeContextBeansAsAttributes" flag to "true" by default (analogous to InternalResourceView)
+* JSF 1.1 DelegatingVariableResolver checks original VariableResolver first again (for strict backwards compatibility)
+* introduced JSF 1.1 SpringBeanVariableResolver, letting Spring bean definitions override other attributes of same name
+* renamed JSF 1.2 DelegatingFacesELResolver to SpringBeanFacesELResolver, indicating its concrete lookup strategy
+* fixed Tiles 1.x TilesConfigurer to explicitly set the factory name to empty String by default
 
 
 Changes in version 2.5 RC1 (2007-10-22)
