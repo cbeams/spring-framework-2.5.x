@@ -56,6 +56,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.AbstractController;
+import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 
 /**
  * @author Juergen Hoeller
@@ -322,6 +323,77 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
+	public void testMethodNameDispatchingController() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyMethodNameDispatchingController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myHandle.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myOtherHandle.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myOtherView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myLangHandle.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myLangView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/mySurpriseHandle.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("mySurpriseView", response.getContentAsString());
+	}
+
+	public void testMethodNameDispatchingControllerWithSuffix() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyMethodNameDispatchingController.class));
+				InternalPathMethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
+				methodNameResolver.setSuffix("Handle");
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().addPropertyValue("methodNameResolver", methodNameResolver);
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/my.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myOther.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myOtherView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myLang.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myLangView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/mySurprise.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("mySurpriseView", response.getContentAsString());
+	}
+
 
 	@RequestMapping("/myPath.do")
 	private static class MyController extends AbstractController {
@@ -474,6 +546,32 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping(params = "surprise")
+		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("mySurpriseView");
+		}
+	}
+
+
+	@Controller
+	@RequestMapping("/*.do")
+	private static class MyMethodNameDispatchingController {
+
+		@RequestMapping
+		public void myHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myView");
+		}
+
+		@RequestMapping
+		public void myOtherHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myOtherView");
+		}
+
+		@RequestMapping
+		public void myLangHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myLangView");
+		}
+
+		@RequestMapping
 		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
 		}

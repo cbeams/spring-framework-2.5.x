@@ -69,6 +69,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
+import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
@@ -91,6 +93,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
+
+	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
@@ -143,6 +147,16 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
+	}
+
+	/**
+	 * Set the MethodNameResolver to use for resolving default handler methods
+	 * (carrying an empty <code>@RequestMapping</code> annotation).
+	 * <p>Will only kick in when the handler method cannot be resolved uniquely
+	 * through the annotation metadata already.
+	 */
+	public void setMethodNameResolver(MethodNameResolver methodNameResolver) {
+		this.methodNameResolver = methodNameResolver;
 	}
 
 	/**
@@ -294,10 +308,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			});
 		}
 
-		public Method resolveHandlerMethod(HttpServletRequest request) {
+		public Method resolveHandlerMethod(HttpServletRequest request) throws ServletException {
 			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
 			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
 			Map<RequestMappingInfo, String> targetPathMatches = new LinkedHashMap<RequestMappingInfo, String>();
+			String resolvedMethodName = null;
 			for (Method handlerMethod : this.handlerMethods) {
 				RequestMappingInfo mappingInfo = new RequestMappingInfo();
 				RequestMapping mapping = handlerMethod.getAnnotation(RequestMapping.class);
@@ -321,14 +336,35 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				else {
 					// No paths specified: parameter match sufficient.
 					match = checkParameters(request, mappingInfo);
+					if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 &&
+							resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
+						match = false;
+					}
 				}
 				if (match) {
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
 					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
-						throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" +
-								lookupPath + "': {" + oldMappedMethod + ", " + handlerMethod +
-								"}. If you intend to handle the same path in multiple methods, then factor " +
-								"them out into a dedicated handler class with that path mapped at the type level!");
+						if (methodNameResolver != null && resolvedMethodName == null && mappingInfo.isEmpty()) {
+							resolvedMethodName = methodNameResolver.getHandlerMethodName(request);
+							if (!resolvedMethodName.equals(oldMappedMethod.getName())) {
+								oldMappedMethod = null;
+							}
+							if (!resolvedMethodName.equals(handlerMethod.getName())) {
+								if (oldMappedMethod != null) {
+									targetHandlerMethods.put(mappingInfo, oldMappedMethod);
+									oldMappedMethod = null;
+								}
+								else {
+									targetHandlerMethods.remove(mappingInfo);
+								}
+							}
+						}
+						if (oldMappedMethod != null) {
+							throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" +
+									lookupPath + "': {" + oldMappedMethod + ", " + handlerMethod +
+									"}. If you intend to handle the same path in multiple methods, then factor " +
+									"them out into a dedicated handler class with that path mapped at the type level!");
+						}
 					}
 				}
 			}
@@ -644,18 +680,23 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		public String[] paths = new String[0];
 
+		public RequestMethod[] methods = new RequestMethod[0];
+
 		public String[] params = new String[0];
 
-		public RequestMethod[] methods = new RequestMethod[0];
+		public boolean isEmpty() {
+			return (paths.length == 0 && methods.length == 0 && params.length == 0);
+		}
 
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.paths.equals(other.paths) && this.params.equals(other.params) &&
-					this.methods.equals(other.methods));
+			return (this.paths.equals(other.paths) && this.methods.equals(other.methods) &&
+					this.params.equals(other.params));
 		}
 
 		public int hashCode() {
-			return (Arrays.hashCode(this.paths) * 29 + Arrays.hashCode(this.params) * 31 + Arrays.hashCode(this.methods));
+			return (Arrays.hashCode(this.paths) * 29 + Arrays.hashCode(this.methods) * 31 +
+					Arrays.hashCode(this.params));
 		}
 	}
 
