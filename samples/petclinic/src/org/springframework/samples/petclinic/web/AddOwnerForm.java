@@ -9,6 +9,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
@@ -21,7 +22,7 @@ import org.springframework.web.bind.support.SessionStatus;
  */
 @Controller
 @RequestMapping("/addOwner.do")
-@SessionAttributes("owner")
+@SessionAttributes(types = Owner.class)
 public class AddOwnerForm {
 
 	private final Clinic clinic;
@@ -31,15 +32,15 @@ public class AddOwnerForm {
 		this.clinic = clinic;
 	}
 
-	@RequestMapping(type = "GET")
+	@RequestMapping(method = RequestMethod.GET)
 	public String setupForm(ModelMap model) {
 		Owner owner = new Owner();
-		model.addAttribute("owner", owner);
+		model.addAttribute(owner);
 		return "ownerForm";
 	}
 
-	@RequestMapping(type = "POST")
-	public String processSubmit(@ModelAttribute("owner") Owner owner, BindingResult result, SessionStatus status) {
+	@RequestMapping(method = RequestMethod.POST)
+	public String processSubmit(@ModelAttribute Owner owner, BindingResult result, SessionStatus status) {
 		new OwnerValidator().validate(owner, result);
 		if (result.hasErrors()) {
 			return "ownerForm";

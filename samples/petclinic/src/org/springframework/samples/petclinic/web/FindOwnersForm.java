@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * JavaBean Form controller that is used to search for <code>Owner</code>s by
@@ -28,13 +29,13 @@ public class FindOwnersForm {
 		this.clinic = clinic;
 	}
 
-	@RequestMapping(type = "GET")
+	@RequestMapping(method = RequestMethod.GET)
 	public  String setupForm(ModelMap model) {
 		model.addAttribute("owner", new Owner());
 		return "findOwners";
 	}
 
-	@RequestMapping(type = "POST")
+	@RequestMapping(method = RequestMethod.POST)
 	public  String processSubmit(Owner owner, BindingResult result, ModelMap model) {
 		// find owners by last name
 		Collection<Owner> results = this.clinic.findOwners(owner.getLastName());

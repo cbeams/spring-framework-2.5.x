@@ -13,6 +13,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
@@ -41,7 +42,7 @@ public class AddPetForm {
 		return this.clinic.getPetTypes();
 	}
 
-	@RequestMapping(type = "GET")
+	@RequestMapping(method = RequestMethod.GET)
 	public String setupForm(@RequestParam("ownerId") int ownerId, ModelMap model) {
 		Owner owner = this.clinic.loadOwner(ownerId);
 		Pet pet = new Pet();
@@ -50,7 +51,7 @@ public class AddPetForm {
 		return "petForm";
 	}
 
-	@RequestMapping(type = "POST")
+	@RequestMapping(method = RequestMethod.POST)
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, SessionStatus status) {
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
