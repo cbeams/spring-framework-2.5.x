@@ -11,7 +11,7 @@
 <book>
 	<bookinfo>
 		<title>Developing a Spring Framework MVC application step-by-step</title>
-		<releaseinfo>Version 2.5</releaseinfo>
+		<releaseinfo>2.5</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Thomas</firstname>
