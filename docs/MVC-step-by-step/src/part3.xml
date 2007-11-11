@@ -52,7 +52,7 @@
         <imageobject role="fo">
           <imagedata align="center"
                      fileref="images/inventory-system-classdiagram.png"
-                     format="PNG" />
+                     format="PNG" width="350" />
         </imageobject>
 
         <imageobject role="html">
@@ -545,8 +545,8 @@ public class SimpleProductManager implements ProductManager {
     keep the code clean.</quote> For those of you running the tests in an IDE
     and are new to unit testing, we hope you're feeling imbued with a sense of
     greater sense of confidence and certainty that the code is truly working
-    as specified in the business rules specification and as you intend. I know
-    I do.</para>
+    as specified in the business rules specification and as you intend. We
+    certainly do.</para>
 
     <para>We're now ready to move back into the web layer to put a list of
     products into our <classname>Controller</classname> model.</para>

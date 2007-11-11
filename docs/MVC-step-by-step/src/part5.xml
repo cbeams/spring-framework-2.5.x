@@ -19,13 +19,13 @@
     <title>Create database startup script</title>
 
     <para>Before we can start developing the persistence code, we need a
-    database. I am planning on using HSQL, which is a good open source
+    database. We are planning on using HSQL, which is a good open source
     database written in Java. This database is distributed with Spring, so we
     can just copy the jar file to the web apps lib directory. Copy <filename
     class="libraryfile">hsqldb.jar</filename> from the <filename
     class="directory">'spring-framework-2.5/lib/hsqldb'</filename> directory
     to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
-    directory. I am planning on using HSQL in a standalone mode. That means we
+    directory. We will use HSQL in a standalone mode. That means we
     will have to start up a separate database server every time we use it, but
     it gives us easier access to see changes made to the database.</para>
 
@@ -210,7 +210,7 @@ db.pw=</emphasis></programlisting>
 
     <para>Begin with creating a new
     <classname>'springapp/src/repository'</classname> directory to contain any
-    classes that are used for database access. In this directory I create a
+    classes that are used for database access. In this directory we create a
     new interface called <classname>'ProductDao.java</classname>'. This will
     be the interface that defines the functionality that the DAO
     implementation classes will provide – we could choose to have more than
@@ -339,8 +339,8 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     affected.</para>
 
     <para>We need to store the value of the primary key for each product in
-    the Product class. This key will be used when I persist any changes to the
-    object back to the database. To hold this key I add a private field named
+    the Product class. This key will be used when we persist any changes to the
+    object back to the database. To hold this key we add a private field named
     'id' complete with setters and getters to Product.java.</para>
 
     <para><filename>'springapp/src/springapp/domain/Product.java'</filename>:</para>

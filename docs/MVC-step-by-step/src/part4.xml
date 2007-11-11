@@ -20,9 +20,9 @@
     invaluable. We rename <classname>HelloController</classname> to
     <classname>InventoryController</classname> and the
     <classname>HelloControllerTests</classname> to
-    <classname>InventoryControllerTests</classname>. Next, I modify the
+    <classname>InventoryControllerTests</classname>. Next, We modify the
     <classname>InventoryController</classname> to hold a reference to the
-    <classname>ProductManager</classname> class. I also add code to have the
+    <classname>ProductManager</classname> class. We also add code to have the
     controller pass some product information to the view. The
     <methodname>getModelAndView()</methodname> method now returns a
     <interfacename>Map</interfacename> with both the date and time and the
@@ -80,11 +80,11 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
     <title>Modify the view to display business data and add support for
     message bundle</title>
 
-    <para>Using the JSTL <literal>&lt;c:forEach/&gt;</literal> tag, I add a
-    section that displays product information. I have also replaced the title,
+    <para>Using the JSTL <literal>&lt;c:forEach/&gt;</literal> tag, we add a
+    section that displays product information. We have also replaced the title,
     heading and greeting text with a JSTL
     <literal>&lt;fmt:message/&gt;</literal> tag that pulls the text to display
-    from a provided <literal>'message'</literal> source – I will show this
+    from a provided <literal>'message'</literal> source – we will show this
     source in a later step.</para>
 
     <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
@@ -110,14 +110,14 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
 
     <para>It's time to add a <classname>SimpleProductManager</classname> to
     our configuration file and to pass that into the setter of the
-    <classname>InventoryController</classname>. I am not going to add any code
+    <classname>InventoryController</classname>. We are not going to add any code
     to load the business objects from a database just yet. Instead, we can
     stub a couple of <classname>Product</classname> instances using Spring's
-    bean and application context support. I will simply put the data I need as
+    bean and application context support. We will simply put the data we need as
     a couple of bean entries in <filename>'springapp-servlet.xml'</filename>.
-    I will also add the <literal>'messageSource'</literal> bean entry that
+    we will also add the <literal>'messageSource'</literal> bean entry that
     will pull in the messages resource bundle
-    (<filename>'messages.properties'</filename>) that I will create in the
+    (<filename>'messages.properties'</filename>) that we will create in the
     next step. Also remember to rename the reference to
     <classname>HelloController</classname> to
     <classname>InventoryController</classname> since we renamed it.</para>
@@ -178,7 +178,7 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
     <title>Add the message bundle and a <literal>'clean'</literal> target to
     <filename>'build.xml'</filename></title>
 
-    <para>I create a <filename>'messages.properties'</filename> file in the
+    <para>We create a <filename>'messages.properties'</filename> file in the
     <filename class="directory">'war/WEB-INF/classes'</filename> directory.
     This properties bundle so far has three entries matching the keys
     specified in the <literal>&lt;fmt:message/&gt;</literal> tags that we
@@ -192,7 +192,7 @@ greeting=Greetings, it is now</programlisting>
 
     <para>Since we moved some source files around, it makes sense to add a
     <literal>'clean'</literal> and an <literal>'undeploy'</literal> target to
-    the build script. I add the following entries to the
+    the build script. We add the following entries to the
     <filename>'build.xml'</filename> file.</para>
 
     <para><filename>'build.xml'</filename>:</para>
@@ -237,7 +237,7 @@ greeting=Greetings, it is now</programlisting>
     <title>Adding a form</title>
 
     <para>To provide an interface in the web application to expose the price
-    increase functionality, I add a form that will allow the user to enter a
+    increase functionality, we add a form that will allow the user to enter a
     percentage value. This form uses a tag library named
     <literal>'spring-form.tld'</literal> that is provided with the Spring
     Framework. We have to copy this file from the Spring distribution
@@ -428,7 +428,7 @@ public class PriceIncreaseValidator implements Validator {
     sent back to the users browser instructing it to redirect to a new URL.
     The URL we use in this case can't be one of our JSP pages, since they are
     hidden from direct access. It has to be a URL that is externally
-    reachable. I have chosen to use <filename>'hello.htm'</filename> as my
+    reachable. We have chosen to use <filename>'hello.htm'</filename> as my
     redirect URL. This URL maps to the <filename>'hello.jsp'</filename> page,
     so this should work nicely.</para>
 
