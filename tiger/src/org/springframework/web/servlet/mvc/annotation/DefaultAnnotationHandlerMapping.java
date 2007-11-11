@@ -120,7 +120,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 			return StringUtils.toStringArray(urls);
 		}
 		else {
-			return new String[0];
+			return null;
 		}
 	}
 

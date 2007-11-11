@@ -19,6 +19,7 @@ package org.springframework.web.servlet.handler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract implementation of the {@link org.springframework.web.servlet.HandlerMapping}
@@ -36,10 +37,9 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 
 	/**
 	 * Set whether to detect handler beans in ancestor ApplicationContexts.
-	 * <p>Default is "false": Only handler beans in the current
-	 * ApplicationContext will be detected, that is, only in the context
-	 * that this BeanNameUrlHandlerMapping itself is defined in (typically
-	 * the current DispatcherServlet's context).
+	 * <p>Default is "false": Only handler beans in the current ApplicationContext
+	 * will be detected, i.e. only in the context that this HandlerMapping itself
+	 * is defined in (typically the current DispatcherServlet's context).
 	 * <p>Switch this flag on to detect handler beans in ancestor contexts
 	 * (typically the Spring root WebApplicationContext) as well.
 	 */
@@ -59,9 +59,11 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 
 	/**
 	 * Register all handlers found in the current ApplicationContext.
-	 * Any bean whose name appears to be a URL is considered a handler.
+	 * <p>The actual URL determination for a handler is up to the concrete
+	 * {@link #determineUrlsForHandler(String)} implementation. A bean for
+	 * which no such URLs could be determined is simply not considered a handler.
 	 * @throws org.springframework.beans.BeansException if the handler couldn't be registered
-	 * @see #determineUrlsForHandler
+	 * @see #determineUrlsForHandler(String)
 	 */
 	protected void detectHandlers() throws BeansException {
 		if (logger.isDebugEnabled()) {
@@ -75,7 +77,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
 			String[] urls = determineUrlsForHandler(beanName);
-			if (urls.length > 0) {
+			if (!ObjectUtils.isEmpty(urls)) {
 				// URL paths found: Let's consider it a handler.
 				registerHandler(urls, beanName);
 			}
@@ -91,7 +93,8 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	/**
 	 * Determine the URLs for the given handler bean.
 	 * @param beanName the name of the candidate bean
-	 * @return the URLs determined for the bean, or an empty array if none
+	 * @return the URLs determined for the bean,
+	 * or <code>null</code> or an empty array if none
 	 */
 	protected abstract String[] determineUrlsForHandler(String beanName);
 
