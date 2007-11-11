@@ -30,31 +30,19 @@
 
     <para>In our inventory management system, we have the concept of a product
     and a service for handling them. In particular, the business has requested
-    the ability to increase or decrease prices across all products. The
-    validation rules for price increase are:</para>
+    the ability to increase prices across all products. Any decrease will be
+    done on an individual product basis, but this fetaure is outside the scope
+    of our application. The validation rules for price increase are:</para>
 
     <itemizedlist>
       <listitem>
-        <para>The maximum increase amount is 100%.</para>
+        <para>The maximum increase is limited to 50%.</para>
       </listitem>
 
       <listitem>
-        <para>The minimum increase amount is 1%.</para>
-      </listitem>
-
-      <listitem>
-        <para>The maximum decrease amount 100%.</para>
-      </listitem>
-
-      <listitem>
-        <para>The minimum decrease amount is 1%.</para>
+        <para>The minimum increase must be greater than 0%.</para>
       </listitem>
     </itemizedlist>
-
-    <para>The business has also said that they want to syndicate the system to
-    several large supermarkets, with one website for each company so that a
-    company can specify the discounts they want to set for the
-    products.</para>
 
     <para>Find below a class diagram of our inventory management
     system.</para>
@@ -373,19 +361,19 @@ import springapp.domain.Product;
 
 public class SimpleProductManager implements ProductManager {
 
-    private List&lt;Product&gt; products;
-    
+<emphasis role="bold">    private List&lt;Product&gt; products;
+</emphasis>    
     public List&lt;Product&gt; getProducts() {
-        return products;
-    }
+<emphasis role="bold">        return products;
+</emphasis>    }
 
     public void increasePrice(int percentage) {
         // TODO Auto-generated method stub      
     }
 
     public void setProducts(List&lt;Product&gt; products) {
-        this.products = products;
-    }
+<emphasis role="bold">        this.products = products;
+</emphasis>    }
     
 }</programlisting>
 
@@ -431,7 +419,8 @@ import junit.framework.TestCase;
 public class SimpleProductManagerTests extends TestCase {
 
     private ProductManager productManager;
-    private List&lt;Product&gt; products;
+
+<emphasis role="bold">    private List&lt;Product&gt; products;
     
     private static int PRODUCT_COUNT = 2;
     
@@ -440,13 +429,12 @@ public class SimpleProductManagerTests extends TestCase {
     
     private static String TABLE_DESCRIPTION = "Table";
     private static Double TABLE_PRICE = new Double(150.10);         
-    
+</emphasis>    
 <emphasis role="bold">    private static int POSITIVE_PRICE_INCREASE = 10;
-    private static int NEGATIVE_PRICE_INCREASE = -10;
 </emphasis>    
     protected void setUp() throws Exception {
         productManager = new SimpleProductManager();
-        products = new ArrayList&lt;Product&gt;();
+<emphasis role="bold">        products = new ArrayList&lt;Product&gt;();
         
         // stub up a list of products
         Product product = new Product();
@@ -460,14 +448,14 @@ public class SimpleProductManagerTests extends TestCase {
         products.add(product);
         
         productManager.setProducts(products);
-    }
+</emphasis>    }
 
     public void testGetProductsWithNoProducts() {
         productManager = new SimpleProductManager();
         assertNull(productManager.getProducts());
     }
     
-    public void testGetProducts() {
+<emphasis role="bold">    public void testGetProducts() {
         List&lt;Product&gt; products = productManager.getProducts();
         assertNotNull(products);        
         assertEquals(PRODUCT_COUNT, productManager.getProducts().size());
@@ -480,7 +468,7 @@ public class SimpleProductManagerTests extends TestCase {
         assertEquals(TABLE_DESCRIPTION, product.getDescription());
         assertEquals(TABLE_PRICE, product.getPrice());      
     }   
-    
+</emphasis>    
 <emphasis role="bold">    public void testIncreasePriceWithNullListOfProducts() {
         try {
             productManager = new SimpleProductManager();
@@ -514,20 +502,7 @@ public class SimpleProductManagerTests extends TestCase {
         product = products.get(1);      
         assertEquals(expectedTablePriceWithIncrease, product.getPrice());       
     }
-    
-    public void testIncreasePriceWithNegativePercentage() {     
-        productManager.increasePrice(NEGATIVE_PRICE_INCREASE);
-        double expectedChairPriceWithDecrease = 18.45;
-        double expectedTablePriceWithDecrease = 135.09;
-        
-        List&lt;Product&gt; products = productManager.getProducts();      
-        Product product = products.get(0);
-        assertEquals(expectedChairPriceWithDecrease, product.getPrice());
-        
-        product = products.get(1);      
-        assertEquals(expectedTablePriceWithDecrease, product.getPrice());       
-    }
-</emphasis>    
+    </emphasis>    
 }</programlisting>
 
     <para>We return to <classname>SimpleProductManager</classname> to

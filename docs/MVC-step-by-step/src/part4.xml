@@ -92,7 +92,7 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
     <programlisting>&lt;%@ include file="/WEB-INF/jsp/include.jsp" %&gt;
 
 &lt;html&gt;
-  &lt;head&gt;&lt;title&gt;&lt;fmt:message key="title"/&gt;&lt;/title&gt;&lt;/head&gt;
+<emphasis role="bold">  &lt;head&gt;&lt;title&gt;&lt;fmt:message key="title"/&gt;&lt;/title&gt;&lt;/head&gt;
   &lt;body&gt;
     &lt;h1&gt;&lt;fmt:message key="heading"/&gt;&lt;/h1&gt;
     &lt;p&gt;&lt;fmt:message key="greeting"/&gt; &lt;c:out value="${model.now}"/&gt;&lt;/p&gt;
@@ -100,7 +100,7 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
     &lt;c:forEach items="${model.products}" var="prod"&gt;
       &lt;c:out value="${prod.description}"/&gt; &lt;i&gt;$&lt;c:out value="${prod.price}"/&gt;&lt;/i&gt;&lt;br&gt;&lt;br&gt;
     &lt;/c:forEach&gt;
-  &lt;/body&gt;
+</emphasis>  &lt;/body&gt;
 &lt;/html&gt;</programlisting>
   </section>
 
@@ -118,7 +118,9 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
     I will also add the <literal>'messageSource'</literal> bean entry that
     will pull in the messages resource bundle
     (<filename>'messages.properties'</filename>) that I will create in the
-    next step.</para>
+    next step. Also remember to rename the reference to
+    <classname>HelloController</classname> to
+    <classname>InventoryController</classname> since we renamed it.</para>
 
     <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
 
@@ -128,11 +130,8 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
 &lt;beans&gt;
 
 <lineannotation>    &lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation>
-<emphasis role="bold">    &lt;bean id="springappController" class="web.InventoryController"&gt;
-<emphasis role="bold">        &lt;property name="productManager" ref="prodMan"/&gt;
-</emphasis>    &lt;/bean&gt;</emphasis>
-
-<emphasis role="bold">    &lt;bean id="prodMan" class="springapp.service.SimpleProductManager"&gt;
+<emphasis role="bold">
+    &lt;bean id="prodMan" class="springapp.service.SimpleProductManager"&gt;
         &lt;property name="products"&gt;
             &lt;list&gt;
                 &lt;ref bean="product1"/&gt;
@@ -161,13 +160,10 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
         &lt;property name="basename" value="messages"/&gt;
     &lt;/bean&gt;
 
-</emphasis>    &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
-        &lt;property name="mappings"&gt;
-            &lt;value&gt;
-                /hello.htm=springappController
-            &lt;/value&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+</emphasis>    &lt;bean name="/hello.htm" class="springapp.web.<emphasis
+        role="bold">InventoryController</emphasis>"&gt;
+<emphasis role="bold"><emphasis role="bold">        &lt;property name="productManager" ref="prodMan"/&gt;
+</emphasis>    &lt;/bean&gt;</emphasis>
 
     &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
         &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
@@ -235,26 +231,6 @@ greeting=Greetings, it is now</programlisting>
         <caption><para>The updated application</para></caption>
       </mediaobject>
     </screenshot>
-
-    <para>Find below a screenshot of what your project directory structure
-    must look like after following the above instructions.</para>
-
-    <screenshot>
-      <mediaobject>
-        <imageobject role="fo">
-          <imagedata align="center" fileref="images/dir-structure-endp3.png"
-                     format="PNG" />
-        </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center" fileref="images/dir-structure-endp3.png"
-                     format="PNG" />
-        </imageobject>
-
-        <caption><para>The project directory structure at the end of part
-        3</para></caption>
-      </mediaobject>
-    </screenshot>
   </section>
 
   <section id="step4.7">
@@ -263,11 +239,12 @@ greeting=Greetings, it is now</programlisting>
     <para>To provide an interface in the web application to expose the price
     increase functionality, I add a form that will allow the user to enter a
     percentage value. This form uses a tag library named
-    <literal>'spring-form'</literal> that is provided with the Spring
+    <literal>'spring-form.tld'</literal> that is provided with the Spring
     Framework. We have to copy this file from the Spring distribution
-    (<filename>'spring-framework-1.2/dist/spring-form.tld '</filename>)to the
-    <filename class="directory">'springapp/war/WEB-INF'</filename> directory.
-    Now we must also add a <literal>&lt;taglib/&gt;</literal> entry to the
+    (<filename>'spring-framework-2.5/dist/resources/spring-form.tld'</filename>)
+    to the <filename class="directory">'springapp/war/WEB-INF/tld'</filename>
+    directory that we also need to create. Next we must also add a
+    <literal>&lt;taglib/&gt;</literal> entry to the
     <filename>'web.xml'</filename> file.</para>
 
     <para><filename>'springapp/war/WEB-INF/web.xml'</filename>:</para>
@@ -279,8 +256,6 @@ greeting=Greetings, it is now</programlisting>
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
          http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" &gt;
-
-&lt;web-app&gt;
 
   &lt;servlet&gt;
     &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
@@ -298,8 +273,8 @@ greeting=Greetings, it is now</programlisting>
       index.jsp
     &lt;/welcome-file&gt;
   &lt;/welcome-file-list&gt;
-<emphasis>
-  &lt;jsp-config&gt;
+
+<emphasis role="bold">  &lt;jsp-config&gt;
     &lt;taglib&gt;
       &lt;taglib-uri&gt;/spring&lt;/taglib-uri&gt;
       &lt;taglib-location&gt;/WEB-INF/tld/spring-form.tld&lt;/taglib-location&gt;
@@ -384,7 +359,6 @@ public class PriceIncrease {
 
     <programlisting>package springapp.service;
 
-import java.io.Serializable;
 import org.springframework.validation.Validator;
 import org.springframework.validation.Errors;
 
@@ -442,19 +416,21 @@ public class PriceIncreaseValidator implements Validator {
 
     <para>Now we need to add an entry in the
     <filename>'springapp-servlet.xml'</filename> file to define the new form
-    and controller. We define properties for command object and validator. We
-    also specify two views, one that is used for the form and one that we will
-    go to after successful form processing. The latter which is called the
-    success view can be of two types. It can be a regular view reference that
-    is forwarded to one of our JSP pages. One disadvantage with this approach
-    is, that if the user refreshes the page, the form data is submitted again,
-    and you would end up with a double price increase. An alternative way is
-    to use a redirect, where a response is sent back to the users browser
-    instructing it to redirect to a new URL. The URL we use in this case can't
-    be one of our JSP pages, since they are hidden from direct access. It has
-    to be a URL that is externally reachable. I have chosen to use
-    <filename>'hello.htm'</filename> as my redirect URL. This URL maps to the
-    <filename>'hello.jsp'</filename> page, so this should work nicely.</para>
+    and controller. We define objects to inject into properties for
+    <classname>commandClass</classname> and <classname>validator</classname>.
+    We also specify two views, a <classname>formView</classname> that is used
+    for the form and a <classname>successView</classname> that we will go to
+    after successful form processing. The latter can be of two types. It can
+    be a regular view reference that is forwarded to one of our JSP pages. One
+    disadvantage with this approach is, that if the user refreshes the page,
+    the form data is submitted again, and you would end up with a double price
+    increase. An alternative way is to use a redirect, where a response is
+    sent back to the users browser instructing it to redirect to a new URL.
+    The URL we use in this case can't be one of our JSP pages, since they are
+    hidden from direct access. It has to be a URL that is externally
+    reachable. I have chosen to use <filename>'hello.htm'</filename> as my
+    redirect URL. This URL maps to the <filename>'hello.jsp'</filename> page,
+    so this should work nicely.</para>
 
     <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
 
@@ -464,23 +440,6 @@ public class PriceIncreaseValidator implements Validator {
 <lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation>
 
 &lt;beans&gt;
-
-    &lt;bean id="springappController" class="springapp.web.InventoryController"&gt;
-        &lt;property name="productManager" ref="prodMan"/&gt;
-    &lt;/bean&gt;
-
-    <lineannotation>&lt;!-- Validator and Form Controller for the "Price Increase" page --&gt;</lineannotation>
-    &lt;bean name="/priceincrease.htm" class="springapp.web.PriceIncreaseFormController"&gt;
-        &lt;property name="sessionForm" value="true"/&gt;
-        &lt;property name="commandName" value="priceIncrease"/&gt;
-        &lt;property name="commandClass" value="sprngapp.service.PriceIncrease"/&gt;
-        &lt;property name="validator"&gt;
-            &lt;bean class="springapp.service.PriceIncreaseValidator"/&gt;
-        &lt;/property&gt;
-        &lt;property name="formView" value="priceincrease"/&gt;
-        &lt;property name="successView" value="hello.htm"/&gt;
-        &lt;property name="productManager" ref="prodMan"/&gt;
-    &lt;/bean&gt;
 
     &lt;bean id="prodMan" class="springapp.service.ProductManager"&gt;
         &lt;property name="products"&gt;
@@ -511,7 +470,23 @@ public class PriceIncreaseValidator implements Validator {
         &lt;property name="basename" value="messages"/&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+    &lt;bean name="/hello.htm" class="springapp.web.InventoryController"&gt;
+        &lt;property name="productManager" ref="prodMan"/&gt;
+    &lt;/bean&gt;
+
+<emphasis role="bold">    &lt;bean name="/priceincrease.htm" class="springapp.web.PriceIncreaseFormController"&gt;
+        &lt;property name="sessionForm" value="true"/&gt;
+        &lt;property name="commandName" value="priceIncrease"/&gt;
+        &lt;property name="commandClass" value="springapp.service.PriceIncrease"/&gt;
+        &lt;property name="validator"&gt;
+            &lt;bean class="springapp.service.PriceIncreaseValidator"/&gt;
+        &lt;/property&gt;
+        &lt;property name="formView" value="priceincrease"/&gt;
+        &lt;property name="successView" value="hello.htm"/&gt;
+        &lt;property name="productManager" ref="prodMan"/&gt;
+    &lt;/bean&gt;
+
+</emphasis>    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
         &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
         &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
         &lt;property name="suffix" value=".jsp"/&gt;
@@ -529,7 +504,7 @@ public class PriceIncreaseValidator implements Validator {
 
     <para><filename>'springapp/src/web/PriceIncreaseFormController.java'</filename>:</para>
 
-    <programlisting>package web;
+    <programlisting>package springapp.web;
 
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.ModelAndView;
@@ -537,16 +512,10 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import springapp.service.Product;
 import springapp.service.ProductManager;
 import springapp.service.PriceIncrease;
 
@@ -565,7 +534,6 @@ public class PriceIncreaseFormController extends SimpleFormController {
 
         prodMan.increasePrice(increase);
 
-        String now = (new java.util.Date()).toString();
         logger.info("returning from PriceIncreaseForm view to " + getSuccessView());
 
         return new ModelAndView(new RedirectView(getSuccessView()));
@@ -595,13 +563,13 @@ public class PriceIncreaseFormController extends SimpleFormController {
     <programlisting>title=SpringApp
 heading=Hello :: SpringApp
 greeting=Greetings, it is now
-priceincrease.heading=Price Increase :: SpringApp
+<emphasis role="bold">priceincrease.heading=Price Increase :: SpringApp
 error.not-specified=Percentage not specified!!!
 error.too-low=You have to specify a percentage higher than {0}!
 error.too-high=Don't be greedy - you can't raise prices by more than {0}%!
 required=Entry required.
 typeMismatch=Invalid data.
-typeMismatch.percentage=That is not a number!!!</programlisting>
+typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
 
     <para>Compile and deploy all this and after reloading the application we
     can test it. This is what the form looks like with errors
@@ -641,6 +609,23 @@ typeMismatch.percentage=That is not a number!!!</programlisting>
         </imageobject>
 
         <caption><para>The updated application</para></caption>
+      </mediaobject>
+    </screenshot>
+
+    <para>Find below a screenshot of what your project directory structure
+    must look like after following the above instructions.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/dir-structure-endp4.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/dir-structure-endp4.png"
+                     format="PNG" />
+        </imageobject>
       </mediaobject>
     </screenshot>
   </section>
