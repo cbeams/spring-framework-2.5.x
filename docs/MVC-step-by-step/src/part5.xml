@@ -25,9 +25,10 @@
     class="libraryfile">hsqldb.jar</filename> from the <filename
     class="directory">'spring-framework-2.5/lib/hsqldb'</filename> directory
     to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
-    directory. We will use HSQL in a standalone mode. That means we
-    will have to start up a separate database server every time we use it, but
-    it gives us easier access to see changes made to the database.</para>
+    directory. We will use HSQL in standalone server mode. That means we will
+    have to start up a separate database server instead of relying on an
+    embedded database, but it gives us easier access to see changes made to
+    the database when running the web application.</para>
 
     <para>We need a script or batch file to start the database. Create a
     <filename class="directory">'db'</filename> directory under the main
@@ -232,7 +233,7 @@ public interface ProductDao {
 
 }</programlisting>
 
-    <para>I'll follow this with a class called
+    <para>We'll follow this with a class called
     '<classname>JdbcProductDao.java</classname>' that will be the JDBC
     implementation of this interface. Spring provides a JDBC abstraction
     framework that we will make use of. The biggest difference between using
@@ -281,7 +282,7 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     public void saveProduct(Product prod) {
         logger.info("Saving product: " + prod.getDescription());
         int count = getSimpleJdbcTemplate().update(
-            "update product set description = :description, price = :price where id = :id",
+            "update products set description = :description, price = :price where id = :id",
             new MapSqlParameterSource().addValue("description", prod.getDescription())
                 .addValue("price", prod.getPrice())
                 .addValue("id", prod.getId()));
@@ -305,8 +306,8 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     <para>Let's go over the two DAO methods in this class. Since we are
     extending <classname>SimpleJdbcSupport</classname> we get a
     <classname>SimpleJdbcTemplate</classname> prepared and ready to use. This
-    is accessed by callng the <classname>getSimpleJdbc()</classname> method.
-    </para>
+    is accessed by callng the <classname>getSimpleJdbcTemplate()</classname>
+    method.</para>
 
     <para>The first method, <classname>getProductList()</classname> executes a
     query using the <classname>SimpleJdbcTemplate</classname>. We simply
@@ -339,9 +340,9 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     affected.</para>
 
     <para>We need to store the value of the primary key for each product in
-    the Product class. This key will be used when we persist any changes to the
-    object back to the database. To hold this key we add a private field named
-    'id' complete with setters and getters to Product.java.</para>
+    the Product class. This key will be used when we persist any changes to
+    the object back to the database. To hold this key we add a private field
+    named 'id' complete with setters and getters to Product.java.</para>
 
     <para><filename>'springapp/src/springapp/domain/Product.java'</filename>:</para>
 
@@ -392,12 +393,34 @@ public class Product implements Serializable {
   </section>
 
   <section id="step5.5">
-    <title>Inplement unit test for JDBC DAO implementation</title>
+    <title>Implement unit test for JDBC DAO implementation</title>
 
     <para>Time to add tests for the JDBC DAO implementation. Spring provides
     an extenive testing framework that supports JUnit 3.8 and 4 as well as
     TestNG. We can't cover all of that in this guide but we will show a simple
-    implementation of the JUnit 3.8 specific support.</para>
+    implementation of the JUnit 3.8 specific support. We need to add the jar
+    file conating the Spring test framework to our project. Copy <filename
+    class="libraryfile">spring-test.jar</filename> from the <filename
+    class="directory">'spring-framework-2.5/dist/modules'</filename> directory
+    to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
+    directory.</para>
+
+    <para>Now we can create or test class. By extending
+    <classname>AbstractTransactionalDataSourceSpringContextTests</classname>
+    we get a lot of nice features for free. We get dependency injection of any
+    public setter from an application context that we specify the name for in
+    the <classname>getConfigLocations</classname> method. We also get an
+    oportunity to prepare our database with the appropriate test data in the
+    <classname>onSetUpInTransaction</classname> method. This is important
+    since we don't know the state of the database when we run our tests. As
+    long as the table exists we will clear it and load what we need for our
+    tests. Since we are a "Transactional" test, any changes we make will be
+    automatically rolled back once the test finishes. The
+    <classname>deleteFromTables</classname> and
+    <classname>executeSqlScript</classname> methods are deinded in the super
+    class, so we don't have to implement them for each test. Just pass in the
+    table names to be cleared and the name of the script that contains the
+    test data.</para>
 
     <para><filename>'springapp/test/springapp/domain/JdbcProductDaoTests.java'</filename>:</para>
 
@@ -451,62 +474,41 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
 
 }</programlisting>
 
-    <para>? ...</para>
+    <para>We don't have the application context file that is loaded for this
+    test yet, so let's create this file in the
+    '<classname>springapp/test</classname>' directory:</para>
 
-    <para><filename>'springapp/src/springapp/repository/JdbcProductDao.java'</filename>:</para>
+    <para><filename>'springapp/test/test-context.xml'</filename>:</para>
 
-    <programlisting>package springapp.repository;
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+&lt;beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt; 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
+    &lt;!-- the test application context definition for the jdbc based tests --&gt; 
 
-import springapp.domain.Product;
+    &lt;bean id="productDao" class="springapp.repository.JdbcProductDao"&gt;
+        &lt;property name="dataSource" ref="dataSource" /&gt;
+    &lt;/bean&gt;
 
-public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
-
-    /** Logger for this class and subclasses */
-    protected final Log logger = LogFactory.getLog(getClass());
-
-
-    public List&lt;Product&gt; getProductList() {
-        logger.info("Getting products!");
-        List&lt;Product&gt; products = getSimpleJdbcTemplate().query("select id, description, price from products", 
-            new ProductMapper());
-        return products;
-    }
-
-    public void saveProduct(Product prod) {
-        logger.info("Saving product: " + prod.getDescription());
-        int count = getSimpleJdbcTemplate().update(
-            "update product set description = :description, price = :price where id = :id",
-            new MapSqlParameterSource().addValue("description", prod.getDescription())
-                .addValue("price", prod.getPrice())
-                .addValue("id", prod.getId()));
-        logger.info("Rows affected: " + count);
-    }
+    &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+      &lt;property name="driverClassName"&gt;&lt;value&gt;org.hsqldb.jdbcDriver&lt;/value&gt;&lt;/property&gt;
+      &lt;property name="url"&gt;
+        &lt;value&gt;jdbc:hsqldb:hsql://localhost&lt;/value&gt;
+      &lt;/property&gt;
+      &lt;property name="username"&gt;&lt;value&gt;sa&lt;/value&gt;&lt;/property&gt;
+      &lt;property name="password"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
+    &lt;/bean&gt;
     
-    private static class ProductMapper implements ParameterizedRowMapper&lt;Product&gt; {
+    &lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+        &lt;property name="dataSource" ref="dataSource" /&gt;
+    &lt;/bean&gt;
 
-        public Product mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Product prod = new Product();
-            prod.setId(rs.getInt("id"));
-            prod.setDescription(rs.getString("description"));
-            prod.setPrice(new Double(rs.getDouble("price")));
-            return prod;
-        }
+&lt;/beans&gt;</programlisting>
 
-    }
-
-}</programlisting>
-
-    <para>Let's </para>
+    <para>...</para>
 
     <para><filename>'springapp/build.xml'</filename>:</para>
 
