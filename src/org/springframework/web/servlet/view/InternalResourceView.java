@@ -155,6 +155,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 		// If already included or response already committed, perform include, else forward.
 		if (useInclude(requestToExpose, response)) {
+			response.setContentType(getContentType());
 			rd.include(requestToExpose, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
