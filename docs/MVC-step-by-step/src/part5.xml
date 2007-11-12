@@ -274,8 +274,9 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
 
     public List&lt;Product&gt; getProductList() {
         logger.info("Getting products!");
-        List&lt;Product&gt; products = getSimpleJdbcTemplate().query("select id, description, price from products", 
-            new ProductMapper());
+        List&lt;Product&gt; products = getSimpleJdbcTemplate().query(
+                "select id, description, price from products", 
+                new ProductMapper());
         return products;
     }
 
@@ -499,7 +500,8 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
       &lt;property name="username"  value="${jdbc.username}"/&gt;
       &lt;property name="password" value="${jdbc.password}"/&gt;
     &lt;/bean&gt;
-    &lt;bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+    &lt;bean id="propertyConfigurer" 
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
         &lt;property name="locations"&gt;
             &lt;list&gt;
                 &lt;value&gt;classpath:jdbc.properties&lt;/value&gt;
@@ -507,7 +509,8 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
         &lt;/property&gt;
     &lt;/bean&gt;
     
-    &lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+    &lt;bean id="transactionManager" 
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
         &lt;property name="dataSource" ref="dataSource" /&gt;
     &lt;/bean&gt;
 
@@ -593,7 +596,8 @@ jdbc.password=
         &lt;/fail&gt;
     &lt;/target&gt;
 
-<emphasis role="bold">    &lt;target name="dbTests" depends="build, buildtests,dropTables,createTables,loadData" description="Run db tests"&gt;
+<emphasis role="bold">    &lt;target name="dbTests" depends="build, buildtests,dropTables,createTables,loadData" 
+            description="Run db tests"&gt;
         &lt;junit printsummary="on"
             fork="false"
             haltonfailure="false"

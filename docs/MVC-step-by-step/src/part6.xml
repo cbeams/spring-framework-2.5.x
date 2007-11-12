@@ -452,7 +452,8 @@ public class InventoryControllerTests extends TestCase {
         &lt;property name="password" value="${jdbc.password}"/&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+    &lt;bean id="propertyConfigurer" 
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
         &lt;property name="locations"&gt;
             &lt;list&gt;
                 &lt;value&gt;classpath:jdbc.properties&lt;/value&gt;
@@ -506,7 +507,8 @@ public class InventoryControllerTests extends TestCase {
         &lt;property name="password" value="${jdbc.password}"/&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+    &lt;bean id="propertyConfigurer" 
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
         &lt;property name="locations"&gt;
             &lt;list&gt;
                 &lt;value&gt;classpath:jdbc.properties&lt;/value&gt;
@@ -514,7 +516,8 @@ public class InventoryControllerTests extends TestCase {
         &lt;/property&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+    &lt;bean id="transactionManager" 
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
         &lt;property name="dataSource" ref="dataSource"/&gt;
     &lt;/bean&gt;
 

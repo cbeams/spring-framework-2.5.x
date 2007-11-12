@@ -681,15 +681,13 @@ public class HelloControllerTests extends TestCase {
     <para>Now run the Ant <literal>'tests'</literal> task and the test should
     pass.</para>
 
-    <para></para>
-
     <programlisting>$ ant tests
 Buildfile: build.xml
 
 build:
 
 buildtests:
-    [javac] Compiling 1 source file to D:\Documents and Settings\portia\workspace\springdev\springapp-part1\war\WEB-INF\classes
+    [javac] Compiling 1 source file to /Users/Shared/Projects/springapp/war/WEB-INF/classes
 
 tests:
     [junit] Running springapp.web.HelloWorldControllerTests

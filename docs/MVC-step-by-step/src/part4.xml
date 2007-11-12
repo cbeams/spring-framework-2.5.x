@@ -156,13 +156,15 @@ public class <emphasis role="bold">InventoryControllerTests</emphasis> extends T
     <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
 
     <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd"&gt;
 
-&lt;beans&gt;
-
-<lineannotation>    &lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation>
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+<lineannotation>
+    &lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation>
 <emphasis role="bold">
-    &lt;bean id="prodMan" class="springapp.service.SimpleProductManager"&gt;
+    &lt;bean id="productManager" class="springapp.service.SimpleProductManager"&gt;
         &lt;property name="products"&gt;
             &lt;list&gt;
                 &lt;ref bean="product1"/&gt;
@@ -470,7 +472,11 @@ public class PriceIncreaseValidator implements Validator {
     <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
 
     <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd"&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
 
 <lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation>
 
