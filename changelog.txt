@@ -6,8 +6,14 @@ http://www.springframework.org
 Changes in version 2.5 final (2007-11-19)
 -----------------------------------------
 
+Package org.springframework.jdbc
+* added "registerDatabase" method to SQLErrorCodesFactory, for eager association of database names with DataSources
+
 Package org.springframework.orm
 * Hibernate SpringSessionSynchronization explicitly disconnects on suspend/completion (to make "on_close" work on JBoss)
+
+Package org.springframework.web
+* InternalResourceView explicitly sets content type on response in include case (for correct charset handling on Tomcat)
 
 
 Changes in version 2.5 RC2 (2007-11-12)
