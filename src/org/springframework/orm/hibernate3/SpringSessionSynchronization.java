@@ -90,6 +90,21 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 		}
 	}
 
+	/**
+	 * Check whether there is a Hibernate Session for the current JTA
+	 * transaction. Else, fall back to the default thread-bound Session.
+	 */
+	private Session getCurrentSession() {
+		Session session = null;
+		if (this.jtaTransaction != null) {
+			session = this.sessionHolder.getSession(this.jtaTransaction);
+		}
+		if (session == null) {
+			session = this.sessionHolder.getSession();
+		}
+		return session;
+	}
+
 
 	public int getOrder() {
 		return SessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER;
@@ -98,6 +113,8 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			// Eagerly disconnect the Session here, to make release mode "on_close" work on JBoss.
+			getCurrentSession().disconnect();
 		}
 	}
 
@@ -109,15 +126,7 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 
 	public void beforeCommit(boolean readOnly) throws DataAccessException {
 		if (!readOnly) {
-			Session session = null;
-			// Check whether there is a Hibernate Session for the current JTA
-			// transaction. Else, fall back to the default thread-bound Session.
-			if (this.jtaTransaction != null) {
-				session = this.sessionHolder.getSession(this.jtaTransaction);
-			}
-			if (session == null) {
-				session = this.sessionHolder.getSession();
-			}
+			Session session = getCurrentSession();
 			// Read-write transaction -> flush the Hibernate Session.
 			// Further check: only flush when not FlushMode.NEVER/MANUAL.
 			if (!session.getFlushMode().lessThan(FlushMode.COMMIT)) {
@@ -161,9 +170,13 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 				if (session != this.sessionHolder.getSession()) {
 					SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 				}
-				else if (this.sessionHolder.getPreviousFlushMode() != null) {
-					// In case of pre-bound Session, restore previous flush mode.
-					session.setFlushMode(this.sessionHolder.getPreviousFlushMode());
+				else {
+					if (this.sessionHolder.getPreviousFlushMode() != null) {
+						// In case of pre-bound Session, restore previous flush mode.
+						session.setFlushMode(this.sessionHolder.getPreviousFlushMode());
+					}
+					// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
+					session.disconnect();
 				}
 				return;
 			}
@@ -181,9 +194,17 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(this.sessionHolder.getSession(), this.sessionFactory);
 			}
 		}
-		else if (this.sessionHolder.getPreviousFlushMode() != null) {
-			// In case of pre-bound Session, restore previous flush mode.
-			this.sessionHolder.getSession().setFlushMode(this.sessionHolder.getPreviousFlushMode());
+		else  {
+			Session session = this.sessionHolder.getSession();
+			if (this.sessionHolder.getPreviousFlushMode() != null) {
+				// In case of pre-bound Session, restore previous flush mode.
+				session.setFlushMode(this.sessionHolder.getPreviousFlushMode());
+			}
+			if (this.hibernateTransactionCompletion) {
+				// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
+				// We know that this is appropriate if a TransactionManagerLookup has been specified.
+				session.disconnect();
+			}
 		}
 	}
 
@@ -202,6 +223,9 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 			// (closed in beforeCompletion in case of TransactionManagerLookup).
 			if (this.newSession) {
 				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
+			}
+			else if (!this.hibernateTransactionCompletion) {
+				session.disconnect();
 			}
 		}
 		if (!this.newSession && status != STATUS_COMMITTED) {

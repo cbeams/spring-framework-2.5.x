@@ -144,18 +144,14 @@ public class HibernateJtaTransactionTests extends TestCase {
 					sessionControl.verify();
 					queryControl.verify();
 					sessionControl.reset();
-					try {
-						if (!readOnly) {
-							session.getFlushMode();
-							sessionControl.setReturnValue(FlushMode.AUTO, 1);
-							session.flush();
-							sessionControl.setVoidCallable(1);
-						}
-						session.close();
-						sessionControl.setReturnValue(null, 1);
+					if (!readOnly) {
+						session.getFlushMode();
+						sessionControl.setReturnValue(FlushMode.AUTO, 1);
+						session.flush();
+						sessionControl.setVoidCallable(1);
 					}
-					catch (HibernateException e) {
-					}
+					session.close();
+					sessionControl.setReturnValue(null, 1);
 					sessionControl.replay();
 					return htl;
 				}
@@ -252,16 +248,12 @@ public class HibernateJtaTransactionTests extends TestCase {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					sessionControl.verify();
 					sessionControl.reset();
-					try {
-						session.getFlushMode();
-						sessionControl.setReturnValue(FlushMode.AUTO, 1);
-						session.flush();
-						sessionControl.setVoidCallable(1);
-						session.close();
-						sessionControl.setReturnValue(null, 1);
-					}
-					catch (HibernateException e) {
-					}
+					session.getFlushMode();
+					sessionControl.setReturnValue(FlushMode.AUTO, 1);
+					session.flush();
+					sessionControl.setVoidCallable(1);
+					session.close();
+					sessionControl.setReturnValue(null, 1);
 					sessionControl.replay();
 					return htl;
 				}
@@ -342,16 +334,12 @@ public class HibernateJtaTransactionTests extends TestCase {
 						assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 						sessionControl.verify();
 						sessionControl.reset();
-						try {
-							session.getFlushMode();
-							sessionControl.setReturnValue(FlushMode.AUTO, 1);
-							session.flush();
-							sessionControl.setThrowable(flushEx);
-							session.close();
-							sessionControl.setReturnValue(null, 1);
-						}
-						catch (HibernateException e) {
-						}
+						session.getFlushMode();
+						sessionControl.setReturnValue(FlushMode.AUTO, 1);
+						session.flush();
+						sessionControl.setThrowable(flushEx);
+						session.close();
+						sessionControl.setReturnValue(null, 1);
 						sessionControl.replay();
 						return htl;
 					}
@@ -418,11 +406,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 					status.setRollbackOnly();
 					sessionControl.verify();
 					sessionControl.reset();
-					try {
-						session.close();
-					}
-					catch (HibernateException ex) {
-					}
+					session.close();
 					sessionControl.setReturnValue(null, 1);
 					sessionControl.replay();
 					return htl;
@@ -550,22 +534,20 @@ public class HibernateJtaTransactionTests extends TestCase {
 						}
 						sessionControl.verify();
 						sessionControl.reset();
-						try {
-							if (!readOnly) {
-								session.getFlushMode();
-								sessionControl.setReturnValue(FlushMode.AUTO, 1);
-								session.flush();
-								sessionControl.setVoidCallable(1);
-								if (flushNever) {
-									session.setFlushMode(FlushMode.NEVER);
-									sessionControl.setVoidCallable(1);
-								}
-							}
-							session.afterTransactionCompletion(true, null);
+						if (!readOnly) {
+							session.getFlushMode();
+							sessionControl.setReturnValue(FlushMode.AUTO, 1);
+							session.flush();
 							sessionControl.setVoidCallable(1);
+							if (flushNever) {
+								session.setFlushMode(FlushMode.NEVER);
+								sessionControl.setVoidCallable(1);
+							}
 						}
-						catch (HibernateException e) {
-						}
+						session.afterTransactionCompletion(true, null);
+						sessionControl.setVoidCallable(1);
+						session.disconnect();
+						sessionControl.setReturnValue(null, 1);
 						sessionControl.replay();
 						return htl;
 					}
@@ -654,6 +636,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 								sessionControl.setReturnValue(FlushMode.AUTO, 1);
 								session.flush();
 								sessionControl.setVoidCallable(1);
+								session.disconnect();
+								sessionControl.setReturnValue(null, 1);
 								session.clear();
 								sessionControl.setVoidCallable(1);
 								sessionControl.replay();
@@ -745,6 +729,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 			session2.flush();
 			session2Control.setVoidCallable(2);
 		}
+		session1.disconnect();
+		session1Control.setReturnValue(null, 1);
 		session1.close();
 		session1Control.setReturnValue(null, 1);
 		session2.close();
@@ -859,6 +845,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sfControl.setReturnValue(session1, 1);
 		session1.getSessionFactory();
 		session1Control.setReturnValue(sf, 1);
+		session1.disconnect();
+		session1Control.setReturnValue(null, 1);
 		session1.close();
 		session1Control.setReturnValue(null, 1);
 
@@ -972,6 +960,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 			session2.flush();
 			session2Control.setVoidCallable(2);
 		}
+		session1.disconnect();
+		session1Control.setReturnValue(null, 1);
 		session1.close();
 		session1Control.setReturnValue(null, 1);
 		session2.close();
@@ -1705,6 +1695,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 				session.setFlushMode(FlushMode.NEVER);
 				sessionControl.setVoidCallable(1);
 			}
+			session.disconnect();
+			sessionControl.setReturnValue(null, 1);
 			sessionControl.replay();
 
 			Synchronization synchronization = transaction.getSynchronization();

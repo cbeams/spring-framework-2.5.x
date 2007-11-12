@@ -723,6 +723,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session1Control.setReturnValue(FlushMode.AUTO, 2);
 		session1.flush();
 		session1Control.setVoidCallable(2);
+		session1.disconnect();
+		session1Control.setReturnValue(null, 1);
 		session1.close();
 		session1Control.setReturnValue(null, 1);
 
