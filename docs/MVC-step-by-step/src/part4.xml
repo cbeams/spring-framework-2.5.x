@@ -264,7 +264,7 @@ greeting=Greetings, it is now</programlisting>
     </screenshot>
   </section>
 
-  <section id="step4.7">
+  <section id="step4.5">
     <title>Adding a form</title>
 
     <para>To provide an interface in the web application to expose the price
@@ -444,6 +444,10 @@ public class PriceIncreaseValidator implements Validator {
     }
 
 }</programlisting>
+  </section>
+
+  <section id="step4.6">
+    <title>Adding a form controller</title>
 
     <para>Now we need to add an entry in the
     <filename>'springapp-servlet.xml'</filename> file to define the new form
@@ -642,22 +646,49 @@ typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
         <caption><para>The updated application</para></caption>
       </mediaobject>
     </screenshot>
-
-    <para></para>
   </section>
 
-  <section>
+  <section id="step4.summary">
     <title>Summary</title>
 
     <para>Let's look at what we did in Part 4.</para>
 
     <orderedlist>
       <listitem>
-        <para>We ..</para>
+        <para>We renamed our controller to
+        <classname>InventoryController</classname> and gave it a refernce to a
+        <classname>ProductManager</classname> so we could retreive a list of
+        products to display.</para>
       </listitem>
 
       <listitem>
-        <para>We also...</para>
+        <para>Next we modified the JSP page to use a message bundle for static
+        text and also added a forEach loop to show the dynamic list of
+        products.</para>
+      </listitem>
+
+      <listitem>
+        <para>Then we defined some test data to populate business objects we
+        modified the JSP page to use a message bundle for static text and also
+        added a forEach loop to show the dynamic list of products.</para>
+      </listitem>
+
+      <listitem>
+        <para>Next we modified the JSP page to use a message bundle for static
+        text and also added a forEach loop to show the dynamic list of
+        products.</para>
+      </listitem>
+
+      <listitem>
+        <para>After this worked we created a form to provide the ability to
+        increase the prices. Next we modified the JSP page to use a message
+        bundle for static text and also added a forEach loop to show the
+        dynamic list of products.</para>
+      </listitem>
+
+      <listitem>
+        <para>Finally we created the form controller and a validator and
+        deployed and tested the new features.</para>
       </listitem>
     </orderedlist>
 

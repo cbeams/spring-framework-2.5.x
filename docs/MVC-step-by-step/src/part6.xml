@@ -76,7 +76,7 @@ public class SimpleProductManager implements ProductManager {
 }</programlisting>
   </section>
 
-  <section id="step6.1">
+  <section id="step6.2">
     <title>Fix the failing tests</title>
 
     <para>We rewrote the <classname>SimpleProductManager</classname> and now
@@ -280,37 +280,325 @@ public class InventoryControllerTests extends TestCase {
 }</programlisting>
   </section>
 
-  <section>
-    <title>Add transaction management to the service layer</title>
+  <section id="step6.3">
+    <title>Create new application context for service layer
+    configuration</title>
 
-    <para>...</para>
+    <para>We saw earlier that it was fairly easy to modify the service layer
+    to use the database persistence. This was beacuse it is decoupled from the
+    web layer. It's now time to decouple or configuration of the service layer
+    from the web layer as well. We will remove the productManager
+    configuration and the list of products from the springapp-servlet.xml
+    configuration file. This is what this file looks like now:</para>
+
+    <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+
+    &lt;!-- the application context definition for the springapp DispatcherServlet --&gt;
+
+    &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
+        &lt;property name="basename" value="messages"/&gt;
+    &lt;/bean&gt;
+    
+    &lt;bean name="/hello.htm" class="springapp.web.InventoryController"&gt;
+        &lt;property name="productManager" ref="productManager"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean name="/priceincrease.htm" class="springapp.web.PriceIncreaseFormController"&gt;
+        &lt;property name="sessionForm" value="true"/&gt;
+        &lt;property name="commandName" value="priceIncrease"/&gt;
+        &lt;property name="commandClass" value="springapp.service.PriceIncrease"/&gt;
+        &lt;property name="validator"&gt;
+            &lt;bean class="springapp.service.PriceIncreaseValidator"/&gt;
+        &lt;/property&gt;
+        &lt;property name="formView" value="priceincrease"/&gt;
+        &lt;property name="successView" value="hello.htm"/&gt;
+        &lt;property name="productManager" ref="productManager"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+        &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"&gt;&lt;/property&gt;
+        &lt;property name="prefix" value="/WEB-INF/jsp/"&gt;&lt;/property&gt;
+        &lt;property name="suffix" value=".jsp"&gt;&lt;/property&gt;        
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+    <para>We still need to configure the service layer and we will do that in
+    its own application context file. This file is called
+    <classname>applicationContext.xml</classname> and it will be loaded via a
+    servlet listener that we will define in <classname>web.xml</classname>.
+    All bean configured in this new application context will be available to
+    reference from any servlet context.</para>
+
+    <para><filename>'springapp/war/WEB-INF/web.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" &gt;
+
+<emphasis role="bold">  &lt;listener&gt;
+    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+  &lt;/listener&gt;
+</emphasis>
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.htm&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;
+      index.jsp
+    &lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
+
+  &lt;jsp-config&gt;
+    &lt;taglib&gt;
+      &lt;taglib-uri&gt;/spring&lt;/taglib-uri&gt;
+      &lt;taglib-location&gt;/WEB-INF/tld/spring-form.tld&lt;/taglib-location&gt;
+    &lt;/taglib&gt;
+  &lt;/jsp-config&gt;
+
+&lt;/web-app&gt;</programlisting>
+
+    <para>Now we create a new <classname>applicationContext.xml</classname>
+    file in the "<classname>war/WEB-INF</classname>" directory.</para>
+
+    <para><filename>'springapp/war/WEB-INF/applicationContext.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:aop="http://www.springframework.org/schema/aop"
+         xmlns:tx="http://www.springframework.org/schema/tx"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"&gt;
+
+    &lt;!-- the parent application context definition for the springapp application --&gt;
+
+    &lt;bean id="productManager" class="springapp.service.SimpleProductManager"&gt;
+        &lt;property name="productDao" ref="productDao"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="productDao" class="springapp.repository.JdbcProductDao"&gt;
+        &lt;property name="dataSource" ref="dataSource"/&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
   </section>
 
-  <section>
-    <title>Add transaction and database configuration to application
+  <section id="step6.4">
+    <title>Add transaction and connection pool configuration to application
     context</title>
 
-    <para>...</para>
+    <para>Any time you persist data in a database its best to use transactions
+    to ensure that all your updates are perform or none are comleted. You want
+    to avoid having half your updates persisted while the other half failed.
+    Spring provides an extensive range of options for how to provide
+    transaction management. The reference manual covers this in depth. Here we
+    will make use of one way of providing this using AOP (Aspect Oriented
+    Programming) in the form of a transaction advice and an ApectJ pointcut to
+    define where the transactions should be applied. If you are interested in
+    how this works in more depth, take a look at the reference manual.</para>
+
+    <programlisting>    &lt;aop:config&gt;
+        &lt;aop:advisor pointcut="execution(* *..ProductManager.*(..))" advice-ref="txAdvice"/&gt;
+    &lt;/aop:config&gt;
+
+    &lt;tx:advice id="txAdvice"&gt;
+        &lt;tx:attributes&gt;
+            &lt;tx:method name="save*"/&gt;
+            &lt;tx:method name="*" read-only="true"/&gt;
+        &lt;/tx:attributes&gt;
+    &lt;/tx:advice&gt;
+</programlisting>
+
+    <para>The pointcut applies to any method called on the Productmanager
+    interface. The advice is a transaction advice that applies to methods with
+    a name starting with 'save'. The default transaction attributes of
+    REQUIRED applies since no other attribute was specified. The advice also
+    applies "read-only" transactions on any other methods that are adviced via
+    the pointcut.</para>
+
+    <para>We also need to define a conection pool. We are using the DBCP
+    connection pool from the Apache Jakarta project. We are reusing the
+    <classname>jdbc.properties</classname> file we created in Part 5.</para>
+
+    <programlisting>    &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+        &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+        &lt;property name="url" value="${jdbc.url}"/&gt;
+        &lt;property name="username" value="${jdbc.username}"/&gt;
+        &lt;property name="password" value="${jdbc.password}"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+        &lt;property name="locations"&gt;
+            &lt;list&gt;
+                &lt;value&gt;classpath:jdbc.properties&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;</programlisting>
+
+    <para>For all this to work we need some additional jar files copied to the
+    <filename class="directory">'WEB-INF/lib'</filename> directory. Copy
+    <filename class="libraryfile">aspectjweaver.jar</filename> from the
+    <filename class="directory">'spring-framework-2.5/lib/aspectj'</filename>
+    directory and <filename class="libraryfile">commons-dbcp.jar</filename>
+    and <filename class="libraryfile">commons-pool.jar</filename> from the
+    <filename
+    class="directory">'spring-framework-2.5/lib/jakarta-commons'</filename>
+    directory to the <filename
+    class="directory">'springapp/war/WEB-INF/lib'</filename> directory.</para>
+
+    <para>Here is the final version of our
+    <classname>applicationContext.xml</classname> file:</para>
+
+    <para><filename>'springapp/war/WEB-INF/applicationContext.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:aop="http://www.springframework.org/schema/aop"
+         xmlns:tx="http://www.springframework.org/schema/tx"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"&gt;
+
+    &lt;!-- the parent application context definition for the springapp application --&gt;
+
+    &lt;bean id="productManager" class="springapp.service.SimpleProductManager"&gt;
+        &lt;property name="productDao" ref="productDao"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="productDao" class="springapp.repository.JdbcProductDao"&gt;
+        &lt;property name="dataSource" ref="dataSource"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+        &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+        &lt;property name="url" value="${jdbc.url}"/&gt;
+        &lt;property name="username" value="${jdbc.username}"/&gt;
+        &lt;property name="password" value="${jdbc.password}"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+        &lt;property name="locations"&gt;
+            &lt;list&gt;
+                &lt;value&gt;classpath:jdbc.properties&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+        &lt;property name="dataSource" ref="dataSource"/&gt;
+    &lt;/bean&gt;
+
+    &lt;aop:config&gt;
+        &lt;aop:advisor pointcut="execution(* *..ProductManager.*(..))" advice-ref="txAdvice"/&gt;
+    &lt;/aop:config&gt;
+
+    &lt;tx:advice id="txAdvice"&gt;
+        &lt;tx:attributes&gt;
+            &lt;tx:method name="save*"/&gt;
+            &lt;tx:method name="*" read-only="true"/&gt;
+        &lt;/tx:attributes&gt;
+    &lt;/tx:advice&gt;
+
+&lt;/beans&gt;</programlisting>
   </section>
 
-  <section>
+  <section id="step6.5">
     <title>Final test of the complete application</title>
 
-    <para>...</para>
+    <para>Now it's finally time to see if all of thes pieces will work
+    together. Build and deploy your finished application and remember to have
+    the database up and running. This is what you should see when pointing the
+    web browser at the application after it has reloaded:</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/screen4.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/screen4.png" format="PNG" />
+        </imageobject>
+
+        <caption><para>The completed application</para></caption>
+      </mediaobject>
+    </screenshot>
+
+    <para>Looks just the same as it did before. We did add persistence though,
+    so if you shut down the application your price increases will not be lost.
+    They are still there when you start the application back up.</para>
+
+    <para>A lot of work for a very simple application, but it was never our
+    goal to just write this application. The goal was to show how to go about
+    creating a Spring MVC application from scratch and we know that the
+    applications you will create are much more complex. The same steps apply
+    though and we hope you have gained enough knowledge to make it easier
+    getting started to use Spring.</para>
   </section>
 
   <section id="step6.summary">
     <title>Summary</title>
 
-    <para>...</para>
+    <para>We have completed all three layers of the application -- the web
+    layer, the service layer and the persistence layer. In this last part we
+    reconfigured the application.</para>
 
     <orderedlist>
       <listitem>
-        <para>First ...</para>
+        <para>First we modified the service layer to use the
+        ProductDao.</para>
       </listitem>
 
       <listitem>
-        <para>We then ...</para>
+        <para>We then had to fix some failing service and web layer
+        tests.</para>
+      </listitem>
+
+      <listitem>
+        <para>Next we introduced a new applicationContext to separate the
+        service and persistence layer configuration from the web layer
+        configuration.</para>
+      </listitem>
+
+      <listitem>
+        <para>We also defined some transaction management for the service
+        layer and configured a connection pool for the database
+        connections.</para>
+      </listitem>
+
+      <listitem>
+        <para>Finally we built the reconfigured application and tested that it
+        still worked.</para>
       </listitem>
     </orderedlist>
 
@@ -320,12 +608,12 @@ public class InventoryControllerTests extends TestCase {
     <screenshot>
       <mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/dir-structure-endp5.png"
+          <imagedata align="center" fileref="images/dir-structure-endp6.png"
                      format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/dir-structure-endp5.png"
+          <imagedata align="center" fileref="images/dir-structure-endp6.png"
                      format="PNG" />
         </imageobject>
       </mediaobject>
