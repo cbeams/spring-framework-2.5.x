@@ -2,27 +2,6 @@
 <preface id="overview">
   <title>Overview</title>
 
-  <para>
-    <emphasis
-    role="bold">=================================================================================</emphasis>
-  </para>
-
-  <para>
-    <emphasis role="bold">NOTE: This document is still in development - please
-    attach a report about any problems found to the Spring JIRA issue
-    at:</emphasis>
-  </para>
-
-  <para>
-    <emphasis
-    role="bold">http://opensource.atlassian.com/projects/spring/browse/SPR-2187</emphasis>
-  </para>
-
-  <para>
-    <emphasis
-    role="bold">=================================================================================</emphasis>
-  </para>
-
   <para>This document is a step-by-step guide on how to develop a web
   application from scratch using the Spring Framework.</para>
 
