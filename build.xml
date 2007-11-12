@@ -1890,8 +1890,6 @@
 	<target name="doc.all" depends="doc.html,doc.htmlsingle,doc.pdf" description="Generate reference documentation"/>
 
 
-	<!-- Start - MVC step-by-step guide -->
-
 	<target name="mvcstep.clean" description="Delete temporary and distribution directories for MVC step-by-step guide">
 
 		<delete quiet="true" dir="${basedir}/${dist.mvcstep.dir}/pdf"/>
@@ -1912,6 +1910,7 @@
 		</fail>
 
 	</target>
+
 
 	<target name="mvcstep.pdf" depends="mvcstep.prepare" description="Compile MVC step-by-step guide to pdf">
 
@@ -1955,6 +1954,7 @@
 		<delete file="${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
 
 	</target>
+
 
 	<target name="mvcstep.html" depends="mvcstep.prepare" description="Compile MVC step-by-step guide to chunked html">
 
@@ -2024,8 +2024,6 @@
 
 	<target name="mvcstep.all" depends="mvcstep.html,mvcstep.htmlsingle,mvcstep.pdf"
 			description="Generate MVC step-by-step guide"/>
-
-	<!-- End - MVC step-by-step guide -->
 
 
 	<target name="releasezips" description="Generate release zips based on present artifacts">
