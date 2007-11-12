@@ -7,7 +7,7 @@ Changes in version 2.5 RC2 (2007-11-12)
 ---------------------------------------
 
 General
-* complete re-write of the Spring MVC step-by-step guide for version 2.5
+* introduced complete rewrite of the Spring MVC step-by-step guide for version 2.5
 
 Package org.springframework.aop
 * fixed garbage collection problem with CGLIB proxies, now holding onto the Advised configuration independent of factory
@@ -18,6 +18,7 @@ Package org.springframework.beans
 * DefaultListableBeanFactory performs bean creation within a PrivilegedAction (for SecurityManager compatibility)
 * optimized DefaultListableBeanFactory's invocation of setter methods for re-created bean instances
 * optimized DefaultListableBeanFactory's invocation of post-processor methods
+* changed XmlReaderContext's "getReader()" to expose the XmlBeanDefinitionReader again (for backwards compatibility)
 * AutowiredAnnotationBeanPostProcessor caches determined candidate constructors per bean class
 * RequiredAnnotationBeanPostProcessor caches validated bean names, skipping re-validation for the same bean
 * added bean type argument to MergedBeanDefinitionPostProcessor (for InitDestroyAnnotationBeanPostProcessor)
@@ -38,6 +39,7 @@ Package org.springframework.jca
 Package org.springframework.jdbc
 * TransactionAwareDataSourceProxy exposes a special "toString()" result for its Connection proxies
 * fixed SingleColumnRowMapper to use passed-in required type in the default "convertValueToRequiredType" implementation
+* SimpleJdbcCallOperations and SimpleJdbcInsertOperations return the interface type (not the impl) for method chaining
 
 Package org.springframework.jndi
 * "jee:jndi-lookup" supports "default-value" and "default-ref" attributes, translated to a default object
