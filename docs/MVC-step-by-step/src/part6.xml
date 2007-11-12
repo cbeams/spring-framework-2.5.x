@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="part6">
-  <title>Integratinging the Web Application with the Persistence Layer [UNDER CONSTRUCTION!!]</title>
+  <title>Integrating the Web Application with the Persistence Layer</title>
 
   <para>This is Part 6 of a step-by-step account of how to develop a web
   application from scratch using the Spring Framework. In <link
@@ -13,9 +13,290 @@
   into a complete web application.</para>
 
   <section id="step6.1">
-    <title>Create database startup script</title>
+    <title>Modify service layer</title>
 
-    <para>Before we can start ...</para>
+    <para>If we structured our application properly, we should only have to
+    change the service layer classes to take advantage of the database
+    persistence. The view and controller classes should not have to be
+    modified, since they should be unaware of any implementation details of
+    the service layer. So let's add the persistence to the ProductManager
+    implementation. We modify the <classname>SimpleProductManager</classname>
+    and add a reference to a <classname>ProductDao</classname> interface plus
+    a setter method for this reference. Which implementation we actually use
+    here should be irrelevant to the ProductManager class, and we will set
+    this through a configuration option.</para>
+
+    <para><filename>'springapp/src/springapp/service/SimpleProductManager.java'</filename>:</para>
+
+    <programlisting>package springapp.service;
+
+import java.util.List;
+
+import springapp.domain.Product;
+
+public class SimpleProductManager implements ProductManager {
+
+    privapackage springapp.service;
+
+import java.util.List;
+
+import springapp.domain.Product;
+import springapp.repository.ProductDao;
+
+public class SimpleProductManager implements ProductManager {
+
+<emphasis role="bold">    // private List&lt;Product&gt; products;
+    private ProductDao productDao;
+</emphasis>
+    public List&lt;Product&gt; getProducts() {
+        // return products;
+        return productDao.getProductList();
+    }
+
+    public void increasePrice(int percentage) {
+<emphasis role="bold">        List&lt;Product&gt; products = productDao.getProductList();
+</emphasis>        if (products != null) {
+            for (Product product : products) {
+                double newPrice = product.getPrice().doubleValue() * 
+                                    (100 + percentage)/100;
+                product.setPrice(newPrice);
+<emphasis role="bold">                productDao.saveProduct(product);
+</emphasis>            }
+        }
+    }
+
+<emphasis role="bold">    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+</emphasis><emphasis role="strikeout">//    public void setProducts(List&lt;Product&gt; products) {
+//        this.products = products;
+//    }
+</emphasis>
+}</programlisting>
+  </section>
+
+  <section id="step6.1">
+    <title>Fix the failing tests</title>
+
+    <para>We rewrote the <classname>SimpleProductManager</classname> and now
+    the tests will of course fail. We need to provide the
+    <classname>ProductManager</classname> with an in-memory implementation of
+    the <classname>ProductDao</classname>. We don't really want to use the
+    real DAO here since we'd like to avoid having to access a database for our
+    unit tests. We will add an internal class called
+    <classname>InMemoryProductDao</classname> that will hold on to a list pf
+    products provided in the constructor. This in-memory class has to be
+    passed in when we create a new
+    <classname>SimpleProductManager</classname>.</para>
+
+    <para><filename>'springapp/test/springapp/repository/InMemoryProductDao.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.util.List;
+
+import springapp.domain.Product;
+
+public class InMemoryProductDao implements ProductDao {
+
+    private List&lt;Product&gt; productList;
+
+    public InMemoryProductDao(List&lt;Product&gt; productList) {
+        this.productList = productList;
+    }
+
+    public List&lt;Product&gt; getProductList() {
+        return productList;
+    }
+
+    public void saveProduct(Product prod) {
+    }
+
+}</programlisting>
+
+    <para>And here is the modified
+    <classname>SimpleProductManagerTests</classname>: </para>
+
+    <para><filename>'springapp/test/springapp/service/SimpleProductManagerTests.java'</filename>:</para>
+
+    <programlisting>package springapp.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import springapp.domain.Product;
+<emphasis role="bold"><emphasis role="bold">import springapp.repository.InMemoryProductDao;
+</emphasis>import springapp.repository.ProductDao;
+</emphasis>
+import junit.framework.TestCase;
+
+public class SimpleProductManagerTests extends TestCase {
+
+    private SimpleProductManager productManager;
+
+    private List&lt;Product&gt; products;
+    
+    private static int PRODUCT_COUNT = 2;
+    
+    private static Double CHAIR_PRICE = new Double(20.50);
+    private static String CHAIR_DESCRIPTION = "Chair";
+    
+    private static String TABLE_DESCRIPTION = "Table";
+    private static Double TABLE_PRICE = new Double(150.10);         
+    
+    private static int POSITIVE_PRICE_INCREASE = 10;
+    
+    protected void setUp() throws Exception {
+        productManager = new SimpleProductManager();
+        products = new ArrayList&lt;Product&gt;();
+        
+        // stub up a list of products
+        Product product = new Product();
+        product.setDescription("Chair");
+        product.setPrice(CHAIR_PRICE);
+        products.add(product);
+        
+        product = new Product();
+        product.setDescription("Table");
+        product.setPrice(TABLE_PRICE);
+        products.add(product);
+        
+<emphasis role="bold">        ProductDao productDao = new InMemoryProductDao(products);
+        productManager.setProductDao(productDao);
+</emphasis><emphasis role="bold">        //productManager.setProducts(products);
+</emphasis>    }
+
+    public void testGetProductsWithNoProducts() {
+        productManager = new SimpleProductManager();
+<emphasis role="bold">        productManager.setProductDao(new InMemoryProductDao(null));
+</emphasis>        assertNull(productManager.getProducts());
+    }
+    
+    public void testGetProducts() {
+        List&lt;Product&gt; products = productManager.getProducts();
+        assertNotNull(products);        
+        assertEquals(PRODUCT_COUNT, productManager.getProducts().size());
+    
+        Product product = products.get(0);
+        assertEquals(CHAIR_DESCRIPTION, product.getDescription());
+        assertEquals(CHAIR_PRICE, product.getPrice());
+        
+        product = products.get(1);
+        assertEquals(TABLE_DESCRIPTION, product.getDescription());
+        assertEquals(TABLE_PRICE, product.getPrice());      
+    }   
+    
+    public void testIncreasePriceWithNullListOfProducts() {
+        try {
+            productManager = new SimpleProductManager();
+<emphasis role="bold">            productManager.setProductDao(new InMemoryProductDao(null));
+</emphasis>            productManager.increasePrice(POSITIVE_PRICE_INCREASE);
+        }
+        catch(NullPointerException ex) {
+            fail("Products list is null.");
+        }
+    }
+    
+    public void testIncreasePriceWithEmptyListOfProducts() {
+        try {
+            productManager = new SimpleProductManager();
+<emphasis role="bold">            productManager.setProductDao(new InMemoryProductDao(new ArrayList&lt;Product&gt;()));
+            //productManager.setProducts(new ArrayList&lt;Product&gt;());
+</emphasis>            productManager.increasePrice(POSITIVE_PRICE_INCREASE);
+        }
+        catch(Exception ex) {
+            fail("Products list is empty.");
+        }           
+    }
+    
+    public void testIncreasePriceWithPositivePercentage() {
+        productManager.increasePrice(POSITIVE_PRICE_INCREASE);
+        double expectedChairPriceWithIncrease = 22.55;
+        double expectedTablePriceWithIncrease = 165.11;
+        
+        List&lt;Product&gt; products = productManager.getProducts();      
+        Product product = products.get(0);
+        assertEquals(expectedChairPriceWithIncrease, product.getPrice());
+        
+        product = products.get(1);      
+        assertEquals(expectedTablePriceWithIncrease, product.getPrice());       
+    }
+
+<emphasis role="bold">    private class InMemoryProductDao implements ProductDao {
+
+        private List&lt;Product&gt; productList;
+
+        public InMemoryProductDao(List&lt;Product&gt; productList) {
+            this.productList = productList;
+        }
+
+        public List&lt;Product&gt; getProductList() {
+            return productList;
+        }
+
+        public void saveProduct(Product prod) {
+        }
+
+    }</emphasis>
+        
+}</programlisting>
+
+    <para>We also need to modify the
+    <classname>InventoryControllerTests</classname> since that class also uses
+    the <classname>SimpleProductManager</classname>. Here is the modified
+    <classname>InventoryControllerTests</classname>:</para>
+
+    <para><filename>'springapp/test/springapp/service/InventoryControllerTests.java'</filename>:</para>
+
+    <programlisting>package springapp.web;
+
+import java.util.Map;
+
+import org.springframework.web.servlet.ModelAndView;
+
+<emphasis role="bold">import springapp.domain.Product;
+import springapp.repository.InMemoryProductDao;
+</emphasis>import springapp.service.SimpleProductManager;
+import springapp.web.InventoryController;
+
+import junit.framework.TestCase;
+
+public class InventoryControllerTests extends TestCase {
+
+    public void testHandleRequestView() throws Exception{
+        InventoryController controller = new InventoryController();
+<emphasis role="bold">        SimpleProductManager spm = new SimpleProductManager();
+        spm.setProductDao(new InMemoryProductDao(new ArrayList&lt;Product&gt;()));
+        controller.setProductManager(spm);
+        //controller.setProductManager(new SimpleProductManager());
+</emphasis>        ModelAndView modelAndView = controller.handleRequest(null, null);
+        assertEquals("hello", modelAndView.getViewName());
+        assertNotNull(modelAndView.getModel());
+        Map modelMap = (Map) modelAndView.getModel().get("model");
+        String nowValue = (String) modelMap.get("now");
+        assertNotNull(nowValue);
+    }
+}</programlisting>
+  </section>
+
+  <section>
+    <title>Add transaction management to the service layer</title>
+
+    <para>...</para>
+  </section>
+
+  <section>
+    <title>Add transaction and database configuration to application
+    context</title>
+
+    <para>...</para>
+  </section>
+
+  <section>
+    <title>Final test of the complete application</title>
+
+    <para>...</para>
   </section>
 
   <section id="step6.summary">
