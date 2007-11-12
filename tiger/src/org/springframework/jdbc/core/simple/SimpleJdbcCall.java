@@ -29,29 +29,34 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 /**
- * A SimpleJdbcCall is a multi-threaded, reusable object representing a call to a stored procedure or a
- * stored function.  It provides meta data processing to simplify the code needed to access basic
- * stored procedures/functions.  All you need to provide is the name of the procedure/fumnction and a Map
- * containing the parameters when you execute the call.  The names of the supplied parameters will be matched
- * up with in and out parameters declared when the stored procedure was created.
+ * A SimpleJdbcCall is a multi-threaded, reusable object representing a call
+ * to a stored procedure or a stored function. It provides meta data processing
+ * to simplify the code needed to access basic stored procedures/functions.
+ * All you need to provide is the name of the procedure/fumnction and a Map
+ * containing the parameters when you execute the call. The names of the
+ * supplied parameters will be matched up with in and out parameters declared
+ * when the stored procedure was created.
  *
- * <p>The meta data processing is based on the DatabaseMetaData provided by the JDBC driver.  Since we rely
- * on the JDBC driver this "auto-detection" can only be used for databases that are known to provide accurate
- * meta data.  These currently include Derby, MySQL, Microsoft SQL Server, Oracle and DB2.
- * For any other databases you are required to declare all parameters explicitly.  You can of course declare all
- * parameters explictly even if the database provides the necessary meta data.  In that case your declared parameters
- * will take precedence.  You can also turn off any mete data processing if you want to use parameter names that do not
- * match what is declared during the stored procedure compilation.
+ * <p>The meta data processing is based on the DatabaseMetaData provided by
+ * the JDBC driver. Since we rely on the JDBC driver this "auto-detection"
+ * can only be used for databases that are known to provide accurate meta data.
+ * These currently include Derby, MySQL, Microsoft SQL Server, Oracle and DB2.
+ * For any other databases you are required to declare all parameters explicitly.
+ * You can of course declare all parameters explictly even if the database provides
+ * the necessary meta data. In that case your declared parameters will take precedence.
+ * You can also turn off any mete data processing if you want to use parameter names
+ * that do not match what is declared during the stored procedure compilation.
  *
- * <p>The actual call is being handled via the standard call method of the JdbcTemplate.
+ * <p>The actual insert is being handled using Spring's
+ * {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
- * <p>Many of the configuration methods return the current instance of the SimpleJdbcCall to provide the ablity
- * to string multiple ones together in a "fluid" interface style.
+ * <p>Many of the configuration methods return the current instance of the SimpleJdbcCall
+ * to provide the ablity to string multiple ones together in a "fluid" interface style.
  *
  * @author Thomas Risberg
  * @since 2.5
- * @see org.springframework.jdbc.core.JdbcTemplate
  * @see java.sql.DatabaseMetaData
+ * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOperations {
 
@@ -73,6 +78,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	public SimpleJdbcCall(JdbcTemplate jdbcTemplate) {
 		super(jdbcTemplate);
 	}
+
 
 	public SimpleJdbcCall withProcedureName(String procedureName) {
 		setProcedureName(procedureName);
@@ -103,14 +109,15 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 
 	public SimpleJdbcCall declareParameters(SqlParameter... sqlParameters) {
 		for (SqlParameter sqlParameter : sqlParameters) {
-			if (sqlParameter != null)
+			if (sqlParameter != null) {
 				addDeclaredParameter(sqlParameter);
+			}
 		}
 		return this;
 	}
 
 	public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
-		setInParameterNames(new HashSet(Arrays.asList(inParameterNames)));
+		setInParameterNames(new HashSet<String>(Arrays.asList(inParameterNames)));
 		return this;
 	}
 
@@ -124,20 +131,24 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, Map args) {
 		return (T) execute(args).get(getScalarOutParameterName());
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, MapSqlParameterSource args) {
 		return (T) execute(args).get(getScalarOutParameterName());
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, Map args) {
 		return (T) execute(args).get(getScalarOutParameterName());
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, MapSqlParameterSource args) {
 		return (T) execute(args).get(getScalarOutParameterName());
 

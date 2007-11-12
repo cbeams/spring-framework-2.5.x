@@ -30,13 +30,14 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Class to manage context metadata used for the configuration and execution of operations on the table.
+ * Class to manage context metadata used for the configuration
+ * and execution of operations on a database table.
  *
  * @author Thomas Risberg
  * @since 2.5
@@ -66,101 +67,103 @@ public class TableMetaDataContext {
 
 
 	/**
-	 * Get the name of the table for this context
-	 */
-	public String getTableName() {
-		return tableName;
-	}
-
-	/**
-	 * Set the name of the table for this context
+	 * Set the name of the table for this context.
 	 */
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
 
 	/**
-	 * Get the name of the catalog for this context
+	 * Get the name of the table for this context.
 	 */
-	public String getCatalogName() {
-		return catalogName;
+	public String getTableName() {
+		return this.tableName;
 	}
 
 	/**
-	 * Set the name of the catalog for this context
+	 * Set the name of the catalog for this context.
 	 */
 	public void setCatalogName(String catalogName) {
 		this.catalogName = catalogName;
 	}
 
 	/**
-	 * Get the name of the schema for this context
+	 * Get the name of the catalog for this context.
 	 */
-	public String getSchemaName() {
-		return schemaName;
+	public String getCatalogName() {
+		return this.catalogName;
 	}
 
 	/**
-	 * Set the name of the schema for this context
+	 * Set the name of the schema for this context.
 	 */
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
 
 	/**
-	 * Are we accessing table meta data
+	 * Get the name of the schema for this context.
 	 */
-	public boolean isAccessTableParameterMetaData() {
-		return accessTableParameterMetaData;
+	public String getSchemaName() {
+		return this.schemaName;
 	}
 
 	/**
-	 * Specify whether we should access table column meta data
+	 * Specify whether we should access table column meta data.
 	 */
 	public void setAccessTableParameterMetaData(boolean accessTableParameterMetaData) {
 		this.accessTableParameterMetaData = accessTableParameterMetaData;
 	}
 
 	/**
-	 * Get a List of the table column names
+	 * Are we accessing table meta data?
+	 */
+	public boolean isAccessTableParameterMetaData() {
+		return this.accessTableParameterMetaData;
+	}
+
+
+	/**
+	 * Get a List of the table column names.
 	 */
 	public List<String> getTableColumns() {
-		return tableColumns;
+		return this.tableColumns;
 	}
 
 	/**
 	 * Does this database support the JDBC 3.0 feature of retreiving generated keys
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
 	public boolean isGetGeneratedKeysSupported() {
-		return metaDataProvider.isGetGeneratedKeysSupported();
+		return this.metaDataProvider.isGetGeneratedKeysSupported();
 	}
 
 	/**
-	 * Does this database support simple query to retreive generated keys when the JDBC 3.0
-	 * feature is not supported
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 * Does this database support simple query to retrieve generated keys
+	 * when the JDBC 3.0 feature is not supported
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
 	public boolean isGetGeneratedKeysSimulated() {
-		return metaDataProvider.isGetGeneratedKeysSimulated();
+		return this.metaDataProvider.isGetGeneratedKeysSimulated();
 	}
 
 	/**
-	 * Does this database support simple query to retreive generated keys when the JDBC 3.0
-	 * feature is not supported
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 * Does this database support simple query to retrieve generated keys
+	 * when the JDBC 3.0 feature is not supported
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
 	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
-		return metaDataProvider.getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
+		return this.metaDataProvider.getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
 	}
 
 	/**
 	 * Is a column name String array for retreiving generated keys supported
-	 * {@link java.sql.Connection#createStruct(String, Object[])}
+	 * {@link java.sql.Connection#createStruct(String, Object[])}?
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {
-		return metaDataProvider.isGeneratedKeysColumnNameArraySupported();
+		return this.metaDataProvider.isGeneratedKeysColumnNameArraySupported();
 	}
+
 
 	/**
 	 * Process the current meta data with the provided configuration options
@@ -169,16 +172,12 @@ public class TableMetaDataContext {
 	 * @param generatedKeyNames name of generated keys
 	 */
 	public void processMetaData(DataSource dataSource, List<String> declaredColumns, String[] generatedKeyNames) {
-
-		metaDataProvider =
-				TableMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
-
-		tableColumns = reconcileColumnsToUse(declaredColumns, generatedKeyNames);
-
+		this.metaDataProvider = TableMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
+		this.tableColumns = reconcileColumnsToUse(declaredColumns, generatedKeyNames);
 	}
 
 	/**
-	 * Compare columns created from metadata with declared columns and return a reconciled list
+	 * Compare columns created from metadata with declared columns and return a reconciled list.
 	 * @param declaredColumns declared column names
 	 * @param generatedKeyNames names of generated key columns
 	 */
@@ -200,8 +199,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Match the provided column names and values with the list of columns used
-	 *
+	 * Match the provided column names and values with the list of columns used.
 	 * @param parameterSource the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
@@ -242,8 +240,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Match the provided column names and values with the list of columns used
-	 *
+	 * Match the provided column names and values with the list of columns used.
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, Object> inParameters) {
