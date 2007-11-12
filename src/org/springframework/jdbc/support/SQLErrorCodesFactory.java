@@ -155,7 +155,7 @@ public class SQLErrorCodesFactory {
 	/**
 	 * Return the {@link SQLErrorCodes} instance for the given database.
 	 * <p>No need for a database metadata lookup.
-	 * @param dbName the database name (must not be <code>null</code> )
+	 * @param dbName the database name (must not be <code>null</code>)
 	 * @return the <code>SQLErrorCodes</code> instance for the given database
 	 * @throws IllegalArgumentException if the supplied database name is <code>null</code>
 	 */
@@ -192,7 +192,8 @@ public class SQLErrorCodesFactory {
 	 * {@link java.sql.DatabaseMetaData}, or an empty error codes
 	 * instance if no <code>SQLErrorCodes</code> were found.
 	 * @param dataSource the <code>DataSource</code> identifying the database
-	 * @see java.sql.DatabaseMetaData#getDatabaseProductName
+	 * @return the corresponding <code>SQLErrorCodes</code> object
+	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource dataSource) {
 		Assert.notNull(dataSource, "DataSource must not be null");
@@ -232,6 +233,21 @@ public class SQLErrorCodesFactory {
 
 		// Fallback is to return an empty SQLErrorCodes instance.
 		return new SQLErrorCodes();
+	}
+
+	/**
+	 * Associate the specified database name with the given {@link DataSource}.
+	 * @param dataSource the <code>DataSource</code> identifying the database
+	 * @param dbName the corresponding database name as stated in the error codes
+	 * definition file (must not be <code>null</code>)
+	 * @return the corresponding <code>SQLErrorCodes</code> object
+	 */
+	public SQLErrorCodes registerDatabase(DataSource dataSource, String dbName) {
+		synchronized (this.dataSourceCache) {
+			SQLErrorCodes sec = getErrorCodes(dbName);
+			this.dataSourceCache.put(dataSource, sec);
+			return sec;
+		}
 	}
 
 }
