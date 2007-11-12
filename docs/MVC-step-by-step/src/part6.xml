@@ -9,7 +9,7 @@
   application that we will build upon. <link linkend="part3">Part 3</link>
   added all the business logic and unit tests and <link linkend="part4">Part
   4</link> developed the web interface. In <link linkend="part5">Part 5</link>
-  we developerd the eprsistence layer. It is now time to integrate all this
+  we developed the persistence layer. It is now time to integrate all this
   into a complete web application.</para>
 
   <section id="step6.1">
@@ -24,7 +24,15 @@
     and add a reference to a <classname>ProductDao</classname> interface plus
     a setter method for this reference. Which implementation we actually use
     here should be irrelevant to the ProductManager class, and we will set
-    this through a configuration option.</para>
+    this through a configuration option. We also change the
+    <classname>setProducts</classname> method to a
+    <classname>setProductDao</classname> method so we can inject an instance
+    of the DAO class. The <classname>getProducts</classname> method will now
+    use the DAO to retrieve a list of products. Finally, the
+    <classname>increasePrices</classname> method will now get the list of
+    products and then after the price have been increased the product will be
+    stored in the database using the <classname>saveProduct</classname> method
+    on the DAO.</para>
 
     <para><filename>'springapp/src/springapp/service/SimpleProductManager.java'</filename>:</para>
 
@@ -49,9 +57,9 @@ public class SimpleProductManager implements ProductManager {
     private ProductDao productDao;
 </emphasis>
     public List&lt;Product&gt; getProducts() {
-        // return products;
+<emphasis role="bold">        // return products;
         return productDao.getProductList();
-    }
+</emphasis>    }
 
     public void increasePrice(int percentage) {
 <emphasis role="bold">        List&lt;Product&gt; products = productDao.getProductList();
@@ -222,23 +230,6 @@ public class SimpleProductManagerTests extends TestCase {
         product = products.get(1);      
         assertEquals(expectedTablePriceWithIncrease, product.getPrice());       
     }
-
-<emphasis role="bold">    private class InMemoryProductDao implements ProductDao {
-
-        private List&lt;Product&gt; productList;
-
-        public InMemoryProductDao(List&lt;Product&gt; productList) {
-            this.productList = productList;
-        }
-
-        public List&lt;Product&gt; getProductList() {
-            return productList;
-        }
-
-        public void saveProduct(Product prod) {
-        }
-
-    }</emphasis>
         
 }</programlisting>
 
@@ -285,7 +276,7 @@ public class InventoryControllerTests extends TestCase {
     configuration</title>
 
     <para>We saw earlier that it was fairly easy to modify the service layer
-    to use the database persistence. This was beacuse it is decoupled from the
+    to use the database persistence. This was because it is decoupled from the
     web layer. It's now time to decouple or configuration of the service layer
     from the web layer as well. We will remove the productManager
     configuration and the list of products from the springapp-servlet.xml
@@ -413,16 +404,24 @@ public class InventoryControllerTests extends TestCase {
     context</title>
 
     <para>Any time you persist data in a database its best to use transactions
-    to ensure that all your updates are perform or none are comleted. You want
-    to avoid having half your updates persisted while the other half failed.
-    Spring provides an extensive range of options for how to provide
+    to ensure that all your updates are perform or none are completed. You
+    want to avoid having half your updates persisted while the other half
+    failed. Spring provides an extensive range of options for how to provide
     transaction management. The reference manual covers this in depth. Here we
     will make use of one way of providing this using AOP (Aspect Oriented
     Programming) in the form of a transaction advice and an ApectJ pointcut to
     define where the transactions should be applied. If you are interested in
-    how this works in more depth, take a look at the reference manual.</para>
+    how this works in more depth, take a look at the reference manual. We are
+    using the new namespace support introduced in Spring 2.0. The "aop" and
+    "tx" namespaces make the configuration entries much more concise compared
+    to the traditional way using regular "&lt;bean&gt;" entries.</para>
 
-    <programlisting>    &lt;aop:config&gt;
+    <programlisting>    &lt;bean id="transactionManager" 
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+        &lt;property name="dataSource" ref="dataSource"/&gt;
+    &lt;/bean&gt;
+
+    &lt;aop:config&gt;
         &lt;aop:advisor pointcut="execution(* *..ProductManager.*(..))" advice-ref="txAdvice"/&gt;
     &lt;/aop:config&gt;
 
@@ -431,8 +430,7 @@ public class InventoryControllerTests extends TestCase {
             &lt;tx:method name="save*"/&gt;
             &lt;tx:method name="*" read-only="true"/&gt;
         &lt;/tx:attributes&gt;
-    &lt;/tx:advice&gt;
-</programlisting>
+    &lt;/tx:advice&gt;</programlisting>
 
     <para>The pointcut applies to any method called on the ProductManager
     interface. The advice is a transaction advice that applies to methods with
@@ -441,7 +439,7 @@ public class InventoryControllerTests extends TestCase {
     applies "read-only" transactions on any other methods that are adviced via
     the pointcut.</para>
 
-    <para>We also need to define a conection pool. We are using the DBCP
+    <para>We also need to define a connection pool. We are using the DBCP
     connection pool from the Apache Jakarta project. We are reusing the
     <classname>jdbc.properties</classname> file we created in Part 5.</para>
 
@@ -538,7 +536,7 @@ public class InventoryControllerTests extends TestCase {
   <section id="step6.5">
     <title>Final test of the complete application</title>
 
-    <para>Now it's finally time to see if all of thes pieces will work
+    <para>Now it's finally time to see if all of these pieces will work
     together. Build and deploy your finished application and remember to have
     the database up and running. This is what you should see when pointing the
     web browser at the application after it has reloaded:</para>
