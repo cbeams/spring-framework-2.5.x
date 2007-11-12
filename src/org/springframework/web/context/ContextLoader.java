@@ -42,9 +42,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>Looks for a "contextClass" parameter at the web.xml context-param level
  * to specify the context class type, falling back to the default of
- * {@link org.springframework.web.context.support.XmlWebApplicationContext XmlWebApplicationContext}
- * if not found. With the default ContextLoader implementation, any context
- * class specified needs to implement ConfigurableWebApplicationContext.
+ * {@link org.springframework.web.context.support.XmlWebApplicationContext}
+ * if not found. With the default ContextLoader implementation, any context class
+ * specified needs to implement the ConfigurableWebApplicationContext interface.
  *
  * <p>Processes a "{@link #CONFIG_LOCATION_PARAM contextConfigLocation}"
  * context-param and passes its value to the context instance, parsing it into
@@ -217,11 +217,10 @@ public class ContextLoader {
 	/**
 	 * Instantiate the root WebApplicationContext for this loader, either the
 	 * default context class or a custom context class if specified.
-	 * <p>This implementation expects custom contexts to implement
-	 * ConfigurableWebApplicationContext. Can be overridden in subclasses.
-	 * In addition, {@link #customizeContext(ConfigurableWebApplicationContext)}
-	 * is called prior to refreshing the context, allowing subclasses to perform
-	 * custom modifications to the context.
+	 * <p>This implementation expects custom contexts to implement the
+	 * ConfigurableWebApplicationContext interface. Can be overridden in subclasses.
+	 * <p>In addition, {@link #customizeContext} gets called prior to refreshing the
+	 * context, allowing subclasses to perform custom modifications to the context.
 	 * @param servletContext current servlet context
 	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the root WebApplicationContext
@@ -286,16 +285,11 @@ public class ContextLoader {
 	}
 
 	/**
-	 * <p>
 	 * Customize the {@link ConfigurableWebApplicationContext} created by this
 	 * ContextLoader after config locations have been supplied to the context
 	 * but before the context is <em>refreshed</em>.
-	 * </p>
-	 * <p>
-	 * The default implementation is empty but can be overridden in subclasses
+	 * <p>The default implementation is empty but can be overridden in subclasses
 	 * to customize the application context.
-	 * </p>
-	 *
 	 * @param servletContext the current servlet context
 	 * @param applicationContext the newly created application context
 	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
