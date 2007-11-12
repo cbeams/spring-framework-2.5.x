@@ -74,6 +74,37 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
     }
 </emphasis>
 }</programlisting>
+
+    <para><filename>We will also need to modify the InventoryControllerTests
+    to supply a ProductManager and extract the value for "now"from the model
+    Map before the tests will pass again.</filename></para>
+
+    <para><filename>'springapp/test/web/InventoryControllerTests.java'</filename>:</para>
+
+    <programlisting>package springapp.web;
+
+<emphasis role="bold">import java.util.Map;
+</emphasis>
+import org.springframework.web.servlet.ModelAndView;
+
+<emphasis role="bold">import springapp.service.SimpleProductManager;
+</emphasis>import springapp.web.InventoryController;
+
+import junit.framework.TestCase;
+
+public class <emphasis role="bold">InventoryControllerTests</emphasis> extends TestCase {
+
+    public void testHandleRequestView() throws Exception{
+        InventoryController controller = new InventoryController();
+<emphasis role="bold">        controller.setProductManager(new SimpleProductManager());
+</emphasis>        ModelAndView modelAndView = controller.handleRequest(null, null);
+        assertEquals("hello", modelAndView.getViewName());
+        assertNotNull(modelAndView.getModel());
+<emphasis role="bold">        Map modelMap = (Map) modelAndView.getModel().get("model");
+        String nowValue = (String) modelMap.get("now");
+</emphasis>        assertNotNull(nowValue);
+    }
+}</programlisting>
   </section>
 
   <section id="step4.2">
@@ -81,8 +112,8 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
     message bundle</title>
 
     <para>Using the JSTL <literal>&lt;c:forEach/&gt;</literal> tag, we add a
-    section that displays product information. We have also replaced the title,
-    heading and greeting text with a JSTL
+    section that displays product information. We have also replaced the
+    title, heading and greeting text with a JSTL
     <literal>&lt;fmt:message/&gt;</literal> tag that pulls the text to display
     from a provided <literal>'message'</literal> source – we will show this
     source in a later step.</para>
@@ -110,15 +141,15 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
 
     <para>It's time to add a <classname>SimpleProductManager</classname> to
     our configuration file and to pass that into the setter of the
-    <classname>InventoryController</classname>. We are not going to add any code
-    to load the business objects from a database just yet. Instead, we can
-    stub a couple of <classname>Product</classname> instances using Spring's
-    bean and application context support. We will simply put the data we need as
-    a couple of bean entries in <filename>'springapp-servlet.xml'</filename>.
-    we will also add the <literal>'messageSource'</literal> bean entry that
-    will pull in the messages resource bundle
-    (<filename>'messages.properties'</filename>) that we will create in the
-    next step. Also remember to rename the reference to
+    <classname>InventoryController</classname>. We are not going to add any
+    code to load the business objects from a database just yet. Instead, we
+    can stub a couple of <classname>Product</classname> instances using
+    Spring's bean and application context support. We will simply put the data
+    we need as a couple of bean entries in
+    <filename>'springapp-servlet.xml'</filename>. we will also add the
+    <literal>'messageSource'</literal> bean entry that will pull in the
+    messages resource bundle (<filename>'messages.properties'</filename>) that
+    we will create in the next step. Also remember to rename the reference to
     <classname>HelloController</classname> to
     <classname>InventoryController</classname> since we renamed it.</para>
 
@@ -612,6 +643,24 @@ typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
       </mediaobject>
     </screenshot>
 
+    <para></para>
+  </section>
+
+  <section>
+    <title>Summary</title>
+
+    <para>Let's look at what we did in Part 4.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>We ..</para>
+      </listitem>
+
+      <listitem>
+        <para>We also...</para>
+      </listitem>
+    </orderedlist>
+
     <para>Find below a screenshot of what your project directory structure
     must look like after following the above instructions.</para>
 
@@ -628,5 +677,9 @@ typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
         </imageobject>
       </mediaobject>
     </screenshot>
+
+    <para></para>
+
+    <para></para>
   </section>
 </chapter>

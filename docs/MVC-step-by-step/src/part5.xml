@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="part5">
-  <title>Implementing Database Persistence [UNDER CONSTRUCTION]</title>
+  <title>Implementing Database Persistence</title>
 
   <para>This is Part 5 of a step-by-step account of how to develop a web
   application from scratch using the Spring Framework. In <link
@@ -393,7 +393,7 @@ public class Product implements Serializable {
   </section>
 
   <section id="step5.5">
-    <title>Implement unit test for JDBC DAO implementation</title>
+    <title>Implement tests for JDBC DAO implementation</title>
 
     <para>Time to add tests for the JDBC DAO implementation. Spring provides
     an extenive testing framework that supports JUnit 3.8 and 4 as well as
@@ -494,12 +494,17 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
     &lt;/bean&gt;
 
     &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
-      &lt;property name="driverClassName"&gt;&lt;value&gt;org.hsqldb.jdbcDriver&lt;/value&gt;&lt;/property&gt;
-      &lt;property name="url"&gt;
-        &lt;value&gt;jdbc:hsqldb:hsql://localhost&lt;/value&gt;
-      &lt;/property&gt;
-      &lt;property name="username"&gt;&lt;value&gt;sa&lt;/value&gt;&lt;/property&gt;
-      &lt;property name="password"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
+      &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+      &lt;property name="url" value="${jdbc.url}"/&gt;
+      &lt;property name="username"  value="${jdbc.username}"/&gt;
+      &lt;property name="password" value="${jdbc.password}"/&gt;
+    &lt;/bean&gt;
+    &lt;bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+        &lt;property name="locations"&gt;
+            &lt;list&gt;
+                &lt;value&gt;classpath:jdbc.properties&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
     &lt;/bean&gt;
     
     &lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
@@ -508,13 +513,172 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
 
 &lt;/beans&gt;</programlisting>
 
-    <para>...</para>
+    <para>We have defined a "<classname>productDao</classname>" which is the
+    class we are testing. We have also defined a
+    <classname>DataSource</classname> with placeholders for the configuration
+    values. These values are provided via a separate propery file and at
+    runtime the <classname>PropertyPlaceholderConfigurer</classname> that we
+    defined will read this prioperty file and substitute the placeholders with
+    the actual values. This is covenient since this isolates the values that
+    are most often provided during application deployment into a separate
+    file. We put this new file in the
+    "<classname>war/WEB-INF/classes</classname>" directory so it will be
+    available when we run the appication. The content of this property file
+    is:</para>
+
+    <para><filename>'springapp/war/WEB-INF/classes/jdbc.properties'</filename>:</para>
+
+    <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
+jdbc.url=jdbc:hsqldb:hsql://localhost
+jdbc.username=sa
+jdbc.password=
+</programlisting>
+
+    <para>Since we added a configuration file to the
+    "<classname>test</classname>" directory and a jdbc.properties file to the
+    "<classname>WEB-INF/classes</classname>" directory, let's add a new
+    classpath entry for our tests:</para>
 
     <para><filename>'springapp/build.xml'</filename>:</para>
 
     <programlisting>...
+
+<emphasis role="bold">    &lt;path id="test-classpath"&gt;
+        &lt;fileset dir="${web.dir}/WEB-INF/lib"&gt;
+            &lt;include name="*.jar"/&gt;
+        &lt;/fileset&gt;
+        &lt;pathelement path="${build.dir}"/&gt;
+        &lt;pathelement path="${test.dir}"/&gt;
+        &lt;pathelement path="${web.dir}/WEB-INF/classes"/&gt;
+    &lt;/path&gt;
+</emphasis>
+...
 </programlisting>
 
-    <para>Time to run this test...</para>
+    <para>We should now have enough for our tests to run and pass but we want
+    to make one additional change to the build script. It's a good practice to
+    separate any integration tests that depend on a live database from the
+    rest of the tests. So we add a separate "dbTests" target to our build
+    script and exclude the database tests from the "tests" target.</para>
+
+    <para><filename>'springapp/build.xml'</filename>:</para>
+
+    <programlisting>...
+
+    &lt;target name="tests" depends="build, buildtests" description="Run tests"&gt;
+        &lt;junit printsummary="on"
+            fork="false"
+            haltonfailure="false"
+            failureproperty="tests.failed"
+            showoutput="true"&gt;
+<emphasis role="bold">            &lt;classpath refid="test-classpath"/&gt;
+</emphasis>            &lt;formatter type="brief" usefile="false"/&gt;
+            
+            &lt;batchtest&gt;
+                &lt;fileset dir="${build.dir}"&gt;
+                    &lt;include name="**/*Tests.*"/&gt;
+<emphasis role="bold">                    &lt;exclude name="**/Jdbc*Tests.*"/&gt;
+</emphasis>                &lt;/fileset&gt;
+            &lt;/batchtest&gt;
+            
+        &lt;/junit&gt;
+        
+        &lt;fail if="tests.failed"&gt;
+            tests.failed=${tests.failed}
+            ***********************************************************
+            ***********************************************************
+            ****  One or more tests failed!  Check the output ...  ****
+            ***********************************************************
+            ***********************************************************
+        &lt;/fail&gt;
+    &lt;/target&gt;
+
+<emphasis role="bold">    &lt;target name="dbTests" depends="build, buildtests,dropTables,createTables,loadData" description="Run db tests"&gt;
+        &lt;junit printsummary="on"
+            fork="false"
+            haltonfailure="false"
+            failureproperty="tests.failed"
+            showoutput="true"&gt;
+            &lt;classpath refid="test-classpath"/&gt;
+            &lt;formatter type="brief" usefile="false"/&gt;
+            
+            &lt;batchtest&gt;
+                &lt;fileset dir="${build.dir}"&gt;
+                    &lt;include name="**/Jdbc*Tests.*"/&gt;
+                &lt;/fileset&gt;
+            &lt;/batchtest&gt;
+            
+        &lt;/junit&gt;
+        
+        &lt;fail if="tests.failed"&gt;
+            tests.failed=${tests.failed}
+            ***********************************************************
+            ***********************************************************
+            ****  One or more tests failed!  Check the output ...  ****
+            ***********************************************************
+            ***********************************************************
+        &lt;/fail&gt;
+    &lt;/target&gt;
+</emphasis>
+...
+</programlisting>
+
+    <para>Time to run this test, execute "<classname>ant dbTests</classname>"
+    to see if the tests pass.</para>
+  </section>
+
+  <section>
+    <title>Summary</title>
+
+    <para>We have now completed the persistence layer and in the next part we
+    will integrate it with our web application. But first, lets quickly
+    summarize hat we accomplieshed in this part.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>First we configured our database and created start-up
+        scripts.</para>
+      </listitem>
+
+      <listitem>
+        <para>We created scripts to use when creating the table and also to
+        load some test data.</para>
+      </listitem>
+
+      <listitem>
+        <para>Next we added some tasks to our build script to run when we
+        needed to create or delete the table and also when we needed to add
+        test data or delete the data. </para>
+      </listitem>
+
+      <listitem>
+        <para>We created the actual DAO class that will handle the persistence
+        work using Spring's <classname>SimpeJdbcTemplate</classname>.</para>
+      </listitem>
+
+      <listitem>
+        <para>Finally we created unit or more accurately integration tests and
+        corresponding ant targets to run these tests.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>Below is a screenshot of what your project directory structure
+    should look like after following the above instructions.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/dir-structure-endp5.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/dir-structure-endp5.png"
+                     format="PNG" />
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para></para>
   </section>
 </chapter>
