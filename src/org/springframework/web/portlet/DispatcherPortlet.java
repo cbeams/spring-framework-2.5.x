@@ -75,17 +75,20 @@ import org.springframework.web.servlet.ViewResolver;
  *
  * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is {@link org.springframework.web.portlet.handler.PortletModeHandlerMapping}.
- * HandlerMapping objects can be defined as beans in the portlet's application context,
- * implementing the HandlerMapping interface, overriding the default HandlerMapping
+ * Default is {@link org.springframework.web.portlet.handler.PortletModeHandlerMapping}, as well
+ * as a {@link org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping}
+ * on Java 5+. HandlerMapping objects can be defined as beans in the portlet's application
+ * context, implementing the HandlerMapping interface, overriding the default HandlerMapping
  * if present. HandlerMappings can be given any bean name (they are tested by type).
  *
- * <li>It can use any {@link HandlerAdapter}; this allows to use any handler interface.
+ * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
  * The default adapter is {@link org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter}
  * for Spring's {@link org.springframework.web.portlet.mvc.Controller} interface.
- * HandlerAdapter objects can be added as beans in the application context,
- * overriding the default HandlerAdapter. Like HandlerMappings, HandlerAdapters
- * can be given any bean name (they are tested by type).
+ * When running in a Java 5+ environment, a default
+ * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
+ * will be registered as well. HandlerAdapter objects can be added as beans in the
+ * application context, overriding the default HandlerAdapter. Like HandlerMappings,
+ * HandlerAdapters can be given any bean name (they are tested by type).
  *
  * <li>The dispatcher's exception resolution strategy can be specified via a
  * {@link HandlerExceptionResolver}, for example mapping certain exceptions to

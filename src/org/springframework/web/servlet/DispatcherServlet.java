@@ -76,21 +76,24 @@ import org.springframework.web.util.WebUtils;
  *
  * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}.
- * HandlerMapping objects can be defined as beans in the servlet's application context,
- * implementing the HandlerMapping interface, overriding the default HandlerMapping
- * if present. HandlerMappings can be given any bean name (they are tested by type).
+ * Default is {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}, as well
+ * as a {@link org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping}
+ * when running on Java 5+. HandlerMapping objects can be defined as beans in the servlet's
+ * application context, implementing the HandlerMapping interface, overriding the default
+ * HandlerMapping if present. HandlerMappings can be given any bean name (they are tested by type).
  *
- * <li>It can use any {@link HandlerAdapter}; this allows to use any handler interface.
+ * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
  * Default adapters are {@link org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter},
  * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter} and
  * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter},
  * for Spring's {@link org.springframework.web.HttpRequestHandler},
  * {@link org.springframework.web.servlet.mvc.Controller} and
  * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController} interfaces,
- * respectively. HandlerAdapter objects can be added as beans in the application context,
- * overriding the default HandlerAdapters. Like HandlerMappings, HandlerAdapters
- * can be given any bean name (they are tested by type).
+ * respectively. When running in a Java 5+ environment, a default
+ * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
+ * will be registered as well. HandlerAdapter objects can be added as beans in the
+ * application context, overriding the default HandlerAdapters. Like HandlerMappings,
+ * HandlerAdapters can be given any bean name (they are tested by type).
  *
  * <li>The dispatcher's exception resolution strategy can be specified via a
  * {@link HandlerExceptionResolver}, for example mapping certain exceptions to
