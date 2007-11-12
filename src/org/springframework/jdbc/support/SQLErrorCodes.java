@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import org.springframework.util.StringUtils;
  * JavaBean for holding JDBC error codes for a particular database.
  * Instances of this class are normally loaded through a bean factory.
  *
- * <p>Used by Spring's SQLErrorCodeSQLExceptionTranslator.
+ * <p>Used by Spring's {@link SQLErrorCodeSQLExceptionTranslator}.
  * The file "sql-error-codes.xml" in this package contains default
- * SQLErrorCodes instances for various databases.
+ * <code>SQLErrorCodes</code> instances for various databases.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -78,7 +78,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getDatabaseProductNames() {
-		return databaseProductNames;
+		return this.databaseProductNames;
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class SQLErrorCodes {
 	}
 
 	public boolean isUseSqlStateForTranslation() {
-		return useSqlStateForTranslation;
+		return this.useSqlStateForTranslation;
 	}
 
 
@@ -99,7 +99,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getBadSqlGrammarCodes() {
-		return badSqlGrammarCodes;
+		return this.badSqlGrammarCodes;
 	}
 
 	public void setInvalidResultSetAccessCodes(String[] invalidResultSetAccessCodes) {
@@ -107,7 +107,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getInvalidResultSetAccessCodes() {
-		return invalidResultSetAccessCodes;
+		return this.invalidResultSetAccessCodes;
 	}
 
 	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
@@ -115,7 +115,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getDataAccessResourceFailureCodes() {
-		return dataAccessResourceFailureCodes;
+		return this.dataAccessResourceFailureCodes;
 	}
 
 	public void setPermissionDeniedCodes(String[] permissionDeniedCodes) {
@@ -123,7 +123,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getPermissionDeniedCodes() {
-		return permissionDeniedCodes;
+		return this.permissionDeniedCodes;
 	}
 
 	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
@@ -131,7 +131,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getDataIntegrityViolationCodes() {
-		return dataIntegrityViolationCodes;
+		return this.dataIntegrityViolationCodes;
 	}
 
 	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
@@ -139,7 +139,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getCannotAcquireLockCodes() {
-		return cannotAcquireLockCodes;
+		return this.cannotAcquireLockCodes;
 	}
 
 	public void setDeadlockLoserCodes(String[] deadlockLoserCodes) {
@@ -147,7 +147,7 @@ public class SQLErrorCodes {
 	}
 
 	public String[] getDeadlockLoserCodes() {
-		return deadlockLoserCodes;
+		return this.deadlockLoserCodes;
 	}
 
 	public void setCannotSerializeTransactionCodes(String[] cannotSerializeTransactionCodes) {
@@ -155,7 +155,7 @@ public class SQLErrorCodes {
 	}
 	
 	public String[] getCannotSerializeTransactionCodes() {
-		return cannotSerializeTransactionCodes;
+		return this.cannotSerializeTransactionCodes;
 	}
 
 	public void setCustomTranslations(CustomSQLErrorCodesTranslation[] customTranslations) {
@@ -163,7 +163,7 @@ public class SQLErrorCodes {
 	}
 
 	public CustomSQLErrorCodesTranslation[] getCustomTranslations() {
-		return customTranslations;
+		return this.customTranslations;
 	}
 
 }
