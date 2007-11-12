@@ -21,7 +21,6 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderContext;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -37,7 +36,7 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class XmlReaderContext extends ReaderContext {
 
-	private final BeanDefinitionReader reader;
+	private final XmlBeanDefinitionReader reader;
 
 	private final NamespaceHandlerResolver namespaceHandlerResolver;
 
@@ -45,7 +44,7 @@ public class XmlReaderContext extends ReaderContext {
 	public XmlReaderContext(
 			Resource resource, ProblemReporter problemReporter,
 			ReaderEventListener eventListener, SourceExtractor sourceExtractor,
-			BeanDefinitionReader reader, NamespaceHandlerResolver namespaceHandlerResolver) {
+			XmlBeanDefinitionReader reader, NamespaceHandlerResolver namespaceHandlerResolver) {
 
 		super(resource, problemReporter, eventListener, sourceExtractor);
 		this.reader = reader;
@@ -53,7 +52,7 @@ public class XmlReaderContext extends ReaderContext {
 	}
 
 
-	public final BeanDefinitionReader getReader() {
+	public final XmlBeanDefinitionReader getReader() {
 		return this.reader;
 	}
 
