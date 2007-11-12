@@ -36,35 +36,36 @@ public interface SimpleJdbcInsertOperations {
 	 * @param tableName the name of the stored table
 	 * @return the instance of this SimpleJdbcInsert
 	 */
-	SimpleJdbcInsert withTableName(String tableName);
+	SimpleJdbcInsertOperations withTableName(String tableName);
 
 	/**
 	 * Specify the shema name, if any, to be used for the insert.
 	 * @param schemaName the name of the schema
 	 * @return the instance of this SimpleJdbcInsert
 	 */
-	SimpleJdbcInsert withSchemaName(String schemaName);
+	SimpleJdbcInsertOperations withSchemaName(String schemaName);
 
 	/**
 	 * Specify the catalog name, if any, to be used for the insert.
 	 * @param catalogName the name of the catalog
 	 * @return the instance of this SimpleJdbcInsert
 	 */
-	SimpleJdbcInsert withCatalogName(String catalogName);
+	SimpleJdbcInsertOperations withCatalogName(String catalogName);
 
 	/**
 	 * Specify the column names that the insert statement should be limited to use.
 	 * @param columnNames one or more column names
 	 * @return the instance of this SimpleJdbcInsert
 	 */
-	SimpleJdbcInsert usingColumns(String... columnNames);
+	SimpleJdbcInsertOperations usingColumns(String... columnNames);
 
 	/**
 	 * Specify the name sof any columns that have auto generated keys.
 	 * @param columnNames one or more column names
 	 * @return the instance of this SimpleJdbcInsert
 	 */
-	SimpleJdbcInsert usingGeneratedKeyColumns(String... columnNames);
+	SimpleJdbcInsertOperations usingGeneratedKeyColumns(String... columnNames);
+
 
 	/**
 	 * Execute the insert using the values passed in.

@@ -37,21 +37,21 @@ public interface SimpleJdbcCallOperations {
 	 * @param procedureName the name of the stored procedure
 	 * @return the instance of this SimpleJdbcCall
 	 */
-	SimpleJdbcCall withProcedureName(String procedureName);
+	SimpleJdbcCallOperations withProcedureName(String procedureName);
 
 	/**
 	 * Specify the procedure name to be used - this implies that we will be calling a stored function.
 	 * @param functionName the name of the stored function
 	 * @return the instance of this SimpleJdbcCall
 	 */
-	SimpleJdbcCall withFunctionName(String functionName);
+	SimpleJdbcCallOperations withFunctionName(String functionName);
 
 	/**
 	 * Optionally, specify the name of the schema that contins the stored procedure.
 	 * @param schemaName the name of the schema
 	 * @return the instance of this SimpleJdbcCall
 	 */
-	SimpleJdbcCall withSchemaName(String schemaName);
+	SimpleJdbcCallOperations withSchemaName(String schemaName);
 
 	/**
 	 * Optionally, specify the name of the catalog that contins the stored procedure.
@@ -60,13 +60,13 @@ public interface SimpleJdbcCallOperations {
 	 * @param catalogName the catalog or package name
 	 * @return the instance of this SimpleJdbcCall
 	 */
-	SimpleJdbcCall withCatalogName(String catalogName);
+	SimpleJdbcCallOperations withCatalogName(String catalogName);
 
 	/**
 	 * Indicates the procedure's return value should be included in the results returned.
 	 * @return the instance of this SimpleJdbcCall
 	 */
-	SimpleJdbcCall withReturnValue();
+	SimpleJdbcCallOperations withReturnValue();
 
 	/**
 	 * Specify one or more parameters if desired.  These parameters will be supplemented with any
@@ -74,10 +74,10 @@ public interface SimpleJdbcCallOperations {
 	 * @param sqlParameters the parameters to use
 	 * @return the instance of this SimpleJdbcCall
 	 */
-	SimpleJdbcCall declareParameters(SqlParameter... sqlParameters);
+	SimpleJdbcCallOperations declareParameters(SqlParameter... sqlParameters);
 
 	/** Not used yet */
-	SimpleJdbcCall useInParameterNames(String... inParameterNames);
+	SimpleJdbcCallOperations useInParameterNames(String... inParameterNames);
 
 	/**
 	 * Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
@@ -88,13 +88,14 @@ public interface SimpleJdbcCallOperations {
 	 * @param parameterName the name of the returned results and/or the name of the ref cursor parameter
 	 * @param rowMapper the RowMapper implementation that will map the data returned for each row
 	 * */
-	SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper);
+	SimpleJdbcCallOperations returningResultSet(String parameterName, ParameterizedRowMapper rowMapper);
 
 	/**
 	 * Turn off any processing of parameter meta data information obtained via JDBC.
 	 * @return the instance of this SimpleJdbcCall
 	 */
-	SimpleJdbcCall withoutProcedureColumnMetaDataAccess();
+	SimpleJdbcCallOperations withoutProcedureColumnMetaDataAccess();
+
 
 	/**
 	 * Execute the stored function and return the results obtained as an Object of the specified return type.
