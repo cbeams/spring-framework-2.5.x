@@ -434,7 +434,7 @@ public class InventoryControllerTests extends TestCase {
     &lt;/tx:advice&gt;
 </programlisting>
 
-    <para>The pointcut applies to any method called on the Productmanager
+    <para>The pointcut applies to any method called on the ProductManager
     interface. The advice is a transaction advice that applies to methods with
     a name starting with 'save'. The default transaction attributes of
     REQUIRED applies since no other attribute was specified. The advice also

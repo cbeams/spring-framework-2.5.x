@@ -104,8 +104,8 @@
 
     <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
 
-    <programlisting>&lt;%@ include file="/WEB-INF/jsp/include.jsp" %&gt;
-
+    <programlisting><emphasis role="bold">&lt;%@ include file="/WEB-INF/jsp/include.jsp" %&gt;
+</emphasis>
 &lt;html&gt;
   &lt;head&gt;&lt;title&gt;Hello :: Spring Application&lt;/title&gt;&lt;/head&gt;
   &lt;body&gt;
@@ -286,12 +286,10 @@ public class HelloController implements Controller {
     http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"&gt;
     
     <lineannotation>&lt;!-- the application context definition for the springapp DispatcherServlet --&gt;</lineannotation>
-            
     
     &lt;bean name="/hello.htm" class="springapp.web.HelloController"/&gt;
     
-    <emphasis role="bold">
-    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+<emphasis role="bold">    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
         &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"&gt;&lt;/property&gt;
         &lt;property name="prefix" value="/WEB-INF/jsp/"&gt;&lt;/property&gt;
         &lt;property name="suffix" value=".jsp"&gt;&lt;/property&gt;        
@@ -315,13 +313,13 @@ import junit.framework.TestCase;
 
 public class HelloControllerTests extends TestCase {
 
-    public void testHandleRequestView() throws Exception{		
+    public void testHandleRequestView() throws Exception{
         HelloController controller = new HelloController();
-        ModelAndView modelAndView = controller.handleRequest(null, null);		
-        assertEquals("hello", modelAndView.getViewName());
-        assertNotNull(modelAndView.getModel());
-<emphasis role="bold">        String nowValue = (String) modelAndView.getModel().get("now");
-</emphasis>        assertNotNull(nowValue);
+        ModelAndView modelAndView = controller.handleRequest(null, null);
+<emphasis role="bold">        assertEquals("hello", modelAndView.getViewName());
+</emphasis>        assertNotNull(modelAndView.getModel());
+        String nowValue = (String) modelAndView.getModel().get("now");
+        assertNotNull(nowValue);
     }
 }</programlisting>
 

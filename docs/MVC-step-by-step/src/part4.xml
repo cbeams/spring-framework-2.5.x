@@ -54,7 +54,6 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
 
 <emphasis role="bold">    private ProductManager productManager;
 </emphasis>
-
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -195,7 +194,7 @@ public class <emphasis role="bold">InventoryControllerTests</emphasis> extends T
 
 </emphasis>    &lt;bean name="/hello.htm" class="springapp.web.<emphasis
         role="bold">InventoryController</emphasis>"&gt;
-<emphasis role="bold"><emphasis role="bold">        &lt;property name="productManager" ref="prodMan"/&gt;
+<emphasis role="bold"><emphasis role="bold">        &lt;property name="productManager" ref="productManager"/&gt;
 </emphasis>    &lt;/bean&gt;</emphasis>
 
     &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
@@ -317,7 +316,9 @@ greeting=Greetings, it is now</programlisting>
 &lt;/web-app&gt;</programlisting>
 
     <para>We also have to declare this taglib in a page directive in the jsp
-    file, and then start using the tags we have thus imported.</para>
+    file, and then start using the tags we have thus imported. Add the JSP
+    page <filename>priceincrease.jsp</filename> to the
+    <filename>war/WEB-INF/jsp</filename> directory.</para>
 
     <para><filename>'springapp/war/WEB-INF/jsp/priceincrease.jsp'</filename>:</para>
 
@@ -482,7 +483,7 @@ public class PriceIncreaseValidator implements Validator {
 
 &lt;beans&gt;
 
-    &lt;bean id="prodMan" class="springapp.service.ProductManager"&gt;
+    &lt;bean id="productManager" class="springapp.service.ProductManager"&gt;
         &lt;property name="products"&gt;
             &lt;list&gt;
                 &lt;ref bean="product1"/&gt;
@@ -512,7 +513,7 @@ public class PriceIncreaseValidator implements Validator {
     &lt;/bean&gt;
 
     &lt;bean name="/hello.htm" class="springapp.web.InventoryController"&gt;
-        &lt;property name="productManager" ref="prodMan"/&gt;
+        &lt;property name="productManager" ref="productManager"/&gt;
     &lt;/bean&gt;
 
 <emphasis role="bold">    &lt;bean name="/priceincrease.htm" class="springapp.web.PriceIncreaseFormController"&gt;
@@ -524,7 +525,7 @@ public class PriceIncreaseValidator implements Validator {
         &lt;/property&gt;
         &lt;property name="formView" value="priceincrease"/&gt;
         &lt;property name="successView" value="hello.htm"/&gt;
-        &lt;property name="productManager" ref="prodMan"/&gt;
+        &lt;property name="productManager" ref="productManager"/&gt;
     &lt;/bean&gt;
 
 </emphasis>    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
@@ -565,7 +566,7 @@ public class PriceIncreaseFormController extends SimpleFormController {
     /** Logger for this class and subclasses */
     protected final Log logger = LogFactory.getLog(getClass());
 
-    private ProductManager prodMan;
+    private ProductManager productManager;
 
     public ModelAndView onSubmit(Object command)
             throws ServletException {
@@ -573,7 +574,7 @@ public class PriceIncreaseFormController extends SimpleFormController {
         int increase = ((PriceIncrease) command).getPercentage();
         logger.info("Increasing prices by " + increase + "%.");
 
-        prodMan.increasePrice(increase);
+        productManager.increasePrice(increase);
 
         logger.info("returning from PriceIncreaseForm view to " + getSuccessView());
 
@@ -586,12 +587,12 @@ public class PriceIncreaseFormController extends SimpleFormController {
         return priceIncrease;
     }
 
-    public void setProductManager(ProductManager pm) {
-        prodMan = pm;
+    public void setProductManager(ProductManager productManager) {
+        this.productManager = productManager;
     }
 
     public ProductManager getProductManager() {
-        return prodMan;
+        return productManager;
     }
 
 }</programlisting>
@@ -607,7 +608,7 @@ greeting=Greetings, it is now
 <emphasis role="bold">priceincrease.heading=Price Increase :: SpringApp
 error.not-specified=Percentage not specified!!!
 error.too-low=You have to specify a percentage higher than {0}!
-error.too-high=Don't be greedy - you can't raise prices by more than {0}%!
+error.too-high=Don''t be greedy - you can''t raise prices by more than {0}%!
 required=Entry required.
 typeMismatch=Invalid data.
 typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>

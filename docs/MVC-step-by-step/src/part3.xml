@@ -282,18 +282,17 @@ public class SimpleProductManagerTests extends TestCase {
 
     <programlisting>package springapp.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+<emphasis role="bold">import java.util.ArrayList;
+</emphasis><emphasis role="bold">import java.util.List;
 
 import springapp.domain.Product;
-
+</emphasis>
 import junit.framework.TestCase;
 
 public class SimpleProductManagerTests extends TestCase {
 
     private SimpleProductManager productManager;
-    private List&lt;Product&gt; products;
+<emphasis role="bold">    private List&lt;Product&gt; products;
     
     private static int PRODUCT_COUNT = 2;
     
@@ -302,10 +301,10 @@ public class SimpleProductManagerTests extends TestCase {
     
     private static String TABLE_DESCRIPTION = "Table";
     private static Double TABLE_PRICE = new Double(150.10);         
-        
+</emphasis>        
     protected void setUp() throws Exception {
         productManager = new SimpleProductManager();
-        products = new ArrayList&lt;Product&gt;();
+<emphasis role="bold">        products = new ArrayList&lt;Product&gt;();
         
         // stub up a list of products
         Product product = new Product();
@@ -319,14 +318,14 @@ public class SimpleProductManagerTests extends TestCase {
         products.add(product);
         
         productManager.setProducts(products);
-    }
+</emphasis>    }
 
     public void testGetProductsWithNoProducts() {
         productManager = new SimpleProductManager();
         assertNull(productManager.getProducts());
     }
     
-    public void testGetProducts() {
+<emphasis role="bold">    public void testGetProducts() {
         List&lt;Product&gt; products = productManager.getProducts();
         assertNotNull(products);        
         assertEquals(PRODUCT_COUNT, productManager.getProducts().size());
@@ -339,7 +338,7 @@ public class SimpleProductManagerTests extends TestCase {
         assertEquals(TABLE_DESCRIPTION, product.getDescription());
         assertEquals(TABLE_PRICE, product.getPrice());      
     }   
-}</programlisting>
+</emphasis>}</programlisting>
 
     <para>Rerun all the Ant <literal>tests</literal> target and our two tests
     should fail.</para>
@@ -352,8 +351,8 @@ public class SimpleProductManagerTests extends TestCase {
 
     <programlisting>package springapp.service;
 
-import java.util.ArrayList;
-import java.util.List;
+<emphasis role="bold">import java.util.ArrayList;
+</emphasis>import java.util.List;
 
 import springapp.domain.Product;
 
@@ -396,11 +395,6 @@ public class SimpleProductManager implements ProductManager {
         <para>Set a price increase of 10% and check the increase is reflected
         in the prices of all the products in the list.</para>
       </listitem>
-
-      <listitem>
-        <para>Set a price decrease of 10% and check the increase is reflected
-        in the prices of all the products in the list.</para>
-      </listitem>
     </itemizedlist>
 
     <para><filename>'springapp/test/springapp/service/SimpleProductManagerTests.java'</filename>:</para>
@@ -418,7 +412,7 @@ public class SimpleProductManagerTests extends TestCase {
 
     private SimpleProductManager productManager;
 
-<emphasis role="bold">    private List&lt;Product&gt; products;
+    private List&lt;Product&gt; products;
     
     private static int PRODUCT_COUNT = 2;
     
@@ -427,12 +421,12 @@ public class SimpleProductManagerTests extends TestCase {
     
     private static String TABLE_DESCRIPTION = "Table";
     private static Double TABLE_PRICE = new Double(150.10);         
-</emphasis>    
+    
 <emphasis role="bold">    private static int POSITIVE_PRICE_INCREASE = 10;
 </emphasis>    
     protected void setUp() throws Exception {
         productManager = new SimpleProductManager();
-<emphasis role="bold">        products = new ArrayList&lt;Product&gt;();
+        products = new ArrayList&lt;Product&gt;();
         
         // stub up a list of products
         Product product = new Product();
@@ -446,14 +440,14 @@ public class SimpleProductManagerTests extends TestCase {
         products.add(product);
         
         productManager.setProducts(products);
-</emphasis>    }
+    }
 
     public void testGetProductsWithNoProducts() {
         productManager = new SimpleProductManager();
         assertNull(productManager.getProducts());
     }
     
-<emphasis role="bold">    public void testGetProducts() {
+    public void testGetProducts() {
         List&lt;Product&gt; products = productManager.getProducts();
         assertNotNull(products);        
         assertEquals(PRODUCT_COUNT, productManager.getProducts().size());
@@ -466,7 +460,7 @@ public class SimpleProductManagerTests extends TestCase {
         assertEquals(TABLE_DESCRIPTION, product.getDescription());
         assertEquals(TABLE_PRICE, product.getPrice());      
     }   
-</emphasis>    
+    
 <emphasis role="bold">    public void testIncreasePriceWithNullListOfProducts() {
         try {
             productManager = new SimpleProductManager();
@@ -522,16 +516,16 @@ public class SimpleProductManager implements ProductManager {
         return products;
     }
 
-<emphasis role="bold">    public void increasePrice(int percentage) {
-        if (products != null) {
+    public void increasePrice(int percentage) {
+<emphasis role="bold">        if (products != null) {
             for (Product product : products) {
                 double newPrice = product.getPrice().doubleValue() * 
                                     (100 + percentage)/100;
                 product.setPrice(newPrice);
             }
         }
-    }
-</emphasis>    
+</emphasis>    }
+    
     public void setProducts(List&lt;Product&gt; products) {
         this.products = products;
     }

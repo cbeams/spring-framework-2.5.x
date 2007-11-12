@@ -287,7 +287,7 @@ tomcat.manager.password=s3cret</programlisting>
 
     <para><remark>To create Tomcat user named 'tomcat' with 's3cret' as their
     password, go to the Tomcat users file <filename class="libraryfile">
-    'appserver.home'/conf/tomcat-users.xml'</filename> and add the user entry.
+    'appserver.home/conf/tomcat-users.xml'</filename> and add the user entry.
     </remark></para>
 
     <programlisting>&lt;?xml version='1.0' encoding='utf-8'?&gt;
@@ -407,14 +407,14 @@ Total time: 3 seconds</screen>
 
     <para>Go to the <filename
     class="directory">'springapp/war/WEB-INF'</filename> directory. Modify the
-    minimal <filename>'web.xml'</filename> file that we created earlier. Now
-    we will modify it by defining a <classname>DispatcherServlet</classname>
-    (also known as a <literal>'Front Controller'</literal> (Crupi et al)). It
-    is going to control where all our requests are routed based on information
-    we will enter at a later point. This servlet definition also has an
-    attendant <literal>&lt;servlet-mapping/&gt;</literal> entry that maps to
-    the URL patterns that we will be using. We have decided to let any URL
-    with an <literal>'.htm'</literal> extension be routed to the
+    minimal <filename>'web.xml'</filename> file that we created earlier. We
+    will define a <classname>DispatcherServlet</classname> (also known as a
+    <literal>'Front Controller'</literal> (Crupi et al)). It is going to
+    control where all our requests are routed based on information we will
+    enter at a later point. This servlet definition also has an attendant
+    <literal>&lt;servlet-mapping/&gt;</literal> entry that maps to the URL
+    patterns that we will be using. We have decided to let any URL with an
+    <literal>'.htm'</literal> extension be routed to the
     <literal>'springapp'</literal> servlet (the
     <classname>DispatcherServlet</classname>).</para>
 
@@ -724,7 +724,7 @@ Total time: 2 seconds
     <para><filename>'springapp/war/hello.jsp'</filename>:</para>
 
     <programlisting>&lt;html&gt;
-  &lt;head&gt;&lt;title&gt;Example :: Spring Application&lt;/title&gt;&lt;/head&gt;
+  &lt;head&gt;&lt;title&gt;Hello :: Spring Application&lt;/title&gt;&lt;/head&gt;
   &lt;body&gt;
     &lt;h1&gt;Hello - Spring Application&lt;/h1&gt;
     &lt;p&gt;Greetings.&lt;/p&gt;
