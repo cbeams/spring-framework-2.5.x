@@ -1969,6 +1969,13 @@
 			</fileset>
 		</copy>
 
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html/" failonerror="false">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/styles/">
+				<include name="*.css"/>
+				<include name="*.js"/>
+			</fileset>
+		</copy>
+
 		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.mvcstep.dir}/html/">
 			<classpath>
 				<fileset dir="${basedir}/${doc.ref.dir}/lib">
@@ -1978,7 +1985,7 @@
 			<jvmarg value="-Xmx256M"/>
 			<jvmarg value="-XX:MaxPermSize=128m"/>
 			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
-			<arg value="${basedir}/${doc.mvcstep.dir}/styles/html_chunk.xsl"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
 		</java>
 
 	</target>
@@ -1996,6 +2003,7 @@
 				<include name="*.png"/>
 			</fileset>
 		</copy>
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html_single/" file="${basedir}/${doc.mvcstep.dir}/styles/html.css" failonerror="false"/>
 
 		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.mvcstep.dir}">
 			<classpath>
@@ -2008,7 +2016,7 @@
 			<arg value="-o"/>
 			<arg value="${basedir}/${dist.mvcstep.dir}/html_single/index.html"/>
 			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
-			<arg value="${basedir}/${doc.mvcstep.dir}/styles/html.xsl"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
 		</java>
 
 	</target>

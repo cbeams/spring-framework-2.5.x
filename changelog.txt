@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 2.5 RC2 (2007-11-12)
 ---------------------------------------
 
+General
+* complete re-write of the Spring MVC step-by-step guide for version 2.5
+
 Package org.springframework.aop
 * fixed garbage collection problem with CGLIB proxies, now holding onto the Advised configuration independent of factory
 
