@@ -31,7 +31,7 @@
     <para>In our inventory management system, we have the concept of a product
     and a service for handling them. In particular, the business has requested
     the ability to increase prices across all products. Any decrease will be
-    done on an individual product basis, but this fetaure is outside the scope
+    done on an individual product basis, but this feature is outside the scope
     of our application. The validation rules for price increase are:</para>
 
     <itemizedlist>
@@ -580,7 +580,7 @@ public class SimpleProductManager implements ProductManager {
       </listitem>
     </orderedlist>
 
-    <para>Find below a screenshot of what your project directory structure
+    <para>Find below a screen shot of what your project directory structure
     must look like after following the above instructions.</para>
 
     <screenshot>

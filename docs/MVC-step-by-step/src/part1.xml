@@ -22,9 +22,9 @@
     JSPs and configuration files, belong in the <filename
     class="directory">'war'</filename> directory.</para>
 
-    <para>Find below a screenshot of what your project directory structure
+    <para>Find below a screen shot of what your project directory structure
     must look like after following the above instructions. <emphasis>(The
-    screenshot shows the project directory structure inside the Eclipse IDE:
+    screen shot shows the project directory structure inside the Eclipse IDE:
     you do not need to use the Eclipse IDE to complete this tutorial
     successfully, but using Eclipse will make it much easier to follow
     along.)</emphasis></para>
@@ -49,7 +49,7 @@
   <section id="step1.2">
     <title>Create <filename>'index.jsp'</filename></title>
 
-    <para>Since we are creating a web application, let's start by creating a a
+    <para>Since we are creating a web application, let's start by creating a
     very simple JSP page named <filename>'index.jsp'</filename> in the
     <filename class="directory">'war'</filename> directory. The
     <filename>'index.jsp'</filename> is the entry point for our
@@ -367,7 +367,7 @@ list:
 BUILD SUCCESSFUL
 Total time: 3 seconds</screen>
 
-    <para>You can now upen up a browser and navigate to the starting page of
+    <para>You can now open up a browser and navigate to the starting page of
     our application at the following URL: <ulink
     url="http://localhost:8080/springapp/index.jsp">http://localhost:8080/springapp/index.jsp</ulink>.</para>
 
@@ -413,8 +413,8 @@ Total time: 3 seconds</screen>
     is going to control where all our requests are routed based on information
     we will enter at a later point. This servlet definition also has an
     attendant <literal>&lt;servlet-mapping/&gt;</literal> entry that maps to
-    the URL patterns that we will be using. We have decided to let any URL with
-    an <literal>'.htm'</literal> extension be routed to the
+    the URL patterns that we will be using. We have decided to let any URL
+    with an <literal>'.htm'</literal> extension be routed to the
     <literal>'springapp'</literal> servlet (the
     <classname>DispatcherServlet</classname>).</para>
 
@@ -501,8 +501,8 @@ Total time: 3 seconds</screen>
     directory in the <filename class="directory">'war/WEB-INF'</filename>
     directory. Then, from the Spring distribution, copy <filename
     class="libraryfile">spring.jar</filename> (from <filename
-    class="libraryfile">spring-framework-2.5/dist</filename>) and and
-    <filename class="libraryfile">spring-webmvc.jar (from <filename
+    class="libraryfile">spring-framework-2.5/dist</filename>) and <filename
+    class="libraryfile">spring-webmvc.jar (from <filename
     class="libraryfile">spring-framework-2.5/dist/modules</filename>)
     </filename>to the new <filename
     class="directory">'war/WEB-INF/lib'</filename> directory. Also, copy
@@ -708,7 +708,7 @@ BUILD SUCCESSFUL
 Total time: 2 seconds
     </programlisting>
 
-    <para>Another of the best pratices of Agile development is
+    <para>Another of the best practices of Agile development is
     <emphasis>Continuous Integration</emphasis>. It's a good idea to ensure
     your tests are run with every build (ideally as automated project builds)
     so that you know your application logic is behaving as expected as the
@@ -845,7 +845,7 @@ INFO: FrameworkServlet 'springapp': initialization completed in 150 ms</screen>
       </listitem>
     </orderedlist>
 
-    <para>Find below a screenshot of what your project directory structure
+    <para>Find below a screen shot of what your project directory structure
     must look like after following the above instructions.</para>
 
     <screenshot>

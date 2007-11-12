@@ -116,7 +116,7 @@ public class InMemoryProductDao implements ProductDao {
 }</programlisting>
 
     <para>And here is the modified
-    <classname>SimpleProductManagerTests</classname>: </para>
+    <classname>SimpleProductManagerTests</classname>:</para>
 
     <para><filename>'springapp/test/springapp/service/SimpleProductManagerTests.java'</filename>:</para>
 
@@ -543,11 +543,11 @@ public class InventoryControllerTests extends TestCase {
     <screenshot>
       <mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/screen4.png" format="PNG" />
+          <imagedata align="center" fileref="images/screen6.png" format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/screen4.png" format="PNG" />
+          <imagedata align="center" fileref="images/screen6.png" format="PNG" />
         </imageobject>
 
         <caption><para>The completed application</para></caption>
@@ -602,7 +602,7 @@ public class InventoryControllerTests extends TestCase {
       </listitem>
     </orderedlist>
 
-    <para>Below is a screenshot of what your project directory structure
+    <para>Below is a screen shot of what your project directory structure
     should look like after following the above instructions.</para>
 
     <screenshot>
@@ -618,7 +618,5 @@ public class InventoryControllerTests extends TestCase {
         </imageobject>
       </mediaobject>
     </screenshot>
-
-    <para></para>
   </section>
 </chapter>

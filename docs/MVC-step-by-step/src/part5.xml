@@ -21,8 +21,8 @@
     <para>Before we can start developing the persistence code, we need a
     database. We are planning on using HSQL, which is a good open source
     database written in Java. This database is distributed with Spring, so we
-    can just copy the jar file to the web apps lib directory. Copy <filename
-    class="libraryfile">hsqldb.jar</filename> from the <filename
+    can just copy the jar file to the web application's lib directory. Copy
+    <filename class="libraryfile">hsqldb.jar</filename> from the <filename
     class="directory">'spring-framework-2.5/lib/hsqldb'</filename> directory
     to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
     directory. We will use HSQL in standalone server mode. That means we will
@@ -33,7 +33,7 @@
     <para>We need a script or batch file to start the database. Create a
     <filename class="directory">'db'</filename> directory under the main
     <filename class="directory">'springapp'</filename> directory. This new
-    directory will contain the datbase files. Now, let's and add a startup
+    directory will contain the database files. Now, let's and add a startup
     script:</para>
 
     <para>For Linux/Mac OS X add:</para>
@@ -42,7 +42,7 @@
 
     <programlisting>java -classpath ../war/WEB-INF/lib/hsqldb.jar org.hsqldb.Server -database test</programlisting>
 
-    <para>Don't forget tp change the execute permission by runnning
+    <para>Don't forget to change the execute permission by running
     <classname>'chmod +x server.sh'</classname>.</para>
 
     <para>For Windows add:</para>
@@ -306,7 +306,7 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     <para>Let's go over the two DAO methods in this class. Since we are
     extending <classname>SimpleJdbcSupport</classname> we get a
     <classname>SimpleJdbcTemplate</classname> prepared and ready to use. This
-    is accessed by callng the <classname>getSimpleJdbcTemplate()</classname>
+    is accessed by calling the <classname>getSimpleJdbcTemplate()</classname>
     method.</para>
 
     <para>The first method, <classname>getProductList()</classname> executes a
@@ -315,8 +315,8 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     the <classname>ResultSet</classname> and the
     <classname>Product</classname> class. In our case the row mapper is a
     class named <classname>ProductMapper</classname> that we define as an
-    inner class of the DAO. This class will sofar not be used outside of the
-    DAO so making it an inner clas works well.</para>
+    inner class of the DAO. This class will so far not be used outside of the
+    DAO so making it an inner class works well.</para>
 
     <para>The ProductMapper implements the
     <classname>ParameterizedRowMapper</classname> interface that defines a
@@ -333,7 +333,7 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     with the parameter values in the form of a
     <classname>MapSqlParameterSource</classname>. Using a
     <classname>MapSqlParameterSource</classname> allows us to use named
-    parameters instead of the typical "?" placeolders that you are used to
+    parameters instead of the typical "?" place holders that you are used to
     from writing plain JDBC. The named parameters makes your code more
     explicit and you avoid problems caused by parameters being set out of
     order etc. The update method does return the count of rows
@@ -396,10 +396,10 @@ public class Product implements Serializable {
     <title>Implement tests for JDBC DAO implementation</title>
 
     <para>Time to add tests for the JDBC DAO implementation. Spring provides
-    an extenive testing framework that supports JUnit 3.8 and 4 as well as
+    an extensive testing framework that supports JUnit 3.8 and 4 as well as
     TestNG. We can't cover all of that in this guide but we will show a simple
     implementation of the JUnit 3.8 specific support. We need to add the jar
-    file conating the Spring test framework to our project. Copy <filename
+    file containing the Spring test framework to our project. Copy <filename
     class="libraryfile">spring-test.jar</filename> from the <filename
     class="directory">'spring-framework-2.5/dist/modules'</filename> directory
     to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
@@ -410,14 +410,14 @@ public class Product implements Serializable {
     we get a lot of nice features for free. We get dependency injection of any
     public setter from an application context that we specify the name for in
     the <classname>getConfigLocations</classname> method. We also get an
-    oportunity to prepare our database with the appropriate test data in the
+    opportunity to prepare our database with the appropriate test data in the
     <classname>onSetUpInTransaction</classname> method. This is important
     since we don't know the state of the database when we run our tests. As
     long as the table exists we will clear it and load what we need for our
     tests. Since we are a "Transactional" test, any changes we make will be
     automatically rolled back once the test finishes. The
     <classname>deleteFromTables</classname> and
-    <classname>executeSqlScript</classname> methods are deinded in the super
+    <classname>executeSqlScript</classname> methods are defined in the super
     class, so we don't have to implement them for each test. Just pass in the
     table names to be cleared and the name of the script that contains the
     test data.</para>
@@ -515,15 +515,15 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
 
     <para>We have defined a "<classname>productDao</classname>" which is the
     class we are testing. We have also defined a
-    <classname>DataSource</classname> with placeholders for the configuration
-    values. These values are provided via a separate propery file and at
+    <classname>DataSource</classname> with place holders for the configuration
+    values. These values are provided via a separate property file and at
     runtime the <classname>PropertyPlaceholderConfigurer</classname> that we
-    defined will read this prioperty file and substitute the placeholders with
-    the actual values. This is covenient since this isolates the values that
+    defined will read this property file and substitute the place holders with
+    the actual values. This is convenient since this isolates the values that
     are most often provided during application deployment into a separate
     file. We put this new file in the
     "<classname>war/WEB-INF/classes</classname>" directory so it will be
-    available when we run the appication. The content of this property file
+    available when we run the application. The content of this property file
     is:</para>
 
     <para><filename>'springapp/war/WEB-INF/classes/jdbc.properties'</filename>:</para>
@@ -632,7 +632,7 @@ jdbc.password=
 
     <para>We have now completed the persistence layer and in the next part we
     will integrate it with our web application. But first, lets quickly
-    summarize hat we accomplieshed in this part.</para>
+    summarize hat we accomplished in this part.</para>
 
     <orderedlist>
       <listitem>
@@ -648,7 +648,7 @@ jdbc.password=
       <listitem>
         <para>Next we added some tasks to our build script to run when we
         needed to create or delete the table and also when we needed to add
-        test data or delete the data. </para>
+        test data or delete the data.</para>
       </listitem>
 
       <listitem>
@@ -662,7 +662,7 @@ jdbc.password=
       </listitem>
     </orderedlist>
 
-    <para>Below is a screenshot of what your project directory structure
+    <para>Below is a screen shot of what your project directory structure
     should look like after following the above instructions.</para>
 
     <screenshot>

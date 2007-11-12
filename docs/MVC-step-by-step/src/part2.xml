@@ -386,7 +386,7 @@ public class HelloController implements Controller {
       <listitem>
         <para>The <classname>HelloControllerTests</classname> has been updated
         repeatedly as we make the controller reference the logical name of a
-        view instead of its hardcoded name and location.</para>
+        view instead of its hard coded name and location.</para>
       </listitem>
 
       <listitem>
@@ -397,7 +397,7 @@ public class HelloController implements Controller {
       </listitem>
     </orderedlist>
 
-    <para>Find below a screenshot of what your project directory structure
+    <para>Find below a screen shot of what your project directory structure
     must look like after following the above instructions.</para>
 
     <screenshot>

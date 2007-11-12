@@ -146,7 +146,7 @@ public class <emphasis role="bold">InventoryControllerTests</emphasis> extends T
     can stub a couple of <classname>Product</classname> instances using
     Spring's bean and application context support. We will simply put the data
     we need as a couple of bean entries in
-    <filename>'springapp-servlet.xml'</filename>. we will also add the
+    <filename>'springapp-servlet.xml'</filename>. We will also add the
     <literal>'messageSource'</literal> bean entry that will pull in the
     messages resource bundle (<filename>'messages.properties'</filename>) that
     we will create in the next step. Also remember to rename the reference to
@@ -656,8 +656,8 @@ typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
     <orderedlist>
       <listitem>
         <para>We renamed our controller to
-        <classname>InventoryController</classname> and gave it a refernce to a
-        <classname>ProductManager</classname> so we could retreive a list of
+        <classname>InventoryController</classname> and gave it a reference to
+        a <classname>ProductManager</classname> so we could retrieve a list of
         products to display.</para>
       </listitem>
 
@@ -692,7 +692,7 @@ typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
       </listitem>
     </orderedlist>
 
-    <para>Find below a screenshot of what your project directory structure
+    <para>Find below a screen shot of what your project directory structure
     must look like after following the above instructions.</para>
 
     <screenshot>
