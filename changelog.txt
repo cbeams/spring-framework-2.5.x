@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5 final (2007-11-19)
+-----------------------------------------
+
+Package org.springframework.orm
+* Hibernate SpringSessionSynchronization explicitly disconnects on suspend/completion (to make "on_close" work on JBoss)
+
+
 Changes in version 2.5 RC2 (2007-11-12)
 ---------------------------------------
 
