@@ -43,7 +43,7 @@
     <programlisting>java -classpath ../war/WEB-INF/lib/hsqldb.jar org.hsqldb.Server -database test</programlisting>
 
     <para>Don't forget to change the execute permission by running
-    <classname>'chmod +x server.sh'</classname>.</para>
+    <command>'chmod +x server.sh'</command>.</para>
 
     <para>For Windows add:</para>
 
@@ -242,7 +242,7 @@ public interface ProductDao {
     handled for you. Another advantage is that you won't have to catch any
     exceptions, unless you want to. Spring wraps all SQLExceptions in it's own
     unchecked exception hierarchy inheriting from DataAccessException. If you
-    want to you can catch this exception, but since most database exceptions
+    want to, you can catch this exception, but since most database exceptions
     are impossible to recover from anyway, you might as well just let the
     exception propagate up to a higher level. The class
     <classname>SimpleJdbcDaoSupport</classname> provides convenient access to
@@ -325,7 +325,7 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     implemented. This method will map the data from each row into a class that
     represents the entity you are retrieving in your query. Since the
     <classname>RowMapper</classname> is parameterized, the
-    <classname>mapRow</classname> method returns the actual type that s
+    <classname>mapRow</classname> method returns the actual type that is
     created.</para>
 
     <para>The second method saveProduct is also using the
@@ -337,8 +337,7 @@ public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
     parameters instead of the typical "?" place holders that you are used to
     from writing plain JDBC. The named parameters makes your code more
     explicit and you avoid problems caused by parameters being set out of
-    order etc. The update method does return the count of rows
-    affected.</para>
+    order etc. The update method returns the count of rows affected.</para>
 
     <para>We need to store the value of the primary key for each product in
     the Product class. This key will be used when we persist any changes to
@@ -406,17 +405,18 @@ public class Product implements Serializable {
     to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
     directory.</para>
 
-    <para>Now we can create or test class. By extending
+    <para>Now we can create our test class. By extending
     <classname>AbstractTransactionalDataSourceSpringContextTests</classname>
     we get a lot of nice features for free. We get dependency injection of any
-    public setter from an application context that we specify the name for in
-    the <classname>getConfigLocations</classname> method. We also get an
+    public setter from an application context. This application context is
+    loaded by the test framework. All we need to do is specify the name for it
+    in the <classname>getConfigLocations</classname> method. We also get an
     opportunity to prepare our database with the appropriate test data in the
-    <classname>onSetUpInTransaction</classname> method. This is important
+    <classname>onSetUpInTransaction</classname> method. This is important,
     since we don't know the state of the database when we run our tests. As
     long as the table exists we will clear it and load what we need for our
-    tests. Since we are a "Transactional" test, any changes we make will be
-    automatically rolled back once the test finishes. The
+    tests. Since we are extending a "Transactional" test, any changes we make
+    will be automatically rolled back once the test finishes. The
     <classname>deleteFromTables</classname> and
     <classname>executeSqlScript</classname> methods are defined in the super
     class, so we don't have to implement them for each test. Just pass in the
@@ -520,14 +520,14 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
     class we are testing. We have also defined a
     <classname>DataSource</classname> with place holders for the configuration
     values. These values are provided via a separate property file and at
-    runtime the <classname>PropertyPlaceholderConfigurer</classname> that we
-    defined will read this property file and substitute the place holders with
-    the actual values. This is convenient since this isolates the values that
-    are most often provided during application deployment into a separate
-    file. We put this new file in the
+    runtime, the <classname>PropertyPlaceholderConfigurer</classname> that we
+    have defined will read this property file and substitute the place holders
+    with the actual values. This is convenient since this isolates the
+    connection values into their own file. These values often need to be
+    changed during application deployment. We put this new file in the
     "<classname>war/WEB-INF/classes</classname>" directory so it will be
-    available when we run the application. The content of this property file
-    is:</para>
+    available when we run the application and also later when we deploy the
+    web application. The content of this property file is:</para>
 
     <para><filename>'springapp/war/WEB-INF/classes/jdbc.properties'</filename>:</para>
 
@@ -540,11 +540,14 @@ jdbc.password=
     <para>Since we added a configuration file to the
     "<classname>test</classname>" directory and a jdbc.properties file to the
     "<classname>WEB-INF/classes</classname>" directory, let's add a new
-    classpath entry for our tests:</para>
+    classpath entry for our tests. It shoud go after the definition of the
+    "<classname>test.dir</classname>" property:</para>
 
     <para><filename>'springapp/build.xml'</filename>:</para>
 
     <programlisting>...
+    &lt;property name="test.dir" value="test"/&gt;
+
 
 <emphasis role="bold">    &lt;path id="test-classpath"&gt;
         &lt;fileset dir="${web.dir}/WEB-INF/lib"&gt;
