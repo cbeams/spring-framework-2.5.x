@@ -8,4 +8,4 @@ Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-orm
 Bundle-SymbolicName: ${spring-bundle-prefix}.orm
-DynamicImport-Package: org.hibernate*;version=${hb-version}
+DynamicImport-Package: *
