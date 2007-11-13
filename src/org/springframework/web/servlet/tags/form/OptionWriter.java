@@ -77,7 +77,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * specified as arguments to the
  * {@link #OptionWriter(Object, BindStatus, String, String, boolean) constructor}.</li>
  * <li>An '<code>option</code>' is marked as 'selected' if its key
- * {@link #isSelected matches} the value that is bound to the tag instance.</li>
+ * {@link #isOptionSelected matches} the value that is bound to the tag instance.</li>
  * </ul>
  *
  * @author Rob Harrop
@@ -85,7 +85,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * @author Sam Brannen
  * @since 2.0
  */
-final class OptionWriter {
+class OptionWriter {
 
 	private final Object optionSource;
 
@@ -191,6 +191,7 @@ final class OptionWriter {
 			Object label = (this.labelProperty != null ? wrapper.getPropertyValue(this.labelProperty) : item);
 			renderOption(tagWriter, item, value, label);
 		}
+
 	}
 
 	/**
@@ -199,6 +200,7 @@ final class OptionWriter {
 	 */
 	private void renderOption(TagWriter tagWriter, Object item, Object value, Object label) throws JspException {
 		tagWriter.startTag("option");
+		writeCommonAttributes(tagWriter);
 
 		String valueDisplayString = getDisplayString(value);
 		String labelDisplayString = getDisplayString(label);
@@ -206,19 +208,14 @@ final class OptionWriter {
 		// allows render values to handle some strange browser compat issues.
 		tagWriter.writeAttribute("value", valueDisplayString);
 
-		if (isSelected(value) || isSelected(item)) {
+		if (isOptionSelected(value) || isOptionSelected(item)) {
 			tagWriter.writeAttribute("selected", "selected");
+		}
+		if (isOptionDisabled()) {
+			tagWriter.writeAttribute("disabled", "disabled");
 		}
 		tagWriter.appendValue(labelDisplayString);
 		tagWriter.endTag();
-	}
-
-	/**
-	 * Determine whether the supplied values matched the selected value.
-	 * Delegates to {@link SelectedValueComparator#isSelected}.
-	 */
-	private boolean isSelected(Object resolvedValue) {
-		return SelectedValueComparator.isSelected(this.bindStatus, resolvedValue);
 	}
 
 	/**
@@ -227,6 +224,27 @@ final class OptionWriter {
 	 */
 	private String getDisplayString(Object value) {
 		return ValueFormatter.getDisplayString(value, this.bindStatus.getEditor(), this.htmlEscape);
+	}
+
+	/**
+	 * Determine whether the supplied values matched the selected value.
+	 * Delegates to {@link SelectedValueComparator#isSelected}.
+	 */
+	private boolean isOptionSelected(Object resolvedValue) {
+		return SelectedValueComparator.isSelected(this.bindStatus, resolvedValue);
+	}
+
+	/**
+	 * Determine whether the option fields should be disabled.
+	 */
+	protected boolean isOptionDisabled() {
+		return false;
+	}
+
+	/**
+	 * Writes default attributes configured to the supplied {@link TagWriter}.
+	 */
+	protected void writeCommonAttributes(TagWriter tagWriter) throws JspException {
 	}
 
 }

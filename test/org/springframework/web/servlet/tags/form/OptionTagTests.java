@@ -119,6 +119,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	public void testWithNoLabel() throws Exception {
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
 		this.tag.setValue("bar");
+		this.tag.setCssClass("myClass");
+		this.tag.setOnclick("CLICK");
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
 		result = this.tag.doEndTag();
@@ -129,6 +131,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "value", "bar");
+		assertContainsAttribute(output, "class", "myClass");
+		assertContainsAttribute(output, "onclick", "CLICK");
 		assertBlockTagContains(output, "bar");
 	}
 

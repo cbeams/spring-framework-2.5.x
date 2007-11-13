@@ -33,7 +33,7 @@ import org.springframework.web.util.TagUtils;
  * @author Rob Harrop
  * @since 2.0
  */
-public class OptionsTag extends AbstractFormTag {
+public class OptionsTag extends AbstractHtmlElementTag {
 	
 	/**
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
@@ -52,6 +52,8 @@ public class OptionsTag extends AbstractFormTag {
 	 * '<code>option</code>' tag.
 	 */
 	private String itemLabel;
+
+	private String disabled;
 
 
 	/**
@@ -88,6 +90,10 @@ public class OptionsTag extends AbstractFormTag {
 		this.itemValue = itemValue;
 	}
 
+	/**
+	 * Return the name of the property mapped to the '<code>value</code>'
+	 * attribute of the '<code>option</code>' tag.
+	 */
 	protected String getItemValue() {
 		return this.itemValue;
 	}
@@ -111,6 +117,30 @@ public class OptionsTag extends AbstractFormTag {
 		return this.itemLabel;
 	}
 
+	/**
+	 * Set the value of the '<code>disabled</code>' attribute.
+	 * <p>May be a runtime expression.
+	 * @param disabled the value of the '<code>disabled</code>' attribute
+	 */
+	public void setDisabled(String disabled) {
+		this.disabled = disabled;
+	}
+
+	/**
+	 * Get the value of the '<code>disabled</code>' attribute.
+	 */
+	protected String getDisabled() {
+		return this.disabled;
+	}
+
+	/**
+	 * Is the current HTML tag disabled?
+	 * @return <code>true</code> if this tag is disabled
+	 */
+	protected boolean isDisabled() {
+		return "true".equals(getDisabled());
+	}
+
 
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		assertUnderSelectTag();
@@ -126,21 +156,35 @@ public class OptionsTag extends AbstractFormTag {
 			String labelProperty =
 					(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)) : null);
 
-			OptionWriter optionWriter =
-					new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+			OptionsWriter optionWriter = new OptionsWriter(itemsObject, valueProperty, labelProperty);
 			optionWriter.writeOptions(tagWriter);
 		}
 
 		return EVAL_PAGE;
 	}
 
-
 	private void assertUnderSelectTag() {
 		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "options", "select");
 	}
 
-	private BindStatus getBindStatus() {
+	protected BindStatus getBindStatus() {
 		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+	}
+
+
+	private class OptionsWriter extends OptionWriter {
+
+		public OptionsWriter(Object optionSource, String valueProperty, String labelProperty) {
+			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+		}
+
+		protected boolean isOptionDisabled() {
+			return isDisabled();
+		}
+
+		protected void writeCommonAttributes(TagWriter tagWriter) throws JspException {
+			writeOptionalAttributes(tagWriter);
+		}
 	}
 
 }

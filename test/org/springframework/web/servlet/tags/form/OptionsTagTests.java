@@ -68,6 +68,8 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItems("${countries}");
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
+		this.tag.setCssClass("myClass");
+		this.tag.setOnclick("CLICK");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 		String output = getOutput();
@@ -82,6 +84,8 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 		Element element = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
 		assertEquals("UK node not selected", "selected", element.attribute("selected").getValue());
+		assertEquals("myClass", element.attribute("class").getValue());
+		assertEquals("CLICK", element.attribute("onclick").getValue());
 	}
 
 	public void testWithCollectionAndCustomEditor() throws Exception {

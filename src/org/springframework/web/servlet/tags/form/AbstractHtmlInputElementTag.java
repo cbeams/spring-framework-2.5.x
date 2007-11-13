@@ -170,11 +170,11 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 
 
 	/**
-	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
-	 * Subclasses should call this when they want the base attribute set to be written to the output.
+	 * Adds input-specific optional attributes as defined by this base class.
 	 */
-	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
-		super.writeDefaultAttributes(tagWriter);
+	protected void writeOptionalAttributes(TagWriter tagWriter) throws JspException {
+		super.writeOptionalAttributes(tagWriter);
+
 		writeOptionalAttribute(tagWriter, ONFOCUS_ATTRIBUTE, getOnfocus());
 		writeOptionalAttribute(tagWriter, ONBLUR_ATTRIBUTE, getOnblur());
 		writeOptionalAttribute(tagWriter, ONCHANGE_ATTRIBUTE, getOnchange());
