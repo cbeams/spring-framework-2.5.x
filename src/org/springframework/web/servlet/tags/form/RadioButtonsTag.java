@@ -1,14 +1,31 @@
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-
-import javax.servlet.jsp.JspException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
+import javax.servlet.jsp.JspException;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Databinding-aware JSP tag for rendering multiple HTML '<code>input</code>'
@@ -18,9 +35,15 @@ import java.util.Map;
  * {@link #setItems(Object) value} matches the bound value.
  *
  * @author Thomas Risberg
- * @since 2.0
+ * @since 2.5
  */
 public class RadioButtonsTag extends AbstractHtmlInputElementTag {
+
+	/**
+	 * The HTML '<code>span</code>' tag.
+	 */
+	private static final String SPAN_TAG = "span";
+
 
 	/**
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
@@ -39,11 +62,6 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 	 * of the '<code>input type="radio"</code>' tag.
 	 */
 	private String itemLabel;
-
-	/**
-	 * The HTML '<code>span</code>' tag.
-	 */
-	public static final String SPAN_TAG = "span";
 
 	private String element = SPAN_TAG;
 
@@ -68,7 +86,6 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array
 	 * of objects used to generate the '<code>input type="radio"</code>' tags.
-	 * <p>Typically a runtime expression.
 	 */
 	protected Object getItems() {
 		return this.items;
@@ -101,7 +118,6 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value to be displayed as part
 	 * of the '<code>input type="radio"</code>' tag.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getItemLabel() {
 		return this.itemLabel;
@@ -195,6 +211,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	private void writeObjectEntry(TagWriter tagWriter, String valueProperty,
 			String labelProperty, Object item, int itemIndex) throws JspException {
+
 		BeanWrapper wrapper = new BeanWrapperImpl(item);
 		Object renderValue = (valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
 		Object renderLabel = (labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
@@ -203,6 +220,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	private void writeMapEntry(TagWriter tagWriter, String valueProperty,
 			String labelProperty, Map.Entry entry, int itemIndex) throws JspException {
+
 		Object mapKey = entry.getKey();
 		Object mapValue = entry.getValue();
 		BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);

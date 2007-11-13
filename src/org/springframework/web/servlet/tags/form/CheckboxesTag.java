@@ -16,16 +16,17 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.servlet.jsp.JspException;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.WebDataBinder;
-
-import javax.servlet.jsp.JspException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Databinding-aware JSP tag for rendering multiple HTML '<code>input</code>'
@@ -38,6 +39,12 @@ import java.util.Map;
  * @since 2.5
  */
 public class CheckboxesTag extends AbstractCheckboxTag {
+
+	/**
+	 * The HTML '<code>span</code>' tag.
+	 */
+	private static final String SPAN_TAG = "span";
+
 
 	/**
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
@@ -56,11 +63,6 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 	 * of the '<code>input type="checkbox"</code>' tag.
 	 */
 	private String itemLabel;
-
-	/**
-	 * The HTML '<code>span</code>' tag.
-	 */
-	public static final String SPAN_TAG = "span";
 
 	private String element = SPAN_TAG;
 
@@ -101,6 +103,10 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 		this.itemValue = itemValue;
 	}
 
+	/**
+	 * Get the name of the property mapped to the '<code>value</code>' attribute
+	 * of the '<code>input type="checkbox"</code>' tag.
+	 */
 	protected String getItemValue() {
 		return this.itemValue;
 	}
@@ -118,7 +124,6 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 	/**
 	 * Get the value to be displayed as part
 	 * of the '<code>input type="checkbox"</code>' tag.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getItemLabel() {
 		return this.itemLabel;
@@ -159,8 +164,8 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 		return this.element;
 	}
 
-	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 
+	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		Object items = getItems();
 		Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
 
@@ -216,6 +221,7 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 
 	private void writeObjectEntry(TagWriter tagWriter, String valueProperty,
 			String labelProperty, Object item, int itemIndex) throws JspException {
+
 		BeanWrapper wrapper = new BeanWrapperImpl(item);
 		Object renderValue = (valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
 		Object renderLabel = (labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
@@ -224,6 +230,7 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 
 	private void writeMapEntry(TagWriter tagWriter, String valueProperty,
 			String labelProperty, Map.Entry entry, int itemIndex) throws JspException {
+
 		Object mapKey = entry.getKey();
 		Object mapValue = entry.getValue();
 		BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
