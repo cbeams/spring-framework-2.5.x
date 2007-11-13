@@ -75,6 +75,13 @@
     </itemizedlist>
 
     <para>
+      <emphasis>Eclipse 3.3 Europa (http://www.eclipse.org/europa) with the 
+      Web Tools Platform (WTP) Project (http://www.eclipse.org/webtools) 
+      and the Spring IDE Project (http://www.springide.org) provides an excellent
+      envirnment for web development.</emphasis>
+    </para>
+
+    <para>
       <emphasis>You may of course use pretty much any variation or version of
       the above software. If you want to use NetBeans or IntelliJ instead of
       Eclipse or Jetty instead of Tomcat, then many of the tutorial steps will
