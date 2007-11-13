@@ -297,7 +297,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Override resolve CSS class since error class is not supported.
 	 */
 	protected String resolveCssClass() throws JspException {
-		return ObjectUtils.getDisplayString(evaluate("class", getCssClass()));
+		return ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass()));
 	}
 
 	/**
