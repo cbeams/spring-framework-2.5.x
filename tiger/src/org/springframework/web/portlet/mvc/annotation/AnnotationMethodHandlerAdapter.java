@@ -79,17 +79,24 @@ import org.springframework.web.portlet.multipart.MultipartActionRequest;
  *
  * <p>Supports request parameter binding through the {@link RequestParam} annotation.
  * Also supports the {@link ModelAttribute} annotation for exposing model attribute
- * values to the view.
+ * values to the view, as well as {@link InitBinder} for binder initialization methods
+ * and {@link SessionAttributes} for automatic session management of specific attributes.
+ *
+ * <p>This adapter can be customized through various bean properties.
+ * A common use case is to apply shared binder initialization logic through
+ * a custom {@link #setWebBindingInitializer WebBindingInitializer}.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @since 2.5
+ * @see #setWebBindingInitializer
+ * @see #setSessionAttributeStore
  */
 public class AnnotationMethodHandlerAdapter extends PortletContentGenerator implements HandlerAdapter {
 
-	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
-
 	private WebBindingInitializer webBindingInitializer;
+
+	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
 	private final Map<Class<?>, HandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, HandlerMethodResolver>();
@@ -97,6 +104,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	private final Map<Class<?>, Set<String>> sessionAttributeNames =
 			new ConcurrentHashMap<Class<?>, Set<String>>();
 
+
+	/**
+	 * Specify a WebBindingInitializer which will apply pre-configured
+	 * configuration to every DataBinder that this controller uses.
+	 */
+	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+		this.webBindingInitializer = webBindingInitializer;
+	}
 
 	/**
 	 * Specify the strategy to store session attributes with.
@@ -107,14 +122,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
 		Assert.notNull(sessionAttributeStore, "SessionAttributeStore must not be null");
 		this.sessionAttributeStore = sessionAttributeStore;
-	}
-
-	/**
-	 * Specify a WebBindingInitializer which will apply pre-configured
-	 * configuration to every DataBinder that this controller uses.
-	 */
-	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
-		this.webBindingInitializer = webBindingInitializer;
 	}
 
 

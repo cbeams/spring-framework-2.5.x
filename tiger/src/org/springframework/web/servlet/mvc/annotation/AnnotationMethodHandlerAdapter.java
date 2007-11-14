@@ -82,11 +82,20 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * <p>Supports request parameter binding through the {@link RequestParam} annotation.
  * Also supports the {@link ModelAttribute} annotation for exposing model attribute
- * values to the view.
+ * values to the view, as well as {@link InitBinder} for binder initialization methods
+ * and {@link SessionAttributes} for automatic session management of specific attributes.
+ *
+ * <p>This adapter can be customized through various bean properties.
+ * A common use case is to apply shared binder initialization logic through
+ * a custom {@link #setWebBindingInitializer WebBindingInitializer}.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @since 2.5
+ * @see #setPathMatcher
+ * @see #setMethodNameResolver
+ * @see #setWebBindingInitializer
+ * @see #setSessionAttributeStore
  */
 public class AnnotationMethodHandlerAdapter extends WebContentGenerator implements HandlerAdapter {
 
@@ -160,6 +169,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 	/**
+	 * Specify a WebBindingInitializer which will apply pre-configured
+	 * configuration to every DataBinder that this controller uses.
+	 */
+	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+		this.webBindingInitializer = webBindingInitializer;
+	}
+
+	/**
 	 * Specify the strategy to store session attributes with.
 	 * <p>Default is {@link org.springframework.web.bind.support.DefaultSessionAttributeStore},
 	 * storing session attributes in the HttpSession, using the same
@@ -168,14 +185,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
 		Assert.notNull(sessionAttributeStore, "SessionAttributeStore must not be null");
 		this.sessionAttributeStore = sessionAttributeStore;
-	}
-
-	/**
-	 * Specify a WebBindingInitializer which will apply pre-configured
-	 * configuration to every DataBinder that this controller uses.
-	 */
-	public final void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
-		this.webBindingInitializer = webBindingInitializer;
 	}
 
 
