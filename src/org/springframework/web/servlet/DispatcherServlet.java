@@ -863,6 +863,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
+				// Do we need view name translation?
+				if (mv != null && !mv.hasView()) {
+					mv.setViewName(getDefaultViewName(request));
+				}
+
 				// Apply postHandle methods of registered interceptors.
 				if (interceptors != null) {
 					for (int i = interceptors.length - 1; i >= 0; i--) {
@@ -1119,11 +1124,6 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		View view = null;
 
-		// Do we need view name translation?
-		if (!mv.hasView()) {
-			mv.setViewName(getDefaultViewName(request));
-		}
-
 		if (mv.isReference()) {
 			// We need to resolve the view name.
 			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
@@ -1151,16 +1151,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Translate the supplied request into a default view name.
 	 * @param request current HTTP servlet request
-	 * @return the view name
+	 * @return the view name (or <code>null</code> if no default found)
 	 * @throws Exception if view name translation failed
 	 */
 	protected String getDefaultViewName(HttpServletRequest request) throws Exception {
-		String viewName = this.viewNameTranslator.getViewName(request);
-		if (viewName == null) {
-			throw new ServletException("Could not translate request [" + request +
-					"] into view name using [" + this.viewNameTranslator.getClass().getName() + "]");
-		}
-		return viewName;
+		return this.viewNameTranslator.getViewName(request);
 	}
 
 	/**
