@@ -46,6 +46,11 @@ class JndiLookupBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionP
 		return JndiObjectFactoryBean.class;
 	}
 
+	protected boolean isEligibleAttribute(String attributeName) {
+		return (super.isEligibleAttribute(attributeName) &&
+				!DEFAULT_VALUE.equals(attributeName) && !DEFAULT_REF.equals(attributeName));
+	}
+
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		super.doParse(element, parserContext, builder);
 
