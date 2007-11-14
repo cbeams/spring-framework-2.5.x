@@ -652,7 +652,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				// Either returned null or was 'void' return.
 				if (!this.responseArgumentUsed) {
 					// Assuming view name translation...
-					return new ModelAndView();
+					return new ModelAndView().addAllObjects(implicitModel);
 				}
 				else {
 					return null;
