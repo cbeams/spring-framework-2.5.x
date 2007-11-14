@@ -6,14 +6,27 @@ http://www.springframework.org
 Changes in version 2.5 final (2007-11-19)
 -----------------------------------------
 
+General
+* updated javadoc and reference documentation
+
 Package org.springframework.jdbc
 * added "registerDatabase" method to SQLErrorCodesFactory, for eager association of database names with DataSources
+
+Package org.springframework.jndi
+* fixed "jee:jndi-lookup" tag to correctly handle "default-value" and "default-ref" attributes
 
 Package org.springframework.orm
 * Hibernate SpringSessionSynchronization explicitly disconnects on suspend/completion (to make "on_close" work on JBoss)
 
+Package org.springframework.scheduling
+* fixed CommonJ TimerManagerFactoryBean to not require the "scheduledTimerListeners" property
+
 Package org.springframework.web
+* RequestToViewNameTranslator kicks in before the "HandlerInterceptor.postHandle" phase
+* RequestToViewNameTranslator's "getViewName" is allowed to return null if no default found
+* fixed AnnotationMethodHandlerAdapter to expose the implicit model even when using request-to-view-name translation
 * InternalResourceView explicitly sets content type on response in include case (for correct charset handling on Tomcat)
+* exposed applicable standard HTML attributes on JSP "form:option" and "form:options" tags
 
 
 Changes in version 2.5 RC2 (2007-11-12)
@@ -272,8 +285,9 @@ Package org.springframework.web
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * TagWriter in JSP AbstractFormTag reobtains the Writer from the PageContext all the time (for FreeMarker compatibility)
 * introduced "modelAttribute" property for JSP FormTag, superseding the "commandName" property for general purposes
-* JSP CheckboxTag caches converted candidate value when comparing it with collection elements
 * JSP SelectTag, OptionTag and OptionsTag properly detect a selected value even for Maps with converted keys
+* JSP CheckboxTag caches converted candidate value when comparing it with collection elements
+* introduced JSP CheckboxesTag (form:checkboxes) and RadioButtonsTag (form:radiobuttons)
 * JSF 1.1 DelegatingVariableResolver checks Spring bean match first (analogous to JSF 1.2 DelegatingFacesELResolver)
 
 
