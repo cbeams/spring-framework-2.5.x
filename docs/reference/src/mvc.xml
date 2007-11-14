@@ -20,6 +20,14 @@
     base class: if you don't have a form, you don't need a form controller.
     This is a major difference to Struts.</para>
 
+    <tip>
+      <para>Since Spring 2.5, an annotated controller style is available
+      for Java 5+ users. This is a compelling alternative to implementing
+      traditional <interfacename>Controller</interfacename> (sub-)classes,
+      allowing for flexible multi-action handling. See the
+      <xref linkend="mvc-annotation"/> section for details.</para>
+    </tip>
+
     <sidebar id="mvc-open-for-extension">
       <title><quote>Open for extension...</quote></title>
 
@@ -55,7 +63,7 @@
       <para>Note that you cannot add advice to final methods using Spring MVC.
       This means it won't be possible to add advice to for example the
       <literal>AbstractController.handleRequest()</literal> method. Refer to
-      <xref linkend="aop-understanding-aop-proxies" /> for more information on
+      <xref linkend="aop-understanding-aop-proxies"/> for more information on
       AOP proxies and why you cannot add advice to final methods.</para>
     </sidebar>
 
@@ -129,7 +137,7 @@
       entry point.</para>
 
       <para>All your registered beans and all of Spring's services can be at
-      your fingertips even without Spring's web MVC. Spring doesn't compete
+      your fingertips even without Spring's Web MVC. Spring doesn't compete
       with Struts or WebWork in this scenario, it just addresses the many
       areas that the pure web MVC frameworks don't, from bean configuration to
       data access and transaction handling. So you are able to enrich your
@@ -3329,7 +3337,7 @@ public class FileUploadBean {
     <title>Annotation-based controller configuration</title>
 
     <para>There is a current trend to favor annotations over XML files for
-    some types of configuration data. To facilitate this Spring is now (since
+    some types of configuration data. To facilitate this, Spring is now (since
     2.5) providing support for configuring the MVC framework components using
     annotations.</para>
 
@@ -3346,29 +3354,70 @@ public class FileUploadBean {
 
     <tip>
       <para>The Spring distribution ships with the
-      <emphasis>PetClinic</emphasis> sample, which is a web application that
-      takes advantage of the annotation support described in this section. You
-      can find the PetClinic application in the
-      <literal>'samples/petclinic'</literal> directory.</para>
+      <emphasis>PetClinic</emphasis> sample, which is a web application that takes
+      advantage of the annotation support described in this section, in the context
+      of simple form processing. You can find the <emphasis>PetClinic</emphasis>
+      application in the <literal>'samples/petclinic'</literal> directory.</para>
+
+      <para>For a further sample application that builds on annotation-based Web MVC,
+      check out <emphasis>imagedb</emphasis>. The focus in that sample is on stateless
+      multi-action controllers, including the processing of multipart file uploads.
+      You can find the <emphasis>imagedb</emphasis> application in the
+      <literal>'samples/imagedb'</literal> directory.</para>
     </tip>
 
     <para>This following sections document these annotations and how they are
     most commonly used.</para>
 
+    <section id="mvc-ann-setup">
+      <title>Setting up the dispatcher for annotation support</title>
+
+      <para><emphasis><interfacename>@RequestMapping</interfacename> will only be processed
+      if a corresponding <interfacename>HandlerMapping</interfacename> (for type level annotations)
+      and/or <interfacename>HandlerAdapter</interfacename> (for method level annotations) is
+      present in the dispatcher.</emphasis> This is the case by default in both
+      <classname>DispatcherServlet</classname> and <classname>DispatcherPortlet</classname>.</para>
+
+      <para>However, if you are defining custom <interfacename>HandlerMappings</interfacename> or
+      <interfacename>HandlerAdapters</interfacename>, then you need to make sure that a
+      corresponding custom <classname>DefaultAnnotationHandlerMapping</classname>
+      and/or <classname>AnnotationMethodHandlerAdapter</classname> is defined as well
+      - provided that you intend to use <interfacename>@RequestMapping</interfacename>.</para>
+
+      <para>Defining a <classname>DefaultAnnotationHandlerMapping</classname>
+      and/or <classname>AnnotationMethodHandlerAdapter</classname> explicitly
+      also makes sense if you would like to customize the mapping strategy,
+      e.g. specifying a custom <interfacename>PathMatcher</interfacename> or
+      <interfacename>WebBindingInitializer</interfacename> (see below).</para>
+    </section>
+
     <section id="mvc-ann-controller">
       <title>Defining a controller with
-      <classname>@Controller</classname></title>
+      <interfacename>@Controller</interfacename></title>
 
-      <para>The <classname>@Controller</classname> annotation indicates that a
-      particular class serves the role of a <emphasis>controller</emphasis>.
+      <para>The <interfacename>@Controller</interfacename> annotation indicates
+      that a particular class serves the role of a <emphasis>controller</emphasis>.
       There is no need to extend any controller base class or reference the
       Servlet API. You are of course still able to reference Servlet-specific
       features if you need to.</para>
 
-      <para>To enable the use of this annotation you must add component
-      scanning to your configuration. This is easily achieved by using the new
-      <emphasis>spring-context</emphasis> schema as shown in the following XML
-      snippet:</para>
+      <para>The basic purpose of the <interfacename>@Controller</interfacename>
+      annotation is to act as a stereotype for the annotated class, indicating
+      its role. The dispatcher will scan such annotated classes for mapped
+      methods, detecting <interfacename>@RequestMapping</interfacename>
+      annotations (see the next section).</para>
+
+      <para>Annotated controller beans may be defined explicitly,
+      using a standard Spring bean definition in the dispatcher's context.
+      However, the <interfacename>@Controller</interfacename> stereotype also
+      allows for autodetection, aligned with Spring 2.5's general support for
+      detecting component classes in the classpath and auto-registering bean
+      definitions for them.</para>
+
+      <para>To enable autodetection of such annotated controllers, you have to add
+      component scanning to your configuration. This is easily achieved by using
+      the <emphasis>spring-context</emphasis> schema as shown in the following
+      XML snippet:</para>
 
       <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans" 
@@ -3390,15 +3439,31 @@ public class FileUploadBean {
     </section>
 
     <section id="mvc-ann-requestmapping">
-      <title>Mapping requests to methods with
-      <classname>@RequestMapping</classname></title>
+      <title>Mapping requests with
+      <interfacename>@RequestMapping</interfacename></title>
 
-      <para>The <classname>@RequestMapping</classname> annotation is used to
-      map URLs like '/editPet.do' to an entire class or a particular method.
-      Typically the class-level annotation is used for a form controller with
-      additional method-level annotations refining the URL specified for the
-      class with type information such as "GET" or "POST" to indicate what
-      type of request the method handles.</para>
+      <para>The <interfacename>@RequestMapping</interfacename> annotation is used
+      to map URLs like '/editPet.do' onto an entire class or a particular handler method.
+      Typically the type-level annotation maps a specific request path (or path pattern)
+      onto a form controller, with additional method-level annotations 'narrowing' the
+      primary mapping for a specific HTTP method request method ("GET"/"POST") or
+      specific HTTP request parameters.</para>
+
+      <tip>
+        <para><interfacename>@RequestMapping</interfacename> at the type
+        level may be used for plain implementations of the
+        <interfacename>Controller</interfacename> interface as well.
+        In this case, the request processing code would follow the
+        traditional <literal>handleRequest</literal> signature,
+        while the controller's mapping would be expressed through an
+        <interfacename>@RequestMapping</interfacename> annotation.
+        This works for pre-built <interfacename>Controller</interfacename>
+        base classes, such as <classname>SimpleFormController</classname>,
+        too.</para>
+
+        <para>In the following discussion, we'll focus on controllers
+        that are based on annotated handler methods.</para>
+      </tip>
 
       <para>The following is an example of a form controller from the
       PetClinic sample application using this annotation:</para>
@@ -3420,14 +3485,14 @@ public class EditPetForm {
 		return this.clinic.getPetTypes();
 	}
 
-	<emphasis role="bold">@RequestMapping(type = "GET")</emphasis>
+	<emphasis role="bold">@RequestMapping(method = RequestMethod.GET)</emphasis>
 	public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
 		Pet pet = this.clinic.loadPet(petId);
 		model.addAttribute("pet", pet);
 		return "petForm";
 	}
 
-	<emphasis role="bold">@RequestMapping(type = "POST")</emphasis>
+	<emphasis role="bold">@RequestMapping(method = RequestMethod.POST)</emphasis>
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, 
 			SessionStatus status) {
 		new PetValidator().validate(pet, result);
@@ -3595,7 +3660,7 @@ public class EditPetForm {
 
     <lineannotation>// ...</lineannotation>
 
-	@RequestMapping(type = "GET")
+	@RequestMapping(method = RequestMethod.GET)
 	public String setupForm(<emphasis role="bold">@RequestParam("petId") int petId</emphasis>, ModelMap model) {
 		Pet pet = this.clinic.loadPet(petId);
 		model.addAttribute("pet", pet);
@@ -3648,7 +3713,7 @@ public class EditPetForm {
 		return this.clinic.getPetTypes();
 	}
 
-	@RequestMapping(type = "POST")
+	@RequestMapping(method = RequestMethod.POST)
 	public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>, BindingResult result,
 			SessionStatus status) {
 		new PetValidator().validate(pet, result);
@@ -3783,8 +3848,7 @@ public class MyFormController {
         MVC-based application using a step-by-step approach. This tutorial is
         available in the <literal>'docs'</literal> directory of the Spring
         distribution. An online version can also be found on the <ulink
-        url="http://springframework.org/">Spring Framework
-        website</ulink>.</para>
+        url="http://springframework.org/">Spring Framework website</ulink>.</para>
       </listitem>
 
       <listitem>

@@ -87,6 +87,17 @@ import java.lang.annotation.Target;
  * (e.g. through writing the response content directly).
  * </ul>
  *
+ * <p><b>NOTE: <code>@RequestMapping</code> will only be processed if a
+ * corresponding <code>HandlerMapping</code> (for type level annotations)
+ * and/or <code>HandlerAdapter</code> (for method level annotations) is
+ * present in the dispatcher.</b> This is the case by default in both
+ * <code>DispatcherServlet</code> and <code>DispatcherPortlet</code>.
+ * However, if you are defining custom <code>HandlerMappings</code> or
+ * <code>HandlerAdapters</code>, then you need to make sure that a
+ * corresponding custom <code>DefaultAnnotationHandlerMapping</code>
+ * and/or <code>AnnotationMethodHandlerAdapter</code> is defined as well
+ * - provided that you intend to use <code>@RequestMapping</code>.
+ *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @since 2.5

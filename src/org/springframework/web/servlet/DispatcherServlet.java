@@ -131,6 +131,16 @@ import org.springframework.web.util.WebUtils;
  * {@link org.springframework.web.servlet.theme.FixedThemeResolver}.
  * </ul>
  *
+ * <p><b>NOTE: The <code>@RequestMapping</code> annotation will only be processed
+ * if a corresponding <code>HandlerMapping</code> (for type level annotations)
+ * and/or <code>HandlerAdapter</code> (for method level annotations)
+ * is present in the dispatcher.</b> This is the case by default.
+ * However, if you are defining custom <code>HandlerMappings</code> or
+ * <code>HandlerAdapters</code>, then you need to make sure that a
+ * corresponding custom <code>DefaultAnnotationHandlerMapping</code>
+ * and/or <code>AnnotationMethodHandlerAdapter</code> is defined as well
+ * - provided that you intend to use <code>@RequestMapping</code>.
+ *
  * <p><b>A web application can define any number of DispatcherServlets.</b>
  * Each servlet will operate in its own namespace, loading its own application
  * context with mappings, handlers, etc. Only the root application context
