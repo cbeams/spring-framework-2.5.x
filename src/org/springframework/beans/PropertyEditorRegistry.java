@@ -35,8 +35,7 @@ import java.beans.PropertyEditor;
 public interface PropertyEditorRegistry {
 
 	/**
-	 * Register the given custom property editor for all properties
-	 * of the given type.
+	 * Register the given custom property editor for all properties of the given type.
 	 * @param requiredType the type of the property
 	 * @param propertyEditor the editor to register
 	 */
@@ -54,7 +53,7 @@ public interface PropertyEditorRegistry {
 	 * is supported. In the case of a Collection/array, do not register an editor
 	 * for both the Collection/array and each element on the same property.
 	 * <p>For example, if you wanted to register an editor for "items[n].quantity"
-	 * (for all values n), you would use "items.quality" as the value of the
+	 * (for all values n), you would use "items.quantity" as the value of the
 	 * 'propertyPath' argument to this method.
 	 * @param requiredType the type of the property. This may be <code>null</code>
 	 * if a property is given but should be specified in any case, in particular in
