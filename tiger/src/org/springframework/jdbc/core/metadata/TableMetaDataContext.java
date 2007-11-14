@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -204,7 +205,7 @@ public class TableMetaDataContext {
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
 		List<Object> values = new ArrayList<Object>();
-		// for bean property lookups we need to provide caseinsensitive property lokup support since the
+		// for parameter source lookups we need to provide caseinsensitive lookup support since the
 		// database metadata is not necessarily providing case sensitive column names
 		// TODO make this instance level cached?
 		Map<String, String> caseInsensitiveParameterNames = new HashMap<String, String>();
@@ -214,24 +215,35 @@ public class TableMetaDataContext {
 				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
 			}
 		}
+		else if (parameterSource instanceof MapSqlParameterSource) {
+			for (Object key : ((MapSqlParameterSource)parameterSource).getValues().keySet()) {
+				String name = (String) key;
+				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
+			}
+		}
 		for (String column : tableColumns) {
-			String lowerCaseName = column.toLowerCase();
-			if (parameterSource.hasValue(lowerCaseName)) {
-				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
+			if (parameterSource.hasValue(column)) {
+				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, column));
 			}
 			else {
-				String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(column);
-				if (parameterSource.hasValue(propertyName)) {
-					values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
+				String lowerCaseName = column.toLowerCase();
+				if (parameterSource.hasValue(lowerCaseName)) {
+					values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
 				}
 				else {
-					if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
-						values.add(
-								SqlParameterSourceUtils.getTypedValue(parameterSource,
-										caseInsensitiveParameterNames.get(lowerCaseName)));
+					String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(column);
+					if (parameterSource.hasValue(propertyName)) {
+						values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
 					}
 					else {
-						values.add(null);
+						if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
+							values.add(
+									SqlParameterSourceUtils.getTypedValue(parameterSource,
+											caseInsensitiveParameterNames.get(lowerCaseName)));
+						}
+						else {
+							values.add(null);
+						}
 					}
 				}
 			}
