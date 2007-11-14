@@ -11,10 +11,10 @@ import java.util.List;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtractor;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ import org.springframework.util.FileCopyUtils;
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.support.lob.LobHandler
  */
-public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabase {
+public class DefaultImageDatabase extends SimpleJdbcDaoSupport implements ImageDatabase {
 
 	private LobHandler lobHandler;
 
@@ -48,11 +48,11 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 	}
 
 	@Transactional(readOnly=true)
-	public List getImages() throws DataAccessException {
-		return getJdbcTemplate().query(
+	public List<ImageDescriptor> getImages() throws DataAccessException {
+		return getSimpleJdbcTemplate().query(
 		    "SELECT image_name, description FROM imagedb",
-		    new RowMapper() {
-			    public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		    new ParameterizedRowMapper<ImageDescriptor>() {
+			    public ImageDescriptor mapRow(ResultSet rs, int rowNum) throws SQLException {
 				    String name = rs.getString(1);
 				    String description = lobHandler.getClobAsString(rs, 2);
 				    return new ImageDescriptor(name, description);

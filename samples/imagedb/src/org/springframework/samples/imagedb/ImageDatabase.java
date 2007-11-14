@@ -14,7 +14,7 @@ import org.springframework.dao.DataAccessException;
  */
 public interface ImageDatabase {
 
-	List getImages() throws DataAccessException;
+	List<ImageDescriptor> getImages() throws DataAccessException;
 
 	void streamImage(String name, OutputStream os) throws DataAccessException;
 
