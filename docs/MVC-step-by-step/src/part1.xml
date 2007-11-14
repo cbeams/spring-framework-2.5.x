@@ -245,9 +245,9 @@
     have to stop and start your application manually.</remark></para>
 
     <para><remark>If you are using an IDE, you may find a number of errors
-    reported by the IDE in the <filename
-    class="libraryfile">build.xml</filename> such as the Tomcat targets. You
-    can ignore these. The file listing above is correct.</remark></para>
+    reported by the IDE in the <filename>'build.xml'</filename> such as the 
+    Tomcat targets. You can ignore these. The file listing above is 
+    correct.</remark></para>
 
     <para>The above Ant build script now contains all the targets that we are
     going to need to make our development efforts easier. We are not going to
@@ -281,12 +281,12 @@ tomcat.manager.password=s3cret</programlisting>
     class="directory">'springapp'</filename> in the <filename
     class="directory">'webapps'</filename> directory of the Tomcat
     installation directory, and also give you full rights to deploy to this
-    newly created directory. On Linux, run the command <command>chmod a+rwx
-    springapp</command> to give everybody full rights to this
+    newly created directory. On Linux, run the command <command>'chmod a+rwx
+    springapp'</command> to give everybody full rights to this
     directory.</remark></para>
 
     <para><remark>To create Tomcat user named 'tomcat' with 's3cret' as their
-    password, go to the Tomcat users file <filename class="libraryfile">
+    password, go to the Tomcat users file <filename>
     'appserver.home/conf/tomcat-users.xml'</filename> and add the user entry.
     </remark></para>
 
@@ -301,7 +301,7 @@ tomcat.manager.password=s3cret</programlisting>
     class="directory">'springapp'</filename> directory.</para>
 
     <para>Open up a command shell (or prompt) and execute
-    <command>ant</command> .</para>
+    <command>'ant'</command> .</para>
 
     <screen>$ ant
 Buildfile: build.xml
@@ -502,9 +502,9 @@ Total time: 3 seconds</screen>
     directory. Then, from the Spring distribution, copy <filename
     class="libraryfile">spring.jar</filename> (from <filename
     class="libraryfile">spring-framework-2.5/dist</filename>) and <filename
-    class="libraryfile">spring-webmvc.jar (from <filename
+    class="libraryfile">spring-webmvc.jar</filename> (from <filename
     class="libraryfile">spring-framework-2.5/dist/modules</filename>)
-    </filename>to the new <filename
+    to the new <filename
     class="directory">'war/WEB-INF/lib'</filename> directory. Also, copy
     <filename class="libraryfile">commons-logging.jar</filename> (from
     <filename
@@ -577,10 +577,10 @@ public class HelloController implements Controller {
     project's build path by adding the jars from the <filename
     class="directory">'lib'</filename> directory. You will also want to add
     <filename class="libraryfile">servlet-api.jar</filename> from your
-    <filename class="directory">servlet container's lib directory
-    ('${appserver.lib}')</filename>. Adding these to your build path should
-    successfully resolve all the import statements in the <filename
-    class="libraryfile">HelloController.java</filename> file.</remark></para>
+    servlet container's <filename class="directory">lib</filename> directory
+    (<literal>'${appserver.lib}'</literal>). Adding these to your build path should
+    successfully resolve all the import statements in the 
+    <filename>'HelloController.java'</filename> file.</remark></para>
   </section>
 
   <section id="step1.9">
@@ -595,16 +595,15 @@ public class HelloController implements Controller {
     a new directory under <filename class="directory">'springapp'</filename>
     called <filename class="directory">'test'</filename>. This is where all
     our tests will go in a package structure that will mirror the source tree
-    in <filename class="directory">'springapp/src</filename>.</para>
+    in <filename class="directory">'springapp/src'</filename>.</para>
 
-    <para>Create a test class called <filename
-    class="libraryfile">'HelloControllerTests'</filename> and make it extend
+    <para>Create a test class called <filename>'HelloControllerTests'</filename> and make it extend
     JUnit's test class <classname>TestCase</classname>. It is a unit test that
     verifies the view name returned by <classname>handleRequest()</classname>
     matches the name of the view we expect:
     <filename>'hello.jsp'</filename>.</para>
 
-    <para><filename>'springapp/test/springapp/web/HelloControllerTests'</filename>:</para>
+    <para><filename>'springapp/test/springapp/web/HelloControllerTests.java'</filename>:</para>
 
     <programlisting>package springapp.web;
 

@@ -95,10 +95,10 @@
 <lineannotation>&lt;%-- Redirected because we can't set the welcome page to a virtual URL. --%&gt;</lineannotation>
 &lt;c:redirect url="/hello.htm"/&gt;</programlisting>
 
-    <para>Move <filename>hello.jsp</filename> to the <filename
+    <para>Move <filename>'hello.jsp'</filename> to the <filename
     class="directory">'WEB-INF/jsp'</filename> directory. Add the same include
-    directive we added to <filename>index.jsp</filename> to
-    <filename>hello.jsp</filename>. We also add the current date and time as
+    directive we added to <filename>'index.jsp'</filename> to
+    <filename>'hello.jsp'</filename>. We also add the current date and time as
     output to be retrieved from the model passed to the view which will be
     rendered using the JSTL &lt;c:out/&gt; tag.</para>
 
@@ -297,8 +297,7 @@ public class HelloController implements Controller {
             
 &lt;/beans&gt;</programlisting>
 
-    <para>We update the view name in the controller test class <filename
-    class="libraryfile"> 'HelloControllerTests'</filename> to
+    <para>We update the view name in the controller test class <classname>HelloControllerTests</classname> to
     <literal>'hello'</literal> and rerun the test to check it fails.</para>
 
     <para><filename>'springapp/test/springapp/web/HelloControllerTests.java'</filename>:</para>

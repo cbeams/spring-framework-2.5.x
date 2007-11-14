@@ -345,7 +345,7 @@ public class SimpleProductManagerTests extends TestCase {
 
     <para>We go back to the <classname>SimpleProductManager</classname> and
     implement the getter and setter methods for the
-    <classname>products</classname> property.</para>
+    <literal>products</literal> property.</para>
 
     <para><filename>'springapp/src/springapp/service/SimpleProductManager.java'</filename>:</para>
 

@@ -74,9 +74,9 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
 </emphasis>
 }</programlisting>
 
-    <para><filename>We will also need to modify the InventoryControllerTests
-    to supply a ProductManager and extract the value for "now"from the model
-    Map before the tests will pass again.</filename></para>
+    <para>We will also need to modify the InventoryControllerTests
+    to supply a ProductManager and extract the value for <literal>'now'</literal> from the model
+    Map before the tests will pass again.</para>
 
     <para><filename>'springapp/test/web/InventoryControllerTests.java'</filename>:</para>
 
@@ -317,8 +317,8 @@ greeting=Greetings, it is now</programlisting>
 
     <para>We also have to declare this taglib in a page directive in the jsp
     file, and then start using the tags we have thus imported. Add the JSP
-    page <filename>priceincrease.jsp</filename> to the
-    <filename>war/WEB-INF/jsp</filename> directory.</para>
+    page <filename>'priceincrease.jsp'</filename> to the
+    <filename>'war/WEB-INF/jsp'</filename> directory.</para>
 
     <para><filename>'springapp/war/WEB-INF/jsp/priceincrease.jsp'</filename>:</para>
 
@@ -455,9 +455,9 @@ public class PriceIncreaseValidator implements Validator {
     <para>Now we need to add an entry in the
     <filename>'springapp-servlet.xml'</filename> file to define the new form
     and controller. We define objects to inject into properties for
-    <classname>commandClass</classname> and <classname>validator</classname>.
-    We also specify two views, a <classname>formView</classname> that is used
-    for the form and a <classname>successView</classname> that we will go to
+    <literal>commandClass</literal> and <literal>validator</literal>.
+    We also specify two views, a <literal>formView</literal> that is used
+    for the form and a <literal>successView</literal> that we will go to
     after successful form processing. The latter can be of two types. It can
     be a regular view reference that is forwarded to one of our JSP pages. One
     disadvantage with this approach is, that if the user refreshes the page,
@@ -618,7 +618,7 @@ typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
     displayed.</para>
 
     <para>Finally, we will add a link to the price increase page from the
-    <classname>hello.jsp</classname>.</para>
+    <filename>'hello.jsp'</filename>.</para>
 
     <programlisting>&lt;%@ include file="/WEB-INF/jsp/include.jsp" %&gt;
 

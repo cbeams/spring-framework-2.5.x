@@ -52,7 +52,7 @@
     <programlisting>java -classpath ..\war\WEB-INF\lib\hsqldb.jar org.hsqldb.Server -database test</programlisting>
 
     <para>Now you can open a command window, change to the
-    <classname>'springapp/db'</classname> directory and start the database by
+    <filename class="directory">'springapp/db'</filename> directory and start the database by
     running one of these startup scripts.</para>
   </section>
 
@@ -115,8 +115,8 @@ db.pw=</emphasis></programlisting>
     targets to create and delete tables and to load and delete test
     data.</para>
 
-    <para><filename>Add the following targets to
-    'springapp/build.xml'</filename>:</para>
+    <para>Add the following targets to
+    <filename>'springapp/build.xml'</filename>:</para>
 
     <programlisting><emphasis role="bold">
     &lt;target name="createTables"&gt;
@@ -202,17 +202,17 @@ db.pw=</emphasis></programlisting>
 
 </emphasis></programlisting>
 
-    <para>Now you can execute <classname>'ant createTables loadData
-    printData'</classname> to prepare the test data we will use later.</para>
+    <para>Now you can execute <command>'ant createTables loadData
+    printData'</command> to prepare the test data we will use later.</para>
   </section>
 
   <section id="step5.4">
     <title>Create a Data Access Object (DAO) implementation for JDBC</title>
 
     <para>Begin with creating a new
-    <classname>'springapp/src/repository'</classname> directory to contain any
+    <filename class="directory">'springapp/src/repository'</filename> directory to contain any
     classes that are used for database access. In this directory we create a
-    new interface called <classname>'ProductDao.java</classname>'. This will
+    new interface called <classname>ProductDao</classname>. This will
     be the interface that defines the functionality that the DAO
     implementation classes will provide – we could choose to have more than
     one implementation some day.</para>
@@ -234,7 +234,7 @@ public interface ProductDao {
 }</programlisting>
 
     <para>We'll follow this with a class called
-    '<classname>JdbcProductDao.java</classname>' that will be the JDBC
+    <classname>JdbcProductDao</classname> that will be the JDBC
     implementation of this interface. Spring provides a JDBC abstraction
     framework that we will make use of. The biggest difference between using
     straight JDBC and Spring's JDBC framework is that you don't have to worry
@@ -388,8 +388,8 @@ public class Product implements Serializable {
     }
 }</programlisting>
 
-    <para><filename>This completes the Simple JDBC implementation of our
-    persistence layer.</filename></para>
+    <para>This completes the Simple JDBC implementation of our
+    persistence layer.</para>
   </section>
 
   <section id="step5.5">
@@ -477,7 +477,7 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
 
     <para>We don't have the application context file that is loaded for this
     test yet, so let's create this file in the
-    '<classname>springapp/test</classname>' directory:</para>
+    <filename class="directory">'springapp/test'</filename> directory:</para>
 
     <para><filename>'springapp/test/test-context.xml'</filename>:</para>
 
@@ -516,7 +516,7 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
 
 &lt;/beans&gt;</programlisting>
 
-    <para>We have defined a "<classname>productDao</classname>" which is the
+    <para>We have defined a <classname>productDao</classname> which is the
     class we are testing. We have also defined a
     <classname>DataSource</classname> with place holders for the configuration
     values. These values are provided via a separate property file and at
@@ -525,7 +525,7 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
     with the actual values. This is convenient since this isolates the
     connection values into their own file. These values often need to be
     changed during application deployment. We put this new file in the
-    "<classname>war/WEB-INF/classes</classname>" directory so it will be
+    <filename class="directory">'war/WEB-INF/classes'</filename> directory so it will be
     available when we run the application and also later when we deploy the
     web application. The content of this property file is:</para>
 
@@ -538,10 +538,10 @@ jdbc.password=
 </programlisting>
 
     <para>Since we added a configuration file to the
-    "<classname>test</classname>" directory and a jdbc.properties file to the
-    "<classname>WEB-INF/classes</classname>" directory, let's add a new
+    <filename class="directory">'test'</filename>" directory and a jdbc.properties file to the
+    <filename class="directory">'WEB-INF/classes'</filename> directory, let's add a new
     classpath entry for our tests. It shoud go after the definition of the
-    "<classname>test.dir</classname>" property:</para>
+    <literal>'test.dir'</literal> property:</para>
 
     <para><filename>'springapp/build.xml'</filename>:</para>
 
@@ -630,7 +630,7 @@ jdbc.password=
 ...
 </programlisting>
 
-    <para>Time to run this test, execute "<classname>ant dbTests</classname>"
+    <para>Time to run this test, execute <command>'ant dbTests'</command>
     to see if the tests pass.</para>
   </section>
 

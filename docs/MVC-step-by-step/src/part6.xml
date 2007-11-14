@@ -323,8 +323,8 @@ public class InventoryControllerTests extends TestCase {
 
     <para>We still need to configure the service layer and we will do that in
     its own application context file. This file is called
-    <classname>applicationContext.xml</classname> and it will be loaded via a
-    servlet listener that we will define in <classname>web.xml</classname>.
+    <filename>'applicationContext.xml'</filename> and it will be loaded via a
+    servlet listener that we will define in <filename>'web.xml'</filename>.
     All bean configured in this new application context will be available to
     reference from any servlet context.</para>
 
@@ -368,8 +368,8 @@ public class InventoryControllerTests extends TestCase {
 
 &lt;/web-app&gt;</programlisting>
 
-    <para>Now we create a new <classname>applicationContext.xml</classname>
-    file in the "<classname>war/WEB-INF</classname>" directory.</para>
+    <para>Now we create a new <filename>'applicationContext.xml'</filename>
+    file in the <filename class="directory">'war/WEB-INF'</filename>" directory.</para>
 
     <para><filename>'springapp/war/WEB-INF/applicationContext.xml'</filename>:</para>
 
@@ -441,7 +441,7 @@ public class InventoryControllerTests extends TestCase {
 
     <para>We also need to define a connection pool. We are using the DBCP
     connection pool from the Apache Jakarta project. We are reusing the
-    <classname>jdbc.properties</classname> file we created in Part 5.</para>
+    <filename>'jdbc.properties'</filename> file we created in Part 5.</para>
 
     <programlisting>    &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
         &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
@@ -471,7 +471,7 @@ public class InventoryControllerTests extends TestCase {
     class="directory">'springapp/war/WEB-INF/lib'</filename> directory.</para>
 
     <para>Here is the final version of our
-    <classname>applicationContext.xml</classname> file:</para>
+    <filename>'applicationContext.xml'</filename> file:</para>
 
     <para><filename>'springapp/war/WEB-INF/applicationContext.xml'</filename>:</para>
 
