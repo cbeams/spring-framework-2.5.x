@@ -577,7 +577,7 @@ public class HelloController implements Controller {
     project's build path by adding the jars from the <filename
     class="directory">'lib'</filename> directory. You will also want to add
     <filename class="libraryfile">servlet-api.jar</filename> from your
-    servlet container's <filename class="directory">lib</filename> directory
+    servlet container's <filename class="directory">'lib'</filename> directory
     (<literal>'${appserver.lib}'</literal>). Adding these to your build path should
     successfully resolve all the import statements in the 
     <filename>'HelloController.java'</filename> file.</remark></para>
