@@ -32,8 +32,8 @@ import org.springframework.context.Lifecycle;
 import org.springframework.jndi.JndiLocatorSupport;
 
 /**
- * FactoryBean that retrieves a CommonJ {@link commonj.timers.TimerManager}
- * and exposes it for bean references.
+ * {@link org.springframework.beans.factory.FactoryBean} that retrieves a
+ * CommonJ {@link commonj.timers.TimerManager} and exposes it for bean references.
  *
  * <p><b>This is the central convenience class for setting up a
  * CommonJ TimerManager in a Spring context.</b>
@@ -144,23 +144,25 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 			this.timerManager = (TimerManager) lookup(this.timerManagerName, TimerManager.class);
 		}
 
-		for (int i = 0; i < this.scheduledTimerListeners.length; i++) {
-			ScheduledTimerListener scheduledTask = this.scheduledTimerListeners[i];
-			Timer timer = null;
-			if (scheduledTask.isOneTimeTask()) {
-				timer = this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
-			}
-			else {
-				if (scheduledTask.isFixedRate()) {
-					timer = this.timerManager.scheduleAtFixedRate(
-							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+		if (this.scheduledTimerListeners != null) {
+			for (int i = 0; i < this.scheduledTimerListeners.length; i++) {
+				ScheduledTimerListener scheduledTask = this.scheduledTimerListeners[i];
+				Timer timer = null;
+				if (scheduledTask.isOneTimeTask()) {
+					timer = this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
 				}
 				else {
-					timer = this.timerManager.schedule(
-							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+					if (scheduledTask.isFixedRate()) {
+						timer = this.timerManager.scheduleAtFixedRate(
+								scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+					}
+					else {
+						timer = this.timerManager.schedule(
+								scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+					}
 				}
+				this.timers.add(timer);
 			}
-			this.timers.add(timer);
 		}
 	}
 
