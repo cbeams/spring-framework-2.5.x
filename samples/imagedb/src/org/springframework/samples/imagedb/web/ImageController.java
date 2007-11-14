@@ -6,10 +6,10 @@ import java.io.OutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.imagedb.ImageDatabase;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * MultiActionController for the image list/upload UI.
@@ -20,12 +20,17 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ImageController {
 
-	@Autowired
 	private ImageDatabase imageDatabase;
 
+	@Autowired
+	public ImageController(ImageDatabase imageDatabase) {
+		this.imageDatabase = imageDatabase;
+	}
+
 	@RequestMapping("/imageList")
-	public ModelAndView showImageList() {
-		return new ModelAndView("imageList", "images", this.imageDatabase.getImages());
+	public String showImageList(ModelMap model) {
+		model.addAttribute("images", this.imageDatabase.getImages());
+		return "imageList";
 	}
 
 	@RequestMapping("/imageContent")
