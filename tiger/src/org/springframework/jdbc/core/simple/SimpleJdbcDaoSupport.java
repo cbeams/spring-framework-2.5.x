@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ package org.springframework.jdbc.core.simple;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 /**
- * Extension of JdbcDaoSupport that exposes a SimpleJdbcTemplate as well.
+ * Extension of {@link org.springframework.jdbc.core.support.JdbcDaoSupport}
+ * that exposes a {@link #getSimpleJdbcTemplate() SimpleJdbcTemplate} as well.
  * Only usable on Java 5 and above.
  * 
  * @author Rod Johnson
@@ -43,7 +44,7 @@ public class SimpleJdbcDaoSupport extends JdbcDaoSupport {
 	 * Return a SimpleJdbcTemplate wrapping the configured JdbcTemplate.
 	 */
 	public SimpleJdbcTemplate getSimpleJdbcTemplate() {
-	  return simpleJdbcTemplate;
+	  return this.simpleJdbcTemplate;
 	}
 
 }
