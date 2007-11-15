@@ -99,10 +99,8 @@ import org.springframework.util.StringUtils;
  * <li>"java:/TransactionManager" for JBoss Application Server
  * </ul>
  *
- * <p>All of these cases are autodetected by JtaTransactionManager (since Spring 1.2),
- * provided that the "autodetectTransactionManager" flag is set to "true" (which it is
- * by default). Consequently, JtaTransactionManager will support transaction suspension
- * out-of-the-box on many J2EE servers.
+ * <p>All of these cases are autodetected by JtaTransactionManager, provided that the
+ * "autodetectTransactionManager" flag is set to "true" (which it is by default).
  *
  * <p><b>Note: Support for the JTA TransactionManager interface is not required by J2EE.
  * Almost all J2EE servers expose it, but do so as extension to J2EE. There might be some
@@ -111,6 +109,10 @@ import org.springframework.util.StringUtils;
  * which are recommended to be used if appropriate: {@link WebLogicJtaTransactionManager},
  * {@link WebSphereUowTransactionManager} and {@link OC4JJtaTransactionManager}.
  * For all other J2EE servers, the standard JtaTransactionManager is sufficient.
+ *
+ * <p><b>Consider using Spring 2.5's <code>tx:jta-transaction-manager</code> configuration
+ * element for automatically picking the appropriate JTA platform transaction manager
+ * (automatically detecting WebLogic, WebSphere and OC4J).</b>
  *
  * <p><b>This pure JtaTransactionManager supports timeouts but not per-transaction
  * isolation levels.</b> Custom subclasses may override {@link #doJtaBegin} for
@@ -552,7 +554,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws TransactionSystemException if the JNDI lookup failed
 	 * @see #setJndiTemplate
 	 * @see #setUserTransactionName
-  */
+   */
 	protected UserTransaction lookupUserTransaction(String userTransactionName)
 			throws TransactionSystemException {
 		try {
