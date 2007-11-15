@@ -1059,7 +1059,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
 		}
 		catch (IllegalStateException ex) {
-			throw new NoTransactionException("No active JTA transaction");
+			logger.debug("Participating in existing JTA transaction, but no JTA transaction active anymore: " +
+					"cannot register Spring after-completion callbacks with outer JTA transaction - " +
+					"processing Spring after-completion callbacks with outcome status 'unknown'");
+			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on registerSynchronization", ex);
