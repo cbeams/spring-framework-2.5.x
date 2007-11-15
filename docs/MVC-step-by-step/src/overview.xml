@@ -13,6 +13,17 @@
   service libraries (such as the JDBC library) all fit together in the context
   of a Spring MVC web application.</para>
 
+  <para>Spring provides several options for configuring your application.  The most
+  popular one is using XML files.  This is also the traditional way that has
+  been supported from the first release of Spring.  With the introduction of Annotations
+  in Java 5, we now have an alternate way of configuring our Spring applications.  The new
+  Spring 2.5 release introduces extensive support for using Annotations to configure a web 
+  application.</para>
+
+  <para>This document uses the traditional XML style for configuration.  We are working on
+  an <emphasis>"Annotation Edition"</emphasis> of this document and hope to publish it in the 
+  near future.</para>
+
   <para>Please note that we are not going to cover any background information
   or theory in this tutorial; there are plenty of books available that cover
   the areas in depth; whenever a new class or feature is used in the tutorial,
