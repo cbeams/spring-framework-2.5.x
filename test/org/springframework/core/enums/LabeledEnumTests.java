@@ -18,6 +18,7 @@ package org.springframework.core.enums;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -29,6 +30,25 @@ import junit.framework.TestCase;
  * @author Sam Brannen
  */
 public class LabeledEnumTests extends TestCase {
+
+	private byte[] serializeObject(final Object obj) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(obj);
+		oos.close();
+		return baos.toByteArray();
+	}
+
+	private Object deserializeObject(final byte[] serializedBytes) throws IOException, ClassNotFoundException {
+		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serializedBytes));
+		Object obj = ois.readObject();
+		ois.close();
+		return obj;
+	}
+
+	private Object serializeAndDeserializeObject(final Object obj) throws IOException, ClassNotFoundException {
+		return deserializeObject(serializeObject(Other.THING1));
+	}
 
 	public void testCodeFound() {
 		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class, new Short((short) 11));
@@ -47,19 +67,15 @@ public class LabeledEnumTests extends TestCase {
 		assertSame(two, ValuedEnum.TWO);
 	}
 
-	public void testDeserializationOfEnums() throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		oos.writeObject(Other.THING1);
-		oos.close();
-		final byte[] serializedBytes = baos.toByteArray();
-
-		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serializedBytes));
-		final Other deserializedThingOne = (Other) ois.readObject();
-		ois.close();
-
-		assertSame(deserializedThingOne, Other.THING1);
+	public void testDeserializationOfInnerClassEnums() throws Exception {
+		assertSame(serializeAndDeserializeObject(Other.THING1), Other.THING1);
 	}
+
+	// TODO Uncomment once SPR-4105 has been addressed.
+	// public void testDeserializationOfStandAloneEnums() throws Exception {
+	// assertSame(serializeAndDeserializeObject(StandAloneStaticLabeledEnum.ENUM1),
+	// StandAloneStaticLabeledEnum.ENUM1);
+	// }
 
 	public void testLabelFound() {
 		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(Dog.class, "Golden Retriever");
