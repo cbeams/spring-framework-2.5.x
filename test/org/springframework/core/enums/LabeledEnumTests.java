@@ -16,6 +16,11 @@
 
 package org.springframework.core.enums;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import junit.framework.TestCase;
 
 /**
@@ -40,6 +45,20 @@ public class LabeledEnumTests extends TestCase {
 				new Short((short) 2));
 		assertSame(one, ValuedEnum.ONE);
 		assertSame(two, ValuedEnum.TWO);
+	}
+
+	public void testDeserializationOfEnums() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(Other.THING1);
+		oos.close();
+		final byte[] serializedBytes = baos.toByteArray();
+
+		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serializedBytes));
+		final Other deserializedThingOne = (Other) ois.readObject();
+		ois.close();
+
+		assertSame(deserializedThingOne, Other.THING1);
 	}
 
 	public void testLabelFound() {
