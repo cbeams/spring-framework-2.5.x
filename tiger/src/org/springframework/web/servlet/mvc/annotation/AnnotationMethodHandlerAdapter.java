@@ -193,6 +193,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+		ModelMap implicitModel = new ModelMap();
 		SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 		Set<String> sessionAttrNames = null;
 
@@ -219,7 +220,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		WebRequest webRequest = new ServletWebRequest(request);
 		HandlerMethodResolver methodResolver = getMethodResolver(handler);
 		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
-		ModelMap implicitModel = new ModelMap();
 		ArgumentsResolver argResolver = new ArgumentsResolver(methodResolver.getInitBinderMethods());
 
 		for (Method attributeMethod : methodResolver.getModelAttributeMethods()) {
@@ -251,12 +251,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 			}
 			else {
-				Set sessionAttributeSet = new HashSet();
+				// Expose model attributes as session attributes, if required.
+				Map<String, Object> model = (mav != null ? mav.getModel() : implicitModel);
+				Set<Object> sessionAttributeSet = new HashSet<Object>();
 				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.value()));
 				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.types()));
-				// Expose model attributes as session attributes, if required.
-				Map<?, ?> model = mav.getModel();
-				for (Map.Entry entry : model.entrySet()) {
+				for (Map.Entry entry : new HashSet<Map.Entry>(model.entrySet())) {
 					String attrName = (String) entry.getKey();
 					Object attrValue = entry.getValue();
 					if (sessionAttributeSet.contains(attrName) ||
@@ -264,7 +264,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						sessionAttrNames.add(attrName);
 						this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
 						String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
-						if (!mav.getModel().containsKey(bindingResultKey)) {
+						if (mav != null && !model.containsKey(bindingResultKey)) {
 							ServletRequestDataBinder binder = new ServletRequestDataBinder(attrValue, attrName);
 							if (this.webBindingInitializer != null) {
 								this.webBindingInitializer.initBinder(binder, webRequest);
@@ -275,6 +275,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 			}
 		}
+
 		return mav;
 	}
 
