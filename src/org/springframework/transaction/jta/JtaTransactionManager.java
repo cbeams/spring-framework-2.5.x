@@ -499,7 +499,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Look up the JTA TransactionManager in JNDI via the configured name.
-	 * Called by <code>afterPropertiesSet</code> if no direct TransactionManager reference was set.
+	 * <p>Called by <code>afterPropertiesSet</code> if no direct TransactionManager reference was set.
 	 * Can be overridden in subclasses to provide a different TransactionManager object.
 	 * @param transactionManagerName the JNDI name of the TransactionManager
 	 * @return the UserTransaction object
@@ -900,7 +900,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
 		}
 		catch (IllegalStateException ex) {
-			throw new NoTransactionException("No active JTA transaction");
+			logger.debug("Participating in existing JTA transaction, but no JTA transaction active anymore: " +
+					"cannot register Spring after-completion callbacks with outer JTA transaction - " +
+					"processing Spring after-completion callbacks with outcome status 'unknown'");
+			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on registerSynchronization", ex);
