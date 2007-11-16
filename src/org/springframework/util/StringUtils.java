@@ -327,16 +327,20 @@ public abstract class StringUtils {
 
 	/**
 	 * Delete all occurrences of the given substring.
+	 * @param inString the original String
 	 * @param pattern the pattern to delete all occurrences of
+	 * @return the resulting String
 	 */
 	public static String delete(String inString, String pattern) {
 		return replace(inString, pattern, "");
 	}
 
 	/**
-	 * Delete any character in a given string.
+	 * Delete any character in a given String.
+	 * @param inString the original String
 	 * @param charsToDelete a set of characters to delete.
 	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
+	 * @return the resulting String
 	 */
 	public static String deleteAny(String inString, String charsToDelete) {
 		if (!hasLength(inString) || !hasLength(charsToDelete)) {
@@ -581,9 +585,9 @@ public abstract class StringUtils {
 			// code sans the separator between the country code and the variant.
 			int endIndexOfCountryCode = localeString.indexOf(country) + country.length();
 			// Strip off any leading '_' and whitespace, what's left is the variant.
-			variant = StringUtils.trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
+			variant = trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
 			if (variant.startsWith("_")) {
-				variant = StringUtils.trimLeadingCharacter(variant, '_');
+				variant = trimLeadingCharacter(variant, '_');
 			}
 		}
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
