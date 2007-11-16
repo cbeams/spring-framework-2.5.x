@@ -9,6 +9,13 @@ Changes in version 2.5 final (2007-11-19)
 General
 * updated javadoc and reference documentation
 
+Package org.springframework.context
+* "context:load-time-weaver" autodetects the GlassFish ClassLoader even within a GlassFish web app now
+* "context:load-time-weaver" correctly detects the use of the Spring VM agent on WebLogic 9
+
+Package org.springframework.core
+* fixed AbstractLabeledEnum to correctly determine the default enum type for a top-level enum class (again)
+
 Package org.springframework.jdbc
 * added "registerDatabase" method to SQLErrorCodesFactory, for eager association of database names with DataSources
 
@@ -21,12 +28,19 @@ Package org.springframework.orm
 Package org.springframework.scheduling
 * fixed CommonJ TimerManagerFactoryBean to not require the "scheduledTimerListeners" property
 
+Package org.springframework.transaction
+* JtaTransactionManager swallows IllegalStateException when synchronizing with existing transaction (for JBoss 4.2)
+
 Package org.springframework.web
 * RequestToViewNameTranslator kicks in before the "HandlerInterceptor.postHandle" phase
 * RequestToViewNameTranslator's "getViewName" is allowed to return null if no default found
 * fixed AnnotationMethodHandlerAdapter to expose the implicit model even when using request-to-view-name translation
+* Portlet AnnotationMethodHandlerAdapter preserves implicit model from action phase to render phase
+* Portlet AnnotationMethodHandlerAdapter applies cache settings (prevents caching when session attributes are involved)
+* Portlet AnnotationMethodHandlerAdapter allows default @RequestMapping annotations for action as well as render methods
 * InternalResourceView explicitly sets content type on response in include case (for correct charset handling on Tomcat)
 * exposed applicable standard HTML attributes on JSP "form:option" and "form:options" tags
+* JSP form tags always autogenerate valid HTML ids (not including "[" or "]" characters from array element properties)
 
 
 Changes in version 2.5 RC2 (2007-11-12)
