@@ -26,9 +26,9 @@ import java.lang.reflect.Proxy;
 import org.springframework.util.Assert;
 
 /**
- * Reflective wrapper around a WebLogic classloader. Used to encapsulate the
- * classloader specific methods (discovered and called through reflection) from
- * the loadtime weaver.
+ * Reflective wrapper around a WebLogic 10 class loader. Used to
+ * encapsulate the classloader-specific methods (discovered and
+ * called through reflection) from the load-time weaver.
  * 
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -68,7 +68,7 @@ class WebLogicClassLoader {
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
-					"Could not initialize WebLogic ClassLoader because WebLogic API classes are not available", ex);
+					"Could not initialize WebLogic ClassLoader because WebLogic 10 API classes are not available", ex);
 		}
 		Assert.isInstanceOf(wlGenericClassLoaderClass, classLoader,
 				"ClassLoader must be instance of [" + wlGenericClassLoaderClass.getName() + "]");
