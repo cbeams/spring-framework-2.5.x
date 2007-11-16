@@ -44,6 +44,7 @@ import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeav
  * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}).
  *
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.5
  * @see org.springframework.context.ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
@@ -54,15 +55,9 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		try {
-			String loaderClassName = classLoader.getClass().getName();
-			if (loaderClassName.startsWith("com.sun.enterprise")) {
-				this.loadTimeWeaver = new GlassFishLoadTimeWeaver(classLoader);
-			}
-			else if (loaderClassName.startsWith("oracle")) {
-				this.loadTimeWeaver = new OC4JLoadTimeWeaver(classLoader);
-			}
-			else if (loaderClassName.startsWith("weblogic")) {
-				this.loadTimeWeaver = new WebLogicLoadTimeWeaver(classLoader);
+			LoadTimeWeaver serverSpecificLoadTimeWeaver = createServerSpecificLoatTimeWeaver(classLoader);
+			if (serverSpecificLoadTimeWeaver != null) {
+				this.loadTimeWeaver = serverSpecificLoadTimeWeaver;
 			}
 			else if (InstrumentationSavingAgent.getInstrumentation() != null) {
 				this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
@@ -94,4 +89,33 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}
 
+	/*
+	 * This method never fails allowing to try other possible ways to use an
+	 * server-agnostic weaver. This non-failure logic is required since
+	 * determining load-time weaver based on classloader name alone may
+	 * legitimately fail due to other mismatches. Specific case in point: the
+	 * use of WebLogicLoadTimeWeaver works for wls10 but fails due to the lack
+	 * of a specific method (addInstanceClassPreProcessor()) for any earlier
+	 * versions even though the classloader name is the same.
+	 */
+	private LoadTimeWeaver createServerSpecificLoatTimeWeaver(ClassLoader classLoader) {
+		try {
+			String loaderClassName = classLoader.getClass().getName();
+			if (loaderClassName.startsWith("com.sun.enterprise")) {
+				return new GlassFishLoadTimeWeaver(classLoader);
+			}
+			else if (loaderClassName.startsWith("oracle")) {
+				return new OC4JLoadTimeWeaver(classLoader);
+			}
+			else if (loaderClassName.startsWith("weblogic")) {
+				return new WebLogicLoadTimeWeaver(classLoader);
+			}
+			else {
+				return null;
+			}
+		}
+		catch (IllegalStateException ex) {
+			return null;
+		}
+	}
 }
