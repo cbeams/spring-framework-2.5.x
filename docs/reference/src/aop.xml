@@ -3443,6 +3443,14 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
               </row>
 
               <row>
+                <entry><para>Running in <ulink
+                url="http://www.bea.com/framework.jsp?CNT=index.htm&amp;FP=/content/products/weblogic/server">BEA's
+                Weblogic 10</ulink></para></entry>
+
+                <entry><para><classname>org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver</classname></para></entry>
+              </row>
+
+              <row>
                 <entry><para>JVM started with Spring
                 <classname>InstrumentationSavingAgent</classname></para>
                 <para><emphasis><literal>(java
@@ -3556,10 +3564,10 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
         configuration that you will need when using Spring's LTW support in
         environments such as application- and web-servers.</para>
 
-        <section id="aop-aj-ltw-environments-oc4j">
-          <title>OC4J</title>
+        <section id="aop-aj-ltw-environments-weblogic10-oc4j">
+          <title>Weblogic 10 and OC4J</title>
 
-          <para>Oracle Containers for Java EE (OC4J) uses a classloader that
+          <para>BEA Weblogic version 10 and Oracle Containers for Java EE (OC4J) use a classloader that
           is capable of working with any instrumentation agent. Spring's
           native LTW leverages that classloader to enable AspectJ weaving. You
           can enable LTW by simply modifying the application context as
@@ -3569,10 +3577,10 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
         </section>
 
         <note>
-          <para>Currently, OC4J is the only application server supported
+          <para>Currently, OC4J and Weblogic 10 are the only application servers supported
           directly by the Spring's native LTW mechanism. In future, we plan to
           extend this support to other application servers such as certain
-          versions of Tomcat, Glassfish, and Weblogic.</para>
+          versions of Tomcat and Glassfish.</para>
         </note>
 
         <section id="aop-aj-ltw-environment-generic">
