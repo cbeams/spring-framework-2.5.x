@@ -783,6 +783,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 				<title><literal>&lt;spring-configured/&gt;</literal></title>
 				<para>This element is detailed in the section entitled <xref linkend="aop-atconfigurable"/>.</para>
 			</section>
+			<section id="xsd-config-body-schemas-context-mbe">
+				<title><literal>&lt;mbean-export/&gt;</literal></title>
+				<para>This element is detailed in the section entitled <xref linkend="jmx-context-mbeanexport"/>.</para>
+			</section>
 		</section>
 
 		<section id="xsd-config-body-schemas-tool">

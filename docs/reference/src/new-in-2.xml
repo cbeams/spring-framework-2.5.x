@@ -460,9 +460,9 @@
       </itemizedlist>
 
       <para>Furthermore, Spring 2.5 provides a
-      <literal>context:mbean-export</literal> configuration element
-      for convenient registration of annotated bean classes, detecting Spring's
-      <interfacename>@ManagedResource</interfacename> annotation.</para>
+      <link linkend="jmx-context-mbeanexport"><literal>context:mbean-export</literal></link>
+      configuration element for convenient registration of annotated bean classes,
+      detecting Spring's <interfacename>@ManagedResource</interfacename> annotation.</para>
     </section>
 
     <section id="new-in-2-other-jca">

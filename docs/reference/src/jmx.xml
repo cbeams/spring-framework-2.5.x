@@ -897,7 +897,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <title>The <classname>AutodetectCapableMBeanInfoAssembler</classname>
       interface</title>
 
-      <para>To simply configuration even further, Spring introduces the
+      <para>To simplify configuration even further, Spring introduces the
       <classname>AutodetectCapableMBeanInfoAssembler</classname> interface
       which extends the <interfacename>MBeanInfoAssembler</interfacename>
       interface to add support for autodetection of MBean resources. If you
@@ -1172,7 +1172,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <title>Using the <classname>MetadataNamingStrategy</classname></title>
 
       <para>The <classname>MetadataNamingStrategy</classname> uses
-      <literal>objectName</literal> property of the
+      the <literal>objectName</literal> property of the
       <classname>ManagedResource</classname> attribute on each bean to create
       the <classname>ObjectName</classname>. The code below shows the
       configuration for the
@@ -1202,6 +1202,47 @@ public class AnnotationTestBean implements IJmxTestBean {
       class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/>
 
 </beans>]]></programlisting>
+
+      <para>If no <literal>objectName</literal> has been provided for
+      the <classname>ManagedResource</classname> attribute, then an
+      <classname>ObjectName</classname> will be created with the
+      following format:
+      <emphasis>[fully-qualified-package-name]:type=[short-classname],name=[bean-name]</emphasis>.
+      For example, the generated <classname>ObjectName</classname> for the
+      following bean would be: <emphasis>com.foo:type=MyClass,name=myBean</emphasis>.
+      </para>
+
+      <programlisting><![CDATA[<bean id="myBean" class="com.foo.MyClass"/>]]></programlisting>
+
+    </section>
+
+    <section id="jmx-context-mbeanexport">
+      <title>The <literal>&lt;context:mbean-export/&gt;</literal> element</title>
+      <para>If you are using at least Java 5, then a convenience subclass of
+      <classname>MBeanExporter</classname> is available:
+      <classname>AnnotationMBeanExporter</classname>.
+      When defining an instance of this subclass, the <literal>namingStrategy</literal>,
+      <literal>assembler</literal>, and <literal>attributeSource</literal>
+      configuration is no longer needed, since it will always use standard Java
+      annotation-based metadata (autodetection is always enabled as well). In fact,
+      an even simpler syntax is supported with the inclusion of Spring's
+      '<literal>context</literal>' namespace in Spring 2.5. Rather than defining an
+      <classname>MBeanExporter</classname> bean, provide this single element:</para>
+
+      <programlisting><![CDATA[<context:mbean-export/>]]></programlisting>
+
+      <para>You can provide a reference to a particular MBean server if
+      necessary, and the <literal>defaultDomain</literal> attribute
+      (a property of <classname>AnnotationMBeanExporter</classname>)
+      accepts an alternate value for the generated MBean
+      <classname>ObjectNames</classname>' domains. This would be used
+      in place of the fully qualified package name as described in the
+      previous section on
+      <link linkend="jmx-naming-metadata"><classname>MetadataNamingStrategy</classname></link>.
+      </para>
+
+      <programlisting><![CDATA[<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>]]></programlisting>.
+
     </section>
   </section>
 
