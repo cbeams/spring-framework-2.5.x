@@ -18,6 +18,9 @@ package org.springframework.context.weaving;
 
 import java.lang.instrument.ClassFileTransformer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
@@ -50,30 +53,73 @@ import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeav
  */
 public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLoaderAware {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private LoadTimeWeaver loadTimeWeaver;
 
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		try {
-			LoadTimeWeaver serverSpecificLoadTimeWeaver = createServerSpecificLoatTimeWeaver(classLoader);
-			if (serverSpecificLoadTimeWeaver != null) {
-				this.loadTimeWeaver = serverSpecificLoadTimeWeaver;
+		LoadTimeWeaver serverSpecificLoadTimeWeaver = createServerSpecificLoadTimeWeaver(classLoader);
+		if (serverSpecificLoadTimeWeaver != null) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Determined server-specific load-time weaver: " +
+						serverSpecificLoadTimeWeaver.getClass().getName());
 			}
-			else if (InstrumentationSavingAgent.getInstrumentation() != null) {
-				this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
-			}
-			else {
+			this.loadTimeWeaver = serverSpecificLoadTimeWeaver;
+		}
+		else if (InstrumentationSavingAgent.getInstrumentation() != null) {
+			logger.info("Found Spring's JVM agent for instrumentation");
+			this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
+		}
+		else {
+			try {
 				this.loadTimeWeaver = new ReflectiveLoadTimeWeaver();
+				logger.info("Using a reflective load-time weaver for class loader: " +
+						this.loadTimeWeaver.getInstrumentableClassLoader());
+			}
+			catch (IllegalStateException ex) {
+				throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver " +
+						"or start your Java virtual machine with Spring's agent: -javaagent:spring-agent.jar");
+			}
+		}
+	}
+
+	/*
+	 * This method never fails, allowing to try other possible ways to use an
+	 * server-agnostic weaver. This non-failure logic is required since
+	 * determining a load-time weaver based on the ClassLoader name alone may
+	 * legitimately fail due to other mismatches. Specific case in point: the
+	 * use of WebLogicLoadTimeWeaver works for WLS 10 but fails due to the lack
+	 * of a specific method (addInstanceClassPreProcessor) for any earlier
+	 * versions even though the ClassLoader name is the same.
+	 */
+	protected LoadTimeWeaver createServerSpecificLoadTimeWeaver(ClassLoader classLoader) {
+		try {
+			if (classLoader.getClass().getName().startsWith("weblogic")) {
+				return new WebLogicLoadTimeWeaver(classLoader);
+			}
+			else if (classLoader.getClass().getName().startsWith("oracle")) {
+				return new OC4JLoadTimeWeaver(classLoader);
+			}
+			else if (isMatchingClassLoaderInHierarchy(classLoader, "com.sun.enterprise")) {
+				return new GlassFishLoadTimeWeaver(classLoader);
 			}
 		}
 		catch (IllegalStateException ex) {
-			throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver " +
-					"or start your Java virtual machine with Spring's agent: -javaagent:spring-agent.jar");
+			logger.info("Could not obtain server-specific LoadTimeWeaver: " + ex.getMessage());
 		}
-		catch (Throwable ex) {
-			throw new IllegalStateException("Failed to build appropriate LoadTimeWeaver - " +
-					"make sure that that all required classes are on the classpath: " + ex);
-		}
+		return null;
+	}
+
+	/**
+	 * Try to find a ClassLoader with matching name in the entire ClassLoader hierarchy.
+	 * Used for GlassFish detection, where the web app ClassLoader might be from the
+	 * embedded Tomcat - but its parent is going to be a GlassFish ClassLoader.
+	 */
+	private boolean isMatchingClassLoaderInHierarchy(ClassLoader classLoader, String loaderName) {
+		return (classLoader != null &&
+				(classLoader.getClass().getName().startsWith(loaderName) ||
+						isMatchingClassLoaderInHierarchy(classLoader.getParent(), loaderName)));
 	}
 
 
@@ -89,33 +135,4 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}
 
-	/*
-	 * This method never fails allowing to try other possible ways to use an
-	 * server-agnostic weaver. This non-failure logic is required since
-	 * determining load-time weaver based on classloader name alone may
-	 * legitimately fail due to other mismatches. Specific case in point: the
-	 * use of WebLogicLoadTimeWeaver works for wls10 but fails due to the lack
-	 * of a specific method (addInstanceClassPreProcessor()) for any earlier
-	 * versions even though the classloader name is the same.
-	 */
-	private LoadTimeWeaver createServerSpecificLoatTimeWeaver(ClassLoader classLoader) {
-		try {
-			String loaderClassName = classLoader.getClass().getName();
-			if (loaderClassName.startsWith("com.sun.enterprise")) {
-				return new GlassFishLoadTimeWeaver(classLoader);
-			}
-			else if (loaderClassName.startsWith("oracle")) {
-				return new OC4JLoadTimeWeaver(classLoader);
-			}
-			else if (loaderClassName.startsWith("weblogic")) {
-				return new WebLogicLoadTimeWeaver(classLoader);
-			}
-			else {
-				return null;
-			}
-		}
-		catch (IllegalStateException ex) {
-			return null;
-		}
-	}
 }
