@@ -5,19 +5,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
 	<!--
-		- Message source for this context, loaded from localized "messages_xx" files.
-		- Could also reside in the root application context, as it is generic,
-		- but is currently just used within PetClinic's web tier.
+		- The controllers are autodetected POJOs labeled with the @Controller annotation.
 	-->
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
-		p:basename="messages"/>
-
-
-	<!-- ========================= MAPPING DEFINITIONS ========================= -->
+	<context:component-scan base-package="org.springframework.samples.petclinic.web"/>
 
 	<!--
 		- The form-based controllers within this application provide @RequestMapping 
@@ -64,12 +58,12 @@
 	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp/"
 		p:suffix=".jsp"/>
 
-
-	<!-- ========================= CONTROLLER DEFINITIONS ========================= -->
-
 	<!--
-		- The controllers are autodetected POJOs labeled with the @Controller annotation.
+		- Message source for this context, loaded from localized "messages_xx" files.
+		- Could also reside in the root application context, as it is generic,
+		- but is currently just used within PetClinic's web tier.
 	-->
-	<context:component-scan base-package="org.springframework.samples.petclinic.web"/>
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+		p:basename="messages"/>
 
 </beans>
