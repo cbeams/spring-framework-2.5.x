@@ -483,9 +483,15 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				Map.Entry entry = (Map.Entry) it.next();
 				String param = PARAM_TARGET + (String) entry.getKey();
 				Object value = entry.getValue();
-				if (logger.isDebugEnabled()) logger.debug("Setting target render parameter [" + param + "]");
-				if (value instanceof String) response.setRenderParameter(param, (String) value);
-				if (value instanceof String[]) response.setRenderParameter(param, (String[]) value);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Setting target render parameter [" + param + "]");
+				}
+				if (value instanceof String) {
+					response.setRenderParameter(param, (String) value);
+				}
+				if (value instanceof String[]) {
+					response.setRenderParameter(param, (String[]) value);
+				}
 			}
 		}
 		catch (IllegalStateException ex) {
