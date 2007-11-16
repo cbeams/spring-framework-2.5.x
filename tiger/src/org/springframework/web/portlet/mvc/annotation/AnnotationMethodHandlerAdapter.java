@@ -94,6 +94,9 @@ import org.springframework.web.portlet.multipart.MultipartActionRequest;
  */
 public class AnnotationMethodHandlerAdapter extends PortletContentGenerator implements HandlerAdapter {
 
+	private static final String IMPLICIT_MODEL_ATTRIBUTE = "org.springframework.web.portlet.mvc.ImplicitModel";
+
+
 	private WebBindingInitializer webBindingInitializer;
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
@@ -142,6 +145,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 	protected ModelAndView doHandle(PortletRequest request, PortletResponse response, Object handler) throws Exception {
+		ModelMap implicitModel = null;
 		SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 		Set<String> sessionAttrNames = null;
 
@@ -159,10 +163,33 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 		}
 
+		if (request instanceof RenderRequest) {
+			RenderRequest renderRequest = (RenderRequest) request;
+			RenderResponse renderResponse = (RenderResponse) response;
+			// Detect implicit model from associated action phase.
+			if (renderRequest.getParameter(IMPLICIT_MODEL_ATTRIBUTE) != null) {
+				PortletSession session = request.getPortletSession(false);
+				if (session != null) {
+					implicitModel = (ModelMap) session.getAttribute(IMPLICIT_MODEL_ATTRIBUTE);
+				}
+			}
+			if (sessionAttributes != null) {
+				// Always prevent caching in case of session attribute management.
+				checkAndPrepare(renderRequest, renderResponse, 0);
+			}
+			else {
+				// Uses configured default cacheSeconds setting.
+				checkAndPrepare(renderRequest, renderResponse);
+			}
+		}
+
+		if (implicitModel == null) {
+			implicitModel = new ModelMap();
+		}
+
 		WebRequest webRequest = new PortletWebRequest(request);
 		HandlerMethodResolver methodResolver = getMethodResolver(handler.getClass());
 		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
-		ModelMap implicitModel = new ModelMap();
 		ArgumentsResolver argResolver = new ArgumentsResolver(methodResolver.getInitBinderMethods());
 
 		for (Method attributeMethod : methodResolver.getModelAttributeMethods()) {
@@ -194,12 +221,12 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 			}
 			else {
-				Set sessionAttributeSet = new HashSet();
+				// Expose model attributes as session attributes, if required.
+				Map<String, Object> model = (mav != null ? mav.getModel() : implicitModel);
+				Set<Object> sessionAttributeSet = new HashSet<Object>();
 				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.value()));
 				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.types()));
-				// Expose model attributes as session attributes, if required.
-				Map<?, ?> model = mav.getModel();
-				for (Map.Entry entry : model.entrySet()) {
+				for (Map.Entry entry : new HashSet<Map.Entry>(model.entrySet())) {
 					String attrName = (String) entry.getKey();
 					Object attrValue = entry.getValue();
 					if (sessionAttributeSet.contains(attrName) ||
@@ -207,7 +234,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 						sessionAttrNames.add(attrName);
 						this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
 						String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
-						if (!mav.getModel().containsKey(bindingResultKey)) {
+						if (mav != null && !model.containsKey(bindingResultKey)) {
 							PortletRequestDataBinder binder = new PortletRequestDataBinder(attrValue, attrName);
 							if (this.webBindingInitializer != null) {
 								this.webBindingInitializer.initBinder(binder, webRequest);
@@ -218,6 +245,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 			}
 		}
+
+		// Expose implicit model for subsequent render phase.
+		if (response instanceof ActionResponse && !implicitModel.isEmpty()) {
+			ActionResponse actionResponse = (ActionResponse) response;
+			actionResponse.setRenderParameter(IMPLICIT_MODEL_ATTRIBUTE, Boolean.TRUE.toString());
+			request.getPortletSession().setAttribute(IMPLICIT_MODEL_ATTRIBUTE, implicitModel);
+		}
+
 		return mav;
 	}
 
@@ -264,11 +299,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				RequestMappingInfo mappingInfo = new RequestMappingInfo();
 				mappingInfo.modes = mapping.value();
 				mappingInfo.params = mapping.params();
+				mappingInfo.action = isActionMethod(handlerMethod);
+				mappingInfo.render = isRenderMethod(handlerMethod);
 				boolean match = false;
 				if (mappingInfo.modes.length > 0) {
 					for (String mappedMode : mappingInfo.modes) {
 						if (mappedMode.equalsIgnoreCase(lookupMode)) {
-							if (checkParameters(request, mappingInfo, handlerMethod)) {
+							if (checkParameters(request, mappingInfo)) {
 								match = true;
 							}
 							else {
@@ -279,7 +316,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 				else {
 					// No modes specified: parameter match sufficient.
-					match = checkParameters(request, mappingInfo, handlerMethod);
+					match = checkParameters(request, mappingInfo);
 				}
 				if (match) {
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
@@ -316,14 +353,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 		}
 
-		private boolean checkParameters(PortletRequest request, RequestMappingInfo mapping, Method handlerMethod) {
+		private boolean checkParameters(PortletRequest request, RequestMappingInfo mapping) {
 			if (request instanceof RenderRequest) {
-				if (isActionMethod(handlerMethod)) {
+				if (mapping.action) {
 					return false;
 				}
 			}
-			else {
-				if (isRenderMethod(handlerMethod)) {
+			else if (request instanceof ActionRequest) {
+				if (mapping.render) {
 					return false;
 				}
 			}
@@ -353,7 +390,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				return false;
 			}
 			for (Class<?> argType : handlerMethod.getParameterTypes()) {
-				if (ActionRequest.class.isAssignableFrom(argType) || ActionResponse.class.isAssignableFrom(argType)) {
+				if (ActionRequest.class.isAssignableFrom(argType) || ActionResponse.class.isAssignableFrom(argType) ||
+						InputStream.class.isAssignableFrom(argType) || Reader.class.isAssignableFrom(argType)) {
 					return true;
 				}
 			}
@@ -365,7 +403,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				return true;
 			}
 			for (Class<?> argType : handlerMethod.getParameterTypes()) {
-				if (RenderRequest.class.isAssignableFrom(argType) || RenderResponse.class.isAssignableFrom(argType)) {
+				if (RenderRequest.class.isAssignableFrom(argType) || RenderResponse.class.isAssignableFrom(argType) ||
+						OutputStream.class.isAssignableFrom(argType) || Writer.class.isAssignableFrom(argType)) {
 					return true;
 				}
 			}
@@ -624,9 +663,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		public String[] params = new String[0];
 
+		private boolean action = false;
+
+		private boolean render = false;
+
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.modes.equals(other.modes) && this.params.equals(other.params));
+			return (this.action == other.action && this.render == other.render &&
+					this.modes.equals(other.modes) && this.params.equals(other.params));
 		}
 
 		public int hashCode() {
