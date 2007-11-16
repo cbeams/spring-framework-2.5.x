@@ -127,10 +127,11 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Autogenerate the '<code>id</code>' attribute value for this tag.
-	 * <p>The default implementation simply delegates to {@link #getName}.
+	 * <p>The default implementation simply delegates to {@link #getName()},
+	 * deleting invalid characters (such as "[" or "]").
 	 */
 	protected String autogenerateId() throws JspException {
-		return getName();
+		return StringUtils.deleteAny(getName(), "[]");
 	}
 
 	/**
