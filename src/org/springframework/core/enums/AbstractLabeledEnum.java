@@ -20,6 +20,7 @@ package org.springframework.core.enums;
  * Abstract base superclass for LabeledEnum implementations.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2.2
  */
@@ -32,15 +33,16 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	}
 
 	public Class getType() {
-		final Class declaringClass = getClass().getDeclaringClass();
-		return (declaringClass != null) ? getClass() : getClass().getSuperclass();
+		// Could be coded as getClass().isAnonymousClass() on JDK 1.5
+		boolean isAnonymous = (getClass().getDeclaringClass() == null && getClass().getName().indexOf('$') != -1);
+		return (isAnonymous ? getClass().getSuperclass() : getClass());
 	}
 
 	public int compareTo(Object obj) {
-		if (!(obj instanceof AbstractLabeledEnum)) {
+		if (!(obj instanceof LabeledEnum)) {
 			throw new ClassCastException("You may only compare LabeledEnums");
 		}
-		final AbstractLabeledEnum that = (AbstractLabeledEnum) obj;
+		LabeledEnum that = (LabeledEnum) obj;
 		if (!this.getType().equals(that.getType())) {
 			throw new ClassCastException("You may only compare LabeledEnums of the same type");
 		}
@@ -55,7 +57,7 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 			return false;
 		}
 		LabeledEnum other = (LabeledEnum) obj;
-		return this.getType().equals(other.getType()) && this.getCode().equals(other.getCode());
+		return (this.getType().equals(other.getType()) && this.getCode().equals(other.getCode()));
 	}
 
 	public int hashCode() {
@@ -65,4 +67,5 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	public String toString() {
 		return getLabel();
 	}
+
 }

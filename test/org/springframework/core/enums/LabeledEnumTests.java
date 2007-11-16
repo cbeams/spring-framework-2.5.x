@@ -46,8 +46,8 @@ public class LabeledEnumTests extends TestCase {
 		return obj;
 	}
 
-	private Object serializeAndDeserializeObject(final Object obj) throws IOException, ClassNotFoundException {
-		return deserializeObject(serializeObject(Other.THING1));
+	private Object serializeAndDeserializeObject(Object obj) throws IOException, ClassNotFoundException {
+		return deserializeObject(serializeObject(obj));
 	}
 
 	public void testCodeFound() {
@@ -71,11 +71,10 @@ public class LabeledEnumTests extends TestCase {
 		assertSame(serializeAndDeserializeObject(Other.THING1), Other.THING1);
 	}
 
-	// TODO Uncomment once SPR-4105 has been addressed.
-	// public void testDeserializationOfStandAloneEnums() throws Exception {
-	// assertSame(serializeAndDeserializeObject(StandAloneStaticLabeledEnum.ENUM1),
-	// StandAloneStaticLabeledEnum.ENUM1);
-	// }
+	public void testDeserializationOfStandAloneEnums() throws Exception {
+		assertSame(serializeAndDeserializeObject(StandAloneStaticLabeledEnum.ENUM1),
+				StandAloneStaticLabeledEnum.ENUM1);
+	}
 
 	public void testLabelFound() {
 		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(Dog.class, "Golden Retriever");
@@ -84,11 +83,20 @@ public class LabeledEnumTests extends TestCase {
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
 
+	public void testLabelFoundForStandAloneEnum() {
+		StandAloneStaticLabeledEnum enum1 = (StandAloneStaticLabeledEnum)
+				StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(StandAloneStaticLabeledEnum.class, "Enum1");
+		StandAloneStaticLabeledEnum enum2 = (StandAloneStaticLabeledEnum)
+				StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(StandAloneStaticLabeledEnum.class, "Enum2");
+		assertSame(enum1, StandAloneStaticLabeledEnum.ENUM1);
+		assertSame(enum2, StandAloneStaticLabeledEnum.ENUM2);
+	}
+
 	public void testLabelFoundForAbstractEnums() {
-		ValuedEnum one = (ValuedEnum) StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(ValuedEnum.class,
-				"one");
-		ValuedEnum two = (ValuedEnum) StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(ValuedEnum.class,
-				"two");
+		ValuedEnum one = (ValuedEnum)
+				StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(ValuedEnum.class, "one");
+		ValuedEnum two = (ValuedEnum)
+				StaticLabeledEnumResolver.instance().getLabeledEnumByLabel(ValuedEnum.class, "two");
 		assertSame(one, ValuedEnum.ONE);
 		assertSame(two, ValuedEnum.TWO);
 	}
@@ -110,7 +118,7 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
-	static class Other extends StaticLabeledEnum {
+	private static class Other extends StaticLabeledEnum {
 
 		public static final Other THING1 = new Other(1, "Thing1");
 		public static final Other THING2 = new Other(2, "Thing2");
@@ -121,7 +129,8 @@ public class LabeledEnumTests extends TestCase {
 		}
 	}
 
-	static class Dog extends StaticLabeledEnum {
+
+	private static class Dog extends StaticLabeledEnum {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
 
@@ -149,28 +158,26 @@ public class LabeledEnumTests extends TestCase {
 		}
 	}
 
-	static abstract class ValuedEnum extends StaticLabeledEnum {
+
+	private static abstract class ValuedEnum extends StaticLabeledEnum {
 
 		public static final ValuedEnum ONE = new ValuedEnum(1, "one") {
-
 			public int getValue() {
 				return 1;
 			}
 		};
 
 		public static final ValuedEnum TWO = new ValuedEnum(2, "two") {
-
 			public int getValue() {
 				return 2;
 			}
 		};
-
 
 		private ValuedEnum(int code, String name) {
 			super(code, name);
 		}
 
 		public abstract int getValue();
-
 	}
+
 }
