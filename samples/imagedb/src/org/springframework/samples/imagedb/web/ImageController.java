@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class ImageController {
 
-	private ImageDatabase imageDatabase;
+	private final ImageDatabase imageDatabase;
 
 	@Autowired
 	public ImageController(ImageDatabase imageDatabase) {

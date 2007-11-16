@@ -489,7 +489,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				if (value instanceof String) {
 					response.setRenderParameter(param, (String) value);
 				}
-				if (value instanceof String[]) {
+				else if (value instanceof String[]) {
 					response.setRenderParameter(param, (String[]) value);
 				}
 			}
