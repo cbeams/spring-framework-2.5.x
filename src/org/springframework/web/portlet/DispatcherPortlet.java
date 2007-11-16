@@ -75,11 +75,11 @@ import org.springframework.web.servlet.ViewResolver;
  *
  * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is {@link org.springframework.web.portlet.handler.PortletModeHandlerMapping}, as well
- * as a {@link org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping}
- * on Java 5+. HandlerMapping objects can be defined as beans in the portlet's application
- * context, implementing the HandlerMapping interface, overriding the default HandlerMapping
- * if present. HandlerMappings can be given any bean name (they are tested by type).
+ * Default is a {@link org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping}
+ * on Java 5+; there is no default on Java 1.4. HandlerMapping objects can be defined as
+ * beans in the portlet's application context, implementing the HandlerMapping interface,
+ * overriding the default HandlerMapping if present. HandlerMappings can be given any
+ * bean name (they are tested by type).
  *
  * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
  * The default adapter is {@link org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter}
@@ -938,10 +938,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		if (pageNotFoundLogger.isWarnEnabled()) {
 			pageNotFoundLogger.warn("No mapping found for current request " +
 					"in DispatcherPortlet with name '" + getPortletName() + "'" +
-					" mode '" + request.getPortletMode() + "'" +
-					" type '" + (request instanceof ActionRequest ? "action" : "render") + "'" +
-					" session '" + request.getRequestedSessionId() + "'" +
-					" user '" + getUsernameForRequest(request) + "'");
+					", mode '" + request.getPortletMode() + "'" +
+					", type '" + (request instanceof ActionRequest ? "action" : "render") + "'" +
+					", session '" + request.getRequestedSessionId() + "'" +
+					", user '" + getUsernameForRequest(request) + "'");
 		}
 		throw new UnavailableException("No handler found for request");
 	}
