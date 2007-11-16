@@ -67,6 +67,17 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("a b  c", StringUtils.trimWhitespace(" a b  c "));
 	}
 
+	public void testTrimAllWhitespace() throws Exception {
+		assertEquals("", StringUtils.trimAllWhitespace(""));
+		assertEquals("", StringUtils.trimAllWhitespace(" "));
+		assertEquals("", StringUtils.trimAllWhitespace("\t"));
+		assertEquals("a", StringUtils.trimAllWhitespace(" a"));
+		assertEquals("a", StringUtils.trimAllWhitespace("a "));
+		assertEquals("a", StringUtils.trimAllWhitespace(" a "));
+		assertEquals("ab", StringUtils.trimAllWhitespace(" a b "));
+		assertEquals("abc", StringUtils.trimAllWhitespace(" a b  c "));
+	}
+
 	public void testTrimLeadingWhitespace() throws Exception {
 		assertEquals(null, StringUtils.trimLeadingWhitespace(null));
 		assertEquals("", StringUtils.trimLeadingWhitespace(""));
@@ -91,15 +102,28 @@ public class StringUtilsTests extends TestCase {
 		assertEquals(" a b  c", StringUtils.trimTrailingWhitespace(" a b  c "));
 	}
 
-	public void testTrimAllWhitespace() throws Exception {
-		assertEquals("", StringUtils.trimAllWhitespace(""));
-		assertEquals("", StringUtils.trimAllWhitespace(" "));
-		assertEquals("", StringUtils.trimAllWhitespace("\t"));
-		assertEquals("a", StringUtils.trimAllWhitespace(" a"));
-		assertEquals("a", StringUtils.trimAllWhitespace("a "));
-		assertEquals("a", StringUtils.trimAllWhitespace(" a "));
-		assertEquals("ab", StringUtils.trimAllWhitespace(" a b "));
-		assertEquals("abc", StringUtils.trimAllWhitespace(" a b  c "));
+	public void testTrimLeadingCharacter() throws Exception {
+		assertEquals(null, StringUtils.trimLeadingCharacter(null, ' '));
+		assertEquals("", StringUtils.trimLeadingCharacter("", ' '));
+		assertEquals("", StringUtils.trimLeadingCharacter(" ", ' '));
+		assertEquals("\t", StringUtils.trimLeadingCharacter("\t", ' '));
+		assertEquals("a", StringUtils.trimLeadingCharacter(" a", ' '));
+		assertEquals("a ", StringUtils.trimLeadingCharacter("a ", ' '));
+		assertEquals("a ", StringUtils.trimLeadingCharacter(" a ", ' '));
+		assertEquals("a b ", StringUtils.trimLeadingCharacter(" a b ", ' '));
+		assertEquals("a b  c ", StringUtils.trimLeadingCharacter(" a b  c ", ' '));
+	}
+
+	public void testTrimTrailingCharacter() throws Exception {
+		assertEquals(null, StringUtils.trimTrailingCharacter(null, ' '));
+		assertEquals("", StringUtils.trimTrailingCharacter("", ' '));
+		assertEquals("", StringUtils.trimTrailingCharacter(" ", ' '));
+		assertEquals("\t", StringUtils.trimTrailingCharacter("\t", ' '));
+		assertEquals("a", StringUtils.trimTrailingCharacter("a ", ' '));
+		assertEquals(" a", StringUtils.trimTrailingCharacter(" a", ' '));
+		assertEquals(" a", StringUtils.trimTrailingCharacter(" a ", ' '));
+		assertEquals(" a b", StringUtils.trimTrailingCharacter(" a b ", ' '));
+		assertEquals(" a b  c", StringUtils.trimTrailingCharacter(" a b  c ", ' '));
 	}
 
 	public void testCountOccurrencesOf() {

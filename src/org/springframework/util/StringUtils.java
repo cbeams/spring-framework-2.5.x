@@ -156,6 +156,30 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Trim <i>all</i> whitespace from the given String:
+	 * leading, trailing, and inbetween characters.
+	 * @param str the String to check
+	 * @return the trimmed String
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimAllWhitespace(String str) {
+		if (!hasLength(str)) {
+			return str;
+		}
+		StringBuffer buf = new StringBuffer(str);
+		int index = 0;
+		while (buf.length() > index) {
+			if (Character.isWhitespace(buf.charAt(index))) {
+				buf.deleteCharAt(index);
+			}
+			else {
+				index++;
+			}
+		}
+		return buf.toString();
+	}
+
+	/**
 	 * Trim leading whitespace from the given String.
 	 * @param str the String to check
 	 * @return the trimmed String
@@ -167,23 +191,6 @@ public abstract class StringUtils {
 		}
 		StringBuffer buf = new StringBuffer(str);
 		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
-			buf.deleteCharAt(0);
-		}
-		return buf.toString();
-	}
-
-	/**
-	 * Trim all occurences of the supplied leading character from the given String.
-	 * @param str the String to check
-	 * @param leadingCharacter the leading character to be trimmed
-	 * @return the trimmed String
-	 */
-	public static String trimLeadingCharacter(String str, char leadingCharacter) {
-		if (!hasLength(str)) {
-			return str;
-		}
-		StringBuffer buf = new StringBuffer(str);
-		while (buf.length() > 0 && buf.charAt(0) == leadingCharacter) {
 			buf.deleteCharAt(0);
 		}
 		return buf.toString();
@@ -207,25 +214,35 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim <i>all</i> whitespace from the given String:
-	 * leading, trailing, and inbetween characters.
+	 * Trim all occurences of the supplied leading character from the given String.
 	 * @param str the String to check
+	 * @param leadingCharacter the leading character to be trimmed
 	 * @return the trimmed String
-	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimAllWhitespace(String str) {
+	public static String trimLeadingCharacter(String str, char leadingCharacter) {
 		if (!hasLength(str)) {
 			return str;
 		}
 		StringBuffer buf = new StringBuffer(str);
-		int index = 0;
-		while (buf.length() > index) {
-			if (Character.isWhitespace(buf.charAt(index))) {
-				buf.deleteCharAt(index);
-			}
-			else {
-				index++;
-			}
+		while (buf.length() > 0 && buf.charAt(0) == leadingCharacter) {
+			buf.deleteCharAt(0);
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * Trim all occurences of the supplied trailing character from the given String.
+	 * @param str the String to check
+	 * @param trailingCharacter the trailing character to be trimmed
+	 * @return the trimmed String
+	 */
+	public static String trimTrailingCharacter(String str, char trailingCharacter) {
+		if (!hasLength(str)) {
+			return str;
+		}
+		StringBuffer buf = new StringBuffer(str);
+		while (buf.length() > 0 && buf.charAt(buf.length() - 1) == trailingCharacter) {
+			buf.deleteCharAt(buf.length() - 1);
 		}
 		return buf.toString();
 	}
@@ -329,16 +346,20 @@ public abstract class StringUtils {
 
 	/**
 	 * Delete all occurrences of the given substring.
+	 * @param inString the original String
 	 * @param pattern the pattern to delete all occurrences of
+	 * @return the resulting String
 	 */
 	public static String delete(String inString, String pattern) {
 		return replace(inString, pattern, "");
 	}
 
 	/**
-	 * Delete any character in a given string.
+	 * Delete any character in a given String.
+	 * @param inString the original String
 	 * @param charsToDelete a set of characters to delete.
 	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
+	 * @return the resulting String
 	 */
 	public static String deleteAny(String inString, String charsToDelete) {
 		if (!hasLength(inString) || !hasLength(charsToDelete)) {
@@ -583,9 +604,9 @@ public abstract class StringUtils {
 			// code sans the separator between the country code and the variant.
 			int endIndexOfCountryCode = localeString.indexOf(country) + country.length();
 			// Strip off any leading '_' and whitespace, what's left is the variant.
-			variant = StringUtils.trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
+			variant = trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
 			if (variant.startsWith("_")) {
-				variant = StringUtils.trimLeadingCharacter(variant, '_');
+				variant = trimLeadingCharacter(variant, '_');
 			}
 		}
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
