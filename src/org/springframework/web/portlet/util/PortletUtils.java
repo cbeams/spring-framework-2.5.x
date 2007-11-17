@@ -49,7 +49,6 @@ public abstract class PortletUtils {
 	 * as provided by the portlet container.
 	 * @param portletContext the portlet context of the web application
 	 * @return the File representing the temporary directory
-	 * @throws IllegalArgumentException if the supplied <code>portletContext</code> is <code>null</code>
 	 */
 	public static File getTempDir(PortletContext portletContext) {
 		Assert.notNull(portletContext, "PortletContext must not be null");
@@ -68,8 +67,6 @@ public abstract class PortletUtils {
 	 * @param path the relative path within the web application
 	 * @return the corresponding real path
 	 * @throws FileNotFoundException if the path cannot be resolved to a resource
-	 * @throws IllegalArgumentException if the supplied <code>portletContext</code> is <code>null</code>
-	 * @throws NullPointerException if the supplied <code>path</code> is <code>null</code>
 	 * @see javax.portlet.PortletContext#getRealPath
 	 */
 	public static String getRealPath(PortletContext portletContext, String path) throws FileNotFoundException {
@@ -96,7 +93,6 @@ public abstract class PortletUtils {
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
 	 * @return the value of the session attribute, or <code>null</code> if not found
-	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public static Object getSessionAttribute(PortletRequest request, String name) {
 		return getSessionAttribute(request, name, PortletSession.PORTLET_SCOPE);
@@ -110,7 +106,6 @@ public abstract class PortletUtils {
 	 * @param name the name of the session attribute
 	 * @param scope session scope of this attribute
 	 * @return the value of the session attribute, or <code>null</code> if not found
-	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public static Object getSessionAttribute(PortletRequest request, String name, int scope) {
 		Assert.notNull(request, "Request must not be null");
@@ -119,30 +114,32 @@ public abstract class PortletUtils {
 	}
 
 	/**
-	 * Check the given request for a session attribute of the given name under the {@link javax.portlet.PortletSession#PORTLET_SCOPE}.
-	 * Throws an exception if there is no session or if the session has no such attribute in that scope.
-	 * Does not create a new session if none has existed before!
+	 * Check the given request for a session attribute of the given name
+	 * under the {@link javax.portlet.PortletSession#PORTLET_SCOPE}.
+	 * Throws an exception if there is no session or if the session has
+	 * no such attribute in that scope.
+	 * <p>Does not create a new session if none has existed before!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
 	 * @return the value of the session attribute
 	 * @throws IllegalStateException if the session attribute could not be found
-	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public static Object getRequiredSessionAttribute(PortletRequest request, String name)
 			throws IllegalStateException {
+
 		return getRequiredSessionAttribute(request, name, PortletSession.PORTLET_SCOPE);
 	}
 
 	/**
 	 * Check the given request for a session attribute of the given name in the given scope.
-	 * Throws an exception if there is no session or if the session has no such attribute in that scope.
-	 * Does not create a new session if none has existed before!
+	 * Throws an exception if there is no session or if the session has no such attribute
+	 * in that scope.
+	 * <p>Does not create a new session if none has existed before!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
 	 * @param scope session scope of this attribute
 	 * @return the value of the session attribute
 	 * @throws IllegalStateException if the session attribute could not be found
-	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public static Object getRequiredSessionAttribute(PortletRequest request, String name, int scope)
 			throws IllegalStateException {
@@ -160,7 +157,6 @@ public abstract class PortletUtils {
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
 	 * @param value the value of the session attribute
-	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public static void setSessionAttribute(PortletRequest request, String name, Object value) {
 		setSessionAttribute(request, name, value, PortletSession.PORTLET_SCOPE);
@@ -174,7 +170,6 @@ public abstract class PortletUtils {
 	 * @param name the name of the session attribute
 	 * @param value the value of the session attribute
 	 * @param scope session scope of this attribute
-	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public static void setSessionAttribute(PortletRequest request, String name, Object value, int scope) {
 		Assert.notNull(request, "Request must not be null");
@@ -198,10 +193,11 @@ public abstract class PortletUtils {
 	 * @param name the name of the session attribute
 	 * @param clazz the class to instantiate for a new attribute
 	 * @return the value of the session attribute, newly created if not found
-	 * @throws IllegalArgumentException if the session attribute could not be instantiated; or if the supplied <code>session</code> argument is <code>null</code>
+	 * @throws IllegalArgumentException if the session attribute could not be instantiated
 	 */
 	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz)
 			throws IllegalArgumentException {
+
 		return getOrCreateSessionAttribute(session, name, clazz, PortletSession.PORTLET_SCOPE);
 	}
 
@@ -215,10 +211,11 @@ public abstract class PortletUtils {
 	 * @param clazz the class to instantiate for a new attribute
 	 * @param scope the session scope of this attribute
 	 * @return the value of the session attribute, newly created if not found
-	 * @throws IllegalArgumentException if the session attribute could not be instantiated; or if the supplied <code>session</code> argument is <code>null</code>
+	 * @throws IllegalArgumentException if the session attribute could not be instantiated
 	 */
 	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz, int scope)
 			throws IllegalArgumentException {
+
 		Assert.notNull(session, "Session must not be null");
 		Object sessionObject = session.getAttribute(name, scope);
 		if (sessionObject == null) {

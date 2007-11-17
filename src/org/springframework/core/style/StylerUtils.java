@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package org.springframework.core.style;
  * Simple utility class to allow for convenient access to value 
  * styling logic, mainly to support descriptive logging messages.
  *
- * <p>For more sophisticated needs, use the ValueStyler abstraction
- * directly. This class simply uses a shared DefaultValueStyler
+ * <p>For more sophisticated needs, use the {@link ValueStyler} abstraction
+ * directly. This class simply uses a shared {@link DefaultValueStyler}
  * instance underneath.
  *
  * @author Keith Donald
@@ -32,8 +32,8 @@ package org.springframework.core.style;
 public abstract class StylerUtils {
 	
 	/**
-	 * Default ValueStyler instance used by this ToStringCreator.
-	 * Also available for direct use.
+	 * Default ValueStyler instance used by the <code>style</code> method.
+	 * Also available for the {@link ToStringCreator} class in this package.
 	 */
 	static final ValueStyler DEFAULT_VALUE_STYLER = new DefaultValueStyler();
 
