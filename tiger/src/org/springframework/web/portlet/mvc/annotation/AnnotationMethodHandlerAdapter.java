@@ -71,6 +71,7 @@ import org.springframework.web.portlet.context.PortletWebRequest;
 import org.springframework.web.portlet.handler.PortletContentGenerator;
 import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.portlet.HandlerAdapter}
@@ -369,7 +370,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				for (String param : params) {
 					int separator = param.indexOf('=');
 					if (separator == -1) {
-						if (request.getParameter(param) == null) {
+						if (!PortletUtils.hasSubmitParameter(request, param)) {
 							return false;
 						}
 					}

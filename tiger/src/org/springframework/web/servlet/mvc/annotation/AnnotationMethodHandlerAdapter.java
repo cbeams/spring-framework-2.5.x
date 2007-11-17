@@ -74,6 +74,7 @@ import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerAdapter}
@@ -421,7 +422,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				for (String param : params) {
 					int separator = param.indexOf('=');
 					if (separator == -1) {
-						if (request.getParameter(param) == null) {
+						if (!WebUtils.hasSubmitParameter(request, param)) {
 							return false;
 						}
 					}
