@@ -35,18 +35,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.PortalContext;
 import javax.portlet.PortletException;
+import javax.portlet.PortletMode;
+import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.WindowState;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -350,7 +355,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 			}
 			else {
-				throw new IllegalStateException("No matching handler method found for request");
+				throw new IllegalStateException("No matching handler method found for portlet request: mode '" +
+						request.getPortletMode() + "', type '" + (request instanceof ActionRequest ? "action" : "render") +
+						"', parameters " + StylerUtils.style(request.getParameterMap()));
 			}
 		}
 
@@ -551,7 +558,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 								ReflectionUtils.makeAccessible(initBinderMethod);
 								Object attrValue = ReflectionUtils.invokeMethod(initBinderMethod, handler, initBinderArgs);
 								if (attrValue != null) {
-									throw new IllegalStateException("InitBinder methods must not have a return value");
+									throw new IllegalStateException(
+											"InitBinder methods must not have a return value: " + initBinderMethod);
 								}
 							}
 						}
@@ -583,6 +591,18 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 			else if (PortletSession.class.isAssignableFrom(parameterType)) {
 				return request.getPortletSession();
+			}
+			else if (PortletPreferences.class.isAssignableFrom(parameterType)) {
+				return request.getPreferences();
+			}
+			else if (PortletMode.class.isAssignableFrom(parameterType)) {
+				return request.getPortletMode();
+			}
+			else if (WindowState.class.isAssignableFrom(parameterType)) {
+				return request.getWindowState();
+			}
+			else if (PortalContext.class.isAssignableFrom(parameterType)) {
+				return request.getPortalContext();
 			}
 			else if (WebRequest.class.isAssignableFrom(parameterType)) {
 				return webRequest;
