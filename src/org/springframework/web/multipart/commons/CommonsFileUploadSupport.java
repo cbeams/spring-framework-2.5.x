@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -84,7 +85,7 @@ public abstract class CommonsFileUploadSupport {
 	 * @return the underlying DiskFileItemFactory instance
 	 */
 	public DiskFileItemFactory getFileItemFactory() {
-		return fileItemFactory;
+		return this.fileItemFactory;
 	}
 
 	/**
@@ -93,7 +94,7 @@ public abstract class CommonsFileUploadSupport {
 	 * @return the underlying FileUpload instance
 	 */
 	public FileUpload getFileUpload() {
-		return fileUpload;
+		return this.fileUpload;
 	}
 
 	/**
@@ -157,7 +158,7 @@ public abstract class CommonsFileUploadSupport {
 	}
 
 	protected boolean isUploadTempDirSpecified() {
-		return uploadTempDirSpecified;
+		return this.uploadTempDirSpecified;
 	}
 
 
@@ -249,7 +250,10 @@ public abstract class CommonsFileUploadSupport {
 			else {
 				// multipart file field
 				CommonsMultipartFile file = new CommonsMultipartFile(fileItem);
-				multipartFiles.put(file.getName(), file);
+				if (multipartFiles.put(file.getName(), file) != null) {
+					throw new MultipartException(
+							"Multiple files for field name [" + file.getName() + "] found - not supported by MultipartResolver");
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found multipart file [" + file.getName() + "] of size " + file.getSize() +
 							" bytes with original filename [" + file.getOriginalFilename() + "], stored " +
@@ -303,14 +307,14 @@ public abstract class CommonsFileUploadSupport {
 		 * Return the multipart files as Map of field name to MultipartFile instance.
 		 */
 		public Map getMultipartFiles() {
-			return multipartFiles;
+			return this.multipartFiles;
 		}
 
 		/**
 		 * Return the multipart parameters as Map of field name to form field String value.
 		 */
 		public Map getMultipartParameters() {
-			return multipartParameters;
+			return this.multipartParameters;
 		}
 	}
 
