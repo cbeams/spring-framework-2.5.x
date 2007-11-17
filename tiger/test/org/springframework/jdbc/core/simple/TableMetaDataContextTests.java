@@ -162,4 +162,76 @@ public class TableMetaDataContextTests extends TestCase {
 		assertTrue("date wrapped with type info", values.get(2) instanceof SqlParameterValue);
 		assertTrue("version wrapped with type info", values.get(3) instanceof SqlParameterValue);
 	}
+
+	public void testTableWithSingleColumnGeneratedKey() throws Exception {
+		final String TABLE = "customers";
+		final String USER = "me";
+
+		MockControl ctrlMetaDataResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockMetaDataResultSet = (ResultSet) ctrlMetaDataResultSet.getMock();
+		mockMetaDataResultSet.next();
+		ctrlMetaDataResultSet.setReturnValue(true);
+		mockMetaDataResultSet.getString("TABLE_CAT");
+		ctrlMetaDataResultSet.setReturnValue(null);
+		mockMetaDataResultSet.getString("TABLE_SCHEM");
+		ctrlMetaDataResultSet.setReturnValue(USER);
+		mockMetaDataResultSet.getString("TABLE_NAME");
+		ctrlMetaDataResultSet.setReturnValue(TABLE);
+		mockMetaDataResultSet.getString("TABLE_TYPE");
+		ctrlMetaDataResultSet.setReturnValue("TABLE");
+		mockMetaDataResultSet.next();
+		ctrlMetaDataResultSet.setReturnValue(false);
+		mockMetaDataResultSet.close();
+		ctrlMetaDataResultSet.setVoidCallable();
+
+		MockControl ctrlColumnsResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockColumnsResultSet = (ResultSet) ctrlColumnsResultSet.getMock();
+		mockColumnsResultSet.next();
+		ctrlColumnsResultSet.setReturnValue(true);
+		mockColumnsResultSet.getString("COLUMN_NAME");
+		ctrlColumnsResultSet.setReturnValue("id");
+		mockColumnsResultSet.getInt("DATA_TYPE");
+		ctrlColumnsResultSet.setReturnValue(Types.INTEGER);
+		mockColumnsResultSet.getBoolean("NULLABLE");
+		ctrlColumnsResultSet.setReturnValue(false);
+		mockColumnsResultSet.next();
+		ctrlColumnsResultSet.setReturnValue(false);
+		mockColumnsResultSet.close();
+		ctrlColumnsResultSet.setVoidCallable();
+
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MyDB");
+		mockDatabaseMetaData.supportsGetGeneratedKeys();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MyDB");
+		mockDatabaseMetaData.getUserName();
+		ctrlDatabaseMetaData.setReturnValue(USER);
+		mockDatabaseMetaData.storesUpperCaseIdentifiers();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.storesLowerCaseIdentifiers();
+		ctrlDatabaseMetaData.setReturnValue(true);
+		mockDatabaseMetaData.getTables(null, null, TABLE, null);
+		ctrlDatabaseMetaData.setReturnValue(mockMetaDataResultSet);
+		mockDatabaseMetaData.getColumns(null, USER, TABLE, null);
+		ctrlDatabaseMetaData.setReturnValue(mockColumnsResultSet);
+
+		ctrlMetaDataResultSet.replay();
+		ctrlColumnsResultSet.replay();
+		replay();
+
+		MapSqlParameterSource map = new MapSqlParameterSource();
+
+		String[] keyCols = new String[] {"id"};
+
+		context.setTableName(TABLE);
+		context.processMetaData(mockDataSource, new ArrayList<String>(), keyCols);
+
+		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
+
+		String insertString = context.createInsertString(keyCols);
+
+		assertEquals("wrong number of parameters: ", 0, values.size());
+		assertEquals("empty insert not generated correctly", "INSERT INTO customers () VALUES()", insertString);
+	}
 }

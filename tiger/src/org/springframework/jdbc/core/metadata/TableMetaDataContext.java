@@ -66,6 +66,9 @@ public class TableMetaDataContext {
 	/** the provider of call meta data */
 	private TableMetaDataProvider metaDataProvider;
 
+	/** are we using generated key columns */
+	private boolean generatedKeyColumnsUsed = false;
+
 
 	/**
 	 * Set the name of the table for this context.
@@ -183,6 +186,9 @@ public class TableMetaDataContext {
 	 * @param generatedKeyNames names of generated key columns
 	 */
 	private List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
+		if (generatedKeyNames.length > 0) {
+			generatedKeyColumnsUsed = true;
+		}
 		if (declaredColumns.size() > 0) {
 			return new ArrayList<String>(declaredColumns);
 		}
@@ -297,7 +303,14 @@ public class TableMetaDataContext {
 		}
 		insertStatement.append(") VALUES(");
 		if (columnCount < 1) {
-			throw new InvalidDataAccessApiUsageException("Unable to locate columns for table " + this.getTableName());
+			if (generatedKeyColumnsUsed) {
+				logger.info("Unable to locate non-key columns for table '" +
+						this.getTableName() + "' so an empty insert statement is generated");
+			}
+			else {
+				throw new InvalidDataAccessApiUsageException("Unable to locate columns for table '" +
+						this.getTableName() + "' so an insert statement can't be generated");
+			}
 		}
 		for (int i = 0; i < columnCount; i++) {
 			if (i > 0) {
