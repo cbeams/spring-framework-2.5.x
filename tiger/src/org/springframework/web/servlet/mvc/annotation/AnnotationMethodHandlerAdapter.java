@@ -43,6 +43,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -404,7 +405,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				return targetHandlerMethods.get(bestMappingMatch);
 			}
 			else {
-				throw new IllegalStateException("No matching handler method found for request");
+				throw new IllegalStateException("No matching handler method found for servlet request: path '" +
+						lookupPath + "', method '" + request.getMethod() + "', parameters " +
+						StylerUtils.style(request.getParameterMap()));
 			}
 		}
 
@@ -583,7 +586,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 								ReflectionUtils.makeAccessible(initBinderMethod);
 								Object attrValue = ReflectionUtils.invokeMethod(initBinderMethod, handler, initBinderArgs);
 								if (attrValue != null) {
-									throw new IllegalStateException("InitBinder methods must not have a return value");
+									throw new IllegalStateException(
+											"InitBinder methods must not have a return value: " + initBinderMethod);
 								}
 							}
 						}
