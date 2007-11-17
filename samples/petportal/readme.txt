@@ -1,9 +1,10 @@
-===============================
-== Spring Pet Portal Example ==
-===============================
+=========================================
+== Spring PetPortal sample application ==
+=========================================
 
 @author John A. Lewis
 @author Mark Fisher
+@author Juergen Hoeller
 
 
 1. MOTIVATION
@@ -46,13 +47,11 @@ HandlerMapping options available:
 
 This directory contains the web app source.
 For deployment, it needs to be built with Apache Ant.
-The only requirements are JDK >=1.3 and Ant >=1.5.
+The only requirements are JDK >=1.5 and Ant >=1.6.
 
 Run "build.bat" in this directory for available targets (e.g. "build.bat build",
-"build.bat warfile"). Note that to start Ant this way, you'll need an XML parser
-in your classpath (e.g. in "%JAVA_HOME%/jre/lib/ext"; included in JDK 1.4).
-You can use "warfile.bat" as a shortcut for WAR file creation.
-The WAR file will be created in the "dist" directory.
+"build.bat warfile"). You can use "warfile.bat" as a shortcut for WAR file
+creation. The WAR file will be created in the "dist" directory.
 
 Unlike a Servlet-based application, in a Portlet-based application, the WAR file
 cannot simply be dropped into a directory and used as-is. There will be 
@@ -85,7 +84,7 @@ portlet-container.
 Many portal platforms have an "automatic" deployment process that will
 make the necessary modifications to the webapp for you. Make sure you
 carefully review the resulting web.xml file after it is deployed. Some
-of these deployment tools will mangle listeners or the ViewRenderServlet 
+of these deployment tools will mangle listeners or the ViewRendererServlet 
 and break the example. It is generally safer to learn how to deploy the webapp 
 yourself and do it by hand or with a custom ant script.
 

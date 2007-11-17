@@ -30,7 +30,7 @@
 <h1>Add New Pet</h1>
 
 <portlet:actionURL var="formAction">
-    <portlet:param name="action" value="addPet"/>
+    <portlet:param name="action" value="add"/>
     <portlet:param name="_page"><jsp:attribute name="value"><c:out value="${page}"/></jsp:attribute></portlet:param>
 </portlet:actionURL>
 

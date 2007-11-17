@@ -3,35 +3,22 @@
 
 <beans>
 
-	<!-- Multipart Resolver -->
+  <bean class="org.springframework.samples.petportal.portlet.PetDescriptionUploadController">
+    <property name="petService" ref="petService"/>
+  </bean>
 
-	<bean id="portletMultipartResolver" class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver">
-		<property name="maxUploadSize">
-			<value>2048</value>
-		</property>
-	</bean>
+  <bean class="org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+    <property name="interceptors">
+      <!-- This interceptor forwards the mapping request parameter from an ActionRequest to be used as a render parameter. -->
+      <bean class="org.springframework.web.portlet.handler.ParameterMappingInterceptor"/>
+    </property>
+  </bean>
 
-	<!-- Controller -->
-
-   <bean id="petDescriptionUploadController" class="org.springframework.samples.petportal.portlet.PetDescriptionUploadController">
-    	<property name="petService" ref="petService"/>
-		<property name="sessionForm" value="false"/>
-		<property name="commandName" value="upload"/>
-		<property name="commandClass" value="org.springframework.samples.petportal.domain.PetDescription"/>
-		<property name="formView" value="upload"/>
-    </bean>
-
-	<!-- Handler Mapping -->
-	
-	<bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
-		<property name="portletModeMap">
-			<map>
-				<entry key="view"><ref bean="petDescriptionUploadController"/></entry>
-			</map>
-		</property>
-	</bean>
-
-	<!-- Exception Handler -->
+  <bean id="portletMultipartResolver" class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver">
+    <property name="maxUploadSize">
+      <value>2048</value>
+    </property>
+  </bean>
 
 	<bean id="customExceptionHandler" class="org.springframework.web.portlet.handler.SimpleMappingExceptionResolver">
 		<property name="order" value="1"/>
@@ -41,10 +28,6 @@
 				<prop key="org.springframework.samples.petportal.domain.InvalidFileTypeException">invalidFileType</prop>
 			</props>
 		</property> 
-	</bean>
-	
-	<bean id="defaultExceptionHandler" parent="defaultExceptionHandlerTemplate">
-		<property name="order" value="2"/>
 	</bean>
 
 </beans>

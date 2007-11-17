@@ -69,7 +69,7 @@
 
 		<mkdir dir="${build.dir}"/>
 
-		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true"
+		<javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
@@ -114,9 +114,9 @@
 		<mkdir dir="${docs.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="PetPortal"
-				source="1.3" author="true" version="true" use="true" packagenames="*">
+				source="1.5" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>PetPortal</h1>]]></doctitle>
-			<bottom><![CDATA[<i>John A. Lewis and Mark Fisher, 2006.</i>]]></bottom>
+			<bottom><![CDATA[<i>John A. Lewis, Mark Fisher, Juergen Hoeller - 2007.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 			<classpath refid="build-classpath"/>
 		</javadoc>

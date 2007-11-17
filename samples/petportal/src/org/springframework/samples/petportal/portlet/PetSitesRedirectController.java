@@ -1,32 +1,13 @@
-/*
- * Copyright 2002-2006 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.springframework.samples.petportal.portlet;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.PortletRequest;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.samples.petportal.domain.PetSite;
-import org.springframework.validation.BindException;
-import org.springframework.web.portlet.mvc.SimpleFormController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * This Controller demonstrates a redirect to a website that is external 
@@ -36,31 +17,31 @@ import org.springframework.web.portlet.mvc.SimpleFormController;
  * 
  * @author John A. Lewis
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
-public class PetSitesRedirectController extends SimpleFormController implements InitializingBean {
+@Controller
+@RequestMapping("VIEW")
+public class PetSitesRedirectController {
 
 	private Properties petSites;
-	
-	public void afterPropertiesSet() throws Exception {
-		this.setRedirectAction(true);
-	}
 	
 	public void setPetSites(Properties petSites) {
 		this.petSites = petSites;
 	}
 	
-	protected Map referenceData(PortletRequest request) throws Exception {
-		Map data = new HashMap();
-		data.put("petSites", petSites);
-		return data;
+	@ModelAttribute("petSites")
+	public Properties getPetSites() {
+		return this.petSites;
 	}
 
-	public void onSubmitAction(ActionRequest request,
-			                   ActionResponse response,
-			                   Object command,
-			                   BindException errors) throws Exception {
-		PetSite redirect = (PetSite) command;
-		response.sendRedirect(redirect.getUrl().toString());
+	@RequestMapping  // default render
+	public String showPetSites() {
+		return "petSitesView";
+	}
+
+	@RequestMapping  // default action
+	public void doRedirect(@RequestParam("url") String url, ActionResponse response) throws Exception {
+		response.sendRedirect(url);
 	}
 
 }

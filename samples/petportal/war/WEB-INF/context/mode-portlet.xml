@@ -3,24 +3,10 @@
 
 <beans>
 
-	<!-- Controller -->
-
 	<bean id="modeNameViewController" class="org.springframework.web.portlet.mvc.PortletModeNameViewController"/>
 
-	<!-- Handler Mapping -->
-	
 	<bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
-		<property name="portletModeMap">
-			<map>
-				<entry key="view" value-ref="modeNameViewController"/>
-				<entry key="edit" value-ref="modeNameViewController"/>
-				<entry key="help" value-ref="modeNameViewController"/>
-			</map>
-		</property>
+		<property name="defaultHandler" ref="modeNameViewController"/>
 	</bean>
-
-	<!-- Exception Handler -->
-
-	<bean id="defaultExceptionHandler" parent="defaultExceptionHandlerTemplate"/>
 
 </beans>

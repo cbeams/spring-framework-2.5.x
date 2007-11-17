@@ -8,6 +8,7 @@ Changes in version 2.5 final (2007-11-19)
 
 General
 * updated javadoc and reference documentation
+* revised PetPortal sample application into a full-fledged Java 5 showcase (annotation-based configuration etc)
 
 Package org.springframework.context
 * "context:load-time-weaver" autodetects the GlassFish ClassLoader even within a GlassFish web app now
@@ -28,16 +29,22 @@ Package org.springframework.orm
 Package org.springframework.scheduling
 * fixed CommonJ TimerManagerFactoryBean to not require the "scheduledTimerListeners" property
 
+Package org.springframework.test
+* TestContextManager logs TestExecutionListener exceptions at error/warn level instead of info/debug
+
 Package org.springframework.transaction
 * JtaTransactionManager swallows IllegalStateException when synchronizing with existing transaction (for JBoss 4.2)
 
 Package org.springframework.web
+* CommonsMultipartResolver detects multiple files for the same field name and throws a corresponding exception
 * RequestToViewNameTranslator kicks in before the "HandlerInterceptor.postHandle" phase
 * RequestToViewNameTranslator's "getViewName" is allowed to return null if no default found
 * fixed AnnotationMethodHandlerAdapter to expose the implicit model even when using request-to-view-name translation
 * Portlet AnnotationMethodHandlerAdapter preserves implicit model from action phase to render phase
 * Portlet AnnotationMethodHandlerAdapter applies cache settings (prevents caching when session attributes are involved)
 * Portlet AnnotationMethodHandlerAdapter allows default @RequestMapping annotations for action as well as render methods
+* Portlet AnnotationMethodHandlerAdapter resolves PortletPreferences, PortletMode, WindowState, PortalContext arguments
+* factored out AbstractWizardFormController's "getTargetPage" logic into WebUtils/PortletUtils, for reuse in custom code
 * InternalResourceView explicitly sets content type on response in include case (for correct charset handling on Tomcat)
 * exposed applicable standard HTML attributes on JSP "form:option" and "form:options" tags
 * JSP form tags always autogenerate valid HTML ids (not including "[" or "]" characters from array element properties)

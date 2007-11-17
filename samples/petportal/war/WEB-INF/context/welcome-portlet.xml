@@ -3,18 +3,11 @@
 
 <beans>
 
-	<!-- Wrapping a Pre-existing JSR-168-compliant Portlet -->
-
+	<!-- Wrapping a pre-existing JSR-168-compliant Portlet -->
 	<bean id="welcomePortlet" class="org.springframework.web.portlet.mvc.PortletWrappingController">
-		<property name="portletClass">
-			<value>org.springframework.samples.petportal.portlet.WelcomePortlet</value>
-		</property>
-		<property name="useSharedPortletConfig">
-			<value>false</value>
-		</property>
-		<property name="portletName">
-			<value>wrapped-welcome</value>
-		</property>
+		<property name="portletClass" value="org.springframework.samples.petportal.portlet.WelcomePortlet"/>
+		<property name="useSharedPortletConfig" value="false"/>
+		<property name="portletName" value="wrapped-welcome"/>
 		<property name="initParameters">
 			<props>
 				<prop key="dog">Poodle</prop>
@@ -30,8 +23,6 @@
 	<bean id="welcomePortlet" class="org.springframework.samples.petportal.portlet.WelcomePortlet"/>
 	-->
 	
-	<!-- Handler Mapping -->
-
 	<bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
 		<property name="portletModeMap">
 			<map>
@@ -39,9 +30,5 @@
 			</map>
 		</property>
 	</bean>
-	
-	<!-- Exception Handler -->
-
-	<bean id="defaultExceptionHandler" parent="defaultExceptionHandlerTemplate"/>
 
 </beans>

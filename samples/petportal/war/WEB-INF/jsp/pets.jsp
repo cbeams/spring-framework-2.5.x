@@ -15,7 +15,7 @@
           <td><c:out value="${pet.breed}"/></td>
           <td>
              <a href="<portlet:renderURL>
-                         <portlet:param name="action" value="viewPet"/>
+                         <portlet:param name="action" value="view"/>
                          <portlet:param name="pet">
                              <jsp:attribute name="value">
                                  <c:out value="${pet.key}"/>
@@ -27,7 +27,7 @@
           </td>
           <td>
              <a href="<portlet:actionURL>
-                         <portlet:param name="action" value="deletePet"/>
+                         <portlet:param name="action" value="delete"/>
                          <portlet:param name="pet">
                              <jsp:attribute name="value">
                                  <c:out value="${pet.key}"/>
@@ -43,7 +43,7 @@
     <tr>
        <td colspan="4" align="right">
           <a href="<portlet:renderURL>
-                      <portlet:param name="action" value="addPet"/>
+                      <portlet:param name="action" value="add"/>
                    </portlet:renderURL>">
              Add a Pet
           </a>

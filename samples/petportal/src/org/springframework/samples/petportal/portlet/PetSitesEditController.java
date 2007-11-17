@@ -1,29 +1,19 @@
-/*
- * Copyright 2002-2006 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.springframework.samples.petportal.portlet;
 
 import java.util.Properties;
 
-import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
 
-import org.springframework.web.portlet.ModelAndView;
-import org.springframework.web.portlet.mvc.Controller;
+import org.springframework.samples.petportal.domain.PetSite;
+import org.springframework.samples.petportal.validation.PetSiteValidator;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 /**
  * This Controller simply populates the model with the current map
@@ -33,8 +23,12 @@ import org.springframework.web.portlet.mvc.Controller;
  * is set. See 'WEB-INF/context/petsites-portlet.xml' for details.
  * 
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
-public class PetSitesEditController implements Controller {
+@Controller
+@RequestMapping("EDIT")
+@SessionAttributes("site")
+public class PetSitesEditController {
 
 	private Properties petSites;
 	
@@ -42,11 +36,41 @@ public class PetSitesEditController implements Controller {
 		this.petSites = petSites;
 	}
 
-	public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) throws Exception {
-		return new ModelAndView("petSitesEdit", "petSites", petSites);
+	@ModelAttribute("petSites")
+	public Properties getPetSites() {
+		return this.petSites;
 	}
 
-	public void handleActionRequest(ActionRequest request, ActionResponse response) throws Exception {
+	@RequestMapping  // default (action=list)
+	public String showPetSites() {
+		return "petSitesEdit";
+	}
+
+	@RequestMapping(params = "action=add")  // render phase
+	public String showSiteForm(ModelMap model) {
+		// Used for the initial form as well as for redisplaying with errors.
+		if (!model.containsKey("site")) {
+			model.addAttribute("site", new PetSite());
+		}
+		return "petSitesAdd";
+	}
+
+	@RequestMapping(params = "action=add")  // action phase
+	public void populateSite(
+			@ModelAttribute("site") PetSite petSite, BindingResult result, SessionStatus status, ActionResponse response) {
+
+		new PetSiteValidator().validate(petSite, result);
+		if (!result.hasErrors()) {
+			this.petSites.put(petSite.getName(), petSite.getUrl());
+			status.setComplete();
+			response.setRenderParameter("action", "list");
+		}
+	}
+
+	@RequestMapping(params = "action=delete")
+	public void removeSite(@RequestParam("site") String site, ActionResponse response) {
+		this.petSites.remove(site);
+		response.setRenderParameter("action", "list");
 	}
 
 }

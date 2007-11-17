@@ -28,12 +28,10 @@
 		<property name="prefix" value="/WEB-INF/jsp/"/>
 		<property name="suffix" value=".jsp"/>
 	</bean>
-	
-	<!-- This interceptor forwards the mapping request parameter from an ActionRequest to be used as a render parameter. -->
-	<bean id="parameterMappingInterceptor" class="org.springframework.web.portlet.handler.ParameterMappingInterceptor"/>
 
-	<!-- Abstract Default ExceptionHandler -->
-	<bean id="defaultExceptionHandlerTemplate" class="org.springframework.web.portlet.handler.SimpleMappingExceptionResolver" abstract="true">
+	<!-- Default ExceptionHandler -->
+	<bean id="defaultExceptionHandler" class="org.springframework.web.portlet.handler.SimpleMappingExceptionResolver">
+    <property name="order" value="10"/>
 		<property name="defaultErrorView" value="error"/>
 		<property name="exceptionMappings">
 			<props>
