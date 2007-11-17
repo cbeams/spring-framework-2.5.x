@@ -249,6 +249,10 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		}
 
 		this.nativeEntityManagerFactory = createNativeEntityManagerFactory();
+		if (this.nativeEntityManagerFactory == null) {
+			throw new IllegalStateException(
+					"JPA PersistenceProvider returned null EntityManagerFactory - check your JPA provider setup!");
+		}
 		if (this.jpaVendorAdapter != null) {
 			this.jpaVendorAdapter.postProcessEntityManagerFactory(this.nativeEntityManagerFactory);
 		}

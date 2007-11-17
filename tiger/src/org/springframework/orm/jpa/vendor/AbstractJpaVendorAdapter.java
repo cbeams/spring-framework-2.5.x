@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import javax.persistence.EntityManagerFactory;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 
 /**
- * Abstract JpaVendorAdapter implementation that defines common properties,
- * to be translated into vendor-specific JPA properties by subclasses.
+ * Abstract {@link JpaVendorAdapter} implementation that defines common properties,
+ * to be translated into vendor-specific JPA properties by concrete subclasses.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -34,9 +34,9 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	private String databasePlatform;
 
-	private boolean generateDdl;
+	private boolean generateDdl = false;
 
-	private boolean showSql;
+	private boolean showSql = false;
 
 
 	/**
@@ -52,7 +52,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Return the target database to operate on.
 	 */
 	protected Database getDatabase() {
-		return database;
+		return this.database;
 	}
 
 	/**
@@ -67,7 +67,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Return the name of the target database to operate on.
 	 */
 	protected String getDatabasePlatform() {
-		return databasePlatform;
+		return this.databasePlatform;
 	}
 
 	/**
@@ -87,7 +87,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * creating/updating all relevant tables.
 	 */
 	protected boolean isGenerateDdl() {
-		return generateDdl;
+		return this.generateDdl;
 	}
 
 	/**
@@ -104,7 +104,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Return whether to show SQL in the log (or in the console).
 	 */
 	protected boolean isShowSql() {
-		return showSql;
+		return this.showSql;
 	}
 
 
