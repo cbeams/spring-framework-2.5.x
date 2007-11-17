@@ -278,11 +278,8 @@ public abstract class PortletUtils {
 	 * and the values as corresponding attribute values. Keys must be Strings.
 	 * @param request current portlet request
 	 * @param attributes the attributes Map
-	 * @throws IllegalArgumentException if an invalid key is found in the Map (i.e. the key is not a String); or if
-	 * either of the supplied arguments is <code>null</code>
 	 */
-	public static void exposeRequestAttributes(PortletRequest request, Map attributes)
-			throws IllegalArgumentException {
+	public static void exposeRequestAttributes(PortletRequest request, Map attributes) {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(attributes, "attributes Map must not be null");
 		Iterator it = attributes.entrySet().iterator();
@@ -295,6 +292,7 @@ public abstract class PortletUtils {
 			request.setAttribute((String) entry.getKey(), entry.getValue());
 		}
 	}
+
 
 	/**
 	 * Check if a specific input type="submit" parameter was sent in the request,
@@ -374,6 +372,32 @@ public abstract class PortletUtils {
 			}
 		}
 		return params;
+	}
+
+	/**
+	 * Return the target page specified in the request.
+	 * @param request current portlet request
+	 * @param paramPrefix the parameter prefix to check for
+	 * (e.g. "_target" for parameters like "_target1" or "_target2")
+	 * @param currentPage the current page, to be returned as fallback
+	 * if no target page specified
+	 * @return the page specified in the request, or current page if not found
+	 */
+	public static int getTargetPage(PortletRequest request, String paramPrefix, int currentPage) {
+		Enumeration paramNames = request.getParameterNames();
+		while (paramNames.hasMoreElements()) {
+			String paramName = (String) paramNames.nextElement();
+			if (paramName.startsWith(paramPrefix)) {
+				for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
+					String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];
+					if (paramName.endsWith(suffix)) {
+						paramName = paramName.substring(0, paramName.length() - suffix.length());
+					}
+				}
+				return Integer.parseInt(paramName.substring(paramPrefix.length()));
+			}
+		}
+		return currentPage;
 	}
 
 

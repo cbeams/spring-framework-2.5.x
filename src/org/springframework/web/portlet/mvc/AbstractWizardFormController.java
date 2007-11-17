@@ -16,7 +16,6 @@
 
 package org.springframework.web.portlet.mvc;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,7 +31,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.util.PortletUtils;
-import org.springframework.web.util.WebUtils;
 
 /**
  * Form controller for typical wizard-style workflows.
@@ -777,20 +775,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #PARAM_TARGET
 	 */
 	protected int getTargetPage(PortletRequest request, int currentPage) {
-		Enumeration paramNames = request.getParameterNames();
-		while (paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
-			if (paramName.startsWith(PARAM_TARGET)) {
-				for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
-					String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];
-					if (paramName.endsWith(suffix)) {
-						paramName = paramName.substring(0, paramName.length() - suffix.length());
-					}
-				}
-				return Integer.parseInt(paramName.substring(PARAM_TARGET.length()));
-			}
-		}
-		return currentPage;
+		return PortletUtils.getTargetPage(request, PARAM_TARGET, currentPage);
 	}
 
 	/**
