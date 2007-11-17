@@ -83,7 +83,7 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-validator.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
 	<classpathentry kind="lib" path="lib/jamon/jamon-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-2.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jdo/jdo2-api.jar"/>
 	<classpathentry kind="lib" path="lib/jexcelapi/jxl.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
@@ -97,7 +97,7 @@
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="lib/oc4j/oc4j-clapi.jar"/>
 	<classpathentry kind="lib" path="lib/ognl/ognl.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/openjpa/openjpa-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/osgi/org.eclipse.osgi_3.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/poi/poi-2.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>

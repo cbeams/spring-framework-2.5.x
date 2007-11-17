@@ -121,7 +121,7 @@ public class JasperReportsUtilsTests extends TestCase {
 	public void testRenderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map exporterParameters = new HashMap();
-		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6);
+		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os, exporterParameters);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
@@ -230,6 +230,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		return list;
 	}
 
+
 	private static class SimpleProgressMonitor implements JRExportProgressMonitor {
 
 		private boolean invoked = false;
@@ -242,4 +243,5 @@ public class JasperReportsUtilsTests extends TestCase {
 			return invoked;
 		}
 	}
+
 }

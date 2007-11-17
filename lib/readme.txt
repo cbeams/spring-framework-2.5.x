@@ -271,8 +271,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Jar Jar Links 1.0 RC5 (http://code.google.com/p/jarjar)
 - required for building the framework jars
 
-* jasperreports/jasperreports-2.0.0.jar
-- JasperReports 2.0.0 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-2.0.2.jar
+- JasperReports 2.0.2 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
@@ -330,8 +330,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Oracle OC4J 10.1.3.1 ClassLoader API extract (http://www.oracle.com/technology/tech/java/oc4j)
 - required for building the framework
 
-* openjpa/openjpa-1.0.0.jar
-- OpenJPA 1.0.0 (http://openjpa.apache.org)
+* openjpa/openjpa-1.0.1.jar
+- OpenJPA 1.0.1 (http://openjpa.apache.org)
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
