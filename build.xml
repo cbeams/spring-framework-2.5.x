@@ -1059,7 +1059,7 @@
 	</target>
 
 
-	<target name="maveninstall" depends="maventasks"
+	<target name="maveninstall" depends="distpoms,maventasks"
 			description="Uploads all jars, sources, and POMs to a local m2 repository">
 
 		<maven:install file="${dist.dir}/spring.jar">
