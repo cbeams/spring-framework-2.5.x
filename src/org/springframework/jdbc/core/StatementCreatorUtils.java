@@ -16,8 +16,12 @@
 
 package org.springframework.jdbc.core;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -25,9 +29,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
@@ -135,10 +136,14 @@ public abstract class StatementCreatorUtils {
 			if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
 				boolean useSetObject = false;
 				try {
-					useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().indexOf("Informix") != -1);
+					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
+					String databaseProductName = dbmd.getDatabaseProductName();
+					String jdbcDriverName = dbmd.getDriverName();
+					useSetObject = (databaseProductName.indexOf("Informix") != -1 ||
+							jdbcDriverName.indexOf("Apache Derby Embedded") != -1);
 				}
 				catch (Throwable ex) {
-					logger.debug("Could not check database product name", ex);
+					logger.debug("Could not check database or driver name", ex);
 				}
 				if (useSetObject) {
 					ps.setObject(paramIndex, null);

@@ -76,6 +76,31 @@ public class StatementCreatorUtilsTests extends TestCase {
 		conControl.setReturnValue(metaData, 1);
 		metaData.getDatabaseProductName();
 		metaDataControl.setReturnValue("Informix Dynamic Server");
+		metaData.getDriverName();
+		metaDataControl.setReturnValue("Informix Driver");
+		ps.setObject(1, null);
+		psControl.setVoidCallable(1);
+		psControl.replay();
+		conControl.replay();
+		metaDataControl.replay();
+		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		conControl.verify();
+		metaDataControl.verify();
+	}
+
+	public void testSetParameterValueWithNullAndUnknownTypeOnDerbyEmbedded() throws SQLException {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl metaDataControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData metaData = (DatabaseMetaData) metaDataControl.getMock();
+		ps.getConnection();
+		psControl.setReturnValue(con, 1);
+		con.getMetaData();
+		conControl.setReturnValue(metaData, 1);
+		metaData.getDatabaseProductName();
+		metaDataControl.setReturnValue("Apache Derby");
+		metaData.getDriverName();
+		metaDataControl.setReturnValue("Apache Derby Embedded Driver");
 		ps.setObject(1, null);
 		psControl.setVoidCallable(1);
 		psControl.replay();
