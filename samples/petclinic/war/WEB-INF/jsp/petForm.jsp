@@ -33,17 +33,15 @@
       <td>
         <c:choose>
           <c:when test="${pet.new}">
-            <input type="submit" value="Add Pet"/>
+            <p class="submit"><input type="submit" value="Add Pet"/></p>
           </c:when>
           <c:otherwise>
-            <input type="submit" value="Update Pet"/>
+            <p class="submit"><input type="submit" value="Update Pet"/></p>
           </c:otherwise>
         </c:choose>
       </td>
     </tr>
   </table>
 </form:form>
-
-<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

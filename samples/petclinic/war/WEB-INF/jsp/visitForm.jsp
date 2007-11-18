@@ -5,12 +5,14 @@
 
 <form:form modelAttribute="visit">
   <b>Pet:</b>
-  <table>
+  <table width="333">
     <tr>
+    <thead>
       <th>Name</th>
       <th>Birth Date</th>
       <th>Type</th>
       <th>Owner</th>
+    </thead>
     </tr>
     <tr>
       <td>${visit.pet.name}</td>
@@ -20,9 +22,7 @@
     </tr>
   </table>
 
-  <br/>
-
-  <table>
+  <table width="333">
     <tr>
       <th>
         Date:
@@ -44,7 +44,7 @@
     <tr>
       <td colspan="2">
         <input type="hidden" name="petId" value="${visit.pet.id}"/>
-        <input type="submit" value="Add Visit"/>
+        <p class="submit"><input type="submit" value="Add Visit"/></p>
       </td>
     </tr>
   </table>
@@ -52,7 +52,7 @@
 
 <br/>
 <b>Previous Visits:</b>
-<table>
+<table width="333">
   <tr>
     <th>Date</th>
     <th>Description</th>
@@ -66,7 +66,5 @@
     </c:if>
   </c:forEach>
 </table>
-
-<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

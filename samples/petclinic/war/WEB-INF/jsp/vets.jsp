@@ -5,8 +5,10 @@
 
 <table>
   <tr>
+  <thead>
     <th>Name</th>
     <th>Specialties</th>
+  </thead>
   </tr>
   <c:forEach var="vet" items="${vetList}">
     <tr>
@@ -20,7 +22,5 @@
     </tr>
   </c:forEach>
 </table>
-
-<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

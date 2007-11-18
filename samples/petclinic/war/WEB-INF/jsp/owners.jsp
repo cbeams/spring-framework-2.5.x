@@ -5,11 +5,13 @@
 
 <table>
   <tr>
+  <thead>
     <th>Name</th>
     <th>Address</th>
     <th>City</th>
     <th>Telephone</th>
     <th>Pets</th>
+  </thead>
   </tr>
   <c:forEach var="owner" items="${selections}">
     <tr>
@@ -27,7 +29,5 @@
     </tr>
   </c:forEach>
 </table>
-
-<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

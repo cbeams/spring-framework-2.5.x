@@ -13,13 +13,12 @@
       </th>
     </tr>
     <tr>
-      <td><input type="submit" value="Find Owners"/></td>
+      <td><p class="submit"><input type="submit" value="Find Owners"/></p></td>
     </tr>
   </table>
 </form:form>
 
 <br/>
 <a href="<c:url value="/addOwner.do"/>">Add Owner</a>
-<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

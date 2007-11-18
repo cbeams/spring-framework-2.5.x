@@ -44,17 +44,15 @@
       <td>
         <c:choose>
           <c:when test="${owner.new}">
-            <input type="submit" value="Add Owner"/>
+            <p class="submit"><input type="submit" value="Add Owner"/></p>
           </c:when>
           <c:otherwise>
-            <input type="submit" value="Update Owner"/>
+            <p class="submit"><input type="submit" value="Update Owner"/></p>
           </c:otherwise>
         </c:choose>
       </td>
     </tr>
   </table>
 </form:form>
-
-<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

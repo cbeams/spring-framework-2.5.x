@@ -20,22 +20,28 @@
       <th>Telephone </th>
       <td>${owner.telephone}</td>
     </tr>
+  </table>
+  <table class="table-buttons">
     <tr>
-      <td></td>
-      <td>
-        <form method=GET action="<c:url value="/editOwner.do"/>">
+      <td colspan="2" align="center">
+        <form method="GET" action="<c:url value="/editOwner.do"/>">
           <input type="hidden" name="ownerId" value="${owner.id}"/>
-          <input type="submit" value="Edit Owner"/>
+          <p class="submit"><input type="submit" value="Edit Owner"/></p>
+        </form>
+      </td>
+      <td>
+        <form method="GET" action="<c:url value="/addPet.do"/>" name="formAddPet">
+          <input type="hidden" name="ownerId" value="${owner.id}"/>
+          <p class="submit"><input type="submit" value="Add New Pet"/></p>
         </form>
       </td>
     </tr>
   </table>
 
-  <br/>
-  <h3>Pets and Visits</h3>
+  <h2>Pets and Visits</h2>
 
   <c:forEach var="pet" items="${owner.pets}">
-    <table>
+    <table width="94%">
       <tr>
         <td valign="top">
           <table>
@@ -51,29 +57,15 @@
               <th>Type</th>
               <td>${pet.type.name}</td>
             </tr>
-            <tr>
-              <td colspan="2">
-                <form method="GET" action="<c:url value="/editPet.do"/>" name="formEditPet${pet.id}">
-                  <input type="hidden" name="petId" value="${pet.id}"/>
-                  <input type="submit" value="Edit Pet"/>
-                </form>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2">
-                <form method="GET" action="<c:url value="/addVisit.do"/>" name="formVisitPet${pet.id}">
-                  <input type="hidden" name="petId" value="${pet.id}"/>
-                  <input type="submit" value="Add Visit"/>
-                </form>
-              </td>
-            </tr>
           </table>
         </td>
         <td valign="top">
           <table>
             <tr>
+            <thead>
               <th>Visit Date</th>
               <th>Description</th>
+            </thead>
             </tr>
             <c:forEach var="visit" items="${pet.visits}">
               <tr>
@@ -85,14 +77,22 @@
         </td>
       </tr>
     </table>
-    <br/>
+    <table class="table-buttons">
+      <tr>
+        <td>
+          <form method="GET" action="<c:url value="/editPet.do"/>" name="formEditPet${pet.id}">
+            <input type="hidden" name="petId" value="${pet.id}"/>
+            <p class="submit"><input type="submit" value="Edit Pet"/></p>
+          </form>
+        </td>
+        <td>
+          <form method="GET" action="<c:url value="/addVisit.do"/>" name="formVisitPet${pet.id}">
+            <input type="hidden" name="petId" value="${pet.id}"/>
+            <p class="submit"><input type="submit" value="Add Visit"/></p>
+          </form>
+        </td>
+      </tr>
+    </table>
   </c:forEach>
-
-  <form method=GET action="<c:url value="/addPet.do"/>" name="formAddPet">
-    <input type="hidden" name="ownerId" value="${owner.id}"/>
-    <input type="submit" value="Add New Pet"/>
-  </form>
-
-  <br/>
   
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>
