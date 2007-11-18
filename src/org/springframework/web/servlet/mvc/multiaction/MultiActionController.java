@@ -525,9 +525,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see #bind
 	 * @see #initBinder
 	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
-	    throws Exception {
-
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command) throws Exception {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName(command));
 		initBinder(request, binder);
 		return binder;
@@ -561,19 +559,17 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
-	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
-	    throws Exception {
+	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
 
 		initBinder((ServletRequest) request, binder);
 	}
 
 	/**
 	 * Initialize the given binder instance, for example with custom editors.
-	 * @deprecated since Spring 2.0:
+	 * @deprecated as of Spring 2.0:
 	 * use <code>initBinder(HttpServletRequest, ServletRequestDataBinder)</code> instead
 	 */
-	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder)
-	    throws Exception {
+	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder) throws Exception {
 	}
 
 
