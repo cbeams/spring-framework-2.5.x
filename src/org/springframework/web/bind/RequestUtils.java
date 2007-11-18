@@ -31,7 +31,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
- * @deprecated since Spring 2.0: use ServletRequestUtils instead
+ * @deprecated as of Spring 2.0: use ServletRequestUtils instead
  * @see ServletRequestUtils
  */
 public abstract class RequestUtils {
