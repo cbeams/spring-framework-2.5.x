@@ -50,9 +50,13 @@ import org.springframework.web.util.NestedServletException;
  * class. Subclasses of this class can handle several different types of
  * request with methods of the form
  *
- * <pre class="code">public (ModelAndView | Map | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
+ * <pre class="code">public (ModelAndView | Map | String | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
  *
- * May take a third parameter (of type {@link HttpSession}) in which an
+ * A Map return value indicates a model that is supposed to be passed to a default view
+ * (determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}).
+ * A String return value indicates the name of a view to be rendered without a specific model.
+ *
+ * <p>May take a third parameter (of type {@link HttpSession}) in which an
  * existing session will be required, or a third parameter of an arbitrary
  * class that gets treated as the command (that is, an instance of the class
  * gets created, and request parameters get bound to it)
@@ -71,9 +75,8 @@ import org.springframework.web.util.NestedServletException;
  * response directly to the supplied {@link HttpServletResponse}.
  *
  * <p>This model allows for rapid coding, but loses the advantage of
- * compile-time checking. It is similar to a Struts 1.1
- * <code>DispatchAction</code>, but more sophisticated. Also supports
- * delegation to another object.
+ * compile-time checking. It is similar to a Struts <code>DispatchAction</code>,
+ * but more sophisticated. Also supports delegation to another object.
  *
  * <p>An implementation of the {@link MethodNameResolver} interface defined in
  * this package should return a method name for a given request, based on any
