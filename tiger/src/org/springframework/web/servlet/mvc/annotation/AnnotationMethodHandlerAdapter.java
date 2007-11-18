@@ -147,6 +147,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	 * and HandlerAdapters.
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
 	}
 

@@ -37,9 +37,8 @@ import org.springframework.web.util.UrlPathHelper;
  * {@link #setSuffix(String) "suffix"} added as appropriate.
  *
  * <p>The stripping of the leading slash and file extension can be disabled
- * using the {@link #setStripLeadingSlash(boolean) "stripLeadingSlash"} and
- * {@link #setStripExtension(boolean) "stripExtension"} properties,
- * respectively.
+ * using the {@link #setStripLeadingSlash "stripLeadingSlash"} and
+ * {@link #setStripExtension "stripExtension"} properties, respectively.
  * 
  * <p>Find below some examples of request to view name translation.
  * 
@@ -49,6 +48,7 @@ import org.springframework.web.util.UrlPathHelper;
  * </pre>
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.servlet.RequestToViewNameTranslator
  * @see org.springframework.web.servlet.ViewResolver
@@ -148,7 +148,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @throws IllegalArgumentException if the supplied UrlPathHelper is <code>null</code>
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		Assert.notNull(urlPathHelper);
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
 	}
 
@@ -159,13 +159,13 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @see org.springframework.web.util.UrlPathHelper#getLookupPathForRequest
 	 * @see #transformPath
 	 */
-	public final String getViewName(HttpServletRequest request) {
+	public String getViewName(HttpServletRequest request) {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		return this.prefix + transformPath(lookupPath) + this.suffix;
+		return (this.prefix + transformPath(lookupPath) + this.suffix);
 	}
 
 
-    /**
+	/**
 	 * Transform the request URI (in the context of the webapp) stripping
 	 * slashes and extensions, and replacing the separator as required.
 	 * @param lookupPath the lookup path for the current request,

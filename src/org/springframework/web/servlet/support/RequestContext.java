@@ -30,6 +30,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
+import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -366,7 +367,8 @@ public class RequestContext {
 	 * <p>A default UrlPathHelper is always available.
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		this.urlPathHelper = (urlPathHelper != null ? urlPathHelper : new UrlPathHelper());
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
+		this.urlPathHelper = urlPathHelper;
 	}
 
 	/**
