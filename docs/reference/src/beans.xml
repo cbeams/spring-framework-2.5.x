@@ -36,10 +36,10 @@
     <para>The <literal>org.springframework.beans</literal> and
     <literal>org.springframework.context</literal> packages provide the basis
     for the Spring Framework's IoC container. The <interfacename><ulink
-    url="http://www.springframework.org/docs/api/org/springframework/beans/factory/BeanFactory.html">BeanFactory</ulink></interfacename>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/BeanFactory.html">BeanFactory</ulink></interfacename>
     interface provides an advanced configuration mechanism capable of managing
     objects of any nature. The <literal><ulink
-    url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink></literal>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink></literal>
     interface builds on top of the <interfacename>BeanFactory</interfacename>
     (it is a sub-interface) and adds other functionality such as easier
     integration with Spring's AOP features, message resource handling (for use
@@ -3212,7 +3212,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <interfacename>Scope</interfacename> implementations that are supplied
         with the Spring Framework itself for an idea of how to go about
         implementing your own. The <ulink
-        url="http://www.springframework.org/docs/api/org/springframework/beans/factory/config/Scope.html">Scope
+        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/config/Scope.html">Scope
         Javadoc</ulink> explains the main class to implement when you need
         your own scope in more detail too.</para>
 
@@ -4508,7 +4508,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     <para>While the <literal>beans</literal> package provides basic
     functionality for managing and manipulating beans, including in a
     programmatic way, the <literal>context</literal> package adds the <ulink
-    url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html"><interfacename>ApplicationContext</interfacename></ulink>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/ApplicationContext.html"><interfacename>ApplicationContext</interfacename></ulink>
     interface, which enhances <interfacename>BeanFactory</interfacename>
     functionality in a more <emphasis>framework-oriented style</emphasis>.
     Many users will use <interfacename>ApplicationContext</interfacename> in a
@@ -5162,9 +5162,9 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     initialize (for example a Hibernate
     <interfacename>SessionFactory</interfacename>), and possible issues due to
     side-effects. As an alternative, classes such as <literal><ulink
-    url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
     or <literal><ulink
-    url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
     may be used to demand-load multiple hierarchical (that is one container is
     the parent of another) Spring IoC container instances in a singleton
     fashion, which may then be used as the parents of the web-application
@@ -5173,9 +5173,9 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
 
     <para>You can see a detailed example of the usage of these classes by
     viewing the Javadoc for the <ulink
-    url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink>
     and <ulink
-    url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink>
     classes. As mentioned in the <link linkend="ejb">chapter on EJBs</link>,
     the Spring convenience base classes for EJBs normally use a non-singleton
     <interfacename>BeanFactoryLocator</interfacename> implementation, which is
@@ -5232,7 +5232,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     <ulink
     url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"><classname>PersistenceAnnotationBeanPostProcessor</classname></ulink>,
     as well as the aforementioned <ulink
-    url="http://www.springframework.org/docs/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"><classname>RequiredAnnotationBeanPostProcessor</classname></ulink>.)</para>
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"><classname>RequiredAnnotationBeanPostProcessor</classname></ulink>.)</para>
 
     <section id="beans-autowired-annotation">
       <title><interfacename>@Autowired</interfacename></title>

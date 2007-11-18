@@ -834,7 +834,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
 
       <para>The full details of this method signature are covered in the
       <ulink
-      url="http://www.springframework.org/docs/api/org/springframework/web/servlet/mvc/multiaction/MultiActionController.html">class-level
+      url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/servlet/mvc/multiaction/MultiActionController.html">class-level
       Javadoc</ulink> of the <classname>MultiActionController</classname>
       source itself. If you are planning to use the
       <classname>MultiActionController</classname>, you are highly encouraged
