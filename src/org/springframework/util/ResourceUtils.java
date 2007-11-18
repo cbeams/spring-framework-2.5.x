@@ -19,8 +19,9 @@ package org.springframework.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 
 /**
  * Utility methods for resolving resource locations to files in the
@@ -198,7 +199,45 @@ public abstract class ResourceUtils {
 					description + " cannot be resolved to absolute file path " +
 					"because it does not reside in the file system: " + resourceUrl);
 		}
-		return new File(URLDecoder.decode(resourceUrl.getFile()));
+		try {
+			return new File(toURI(resourceUrl).getSchemeSpecificPart());
+		}
+		catch (URISyntaxException ex) {
+			// Fallback for URLs that are not valid URIs (should hardly ever happen).
+			return new File(resourceUrl.getFile());
+		}
+	}
+
+	/**
+	 * Resolve the given resource URI to a <code>java.io.File</code>,
+	 * i.e. to a file in the file system.
+	 * @param resourceUri the resource URI to resolve
+	 * @return a corresponding File object
+	 * @throws FileNotFoundException if the URL cannot be resolved to
+	 * a file in the file system
+	 */
+	public static File getFile(URI resourceUri) throws FileNotFoundException {
+		return getFile(resourceUri, "URI");
+	}
+
+	/**
+	 * Resolve the given resource URI to a <code>java.io.File</code>,
+	 * i.e. to a file in the file system.
+	 * @param resourceUri the resource URI to resolve
+	 * @param description a description of the original resource that
+	 * the URI was created for (for example, a class path location)
+	 * @return a corresponding File object
+	 * @throws FileNotFoundException if the URL cannot be resolved to
+	 * a file in the file system
+	 */
+	public static File getFile(URI resourceUri, String description) throws FileNotFoundException {
+		Assert.notNull(resourceUri, "Resource URI must not be null");
+		if (!URL_PROTOCOL_FILE.equals(resourceUri.getScheme())) {
+			throw new FileNotFoundException(
+					description + " cannot be resolved to absolute file path " +
+					"because it does not reside in the file system: " + resourceUri);
+		}
+		return new File(resourceUri.getSchemeSpecificPart());
 	}
 
 	/**
@@ -245,6 +284,20 @@ public abstract class ResourceUtils {
 		else {
 			return jarUrl;
 		}
+	}
+
+	/**
+	 * Create a URI instance for the given URL, replacing spaces with
+	 * "%20" quotes first.
+	 * <p>Furthermore, this method works on JDK 1.4 as well,
+	 * in contrast to the <code>URL.toURI()</code> method.
+	 * @param url the URL to convert into a URI instance
+	 * @return the URI instance
+	 * @throws URISyntaxException if the URL wasn't a valid URI
+	 * @see java.net.URL#toURI()
+	 */
+	public static URI toURI(URL url) throws URISyntaxException {
+		return new URI(StringUtils.replace(url.toString(), " ", "%20"));
 	}
 
 }

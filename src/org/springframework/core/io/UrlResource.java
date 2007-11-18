@@ -49,6 +49,11 @@ public class UrlResource extends AbstractResource {
 	 */
 	private final URL cleanedUrl;
 
+	/**
+	 * Original URI, if available; used for URI and File access.
+	 */
+	private final URI uri;
+
 
 	/**
 	 * Create a new UrlResource.
@@ -58,6 +63,7 @@ public class UrlResource extends AbstractResource {
 		Assert.notNull(url, "URL must not be null");
 		this.url = url;
 		this.cleanedUrl = getCleanedUrl(this.url, url.toString());
+		this.uri = null;
 	}
 
 	/**
@@ -68,7 +74,8 @@ public class UrlResource extends AbstractResource {
 	public UrlResource(URI uri) throws MalformedURLException {
 		Assert.notNull(uri, "URI must not be null");
 		this.url = uri.toURL();
-		this.cleanedUrl = getCleanedUrl(this.url, this.url.toString());
+		this.cleanedUrl = getCleanedUrl(this.url, uri.toString());
+		this.uri = uri;
 	}
 
 	/**
@@ -80,6 +87,7 @@ public class UrlResource extends AbstractResource {
 		Assert.notNull(path, "Path must not be null");
 		this.url = new URL(path);
 		this.cleanedUrl = getCleanedUrl(this.url, path);
+		this.uri = null;
 	}
 
 	/**
@@ -123,12 +131,30 @@ public class UrlResource extends AbstractResource {
 	}
 
 	/**
-	 * This implementation returns a File reference for the underlying URL,
+	 * This implementation returns the underlying URI directly,
+	 * if possible.
+	 */
+	public URI getURI() throws IOException {
+		if (this.uri != null) {
+			return this.uri;
+		}
+		else {
+			return super.getURI();
+		}
+	}
+
+	/**
+	 * This implementation returns a File reference for the underlying URL/URI,
 	 * provided that it refers to a file in the file system.
 	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
 	 */
 	public File getFile() throws IOException {
-		return ResourceUtils.getFile(this.url, getDescription());
+		if (this.uri != null) {
+			return ResourceUtils.getFile(this.uri, getDescription());
+		}
+		else {
+			return ResourceUtils.getFile(this.url, getDescription());
+		}
 	}
 
 	/**

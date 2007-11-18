@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.springframework.core.NestedIOException;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Convenience base class for {@link Resource} implementations,
@@ -82,9 +83,9 @@ public abstract class AbstractResource implements Resource {
 	 * by {@link #getURL()}.
 	 */
 	public URI getURI() throws IOException {
-		String url = getURL().toString();
+		URL url = getURL();
 		try {
-			return new URI(url);
+			return ResourceUtils.toURI(url);
 		}
 		catch (URISyntaxException ex) {
 			throw new NestedIOException("Invalid URI [" + url + "]", ex);
