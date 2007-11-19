@@ -22,6 +22,9 @@ Package org.springframework.core
 Package org.springframework.jdbc
 * added "registerDatabase" method to SQLErrorCodesFactory, for eager association of database names with DataSources
 
+Package org.springframework.jms
+* DefaultMessageListenerContainer avoids deadlock between Connection and Session through the use of a shared monitor
+
 Package org.springframework.jndi
 * fixed "jee:jndi-lookup" tag to correctly handle "default-value" and "default-ref" attributes
 
@@ -42,6 +45,8 @@ Package org.springframework.web
 * RequestToViewNameTranslator kicks in before the "HandlerInterceptor.postHandle" phase
 * RequestToViewNameTranslator's "getViewName" is allowed to return null if no default found
 * fixed AnnotationMethodHandlerAdapter to expose the implicit model even when using request-to-view-name translation
+* fixed AnnotationMethodHandlerAdapter to correctly match parameters even in case of request method specified as well
+* DispatcherPortlet/AnnotationMethodHandlerAdapter swallows IllegalStateException when setting implicit render parameter
 * Portlet AnnotationMethodHandlerAdapter preserves implicit model from action phase to render phase
 * Portlet AnnotationMethodHandlerAdapter applies cache settings (prevents caching when session attributes are involved)
 * Portlet AnnotationMethodHandlerAdapter allows default @RequestMapping annotations for action as well as render methods
