@@ -10,6 +10,9 @@ General
 * updated javadoc and reference documentation
 * revised PetPortal sample application into a full-fledged Java 5 showcase (annotation-based configuration etc)
 
+Package org.springframework.aop
+* fixed garbage collection problem with CGLIB proxies, using a strong reference map for the fixed interceptors
+
 Package org.springframework.context
 * "context:load-time-weaver" autodetects the GlassFish ClassLoader even within a GlassFish web app now
 * "context:load-time-weaver" correctly detects the use of the Spring VM agent on WebLogic 9
