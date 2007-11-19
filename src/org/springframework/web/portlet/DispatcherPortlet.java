@@ -685,10 +685,15 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			// Trigger after-completion for thrown exception.
 			triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			// Forward the exception to the render phase to be displayed.
-			logger.debug("Caught exception during action phase - forwarding to render phase", ex);
-			PortletSession session = request.getPortletSession();
-			session.setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
-			response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, ex.toString());
+			try {
+				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, ex.toString());
+				request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
+				logger.debug("Caught exception during action phase - forwarding to render phase", ex);
+			}
+			catch (IllegalStateException ex2) {
+				// Probably sendRedirect called... need to rethrow exception immediately.
+				throw ex;
+			}
 		}
 		catch (Error err) {
 			PortletException ex =
