@@ -278,7 +278,8 @@
       message listeners is supported as well, through the
       <classname>GenericMessageEndpointManager</classname> facility.
       This is an alternative to the standard JMS listener facility, allowing
-      closer integration with message brokers such as ActiveMQ and JORAM.</para>
+      closer integration with message brokers such as ActiveMQ and JORAM.
+      See <xref linkend="jms-jca-message-endpoint-manager"/>.</para>
 
       <para>Spring 2.5 also introduces an XML namespace for simplifying JMS
       configuration, offering concise configuration of a large numbers of

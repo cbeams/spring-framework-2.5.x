@@ -747,6 +747,48 @@ public interface SessionAwareMessageListener {
   	</section>
   </section>
 
+  <section id="jms-jca-message-endpoint-manager">
+    <title>Support for JCA Message Endpoints</title>
+    <para>Beginning with version 2.5, Spring also provides support for a JCA-based
+    <interfacename>MessageListener</interfacename> container. The
+    <classname>JmsMessageEndpointManager</classname> will attempt to automatically
+    determine the <interfacename>ActivationSpec</interfacename> class name from the
+    provider's <interfacename>ResourceAdapter</interfacename> class name. Therefore,
+    it is typically possible to just provide Spring's generic
+    <classname>JmsActivationSpecConfig</classname> as shown in the following example.
+    </para>
+
+    <programlisting><![CDATA[<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
+  <property name="resourceAdapter" ref="resourceAdapter"/>
+  <property name="jmsActivationSpecConfig">
+    <bean class="org.springframework.jms.listener.endpoint.JmsActivationSpecConfig">
+      <property name="destinationName" value="myQueue"/>
+    </bean>
+  </property>
+  <property name="messageListener" ref="myMessageListener"/>
+</bean>]]></programlisting>
+
+    <para>Using Spring's <classname>ResourceAdapterFactoryBean</classname>, the
+    target <interfacename>ResourceAdapter</interfacename> may be configured locally
+    as depicted in the following example. In some environments (e.g. WebLogic), this
+    could alternatively be accomplished with a JNDI-lookup.</para>
+
+    <programlisting><![CDATA[<bean id="resourceAdapter" class="org.springframework.jca.support.ResourceAdapterFactoryBean">
+  <property name="resourceAdapter">
+    <bean class="org.apache.activemq.ra.ActiveMQResourceAdapter">
+      <property name="serverUrl" value="tcp://localhost:61616"/>
+    </bean>
+  </property>
+  <property name="workManager">
+    <bean class="org.springframework.jca.work.SimpleTaskWorkManager"/>
+  </property>
+</bean>]]></programlisting>
+
+    <para>Please consult the JavaDoc for <classname>JmsMessageEndpointManager</classname>,
+    <classname>JmsActivationSpecConfig</classname>, and
+    <classname>ResourceAdapterFactoryBean</classname> for more details.</para>
+  </section>
+
   <section id="jms-namespace">
     <title>JMS Namespace Support</title>
     
@@ -825,6 +867,19 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                         <interfacename>MessageListener</interfacename> or Spring
                         <interfacename>SessionAwareMessageListener</interfacename>,
                         this attribute may be omitted.</para> 
+                    </entry>
+                </row>
+                <row>
+                    <entry>response-destination</entry>
+                    <entry>
+                        <para>The name of the default response destination to send
+                        response messages to. This will be applied in case of a
+                        request message that does not carry a "JMSReplyTo" field.
+                        The type of this destination will be determined by the
+                        listener-container's "destination-type" attribute. Note:
+                        This only applies to a listener method with a return
+                        value, for which each result object will be converted
+                        into a response message.</para>
                     </entry>
                 </row>
                 <row>
@@ -912,6 +967,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                     </entry>
                 </row>
                 <row>
+                    <entry>message-converter</entry>
+                    <entry>
+                        <para>A reference to the <interfacename>MessageConverter</interfacename>
+                        strategy for converting JMS Messages to listener method arguments. Default
+                        is a <classname>SimpleMessageConverter</classname>.</para>
+                    </entry>
+                </row>
+                <row>
                     <entry>destination-type</entry>
                     <entry>
                         <para>The JMS destination type for this listener. Valid options include
@@ -933,8 +996,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                         <literal>auto</literal>, <literal>client</literal>,
                         <literal>dups-ok</literal>, or <literal>transacted</literal>
                         (the default is <literal>'auto'</literal>). A value of
-                        <literal>'transacted'</literal> activates a locally transacted Session.
-                        As an alternative, specify the <literal>transaction-manager</literal>
+                        <literal>'transacted'</literal> activates a locally transacted
+                        <interfacename>Session</interfacename>. As an alternative,
+                        specify the <literal>transaction-manager</literal>
                         attribute described below.</para>
                     </entry>
                 </row>
@@ -964,6 +1028,121 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         </tgroup>
     </table>	
   	
+    <para>Configuring a JCA-based listener container with the "jms" schema support is very similar.</para>
+
+    <programlisting><![CDATA[<jms:jca-listener-container resource-adapter="myResourceAdapter"
+                        destination-resolver="myDestinationResolver"
+                        transaction-manager="myTransactionManager"
+                        concurrency="10">
+
+    <jms:listener destination="queue.orders" ref="myMessageListener"/>
+
+</jms:jca-listener-container>]]></programlisting>
+
+    <para>The available configuration options for the JCA variant are described in the following table:</para>
+
+    <table id="jms-namespace-jca-listener-container-tbl">
+        <title>Attributes of the JMS <literal>&lt;jca-listener-container/&gt;</literal> element</title>
+        <tgroup cols="2">
+            <colspec colname="c1" colwidth="2*" />
+            <colspec colname="c2" colwidth="4*" />
+            <thead>
+                <row>
+                    <entry>Attribute</entry>
+                    <entry>Description</entry>
+                </row>
+            </thead>
+            <tbody>
+                <row>
+                    <entry>resource-adapter</entry>
+                    <entry>
+                        <para>A reference to the JCA
+                        <interfacename>ResourceAdapter</interfacename> bean (the default bean
+                        name is <literal>'resourceAdapter'</literal>).</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>activation-spec-factory</entry>
+                    <entry>
+                        <para>A reference to the <interfacename>JmsActivationSpecFactory</interfacename>.
+                        The default is to autodetect the JMS provider and its
+                        <interfacename>ActivationSpec</interfacename> class
+                        (see <classname>DefaultJmsActivationSpecFactory</classname>)</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>destination-resolver</entry>
+                    <entry>
+                        <para>A reference to the <interfacename>DestinationResolver</interfacename>
+                        strategy for resolving JMS <interfacename>Destinations</interfacename>.
+                        </para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>message-converter</entry>
+                    <entry>
+                        <para>A reference to the <interfacename>MessageConverter</interfacename>
+                        strategy for converting JMS Messages to listener method arguments. Default
+                        is a <classname>SimpleMessageConverter</classname>.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>destination-type</entry>
+                    <entry>
+                        <para>The JMS destination type for this listener. Valid options include
+                        <literal>queue</literal>, <literal>topic</literal>, or
+                        <literal>durableTopic</literal> (the default is
+                        <literal>'queue'</literal>).</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>client-id</entry>
+                    <entry>
+                        <para>The JMS client id for this listener container.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>acknowledge</entry>
+                    <entry>
+                        <para>The native JMS acknowledge mode. Valid options include:
+                        <literal>auto</literal>, <literal>client</literal>,
+                        <literal>dups-ok</literal>, or <literal>transacted</literal>
+                        (the default is <literal>'auto'</literal>). A value of
+                        <literal>'transacted'</literal> activates a locally transacted
+                        <interfacename>Session</interfacename>. As an alternative,
+                        specify the <literal>transaction-manager</literal>
+                        attribute described below.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>transaction-manager</entry>
+                    <entry>
+                        <para>A reference to a Spring <classname>JtaTransactionManager</classname>
+                        or a <interfacename>javax.transaction.TransactionManager</interfacename>
+                        for kicking off an XA transaction for each incoming message.
+                        If not specified, native acknowledging will be used (see
+                        the "acknowledge" attribute).</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>concurrency</entry>
+                    <entry>
+                        <para>The maximum number of concurrent sessions to activate for
+                        each listener.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>prefetch</entry>
+                    <entry>
+                        <para>The maximum number of messages to load into a single session.
+                        Note that raising this number might lead to starvation of concurrent
+                        consumers!</para>
+                    </entry>
+                </row>
+            </tbody>
+        </tgroup>
+    </table>
+ 
   </section>
 
 </chapter>
