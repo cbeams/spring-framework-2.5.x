@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.0.8 (November 2007)
+THE SPRING FRAMEWORK, release 2.0.8 (December 2007)
 ---------------------------------------------------
 http://www.springframework.org
 
@@ -33,10 +33,10 @@ managed by Spring, adding aspects such as declarative transaction management. Wi
 declarative transaction management without EJB... even without JTA, if you're using a single database in
 Tomcat or another web container without JTA support.
 
-* Flexible MVC web application framework, built on core Spring functionality. This framework is highly
-configurable via strategy interfaces, and accommodates multiple view technologies like JSP, Tiles, Velocity,
-FreeMarker, iText (for PDF), and POI (for Excel). Note that a Spring middle tier can easily be combined with
-a web tier based on any other web MVC framework, like Struts, WebWork, Tapestry, or JSF.
+* Flexible MVC web application framework, built on core Spring functionality. This dispatcher framework
+is highly configurable via strategy interfaces, and accommodates multiple view technologies: e.g. JSP, Tiles,
+Velocity, FreeMarker, iText. It comes in a Servlet and a Portlet edition, working closely with the underlying
+environment. Note that Spring can easily be combined with third-party web MVC frameworks too: e.g. Struts, JSF.
 
 You can use all of Spring's functionality in any J2EE server, and most of it also in non-managed environments.
 A central focus of Spring is to allow for reusable business and data access objects that are not tied to
