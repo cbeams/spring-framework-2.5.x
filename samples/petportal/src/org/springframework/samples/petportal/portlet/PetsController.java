@@ -106,6 +106,9 @@ public class PetsController {
 				this.petService.addPet(pet);
 				response.setRenderParameter("action", "list");
 			}
+			else {
+				model.addAttribute("page", currentPage);
+			}
 		}
 		else {
 			switch (currentPage) {
