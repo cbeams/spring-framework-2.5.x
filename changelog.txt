@@ -33,6 +33,7 @@ Package org.springframework.transaction
 * JtaTransactionManager swallows IllegalStateException when synchronizing with existing transaction (for JBoss 4.2)
 
 Package org.springframework.web
+* DispatcherPortlet swallows IllegalStateException when setting implicit render parameter (e.g. after sendRedirect call)
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
 * fixed TilesConfigurer to explicitly set the factory name to empty String by default
