@@ -312,6 +312,13 @@ public class CallMetaDataContext {
 			return workParameters;
 		}
 
+		Map limitedInParameterNamesMap  = new HashMap(limitedInParameterNames.size());
+		for (String limitedParameterName : limitedInParameterNames) {
+			limitedInParameterNamesMap.put(
+					metaDataProvider.parameterNameToUse(limitedParameterName).toLowerCase(),
+					limitedParameterName);			
+		}
+
 		for (CallParameterMetaData meta : metaDataProvider.getCallParameterMetaData()) {
 			String parNameToCheck = null;
 			if (meta.getParameterName() != null)
@@ -376,7 +383,8 @@ public class CallMetaDataContext {
 						}
 					}
 					else {
-						if (limitedInParameterNames.size() == 0 || limitedInParameterNames.contains(parNameToUse)) {
+						if (limitedInParameterNames.size() == 0 ||
+								limitedInParameterNamesMap.containsKey(parNameToUse.toLowerCase())) {
 							workParameters.add(metaDataProvider.createDefaultInParameter(parNameToUse, meta));
 							if (logger.isDebugEnabled()) {
 								logger.debug("Added metadata in parameter for: " + parNameToUse);
@@ -384,8 +392,8 @@ public class CallMetaDataContext {
 						}
 						else {
 							if (logger.isDebugEnabled()) {
-								logger.debug("Limited set of parameters " + limitedInParameterNames +
-										" -- skipped parameter for: " + parNameToUse);
+								logger.debug("Limited set of parameters " + limitedInParameterNamesMap.keySet() +
+										" skipped parameter for: " + parNameToUse);
 							}
 						}
 					}
@@ -450,7 +458,7 @@ public class CallMetaDataContext {
 			String callParameterName = callParameterNames.get(parameterNameToMatch.toLowerCase());
 			if (callParameterName == null) {
 				logger.warn("Unable to locate the corresponding parameter for \"" + parameterName +
-						"\" specified in the provided parameter values: " + inParameters);
+						"\" in the parameters used: " + callParameterNames.keySet());
 			}
 			else {
 				matchedParameters.put(callParameterName, inParameters.get(parameterName));
