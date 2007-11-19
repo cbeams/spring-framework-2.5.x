@@ -2,6 +2,11 @@ Export-Package: org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
   org.springframework.dao*;version=${spring-version-osgi}, \
   javax.transaction*;version=${tx-version};resolution:=optional, \
+  oracle.sql;resolution:=optional, \
+  org.jboss.resource.adapter.jdbc;resolution:=optional, \
+  weblogic.jdbc.extensions;resolution:=optional, \
+  com.ibm.websphere.rsadapter;resolution:=optional, \
+  com.ibm.ws.rsadapter.jdbc;resolution:=optional, \
   *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
