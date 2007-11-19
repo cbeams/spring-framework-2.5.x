@@ -37,17 +37,22 @@ public abstract class LangNamespaceUtils {
 
 
 	/**
-	 * Registers a {@link ScriptFactoryPostProcessor} bean definition in the supplied
+	 * Register a {@link ScriptFactoryPostProcessor} bean definition in the supplied
 	 * {@link BeanDefinitionRegistry} if the {@link ScriptFactoryPostProcessor} hasn't
 	 * already been registered.
-	 * @return the {@ScriptFactoryPostProcessor} bean definition
+	 * @param registry the {@link BeanDefinitionRegistry} to register the script processor with
+	 * @return the {@link ScriptFactoryPostProcessor} bean definition (new or already registered)
 	 */
 	public static BeanDefinition registerScriptFactoryPostProcessorIfNecessary(BeanDefinitionRegistry registry) {
-		if (!registry.containsBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition beanDefinition = new RootBeanDefinition(ScriptFactoryPostProcessor.class);
+		BeanDefinition beanDefinition = null;
+		if (registry.containsBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME)) {
+			beanDefinition = registry.getBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME);
+		}
+		else {
+			beanDefinition = new RootBeanDefinition(ScriptFactoryPostProcessor.class);
 			registry.registerBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME, beanDefinition);
 		}
-		return registry.getBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME);
+		return beanDefinition;
 	}
 
 }
