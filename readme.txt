@@ -33,10 +33,10 @@ managed by Spring, adding aspects such as declarative transaction management. Wi
 declarative transaction management without EJB... even without JTA, if you're using a single database in
 Tomcat or another web container without JTA support.
 
-* Flexible MVC web application framework, built on core Spring functionality. This framework is highly
-configurable via strategy interfaces, and accommodates multiple view technologies like JSP, Tiles, Velocity,
-FreeMarker, iText (for PDF), and POI (for Excel). Note that a Spring middle tier can easily be combined with
-a web tier based on any other web MVC framework, like Struts, WebWork, Tapestry, or JSF.
+* Flexible MVC web application framework, built on core Spring functionality. This dispatcher framework
+is highly configurable via strategy interfaces, and accommodates multiple view technologies: e.g. JSP, Tiles,
+Velocity, FreeMarker, iText. It comes in a Servlet and a Portlet edition, working closely with the underlying
+environment. Note that Spring can easily be combined with third-party web MVC frameworks too: e.g. Struts, JSF.
 
 You can use all of Spring's functionality in any J2EE server, and most of it also in non-managed environments.
 A central focus of Spring is to allow for reusable business and data access objects that are not tied to
@@ -54,10 +54,10 @@ knowledge about it immediately.
 The Spring Framework 2.5 requires JDK 1.4.2 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5.3, Commons Attributes 2.2, JMX 1.0/1.2,
-JCA 1.0/1.5, Hibernate 3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.3,
-Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.2, JSTL 1.0/1.1, Velocity 1.5,
-FreeMarker 2.3, JasperReports 1.3, Commons FileUpload 1.2, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 2.0, etc.
+Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5.3, Commons Attributes 2.2, JMX 1.2, JCA 1.0/1.5,
+Hibernate 3.1/3.2, TopLink 10.1.3/11, JDO 2.0, JPA 1.0, iBATIS SQL Maps 2.3, Caucho's Hessian & Burlap 2.1/3.0,
+JAX-RPC 1.1, JAX-WS 2.0, Quartz 1.5/1.6, EHCache 1.2, Commons FileUpload 1.2, Velocity 1.5, FreeMarker 2.3,
+JasperReports 1.3, JSTL 1.0/1.1, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 1.2/2.0, etc.
 
 Basic release contents (~5 MB):
 * "dist" contains the Spring binary jar files
@@ -116,7 +116,7 @@ MODULE JARS (dist/modules):
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
-* "spring-context" (~430 KB)
+* "spring-context" (~435 KB)
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
@@ -144,7 +144,7 @@ MODULE JARS (dist/modules):
 - Contents: test context framework, JUnit support, JNDI mocks, Servlet API mocks, Portlet API mocks
 - Dependencies: spring-core, (spring-context, spring-jdbc, spring-web, JUnit, Servlet API, Portlet API)
 
-* "spring-tx" (~215 KB)
+* "spring-tx" (~220 KB)
 - Contents: transaction infrastructure, JCA support, DAO support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
 
@@ -152,7 +152,7 @@ MODULE JARS (dist/modules):
 - Contents: web application context, multipart resolver, HTTP-based remoting support
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
-* "spring-webmvc" (~320 KB)
+* "spring-webmvc" (~325 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-context-support)
 
@@ -195,18 +195,27 @@ Documented sample applications can be found in "samples" (depending on distribut
 * petportal
 * (showcases)
 
-PetClinic features alternative DAO implementations and application configurations for JDBC, Hibernate
-and JPA, with HSQLDB and MySQL as target databases. The default PetClinic configuration is JDBC on HSQL,
-which also demonstrates Spring's JMX export. The Spring distribution comes with all required jar files
-to be able to build and run the Hibernate and JPA versions. PetClinic's web layer shows Spring 2.5's
-annotation-based controller implementation style.
+The Image Database sample is a simple one-screen image management web app that illustrates various
+Spring-integrated technologies: C3P0 as connection pool, BLOB/CLOB handling with MySQL and Oracle,
+Velocity and FreeMarker for web views, scheduling via Quartz and Timer, and mail sending via JavaMail.
+Its web layer shows Spring 2.5's annotation-based style for multi-action controllers.
+The imagedb sample application requires Java 5+.
 
 The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (available from http://www.ibatis.com).
 It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of
 internal structure and wiring. On top of a Spring-managed middle tier, it offers two alternative web
 tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.2 plus JSTL. Furthermore,
 it illustrates remoting via 5 different strategies: Hessian, Burlap, HTTP invoker, RMI invoker, and JAX-RPC.
+JPetStore comes in a JDK 1.4 version as well as a Java 5+ version (see its readme).
 
-The Image Database sample is a simple one-screen image management web app that illustrates various
-Spring-integrated technologies: C3P0 as connection pool, BLOB/CLOB handling with MySQL and Oracle,
-Velocity and FreeMarker for web views, scheduling via Quartz and Timer, and mail sending via JavaMail.
+PetClinic features alternative DAO implementations and application configurations for JDBC, Hibernate
+and JPA, with HSQLDB and MySQL as target databases. The default PetClinic configuration is JDBC on HSQL,
+which also demonstrates Spring's JMX export. The Spring distribution comes with all required jar files
+to be able to build and run the Hibernate and JPA versions. PetClinic's web layer shows Spring 2.5's
+annotation-based controller implementation style. PetClinic requires Java 5+.
+
+PetPortal is Spring's primary sample for Portlet environments. It shows a couple of portlets combined
+on a portal page, including multi-mode portlets and form-based portlets. All of the portlets are compliant
+with JSR-168 (Portlet specification 1.0) and are implemented in Spring 2.5's annotation-based controller
+style (except for the welcome portlet which is a hosted GenericPortlet). PetPortal requires Java 5+
+and comes with instructions for deployment to Apache JetSpeed (see its readme).
