@@ -70,7 +70,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private Connection sharedConnection;
 
-	private final Object sharedConnectionMonitor = new Object();
+	protected final Object sharedConnectionMonitor = new Object();
 
 	private boolean active = false;
 
@@ -78,7 +78,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private final List pausedTasks = new LinkedList();
 
-	private final Object lifecycleMonitor = new Object();
+	protected final Object lifecycleMonitor = new Object();
 
 
 	/**
