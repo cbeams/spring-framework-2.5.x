@@ -255,8 +255,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		// Expose implicit model for subsequent render phase.
 		if (response instanceof ActionResponse && !implicitModel.isEmpty()) {
 			ActionResponse actionResponse = (ActionResponse) response;
-			actionResponse.setRenderParameter(IMPLICIT_MODEL_ATTRIBUTE, Boolean.TRUE.toString());
-			request.getPortletSession().setAttribute(IMPLICIT_MODEL_ATTRIBUTE, implicitModel);
+			try {
+				actionResponse.setRenderParameter(IMPLICIT_MODEL_ATTRIBUTE, Boolean.TRUE.toString());
+				request.getPortletSession().setAttribute(IMPLICIT_MODEL_ATTRIBUTE, implicitModel);
+			}
+			catch (IllegalStateException ex) {
+				// Probably sendRedirect called... no need to expose model to render phase.
+			}
 		}
 
 		return mav;
