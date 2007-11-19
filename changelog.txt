@@ -15,6 +15,8 @@ Package org.springframework.context
 * "context:load-time-weaver" correctly detects the use of the Spring VM agent on WebLogic 9
 
 Package org.springframework.core
+* URL-to-File conversion for ClassPathResource/UrlResource performs URI-based decoding rather than using URLDecoder
+* optimized UrlResource's handling of URI access and File access if constructed with a URI directly
 * fixed AbstractLabeledEnum to correctly determine the default enum type for a top-level enum class (again)
 
 Package org.springframework.jdbc
