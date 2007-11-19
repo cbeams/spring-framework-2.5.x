@@ -60,7 +60,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * invocations, enlisting the endpoint resource in each such transaction.
 	 * <p>The passed-in object may be a transaction manager which implements
 	 * Spring's {@link org.springframework.transaction.jta.TransactionFactory}
-	 * interface, or a plan {@link javax.transaction.TransactionManager}.
+	 * interface, or a plain {@link javax.transaction.TransactionManager}.
 	 * <p>If no transaction manager is specified, the endpoint invocation
 	 * will simply not be wrapped in an XA transaction. Check out your
 	 * resource provider's ActivationSpec documentation for local

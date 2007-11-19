@@ -171,7 +171,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Establish a shared Connection for this container.
 	 * <p>The default implementation delegates to {@link #createSharedConnection()},
 	 * which does one immediate attempt and throws an exception if it fails.
-	 * Can be overridden to have a recovery proces in place, retrying
+	 * Can be overridden to have a recovery process in place, retrying
 	 * until a Connection can be successfully established.
 	 * @throws JMSException if thrown by JMS API methods
 	 */
@@ -187,7 +187,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Refresh the shared Connection that this container holds.
 	 * <p>Called on startup and also after an infrastructure exception
-	 * that occured during invoker setup and/or execution.
+	 * that occurred during invoker setup and/or execution.
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected final void refreshSharedConnection() throws JMSException {
