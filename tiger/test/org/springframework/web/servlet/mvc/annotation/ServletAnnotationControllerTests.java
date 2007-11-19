@@ -46,6 +46,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
@@ -540,12 +541,12 @@ public class ServletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("myOtherView");
 		}
 
-		@RequestMapping(params = {"view=my", "lang=de"})
+		@RequestMapping(method = RequestMethod.GET, params = {"view=my", "lang=de"})
 		public void myLangHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("myLangView");
 		}
 
-		@RequestMapping(params = "surprise")
+		@RequestMapping(method = {RequestMethod.POST, RequestMethod.GET}, params = "surprise")
 		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
 		}

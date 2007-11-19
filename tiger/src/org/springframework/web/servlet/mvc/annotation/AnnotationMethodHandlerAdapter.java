@@ -414,12 +414,15 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		private boolean checkParameters(HttpServletRequest request, RequestMappingInfo mapping) {
 			if (mapping.methods.length > 0) {
+				boolean match = false;
 				for (RequestMethod type : mapping.methods) {
 					if (type.toString().equals(request.getMethod().toUpperCase())) {
-						return true;
+						match = true;
 					}
 				}
-				return false;
+				if (!match) {
+					return false;
+				}
 			}
 			String[] params = mapping.params;
 			if (params.length > 0) {
