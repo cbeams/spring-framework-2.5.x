@@ -236,6 +236,14 @@
 		<delete dir="${dist.dir}"/>
 		<delete dir="${javadoc.dir}"/>
 
+		<delete dir="${basedir}/${dist.ref.dir}/pdf"/>
+		<delete dir="${basedir}/${dist.ref.dir}/html_single"/>
+		<delete dir="${basedir}/${dist.ref.dir}/html"/>
+
+		<delete dir="${basedir}/${dist.mvcstep.dir}/pdf"/>
+		<delete dir="${basedir}/${dist.mvcstep.dir}/html_single"/>
+		<delete dir="${basedir}/${dist.mvcstep.dir}/html"/>
+
 	</target>
 
 
@@ -1667,15 +1675,6 @@
 	</target>
 
 
-	<target name="doc.clean" description="Delete temporary and distribution directories for docs">
-
-		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/pdf"/>
-		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html_single"/>
-		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html"/>
-
-	</target>
-
-
 	<target name="doc.prepare" description="Extra preparation for the documentation">
 
 		<fail message="XSLT supporting lib not installed. Please see '${doc.ref.dir}/readme.txt' for instructions.">
@@ -1888,15 +1887,6 @@
 
 
 	<target name="doc.all" depends="doc.html,doc.htmlsingle,doc.pdf" description="Generate reference documentation"/>
-
-
-	<target name="mvcstep.clean" description="Delete temporary and distribution directories for MVC step-by-step guide">
-
-		<delete quiet="true" dir="${basedir}/${dist.mvcstep.dir}/pdf"/>
-		<delete quiet="true" dir="${basedir}/${dist.mvcstep.dir}/html_single"/>
-		<delete quiet="true" dir="${basedir}/${dist.mvcstep.dir}/html"/>
-
-	</target>
 
 
 	<target name="mvcstep.prepare" description="Extra preparation for the MVC step-by-step guide">
