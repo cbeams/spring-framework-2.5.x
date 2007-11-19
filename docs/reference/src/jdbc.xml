@@ -1090,7 +1090,7 @@ jdbcTemplate.update(
       custom isolation levels!</para>
     </section>
 
-    <section>
+    <section id="jdbc-NativeJdbcExtractor">
       <title>NativeJdbcExtractor</title>
 
       <para>There are times when we need to access vendor specific JDBC
@@ -1668,7 +1668,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       define customized handling of the return values.</para>
     </section>
 
-    <section>
+    <section id="jdbc-simple-jdbc-call-3">
       <title>Calling a stored function using SimpleJdbcCall</title>
 
       <para>Calling a stored function is done almost exactly the same way as
@@ -1727,7 +1727,7 @@ END;</programlisting></para>
       function call.</para>
     </section>
 
-    <section>
+    <section id="jdbc-simple-jdbc-call-4">
       <title>Returning ResultSet/REF Cursor from a SimpleJdbcCall</title>
 
       <para>Calling a stored procedure or function that returns a result set
@@ -2172,7 +2172,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
     </section>
   </section>
 
-  <section>
+  <section id="jdbc-parameter-handling">
     <title>Common issues with parameter and data value handling</title>
 
     <para>There are some issues involving parameters and data values that are
@@ -2221,7 +2221,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="jdbc-lob">
       <title>Handling BLOB and CLOB objects</title>
 
       <para>You can store images and other binary objects as well and large
@@ -2375,7 +2375,7 @@ clobReader.close();</programlisting>
         </programlistingco></para>
     </section>
 
-    <section>
+    <section id="jdbc-in-clause">
       <title>Passing in lists of values for IN clause</title>
 
       <para>The SQL standard allows for selecting rows based on an expression
@@ -2410,7 +2410,7 @@ clobReader.close();</programlisting>
       supports this syntax.</para>
     </section>
 
-    <section>
+    <section id="jdbc-complex-types">
       <title>Handling complex types for stored procedure calls</title>
 
       <para>When calling stored procedures it's sometimes possible to use
