@@ -57,7 +57,7 @@
 			classpathref="aws.lib.path" />
 	</target>
 
-	<target name="mavendeploy" depends="maventasks,alljars"
+	<target name="mavendeploy" depends="maventasks"
 			description="Uploads all jars,sources, and POMs to a remote m2 repository">
 
 		<maven:install-provider groupId="org.springframework.aws" artifactId="spring-aws-maven" version="1.2"/>
@@ -68,7 +68,7 @@
 		</maven:deploy>
 
 		<maven:deploy file="${dist.dir}/modules/spring-aop.jar">
-			<pom file="${dist.dir}/maven/spring.pom" />
+			<pom file="${dist.dir}/maven/spring-aop.pom" />
 			<attach file="${dist.dir}/module-sources/spring-aop-sources.jar" classifier="sources"/>
 		</maven:deploy>
 
