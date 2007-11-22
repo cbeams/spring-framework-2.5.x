@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,35 +69,34 @@ public class Person {
 		return testBean;
 	}
 
+	public void setFirstName(String firstName) {
+		this.first_name = firstName;
+	}
+
 	public String getFirstName() {
 		return this.first_name;
 	}
 
-	public void setFirstName(String firstName) {
-		this.first_name = firstName;
+	public void setLastName(String lastName) {
+		this.last_name = lastName;
 	}
 
 	public String getLastName() {
 		return this.last_name;
 	}
 
-	public void setLastName(String lastName) {
-		this.last_name = lastName;
-	}
-	
 	public void setDriversLicense(DriversLicense driversLicense) {
 		this.driversLicense = driversLicense;
 	}
 	
 	public DriversLicense getDriversLicense() {
-		return driversLicense;
+		return this.driversLicense;
 	}
 	
 	@Override
 	public String toString() {
-		return getClass().getName() + ":(" + hashCode() + ") id=" + id + 
-		"; firstName=" + first_name + "; lastName=" + last_name
-		+ "testBean=" + testBean;
+		return getClass().getName() + ":(" + hashCode() + ") id=" + id +
+				"; firstName=" + first_name + "; lastName=" + last_name + "testBean=" + testBean;
 	}
 
 }
