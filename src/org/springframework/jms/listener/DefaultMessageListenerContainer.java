@@ -895,8 +895,16 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 
 		private void clearResources() {
-			JmsUtils.closeMessageConsumer(this.consumer);
-			JmsUtils.closeSession(this.session);
+			if (sharedConnectionEnabled()) {
+				synchronized (sharedConnectionMonitor) {
+					JmsUtils.closeMessageConsumer(this.consumer);
+					JmsUtils.closeSession(this.session);
+				}
+			}
+			else {
+				JmsUtils.closeMessageConsumer(this.consumer);
+				JmsUtils.closeSession(this.session);
+			}
 			this.consumer = null;
 			this.session = null;
 		}
