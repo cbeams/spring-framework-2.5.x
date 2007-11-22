@@ -36,12 +36,15 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * HTTP request handler that exports the specified service bean as
- * Burlap service endpoint, accessible via a Burlap proxy.
+ * Servlet-API-based HTTP request handler that exports the specified service bean
+ * as Burlap service endpoint, accessible via a Burlap proxy.
+ *
+ * <p><b>Note:</b> Spring also provides an alternative version of this exporter,
+ * for Sun's JRE 1.6 HTTP server: {@link SimpleBurlapServiceExporter}.
  *
  * <p>Burlap is a slim, XML-based RPC protocol.
  * For information on Burlap, see the
- * <a href="http://www.caucho.com/burlap">Burlap website</a>
+ * <a href="http://www.caucho.com/burlap">Burlap website</a>.
  *
  * <p>This exporter will work with both Burlap 2.x and 3.x (respectively
  * Resin 2.x and 3.x), autodetecting the corresponding skeleton class.
@@ -57,8 +60,7 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
-public class BurlapServiceExporter extends RemoteExporter
-		implements HttpRequestHandler, InitializingBean {
+public class BurlapServiceExporter extends RemoteExporter implements HttpRequestHandler, InitializingBean {
 
 	private BurlapSkeleton skeleton;
 
@@ -105,9 +107,9 @@ public class BurlapServiceExporter extends RemoteExporter
 					"BurlapServiceExporter only supports POST requests");
 		}
 
-		BurlapInput in = new BurlapInput(request.getInputStream());
-		BurlapOutput out = new BurlapOutput(response.getOutputStream());
 		try {
+			BurlapInput in = new BurlapInput(request.getInputStream());
+			BurlapOutput out = new BurlapOutput(response.getOutputStream());
 		  this.skeleton.invoke(in, out);
 		}
 		catch (Throwable ex) {

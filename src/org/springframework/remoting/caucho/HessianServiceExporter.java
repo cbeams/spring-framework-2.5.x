@@ -36,12 +36,15 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * HTTP request handler that exports the specified service bean as
- * Hessian service endpoint, accessible via a Hessian proxy.
+ * Servlet-API-based HTTP request handler that exports the specified service bean
+ * as Hessian service endpoint, accessible via a Hessian proxy.
+ *
+ * <p><b>Note:</b> Spring also provides an alternative version of this exporter,
+ * for Sun's JRE 1.6 HTTP server: {@link SimpleHessianServiceExporter}.
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
- * <a href="http://www.caucho.com/hessian">Hessian website</a>
+ * <a href="http://www.caucho.com/hessian">Hessian website</a>.
  *
  * <p>This exporter will work with both Hessian 2.x and 3.x (respectively
  * Resin 2.x and 3.x), autodetecting the corresponding skeleton class.
@@ -59,8 +62,7 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
-public class HessianServiceExporter extends RemoteExporter
-		implements HttpRequestHandler, InitializingBean {
+public class HessianServiceExporter extends RemoteExporter implements HttpRequestHandler, InitializingBean {
 
 	private static final boolean hessian2Available =
 			ClassUtils.isPresent("com.caucho.hessian.io.Hessian2Input", HessianServiceExporter.class.getClassLoader());
