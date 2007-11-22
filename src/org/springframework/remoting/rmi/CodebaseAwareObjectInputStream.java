@@ -23,8 +23,6 @@ import java.io.ObjectStreamClass;
 import java.lang.reflect.Proxy;
 import java.rmi.server.RMIClassLoader;
 
-import org.springframework.util.ClassUtils;
-
 /**
  * Special ObjectInputStream subclass that falls back to a specified codebase
  * to load classes from if not found locally. In contrast to standard RMI
@@ -50,6 +48,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 1.1.3
  * @see java.rmi.server.RMIClassLoader
+ * @see RemoteInvocationSerializingExporter#createObjectInputStream
  * @see org.springframework.remoting.httpinvoker.HttpInvokerClientInterceptor#setCodebaseUrl
  */
 public class CodebaseAwareObjectInputStream extends ObjectInputStream {
