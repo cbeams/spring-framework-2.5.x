@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,36 +79,43 @@ public class MailSendException extends MailException {
 	 * @see javax.mail.internet.MimeMessage
 	 */
 	public final Map getFailedMessages() {
-		return failedMessages;
+		return this.failedMessages;
 	}
 
 
 	public String getMessage() {
-		StringBuffer sb = new StringBuffer();
-		String superMsg = super.getMessage();
-		sb.append(superMsg != null ? superMsg : "Failed messages: ");
-		for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
-			Throwable subEx = (Throwable) subExs.next();
-			sb.append(subEx.toString());
-			if (subExs.hasNext()) {
-				sb.append("; ");
-			}
+		if (getFailedMessages().isEmpty()) {
+			return super.getMessage();
 		}
-		return sb.toString();
+		else {
+			StringBuffer sb = new StringBuffer("Failed messages: ");
+			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
+				Throwable subEx = (Throwable) subExs.next();
+				sb.append(subEx.toString());
+				if (subExs.hasNext()) {
+					sb.append("; ");
+				}
+			}
+			return sb.toString();
+		}
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(getClass().getName()).append("; nested exceptions (");
-		sb.append(getFailedMessages().size()).append(") are:");
-		int i = 0;
-		for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
-			Throwable subEx = (Throwable) subExs.next();
-			i++;
-			sb.append('\n').append("Failed message ").append(i).append(": ");
-			sb.append(subEx);
+		if (getFailedMessages().isEmpty()) {
+			return super.toString();
 		}
-		return sb.toString();
+		else {
+			StringBuffer sb = new StringBuffer(getClass().getName());
+			sb.append("; nested exceptions (").append(getFailedMessages().size()).append(") are:");
+			int i = 0;
+			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
+				Throwable subEx = (Throwable) subExs.next();
+				i++;
+				sb.append('\n').append("Failed message ").append(i).append(": ");
+				sb.append(subEx);
+			}
+			return sb.toString();
+		}
 	}
 
 	public void printStackTrace(PrintStream ps) {
