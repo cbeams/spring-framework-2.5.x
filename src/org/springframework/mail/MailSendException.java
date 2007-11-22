@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.util.ObjectUtils;
+
 /**
  * Exception thrown when a mail sending error is encountered.
  * Can register failed messages with their exceptions.
@@ -105,33 +107,40 @@ public class MailSendException extends MailException {
 
 
 	public String getMessage() {
-		StringBuffer sb = new StringBuffer();
-		String superMsg = super.getMessage();
-		sb.append(superMsg != null ? superMsg : "Failed messages: ");
-		for (int i = 0; i < this.messageExceptions.length; i++) {
-			Exception subEx = this.messageExceptions[i];
-			sb.append(subEx.toString());
-			if (i < this.messageExceptions.length - 1) {
-				sb.append("; ");
-			}
+		if (ObjectUtils.isEmpty(this.messageExceptions)) {
+			return super.getMessage();
 		}
-		return sb.toString();
+		else {
+			StringBuffer sb = new StringBuffer("Failed messages: ");
+			for (int i = 0; i < this.messageExceptions.length; i++) {
+				Exception subEx = this.messageExceptions[i];
+				sb.append(subEx.toString());
+				if (i < this.messageExceptions.length - 1) {
+					sb.append("; ");
+				}
+			}
+			return sb.toString();
+		}
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(getClass().getName()).append("; nested exceptions (");
-		sb.append(this.messageExceptions.length).append(") are:");
-		for (int i = 0; i < this.messageExceptions.length; i++) {
-			Exception subEx = this.messageExceptions[i];
-			sb.append('\n').append("Failed message ").append(i + 1).append(": ");
-			sb.append(subEx);
+		if (ObjectUtils.isEmpty(this.messageExceptions)) {
+			return super.toString();
 		}
-		return sb.toString();
+		else {
+			StringBuffer sb = new StringBuffer(getClass().getName());
+			sb.append("; nested exceptions (").append(this.messageExceptions.length).append(") are:");
+			for (int i = 0; i < this.messageExceptions.length; i++) {
+				Exception subEx = this.messageExceptions[i];
+				sb.append('\n').append("Failed message ").append(i + 1).append(": ");
+				sb.append(subEx);
+			}
+			return sb.toString();
+		}
 	}
 
 	public void printStackTrace(PrintStream ps) {
-		if (this.messageExceptions.length == 0) {
+		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			super.printStackTrace(ps);
 		}
 		else {
@@ -146,7 +155,7 @@ public class MailSendException extends MailException {
 	}
 
 	public void printStackTrace(PrintWriter pw) {
-		if (this.messageExceptions.length == 0) {
+		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			super.printStackTrace(pw);
 		}
 		else {
