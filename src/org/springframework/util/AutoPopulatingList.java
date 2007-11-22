@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +39,7 @@ import java.util.ListIterator;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class AutoPopulatingList implements List {
+public class AutoPopulatingList implements List, Serializable {
 
 	/**
 	 * The {@link List} that all operations are eventually delegated to.
@@ -244,7 +245,7 @@ public class AutoPopulatingList implements List {
 	 * using <code>Class.newInstance()</code> on a given element class.
 	 * @see java.lang.Class#newInstance()
 	 */
-	private static class ReflectiveElementFactory implements ElementFactory {
+	private static class ReflectiveElementFactory implements ElementFactory, Serializable {
 
 		private final Class elementClass;
 
