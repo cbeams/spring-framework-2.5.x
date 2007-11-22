@@ -16,6 +16,7 @@
 
 package org.springframework.jndi;
 
+import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.naming.Context;
@@ -25,6 +26,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.CollectionUtils;
 
 /**
  * Helper class that simplifies JNDI operations. It provides methods to lookup and
@@ -95,14 +98,20 @@ public class JndiTemplate {
 	}
 
 	/**
-	 * Create a new JNDI initial context. Invoked by execute.
-	 * The default implementation use this template's environment settings.
+	 * Create a new JNDI initial context. Invoked by {@link #execute}.
+	 * <p>The default implementation use this template's environment settings.
 	 * Can be subclassed for custom contexts, e.g. for testing.
 	 * @return the initial Context instance
 	 * @throws NamingException in case of initialization errors
 	 */
 	protected Context createInitialContext() throws NamingException {
-		return new InitialContext(getEnvironment());
+		Properties env = getEnvironment();
+		Hashtable icEnv = null;
+		if (env != null) {
+			icEnv = new Hashtable(env.size());
+			CollectionUtils.mergePropertiesIntoMap(env, icEnv);
+		}
+		return new InitialContext(icEnv);
 	}
 
 
