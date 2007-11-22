@@ -79,8 +79,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework test suite
 
-* ehcache/ehcache-1.2.4.jar
-- EHCache 1.2.4 (http://ehcache.sourceforge.net)
+* ehcache/ehcache-1.3.0.jar
+- EHCache 1.3.0 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
 - required for running PetClinic (by Hibernate)
