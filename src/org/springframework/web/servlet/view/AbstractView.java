@@ -118,6 +118,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Set static attributes as a CSV string.
 	 * Format is: attname0={value1},attname1={value1}
+	 * <p>"Static" attributes are fixed attributes that are specified in
+	 * the View instance configuration. "Dynamic" attributes, on the other hand,
+	 * are values passed in as part of the model.
 	 */
 	public void setAttributesCSV(String propString) throws IllegalArgumentException {
 		if (propString != null) {
@@ -147,6 +150,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Set static attributes for this view from a
 	 * <code>java.util.Properties</code> object.
+	 * <p>"Static" attributes are fixed attributes that are specified in
+	 * the View instance configuration. "Dynamic" attributes, on the other hand,
+	 * are values passed in as part of the model.
 	 * <p>This is the most convenient way to set static attributes. Note that
 	 * static attributes can be overridden by dynamic attributes, if a value
 	 * with the same name is included in the model.
@@ -161,6 +167,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Set static attributes for this view from a Map. This allows to set
 	 * any kind of attribute values, for example bean references.
+	 * <p>"Static" attributes are fixed attributes that are specified in
+	 * the View instance configuration. "Dynamic" attributes, on the other hand,
+	 * are values passed in as part of the model.
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @param attributes Map with name Strings as keys and attribute objects as values
 	 */
@@ -192,6 +201,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Add static data to this view, exposed in each view.
+	 * <p>"Static" attributes are fixed attributes that are specified in
+	 * the View instance configuration. "Dynamic" attributes, on the other hand,
+	 * are values passed in as part of the model.
 	 * <p>Must be invoked before any calls to <code>render</code>.
 	 * @param name the name of the attribute to expose
 	 * @param value the attribute value to expose
