@@ -28,9 +28,9 @@
     <interfacename>Map</interfacename> with both the date and time and the
     products list obtained from the manager reference.</para>
 
-    <para><filename>'springapp/src/web/InventoryController.java'</filename>:</para>
+    <para><filename>'springapp/src/springapp/web/InventoryController.java'</filename>:</para>
 
-    <programlisting>package web;
+    <programlisting>package springapp.web;
 
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.ModelAndView;
@@ -74,11 +74,11 @@ public class <emphasis role="bold">InventoryController</emphasis> implements Con
 </emphasis>
 }</programlisting>
 
-    <para>We will also need to modify the InventoryControllerTests
-    to supply a ProductManager and extract the value for <literal>'now'</literal> from the model
-    Map before the tests will pass again.</para>
+    <para>We will also need to modify the InventoryControllerTests to supply a
+    ProductManager and extract the value for <literal>'now'</literal> from the
+    model Map before the tests will pass again.</para>
 
-    <para><filename>'springapp/test/web/InventoryControllerTests.java'</filename>:</para>
+    <para><filename>'springapp/test/springapp/web/InventoryControllerTests.java'</filename>:</para>
 
     <programlisting>package springapp.web;
 
@@ -455,20 +455,20 @@ public class PriceIncreaseValidator implements Validator {
     <para>Now we need to add an entry in the
     <filename>'springapp-servlet.xml'</filename> file to define the new form
     and controller. We define objects to inject into properties for
-    <literal>commandClass</literal> and <literal>validator</literal>.
-    We also specify two views, a <literal>formView</literal> that is used
-    for the form and a <literal>successView</literal> that we will go to
-    after successful form processing. The latter can be of two types. It can
-    be a regular view reference that is forwarded to one of our JSP pages. One
-    disadvantage with this approach is, that if the user refreshes the page,
-    the form data is submitted again, and you would end up with a double price
-    increase. An alternative way is to use a redirect, where a response is
-    sent back to the users browser instructing it to redirect to a new URL.
-    The URL we use in this case can't be one of our JSP pages, since they are
-    hidden from direct access. It has to be a URL that is externally
-    reachable. We have chosen to use <filename>'hello.htm'</filename> as my
-    redirect URL. This URL maps to the <filename>'hello.jsp'</filename> page,
-    so this should work nicely.</para>
+    <literal>commandClass</literal> and <literal>validator</literal>. We also
+    specify two views, a <literal>formView</literal> that is used for the form
+    and a <literal>successView</literal> that we will go to after successful
+    form processing. The latter can be of two types. It can be a regular view
+    reference that is forwarded to one of our JSP pages. One disadvantage with
+    this approach is, that if the user refreshes the page, the form data is
+    submitted again, and you would end up with a double price increase. An
+    alternative way is to use a redirect, where a response is sent back to the
+    users browser instructing it to redirect to a new URL. The URL we use in
+    this case can't be one of our JSP pages, since they are hidden from direct
+    access. It has to be a URL that is externally reachable. We have chosen to
+    use <filename>'hello.htm'</filename> as my redirect URL. This URL maps to
+    the <filename>'hello.jsp'</filename> page, so this should work
+    nicely.</para>
 
     <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
 
@@ -483,7 +483,7 @@ public class PriceIncreaseValidator implements Validator {
 
 &lt;beans&gt;
 
-    &lt;bean id="productManager" class="springapp.service.ProductManager"&gt;
+    &lt;bean id="productManager" class="springapp.service.SimpleProductManager"&gt;
         &lt;property name="products"&gt;
             &lt;list&gt;
                 &lt;ref bean="product1"/&gt;
@@ -493,17 +493,17 @@ public class PriceIncreaseValidator implements Validator {
         &lt;/property&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="product1" class="bus.Product"&gt;
+    &lt;bean id="product1" class="springapp.domain.Product"&gt;
         &lt;property name="description" value="Lamp"/&gt;
         &lt;property name="price" value="5.75"/&gt;
     &lt;/bean&gt;
         
-    &lt;bean id="product2" class="bus.Product"&gt;
+    &lt;bean id="product2" class="springapp.domain.Product"&gt;
         &lt;property name="description" value="Table"/&gt;
         &lt;property name="price" value="75.25"/&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="product3" class="bus.Product"&gt;
+    &lt;bean id="product3" class="springapp.domain.Product"&gt;
         &lt;property name="description" value="Chair"/&gt;
         &lt;property name="price" value="22.79"/&gt;
     &lt;/bean&gt;
