@@ -389,7 +389,7 @@
 
       <para>Spring 2.5 supports JSF 1.2, providing a JSF 1.2 variant of Spring's
       <classname>DelegatingVariableResolver</classname> in the form of the new
-      <classname>DelegatingFacesELResolver</classname>.</para>
+      <classname>SpringBeanFacesELResolver</classname>.</para>
     </section>
 
     <section id="new-in-2-web-jaxws">
