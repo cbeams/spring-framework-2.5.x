@@ -122,6 +122,10 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 				if (!url.startsWith("/")) {
 					url = "/" + url;
 				}
+				// Remove whitespace from handler bean name.
+				if (handler instanceof String) {
+					handler = ((String) handler).trim();
+				}
 				registerHandler(url, handler);
 			}
 		}
