@@ -3,11 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.8 (2007-12-03)
+Changes in version 2.0.8 (2007-12-19)
 -------------------------------------
 
 General
-* various documentation fixes
+* various documentation fixes and clarifications
 
 Package org.springframework.aop
 * fixed garbage collection problem with CGLIB proxies, now holding onto the Advised configuration independent of factory
@@ -24,6 +24,9 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * DefaultMessageListenerContainer avoids deadlock between Connection and Session through the use of a shared monitor
+
+Package org.springframework.jndi
+* JndiTemplate prepares a specific Hashtable for the InitialContext, exposing default environment properties as well
 
 Package org.springframework.mail
 * revised MailSendException's "toString()" output to include a local message as well
