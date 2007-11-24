@@ -74,3 +74,6 @@ FORM12
 
 FORM13
 <@spring.formInput "command.name", "", "password"/>
+
+FORM14
+<@spring.formSingleSelect "command.name", options, ""/>

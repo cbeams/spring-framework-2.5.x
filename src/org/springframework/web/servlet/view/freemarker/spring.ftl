@@ -219,9 +219,15 @@
 <#macro formSingleSelect path options attributes="">
     <@bind path/>
     <select id="${status.expression}" name="${status.expression}" ${attributes}>
-        <#list options?keys as value>
-        <option value="${value?html}"<@checkSelected value/>>${options[value]?html}</option>
-        </#list>
+        <#if options?is_hash>
+            <#list options?keys as value>
+            <option value="${value?html}"<@checkSelected value/>>${options[value]?html}</option>
+            </#list>
+        <#else> 
+            <#list options as value>
+            <option value="${value?html}"<@checkSelected value/>>${value?html}</option>
+            </#list>
+        </#if>
     </select>
 </#macro>
 

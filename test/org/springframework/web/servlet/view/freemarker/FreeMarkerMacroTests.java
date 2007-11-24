@@ -148,6 +148,7 @@ public class FreeMarkerMacroTests extends TestCase {
 		model.put("springMacroRequestContext", rc);
 		model.put("msgArgs", new Object[] {"World"});
 		model.put("nameOptionMap", names);
+		model.put("options", names.values());
 
 		FreeMarkerView view = new FreeMarkerView();
 		view.setBeanName("myView");
