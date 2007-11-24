@@ -112,7 +112,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 
-	private Object beanClass;
+	private volatile Object beanClass;
 
 	private String scope = SCOPE_SINGLETON;
 
