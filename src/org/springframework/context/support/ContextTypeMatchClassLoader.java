@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.SmartClassLoader;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -34,7 +35,7 @@ import org.springframework.util.ReflectionUtils;
  * @see AbstractApplicationContext
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setTempClassLoader
  */
-class ContextTypeMatchClassLoader extends ClassLoader {
+class ContextTypeMatchClassLoader extends ClassLoader implements SmartClassLoader {
 
 	private static Method findLoadedClassMethod;
 
@@ -58,6 +59,10 @@ class ContextTypeMatchClassLoader extends ClassLoader {
 
 	public Class loadClass(String name) throws ClassNotFoundException {
 		return new ContextOverridingClassLoader(getParent()).loadClass(name);
+	}
+
+	public boolean isClassReloadable(Class clazz) {
+		return (clazz.getClassLoader() instanceof ContextOverridingClassLoader);
 	}
 
 
