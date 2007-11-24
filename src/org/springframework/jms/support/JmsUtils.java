@@ -140,6 +140,9 @@ public abstract class JmsUtils {
 	 */
 	public static void closeMessageConsumer(MessageConsumer consumer) {
 		if (consumer != null) {
+			// Clear interruptions to ensure that the consumer closes successfully...
+			// (working around misbehaving JMS providers such as ActiveMQ)
+			boolean wasInterrupted = Thread.interrupted();
 			try {
 				consumer.close();
 			}
@@ -149,6 +152,12 @@ public abstract class JmsUtils {
 			catch (Throwable ex) {
 				// We don't trust the JMS provider: It might throw RuntimeException or Error.
 				logger.debug("Unexpected exception on closing JMS MessageConsumer", ex);
+			}
+			finally {
+				if (wasInterrupted) {
+					// Reset the interrupted flag as it was before.
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 	}
