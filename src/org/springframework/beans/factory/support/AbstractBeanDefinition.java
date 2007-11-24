@@ -106,7 +106,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 
-	private Object beanClass;
+	private volatile Object beanClass;
 
 	private String scope = SCOPE_SINGLETON;
 
