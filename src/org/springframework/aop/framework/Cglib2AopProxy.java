@@ -45,6 +45,7 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.SmartClassLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -149,17 +150,11 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			logger.debug("Creating CGLIB2 proxy: target source is " + this.advised.getTargetSource());
 		}
 
-		Enhancer enhancer = createEnhancer();
 		try {
-			// Create proxy in specific ClassLoader, if given.
-			if (classLoader != null) {
-				enhancer.setClassLoader(classLoader);
-			}
-
 			Class rootClass = this.advised.getTargetClass();
 			Assert.state(rootClass != null, "Target class must be available for creating a CGLIB proxy");
-			Class proxySuperClass = rootClass;
 
+			Class proxySuperClass = rootClass;
 			if (AopUtils.isCglibProxyClass(rootClass)) {
 				proxySuperClass = rootClass.getSuperclass();
 				Class[] additionalInterfaces = rootClass.getInterfaces();
@@ -172,6 +167,15 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			// Validate the class, writing log messages as necessary.
 			validateClassIfNecessary(proxySuperClass);
 
+			// Configure CGLIB Enhancer...
+			Enhancer enhancer = createEnhancer();
+			if (classLoader != null) {
+				enhancer.setClassLoader(classLoader);
+				if (classLoader instanceof SmartClassLoader &&
+						((SmartClassLoader) classLoader).isClassReloadable(proxySuperClass)) {
+					enhancer.setUseCache(false);
+				}
+			}
 			enhancer.setSuperclass(proxySuperClass);
 			enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
