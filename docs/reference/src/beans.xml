@@ -3321,10 +3321,11 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             <para>The next extension point that we will look at is the
             <interfacename>org.springframework.beans.factory.config.BeanFactoryPostProcessor</interfacename>.
             The semantics of this interface are similar to the <interfacename>BeanPostProcessor</interfacename>,
-            with one major difference. <literal>BeanFactoryPostProcessors</literal> operate on; that is to say,
-            the Spring IoC container will allow <literal>BeanFactoryPostProcessors</literal> to read the
-            configuration metadata and potentially change it <emphasis>before</emphasis> the
-            container has actually instantied any other beans.</para>
+            with one major difference: <literal>BeanFactoryPostProcessors</literal> operate on the
+            <emphasis>bean configuration metadata</emphasis>; that is, the Spring IoC container will
+            allow <literal>BeanFactoryPostProcessors</literal> to read the configuration metadata
+            and potentially change it <emphasis>before</emphasis> the container has actually
+            instantiated any other beans.</para>
             <para>You can configure multiple <literal>BeanFactoryPostProcessors</literal> if you wish.
             You can control the order in which these <literal>BeanFactoryPostProcessors</literal>
             execute by setting the <literal>'order'</literal> property (you can only set this property 
