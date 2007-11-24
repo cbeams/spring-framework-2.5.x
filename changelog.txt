@@ -3,6 +3,37 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5.1 (2007-12-20)
+-------------------------------------
+
+Package org.springframework.aop
+* ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
+
+Package org.springframework.core
+* introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
+
+Package org.springframework.jms
+* JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
+
+Package org.springframework.jndi
+* JndiTemplate prepares a specific Hashtable for the InitialContext, exposing default environment properties as well
+
+Package org.springframework.mail
+* fixed potential NPE in MailSendException
+
+Package org.springframework.remoting
+* factored out abstract RemoteInvocationSerializingExporter base class from HttpInvokerServiceExporter
+* introduced SimpleHttpInvokerServiceExporter and SimpleHessian/BurlapServiceExporter as HttpHandlers for Sun JRE 1.6
+* introduced SimpleHttpServerFactoryBean for Spring-style set-up of a Sun JRE 1.6 HttpServer
+
+Package org.springframework.util
+* AutoPopulatingList is serializable now
+* FreeMarker "formSingleSelect" macro also accepts options from a sequence (list) as both labels and values
+
+Package org.springframework.web
+* SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
+
+
 Changes in version 2.5 final (2007-11-19)
 -----------------------------------------
 
