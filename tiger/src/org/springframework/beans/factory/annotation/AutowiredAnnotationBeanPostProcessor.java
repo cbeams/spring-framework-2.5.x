@@ -246,6 +246,23 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return pvs;
 	}
 
+	/**
+	 * 'Native' processing method for direct calls with an arbitrary target
+	 * instance, resolving all of its fields and methods which are annotated
+	 * with <code>@Autowired</code>.
+	 * @param bean the target instance to process
+	 */
+	public void processInjection(Object bean) throws BeansException {
+		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
+		try {
+			metadata.injectFields(bean, null);
+			metadata.injectMethods(bean, null, null);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException("Autowiring of fields/methods failed", ex);
+		}
+	}
+
 
 	private InjectionMetadata findAutowiringMetadata(final Class clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
@@ -424,12 +441,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		}
 
 		private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
-			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
-				String autowiredBeanName = (String) it.next();
-				beanFactory.registerDependentBean(autowiredBeanName, beanName);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Autowiring by type from bean name '" + beanName + "' via " +
-							(this.isField ? "field" : "configuration method") + " to bean named '" + autowiredBeanName + "'");
+			if (beanName != null) {
+				for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
+					String autowiredBeanName = (String) it.next();
+					beanFactory.registerDependentBean(autowiredBeanName, beanName);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Autowiring by type from bean name '" + beanName + "' via " +
+								(this.isField ? "field" : "configuration method") + " to bean named '" + autowiredBeanName + "'");
+					}
 				}
 			}
 		}
