@@ -9,8 +9,15 @@ Changes in version 2.5.1 (2007-12-20)
 Package org.springframework.aop
 * ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
 
+Package org.springframework.beans
+* SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
+* revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
+
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
+
+Package org.springframework.ejb
+* introduced EJB3-compliant SpringBeanAutowiringInterceptor for processing Spring's @Autowired in EJB3 SBs/MDBs
 
 Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
