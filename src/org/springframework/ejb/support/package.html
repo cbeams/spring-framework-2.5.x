@@ -1,27 +1,25 @@
 <html>
 <body>
 
-Superclasses to make implementing EJBs simpler and less error-prone,
-as well as guaranteeing a Spring BeanFactory is available to EJBs.
+<p>Base classes to make implementing EJB 2.x beans simpler and less error-prone,
+as well as guaranteeing a Spring BeanFactory is available to such EJBs.
 This promotes good practice, with EJB services used for transaction
 management, thread management, and (possibly) remoting, while
-business logic is implemented in easily testable POJOs.
+business logic is implemented in easily testable POJOs.</p>
 
 <p>In this model, the EJB is a facade, with as many POJO helpers
-behind the BeanFactory as required.
+behind the BeanFactory as required.</p>
 
-<p>The classes in this package are discussed in Chapter 11 of
-<a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
-by Rod Johnson (Wrox, 2002).
-The present version has changed somewhat, but has the same goals.
-
-<p>
-Note that the default behavior is to look for an EJB enviroment variable
+<p>Note that the default behavior is to look for an EJB enviroment variable
 with name <code>ejb/BeanFactoryPath</code> that specifies the
 location <i>on the classpath</i> of an XML bean factory definition
 file (such as <code>/com/mycom/mypackage/mybeans.xml</code>).
 If this JNDI key is missing, your EJB subclass won't successfully
-initialize in the container.
+initialize in the container.</p>
+
+<p><b>Check out the <code>org.springframework.ejb.interceptor</code>
+package for equivalent support for the EJB 3 component model</b>,
+providing annotation-based autowiring using an EJB 3 interceptor.</p>
 
 </body>
 </html>

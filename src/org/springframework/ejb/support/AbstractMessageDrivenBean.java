@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /** 
- * Convenient superclass for MDBs.
+ * Convenient base class for EJB 2.x MDBs.
  * Doesn't require JMS, as EJB 2.1 MDBs are no longer JMS-specific;
  * see the {@link AbstractJmsMessageDrivenBean} subclass.
  *

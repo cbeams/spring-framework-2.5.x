@@ -19,8 +19,8 @@ package org.springframework.ejb.support;
 import javax.jms.MessageListener;
 
 /** 
- * Convenient superclass for JMS MDBs. Requires subclasses to implement
- * the JMS interface <code>javax.jms.MessageListener</code>.
+ * Convenient base class for JMS-based EJB 2.x MDBs. Requires subclasses
+ * to implement the JMS <code>javax.jms.MessageListener</code> interface.
  *
  * @author Rod Johnson
  */

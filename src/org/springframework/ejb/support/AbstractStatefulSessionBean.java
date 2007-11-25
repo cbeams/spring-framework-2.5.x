@@ -20,7 +20,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 
 /**
- * Convenient superclass for stateful session beans.
+ * Convenient base class for EJB 2.x stateful session beans (SFSBs).
  * SFSBs should extend this class, leaving them to implement the
  * <code>ejbActivate()</code> and <code>ejbPassivate()</code> lifecycle
  * methods to comply with the requirements of the EJB specification.
@@ -59,9 +59,9 @@ public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 	}
 
 	/**
-	 * Unload the Spring BeanFactory instance. The default <code>ejbRemove</code>
+	 * Unload the Spring BeanFactory instance. The default <code>ejbRemove()</code>
 	 * method invokes this method, but subclasses which override
-	 * <code>ejbRemove</code> must invoke this method themselves.
+	 * <code>ejbRemove()</code> must invoke this method themselves.
 	 * <p>Unless the BeanFactory is known to be serializable, this method
 	 * must also be called from <code>ejbPassivate()</code>, with a corresponding
 	 * call to <code>loadBeanFactory()</code> from <code>ejbActivate()</code>.

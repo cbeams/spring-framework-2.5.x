@@ -23,9 +23,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Convenient superclass for stateless session beans (SLSBs), minimizing
- * the work involved in implementing an SLSB and preventing common errors.
- * <b>Note that SLSBs are the most useful kind of EJB.</b>
+ * Convenient base class for EJB 2.x stateless session beans (SLSBs),
+ * minimizing the work involved in implementing an SLSB and preventing
+ * common errors. <b>Note that SLSBs are the most useful kind of EJB.</b>
  *
  * <p>As the ejbActivate() and ejbPassivate() methods cannot be invoked
  * on SLSBs, these methods are implemented to throw an exception and should

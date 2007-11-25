@@ -27,7 +27,7 @@ import org.springframework.context.access.ContextJndiBeanFactoryLocator;
 import org.springframework.util.WeakReferenceMonitor;
 
 /**
- * Base class for all Spring-based EJBs. Not intended for direct subclassing:
+ * Base class for Spring-based EJB 2.x beans. Not intended for direct subclassing:
  * Extend {@link AbstractStatelessSessionBean}, {@link AbstractStatefulSessionBean}
  * or {@link AbstractMessageDrivenBean} instead.
  *
@@ -75,10 +75,10 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * ContextJndiBeanFactoryLocator.
 	 * <p>Can be invoked before loadBeanFactory, for example in constructor or
 	 * setSessionContext if you want to override the default locator.
-	 * <p>Note that the BeanFactory is automatically loaded by the ejbCreate
+	 * <p>Note that the BeanFactory is automatically loaded by the <code>ejbCreate</code>
 	 * implementations of AbstractStatelessSessionBean and
 	 * AbstractMessageDriverBean but needs to be explicitly loaded in custom
-	 * AbstractStatefulSessionBean ejbCreate methods.
+	 * AbstractStatefulSessionBean <code>ejbCreate</code> methods.
 	 * @see AbstractStatelessSessionBean#ejbCreate
 	 * @see AbstractMessageDrivenBean#ejbCreate
 	 * @see AbstractStatefulSessionBean#loadBeanFactory
@@ -93,8 +93,8 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * <p>In case of the default BeanFactoryLocator implementation,
 	 * ContextJndiBeanFactoryLocator, this is the JNDI path. The default value
 	 * of this property is "java:comp/env/ejb/BeanFactoryPath".
-	 * <p>Can be invoked before loadBeanFactory, for example in constructor or
-	 * setSessionContext if you want to override the default locator key.
+	 * <p>Can be invoked before {@link #loadBeanFactory}, for example in the constructor
+	 * or <code>setSessionContext</code> if you want to override the default locator key.
 	 * @see #BEAN_FACTORY_PATH_ENVIRONMENT_KEY
 	 */
 	public void setBeanFactoryLocatorKey(String factoryKey) {
@@ -125,7 +125,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	/**
 	 * Unload the Spring BeanFactory instance. The default {@link #ejbRemove()}
-	 * method invokes this method, but subclasses which override <code>ejbRemove</code>
+	 * method invokes this method, but subclasses which override <code>ejbRemove()</code>
 	 * must invoke this method themselves.
 	 * <p>Package-visible as it shouldn't be called directly by user-created
 	 * subclasses.
@@ -140,7 +140,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	}
 
 	/**
-	 * May be called after ejbCreate().
+	 * May be called after <code>ejbCreate()</code>.
 	 * @return the bean factory
 	 */
 	protected BeanFactory getBeanFactory() {
@@ -148,11 +148,10 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	}
 
 	/**
-	 * EJB lifecycle method, implemented to invoke onEjbRemote and unload the
-	 * BeanFactory afterwards.
+	 * EJB lifecycle method, implemented to invoke <code>onEjbRemove()</code>
+	 * and unload the BeanFactory afterwards.
 	 * <p>Don't override it (although it can't be made final): code your shutdown
-	 * in onEjbRemove.
-	 * @see #onEjbRemove
+	 * in {@link #onEjbRemove()}.
 	 */
 	public void ejbRemove() {
 		onEjbRemove();
@@ -161,10 +160,11 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	/**
 	 * Subclasses must implement this method to do any initialization they would
-	 * otherwise have done in an ejbRemove() method. The BeanFactory will be
-	 * unloaded afterwards.
-	 * <p>This implementation is empty, to be overridden in subclasses. The same
-	 * restrictions apply to the work of this method as to an ejbRemove() method.
+	 * otherwise have done in an <code>ejbRemove()</code> method.
+	 * The BeanFactory will be unloaded afterwards.
+	 * <p>This implementation is empty, to be overridden in subclasses.
+	 * The same restrictions apply to the work of this method as to an
+	 * <code>ejbRemove()<code> method.
 	 */
 	protected void onEjbRemove() {
 		// empty

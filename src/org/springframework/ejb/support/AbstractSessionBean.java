@@ -19,7 +19,7 @@ package org.springframework.ejb.support;
 import javax.ejb.SessionContext;
 
 /**
- * Base class for all Spring-based EJB session beans. Not intended for direct
+ * Base class for Spring-based EJB 2.x session beans. Not intended for direct
  * subclassing: Extend {@link AbstractStatelessSessionBean} or
  * {@link AbstractStatefulSessionBean} instead.
  *
