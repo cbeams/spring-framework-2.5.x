@@ -26,15 +26,14 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Convenient superclass for configurers that can perform Dependency Injection
- * on objects (however they may be created).
+ * Convenient base class for configurers that can perform Dependency Injection
+ * on objects (however they may be created). Typically subclassed by AspectJ aspects.
  *
- * <p>Typically subclassed by AspectJ aspects.
-
- * <p>Subclasses may also need a metadata resolution strategy, in the
+ * <p>Subclasses may also need a custom metadata resolution strategy, in the
  * {@link BeanWiringInfoResolver} interface. The default implementation looks
  * for a bean with the same name as the fully-qualified class name. (This is
  * the default name of the bean in a Spring XML file if the '<code>id</code>'
@@ -45,21 +44,22 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @author Adrian Colyer
  * @since 2.0
+ * @see #setBeanWiringInfoResolver
+ * @see ClassNameBeanWiringInfoResolver
  */
-public abstract class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean  {
+public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean  {
 
 	/** Logger available to subclasses */
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private BeanWiringInfoResolver beanWiringInfoResolver;
+	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
 
 	private ConfigurableListableBeanFactory beanFactory;
 
 
 	/**
 	 * Set the <code>BeanWiringInfoResolver</code> to use.
-	 * <p>Default behavior will be to look for a bean with the same name as the
-	 * class.
+	 * <p>Default behavior will be to look for a bean with the same name as the class.
 	 * <p>As an alternative, consider using annotation-driven bean wiring.
 	 * @param beanWiringInfoResolver the <code>BeanWiringInfoResolver</code> to use.
 	 * @see ClassNameBeanWiringInfoResolver
@@ -83,13 +83,11 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	}
 
 	/**
-	 * If no {@link #setBeanWiringInfoResolver BeanWiringInfoResolver} was
-	 * provided, use a {@link ClassNameBeanWiringInfoResolver} as the default.
+	 * Check that a {@link BeanFactory} has been set.
 	 */
-	public void afterPropertiesSet() throws Exception {
-		if (this.beanWiringInfoResolver == null) {
-			this.beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
-		}		
+	public void afterPropertiesSet() {
+		Assert.notNull(this.beanFactory, "BeanFactory must be set");
+		Assert.notNull(this.beanWiringInfoResolver, "BeanWiringInfoResolver must be set");
 	}
 	
 	/**
@@ -109,7 +107,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	 * pointcut.
 	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>)
 	 */
-	protected void configureBean(Object beanInstance) {
+	public void configureBean(Object beanInstance) {
 		if (this.beanWiringInfoResolver == null) {
 			if (logger.isWarnEnabled()) {
 				logger.warn(ClassUtils.getShortName(getClass()) + " has not been set up " +
