@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.jndi.JndiObjectLocator;
 
 /**
- * Superclass for AOP interceptors invoking local or remote Stateless Session Beans.
+ * Base class for AOP interceptors invoking local or remote Stateless Session Beans.
+ * Designed for EJB 2.x, but works for EJB 3 Session Beans as well.
  *
  * <p>Such an interceptor must be the last interceptor in the advice chain.
  * In this case, there is no direct target object: The call is handled in a
@@ -172,6 +173,9 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 			Method createMethodToUse = this.createMethod;
 			if (createMethodToUse == null) {
 				createMethodToUse = getCreateMethod(home);
+			}
+			if (createMethodToUse == null) {
+				return home;
 			}
 			// Invoke create() method on EJB home object.
 			return createMethodToUse.invoke(home, (Object[]) null);

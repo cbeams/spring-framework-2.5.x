@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 
 import javax.ejb.EJBObject;
@@ -30,7 +31,8 @@ import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
- * Superclass for interceptors proxying remote Stateless Session Beans.
+ * Base class for interceptors proxying remote Stateless Session Beans.
+ * Designed for EJB 2.x, but works for EJB 3 Session Beans as well.
  *
  * <p>Such an interceptor must be the last interceptor in the advice chain.
  * In this case, there is no target object.
@@ -43,6 +45,9 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	private Class homeInterface;
 
 	private boolean refreshHomeOnConnectFailure = false;
+
+	private volatile boolean homeAsComponent = false;
+
 
 
 	/**
@@ -100,6 +105,21 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 			}
 		}
 		return homeObject;
+	}
+
+	/**
+	 * Check for EJB3-style home object that serves as EJB component directly.
+	 */
+	protected Method getCreateMethod(Object home) throws EjbAccessException {
+		if (this.homeAsComponent) {
+			return null;
+		}
+		if (home instanceof EJBObject) {
+			// An EJB3 Session Bean...
+			this.homeAsComponent = true;
+			return null;
+		}
+		return super.getCreateMethod(home);
 	}
 
 
@@ -222,7 +242,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see javax.ejb.EJBObject#remove
 	 */
 	protected void removeSessionBeanInstance(EJBObject ejb) {
-		if (ejb != null) {
+		if (ejb != null && !this.homeAsComponent) {
 			try {
 				ejb.remove();
 			}

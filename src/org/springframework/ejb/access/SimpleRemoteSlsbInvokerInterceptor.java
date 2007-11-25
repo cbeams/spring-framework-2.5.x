@@ -29,10 +29,11 @@ import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
- * <p>Basic invoker for a remote Stateless Session Bean.
- * "Creates" a new EJB instance for each invocation.
- * 
- * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
+ * Basic invoker for a remote Stateless Session Bean.
+ * Designed for EJB 2.x, but works for EJB 3 Session Beans as well.
+ *
+ * <p>"Creates" a new EJB instance for each invocation.
+ * See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
  *
  * <p>In a bean container, this class is normally best used as a singleton. However,
@@ -40,9 +41,9 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  * variants) you may have a problem if the bean container is loaded before the EJB
  * container loads the target EJB. That is because by default the JNDI lookup will be
  * performed in the init method of this class and cached, but the EJB will not have been
- * bound at the target location yet. The best solution is to set the lookupHomeOnStartup
- * property to false, in which case the home will be fetched on first access to the EJB.
- * (This flag is only true by default for backwards compatibility reasons).</p>
+ * bound at the target location yet. The best solution is to set the "lookupHomeOnStartup"
+ * property to "false", in which case the home will be fetched on first access to the EJB.
+ * (This flag is only true by default for backwards compatibility reasons).
  *
  * <p>This invoker is typically used with an RMI business interface, which serves
  * as super-interface of the EJB component interface. Alternatively, this invoker

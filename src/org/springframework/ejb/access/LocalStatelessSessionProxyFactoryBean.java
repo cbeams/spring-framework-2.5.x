@@ -24,21 +24,23 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * <p>Convenient factory for local Stateless Session Bean (SLSB) proxies.
- * If you want control over interceptor chaining, use an AOP ProxyFactoryBean
- * with LocalSlsbInvokerInterceptor rather than rely on this class.
- * 
+ * Convenient factory for local Stateless Session Bean (SLSB) proxies.
+ * Designed for EJB 2.x, but works for EJB 3 Session Beans as well.
+ *
  * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
  * 
+ * <p>If you want control over interceptor chaining, use an AOP ProxyFactoryBean
+ * with LocalSlsbInvokerInterceptor rather than rely on this class.
+ *
  * <p>In a bean container, this class is normally best used as a singleton. However,
  * if that bean container pre-instantiates singletons (as do the XML ApplicationContext
  * variants) you may have a problem if the bean container is loaded before the EJB
  * container loads the target EJB. That is because by default the JNDI lookup will be
  * performed in the init method of this class and cached, but the EJB will not have been
- * bound at the target location yet. The best solution is to set the lookupHomeOnStartup
- * property to false, in which case the home will be fetched on first access to the EJB.
- * (This flag is only true by default for backwards compatibility reasons).</p>
+ * bound at the target location yet. The best solution is to set the "lookupHomeOnStartup"
+ * property to "false", in which case the home will be fetched on first access to the EJB.
+ * (This flag is only true by default for backwards compatibility reasons).
  *  
  * @author Rod Johnson
  * @author Colin Sampaleanu

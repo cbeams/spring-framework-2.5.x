@@ -43,6 +43,8 @@ public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 		MyEjb myEjb = (MyEjb) ec.getMock();
 		myEjb.getValue();
 		ec.setReturnValue(value, 1);
+		myEjb.remove();
+		ec.setVoidCallable(1);
 		ec.replay();
 		
 		MockControl mc = MockControl.createControl(MyHome.class);
@@ -75,6 +77,39 @@ public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 		ec.verify();	
 	}
 	
+	public void testInvokesMethodOnEjb3StyleBean() throws Exception {
+		final int value = 11;
+		final String jndiName = "foo";
+
+		MockControl ec = MockControl.createControl(MyEjb.class);
+		final MyEjb myEjb = (MyEjb) ec.getMock();
+		myEjb.getValue();
+		ec.setReturnValue(value, 1);
+		ec.replay();
+
+		JndiTemplate jt = new JndiTemplate() {
+			public Object lookup(String name) throws NamingException {
+				// parameterize
+				assertTrue(name.equals("java:comp/env/" + jndiName));
+				return myEjb;
+			}
+		};
+
+		LocalStatelessSessionProxyFactoryBean fb = new LocalStatelessSessionProxyFactoryBean();
+		fb.setJndiName(jndiName);
+		fb.setResourceRef(true);
+		fb.setBusinessInterface(MyBusinessMethods.class);
+		fb.setJndiTemplate(jt);
+
+		// Need lifecycle methods
+		fb.afterPropertiesSet();
+
+		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
+		assertTrue(Proxy.isProxyClass(mbm.getClass()));
+		assertTrue(mbm.getValue() == value);
+		ec.verify();
+	}
+
 	public void testCreateException() throws Exception {
 		final String jndiName = "foo";
 	

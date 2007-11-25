@@ -89,6 +89,39 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		ec.verify();	
 	}
 	
+	public void testInvokesMethodOnEjb3StyleBean() throws Exception {
+		final int value = 11;
+		final String jndiName = "foo";
+
+		MockControl ec = MockControl.createControl(MyEjb.class);
+		final MyEjb myEjb = (MyEjb) ec.getMock();
+		myEjb.getValue();
+		ec.setReturnValue(value, 1);
+		ec.replay();
+
+		JndiTemplate jt = new JndiTemplate() {
+			public Object lookup(String name) {
+				// parameterize
+				assertTrue(name.equals("java:comp/env/" + jndiName));
+				return myEjb;
+			}
+		};
+
+		SimpleRemoteStatelessSessionProxyFactoryBean fb = new SimpleRemoteStatelessSessionProxyFactoryBean();
+		fb.setJndiName(jndiName);
+		fb.setResourceRef(true);
+		fb.setBusinessInterface(MyBusinessMethods.class);
+		fb.setJndiTemplate(jt);
+
+		// Need lifecycle methods
+		fb.afterPropertiesSet();
+
+		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
+		assertTrue(Proxy.isProxyClass(mbm.getClass()));
+		assertEquals("Returns expected value", value, mbm.getValue());
+		ec.verify();
+	}
+
 	public void testRemoteException() throws Exception {
 		final RemoteException rex = new RemoteException();
 		final String jndiName = "foo";

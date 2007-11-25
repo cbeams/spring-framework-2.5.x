@@ -289,6 +289,8 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
 		ejb.targetMethod();
 		ejbControl.setReturnValue(retVal, 1);
+		ejb.remove();
+		ejbControl.setVoidCallable(1);
 		ejbControl.replay();
 
 		final String jndiName= "foobar";
@@ -308,6 +310,8 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
 		ejb.targetMethod();
 		ejbControl.setThrowable(new RemoteException(), 1);
+		ejb.remove();
+		ejbControl.setVoidCallable(1);
 		ejbControl.replay();
 
 		final String jndiName= "foobar";
@@ -341,6 +345,8 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
 		ejb.targetMethod();
 		ejbControl.setThrowable(expected);
+		ejb.remove();
+		ejbControl.setVoidCallable(1);
 		ejbControl.replay();
 
 		final String jndiName= "foobar";
