@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * A simple decorator for a Map, encapsulating the workflow for caching
  * expensive values in a target Map. Supports caching weak or strong keys.
@@ -36,14 +33,12 @@ import org.apache.commons.logging.LogFactory;
  * encapsulates expensive creation of a new object.
  * 
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 1.2.2
  */
 public abstract class CachingMapDecorator implements Map, Serializable {
-	
+
 	private static Object NULL_VALUE = new Object();
-
-
-	private static final Log logger = LogFactory.getLog(CachingMapDecorator.class);
 
 	private final Map targetMap;
 
@@ -146,24 +141,13 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	public Object get(Object key) {
 		Object value = this.targetMap.get(key);
 		if (value == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new expensive value for key '" + key + "'");
-			}
 			value = create(key);
 			if (value == null) {
 				value = NULL_VALUE;
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Caching expensive value: " + value);
-			}
 			put(key, value);
 		}
-		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("For key '" + key + "', returning cached value: " + value);
-			}
-		}
-		return (value == NULL_VALUE) ? null : value;
+		return (value == NULL_VALUE ? null : value);
 	}
 
 	/**
