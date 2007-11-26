@@ -188,8 +188,7 @@ public class ContextLoader {
 			// Store context in local instance variable, to guarantee that
 			// it is available on ServletContext shutdown.
 			this.context = createWebApplicationContext(servletContext, parent);
-			servletContext.setAttribute(
-					WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
+			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
@@ -294,8 +293,8 @@ public class ContextLoader {
 	 * @param applicationContext the newly created application context
 	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
 	 */
-	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
-		/* no-op */
+	protected void customizeContext(
+			ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
 	}
 
 	/**
@@ -358,6 +357,7 @@ public class ContextLoader {
 			}
 		}
 		finally {
+			servletContext.removeAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 			if (this.parentContextRef != null) {
 				this.parentContextRef.release();
 			}
