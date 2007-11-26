@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
@@ -1108,6 +1107,85 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				// something transactional
 				assertEquals(con, DataSourceUtils.getConnection(ds));
 				final TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
+				try {
+					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
+					assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
+					// should be ignored
+					dsProxy.getConnection().close();
+				}
+				catch (SQLException ex) {
+					throw new UncategorizedSQLException("", "", ex);
+				}
+
+				tt.execute(new TransactionCallbackWithoutResult() {
+					protected void doInTransactionWithoutResult(TransactionStatus status) {
+						// something transactional
+						assertEquals(con, DataSourceUtils.getConnection(ds));
+						try {
+							assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
+							assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
+							// should be ignored
+							dsProxy.getConnection().close();
+						}
+						catch (SQLException ex) {
+							throw new UncategorizedSQLException("", "", ex);
+						}
+					}
+				});
+
+				try {
+					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
+					// should be ignored
+					dsProxy.getConnection().close();
+				}
+				catch (SQLException ex) {
+					throw new UncategorizedSQLException("", "", ex);
+				}
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testTransactionAwareDataSourceProxyWithSuspensionAndReobtaining() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+
+		ds.getConnection();
+		dsControl.setReturnValue(con, 2);
+		con.getMetaData();
+		conControl.setReturnValue(null, 2);
+		con.getAutoCommit();
+		conControl.setReturnValue(true, 2);
+		con.setAutoCommit(false);
+		conControl.setVoidCallable(2);
+		con.commit();
+		conControl.setVoidCallable(2);
+		con.setAutoCommit(true);
+		conControl.setVoidCallable(2);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 2);
+		con.close();
+		conControl.setVoidCallable(2);
+
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				// something transactional
+				assertEquals(con, DataSourceUtils.getConnection(ds));
+				final TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
+				dsProxy.setReobtainTransactionalConnections(true);
 				try {
 					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
 					assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));

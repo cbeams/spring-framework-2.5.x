@@ -200,6 +200,8 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		final Connection con = (Connection) conControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
+		con.isReadOnly();
+		conControl.setReturnValue(true, 1);
 		if (!openOuterConnection) {
 			con.close();
 			conControl.setVoidCallable(1);
@@ -223,13 +225,18 @@ public class DataSourceJtaTransactionTests extends TestCase {
 				assertTrue("Is new transaction", status.isNewTransaction());
 
 				Connection c = DataSourceUtils.getConnection(dsToUse);
-				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-				DataSourceUtils.releaseConnection(c, dsToUse);
-
-				c = DataSourceUtils.getConnection(dsToUse);
-				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-				if (!openOuterConnection) {
+				try {
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+					c.isReadOnly();
 					DataSourceUtils.releaseConnection(c, dsToUse);
+
+					c = DataSourceUtils.getConnection(dsToUse);
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+					if (!openOuterConnection) {
+						DataSourceUtils.releaseConnection(c, dsToUse);
+					}
+				}
+				catch (SQLException ex) {
 				}
 
 				for (int i = 0; i < 5; i++) {
@@ -247,21 +254,24 @@ public class DataSourceJtaTransactionTests extends TestCase {
 								conControl.reset();
 								ds.getConnection();
 								dsControl.setReturnValue(con, 1);
+								con.isReadOnly();
+								conControl.setReturnValue(true, 1);
 								con.close();
 								conControl.setVoidCallable(1);
 								dsControl.replay();
 								conControl.replay();
+
+								Connection c = DataSourceUtils.getConnection(dsToUse);
+								c.isReadOnly();
+								assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+								DataSourceUtils.releaseConnection(c, dsToUse);
+
+								c = DataSourceUtils.getConnection(dsToUse);
+								assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+								DataSourceUtils.releaseConnection(c, dsToUse);
 							}
 							catch (SQLException ex) {
 							}
-
-							Connection c = DataSourceUtils.getConnection(dsToUse);
-							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-							DataSourceUtils.releaseConnection(c, dsToUse);
-
-							c = DataSourceUtils.getConnection(dsToUse);
-							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-							DataSourceUtils.releaseConnection(c, dsToUse);
 						}
 					});
 
@@ -282,22 +292,25 @@ public class DataSourceJtaTransactionTests extends TestCase {
 						}
 						conControl.verify();
 						conControl.reset();
+						con.isReadOnly();
+						conControl.setReturnValue(true, 1);
 						con.close();
 						conControl.setVoidCallable(1);
 						conControl.replay();
+
+						if (!openOuterConnection) {
+							c = DataSourceUtils.getConnection(dsToUse);
+						}
+						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+						c.isReadOnly();
+						DataSourceUtils.releaseConnection(c, dsToUse);
+
+						c = DataSourceUtils.getConnection(dsToUse);
+						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+						DataSourceUtils.releaseConnection(c, dsToUse);
 					}
 					catch (SQLException ex) {
 					}
-
-					if (!openOuterConnection) {
-						c = DataSourceUtils.getConnection(dsToUse);
-					}
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-					DataSourceUtils.releaseConnection(c, dsToUse);
-
-					c = DataSourceUtils.getConnection(dsToUse);
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-					DataSourceUtils.releaseConnection(c, dsToUse);
 				}
 
 				else {
@@ -449,12 +462,20 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(true, false, true);
 	}
 
+	public void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndTransactionAwareDataSourceAndSuspendException() throws Exception {
+		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(true, true, true);
+	}
+
 	public void testJtaTransactionCommitWithPropagationRequiresNewAndBeginException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(false, false, false);
 	}
 
 	public void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndBeginException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(false, true, false);
+	}
+
+	public void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndTransactionAwareDataSourceAndBeginException() throws Exception {
+		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(false, true, true);
 	}
 
 	public void testJtaTransactionCommitWithPropagationRequiresNewWithTransactionAwareDataSourceAndBeginException() throws Exception {
@@ -499,7 +520,9 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		final Connection con = (Connection) conControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
-		if (!openOuterConnection) {
+		con.isReadOnly();
+		conControl.setReturnValue(true, 1);
+		if (!openOuterConnection || useTransactionAwareDataSource) {
 			con.close();
 			conControl.setVoidCallable(1);
 		}
@@ -508,6 +531,9 @@ public class DataSourceJtaTransactionTests extends TestCase {
 
 		final DataSource dsToUse = useTransactionAwareDataSource ?
 				new TransactionAwareDataSourceProxy(ds) : ds;
+		if (dsToUse instanceof TransactionAwareDataSourceProxy) {
+			((TransactionAwareDataSourceProxy) dsToUse).setReobtainTransactionalConnections(true);
+		}
 
 		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
 		final TransactionTemplate tt = new TransactionTemplate(ptm);
@@ -523,57 +549,77 @@ public class DataSourceJtaTransactionTests extends TestCase {
 					assertTrue("Is new transaction", status.isNewTransaction());
 
 					Connection c = DataSourceUtils.getConnection(dsToUse);
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-					DataSourceUtils.releaseConnection(c, dsToUse);
-
-					c = DataSourceUtils.getConnection(dsToUse);
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-					if (!openOuterConnection) {
+					try {
+						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+						c.isReadOnly();
 						DataSourceUtils.releaseConnection(c, dsToUse);
+
+						c = DataSourceUtils.getConnection(dsToUse);
+						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+						if (!openOuterConnection) {
+							DataSourceUtils.releaseConnection(c, dsToUse);
+						}
+					}
+					catch (SQLException ex) {
 					}
 
-					tt.execute(new TransactionCallbackWithoutResult() {
-						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-							assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(dsToUse));
-							assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
-							assertTrue("Is new transaction", status.isNewTransaction());
+					try {
+						tt.execute(new TransactionCallbackWithoutResult() {
+							protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+								assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(dsToUse));
+								assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+								assertTrue("Is new transaction", status.isNewTransaction());
 
+								try {
+									dsControl.verify();
+									conControl.verify();
+									dsControl.reset();
+									conControl.reset();
+									ds.getConnection();
+									dsControl.setReturnValue(con, 1);
+									con.close();
+									conControl.setVoidCallable(1);
+									dsControl.replay();
+									conControl.replay();
+
+									Connection c = DataSourceUtils.getConnection(dsToUse);
+									assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+									DataSourceUtils.releaseConnection(c, dsToUse);
+
+									c = DataSourceUtils.getConnection(dsToUse);
+									assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+									DataSourceUtils.releaseConnection(c, dsToUse);
+								}
+								catch (SQLException ex) {
+								}
+							}
+						});
+					}
+					finally {
+						if (openOuterConnection) {
 							try {
 								dsControl.verify();
-								conControl.verify();
 								dsControl.reset();
+								conControl.verify();
 								conControl.reset();
-								ds.getConnection();
-								dsControl.setReturnValue(con, 1);
+
+								if (useTransactionAwareDataSource) {
+									ds.getConnection();
+									dsControl.setReturnValue(con, 1);
+								}
+								con.isReadOnly();
+								conControl.setReturnValue(true, 1);
 								con.close();
 								conControl.setVoidCallable(1);
 								dsControl.replay();
 								conControl.replay();
+
+								c.isReadOnly();
+								DataSourceUtils.releaseConnection(c, dsToUse);
 							}
 							catch (SQLException ex) {
 							}
-
-							Connection c = DataSourceUtils.getConnection(dsToUse);
-							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-							DataSourceUtils.releaseConnection(c, dsToUse);
-
-							c = DataSourceUtils.getConnection(dsToUse);
-							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
-							DataSourceUtils.releaseConnection(c, dsToUse);
 						}
-					});
-
-					if (openOuterConnection) {
-						try {
-							conControl.verify();
-							conControl.reset();
-							con.close();
-							conControl.setVoidCallable(1);
-							conControl.replay();
-						}
-						catch (SQLException ex) {
-						}
-						DataSourceUtils.releaseConnection(c, dsToUse);
 					}
 				}
 			});
