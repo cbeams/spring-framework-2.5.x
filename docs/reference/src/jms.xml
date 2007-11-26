@@ -787,6 +787,21 @@ public interface SessionAwareMessageListener {
     <para>Please consult the JavaDoc for <classname>JmsMessageEndpointManager</classname>,
     <classname>JmsActivationSpecConfig</classname>, and
     <classname>ResourceAdapterFactoryBean</classname> for more details.</para>
+
+    <para>Spring also provides a generic JCA message endpoint manager which is not tied to JMS:
+    <classname>org.springframework.jca.endpoint.GenericMessageEndpointManager</classname>.
+    This component allows for using any message listener type (e.g. a CCI MessageListener)
+    and any provided-specific ActivationSpec object. Check out your JCA provider's
+    documentation to find out about the actual capabilities of your connector,
+    and consult <classname>GenericMessageEndpointManager</classname>'s JavaDoc
+    for the Spring-specific configuration details.</para>
+
+    <para>Note: JCA-based message endpoint management is very analogous to EJB 2.1
+    Message-Driven Beans; it uses the same underlying resource provider contract.
+    Like with EJB 2.1 MDBs, any message listener interface supported by your JCA
+    provider can be used in the Spring context as well. Spring nevertheless provides
+    explicit 'convenience' support for JMS, simply because JMS is the most common
+    endpoint API used with the JCA endpoint management contract.</para>
   </section>
 
   <section id="jms-namespace">
