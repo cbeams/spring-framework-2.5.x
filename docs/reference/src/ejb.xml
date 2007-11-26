@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="ejb">
-	<title>Enterprise Java Bean (EJB) integration</title>
+	<title>Enterprise Java Beans (EJB) integration</title>
+
 	<section id="ejb-introduction">
-	    <title>Introduction</title>
-	    <para>
-		    As a lightweight container, Spring is often considered an EJB
-		    replacement. We do believe that for many if not most applications and use
-		    cases, Spring as a container, combined with its rich supporting
-		    functionality in the area of transactions, ORM and JDBC access, is a better
-		    choice than implementing equivalent functionality via an EJB container and
-		    EJBs.
-        </para>
-	    <para>
-		    However, it is important to note that using Spring does not prevent
-		    you from using EJBs. In fact, Spring makes it much easier to access EJBs and
-		    implement EJBs and functionality within them. Additionally, using Spring to
-		    access services provided by EJBs allows the implementation of those services
-		    to later transparently be switched between local EJB, remote EJB, or POJO
-		    (plain old Java object) variants, without the client code having to
-		    be changed.
-        </para>
-	    <para>
-		    In this chapter, we look at how Spring can help you access and
-		    implement EJBs. Spring provides particular value when accessing stateless
-		    session beans (SLSBs), so we'll begin by discussing this.
-        </para>
+    <title>Introduction</title>
+    <para>
+      As a lightweight container, Spring is often considered an EJB
+      replacement. We do believe that for many if not most applications and use
+      cases, Spring as a container, combined with its rich supporting
+      functionality in the area of transactions, ORM and JDBC access, is a better
+      choice than implementing equivalent functionality via an EJB container and
+      EJBs.
+      </para>
+    <para>
+      However, it is important to note that using Spring does not prevent
+      you from using EJBs. In fact, Spring makes it much easier to access EJBs and
+      implement EJBs and functionality within them. Additionally, using Spring to
+      access services provided by EJBs allows the implementation of those services
+      to later transparently be switched between local EJB, remote EJB, or POJO
+      (plain old Java object) variants, without the client code having to
+      be changed.
+      </para>
+    <para>
+      In this chapter, we look at how Spring can help you access and
+      implement EJBs. Spring provides particular value when accessing stateless
+      session beans (SLSBs), so we'll begin by discussing this.
+    </para>
 	</section>
+
 	<section id="ejb-access">
 		<title>Accessing EJBs</title>
+
 		<section id="ejb-access-concepts">
 			<title>Concepts</title>
 			<para>
@@ -36,7 +39,7 @@
 				remote) EJB Home object, then use a 'create' method call on that object
 				to obtain the actual (local or remote) EJB object. One or more methods
 				are then invoked on the EJB.
-            </para>
+      </para>
 			<para>
 				To avoid repeated low-level code, many EJB applications use the
 				Service Locator and Business Delegate patterns. These are better than
@@ -75,6 +78,7 @@
 				you are actually adding real value in such code.
 			</para>
 		</section>
+
 		<section id="ejb-access-local">
 			<title>Accessing local SLSBs</title>
 			<para>
@@ -117,7 +121,7 @@ public void setMyComponent(MyComponent myComponent) {
 			</para>
 			<programlisting><![CDATA[<bean id="myComponent"
       class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
-  <property name="jndiName" value="myComponent"/>
+  <property name="jndiName" value="myJndiComponent"/>
   <property name="businessInterface" value="com.mycom.MyComponent"/>
 </bean>
 
@@ -139,6 +143,17 @@ public void setMyComponent(MyComponent myComponent) {
 				<literal>myComponent</literal> property of the controller class to the
 				EJB proxy.
 			</para>
+      <para>
+        Alternatively (and preferably in case of many such proxy definitions),
+        consider using the <literal>local-slsb</literal> configuration element
+        in Spring's "jee" namespace:
+      </para>
+      <programlisting><![CDATA[<jee:local-slsb id="myComponent" jndi-name="myJndiComponent"
+      business-interface="com.mycom.MyComponent"/>
+
+<bean id="myController" class="com.mycom.myController">
+  <property name="myComponent" ref="myComponent"/>
+</bean>]]></programlisting>
 			<para>
 				This EJB access mechanism delivers huge simplification of
 				application code: the web tier code (or other EJB client code) has no
@@ -176,12 +191,14 @@ public void setMyComponent(MyComponent myComponent) {
 				<classname>LocalSlsbInvokerInterceptor</classname>.
 			</para>
 		</section>
+
 		<section id="ejb-access-remote">
 			<title>Accessing remote SLSBs</title>
 			<para>
 				Accessing remote EJBs is essentially identical to accessing local
 				EJBs, except that the
-				<classname>SimpleRemoteStatelessSessionProxyFactoryBean</classname> is used.
+				<classname>SimpleRemoteStatelessSessionProxyFactoryBean</classname>
+        or <literal>jee:remote-slsb</literal> configuration element is used.
 				Of course, with or without Spring, remote invocation semantics apply; a
 				call to a method on an object in another VM in another computer does
 				sometimes have to be treated differently in terms of usage scenarios and
@@ -216,43 +233,67 @@ public void setMyComponent(MyComponent myComponent) {
 				<classname>RemoteExceptions</classname> in your business interface.
 			</para>
 		</section>
+
+    <section id="ejb-access-ejb2-ejb3">
+      <title>Accessing EJB 2.x SLSBs versus EJB 3 SLSBs</title>
+      <para>
+        Accessing EJB 2.x Session Beans and EJB 3 Session Beans via Spring
+        is largely transparent. Spring's EJB accessors, including the
+        <literal>jee:local-slsb</literal> and <literal>jee:remote-slsb</literal>
+        facilities, transparently adapt to the actual component at runtime.
+        They handle a home interface if found (EJB 2.x style), or perform straight
+        component invocations if no home interface is available (EJB 3 style).
+      </para>
+      <para>
+        Note: For EJB 3 Session Beans, you could effectively use a
+        <classname>JndiObjectFactoryBean</classname> / <literal>jee:jndi-lookup</literal>
+        as well, since fully usable component references are exposed for plain
+        JNDI lookups there. Defining explicit <literal>jee:local-slsb</literal>
+        / <literal>jee:remote-slsb</literal> lookups simply provides
+        consistent and more explicit EJB access configuration.
+      </para>
+    </section>
 	</section>
+
 	<section id="ejb-implementation">
-		<title>Using Spring's convenience EJB implementation classes</title>
-		<para>
-			Spring also provides convenience classes to help you implement EJBs.
-			These are designed to encourage the good practice of putting business
-			logic behind EJBs in POJOs, leaving EJBs responsible for transaction
-			demarcation and (optionally) remoting.
-		</para>
-		<para>
-			To implement a Stateless or Stateful session bean, or a Message Driven
-			bean, you need only derive your implementation class from
-			<classname>AbstractStatelessSessionBean</classname>,
-			<classname>AbstractStatefulSessionBean</classname>, and
-			<classname>AbstractMessageDrivenBean</classname>/<classname>AbstractJmsMessageDrivenBean</classname>,
-			respectively.
-		</para>
-		<para>
-			Consider an example Stateless Session bean which actually delegates
-			the implementation to a plain java service object. We have the business	interface:
-		</para>
-		<programlisting><![CDATA[public interface MyComponent {
+		<title>Using Spring's EJB implementation support classes</title>
+
+    <section id="ejb-implementation-ejb2">
+      <title>EJB 2.x base classes</title>
+      <para>
+        Spring provides convenience classes to help you implement EJBs.
+        These are designed to encourage the good practice of putting business
+        logic behind EJBs in POJOs, leaving EJBs responsible for transaction
+        demarcation and (optionally) remoting.
+      </para>
+      <para>
+        To implement a Stateless or Stateful session bean, or a Message Driven
+        bean, you need only derive your implementation class from
+        <classname>AbstractStatelessSessionBean</classname>,
+        <classname>AbstractStatefulSessionBean</classname>, and
+        <classname>AbstractMessageDrivenBean</classname>/<classname>AbstractJmsMessageDrivenBean</classname>,
+        respectively.
+      </para>
+      <para>
+        Consider an example Stateless Session bean which actually delegates
+        the implementation to a plain java service object. We have the business	interface:
+      </para>
+      <programlisting><![CDATA[public interface MyComponent {
     public void myMethod(...);
     ...
 }]]></programlisting>
-		<para>We also have the plain Java implementation object:</para>
-		<programlisting><![CDATA[public class MyComponentImpl implements MyComponent {
+      <para>We also have the plain Java implementation object:</para>
+      <programlisting><![CDATA[public class MyComponentImpl implements MyComponent {
     public String myMethod(...) {
         ...
     }
     ...
 }]]></programlisting>
-		<para>And finally the Stateless Session Bean itself:</para>
-		<programlisting><![CDATA[public class MyComponentEJB extends AbstractStatelessSessionBean
-        implements MyComponent {
+      <para>And finally the Stateless Session Bean itself:</para>
+      <programlisting><![CDATA[public class MyFacadeEJB extends AbstractStatelessSessionBean
+        implements MyFacadeLocal {
 
-    MyComponent myComp;
+    private MyComponent myComp;
 
     /**
      * Obtain our POJO service object from the BeanFactory/ApplicationContext
@@ -264,53 +305,53 @@ public void setMyComponent(MyComponent myComponent) {
     }
 
     // for business method, delegate to POJO service impl.
-    public String myMethod(...) {
+    public String myFacadeMethod(...) {
         return myComp.myMethod(...);
     }
     ...
 }]]></programlisting>
-		<para>
-			The Spring EJB support base classes will by default create and load
-			a Spring IoC container as part of their lifecycle, which is then available
-			to the EJB (for example, as used in the code above to obtain the POJO
-			service object). The loading is	done via a strategy object which is a subclass of
-			<classname>BeanFactoryLocator</classname>. The actual implementation of
-			<classname>BeanFactoryLocator</classname> used by default is
-			<classname>ContextJndiBeanFactoryLocator</classname>, which creates the
-			ApplicationContext from a resource locations specified as a JNDI
-			environment variable (in the case of the EJB classes, at
-			<literal>java:comp/env/ejb/BeanFactoryPath</literal>). If there is a need
-			to change the BeanFactory/ApplicationContext loading strategy, the default
-			<classname>BeanFactoryLocator</classname> implementation used may be overridden
-			by calling the <literal>setBeanFactoryLocator()</literal> method, either
-			in <literal>setSessionContext()</literal>, or in the actual constructor of
-			the EJB. Please see the Javadocs for more details.
-		</para>
-		<para>
-			As described in the Javadocs, Stateful Session beans expecting to be
-			passivated and reactivated as part of their lifecycle, and which use a
-			non-serializable container instance (which is the normal case) will have
-			to manually call <literal>unloadBeanFactory()</literal> and
-			<literal>loadBeanFactory</literal> from <literal>ejbPassivate</literal>
-			and <literal>ejbActivate</literal>, respectively, to unload and reload the
-			BeanFactory on passivation and activation, since it can not be saved by
-			the EJB container.
-		</para>
-		<para>
-			The default behavior of the <classname>ContextJndiBeanFactoryLocator</classname>
-			classes which is to load an <classname>ApplicationContext</classname> for the
-			use of the EJB is adequate for some situations. However, it is problematic when
-			the <classname>ApplicationContext</classname> is loading a number
-			of beans, or the initialization of those beans is time consuming or memory
-			intensive (such as a Hibernate <classname>SessionFactory</classname> initialization, for
-			example), since every EJB will have their own copy. In this case, the user
-			may want to override the default <classname>ContextJndiBeanFactoryLocator</classname>
-			usage and use another <classname>BeanFactoryLocator</classname> variant, such as the
-			<classname>ContextSingletonBeanFactoryLocator</classname> which can load and use a
-			shared container to be used by multiple EJBs or other clients. Doing this is relatively
-			simple, by adding code similar to this to the EJB:
-		</para>
-		<programlisting><![CDATA[   /**
+      <para>
+        The Spring EJB support base classes will by default create and load
+        a Spring IoC container as part of their lifecycle, which is then available
+        to the EJB (for example, as used in the code above to obtain the POJO
+        service object). The loading is	done via a strategy object which is a subclass of
+        <classname>BeanFactoryLocator</classname>. The actual implementation of
+        <classname>BeanFactoryLocator</classname> used by default is
+        <classname>ContextJndiBeanFactoryLocator</classname>, which creates the
+        ApplicationContext from a resource locations specified as a JNDI
+        environment variable (in the case of the EJB classes, at
+        <literal>java:comp/env/ejb/BeanFactoryPath</literal>). If there is a need
+        to change the BeanFactory/ApplicationContext loading strategy, the default
+        <classname>BeanFactoryLocator</classname> implementation used may be overridden
+        by calling the <literal>setBeanFactoryLocator()</literal> method, either
+        in <literal>setSessionContext()</literal>, or in the actual constructor of
+        the EJB. Please see the Javadocs for more details.
+      </para>
+      <para>
+        As described in the Javadocs, Stateful Session beans expecting to be
+        passivated and reactivated as part of their lifecycle, and which use a
+        non-serializable container instance (which is the normal case) will have
+        to manually call <literal>unloadBeanFactory()</literal> and
+        <literal>loadBeanFactory</literal> from <literal>ejbPassivate</literal>
+        and <literal>ejbActivate</literal>, respectively, to unload and reload the
+        BeanFactory on passivation and activation, since it can not be saved by
+        the EJB container.
+      </para>
+      <para>
+        The default behavior of the <classname>ContextJndiBeanFactoryLocator</classname>
+        classes which is to load an <classname>ApplicationContext</classname> for the
+        use of the EJB is adequate for some situations. However, it is problematic when
+        the <classname>ApplicationContext</classname> is loading a number
+        of beans, or the initialization of those beans is time consuming or memory
+        intensive (such as a Hibernate <classname>SessionFactory</classname> initialization, for
+        example), since every EJB will have their own copy. In this case, the user
+        may want to override the default <classname>ContextJndiBeanFactoryLocator</classname>
+        usage and use another <classname>BeanFactoryLocator</classname> variant, such as the
+        <classname>ContextSingletonBeanFactoryLocator</classname> which can load and use a
+        shared container to be used by multiple EJBs or other clients. Doing this is relatively
+        simple, by adding code similar to this to the EJB:
+      </para>
+      <programlisting><![CDATA[   /**
     * Override default BeanFactoryLocator implementation
     * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
     */
@@ -319,27 +360,73 @@ public void setMyComponent(MyComponent myComponent) {
        setBeanFactoryLocator(ContextSingletonBeanFactoryLocator.getInstance());
        setBeanFactoryLocatorKey(ServicesConstants.PRIMARY_CONTEXT_ID);
    }]]></programlisting>
-		<para>
-			You would then need to create a bean definition file named <literal>beanRefContext.xml</literal>.
-			This file defines all bean factories (usually in the form of application contexts) that may be used
-			in the EJB. In many cases, this file will only contain a single bean definition such as this (where
-			<literal>businessApplicationContext.xml</literal> contains the bean	definitions for all business
-			service POJOs):
-		</para>
-		<programlisting><![CDATA[<beans>
+      <para>
+        You would then need to create a bean definition file named <literal>beanRefContext.xml</literal>.
+        This file defines all bean factories (usually in the form of application contexts) that may be used
+        in the EJB. In many cases, this file will only contain a single bean definition such as this (where
+        <literal>businessApplicationContext.xml</literal> contains the bean	definitions for all business
+        service POJOs):
+      </para>
+      <programlisting><![CDATA[<beans>
     <bean id="businessBeanFactory" class="org.springframework.context.support.ClassPathXmlApplicationContext">
         <constructor-arg value="businessApplicationContext.xml" />
     </bean>
 </beans>]]></programlisting>
-		<para>
-		In the above example, the <literal>ServicesConstants.PRIMARY_CONTEXT_ID</literal> constant
-		would be defined as follows:
-    </para>
-		<programlisting><![CDATA[public static final String ServicesConstants.PRIMARY_CONTEXT_ID = "businessBeanFactory";]]></programlisting>
-		<para>
-		Please see the respective Javadocs for the <classname>BeanFactoryLocator</classname> and
-		<classname>ContextSingletonBeanFactoryLocator</classname> classes for more information on
-		their usage.
-	</para>
+      <para>
+        In the above example, the <literal>ServicesConstants.PRIMARY_CONTEXT_ID</literal> constant
+        would be defined as follows:
+        </para>
+        <programlisting><![CDATA[public static final String ServicesConstants.PRIMARY_CONTEXT_ID = "businessBeanFactory";]]></programlisting>
+        <para>
+        Please see the respective Javadocs for the <classname>BeanFactoryLocator</classname> and
+        <classname>ContextSingletonBeanFactoryLocator</classname> classes for more information on
+        their usage.
+      </para>
+    </section>
+
+    <section id="ejb-implementation-ejb3">
+      <title>EJB 3 injection interceptor</title>
+      <para>
+        For EJB 3 Session Beans and Message-Driven Beans, Spring provides a convenient
+        interceptor that resolves Spring 2.5's <literal>@Autowired</literal> annotation
+        in the EJB component class:
+        <classname>org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor</classname>.
+        This interceptor can be applied through an <code>@Interceptors</code> annotation
+        in the EJB component class, or through an <literal>interceptor-binding</literal>
+        XML element in the EJB deployment descriptor.
+      </para>
+      <programlisting><![CDATA[@Stateless
+@Interceptors(SpringBeanAutowiringInterceptor.class)
+public class MyFacadeEJB implements MyFacadeLocal {
+
+    // automatically injected with a matching Spring bean
+    @Autowired
+    private MyComponent myComp;
+
+    // for business method, delegate to POJO service impl.
+    public String myFacadeMethod(...) {
+        return myComp.myMethod(...);
+    }
+    ...
+}]]></programlisting>
+      <para>
+        <classname>SpringBeanAutowiringInterceptor</classname> by default obtains target
+        beans from a <classname>ContextSingletonBeanFactoryLocator</classname>, with the
+        context defined in a bean definition file named <literal>beanRefContext.xml</literal>.
+        By default, a single context definition is expected, which is obtained by type rather
+        than by name. However, if you need to choose between multiple context definitions,
+        a specific locator key is required. The locator key (i.e. the name of the context
+        definition in <literal>beanRefContext.xml</literal>) can be explicitly specified
+        either through overriding the <literal>getBeanFactoryLocatorKey</literal> method
+        in a custom <classname>SpringBeanAutowiringInterceptor</classname> subclass.
+      </para>
+      <para>
+        Alternatively, consider overriding <classname>SpringBeanAutowiringInterceptor</classname>'s
+        <literal>getBeanFactory</literal> method, e.g. obtaining a shared
+        <interfacename>ApplicationContext</interfacename> from a custom holder class.
+      </para>
+    </section>
+
 	</section>
+
 </chapter>
