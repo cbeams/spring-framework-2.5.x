@@ -19,6 +19,9 @@ Package org.springframework.beans
 Package org.springframework.context
 * AbstractApplicationContext calls "cancelRefresh" method in case of refresh failure now, resetting the 'active' flag
 
+Package org.springframework.core
+* OverridingClassLoader excludes the "oracle." package by default as well (e.g. for TopLink's custom annotations)
+
 Package org.springframework.jdbc
 * fixed SingleColumnRowMapper to use passed-in required type in the default "convertValueToRequiredType" implementation
 
@@ -45,6 +48,7 @@ Package org.springframework.util
 * AutoPopulatingList is serializable now
 
 Package org.springframework.web
+* ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
 * DispatcherPortlet swallows IllegalStateException when setting implicit render parameter (e.g. after sendRedirect call)
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
