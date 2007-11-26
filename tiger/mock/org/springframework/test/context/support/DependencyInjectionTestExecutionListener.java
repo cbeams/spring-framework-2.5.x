@@ -116,14 +116,14 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * </p>
 	 *
 	 * @param testContext the test context for which dependency injection should
-	 *        be performed; may not be <code>null</code>.
-	 * @throws Exception allows any exception to propagate.
+	 * be performed; may not be <code>null</code>
+	 * @throws Exception allows any exception to propagate
 	 * @see #prepareTestInstance(TestContext)
 	 * @see #beforeTestMethod(TestContext)
 	 */
 	protected void injectDependencies(final TestContext testContext) throws Exception {
-		final Object bean = testContext.getTestInstance();
-		final AutowireCapableBeanFactory beanFactory = testContext.getApplicationContext().getAutowireCapableBeanFactory();
+		Object bean = testContext.getTestInstance();
+		AutowireCapableBeanFactory beanFactory = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 		beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		beanFactory.initializeBean(bean, testContext.getTestClass().getName());
 
