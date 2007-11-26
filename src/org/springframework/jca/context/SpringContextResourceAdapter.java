@@ -54,8 +54,14 @@ import org.springframework.util.StringUtils;
  * use the JCA WorkManager from the BootstrapContext that has been provided
  * to this ResourceAdapter.
  *
- * <p>To be defined in a "META-INF/ra.xml" file within a ".rar" deployment
- * unit like as follows:
+ * <p>The JCA {@link javax.resource.spi.BootstrapContext} may also be
+ * accessed directly, through application components that implement the
+ * {@link BootstrapContextAware} interface. When deployed using this
+ * ResourceAdapter, the BootstrapContext is guaranteed to be passed on
+ * to such components.
+ *
+ * <p>This ResourceAdapter is to be defined in a "META-INF/ra.xml" file
+ * within a J2EE ".rar" deployment unit like as follows:
  *
  * <pre class="code">
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -94,6 +100,7 @@ import org.springframework.util.StringUtils;
  * @since 2.5
  * @see #setContextConfigLocation
  * @see #loadBeanDefinitions
+ * @see ResourceAdapterApplicationContext
  */
 public class SpringContextResourceAdapter implements ResourceAdapter {
 

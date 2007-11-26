@@ -5184,6 +5184,52 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     <classname>ContextSingletonBeanFactoryLocator</classname>.</para>
   </section>
 
+  <section id="beans-rar-deployment">
+    <title>Deploying a Spring ApplicationContext as a J2EE RAR file</title>
+
+    <para>Since Spring 2.5, it is possible to deploy a Spring ApplicationContext
+    as a RAR file, encapsulating the context and all of its required bean classes
+    and libary JARs in a J2EE RAR deployment unit. This is the equivalent of
+    bootstrapping a standalone ApplicationContext, just hosted in J2EE environment,
+    being able to access the J2EE server's facilities. RAR deployment is intended
+    as a more 'natural' alternative to the not uncommon scenario of deploying a
+    headless WAR file - i.e. a WAR file without any HTTP entry points, just used
+    for bootstrapping a Spring ApplicationContext in a J2EE environment.</para>
+
+    <para>RAR deployment is ideal for application contexts that do not need any
+    HTTP entry points but rather just consist of message endpoints and scheduled
+    jobs etc. Beans in such a context may use application server resources such
+    as the JTA transaction manager and JNDI-bound JDBC DataSources and JMS
+    ConnectionFactory instances, and may also register with the platform's
+    JMX server - all through Spring's standard transaction management and
+    JNDI and JMX support facilities. Application components may also interact
+    with the application's server JCA WorkManager through Spring's
+    <interfacename>TaskExecutor</interfacename> abstraction.</para>
+
+    <para>Check out the JavaDoc of the
+    <classname>org.springframework.jca.context.SpringContextResourceAdapter</classname>
+    class for the configuration details involved in RAR deployment.</para>
+
+    <para><emphasis>For simple deployment needs, all you need to do is the following:</emphasis>
+    Package all application classes into a RAR file (which is just a standard
+    JAR file with a different file extension), add all required library jars
+    into the root of the RAR archive, add a "META-INF/ra.xml" deployment descriptor
+    (as shown in <classname>SpringContextResourceAdapter</classname>'s JavaDoc)
+    as well as the corresponding Spring XML bean definition file(s)
+    (typically "META-INF/applicationContext.xml"), and drop the resulting RAR
+    file into your application server's deployment directory!</para>
+
+    <para><emphasis>NOTE:</emphasis> Such RAR deployment units are usually self-contained;
+    they do not expose components to the 'outside' world, not even to other
+    modules of the same application. Interaction with a RAR-based ApplicationContext
+    usually happens through JMS destinations that it shares with other modules.
+    A RAR-based ApplicationContext may also - for example - schedule some jobs,
+    reacting to new files in the file system (or the like). If it actually needs
+    to allow for synchronous access from the outside, it could for example export
+    RMI endpoints, which of course may be used by other application modules
+    on the same machine as well.</para>
+  </section>
+
   <section id="beans-annotation-config">
     <title>Annotation-based configuration</title>
 
