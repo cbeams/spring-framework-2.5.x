@@ -188,7 +188,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * <p>The returned Connection handle implements the ConnectionProxy interface,
 	 * allowing to retrieve the underlying target Connection.
 	 * @return a lazy Connection handle
-	 * @see ConnectionProxy#getTargetConnection
+	 * @see ConnectionProxy#getTargetConnection()
 	 */
 	public Connection getConnection() throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
@@ -205,7 +205,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @param username the per-Connection username
 	 * @param password the per-Connection password
 	 * @return a lazy Connection handle
-	 * @see ConnectionProxy#getTargetConnection
+	 * @see ConnectionProxy#getTargetConnection()
 	 */
 	public Connection getConnection(String username, String password) throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
@@ -249,11 +249,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying connection.
-				return getTargetConnection(method);
-			}
-			else if (method.getName().equals("equals")) {
+			if (method.getName().equals("equals")) {
 				// We must avoid fetching a target Connection for "equals".
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
@@ -263,6 +259,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// and we must return the same hash code even when the target
 				// Connection has been fetched: use hashCode of Connection proxy.
 				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying connection.
+				return getTargetConnection(method);
 			}
 
 			if (!hasTargetConnection()) {
