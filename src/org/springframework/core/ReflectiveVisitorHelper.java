@@ -157,7 +157,7 @@ public final class ReflectiveVisitorHelper {
 				}
 			}
 			if (logger.isWarnEnabled()) {
-				logger.warn("No default '" + VISIT_METHOD + "' method found.  Returning <null>");
+				logger.warn("No default '" + VISIT_METHOD + "' method found. Returning <null>.");
 			}
 			return null;
 		}
@@ -184,8 +184,8 @@ public final class ReflectiveVisitorHelper {
 				// Check for a visit method on the visitor class matching this
 				// argument type.
 				try {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Looking for method " + VISIT_METHOD + "(" + argumentType + ")");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Looking for method " + VISIT_METHOD + "(" + argumentType + ")");
 					}
 					return findVisitMethod(this.visitorClass, argumentType);
 				}
