@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 2.5.1 (2007-12-20)
 -------------------------------------
 
+General
+* added section on J2EE RAR deployment to the reference documentation
+
 Package org.springframework.aop
 * ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
 
@@ -15,9 +18,15 @@ Package org.springframework.beans
 
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
+* OverridingClassLoader excludes the "oracle." package by default as well (e.g. for TopLink's custom annotations)
 
 Package org.springframework.ejb
+* "jee:local-slsb" and "jee:remote-slsb" work for EJB3 Session Beans as well (as alternative to "jee:jndi-lookup")
 * introduced EJB3-compliant SpringBeanAutowiringInterceptor for processing Spring's @Autowired in EJB3 SBs/MDBs
+
+Package org.springframework.jdbc
+* TransactionAwareDataSourceProxy obtains target Connections lazily when the first call comes in on the Connection proxy
+* added "reobtainTransactionalConnections" flag to TransactionAwareDataSourceProxy (for Connection handles on JBoss)
 
 Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
@@ -33,11 +42,15 @@ Package org.springframework.remoting
 * introduced SimpleHttpInvokerServiceExporter and SimpleHessian/BurlapServiceExporter as HttpHandlers for Sun JRE 1.6
 * introduced SimpleHttpServerFactoryBean for Spring-style set-up of a Sun JRE 1.6 HttpServer
 
+Package org.springframework.test
+* fixed AbstractContextLoader to detect and accept "classpath*:" URLs as well
+
 Package org.springframework.util
 * AutoPopulatingList is serializable now
 * FreeMarker "formSingleSelect" macro also accepts options from a sequence (list) as both labels and values
 
 Package org.springframework.web
+* ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
 * SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
 
 
