@@ -190,24 +190,24 @@ public class ContextLoader {
 			this.context = createWebApplicationContext(servletContext, parent);
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
 						WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
 			}
-			if (this.logger.isInfoEnabled()) {
+			if (logger.isInfoEnabled()) {
 				long elapsedTime = System.currentTimeMillis() - startTime;
-				this.logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
+				logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
 			}
 
 			return this.context;
 		}
 		catch (RuntimeException ex) {
-			this.logger.error("Context initialization failed", ex);
+			logger.error("Context initialization failed", ex);
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ex);
 			throw ex;
 		}
 		catch (Error err) {
-			this.logger.error("Context initialization failed", err);
+			logger.error("Context initialization failed", err);
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, err);
 			throw err;
 		}
@@ -217,7 +217,8 @@ public class ContextLoader {
 	 * Instantiate the root WebApplicationContext for this loader, either the
 	 * default context class or a custom context class if specified.
 	 * <p>This implementation expects custom contexts to implement the
-	 * ConfigurableWebApplicationContext interface. Can be overridden in subclasses.
+	 * {@link ConfigurableWebApplicationContext} interface.
+	 * Can be overridden in subclasses.
 	 * <p>In addition, {@link #customizeContext} gets called prior to refreshing the
 	 * context, allowing subclasses to perform custom modifications to the context.
 	 * @param servletContext current servlet context
@@ -308,7 +309,7 @@ public class ContextLoader {
 	 * EJBs. For pure web applications, there is usually no need to worry about
 	 * having a parent context to the root web application context.
 	 * <p>The default implementation uses
-	 * {@link org.springframework.context.access.ContextSingletonBeanFactoryLocator ContextSingletonBeanFactoryLocator},
+	 * {@link org.springframework.context.access.ContextSingletonBeanFactoryLocator},
 	 * configured via {@link #LOCATOR_FACTORY_SELECTOR_PARAM} and
 	 * {@link #LOCATOR_FACTORY_KEY_PARAM}, to load a parent context
 	 * which will be shared by all other users of ContextsingletonBeanFactoryLocator
@@ -328,8 +329,8 @@ public class ContextLoader {
 		if (parentContextKey != null) {
 			// locatorFactorySelector may be null, indicating the default "classpath*:beanRefContext.xml"
 			BeanFactoryLocator locator = ContextSingletonBeanFactoryLocator.getInstance(locatorFactorySelector);
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Getting parent context definition: using parent context key of '" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Getting parent context definition: using parent context key of '" +
 						parentContextKey + "' with BeanFactoryLocator");
 			}
 			this.parentContextRef = locator.useBeanFactory(parentContextKey);
