@@ -17,6 +17,7 @@
 package org.springframework.test.context.support;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -33,6 +34,7 @@ import org.springframework.util.StringUtils;
  * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see #generateDefaultLocations(Class)
  * @see #modifyLocations(Class,String...)
@@ -50,7 +52,7 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * Can be overridden by subclasses to change the default behavior.
 	 * </p>
 	 *
-	 * @return <code>true</code>.
+	 * @return always <code>true</code> by default
 	 */
 	protected boolean isGenerateDefaultLocations() {
 		return true;
@@ -65,7 +67,7 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * Must be implemented by subclasses.
 	 * </p>
 	 *
-	 * @return The resource suffix; should not be <code>null</code> or empty.
+	 * @return the resource suffix; should not be <code>null</code> or empty.
 	 * @see #generateDefaultLocations(Class)
 	 */
 	protected abstract String getResourceSuffix();
@@ -83,15 +85,14 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * returned.
 	 * </p>
 	 *
-	 * @param clazz The class with which the locations are associated: to be
-	 *        used when generating default locations.
-	 * @param locations The unmodified locations to use for loading the
-	 *        application context; can be <code>null</code> or empty.
-	 * @return An array of application context resource locations.
+	 * @param clazz the class with which the locations are associated: to be
+	 * used when generating default locations.
+	 * @param locations the unmodified locations to use for loading the
+	 * application context; can be <code>null</code> or empty.
+	 * @return an array of application context resource locations
 	 * @see #generateDefaultLocations(Class)
 	 * @see #modifyLocations(Class,String...)
-	 * @see org.springframework.test.context.ContextLoader#processLocations(java.lang.Class,
-	 *      java.lang.String[])
+	 * @see org.springframework.test.context.ContextLoader#processLocations
 	 */
 	public final String[] processLocations(final Class<?> clazz, final String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
@@ -115,9 +116,8 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * <em>default location generation</em> strategy.
 	 * </p>
 	 *
-	 * @param clazz The class for which the default locations are to be
-	 *        generated.
-	 * @return An array of default application context resource locations.
+	 * @param clazz the class for which the default locations are to be generated
+	 * @return an array of default application context resource locations
 	 * @see #getResourceSuffix()
 	 */
 	protected String[] generateDefaultLocations(final Class<?> clazz) {
@@ -148,20 +148,18 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * <em>location modification</em> strategy.
 	 * </p>
 	 *
-	 * @param clazz The class with which the locations are associated.
-	 * @param locations The resource locations to be modified.
-	 * @return An array of modified application context resource locations.
+	 * @param clazz the class with which the locations are associated
+	 * @param locations the resource locations to be modified
+	 * @return an array of modified application context resource locations
 	 */
 	protected String[] modifyLocations(final Class<?> clazz, final String... locations) {
-
-		final String[] modifiedLocations = new String[locations.length];
-
+		String[] modifiedLocations = new String[locations.length];
 		for (int i = 0; i < locations.length; i++) {
-			final String path = locations[i];
+			String path = locations[i];
 			if (path.startsWith("/")) {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
-			else if (!ResourceUtils.isUrl(path)) {
+			else if (!ResourcePatternUtils.isUrl(path)) {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + "/"
 						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + "/" + path);
 			}
