@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,8 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 
 	private boolean shared = false;
 
+	private String cacheManagerName;
+
 	private CacheManager cacheManager;
 
 
@@ -69,6 +71,8 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 	 * Set the location of the EHCache config file. A typical value is "/WEB-INF/ehcache.xml".
 	 * <p>Default is "ehcache.xml" in the root of the class path, or if not found,
 	 * "ehcache-failsafe.xml" in the EHCache jar (default EHCache initialization).
+	 * @see net.sf.ehcache.CacheManager#create(java.io.InputStream)
+	 * @see net.sf.ehcache.CacheManager#CacheManager(java.io.InputStream)
 	 */
 	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
@@ -80,9 +84,19 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 	 * an independent instance.
 	 * <p>Note that independent CacheManager instances are only available on EHCache 1.2 and
 	 * higher. Switch this flag to "true" if you intend to run against an EHCache 1.1 jar.
+	 * @see net.sf.ehcache.CacheManager#create()
+	 * @see net.sf.ehcache.CacheManager#CacheManager()
 	 */
 	public void setShared(boolean shared) {
 		this.shared = shared;
+	}
+
+	/**
+	 * Set the name of the EHCache CacheManager (if a specific name is desired).
+	 * @see net.sf.ehcache.CacheManager#setName(String)
+	 */
+	public void setCacheManagerName(String cacheManagerName) {
+		this.cacheManagerName = cacheManagerName;
 	}
 
 
@@ -105,6 +119,9 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 			else {
 				this.cacheManager = new CacheManager();
 			}
+		}
+		if (this.cacheManagerName != null) {
+			this.cacheManager.setName(this.cacheManagerName);
 		}
 	}
 

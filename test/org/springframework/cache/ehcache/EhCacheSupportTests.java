@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.constructs.blocking.BlockingCache;
 import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
-import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
 import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
+import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
 
 import org.springframework.core.io.ClassPathResource;
 
@@ -54,6 +54,7 @@ public class EhCacheSupportTests extends TestCase {
 	public void testLoadingCacheManagerFromConfigFile() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
 		cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
+		cacheManagerFb.setCacheManagerName("myCacheManager");
 		cacheManagerFb.afterPropertiesSet();
 		try {
 			CacheManager cm = (CacheManager) cacheManagerFb.getObject();
