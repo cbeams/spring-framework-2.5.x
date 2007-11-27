@@ -495,6 +495,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		this.taskExecutor.execute((Runnable) task);
 	}
 
+	/**
+	 * Try scheduling a new invoker, since we know messages are coming in...
+	 * @see #scheduleNewInvokerIfAppropriate()
+	 */
 	protected void messageReceived(Message message, Session session) {
 		scheduleNewInvokerIfAppropriate();
 	}
@@ -512,11 +516,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	protected void scheduleNewInvokerIfAppropriate() {
 		if (isRunning()) {
+			resumePausedTasks();
 			synchronized (this.activeInvokerMonitor) {
 				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
 					scheduleNewInvoker();
 					if (logger.isDebugEnabled()) {
-						logger.debug("Raised scheduled invoker count: " + scheduledInvokers.size());
+						logger.debug("Raised scheduled invoker count: " + this.scheduledInvokers.size());
 					}
 				}
 			}
@@ -862,6 +867,18 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					activeInvokerMonitor.notifyAll();
 				}
 				clearResources();
+			}
+			else if (isRunning()) {
+				int nonPausedConsumers = getScheduledConsumerCount() - getPausedTaskCount();
+				if (nonPausedConsumers < 1) {
+					logger.error("All scheduled consumers have been paused, probably due to tasks having been rejected. " +
+							"Check your thread pool configuration! Manual recovery necessary through a start() call.");
+				}
+				else if (nonPausedConsumers < getConcurrentConsumers()) {
+					logger.warn("Number of scheduled consumers has dropped below concurrentConsumers limit, probably " +
+							"due to tasks having been rejected. Check your thread pool configuration! Automatic recovery " +
+							"to be triggered by remaining consumers.");
+				}
 			}
 		}
 

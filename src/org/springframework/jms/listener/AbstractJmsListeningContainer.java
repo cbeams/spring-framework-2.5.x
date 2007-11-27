@@ -349,10 +349,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		synchronized (this.lifecycleMonitor) {
 			this.running = true;
 			this.lifecycleMonitor.notifyAll();
-			for (Iterator it = this.pausedTasks.iterator(); it.hasNext();) {
-				doRescheduleTask(it.next());
-				it.remove();
-			}
+			resumePausedTasks();
 		}
 
 		// Start the shared Connection, if any.
@@ -471,7 +468,13 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		Assert.notNull(task, "Task object must not be null");
 		synchronized (this.lifecycleMonitor) {
 			if (this.running) {
-				doRescheduleTask(task);
+				try {
+					doRescheduleTask(task);
+				}
+				catch (RuntimeException ex) {
+					logRejectedTask(task, ex);
+					this.pausedTasks.add(task);
+				}
 				return true;
 			}
 			else if (this.active) {
@@ -481,6 +484,37 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			else {
 				return false;
 			}
+		}
+	}
+
+	/**
+	 * Try to resume all paused tasks.
+	 * Tasks for which rescheduling failed simply remain in paused mode.
+	 */
+	protected void resumePausedTasks() {
+		synchronized (this.lifecycleMonitor) {
+			if (!this.pausedTasks.isEmpty()) {
+				for (Iterator it = this.pausedTasks.iterator(); it.hasNext();) {
+					Object task = it.next();
+					try {
+						doRescheduleTask(task);
+						it.remove();
+						if (logger.isDebugEnabled()) {
+							logger.debug("Resumed paused task: " + task);
+						}
+					}
+					catch (RuntimeException ex) {
+						logRejectedTask(task, ex);
+						// Keep the task in paused mode...
+					}
+				}
+			}
+		}
+	}
+
+	public int getPausedTaskCount() {
+		synchronized (this.lifecycleMonitor) {
+			return this.pausedTasks.size();
 		}
 	}
 
@@ -495,6 +529,19 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	protected void doRescheduleTask(Object task) {
 		throw new UnsupportedOperationException(
 				ClassUtils.getShortName(getClass()) + " does not support rescheduling of tasks");
+	}
+
+	/**
+	 * Log a task that has been rejected by {@link #doRescheduleTask}.
+	 * <p>The default implementation simply logs a corresponding message
+	 * at debug level.
+	 * @param task the rejected task object
+	 * @param ex the exception thrown from {@link #doRescheduleTask}
+	 */
+	protected void logRejectedTask(Object task, RuntimeException ex) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Listener container task [" + task + "] has been rejected and paused: " + ex);
+		}
 	}
 
 
