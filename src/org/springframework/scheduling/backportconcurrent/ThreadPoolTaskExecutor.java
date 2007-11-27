@@ -82,6 +82,8 @@ public class ThreadPoolTaskExecutor
 
 	private int keepAliveSeconds = 60;
 
+	private boolean allowCoreThreadTimeOut = false;
+
 	private int queueCapacity = Integer.MAX_VALUE;
 
 	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
@@ -163,6 +165,18 @@ public class ThreadPoolTaskExecutor
 	}
 
 	/**
+	 * Specify whether to allow core threads to time out. This enables dynamic
+	 * growing and shrinking even in combination with a non-zero queue (since
+	 * the max pool size will only grow once the queue is full).
+	 * <p>Default is "false". Note that this feature is only available on
+	 * backport-concurrent 3.0 or above (based on the code in Java 6).
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
+	 */
+	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
+		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
+	}
+
+	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
 	 * Default is <code>Integer.MAX_VALUE</code>.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
@@ -218,6 +232,9 @@ public class ThreadPoolTaskExecutor
 		this.threadPoolExecutor = new ThreadPoolExecutor(
 				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
 				queue, this.threadFactory, this.rejectedExecutionHandler);
+		if (this.allowCoreThreadTimeOut) {
+			this.threadPoolExecutor.allowCoreThreadTimeOut(true);
+		}
 	}
 
 	/**
