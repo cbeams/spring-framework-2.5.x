@@ -44,6 +44,7 @@ import org.springframework.context.ApplicationContext;
  * </ul>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public interface ContextLoader {
@@ -54,15 +55,14 @@ public interface ContextLoader {
 	 * </p>
 	 * <p>
 	 * Concrete implementations may choose to modify the supplied locations,
-	 * generate new locations, or simply return the supplied locations
-	 * unchanged.
+	 * generate new locations, or simply return the supplied locations unchanged.
 	 * </p>
 	 *
-	 * @param clazz The class with which the locations are associated: used to
+	 * @param clazz the class with which the locations are associated: used to
 	 * determine how to process the supplied locations.
-	 * @param locations The unmodified locations to use for loading the
+	 * @param locations the unmodified locations to use for loading the
 	 * application context; can be <code>null</code> or empty.
-	 * @return An array of application context resource locations.
+	 * @return an array of application context resource locations
 	 */
 	String[] processLocations(Class<?> clazz, String... locations);
 
@@ -70,7 +70,7 @@ public interface ContextLoader {
 	 * <p>
 	 * Loads a new {@link ApplicationContext context} based on the supplied
 	 * <code>locations</code>, configures the context, and finally returns
-	 * the context, potentially <em>refreshed</em>.
+	 * the context in fully <em>refreshed</em> state.
 	 * </p>
 	 * <p>
 	 * Configuration locations are generally considered to be classpath
@@ -93,9 +93,9 @@ public interface ContextLoader {
 	 * the context, e.g. temporary files.
 	 * </p>
 	 *
-	 * @param locations The resource locations to use to load the application
-	 * context.
+	 * @param locations the resource locations to use to load the application context
 	 * @return a new application context
+	 * @throws Exception if context loading failed
 	 */
 	ApplicationContext loadContext(String... locations) throws Exception;
 
