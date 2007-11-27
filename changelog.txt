@@ -16,6 +16,9 @@ Package org.springframework.beans
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
 * revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
 
+Package org.springframework.context
+* fixed AbstractApplicationContext to only send ContextStoppedEvent in case of "stop()" (i.e. not for "close()")
+
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
 * OverridingClassLoader excludes the "oracle." package by default as well (e.g. for TopLink's custom annotations)
@@ -30,6 +33,7 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
+* DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
 
 Package org.springframework.jndi
 * JndiTemplate prepares a specific Hashtable for the InitialContext, exposing default environment properties as well
@@ -41,6 +45,9 @@ Package org.springframework.remoting
 * factored out abstract RemoteInvocationSerializingExporter base class from HttpInvokerServiceExporter
 * introduced SimpleHttpInvokerServiceExporter and SimpleHessian/BurlapServiceExporter as HttpHandlers for Sun JRE 1.6
 * introduced SimpleHttpServerFactoryBean for Spring-style set-up of a Sun JRE 1.6 HttpServer
+
+Package org.springframework.scheduling
+* ThreadPoolTaskExecutor supports Java 6's "allowCoreThreadTimeOut" feature (for both native and backport-concurrent)
 
 Package org.springframework.test
 * fixed AbstractContextLoader to detect and accept "classpath*:" URLs as well
