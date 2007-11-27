@@ -829,7 +829,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.error("Exception thrown from ApplicationListener handling ContextClosedEvent", ex);
 			}
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			stop();
+			Map lifecycleBeans = getLifecycleBeans();
+			for (Iterator it = new HashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
+				String beanName = (String) it.next();
+				doStop(lifecycleBeans, beanName);
+			}
 			// Destroy all cached singletons in the context's BeanFactory.
 			destroyBeans();
 			// Close the state of this context itself.
