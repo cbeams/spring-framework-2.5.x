@@ -44,6 +44,21 @@ class GroovyCalculator implements Calculator {
 		<property name="message" ref="myMessage"/>
 	</bean>
 
+  <bean id="messengerInstanceInline"
+      class="org.springframework.scripting.groovy.GroovyScriptFactory">
+    <constructor-arg>
+      <value>inline:
+package org.springframework.scripting.groovy;
+import org.springframework.scripting.Messenger
+class GroovyMessenger implements Messenger {
+  def String message;
+}
+return new GroovyMessenger();
+      </value>
+    </constructor-arg>
+    <property name="message" ref="myMessage"/>
+  </bean>
+
 	<bean id="myMessage" class="java.lang.String">
 		<constructor-arg value="Hello World!"/>
 	</bean>

@@ -69,7 +69,7 @@ public class StaticScriptSource implements ScriptSource {
 
 
 	public String toString() {
-		return "static script";
+		return "StaticScript";
 	}
 
 }
