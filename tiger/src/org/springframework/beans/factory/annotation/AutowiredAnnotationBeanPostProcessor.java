@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -281,7 +280,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 									throw new IllegalStateException("Autowired annotation is not supported on static fields");
 								}
 								boolean required = determineRequiredStatus(annotation);
-								newMetadata.addInjectedField(new AutowiredElement(field, required, null));
+								newMetadata.addInjectedField(new AutowiredFieldElement(field, required));
 							}
 						}
 					});
@@ -297,7 +296,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								}
 								boolean required = determineRequiredStatus(annotation);
 								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								newMetadata.addInjectedMethod(new AutowiredElement(method, required, pd));
+								newMetadata.addInjectedMethod(new AutowiredMethodElement(method, required, pd));
 							}
 						}
 					});
@@ -342,47 +341,64 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		}
 	}
 
+	/**
+	 * Register the specified bean as dependent on the autowired beans.
+	 */
+	private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
+		if (beanName != null) {
+			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
+				String autowiredBeanName = (String) it.next();
+				beanFactory.registerDependentBean(autowiredBeanName, beanName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Autowiring by type from bean name '" + beanName +
+							"' to bean named '" + autowiredBeanName + "'");
+				}
+			}
+		}
+	}
+
 
 	/**
-	 * Class representing injection information about an annotated field
-	 * or setter method.
+	 * Class representing injection information about an annotated field.
 	 */
-	private class AutowiredElement extends InjectionMetadata.InjectedElement {
+	private class AutowiredFieldElement extends InjectionMetadata.InjectedElement {
 
 		private final boolean required;
 
+		private volatile boolean cached = false;
+
 		private volatile Object cachedFieldValue;
 
-		private volatile Object[] cachedMethodArguments;
-
-		public AutowiredElement(Member member, boolean required, PropertyDescriptor pd) {
-			super(member, pd);
+		public AutowiredFieldElement(Field field, boolean required) {
+			super(field, null);
 			this.required = required;
 		}
 
 		@Override
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
-			if (this.skip) {
-				return;
-			}
-			if (this.isField) {
-				Field field = (Field) this.member;
-				try {
-					Object value = null;
-					if (this.cachedFieldValue != null) {
-						if (this.cachedFieldValue instanceof RuntimeBeanReference) {
-							value = beanFactory.getBean(((RuntimeBeanReference) this.cachedFieldValue).getBeanName());
-						}
-						else {
-							value = this.cachedFieldValue;
-						}
+			Field field = (Field) this.member;
+			try {
+				Object value = null;
+				if (this.cached) {
+					if (this.cachedFieldValue instanceof DependencyDescriptor) {
+						DependencyDescriptor descriptor = (DependencyDescriptor) this.cachedFieldValue;
+						TypeConverter typeConverter = beanFactory.getTypeConverter();
+						value = beanFactory.resolveDependency(descriptor, beanName, null, typeConverter);
+					}
+					else if (this.cachedFieldValue instanceof RuntimeBeanReference) {
+						value = beanFactory.getBean(((RuntimeBeanReference) this.cachedFieldValue).getBeanName());
 					}
 					else {
-						Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
-						TypeConverter typeConverter = beanFactory.getTypeConverter();
-						value = beanFactory.resolveDependency(
-								new DependencyDescriptor(field, this.required),
-								beanName, autowiredBeanNames, typeConverter);
+						value = this.cachedFieldValue;
+					}
+				}
+				else {
+					Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
+					TypeConverter typeConverter = beanFactory.getTypeConverter();
+					DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
+					this.cachedFieldValue = descriptor;
+					value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
+					if (value != null) {
 						registerDependentBeans(beanName, autowiredBeanNames);
 						if (autowiredBeanNames.size() == 1) {
 							String autowiredBeanName = autowiredBeanNames.iterator().next();
@@ -394,29 +410,63 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 						}
 					}
-					if (value != null) {
-						ReflectionUtils.makeAccessible(field);
-						field.set(bean, value);
+					else {
+						this.cachedFieldValue = null;
 					}
+					this.cached = true;
 				}
-				catch (Throwable ex) {
-					throw new BeanCreationException("Could not autowire field: " + field, ex);
+				if (value != null) {
+					ReflectionUtils.makeAccessible(field);
+					field.set(bean, value);
 				}
 			}
-			else {
-				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
-					// Explicit value provided as part of the bean definition.
-					this.skip = true;
-					return;
-				}
-				Method method = (Method) this.member;
-				try {
-					Object[] arguments = null;
+			catch (Throwable ex) {
+				throw new BeanCreationException("Could not autowire field: " + field, ex);
+			}
+		}
+	}
+
+
+	/**
+	 * Class representing injection information about an annotated method.
+	 */
+	private class AutowiredMethodElement extends InjectionMetadata.InjectedElement {
+
+		private final boolean required;
+
+		private volatile boolean cached = false;
+
+		private volatile Object[] cachedMethodArguments;
+
+		public AutowiredMethodElement(Method method, boolean required, PropertyDescriptor pd) {
+			super(method, pd);
+			this.required = required;
+		}
+
+		@Override
+		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
+			if (this.skip) {
+				return;
+			}
+			if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
+				// Explicit value provided as part of the bean definition.
+				this.skip = true;
+				return;
+			}
+			Method method = (Method) this.member;
+			try {
+				Object[] arguments = null;
+				if (this.cached) {
 					if (this.cachedMethodArguments != null) {
 						arguments = new Object[this.cachedMethodArguments.length];
 						for (int i = 0; i < arguments.length; i++) {
 							Object cachedArg = this.cachedMethodArguments[i];
-							if (cachedArg instanceof RuntimeBeanReference) {
+							if (cachedArg instanceof DependencyDescriptor) {
+								DependencyDescriptor descriptor = (DependencyDescriptor) cachedArg;
+								TypeConverter typeConverter = beanFactory.getTypeConverter();
+								arguments[i] = beanFactory.resolveDependency(descriptor, beanName, null, typeConverter);
+							}
+							else if (cachedArg instanceof RuntimeBeanReference) {
 								arguments[i] = beanFactory.getBean(((RuntimeBeanReference) cachedArg).getBeanName());
 							}
 							else {
@@ -424,60 +474,53 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 						}
 					}
-					else {
-						arguments = new Object[method.getParameterTypes().length];
-						Set<String> autowiredBeanNames = new LinkedHashSet<String>(arguments.length);
-						TypeConverter typeConverter = beanFactory.getTypeConverter();
-						for (int i = 0; i < arguments.length; i++) {
-							arguments[i] = beanFactory.resolveDependency(
-									new DependencyDescriptor(new MethodParameter(method, i), this.required),
-									beanName, autowiredBeanNames, typeConverter);
-							if (arguments[i] == null) {
-								arguments = null;
-								break;
-							}
+				}
+				else {
+					arguments = new Object[method.getParameterTypes().length];
+					Set<String> autowiredBeanNames = new LinkedHashSet<String>(arguments.length);
+					TypeConverter typeConverter = beanFactory.getTypeConverter();
+					this.cachedMethodArguments = new Object[arguments.length];
+					for (int i = 0; i < arguments.length; i++) {
+						DependencyDescriptor descriptor =
+								new DependencyDescriptor(new MethodParameter(method, i), this.required);
+						this.cachedMethodArguments[i] = descriptor;
+						arguments[i] = beanFactory.resolveDependency(
+								descriptor, beanName, autowiredBeanNames, typeConverter);
+						if (arguments[i] == null) {
+							arguments = null;
+							break;
 						}
-						if (arguments != null) {
-							registerDependentBeans(beanName, autowiredBeanNames);
-							if (autowiredBeanNames.size() == arguments.length) {
-								this.cachedMethodArguments = new Object[arguments.length];
-								Iterator<String> it = autowiredBeanNames.iterator();
-								for (int i = 0; i < arguments.length; i++) {
-									String autowiredBeanName = it.next();
-									if (beanFactory.containsBean(autowiredBeanName)) {
-										this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
-									}
-									else {
-										this.cachedMethodArguments[i] = arguments[i];
-									}
+					}
+					if (arguments != null) {
+						registerDependentBeans(beanName, autowiredBeanNames);
+						if (autowiredBeanNames.size() == arguments.length) {
+							Iterator<String> it = autowiredBeanNames.iterator();
+							for (int i = 0; i < arguments.length; i++) {
+								String autowiredBeanName = it.next();
+								if (beanFactory.containsBean(autowiredBeanName)) {
+									this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
+								}
+								else {
+									this.cachedMethodArguments[i] = arguments[i];
 								}
 							}
 						}
 					}
-					if (arguments != null) {
-						ReflectionUtils.makeAccessible(method);
-						method.invoke(bean, arguments);
+					else {
+						this.cachedMethodArguments = null;
 					}
+					this.cached = true;
 				}
-				catch (InvocationTargetException ex) {
-					throw ex.getTargetException();
-				}
-				catch (Throwable ex) {
-					throw new BeanCreationException("Could not autowire method: " + method, ex);
+				if (arguments != null) {
+					ReflectionUtils.makeAccessible(method);
+					method.invoke(bean, arguments);
 				}
 			}
-		}
-
-		private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
-			if (beanName != null) {
-				for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
-					String autowiredBeanName = (String) it.next();
-					beanFactory.registerDependentBean(autowiredBeanName, beanName);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Autowiring by type from bean name '" + beanName + "' via " +
-								(this.isField ? "field" : "configuration method") + " to bean named '" + autowiredBeanName + "'");
-					}
-				}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+			catch (Throwable ex) {
+				throw new BeanCreationException("Could not autowire method: " + method, ex);
 			}
 		}
 	}

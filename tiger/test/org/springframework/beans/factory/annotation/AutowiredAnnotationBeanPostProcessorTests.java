@@ -48,14 +48,17 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ResourceInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ResourceInjectionBean.class, false));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 
 		ResourceInjectionBean bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb, bean.getTestBean2());
-		bf.destroySingletons();
+
+		bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb, bean.getTestBean2());
 	}
 
 	public void testExtendedResourceInjection() {
@@ -77,6 +80,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
 		assertSame(bf, bean.getBeanFactory());
+
 		bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb, bean.getTestBean2());
@@ -212,7 +216,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorResourceInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorResourceInjectionBean.class, false));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 		NestedTestBean ntb = new NestedTestBean();
@@ -225,7 +229,14 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
 		assertSame(bf, bean.getBeanFactory());
-		bf.destroySingletons();
+
+		bean = (ConstructorResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb, bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
 	}
 
 	public void testConstructorResourceInjectionWithMultipleCandidates() {
@@ -306,13 +317,20 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapConstructorInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapConstructorInjectionBean.class, false));
 		TestBean tb1 = new TestBean();
 		TestBean tb2 = new TestBean();
 		bf.registerSingleton("testBean1", tb1);
 		bf.registerSingleton("testBean2", tb1);
 
 		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertEquals(2, bean.getTestBeanMap().size());
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean1"));
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean2"));
+		assertTrue(bean.getTestBeanMap().values().contains(tb1));
+		assertTrue(bean.getTestBeanMap().values().contains(tb2));
+
+		bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertEquals(2, bean.getTestBeanMap().size());
 		assertTrue(bean.getTestBeanMap().keySet().contains("testBean1"));
 		assertTrue(bean.getTestBeanMap().keySet().contains("testBean2"));
@@ -325,7 +343,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapFieldInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapFieldInjectionBean.class, false));
 		TestBean tb1 = new TestBean();
 		TestBean tb2 = new TestBean();
 		bf.registerSingleton("testBean1", tb1);
@@ -337,7 +355,13 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.getTestBeanMap().keySet().contains("testBean2"));
 		assertTrue(bean.getTestBeanMap().values().contains(tb1));
 		assertTrue(bean.getTestBeanMap().values().contains(tb2));
-		bf.destroySingletons();
+
+		bean = (MapFieldInjectionBean) bf.getBean("annotatedBean");
+		assertEquals(2, bean.getTestBeanMap().size());
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean1"));
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean2"));
+		assertTrue(bean.getTestBeanMap().values().contains(tb1));
+		assertTrue(bean.getTestBeanMap().values().contains(tb2));
 	}
 
 	public void testMethodInjectionWithMap() {
@@ -345,7 +369,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class, false));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 
@@ -354,7 +378,12 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.getTestBeanMap().keySet().contains("testBean"));
 		assertTrue(bean.getTestBeanMap().values().contains(tb));
 		assertSame(tb, bean.getTestBean());
-		bf.destroySingletons();
+
+		bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
+		assertEquals(1, bean.getTestBeanMap().size());
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean"));
+		assertTrue(bean.getTestBeanMap().values().contains(tb));
+		assertSame(tb, bean.getTestBean());
 	}
 
 	public void testMethodInjectionWithMapAndMultipleMatches() {
