@@ -1474,6 +1474,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String beanName, Class requiredType, DependencyDescriptor descriptor)
 			throws BeansException;
 
+	/**
+	 * Determine the primary autowire candidate in the given set of beans.
+	 * @param matchingBeans a Map of candidate names and candidate instances
+	 * that match the required type, as returned by {@link #findAutowireCandidates}
+	 * @param type the required type
+	 * @return the name of the primary candidate, or <code>null</code> if none found
+	 */
 	protected abstract String determinePrimaryCandidate(Map matchingBeans, Class type);
 
 

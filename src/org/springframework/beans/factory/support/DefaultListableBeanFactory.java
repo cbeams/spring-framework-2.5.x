@@ -330,8 +330,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throws NoSuchBeanDefinitionException {
 
 		// Consider FactoryBeans as autowiring candidates.
-		final boolean isFactoryBean = (descriptor != null) && (descriptor.getDependencyType() != null)
-				&& FactoryBean.class.isAssignableFrom(descriptor.getDependencyType());
+		boolean isFactoryBean = (descriptor != null && descriptor.getDependencyType() != null &&
+				FactoryBean.class.isAssignableFrom(descriptor.getDependencyType()));
 		if (isFactoryBean) {
 			beanName = BeanFactoryUtils.transformedBeanName(beanName);
 		}
@@ -362,10 +362,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);
 	}
 
-	public boolean isPrimary(String beanName, Object beanInstance) {
-		return (super.isPrimary(beanName, beanInstance) || this.resolvableDependencies.values().contains(beanInstance));
-	}
-
 	protected String determinePrimaryCandidate(Map candidateBeans, Class type) {
 		String primaryBeanName = null;
 		for (Iterator it = candidateBeans.entrySet().iterator(); it.hasNext();) {
@@ -380,6 +376,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return primaryBeanName;
+	}
+
+	/**
+	 * Return whether the bean definition for the given bean name has been
+	 * marked as a primary bean.
+	 * @param beanName the name of the bean
+	 * @param beanInstance the corresponding bean instance
+	 * @return whether the given bean qualifies as primary
+	 */
+	protected boolean isPrimary(String beanName, Object beanInstance) {
+		return ((containsBeanDefinition(beanName) && getMergedLocalBeanDefinition(beanName).isPrimary()) ||
+				this.resolvableDependencies.values().contains(beanInstance));
 	}
 
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
