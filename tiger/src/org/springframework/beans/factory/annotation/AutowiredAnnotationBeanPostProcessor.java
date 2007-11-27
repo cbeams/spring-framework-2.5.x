@@ -46,6 +46,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -350,9 +351,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private volatile String beanNameForField;
+		private volatile Object cachedFieldValue;
 
-		private volatile String[] beanNamesForMethod;
+		private volatile Object[] cachedMethodArguments;
 
 		public AutowiredElement(Member member, boolean required, PropertyDescriptor pd) {
 			super(member, pd);
@@ -367,25 +368,35 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			if (this.isField) {
 				Field field = (Field) this.member;
 				try {
-					Object argument = null;
-					String determinedBeanName = this.beanNameForField;
-					if (determinedBeanName != null) {
-						argument = beanFactory.getBean(determinedBeanName);
+					Object value = null;
+					if (this.cachedFieldValue != null) {
+						if (this.cachedFieldValue instanceof RuntimeBeanReference) {
+							value = beanFactory.getBean(((RuntimeBeanReference) this.cachedFieldValue).getBeanName());
+						}
+						else {
+							value = this.cachedFieldValue;
+						}
 					}
 					else {
-						Set<String> autowiredBeanNames = new LinkedHashSet<String>(4);
+						Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
 						TypeConverter typeConverter = beanFactory.getTypeConverter();
-						argument = beanFactory.resolveDependency(
+						value = beanFactory.resolveDependency(
 								new DependencyDescriptor(field, this.required),
 								beanName, autowiredBeanNames, typeConverter);
 						registerDependentBeans(beanName, autowiredBeanNames);
 						if (autowiredBeanNames.size() == 1) {
-							this.beanNameForField = autowiredBeanNames.iterator().next();
+							String autowiredBeanName = autowiredBeanNames.iterator().next();
+							if (beanFactory.containsBean(autowiredBeanName)) {
+								this.cachedFieldValue = new RuntimeBeanReference(autowiredBeanName);
+							}
+							else {
+								this.cachedFieldValue = value;
+							}
 						}
 					}
-					if (argument != null) {
+					if (value != null) {
 						ReflectionUtils.makeAccessible(field);
-						field.set(bean, argument);
+						field.set(bean, value);
 					}
 				}
 				catch (Throwable ex) {
@@ -399,16 +410,23 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					return;
 				}
 				Method method = (Method) this.member;
-				Object[] arguments = new Object[method.getParameterTypes().length];
 				try {
-					String[] determinedBeanNames = this.beanNamesForMethod;
-					if (determinedBeanNames != null) {
-						for (int i = 0; i < determinedBeanNames.length; i++) {
-							arguments[i] = beanFactory.getBean(determinedBeanNames[i]);
+					Object[] arguments = null;
+					if (this.cachedMethodArguments != null) {
+						arguments = new Object[this.cachedMethodArguments.length];
+						for (int i = 0; i < arguments.length; i++) {
+							Object cachedArg = this.cachedMethodArguments[i];
+							if (cachedArg instanceof RuntimeBeanReference) {
+								arguments[i] = beanFactory.getBean(((RuntimeBeanReference) cachedArg).getBeanName());
+							}
+							else {
+								arguments[i] = cachedArg;
+							}
 						}
 					}
 					else {
-						Set<String> autowiredBeanNames = new LinkedHashSet<String>(4);
+						arguments = new Object[method.getParameterTypes().length];
+						Set<String> autowiredBeanNames = new LinkedHashSet<String>(arguments.length);
 						TypeConverter typeConverter = beanFactory.getTypeConverter();
 						for (int i = 0; i < arguments.length; i++) {
 							arguments[i] = beanFactory.resolveDependency(
@@ -422,7 +440,17 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						if (arguments != null) {
 							registerDependentBeans(beanName, autowiredBeanNames);
 							if (autowiredBeanNames.size() == arguments.length) {
-								this.beanNamesForMethod = autowiredBeanNames.toArray(new String[arguments.length]);
+								this.cachedMethodArguments = new Object[arguments.length];
+								Iterator<String> it = autowiredBeanNames.iterator();
+								for (int i = 0; i < arguments.length; i++) {
+									String autowiredBeanName = it.next();
+									if (beanFactory.containsBean(autowiredBeanName)) {
+										this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
+									}
+									else {
+										this.cachedMethodArguments[i] = arguments[i];
+									}
+								}
 							}
 						}
 					}

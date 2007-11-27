@@ -64,7 +64,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class, false));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 		NestedTestBean ntb = new NestedTestBean();
@@ -77,7 +77,13 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
 		assertSame(bf, bean.getBeanFactory());
-		bf.destroySingletons();
+		bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb, bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
 	}
 
 	public void testExtendedResourceInjectionWithOverriding() {
@@ -709,6 +715,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class ExtendedResourceInjectionBean extends ResourceInjectionBean {
 
 		@Autowired
@@ -719,7 +726,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		private ITestBean testBean4;
 
 		private BeanFactory beanFactory;
-
 
 		public ExtendedResourceInjectionBean() {
 		}
@@ -757,6 +763,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class OptionalResourceInjectionBean extends ResourceInjectionBean {
 
 		@Autowired(required = false)
@@ -770,7 +777,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		public NestedTestBean[] nestedTestBeansField;
 
 		private ITestBean testBean4;
-
 
 		@Autowired(required = false)
 		public void setTestBean2(TestBean testBean2) {
@@ -801,6 +807,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class OptionalCollectionResourceInjectionBean extends ResourceInjectionBean {
 
 		@Autowired(required = false)
@@ -814,7 +821,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		public List<NestedTestBean> nestedTestBeansField;
 
 		private ITestBean testBean4;
-
 
 		@Autowired(required = false)
 		public void setTestBean2(TestBean testBean2) {
@@ -844,6 +850,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 			return this.nestedTestBeans;
 		}
 	}
+
 
 	public static class ConstructorResourceInjectionBean extends ResourceInjectionBean {
 
@@ -903,6 +910,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class ConstructorsResourceInjectionBean {
 
 		protected ITestBean testBean3;
@@ -910,7 +918,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		private ITestBean testBean4;
 
 		private NestedTestBean[] nestedTestBeans;
-
 
 		public ConstructorsResourceInjectionBean() {
 		}
@@ -947,6 +954,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class ConstructorsCollectionResourceInjectionBean {
 
 		protected ITestBean testBean3;
@@ -954,7 +962,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		private ITestBean testBean4;
 
 		private List<NestedTestBean> nestedTestBeans;
-
 
 		public ConstructorsCollectionResourceInjectionBean() {
 		}
@@ -992,10 +999,10 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class MapConstructorInjectionBean {
 
 		private Map<String, TestBean> testBeanMap;
-
 
 		@Autowired
 		public MapConstructorInjectionBean(Map<String, TestBean> testBeanMap) {
@@ -1006,6 +1013,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 			return this.testBeanMap;
 		}
 	}
+
 
 	public static class MapFieldInjectionBean {
 
@@ -1018,12 +1026,12 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class MapMethodInjectionBean {
 
 		private TestBean testBean;
 
 		private Map<String, TestBean> testBeanMap;
-
 
 		@Autowired(required = false)
 		public void setTestBeanMap(TestBean testBean, Map<String, TestBean> testBeanMap) {
@@ -1040,21 +1048,21 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class CustomAnnotationRequiredFieldResourceInjectionBean {
 
 		@MyAutowired(optional = false)
 		private TestBean testBean;
-
 
 		public TestBean getTestBean() {
 			return this.testBean;
 		}
 	}
 
+
 	public static class CustomAnnotationRequiredMethodResourceInjectionBean {
 
 		private TestBean testBean;
-
 
 		@MyAutowired(optional = false)
 		public void setTestBean(TestBean testBean) {
@@ -1066,16 +1074,17 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
+
 	public static class CustomAnnotationOptionalFieldResourceInjectionBean extends ResourceInjectionBean {
 
 		@MyAutowired(optional = true)
 		private TestBean testBean3;
 
-
 		public TestBean getTestBean3() {
 			return this.testBean3;
 		}
 	}
+
 
 	public static class CustomAnnotationOptionalMethodResourceInjectionBean extends ResourceInjectionBean {
 
@@ -1099,6 +1108,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		boolean optional() default false;
 	}
 
+
 	/**
 	 * Bean with a dependency on a {@link FactoryBean}.
 	 */
@@ -1107,11 +1117,11 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		@Autowired
 		private FactoryBean factoryBean;
 
-
 		public final FactoryBean getFactoryBean() {
 			return this.factoryBean;
 		}
 	}
+
 
 	public static class StringFactoryBean implements FactoryBean {
 
