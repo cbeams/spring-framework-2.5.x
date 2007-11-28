@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * JDBC operations interface usable on Java 5 and above, exposing a
@@ -37,7 +37,7 @@ import java.util.Map;
  * @see SimpleJdbcTemplate
  * @see org.springframework.jdbc.core.JdbcOperations
  */
-public interface 	SimpleJdbcOperations {
+public interface SimpleJdbcOperations {
 
 	/**
 	 * Expose the classic Spring JdbcTemplate to allow invocation of less
@@ -313,7 +313,7 @@ public interface 	SimpleJdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Executes the supplied SQL statement with (optional) supplied arguments.
+	 * Execute the supplied SQL statement with (optional) supplied arguments.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL statement to execute.
@@ -324,7 +324,7 @@ public interface 	SimpleJdbcOperations {
 	int update(String sql, Map args) throws DataAccessException;
 
 	/**
-	 * Executes the supplied SQL statement with supplied arguments.
+	 * Execute the supplied SQL statement with supplied arguments.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL statement to execute.
@@ -335,7 +335,7 @@ public interface 	SimpleJdbcOperations {
 	int update(String sql, SqlParameterSource args) throws DataAccessException;
 
 	/**
-	 * Executes the supplied SQL statement with supplied arguments.
+	 * Execute the supplied SQL statement with supplied arguments.
 	 * Uses sql with the standard '?' placeholders for parameters
 	 * @param sql the SQL statement to execute.
 	 * @param args the variable number of arguments for the query.
@@ -355,7 +355,7 @@ public interface 	SimpleJdbcOperations {
 	public int[] batchUpdate(String sql, Map[] batchValues);
 
 	/**
-	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * Uses sql with the named parameter support.
 	 * @param sql the SQL statement to execute.
 	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of arguments for the query.
@@ -364,7 +364,7 @@ public interface 	SimpleJdbcOperations {
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);
 
 	/**
-	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * Uses sql with the standard '?' placeholders for parameters
 	 * @param sql the SQL statement to execute.
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query.
@@ -373,7 +373,7 @@ public interface 	SimpleJdbcOperations {
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs);
 
 	/**
-	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * Uses sql with the standard '?' placeholders for parameters
 	 * @param sql the SQL statement to execute.
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query.
