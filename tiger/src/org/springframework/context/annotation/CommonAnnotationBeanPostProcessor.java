@@ -29,8 +29,8 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,11 +66,15 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
- * that supports common JSR-250 annotations out of the box.
+ * that supports common Java annotations out of the box, in particular the JSR-250
+ * annotations in the <code>javax.annotation</code> package. These common Java
+ * annotations are supported in many Java EE 5 technologies (e.g. JSF 1.2),
+ * as well as in Java 6's JAX-WS.
  *
- * <p>This includes support for the {@link javax.annotation.PostConstruct} and
- * {@link javax.annotation.PreDestroy} annotations (as init annotation and destroy
- * annotation, respectively).
+ * <p>This post-processor includes support for the {@link javax.annotation.PostConstruct}
+ * and {@link javax.annotation.PreDestroy} annotations - as init annotation
+ * and destroy annotation, respectively - through inheriting from
+ * {@link InitDestroyAnnotationBeanPostProcessor} with pre-configured annotation types.
  *
  * <p>The central element is the {@link javax.annotation.Resource} annotation
  * for annotation-driven injection of named beans, by default from the containing
@@ -110,15 +114,15 @@ import org.springframework.util.StringUtils;
  *   &lt;property name="alwaysUseJndiLookup" value="true"/&gt;
  * &lt;/bean&gt;</pre>
  *
- * Note: <code>mappedName</code> references will always be resolved in JNDI,
+ * <code>mappedName</code> references will always be resolved in JNDI,
  * allowing for global JNDI names (including "java:" prefix) as well. The
  * "alwaysUseJndiLookup" flag just affects <code>name</code> references and
  * default names (inferred from the field name / property name).
  *
- * <p>A default CommonAnnotationBeanPostProcessor will be registered
+ * <p><b>NOTE:</b> A default CommonAnnotationBeanPostProcessor will be registered
  * by the "context:annotation-config" and "context:component-scan" XML tags.
  * Remove or turn off the default annotation configuration there if you intend
- * to specify a custom CommonAnnotationBeanPostProcessor bean definition.
+ * to specify a custom CommonAnnotationBeanPostProcessor bean definition!
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -380,7 +384,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		if (this.fallbackToDefaultTypeMatch && resourceElement.isDefaultName &&
 				this.resourceFactory instanceof AutowireCapableBeanFactory && !this.resourceFactory.containsBean(name)) {
-			autowiredBeanNames = new HashSet();
+			autowiredBeanNames = new LinkedHashSet();
 			resource = ((AutowireCapableBeanFactory) this.resourceFactory).resolveDependency(
 					resourceElement.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
 		}
