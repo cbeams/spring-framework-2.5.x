@@ -13,8 +13,14 @@ Package org.springframework.aop
 * ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
 
 Package org.springframework.beans
+* revised accidental exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
+* DefaultListableBeanFactory supports ObjectFactory indirection for resolvable dependencies
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
 * revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
+* fixed AutowiredAnnotationBeanPostProcessor to properly cache dependencies that do not correspond to a registered bean
+
+Package org.springframework.cache
+* added "cacheManagerName" property to EhCacheManagerFactoryBean
 
 Package org.springframework.context
 * fixed AbstractApplicationContext to only send ContextStoppedEvent in case of "stop()" (i.e. not for "close()")
@@ -26,6 +32,9 @@ Package org.springframework.core
 Package org.springframework.ejb
 * "jee:local-slsb" and "jee:remote-slsb" work for EJB3 Session Beans as well (as alternative to "jee:jndi-lookup")
 * introduced EJB3-compliant SpringBeanAutowiringInterceptor for processing Spring's @Autowired in EJB3 SBs/MDBs
+
+Package org.springframework.instrument
+* ShadowingClassLoader excludes the "com.ibm." package by default as well (for IBM JDK classes, DB2 JDBC driver, etc)
 
 Package org.springframework.jdbc
 * TransactionAwareDataSourceProxy obtains target Connections lazily when the first call comes in on the Connection proxy
@@ -49,6 +58,10 @@ Package org.springframework.remoting
 Package org.springframework.scheduling
 * ThreadPoolTaskExecutor supports Java 6's "allowCoreThreadTimeOut" feature (for both native and backport-concurrent)
 
+Package org.springframework.scripting
+* StaticScriptSource exposes "StaticScript" as toString result, in order for Groovy to derive a valid class name from it
+* "lang:groovy/jruby/bsh" does not insist on an id for a scripted bean anymore (i.e. allows for anonymous scripts)
+
 Package org.springframework.test
 * fixed AbstractContextLoader to detect and accept "classpath*:" URLs as well
 
@@ -58,6 +71,8 @@ Package org.springframework.util
 
 Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
+* WebApplicationContext impls register request/session/ServletContext as resolvable dependencies (e.g. for @Autowired)
+* PortletApplicationContext impls register request/session/PortletContext as resolvable dependencies (for @Autowired)
 * SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
 
 
