@@ -18,6 +18,7 @@ package org.springframework.scripting.groovy;
 
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Map;
 
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
@@ -342,6 +343,12 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals(1, countingAspect.getCalls());
 
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+	}
+
+	public void testAnonymousScriptDetected() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		Map beans = ctx.getBeansOfType(Messenger.class);
+		assertEquals(4, beans.size());
 	}
 
 	/**

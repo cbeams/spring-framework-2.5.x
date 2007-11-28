@@ -41,4 +41,8 @@ class GroovyCalculator implements Calculator {
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 
+  <lang:groovy script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
+    <lang:property name="message" value="Hello World!"/>
+  </lang:groovy>
+
 </beans>
