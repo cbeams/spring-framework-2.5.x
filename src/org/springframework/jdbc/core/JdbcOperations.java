@@ -268,7 +268,7 @@ public interface JdbcOperations {
 	SqlRowSet queryForRowSet(String sql) throws DataAccessException;
 
 	/**
-	 * Issue a single SQL update.
+	 * Issue a single SQL update operation (such as an insert, update or delete statement).
 	 * @param sql static SQL to execute
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem.
@@ -276,7 +276,7 @@ public interface JdbcOperations {
 	int update(String sql) throws DataAccessException;
 
 	/**
-	 * Issue multiple SQL updates on a single Statement, using JDBC 2.0 batching.
+	 * Issue multiple SQL updates on a single JDBC Statement using batching.
 	 * <p>Will fall back to separate updates on a single Statement if the JDBC
 	 * driver does not support batch updates.
 	 * @param sql defining an array of SQL statements that will be executed.
@@ -808,8 +808,8 @@ public interface JdbcOperations {
 	SqlRowSet queryForRowSet(String sql, Object[] args) throws DataAccessException;
 
 	/**
-	 * Issue an update using a PreparedStatementCreator to provide SQL and any
-	 * required parameters.
+	 * Issue a single SQL update operation (such as an insert, update or delete statement)
+	 * using a PreparedStatementCreator to provide SQL and any required parameters.
 	 * <p>A PreparedStatementCreator can either be implemented directly or
 	 * configured through a PreparedStatementCreatorFactory.
 	 * @param psc object that provides SQL and any necessary parameters
@@ -820,8 +820,8 @@ public interface JdbcOperations {
 	int update(PreparedStatementCreator psc) throws DataAccessException;
 
 	/**
-	 * Issue an update using a PreparedStatementCreator to provide SQL and any
-	 * required parameters. Generated keys will be put into the given KeyHolder.
+	 * Issue an update statement using a PreparedStatementCreator to provide SQL and
+	 * any required parameters. Generated keys will be put into the given KeyHolder.
 	 * <p>Note that the given PreparedStatementCreator has to create a statement
 	 * with activated extraction of generated keys (a JDBC 3.0 feature). This can
 	 * either be done directly or through using a PreparedStatementCreatorFactory.
@@ -835,10 +835,10 @@ public interface JdbcOperations {
 	int update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) throws DataAccessException;
 
 	/**
-	 * Issue an update using a PreparedStatementSetter to set bind parameters,
-	 * with given SQL. Simpler than using a PreparedStatementCreator as this
-	 * method will create the PreparedStatement: The PreparedStatementSetter
-	 * just needs to set parameters.
+	 * Issue an update statement using a PreparedStatementSetter to set bind parameters,
+	 * with given SQL. Simpler than using a PreparedStatementCreator as this method
+	 * will create the PreparedStatement: The PreparedStatementSetter just needs to
+	 * set parameters.
 	 * @param sql SQL containing bind parameters
 	 * @param pss helper that sets bind parameters. If this is <code>null</code>
 	 * we run an update with static SQL.
@@ -848,7 +848,8 @@ public interface JdbcOperations {
 	int update(String sql, PreparedStatementSetter pss) throws DataAccessException;
 	
 	/**
-	 * Issue an update via a prepared statement, binding the given arguments.
+	 * Issue a single SQL update operation (such as an insert, update or delete statement)
+	 * via a prepared statement, binding the given arguments.
 	 * @param sql SQL containing bind parameters
 	 * @param args arguments to bind to the query
 	 * @param argTypes SQL types of the arguments
@@ -860,7 +861,8 @@ public interface JdbcOperations {
 	int update(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
-	 * Issue an update via a prepared statement, binding the given arguments.
+	 * Issue a single SQL update operation (such as an insert, update or delete statement)
+	 * via a prepared statement, binding the given arguments.
 	 * @param sql SQL containing bind parameters
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
@@ -872,8 +874,8 @@ public interface JdbcOperations {
 	int update(String sql, Object[] args) throws DataAccessException;
 
 	/**
-	 * Issue multiple updates on a single PreparedStatement, using JDBC 2.0
-	 * batch updates and a BatchPreparedStatementSetter to set values.
+	 * Issue multiple update statements on a single PreparedStatement,
+	 * using batch updates and a BatchPreparedStatementSetter to set values.
 	 * <p>Will fall back to separate updates on a single PreparedStatement
 	 * if the JDBC driver does not support batch updates.
 	 * @param sql defining PreparedStatement that will be reused.

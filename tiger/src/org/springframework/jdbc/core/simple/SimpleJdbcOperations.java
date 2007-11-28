@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, Class)
 	 * @see JdbcOperations#queryForObject(String, Object[], Class)
 	 */
-	<T> T queryForObject(String sql, Class<T> requiredType, Object... args)
-			throws DataAccessException;
+	<T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException;
 
 	/**
 	 * Query for an object of type <code>T</code> using the supplied
@@ -74,8 +73,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args)
-			throws DataAccessException;
+	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException;
 
 	/**
 	 * Query for a {@link List} of <code>Objects</code> of type <code>T</code> using
@@ -86,8 +84,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
-	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args)
-			throws DataAccessException;
+	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException;
 
 	/**
 	 * Execute the supplied query with the (optional) supplied arguments.
@@ -96,8 +93,7 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForMap(String)
 	 * @see JdbcOperations#queryForMap(String, Object[])
 	 */
-	Map<String, Object> queryForMap(String sql, Object... args)
-			throws DataAccessException;
+	Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Execute the supplied query with the (optional) supplied arguments.
@@ -106,11 +102,10 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#queryForList(String)
 	 * @see JdbcOperations#queryForList(String, Object[]) 
 	 */
-	List<Map<String, Object>> queryForList(String sql, Object... args)
-			throws DataAccessException;
+	List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException;
 
 	/**
-	 * Executes the supplied SQL statement with (optional) supplied arguments.
+	 * Execute the supplied SQL statement with (optional) supplied arguments.
 	 * @return the numbers of rows affected by the update.
 	 * @see JdbcOperations#update(String)
 	 * @see JdbcOperations#update(String, Object[])
