@@ -3832,7 +3832,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
         long as the field, constructor, or method in question carries the
         <interfacename>@Autowired</interfacename> annotation. For more
         information, see the section entitled <xref
-        linkend="beans-autowired-annotation" />.</para>
+        linkend="beans-autowired-annotation"/>.</para>
       </section>
 
       <section id="beans-factory-aware-beannameaware">
@@ -5207,7 +5207,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     <interfacename>TaskExecutor</interfacename> abstraction.</para>
 
     <para>Check out the JavaDoc of the
-    <classname>org.springframework.jca.context.SpringContextResourceAdapter</classname>
+    <ulink
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/jca/context/SpringContextResourceAdapter.html">SpringContextResourceAdapter</ulink>
     class for the configuration details involved in RAR deployment.</para>
 
     <para><emphasis>For simple deployment needs, all you need to do is the following:</emphasis>
@@ -5348,8 +5349,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     <lineannotation>// ...</lineannotation>
 }</programlisting>
 
-      <para>If you are using at least Java 5, then the same applies for typed
-      collections:</para>
+      <para>The same applies for typed collections:</para>
 
       <programlisting>public class MovieRecommender {
 
@@ -5406,6 +5406,28 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
         <emphasis>greediest</emphasis> constructor whose dependencies can be
         satisfied.</para>
       </note>
+
+      <para><interfacename>@Autowired</interfacename> may also be used for
+      well-known "resolvable dependencies": the <interfacename>BeanFactory</interfacename>
+      interface, the <interfacename>ApplicationContext</interfacename> interface,
+      the <interfacename>ResourceLoader</interfacename> interface,
+      the <interfacename>ApplicationEventPublisher</interfacename> interface
+      and the <interfacename>MessageSource</interfacename> interface.
+      These interfaces (and their extended interfaces such as
+      <interfacename>ConfigurableApplicationContext</interfacename> or
+      <interfacename>ResourcePatternResolver</interfacename>) will be
+      automatically resolved, with no special setup necessary.</para>
+
+      <programlisting>public class MovieRecommender {
+
+    @Autowired
+    private ApplicationContext context;
+
+    public MovieRecommender() {
+    }
+
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
     </section>
 
     <section id="beans-autowired-annotation-qualifiers">
@@ -5693,11 +5715,15 @@ public @interface MovieQualifier {
     <section id="beans-resource-annotation">
       <title><interfacename>@Resource</interfacename></title>
 
-      <para>Spring also supports autowiring with the JSR-250
-      <interfacename>@Resource</interfacename> annotation.
-      <interfacename>@Resource</interfacename> always takes a value, and by
-      default Spring will interpret that value as the bean name to be
-      autowired. In other words, it follows <emphasis>by-name</emphasis>
+      <para>Spring also supports injection using the JSR-250
+      <interfacename>@Resource</interfacename> annotation on fields or
+      bean property setter methods. This is a common pattern found in
+      Java EE 5 and Java 6 (e.g. in JSF 1.2 managed beans or JAX-WS 2.0
+      endpoints), which Spring supports for Spring-managed objects as well.</para>
+
+      <para><interfacename>@Resource</interfacename> takes a 'name' attribute,
+      and by default Spring will interpret that value as the bean name to be
+      injected. In other words, it follows <emphasis>by-name</emphasis>
       semantics as demonstrated in this example:</para>
 
       <programlisting>public class SimpleMovieLister {
@@ -5705,6 +5731,23 @@ public @interface MovieQualifier {
     private MovieFinder movieFinder;
 
     <emphasis role="bold">@Resource(name="myMovieFinder")</emphasis>
+    public void setMovieFinder(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+}</programlisting>
+
+      <para>If no name is specified explicitly, then the default name
+      will be derived from the name of the field or setter method:
+      In case of a field, it will simply be equivalent to the field name;
+      in case of a setter method, it will be equivalent to the bean
+      property name. So the following example is going to have the bean
+      with name "movieFinder" injected into its setter method:</para>
+
+      <programlisting>public class SimpleMovieLister {
+
+    private MovieFinder movieFinder;
+
+    <emphasis role="bold">@Resource</emphasis>
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
@@ -5720,6 +5763,38 @@ public @interface MovieQualifier {
         default behavior and simply use Spring's JNDI lookup capabilities to
         preserve the level of indirection.</para>
       </note>
+
+      <para>Similar to <interfacename>@Autowired</interfacename>,
+      <interfacename>@Resource</interfacename> may fall back to standard bean type
+      matches (i.e. find a primary type match instead of a specific named bean)
+      as well as resolve well-known "resolvable dependencies":
+      the <interfacename>BeanFactory</interfacename> interface,
+      the <interfacename>ApplicationContext</interfacename> interface,
+      the <interfacename>ResourceLoader</interfacename> interface,
+      the <interfacename>ApplicationEventPublisher</interfacename> interface
+      and the <interfacename>MessageSource</interfacename> interface.
+      Note that this only applies to <interfacename>@Resource</interfacename>
+      usage with no explicit name specified!</para>
+
+      <para>So the following example will have its <literal>customerPreferenceDao</literal>
+      field looking for a bean with name "customerPreferenceDao" first, then falling
+      back to a primary type match for the type <classname>CustomerPreferenceDao</classname>.
+      The "context" field will simply be injected based on the known resolvable dependency
+      type <interfacename>ApplicationContext</interfacename>.</para>
+
+      <programlisting>public class MovieRecommender {
+
+    @Resource
+    private CustomerPreferenceDao customerPreferenceDao;
+
+    @Resource
+    private ApplicationContext context;
+
+    public MovieRecommender() {
+    }
+
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
     </section>
 
     <section id="beans-postconstruct-and-predestroy-annotations">
