@@ -323,9 +323,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public void registerResolvableDependency(Class dependencyType, Object autowiredValue) {
 		Assert.notNull(dependencyType, "Type must not be null");
-		Assert.isTrue((autowiredValue instanceof ObjectFactory || dependencyType.isInstance(autowiredValue)),
-				"Value [" + autowiredValue + "] does not implement specified type [" + dependencyType.getName() + "]");
-		this.resolvableDependencies.put(dependencyType, autowiredValue);
+		if (autowiredValue != null) {
+			Assert.isTrue((autowiredValue instanceof ObjectFactory || dependencyType.isInstance(autowiredValue)),
+					"Value [" + autowiredValue + "] does not implement specified type [" + dependencyType.getName() + "]");
+			this.resolvableDependencies.put(dependencyType, autowiredValue);
+		}
 	}
 
 	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)

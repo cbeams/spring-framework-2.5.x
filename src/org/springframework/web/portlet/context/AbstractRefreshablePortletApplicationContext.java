@@ -28,8 +28,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestScope;
-import org.springframework.web.context.request.SessionScope;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
 
 /**
@@ -156,15 +154,16 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	 * Register request/session scopes, a {@link PortletContextAwareProcessor}, etc.
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
-		beanFactory.registerScope(SCOPE_SESSION, new SessionScope(false));
-		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScope(true));
-
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext, this.portletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(PortletContextAware.class);
 		beanFactory.ignoreDependencyInterface(PortletConfigAware.class);
+		beanFactory.registerResolvableDependency(ServletContext.class, this.servletContext);
+		beanFactory.registerResolvableDependency(PortletContext.class, this.portletContext);
+		beanFactory.registerResolvableDependency(PortletConfig.class, this.portletConfig);
+
+		PortletApplicationContextUtils.registerPortletApplicationScopes(beanFactory);
 	}
 
 	/**

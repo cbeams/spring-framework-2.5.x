@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,12 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestScope;
-import org.springframework.web.context.request.SessionScope;
 
 /**
- * Subclass of GenericApplicationContext, suitable for web environments.
+ * Subclass of {@link GenericApplicationContext}, suitable for web environments.
  *
- * <p>Implements the WebApplicationContext interface, but not ConfigurableWebApplicationContext,
+ * <p>Implements the {@link WebApplicationContext} interface, but not
+ * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
  * as it is not intended for declarative setup in <code>web.xml</code>. Instead,
  * it is designed for programmatic setup, for example for building nested contexts.
  *
@@ -47,7 +46,8 @@ import org.springframework.web.context.request.SessionScope;
  * the web application root. Absolute paths, e.g. for files outside the web app root,
  * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
  *
- * <p>In addition to the special beans detected by AbstractApplicationContext,
+ * <p>In addition to the special beans detected by
+ * {@link org.springframework.context.support.AbstractApplicationContext},
  * this class detects a ThemeSource bean in the context, with the name "themeSource".
  *
  * @author Juergen Hoeller
@@ -91,7 +91,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 
@@ -100,12 +100,11 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * @see ServletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
-		beanFactory.registerScope(SCOPE_SESSION, new SessionScope(false));
-		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScope(true));
-
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
+		beanFactory.registerResolvableDependency(ServletContext.class, this.servletContext);
+
+		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory);
 	}
 
 	/**

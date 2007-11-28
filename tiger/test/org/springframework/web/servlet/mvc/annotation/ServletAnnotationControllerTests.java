@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import junit.framework.TestCase;
 
@@ -33,11 +35,14 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -292,7 +297,11 @@ public class ServletAnnotationControllerTests extends TestCase {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyParameterDispatchingController.class));
+				wac.setServletContext(new MockServletContext());
+				RootBeanDefinition bd = new RootBeanDefinition(MyParameterDispatchingController.class);
+				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller", bd);
+				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
 				wac.refresh();
 				return wac;
 			}
@@ -531,8 +540,20 @@ public class ServletAnnotationControllerTests extends TestCase {
 	@RequestMapping("/myPath.do")
 	private static class MyParameterDispatchingController {
 
+		@Autowired
+		private ServletContext servletContext;
+
+		@Autowired
+		private HttpSession session;
+
+		@Autowired
+		private HttpServletRequest request;
+
 		@RequestMapping
 		public void myHandle(HttpServletResponse response) throws IOException {
+			if (this.servletContext == null || this.session == null || this.request == null) {
+				throw new IllegalStateException();
+			}
 			response.getWriter().write("myView");
 		}
 

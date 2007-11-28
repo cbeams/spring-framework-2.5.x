@@ -25,7 +25,10 @@ import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -33,12 +36,15 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
 import org.springframework.mock.web.portlet.MockPortletConfig;
+import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.stereotype.Controller;
@@ -51,10 +57,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.WebBindingInitializer;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.portlet.DispatcherPortlet;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.mvc.AbstractController;
 
 /**
@@ -204,7 +212,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySpecificBinderInitializingCommandProvidingFormController.class));
 				wac.refresh();
 				return wac;
@@ -227,8 +235,12 @@ public class PortletAnnotationControllerTests extends TestCase {
 	public void testParameterDispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyParameterDispatchingController.class));
+				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
+				wac.setPortletContext(new MockPortletContext());
+				RootBeanDefinition bd = new RootBeanDefinition(MyParameterDispatchingController.class);
+				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller", bd);
+				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
 				wac.refresh();
 				return wac;
 			}
@@ -418,8 +430,20 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@RequestMapping("VIEW")
 	private static class MyParameterDispatchingController {
 
+		@Autowired
+		private PortletContext portletContext;
+
+		@Autowired
+		private PortletSession session;
+
+		@Autowired
+		private PortletRequest request;
+
 		@RequestMapping
 		public void myHandle(RenderResponse response) throws IOException {
+			if (this.portletContext == null || this.session == null || this.request == null) {
+				throw new IllegalStateException();
+			}
 			response.getWriter().write("myView");
 		}
 
