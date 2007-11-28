@@ -16,11 +16,17 @@ Package org.springframework.beans
 * DefaultListableBeanFactory freshly resolves autowired arguments even for cached constructors (re-resolving prototypes)
 * fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
 
+Package org.springframework.cache
+* added "cacheManagerName" property to EhCacheManagerFactoryBean
+
 Package org.springframework.context
 * AbstractApplicationContext calls "cancelRefresh" method in case of refresh failure now, resetting the 'active' flag
 
 Package org.springframework.core
 * OverridingClassLoader excludes the "oracle." package by default as well (e.g. for TopLink's custom annotations)
+
+Package org.springframework.instrument
+* ShadowingClassLoader excludes the "com.ibm." package by default as well (for IBM JDK classes, DB2 JDBC driver, etc)
 
 Package org.springframework.jdbc
 * fixed SingleColumnRowMapper to use passed-in required type in the default "convertValueToRequiredType" implementation
