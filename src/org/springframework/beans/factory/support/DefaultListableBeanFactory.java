@@ -32,6 +32,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -322,7 +323,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public void registerResolvableDependency(Class dependencyType, Object autowiredValue) {
 		Assert.notNull(dependencyType, "Type must not be null");
-		Assert.isTrue(dependencyType.isInstance(autowiredValue), "Value does not implement specified type");
+		Assert.isTrue((autowiredValue instanceof ObjectFactory || dependencyType.isInstance(autowiredValue)),
+				"Value [" + autowiredValue + "] does not implement specified type [" + dependencyType.getName() + "]");
 		this.resolvableDependencies.put(dependencyType, autowiredValue);
 	}
 
@@ -528,6 +530,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Class autowiringType = (Class) it.next();
 			if (autowiringType.isAssignableFrom(requiredType)) {
 				Object autowiringValue = this.resolvableDependencies.get(autowiringType);
+				if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
+					autowiringValue = ((ObjectFactory) autowiringValue).getObject();
+				}
 				if (requiredType.isInstance(autowiringValue)) {
 					result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
 					break;
