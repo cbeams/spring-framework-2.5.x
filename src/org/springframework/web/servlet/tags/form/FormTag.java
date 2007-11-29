@@ -113,6 +113,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the name of the form attribute in the model.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getModelAttribute() {
 		return this.modelAttribute;
@@ -129,6 +130,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the name of the form attribute in the model.
+	 * <p>May be a runtime expression.
 	 * @see #getModelAttribute
 	 */
 	protected String getCommandName() {
@@ -147,6 +149,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>name</code>' attribute.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getName() throws JspException {
 		return this.name;
@@ -162,6 +165,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>action</code>' attribute.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getAction() {
 		return this.action;
@@ -387,4 +391,5 @@ public class FormTag extends AbstractHtmlElementTag {
 	public void setCssErrorClass(String cssErrorClass) {
 		throw new UnsupportedOperationException("The 'cssErrorClass' attribute is not supported for forms");
 	}
+
 }
