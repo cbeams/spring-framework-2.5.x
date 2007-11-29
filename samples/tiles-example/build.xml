@@ -34,8 +34,12 @@
 		<fileset dir="${spring.root}/lib/tiles">
 			<include name="*.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/dist">
-			<include name="spring.jar"/>
+		<fileset dir="${spring.root}/dist/modules">
+			<include name="spring-beans.jar"/>
+			<include name="spring-context.jar"/>
+			<include name="spring-core.jar"/>
+			<include name="spring-web.jar"/>
+			<include name="spring-webmvc.jar"/>
 		</fileset>
 
 	</path>
@@ -102,8 +106,12 @@
 			<fileset dir="${spring.root}/lib/tiles">
 				<include name="*.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/dist">
-				<include name="spring.jar"/>
+			<fileset dir="${spring.root}/dist/modules">
+				<include name="spring-beans.jar"/>
+				<include name="spring-context.jar"/>
+				<include name="spring-core.jar"/>
+				<include name="spring-web.jar"/>
+				<include name="spring-webmvc.jar"/>
 			</fileset>
 		</copy>
 
@@ -119,7 +127,7 @@
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="Tiles Example"
 				source="1.3" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>Tiles Example</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Alef Arendsen, 2003.</i>]]></bottom>
+			<bottom><![CDATA[<i>Alef Arendsen and Juergen Hoeller, 2003-2007.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 		</javadoc>
 
