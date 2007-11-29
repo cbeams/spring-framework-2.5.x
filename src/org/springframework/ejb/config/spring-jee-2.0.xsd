@@ -55,10 +55,10 @@
 						<xsd:annotation>
 							<xsd:documentation source="java:java.lang.Class"><![CDATA[
 	The proxy interface to use for the JNDI object.
-	
+
 	Needs to be specified because the actual JNDI object type is not
 	known in advance in case of a lazy lookup.
-	
+
 	Typically used in conjunction with "lookupOnStartup"=false and/or
 	"cache"=false.
 							]]></xsd:documentation>
@@ -104,7 +104,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether to refresh the EJB home on connect failure.
-	
+
 	Can be turned on to allow for hot restart of the EJB server.
 	If a cached EJB home throws an RMI exception that indicates a
 	remote connect failure, a fresh home will be fetched and the
@@ -134,6 +134,14 @@
 						</xsd:simpleType>
 					</xsd:element>
 				</xsd:sequence>
+				<xsd:attribute name="environment-ref" type="environmentRefType">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	A reference to JNDI environment properties, indicating the name of a
+	shared bean of type [java.util.Properties}.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
 				<xsd:attribute name="jndi-name" type="xsd:string" use="required">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
@@ -147,13 +155,6 @@
 	Controls whether the lookup occurs in a J2EE container, i.e. if the
 	prefix "java:comp/env/" needs to be added if the JNDI name doesn't
 	already contain it.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:attribute>
-				<xsd:attribute name="environment-ref" type="environmentRefType">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
-			A reference to JNDI environment properties.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
