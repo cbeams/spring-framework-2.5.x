@@ -13,10 +13,12 @@ Package org.springframework.aop
 * ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
 
 Package org.springframework.beans
-* revised accidental exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
+* BeanWrapper supports well-known collection implementation types for generic element conversion again (like Spring 2.0)
 * DefaultListableBeanFactory supports ObjectFactory indirection for resolvable dependencies
+* revised accidental exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
 * revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
+* revised BeanConfigurerSupport to re-initialize its default BeanWiringInfoResolver for each context refresh
 * fixed AutowiredAnnotationBeanPostProcessor to properly cache dependencies that do not correspond to a registered bean
 
 Package org.springframework.cache
@@ -28,6 +30,7 @@ Package org.springframework.context
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
 * OverridingClassLoader excludes the "oracle." package by default as well (e.g. for TopLink's custom annotations)
+* MethodParameter uses reflection to obtain parameter annotations (for compatibility with the IBM 1.4.2 VM's debug mode)
 
 Package org.springframework.ejb
 * "jee:local-slsb" and "jee:remote-slsb" work for EJB3 Session Beans as well (as alternative to "jee:jndi-lookup")
@@ -64,6 +67,10 @@ Package org.springframework.scripting
 
 Package org.springframework.test
 * fixed AbstractContextLoader to detect and accept "classpath*:" URLs as well
+* AbstractTestNGSpringContextTests does not define a "SpringTestContext" group anymore (for ease of using custom groups)
+
+Package org.springframework.ui
+* fixed ModelMap's "mergeAttributes" to correctly copy new attributes into the model
 
 Package org.springframework.util
 * AutoPopulatingList is serializable now
@@ -74,6 +81,10 @@ Package org.springframework.web
 * WebApplicationContext impls register request/session/ServletContext as resolvable dependencies (e.g. for @Autowired)
 * PortletApplicationContext impls register request/session/PortletContext as resolvable dependencies (for @Autowired)
 * SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
+* @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
+* AnnotationMethodHandlerAdapter throws an exception if it cannot find a clear best path match for a specific request
+* reworked Spring's Tiles2 support such that it can operate against the Tiles2 (2.0.5+) JDK 1.4 version as well
+* Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
 
 
 Changes in version 2.5 final (2007-11-19)
@@ -671,6 +682,7 @@ Package org.springframework.web
 * AbstractUrlHandlerMapping exposes "path within mapping" attribute through an interceptor (for proper include cleanup)
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
+* added "accept-charset" support to JSP FormTag
 * fixed JSP CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
 
 
