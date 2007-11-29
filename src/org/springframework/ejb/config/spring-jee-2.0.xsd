@@ -134,6 +134,14 @@
 						</xsd:simpleType>
 					</xsd:element>
 				</xsd:sequence>
+				<xsd:attribute name="environment-ref" type="environmentRefType">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	A reference to JNDI environment properties, indicating the name of a
+	shared bean of type [java.util.Properties}.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
 				<xsd:attribute name="jndi-name" type="xsd:string" use="required">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
@@ -147,13 +155,6 @@
 	Controls whether the lookup occurs in a J2EE container, i.e. if the
 	prefix "java:comp/env/" needs to be added if the JNDI name doesn't
 	already contain it.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:attribute>
-				<xsd:attribute name="environment-ref" type="environmentRefType">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
-	A reference to JNDI environment properties.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
