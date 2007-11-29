@@ -33,7 +33,7 @@ import org.springframework.web.util.WebUtils;
  * View implementation that retrieves a Tiles definition.
  * The "url" property is interpreted as name of a Tiles definition.
  *
- * <p>This class builds on Tiles2, which requires Java 5 and JSP 2.0.
+ * <p>This class builds on Tiles2, which requires JSP 2.0.
  * JSTL support is integrated out of the box.
  *
  * <p>Depends on a TilesContainer which must be available in
@@ -67,7 +67,7 @@ public class TilesView extends AbstractUrlBasedView {
 			// do not properly expose the Servlet 2.4 forward request attributes...
 			WebUtils.exposeForwardRequestAttributes(request);
 		}
-		container.render(getUrl(), request, response);
+		container.render(getUrl(), new Object[] {request, response});
 	}
 
 }

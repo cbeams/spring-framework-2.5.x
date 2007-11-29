@@ -17,13 +17,13 @@
 package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.tiles.TilesException;
 import org.apache.tiles.preparer.NoSuchPreparerException;
 import org.apache.tiles.preparer.PreparerException;
 import org.apache.tiles.preparer.ViewPreparer;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -39,15 +39,15 @@ import org.springframework.web.context.WebApplicationContext;
 public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {
 
 	/** Cache of shared ViewPreparer instances: bean name --> bean instance */
-	private final Map<String, ViewPreparer> sharedPreparers = new ConcurrentHashMap<String, ViewPreparer>();
+	private final Map sharedPreparers = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	protected ViewPreparer getPreparer(String name, WebApplicationContext context) throws TilesException {
 		// Quick check on the concurrent map first, with minimal locking.
-		ViewPreparer preparer = this.sharedPreparers.get(name);
+		ViewPreparer preparer = (ViewPreparer) this.sharedPreparers.get(name);
 		if (preparer == null) {
 			synchronized (this.sharedPreparers) {
-				preparer = this.sharedPreparers.get(name);
+				preparer = (ViewPreparer) this.sharedPreparers.get(name);
 				if (preparer == null) {
 					try {
 						Class beanClass = context.getClassLoader().loadClass(name);

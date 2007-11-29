@@ -16,10 +16,7 @@
 
 package org.springframework.web.servlet.view.tiles2;
 
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletConfig;
@@ -87,7 +84,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<String, String> tilesPropertyMap = new HashMap<String, String>();
+	private final Properties tilesPropertyMap = new Properties();
 
 	private ServletContext servletContext;
 
@@ -242,11 +239,11 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		}
 
 		public String getInitParameter(String paramName) {
-			return tilesPropertyMap.get(paramName);
+			return tilesPropertyMap.getProperty(paramName);
 		}
 
 		public Enumeration getInitParameterNames() {
-			return Collections.enumeration(tilesPropertyMap.keySet());
+			return tilesPropertyMap.keys();
 		}
 	}
 
