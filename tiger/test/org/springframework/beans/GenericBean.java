@@ -16,8 +16,11 @@
 
 package org.springframework.beans;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +38,7 @@ public class GenericBean {
 
 	private List<List<Integer>> listOfLists;
 
-	private List<String[]> listOfArrays;
+	private ArrayList<String[]> listOfArrays;
 
 	private List<Map<Integer, Long>> listOfMaps;
 
@@ -43,7 +46,7 @@ public class GenericBean {
 
 	private Map<Short, Integer> shortMap;
 
-	private Map<Long, ?> longMap;
+	private HashMap<Long, ?> longMap;
 
 	private Map<Number, Collection<? extends Object>> collectionMap;
 
@@ -66,7 +69,7 @@ public class GenericBean {
 		this.resourceList = resourceList;
 	}
 
-	public GenericBean(Set<Integer> integerSet, Map<Short, Integer> shortMap) {
+	public GenericBean(HashSet<Integer> integerSet, Map<Short, Integer> shortMap) {
 		this.integerSet = integerSet;
 		this.shortMap = shortMap;
 	}
@@ -81,7 +84,7 @@ public class GenericBean {
 		this.shortMap = shortMap;
 	}
 
-	public GenericBean(Map<Long, ?> longMap) {
+	public GenericBean(HashMap<Long, ?> longMap) {
 		this.longMap = longMap;
 	}
 
@@ -110,11 +113,11 @@ public class GenericBean {
 		return listOfLists;
 	}
 
-	public List<String[]> getListOfArrays() {
+	public ArrayList<String[]> getListOfArrays() {
 		return listOfArrays;
 	}
 
-	public void setListOfArrays(List<String[]> listOfArrays) {
+	public void setListOfArrays(ArrayList<String[]> listOfArrays) {
 		this.listOfArrays = listOfArrays;
 	}
 
@@ -142,11 +145,11 @@ public class GenericBean {
 		this.shortMap = shortMap;
 	}
 
-	public Map<Long, ?> getLongMap() {
+	public HashMap<Long, ?> getLongMap() {
 		return longMap;
 	}
 
-	public void setLongMap(Map<Long, ?> longMap) {
+	public void setLongMap(HashMap<Long, ?> longMap) {
 		this.longMap = longMap;
 	}
 
@@ -191,7 +194,7 @@ public class GenericBean {
 		return new GenericBean(integerSet, resourceList);
 	}
 
-	public static GenericBean createInstance(Set<Integer> integerSet, Map<Short, Integer> shortMap) {
+	public static GenericBean createInstance(HashSet<Integer> integerSet, Map<Short, Integer> shortMap) {
 		return new GenericBean(integerSet, shortMap);
 	}
 
@@ -203,7 +206,7 @@ public class GenericBean {
 		return new GenericBean(map, shortMap);
 	}
 
-	public static GenericBean createInstance(Map<Long, ?> longMap) {
+	public static GenericBean createInstance(HashMap<Long, ?> longMap) {
 		return new GenericBean(longMap);
 	}
 

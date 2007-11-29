@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -73,9 +74,9 @@ public abstract class CollectionFactory {
 					CollectionFactory.class.getClassLoader());
 
 
-	private static final Set approximableCollectionTypes = new HashSet(5);
+	private static final Set approximableCollectionTypes = new HashSet(10);
 
-	private static final Set approximableMapTypes = new HashSet(3);
+	private static final Set approximableMapTypes = new HashSet(6);
 
 	static {
 		approximableCollectionTypes.add(Collection.class);
@@ -88,6 +89,14 @@ public abstract class CollectionFactory {
 			approximableCollectionTypes.add(NavigableSet.class);
 			approximableMapTypes.add(NavigableMap.class);
 		}
+		approximableCollectionTypes.add(ArrayList.class);
+		approximableCollectionTypes.add(LinkedList.class);
+		approximableCollectionTypes.add(HashSet.class);
+		approximableCollectionTypes.add(LinkedHashSet.class);
+		approximableCollectionTypes.add(TreeSet.class);
+		approximableMapTypes.add(HashMap.class);
+		approximableMapTypes.add(LinkedHashMap.class);
+		approximableMapTypes.add(TreeMap.class);
 	}
 
 	/**
@@ -246,7 +255,10 @@ public abstract class CollectionFactory {
 	 * @see java.util.LinkedHashSet
 	 */
 	public static Collection createApproximateCollection(Object collection, int initialCapacity) {
-		if (collection instanceof List) {
+		if (collection instanceof LinkedList) {
+			return new LinkedList();
+		}
+		else if (collection instanceof List) {
 			return new ArrayList(initialCapacity);
 		}
 		else if (collection instanceof SortedSet) {

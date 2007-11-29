@@ -176,7 +176,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 	public void testGenericListOfArrays() throws MalformedURLException {
 		GenericBean gb = new GenericBean();
-		List<String[]> list = new LinkedList<String[]>();
+		ArrayList<String[]> list = new ArrayList<String[]>();
 		list.add(new String[] {"str1", "str2"});
 		gb.setListOfArrays(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -187,7 +187,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 	public void testGenericListOfArraysWithElementConversion() throws MalformedURLException {
 		GenericBean gb = new GenericBean();
-		List<String[]> list = new LinkedList<String[]>();
+		ArrayList<String[]> list = new ArrayList<String[]>();
 		list.add(new String[] {"str1", "str2"});
 		gb.setListOfArrays(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
