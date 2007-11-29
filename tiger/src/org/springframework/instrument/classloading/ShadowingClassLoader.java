@@ -51,7 +51,7 @@ public class ShadowingClassLoader extends ClassLoader {
 
 	/** Packages that are excluded by default */
 	public static final String[] DEFAULT_EXCLUDED_PACKAGES =
-			new String[] {"java.", "javax.", "sun.", "oracle.", "com.sun.", "com.ibm.", "org.w3c.",
+			new String[] {"java.", "javax.", "sun.", "oracle.", "com.sun.", "com.ibm.", "COM.ibm.", "org.w3c.",
 					"org.xml.", "org.dom4j.", "org.aspectj.", "org.apache.xerces.", "org.apache.commons.logging."};
 
 
