@@ -67,6 +67,8 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	public static final String ENCTYPE_ATTRIBUTE = "enctype";
 
+	public static final String ACCEPT_CHARSET_ATTRIBUTE = "accept-charset";
+
 
 	private TagWriter tagWriter;
 
@@ -84,6 +86,8 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	private String onreset;
 
+	private String acceptCharset;
+
 
 	/**
 	 * Set the name of the command object.
@@ -95,7 +99,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>commandName</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getCommandName() {
 		return this.commandName;
@@ -103,7 +107,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>name</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -111,7 +115,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>action</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setAction(String action) {
 		this.action = (action != null ? action : "");
@@ -119,7 +123,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>action</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getAction() {
 		return this.action;
@@ -127,7 +131,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>method</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setMethod(String method) {
 		this.method = method;
@@ -135,7 +139,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>method</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getMethod() {
 		return this.method;
@@ -143,7 +147,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>enctype</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
 		this.enctype = enctype;
@@ -151,15 +155,31 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>enctype</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getEnctype() {
 		return this.enctype;
 	}
 
 	/**
+	 * Set the value of the '<code>acceptCharset</code>' attribute.
+	 * <p>May be a runtime expression.
+	 */
+	public void setAcceptCharset(String acceptCharset) {
+		this.acceptCharset = acceptCharset;
+	}
+
+	/**
+	 * Get the value of the '<code>acceptCharset</code>' attribute.
+	 * <p>May be a runtime expression.
+	 */
+	protected String getAcceptCharset() {
+		return this.acceptCharset;
+	}
+
+	/**
 	 * Set the value of the '<code>onsubmit</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setOnsubmit(String onsubmit) {
 		this.onsubmit = onsubmit;
@@ -167,7 +187,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>onsubmit</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getOnsubmit() {
 		return this.onsubmit;
@@ -175,7 +195,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>onreset</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
 		this.onreset = onreset;
@@ -183,7 +203,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>onreset</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getOnreset() {
 		return this.onreset;
@@ -205,10 +225,11 @@ public class FormTag extends AbstractHtmlElementTag {
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, getOnsubmit());
 		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, getOnreset());
+		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
 
 		this.tagWriter.forceBlock();
 
-		// expose the command name for nested tags
+		// Expose the command name for nested tags.
 		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName(), PageContext.REQUEST_SCOPE);
 		return EVAL_BODY_INCLUDE;
 	}
