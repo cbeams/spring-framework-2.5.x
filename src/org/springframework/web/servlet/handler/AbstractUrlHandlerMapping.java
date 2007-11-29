@@ -111,6 +111,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
+	 * Return the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns.
+	 */
+	public PathMatcher getPathMatcher() {
+		return this.pathMatcher;
+	}
+
+	/**
 	 * Set the root handler for this handler mapping, that is,
 	 * the handler to be registered for the root path ("/").
 	 * <p>Default is <code>null</code>, indicating no root handler.
@@ -193,14 +201,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		String bestPathMatch = null;
 		for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
 			String registeredPath = (String) it.next();
-			if (this.pathMatcher.match(registeredPath, urlPath) &&
+			if (getPathMatcher().match(registeredPath, urlPath) &&
 					(bestPathMatch == null || bestPathMatch.length() < registeredPath.length())) {
 				bestPathMatch = registeredPath;
 			}
 		}
 		if (bestPathMatch != null) {
 			handler = this.handlerMap.get(bestPathMatch);
-			String pathWithinMapping = this.pathMatcher.extractPathWithinPattern(bestPathMatch, urlPath);
+			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPathMatch, urlPath);
 			return buildPathExposingHandler(handler, pathWithinMapping);
 		}
 		// No handler found...

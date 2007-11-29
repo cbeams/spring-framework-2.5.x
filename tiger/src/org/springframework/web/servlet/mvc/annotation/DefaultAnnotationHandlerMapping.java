@@ -76,6 +76,22 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  */
 public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 
+	private boolean useDefaultSuffixPattern = true;
+
+
+	/**
+	 * Set whether to register paths using the default suffix pattern as well:
+	 * i.e. whether "/users" should be registered as "/users.*" too.
+	 * <p>Default is "true". Turn this convention off if you intend to interpret
+	 * your <code>@RequestMapping</code> paths strictly.
+	 * <p>Note that paths which include a ".xxx" suffix already will not be
+	 * transformed using the default suffix pattern in any case.
+	 */
+	public void setUseDefaultSuffixPattern(boolean useDefaultSuffixPattern) {
+		this.useDefaultSuffixPattern = useDefaultSuffixPattern;
+	}
+
+
 	/**
 	 * Checks for presence of the {@link org.springframework.web.bind.annotation.RequestMapping}
 	 * annotation on the handler class and on any of its methods.
@@ -84,6 +100,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		ApplicationContext context = getApplicationContext();
 		Class<?> handlerType = context.getType(beanName);
 		RequestMapping mapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
+
 		if (mapping == null && context instanceof ConfigurableApplicationContext &&
 				context.containsBeanDefinition(beanName)) {
 			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
@@ -96,13 +113,19 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 				}
 			}
 		}
+
 		if (mapping != null) {
 			if (mapping.method().length > 0 || mapping.params().length > 0) {
 				throw new IllegalStateException("Only path value supported for RequestMapping annotation " +
 						"at the type level - map HTTP method and/or parameters at the method level! " +
 						"Offending type: " + handlerType);
 			}
-			return mapping.value();
+			final Set<String> urls = new LinkedHashSet<String>();
+			String[] paths = mapping.value();
+			for (String path : paths) {
+				addUrlsForPath(urls, path);
+			}
+			return StringUtils.toStringArray(urls);
 		}
 		else if (AnnotationUtils.findAnnotation(handlerType, Controller.class) != null) {
 			final Set<String> urls = new LinkedHashSet<String>();
@@ -112,7 +135,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 					if (mapping != null) {
 						String[] mappedPaths = mapping.value();
 						for (int i = 0; i < mappedPaths.length; i++) {
-							urls.add(mappedPaths[i]);
+							addUrlsForPath(urls, mappedPaths[i]);
 						}
 					}
 				}
@@ -121,6 +144,18 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		}
 		else {
 			return null;
+		}
+	}
+
+	/**
+	 * Add URLs and/or URL patterns for the given path.
+	 * @param urls the Set of URLs for the current bean
+	 * @param path the currently introspected path
+	 */
+	protected void addUrlsForPath(Set<String> urls, String path) {
+		urls.add(path);
+		if (this.useDefaultSuffixPattern && path.indexOf('.') == -1) {
+			urls.add(path + ".*");
 		}
 	}
 

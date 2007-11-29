@@ -428,7 +428,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("test-" + p1 + "-" + p2);
 		}
 
-		@RequestMapping("/myPath3.do")
+		@RequestMapping("/myPath3")
 		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
@@ -454,7 +454,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
-		@RequestMapping("/myPath3.do")
+		@RequestMapping("/myPath3")
 		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}

@@ -335,7 +335,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				boolean match = false;
 				if (mappingInfo.paths.length > 0) {
 					for (String mappedPath : mappingInfo.paths) {
-						if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath, lookupPath)) {
+						if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath, lookupPath) ||
+								(mappedPath.indexOf('.') == -1 && pathMatcher.match(mappedPath + ".*", lookupPath))) {
 							if (checkParameters(request, mappingInfo)) {
 								match = true;
 								targetPathMatches.put(mappingInfo, mappedPath);
@@ -709,8 +710,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.paths.equals(other.paths) && this.methods.equals(other.methods) &&
-					this.params.equals(other.params));
+			return (Arrays.equals(this.paths, other.paths) && Arrays.equals(this.methods, other.methods) &&
+					Arrays.equals(this.params, other.params));
 		}
 
 		public int hashCode() {

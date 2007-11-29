@@ -696,7 +696,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
 			return (this.action == other.action && this.render == other.render &&
-					this.modes.equals(other.modes) && this.params.equals(other.params));
+					Arrays.equals(this.modes, other.modes) && Arrays.equals(this.params, other.params));
 		}
 
 		public int hashCode() {
