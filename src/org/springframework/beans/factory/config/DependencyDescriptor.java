@@ -17,11 +17,14 @@
 package org.springframework.beans.factory.config;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Descriptor for a specific dependency that is about to be injected.
@@ -33,11 +36,17 @@ import org.springframework.util.Assert;
  */
 public class DependencyDescriptor {
 
+	private static final Method fieldAnnotationsMethod =
+			ClassUtils.getMethodIfAvailable(Field.class, "getAnnotations", new Class[0]);
+
+
 	private MethodParameter methodParameter;
 
 	private Field field;
 
 	private final boolean required;
+
+	private Object[] fieldAnnotations;
 
 
 	/**
@@ -145,10 +154,14 @@ public class DependencyDescriptor {
 	 */
 	public Object[] getAnnotations() {
 		if (this.field != null) {
-			if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			if (this.fieldAnnotations != null) {
+				return this.fieldAnnotations;
+			}
+			if (fieldAnnotationsMethod == null) {
 				return null;
 			}
-			return this.field.getAnnotations();
+			this.fieldAnnotations = (Object[]) ReflectionUtils.invokeMethod(fieldAnnotationsMethod, this.field);
+			return this.fieldAnnotations;
 		}
 		else {
 			return this.methodParameter.getParameterAnnotations();

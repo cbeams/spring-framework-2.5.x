@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e.
@@ -42,6 +44,13 @@ import org.springframework.util.Assert;
  * @see GenericCollectionTypeResolver
  */
 public class MethodParameter {
+
+	private static final Method methodParameterAnnotationsMethod =
+			ClassUtils.getMethodIfAvailable(Method.class, "getParameterAnnotations", new Class[0]);
+
+	private static final Method constructorParameterAnnotationsMethod =
+			ClassUtils.getMethodIfAvailable(Constructor.class, "getParameterAnnotations", new Class[0]);
+
 
 	private Method method;
 
@@ -157,14 +166,15 @@ public class MethodParameter {
 	 * feel free to cast it to <code>Annotation[]</code> on JDK 1.5 or higher.
 	 */
 	public Object[] getParameterAnnotations() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+		if (this.parameterAnnotations != null) {
+			return this.parameterAnnotations;
+		}
+		if (methodParameterAnnotationsMethod == null) {
 			return null;
 		}
-		if (this.parameterAnnotations == null) {
-			this.parameterAnnotations = (this.method != null ?
-					this.method.getParameterAnnotations()[this.parameterIndex] :
-					this.constructor.getParameterAnnotations()[this.parameterIndex]);
-		}
+		this.parameterAnnotations = (this.method != null ?
+				((Object[][]) ReflectionUtils.invokeMethod(methodParameterAnnotationsMethod, this.method))[this.parameterIndex] :
+				((Object[][]) ReflectionUtils.invokeMethod(constructorParameterAnnotationsMethod, this.constructor))[this.parameterIndex]);
 		return this.parameterAnnotations;
 	}
 
