@@ -2030,6 +2030,7 @@
 			<include name="dist/resources/*.*"/>
 			<include name="dist/weaving/*.*"/>
 			<include name="*.txt"/>
+			<exclude name="build-number.txt"/>
 		</fileset>
 
 		<fileset id="docs" dir=".">
