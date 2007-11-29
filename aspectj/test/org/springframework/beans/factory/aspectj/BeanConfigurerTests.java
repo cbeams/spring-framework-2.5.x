@@ -38,18 +38,26 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Adrian Colyer
  * @author Rod Johnson
  * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  */
 public class BeanConfigurerTests extends TestCase {
 
+	private ClassPathXmlApplicationContext context;
+
 	@Override
 	protected void setUp() throws Exception {
-		new ClassPathXmlApplicationContext("org/springframework/beans/factory/aspectj/beanConfigurerTests.xml");
+		this.context =
+				new ClassPathXmlApplicationContext("org/springframework/beans/factory/aspectj/beanConfigurerTests.xml");
 	}
 
 	public void testConfigurableWithExplicitBeanName() {
-		System.out.println("Before ShouldBeConfiguredBySpring constructor");
 		ShouldBeConfiguredBySpring myObject = new ShouldBeConfiguredBySpring();
-		System.out.println("After ShouldBeConfiguredBySpring constructor");
+		assertEquals("Rod", myObject.getName());
+	}
+
+	public void testInjectionAfterRefresh() {
+		context.refresh();
+		ShouldBeConfiguredBySpring myObject = new ShouldBeConfiguredBySpring();
 		assertEquals("Rod", myObject.getName());
 	}
 

@@ -50,11 +50,11 @@ import org.springframework.util.ClassUtils;
 public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean  {
 
 	/** Logger available to subclasses */
-	protected Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
-	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
+	private volatile BeanWiringInfoResolver beanWiringInfoResolver;
 
-	private ConfigurableListableBeanFactory beanFactory;
+	private volatile ConfigurableListableBeanFactory beanFactory;
 
 
 	/**
@@ -80,6 +80,19 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 				 "Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		if (this.beanWiringInfoResolver == null) {
+			this.beanWiringInfoResolver = createDefaultBeanWiringInfoResolver();
+		}
+	}
+
+	/**
+	 * Create the default BeanWiringInfoResolver to be used if none was
+	 * specified explicitly.
+	 * <p>The default implementation builds a {@link ClassNameBeanWiringInfoResolver}.
+	 * @return the default BeanWiringInfoResolver (never <code>null</code>)
+	 */
+	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
+		return new ClassNameBeanWiringInfoResolver();
 	}
 
 	/**
@@ -87,9 +100,8 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 */
 	public void afterPropertiesSet() {
 		Assert.notNull(this.beanFactory, "BeanFactory must be set");
-		Assert.notNull(this.beanWiringInfoResolver, "BeanWiringInfoResolver must be set");
 	}
-	
+
 	/**
 	 * Release references to the {@link BeanFactory} and
 	 * {@link BeanWiringInfoResolver} when the container is destroyed.

@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.wiring.BeanWiringInfoResolver;
 
 /**
  * Concrete aspect that uses the {@link Configurable }
@@ -67,6 +68,7 @@ import org.springframework.beans.factory.annotation.Configurable;
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  * @author Adrian Colyer
  * @since 2.0
  * @see org.springframework.beans.factory.annotation.Configurable
@@ -75,13 +77,11 @@ import org.springframework.beans.factory.annotation.Configurable;
 public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspect {
 
 	/**
-	 * Create a new instance of the <code>AnnotationBeanConfigurerAspect</code>
-	 * aspect that uses an {@link AnnotationBeanWiringInfoResolver}.
+	 * Creates an {@link AnnotationBeanWiringInfoResolver} as default.
 	 */
-	public AnnotationBeanConfigurerAspect() {
-		setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
+	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
+		return new AnnotationBeanWiringInfoResolver();
 	}
-
 
 	/**
 	 * The initialization of a new object where the class of the object
