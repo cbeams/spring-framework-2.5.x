@@ -27,6 +27,7 @@ import org.apache.tiles.access.TilesAccess;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import org.springframework.web.util.WebUtils;
 
 /**
  * View implementation that retrieves a Tiles definition.
@@ -40,6 +41,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * {@link TilesConfigurer} bean definition in the application context.
  *
  * @author Juergen Hoeller
+ * @since 2.5
  * @see #setUrl
  * @see TilesConfigurer
  */
@@ -60,6 +62,11 @@ public class TilesView extends AbstractUrlBasedView {
 		TilesContainer container = TilesAccess.getContainer(getServletContext());
 		exposeModelAsRequestAttributes(model, request);
 		JstlUtils.exposeLocalizationContext(request, this.jstlAwareMessageSource);
+		if (!response.isCommitted()) {
+			// Tiles is going to use a forward, but some web containers (e.g. OC4J 10.1.3)
+			// do not properly expose the Servlet 2.4 forward request attributes...
+			WebUtils.exposeForwardRequestAttributes(request);
+		}
 		container.render(getUrl(), request, response);
 	}
 
