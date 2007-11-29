@@ -51,7 +51,7 @@ public final class ModelMapTests extends TestCase {
 	 */
 	public void testAddNullObjectWithExplicitKey() throws Exception {
 		ModelMap model = new ModelMap();
-		model.addObject("foo", null);
+		model.addAttribute("foo", null);
 		assertTrue(model.containsKey("foo"));
 		assertNull(model.get("foo"));
 	}
@@ -117,7 +117,7 @@ public final class ModelMapTests extends TestCase {
 		new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
 			public void test() throws Exception {
 				ModelMap model = new ModelMap();
-				model.addObject(null);
+				model.addAttribute(null);
 			}
 		}.runTest();
 	}
@@ -132,13 +132,13 @@ public final class ModelMapTests extends TestCase {
 
 	public void testAddAllObjectsWithNullMap() throws Exception {
 		ModelMap model = new ModelMap();
-		model.addAllObjects((Map) null);
+		model.addAllAttributes((Map) null);
 		assertEquals(0, model.size());
 	}
 
 	public void testAddAllObjectsWithNullCollection() throws Exception {
 		ModelMap model = new ModelMap();
-		model.addAllObjects((Collection) null);
+		model.addAllAttributes((Collection) null);
 		assertEquals(0, model.size());
 	}
 
@@ -149,7 +149,7 @@ public final class ModelMapTests extends TestCase {
 				ArrayList list = new ArrayList();
 				list.add("bing");
 				list.add(null);
-				model.addAllObjects(list);
+				model.addAllAttributes(list);
 			}
 		}.runTest();
 	}
@@ -159,7 +159,7 @@ public final class ModelMapTests extends TestCase {
 		map.put("one", "one-value");
 		map.put("two", "two-value");
 		ModelMap model = new ModelMap();
-		model.addObject(map);
+		model.addAttribute(map);
 		assertEquals(1, model.size());
 		String key = StringUtils.uncapitalize(ClassUtils.getShortName(map.getClass()));
 		assertTrue(model.containsKey(key));
@@ -167,8 +167,8 @@ public final class ModelMapTests extends TestCase {
 
 	public void testAddObjectNoKeyOfSameTypeOverrides() throws Exception {
 		ModelMap model = new ModelMap();
-		model.addObject("foo");
-		model.addObject("bar");
+		model.addAttribute("foo");
+		model.addAttribute("bar");
 		assertEquals(1, model.size());
 		String bar = (String) model.get("string");
 		assertEquals("bar", bar);
@@ -180,21 +180,33 @@ public final class ModelMapTests extends TestCase {
 		beans.add(new TestBean("two"));
 		beans.add(new TestBean("three"));
 		ModelMap model = new ModelMap();
-		model.addAllObjects(beans);
+		model.addAllAttributes(beans);
 		assertEquals(1, model.size());
+	}
+
+	public void testMergeMapWithOverriding() throws Exception {
+		Map beans = new HashMap();
+		beans.put("one", new TestBean("one"));
+		beans.put("two", new TestBean("two"));
+		beans.put("three", new TestBean("three"));
+		ModelMap model = new ModelMap();
+		model.put("one", new TestBean("oneOld"));
+		model.mergeAttributes(beans);
+		assertEquals(3, model.size());
+		assertEquals("oneOld", ((TestBean) model.get("one")).getName());
 	}
 
 	public void testInnerClass() throws Exception {
 		ModelMap map = new ModelMap();
 		SomeInnerClass inner = new SomeInnerClass();
-		map.addObject(inner);
+		map.addAttribute(inner);
 		assertSame(inner, map.get("someInnerClass"));
 	}
 
 	public void testInnerClassWithTwoUpperCaseLetters() throws Exception {
 		ModelMap map = new ModelMap();
 		UKInnerClass inner = new UKInnerClass();
-		map.addObject(inner);
+		map.addAttribute(inner);
 		assertSame(inner, map.get("UKInnerClass"));
 	}
 
@@ -204,7 +216,7 @@ public final class ModelMapTests extends TestCase {
 		Date date = new Date();
 		factory.setTarget(date);
 		factory.setProxyTargetClass(true);
-		map.addObject(factory.getProxy());
+		map.addAttribute(factory.getProxy());
 		assertTrue(map.containsKey("date"));
 		assertEquals(date, map.get("date"));
 	}
@@ -216,7 +228,7 @@ public final class ModelMapTests extends TestCase {
 		factory.setTarget(target);
 		factory.addInterface(Map.class);
 		Object proxy = factory.getProxy();
-		map.addObject(proxy);
+		map.addAttribute(proxy);
 		assertSame(proxy, map.get("map"));
 	}
 
@@ -230,7 +242,7 @@ public final class ModelMapTests extends TestCase {
 		factory.addInterface(Comparable.class);
 		factory.addInterface(Map.class);
 		Object proxy = factory.getProxy();
-		map.addObject(proxy);
+		map.addAttribute(proxy);
 		assertSame(proxy, map.get("map"));
 	}
 
@@ -239,7 +251,7 @@ public final class ModelMapTests extends TestCase {
 		Map target = new HashMap();
 		ProxyFactory factory = new ProxyFactory(target);
 		Object proxy = factory.getProxy();
-		map.addObject(proxy);
+		map.addAttribute(proxy);
 		assertSame(proxy, map.get("map"));
 	}
 
@@ -253,7 +265,7 @@ public final class ModelMapTests extends TestCase {
 						return "proxy";
 					}
 				});
-		map.addObject(proxy);
+		map.addAttribute(proxy);
 		assertSame(proxy, map.get("map"));
 	}
 
