@@ -8,13 +8,14 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 
 /**
- * Aspect to illustrate Spring native load-time weaver.
- * 
+ * Aspect to illustrate Spring-driven load-time weaving.
+ *
  * @author Ramnivas Laddad
  * @since 2.5
  */
 @Aspect
 public abstract class AbstractTraceAspect {
+
 	protected final Log logger = LogFactory.getLog(getClass());
 	
 	@Pointcut
@@ -22,6 +23,9 @@ public abstract class AbstractTraceAspect {
 	
 	@Before("traced()")
 	public void trace(JoinPoint.StaticPart jpsp) {
-		logger.debug("Entering " + jpsp.getSignature().toLongString());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Entering " + jpsp.getSignature().toLongString());
+		}
 	}
+
 }
