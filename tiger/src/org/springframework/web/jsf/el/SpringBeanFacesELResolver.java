@@ -41,7 +41,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * <pre>
  * &lt;application>
  *   ...
- *   &lt;el-resolver>org.springframework.web.jsf.el.DelegatingFacesELResolver&lt;/el-resolver>
+ *   &lt;el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver&lt;/el-resolver>
  * &lt;/application></pre>
  *
  * All your JSF expressions can then implicitly refer to the names of
