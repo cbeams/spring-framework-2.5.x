@@ -553,7 +553,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws TransactionSystemException if the JNDI lookup failed
 	 * @see #setJndiTemplate
 	 * @see #setUserTransactionName
-   */
+	 */
 	protected UserTransaction lookupUserTransaction(String userTransactionName)
 			throws TransactionSystemException {
 		try {
@@ -593,7 +593,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Look up the JTA TransactionSynchronizationRegistry in JNDI via the configured name.
+	 * Look up the JTA 1.1 TransactionSynchronizationRegistry in JNDI via the configured name.
 	 * <p>Can be overridden in subclasses to provide a different TransactionManager object.
 	 * @param registryName the JNDI name of the
 	 * TransactionSynchronizationRegistry
