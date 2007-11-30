@@ -291,7 +291,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -324,7 +324,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -363,7 +363,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -403,7 +403,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -437,7 +437,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		utControl.replay();
 
 		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
@@ -479,7 +479,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockJtaTransaction tx = new MockJtaTransaction();
 
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
 		tm.getTransaction();
@@ -520,7 +520,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -580,7 +580,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -1395,7 +1395,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setThrowable(new IllegalStateException("no existing transaction"));
 		utControl.replay();
@@ -1421,7 +1421,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.setRollbackOnly();
 		utControl.setThrowable(new SystemException("system exception"));
 		utControl.replay();
