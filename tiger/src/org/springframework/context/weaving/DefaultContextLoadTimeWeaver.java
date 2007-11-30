@@ -73,7 +73,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		}
 		else {
 			try {
-				this.loadTimeWeaver = new ReflectiveLoadTimeWeaver();
+				this.loadTimeWeaver = new ReflectiveLoadTimeWeaver(classLoader);
 				logger.info("Using a reflective load-time weaver for class loader: " +
 						this.loadTimeWeaver.getInstrumentableClassLoader());
 			}
@@ -101,7 +101,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			else if (classLoader.getClass().getName().startsWith("oracle")) {
 				return new OC4JLoadTimeWeaver(classLoader);
 			}
-			else if (isMatchingClassLoaderInHierarchy(classLoader, "com.sun.enterprise")) {
+			else if (classLoader.getClass().getName().startsWith("com.sun.enterprise")) {
 				return new GlassFishLoadTimeWeaver(classLoader);
 			}
 		}
@@ -109,17 +109,6 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			logger.info("Could not obtain server-specific LoadTimeWeaver: " + ex.getMessage());
 		}
 		return null;
-	}
-
-	/**
-	 * Try to find a ClassLoader with matching name in the entire ClassLoader hierarchy.
-	 * Used for GlassFish detection, where the web app ClassLoader might be from the
-	 * embedded Tomcat - but its parent is going to be a GlassFish ClassLoader.
-	 */
-	private boolean isMatchingClassLoaderInHierarchy(ClassLoader classLoader, String loaderName) {
-		return (classLoader != null &&
-				(classLoader.getClass().getName().startsWith(loaderName) ||
-						isMatchingClassLoaderInHierarchy(classLoader.getParent(), loaderName)));
 	}
 
 
