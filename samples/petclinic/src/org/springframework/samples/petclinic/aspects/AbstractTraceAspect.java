@@ -16,15 +16,15 @@ import org.aspectj.lang.annotation.Pointcut;
 @Aspect
 public abstract class AbstractTraceAspect {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(AbstractTraceAspect.class);
 	
 	@Pointcut
 	public abstract void traced();
 	
 	@Before("traced()")
 	public void trace(JoinPoint.StaticPart jpsp) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Entering " + jpsp.getSignature().toLongString());
+		if (logger.isTraceEnabled()) {
+			logger.trace("Entering " + jpsp.getSignature().toLongString());
 		}
 	}
 
