@@ -1410,9 +1410,9 @@ public class JtaTransactionManagerTests extends TestCase {
 					status.setRollbackOnly();
 				}
 			});
-			fail("Should have thrown NoTransactionException");
+			fail("Should have thrown TransactionSystemException");
 		}
-		catch (NoTransactionException ex) {
+		catch (TransactionSystemException ex) {
 			// expected
 		}
 

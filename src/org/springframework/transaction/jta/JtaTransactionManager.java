@@ -41,7 +41,6 @@ import org.springframework.transaction.HeuristicCompletionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
-import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSuspensionNotSupportedException;
 import org.springframework.transaction.TransactionSystemException;
@@ -334,7 +333,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		this.cacheUserTransaction = cacheUserTransaction;
 	}
 
-
 	/**
 	 * Set the JTA TransactionManager to use as direct reference.
 	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
@@ -455,9 +453,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		else {
-			throw new IllegalStateException(
-					"Either 'userTransaction' or 'userTransactionName' or 'transactionManager' " +
-					"or 'transactionManagerName' must be specified");
+			throw new IllegalStateException("No JTA UserTransaction available - specify either " +
+					"'userTransaction' or 'userTransactionName' or 'transactionManager' or 'transactionManagerName'");
 		}
 
 		// For transaction suspension, the JTA TransactionManager is necessary too.
@@ -475,7 +472,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Look up the JTA UserTransaction in JNDI via the configured name.
-	 * Called by <code>afterPropertiesSet</code> if no direct UserTransaction reference was set.
+	 * <p>Called by <code>afterPropertiesSet</code> if no direct UserTransaction reference was set.
 	 * Can be overridden in subclasses to provide a different UserTransaction object.
 	 * @param userTransactionName the JNDI name of the UserTransaction
 	 * @return the UserTransaction object
@@ -801,6 +798,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		catch (InvalidTransactionException ex) {
 			throw new IllegalTransactionStateException("Tried to resume invalid JTA transaction", ex);
 		}
+		catch (IllegalStateException ex) {
+			throw new TransactionSystemException("Unexpected internal transaction state", ex);
+		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on resume", ex);
 		}
@@ -851,6 +851,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		catch (HeuristicRollbackException ex) {
 			throw new HeuristicCompletionException(HeuristicCompletionException.STATE_ROLLED_BACK, ex);
 		}
+		catch (IllegalStateException ex) {
+			throw new TransactionSystemException("Unexpected internal transaction state", ex);
+		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on commit", ex);
 		}
@@ -862,6 +865,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			if (txObject.getUserTransaction().getStatus() != Status.STATUS_NO_TRANSACTION) {
 				txObject.getUserTransaction().rollback();
 			}
+		}
+		catch (IllegalStateException ex) {
+			throw new TransactionSystemException("Unexpected internal transaction state", ex);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on rollback", ex);
@@ -879,7 +885,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		catch (IllegalStateException ex) {
-			throw new NoTransactionException("No active JTA transaction");
+			throw new TransactionSystemException("Unexpected internal transaction state", ex);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on setRollbackOnly", ex);
@@ -931,15 +937,16 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 				transaction.registerSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
 			}
 			else {
-				// No current JTA Transaction available.
+				// No current JTA Transaction available - log a warning.
 				logger.debug("Participating in existing JTA transaction, but no current JTA Transaction available: " +
 						"cannot register Spring after-completion callbacks with outer JTA transaction - " +
 						"processing Spring after-completion callbacks with outcome status 'unknown'");
 				invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 			}
 		}
+
 		else {
-			// No JTA TransactionManager available.
+			// No JTA TransactionManager available - log a warning.
 			logger.warn("Participating in existing JTA transaction, but no JTA TransactionManager available: " +
 					"cannot register Spring after-completion callbacks with outer JTA transaction - " +
 					"processing Spring after-completion callbacks with outcome status 'unknown'");
