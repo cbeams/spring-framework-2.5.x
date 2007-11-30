@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.aspects;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.aspectj.lang.annotation.Aspect;
@@ -11,6 +12,7 @@ import org.aspectj.lang.annotation.Before;
  * every owner name requested to the clinic.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 @Aspect
@@ -40,7 +42,7 @@ public class UsageLogAspect {
 	}
 
 	public synchronized List<String> getNamesRequested() {
-		return this.namesRequested;
+		return Collections.unmodifiableList(this.namesRequested);
 	}
 
 }
