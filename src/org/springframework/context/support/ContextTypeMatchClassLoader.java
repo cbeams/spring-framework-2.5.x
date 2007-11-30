@@ -74,7 +74,6 @@ class ContextTypeMatchClassLoader extends ClassLoader implements SmartClassLoade
 
 		public ContextOverridingClassLoader(ClassLoader parent) {
 			super(parent);
-			excludePackage("org.springframework");
 		}
 
 		protected boolean isEligibleForOverriding(String className) {
