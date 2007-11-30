@@ -23,11 +23,10 @@ public class UsageLogAspect {
 	private List<String> namesRequested = new ArrayList<String>(this.historySize);
 
 
-	public void setHistorySize(int historySize) {
+	public synchronized void setHistorySize(int historySize) {
 		this.historySize = historySize;
 		this.namesRequested = new ArrayList<String>(historySize);
 	}
-
 
 	@Before("execution(* *.findOwners(String)) && args(name)")
 	public synchronized void logNameRequest(String name) {
@@ -35,12 +34,12 @@ public class UsageLogAspect {
 		// but we're aiming to illustrate the power of
 		// @AspectJ AOP, not write perfect code here :-)
 		if (this.namesRequested.size() > this.historySize) {
-			namesRequested.remove(0);
+			this.namesRequested.remove(0);
 		}
 		this.namesRequested.add(name);
 	}
 
-	public List<String> getNamesRequested() {
+	public synchronized List<String> getNamesRequested() {
 		return this.namesRequested;
 	}
 
