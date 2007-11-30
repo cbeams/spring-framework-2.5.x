@@ -63,13 +63,15 @@ public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTime
 					new ClassPreProcessorAgentAdapter()));
 	}
 
+
 	/*
 	 * Potentially temporary way to avoid processing AspectJ classes and avoiding the LinkageError
 	 * while doing so. OC4J and Tomcat (in Glassfish) definitely need bypasing such classes.
 	 * TODO: Investigate further to see why AspectJ itself isn't doing so.
 	 */
 	private static class AspectJClassBypassingClassFileTransformerDecorator implements ClassFileTransformer {
-		private ClassFileTransformer delegate;
+
+		private final ClassFileTransformer delegate;
 		
 		public AspectJClassBypassingClassFileTransformerDecorator(ClassFileTransformer delegate) {
 			this.delegate = delegate;
@@ -78,10 +80,12 @@ public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTime
 		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-			if(className.startsWith("org.aspectj") || className.startsWith("org/aspectj")) {
+
+			if (className.startsWith("org.aspectj") || className.startsWith("org/aspectj")) {
 				return classfileBuffer;
 			}
-			return delegate.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+			return this.delegate.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 		}
 	}
+
 }
