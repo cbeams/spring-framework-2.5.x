@@ -900,15 +900,17 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			doRegisterAfterCompletionWithJtaTransaction(txObject, synchronizations);
 		}
 		catch (RollbackException ex) {
-			logger.debug("Participating in existing JTA transaction that has been marked rollback-only: " +
+			logger.debug("Participating in existing JTA transaction that has been marked for rollback: " +
 					"cannot register Spring after-completion callbacks with outer JTA transaction - " +
-					"immediately performing Spring after-completion callbacks with outcome status 'rollback'");
+					"immediately performing Spring after-completion callbacks with outcome status 'rollback'. " +
+					"Original exception: " + ex);
 			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
 		}
 		catch (IllegalStateException ex) {
-			logger.debug("Participating in existing JTA transaction, but no JTA transaction active anymore: " +
-					"cannot register Spring after-completion callbacks with outer JTA transaction - " +
-					"processing Spring after-completion callbacks with outcome status 'unknown'");
+			logger.debug("Participating in existing JTA transaction, but unexpected internal transaction " +
+					"state encountered: cannot register Spring after-completion callbacks with outer JTA " +
+					"transaction - processing Spring after-completion callbacks with outcome status 'unknown'" +
+					"Original exception: " + ex);
 			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 		}
 		catch (SystemException ex) {
@@ -920,6 +922,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Register a JTA synchronization on the JTA TransactionManager, for calling
 	 * <code>afterCompletion</code> on the given Spring TransactionSynchronizations.
 	 * <p>Can be overridden in subclasses, for specific JTA implementations.
+	 * @param txObject the current transaction object
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @throws RollbackException if thrown by JTA methods
 	 * @throws SystemException if thrown by JTA methods
