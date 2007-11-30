@@ -403,6 +403,113 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		dsControl.verify();
 	}
 
+	public void testParticipatingTransactionWithIncompatibleIsolationLevel() throws Exception {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		con.rollback();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		conControl.replay();
+		dsControl.replay();
+
+		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
+		tm.setValidateExistingTransaction(true);
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		try {
+			final TransactionTemplate tt = new TransactionTemplate(tm);
+			final TransactionTemplate tt2 = new TransactionTemplate(tm);
+			tt2.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+					assertFalse("Is not rollback-only", status.isRollbackOnly());
+					tt2.execute(new TransactionCallbackWithoutResult() {
+						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							status.setRollbackOnly();
+						}
+					});
+					assertTrue("Is rollback-only", status.isRollbackOnly());
+				}
+			});
+
+			fail("Should have thrown IllegalTransactionStateException");
+		}
+		catch (IllegalTransactionStateException ex) {
+			// expected
+		}
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testParticipatingTransactionWithIncompatibleReadOnly() throws Exception {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		con.rollback();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		conControl.replay();
+		dsControl.replay();
+
+		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
+		tm.setValidateExistingTransaction(true);
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		try {
+			final TransactionTemplate tt = new TransactionTemplate(tm);
+			tt.setReadOnly(true);
+			final TransactionTemplate tt2 = new TransactionTemplate(tm);
+			tt2.setReadOnly(false);
+
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+					assertFalse("Is not rollback-only", status.isRollbackOnly());
+					tt2.execute(new TransactionCallbackWithoutResult() {
+						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							status.setRollbackOnly();
+						}
+					});
+					assertTrue("Is rollback-only", status.isRollbackOnly());
+				}
+			});
+
+			fail("Should have thrown IllegalTransactionStateException");
+		}
+		catch (IllegalTransactionStateException ex) {
+			// expected
+		}
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		conControl.verify();
+		dsControl.verify();
+	}
+
 	public void testParticipatingTransactionWithTransactionStartedFromSynch() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();

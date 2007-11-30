@@ -122,6 +122,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	private boolean nestedTransactionAllowed = false;
 
+	private boolean validateExistingTransaction = false;
+
 	private boolean globalRollbackOnParticipationFailure = true;
 
 	private boolean failEarlyOnGlobalRollbackOnly = false;
@@ -202,6 +204,31 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public final boolean isNestedTransactionAllowed() {
 		return this.nestedTransactionAllowed;
+	}
+
+	/**
+	 * Set whether existing transactions should be validated before participating
+	 * in them.
+	 * <p>When participating in an existing transaction (e.g. with
+	 * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
+	 * transaction), this outer transaction's characteristics will apply even
+	 * to the inner transaction scope. Validation will detect incompatible
+	 * isolation level and read-only settings on the inner transaction definition
+	 * and reject participation accordingly through throwing a corresponding exception.
+	 * <p>Default is "false", leniently ignoring inner transaction settings,
+	 * simply overriding them with the outer transaction's characteristics.
+	 * Switch this flag to "true" in order to enforce strict validation.
+	 */
+	public final void setValidateExistingTransaction(boolean validateExistingTransaction) {
+		this.validateExistingTransaction = validateExistingTransaction;
+	}
+
+	/**
+	 * Return whether existing transactions should be validated before participating
+	 * in them.
+	 */
+	public final boolean isValidateExistingTransaction() {
+		return this.validateExistingTransaction;
 	}
 
 	/**
@@ -439,9 +466,28 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 		}
 
-		// Assumably PROPAGATION_SUPPORTS.
+		// Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.
 		if (debugEnabled) {
 			logger.debug("Participating in existing transaction");
+		}
+		if (isValidateExistingTransaction()) {
+			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+				Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+				if (currentIsolationLevel == null || currentIsolationLevel.intValue() != definition.getIsolationLevel()) {
+					Constants isoConstants = DefaultTransactionDefinition.constants;
+					throw new IllegalTransactionStateException("Participating transaction with definition [" +
+							definition + "] specifies isolation level which is incompatible with existing transaction: " +
+							(currentIsolationLevel != null ?
+									isoConstants.toCode(currentIsolationLevel, DefaultTransactionDefinition.PREFIX_ISOLATION) :
+									"(unknown)"));
+				}
+			}
+			if (!definition.isReadOnly()) {
+				if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+					throw new IllegalTransactionStateException("Participating transaction with definition [" +
+							definition + "] is not marked as read-only but existing transaction is");
+				}
+			}
 		}
 		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 		return newTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);

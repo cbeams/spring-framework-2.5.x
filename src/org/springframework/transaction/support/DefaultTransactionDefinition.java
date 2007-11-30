@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,15 @@ import org.springframework.core.Constants;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
- * Default implementation of the TransactionDefinition interface,
+ * Default implementation of the {@link TransactionDefinition} interface,
  * offering bean-style configuration and sensible default values
  * (PROPAGATION_REQUIRED, ISOLATION_DEFAULT, TIMEOUT_DEFAULT, readOnly=false).
  *
- * <p>Base class for both TransactionTemplate and DefaultTransactionAttribute.
+ * <p>Base class for both {@link TransactionTemplate} and
+ * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}.
  *
  * @author Juergen Hoeller
  * @since 08.05.2003
- * @see org.springframework.transaction.support.TransactionTemplate
- * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
  */
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
@@ -49,7 +48,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 
 	/** Constants instance for TransactionDefinition */
-	private static final Constants constants = new Constants(TransactionDefinition.class);
+	static final Constants constants = new Constants(TransactionDefinition.class);
 
 	private int propagationBehavior = PROPAGATION_REQUIRED;
 
