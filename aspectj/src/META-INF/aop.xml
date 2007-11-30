@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 
+<!--
+	AspectJ load-time weaving config file to install common Spring aspects.
+-->
 <aspectj>
 
 	<aspects>

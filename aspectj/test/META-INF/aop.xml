@@ -2,6 +2,7 @@
 
 <!--
 	AspectJ load-time weaving config file to install common Spring aspects.
+	This version shows detailed weaving info when loading classes.
 -->
 <aspectj>
 
