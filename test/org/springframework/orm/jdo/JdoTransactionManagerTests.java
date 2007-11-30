@@ -566,7 +566,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.commit();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -663,7 +663,7 @@ public class JdoTransactionManagerTests extends TestCase {
 					ut.begin();
 					utControl.setVoidCallable(1);
 					ut.getStatus();
-					utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+					utControl.setReturnValue(Status.STATUS_ACTIVE, 4);
 					ut.commit();
 					utControl.setVoidCallable(2);
 					tm.resume(transaction);

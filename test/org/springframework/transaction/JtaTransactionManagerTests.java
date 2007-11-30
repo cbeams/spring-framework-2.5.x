@@ -50,7 +50,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -100,7 +100,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -142,7 +142,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -736,7 +736,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 5);
 		tm.suspend();
 		tmControl.setReturnValue(tx, 1);
 		ut.begin();
@@ -793,7 +793,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.commit();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -837,7 +837,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		tm.suspend();
 		tmControl.setReturnValue(tx, 1);
 		ut.begin();
@@ -942,7 +942,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		tm.suspend();
 		tmControl.setReturnValue(tx, 1);
 		tm.begin();
@@ -1046,7 +1046,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -1151,7 +1151,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -1194,12 +1194,10 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK, 2);
+		utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK, 3);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		if (failEarly) {
-			ut.getStatus();
-			utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK, 1);
 			ut.rollback();
 		}
 		else {
@@ -1257,7 +1255,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -1293,7 +1291,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -1329,7 +1327,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -1410,9 +1408,9 @@ public class JtaTransactionManagerTests extends TestCase {
 					status.setRollbackOnly();
 				}
 			});
-			fail("Should have thrown NoTransactionException");
+			fail("Should have thrown TransactionSystemException");
 		}
-		catch (NoTransactionException ex) {
+		catch (TransactionSystemException ex) {
 			// expected
 		}
 
@@ -1456,7 +1454,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();

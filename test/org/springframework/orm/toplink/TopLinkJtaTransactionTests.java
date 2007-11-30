@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class TopLinkJtaTransactionTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 5);
 		ut.begin();
 		utControl.setVoidCallable(2);
 		tm.suspend();
@@ -139,7 +139,7 @@ public class TopLinkJtaTransactionTests extends TestCase {
 			ut.begin();
 			utControl.setVoidCallable(1);
 			ut.getStatus();
-			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 			ut.commit();
 			utControl.setVoidCallable(1);
 		}
@@ -226,7 +226,7 @@ public class TopLinkJtaTransactionTests extends TestCase {
 			ut.begin();
 			utControl.setVoidCallable(1);
 			ut.getStatus();
-			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 			ut.commit();
 			utControl.setVoidCallable(1);
 		}

@@ -60,9 +60,12 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	 * This implementation checks the UserTransaction's rollback-only flag.
 	 */
 	public boolean isRollbackOnly() {
+		if (this.userTransaction == null) {
+			return false;
+		}
 		try {
-			return (this.userTransaction != null &&
-					this.userTransaction.getStatus() == Status.STATUS_MARKED_ROLLBACK);
+			int jtaStatus = this.userTransaction.getStatus();
+			return (jtaStatus == Status.STATUS_MARKED_ROLLBACK || jtaStatus == Status.STATUS_ROLLEDBACK);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on getStatus", ex);

@@ -61,7 +61,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 			ut.getStatus();
 			utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 			ut.getStatus();
-			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 			ut.begin();
 			utControl.setVoidCallable(1);
 			ut.commit();
@@ -75,7 +75,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 			tm.getStatus();
 			tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 			tm.getStatus();
-			tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			tmControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 			tm.begin();
 			tmControl.setVoidCallable(1);
 			tm.commit();
@@ -131,7 +131,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -175,7 +175,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -187,7 +187,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		ut2.getStatus();
 		ut2Control.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut2.getStatus();
-		ut2Control.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut2Control.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut2.begin();
 		ut2Control.setVoidCallable(1);
 		ut2.commit();

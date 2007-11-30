@@ -72,6 +72,8 @@ public class DataSourceJtaTransactionTests extends TestCase {
 			ut.rollback();
 		}
 		else {
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 			ut.commit();
 		}
 		utControl.setVoidCallable(1);
@@ -175,7 +177,7 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 11);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 16);
 		tm.suspend();
 		tmControl.setReturnValue(tx, 5);
 		ut.begin();
@@ -188,6 +190,8 @@ public class DataSourceJtaTransactionTests extends TestCase {
 			ut.rollback();
 		}
 		else {
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 			ut.commit();
 		}
 		utControl.setVoidCallable(1);
@@ -378,7 +382,7 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.commit();
 		utControl.setVoidCallable(1);
 		if (notSupported) {
@@ -722,14 +726,14 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
@@ -802,14 +806,14 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.commit();
