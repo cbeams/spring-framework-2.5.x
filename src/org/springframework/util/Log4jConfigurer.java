@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,12 +29,14 @@ import org.apache.log4j.xml.DOMConfigurator;
  *
  * <p>Only needed for non-default Log4J initialization, for example with a custom
  * config location or a refresh interval. By default, Log4J will simply read its
- * configuration from a "log4j.properties" file in the root of the class path.
+ * configuration from a "log4j.properties" or "log4j.xml" file in the root of
+ * the classpath.
  *
  * <p>For web environments, the analogous Log4jWebConfigurer class can be found
- * in the web package, reading in its configuration from context-params in web.xml.
- * In a J2EE web application, Log4J is usually set up via Log4jConfigListener or
- * Log4jConfigServlet, delegating to Log4jWebConfigurer underneath.
+ * in the web package, reading in its configuration from context-params in
+ * <code>web.xml</code>. In a J2EE web application, Log4J is usually set up
+ * via Log4jConfigListener or Log4jConfigServlet, delegating to
+ * Log4jWebConfigurer underneath.
  *
  * @author Juergen Hoeller
  * @since 13.03.2003
@@ -53,7 +55,8 @@ public abstract class Log4jConfigurer {
 
 	/**
 	 * Initialize Log4J from the given file location, with no config file refreshing.
-	 * Assumes an XML file in case of a ".xml" file extension, and a properties file else.
+	 * Assumes an XML file in case of a ".xml" file extension, and a properties file
+	 * otherwise.
 	 * @param location the location of the config file: either a "classpath:" location
 	 * (e.g. "classpath:myLog4j.properties"), an absolute file URL
 	 * (e.g. "file:C:/log4j.properties), or a plain absolute path in the file system
@@ -74,7 +77,7 @@ public abstract class Log4jConfigurer {
 	/**
 	 * Initialize Log4J from the given location, with the given refresh interval
 	 * for the config file. Assumes an XML file in case of a ".xml" file extension,
-	 * and a properties file else.
+	 * and a properties file otherwise.
 	 * <p>Log4J's watchdog thread will asynchronously check whether the timestamp
 	 * of the config file has changed, using the given interval between checks.
 	 * A refresh interval of 1000 milliseconds (one second), which allows to

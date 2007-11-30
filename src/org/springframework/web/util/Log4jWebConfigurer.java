@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,8 +44,9 @@ import org.springframework.util.SystemPropertyUtils;
  * Location of the Log4J config file; either a "classpath:" location (e.g.
  * "classpath:myLog4j.properties"), an absolute file URL (e.g. "file:C:/log4j.properties),
  * or a plain path relative to the web application root directory (e.g.
- * "/WEB-INF/log4j.properties"). If not specified, default Log4J initialization will
- * apply ("log4j.properties" in the class path; see Log4J documentation for details).
+ * "/WEB-INF/log4j.properties"). If not specified, default Log4J initialization
+ * will apply ("log4j.properties" or "log4j.xml" in the class path; see the
+ * Log4J documentation for details).
  * <li><i>"log4jRefreshInterval":</i><br>
  * Interval between config file refresh checks, in milliseconds. If not specified,
  * no refresh checks will happen, which avoids starting Log4J's watchdog thread.
