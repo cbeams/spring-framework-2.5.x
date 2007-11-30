@@ -143,7 +143,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				};
 			}
 			protected SessionFactory newSessionFactory(Configuration config) {
-				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
+				assertEquals(LocalJtaDataSourceConnectionProvider.class.getName(),
 				    config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				assertEquals(LocalTransactionManagerLookup.class.getName(),

@@ -517,6 +517,13 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		}
 
 		try {
+			if (isExposeTransactionAwareSessionFactory()) {
+				// Set Hibernate 3.1 CurrentSessionContext implementation,
+				// providing the Spring-managed Session as current Session.
+				// Can be overridden by a custom value for the corresponding Hibernate property.
+				config.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
+			}
+
 			if (this.jtaTransactionManager != null) {
 				// Set Spring-provided JTA TransactionManager as Hibernate property.
 				config.setProperty(
@@ -531,13 +538,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				// However, for Spring's resource management (in particular for
 				// HibernateTransactionManager), "on_close" is the better default.
 				config.setProperty(Environment.RELEASE_CONNECTIONS, ConnectionReleaseMode.ON_CLOSE.toString());
-			}
-
-			if (isExposeTransactionAwareSessionFactory()) {
-				// Set Hibernate 3.1 CurrentSessionContext implementation,
-				// providing the Spring-managed Session as current Session.
-				// Can be overridden by a custom value for the corresponding Hibernate property.
-				config.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 			}
 
 			if (this.entityInterceptor != null) {
@@ -579,13 +579,15 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			}
 
 			if (dataSource != null) {
-				boolean actuallyTransactionAware =
-						(isUseTransactionAwareDataSource() || dataSource instanceof TransactionAwareDataSourceProxy);
+				Class providerClass = LocalDataSourceConnectionProvider.class;
+				if (isUseTransactionAwareDataSource() || dataSource instanceof TransactionAwareDataSourceProxy) {
+					providerClass = TransactionAwareDataSourceConnectionProvider.class;
+				}
+				else if (config.getProperty(Environment.TRANSACTION_MANAGER_STRATEGY) != null) {
+					providerClass = LocalJtaDataSourceConnectionProvider.class;
+				}
 				// Set Spring-provided DataSource as Hibernate ConnectionProvider.
-				config.setProperty(Environment.CONNECTION_PROVIDER,
-						actuallyTransactionAware ?
-						TransactionAwareDataSourceConnectionProvider.class.getName() :
-						LocalDataSourceConnectionProvider.class.getName());
+				config.setProperty(Environment.CONNECTION_PROVIDER, providerClass.getName());
 			}
 
 			if (this.mappingResources != null) {
