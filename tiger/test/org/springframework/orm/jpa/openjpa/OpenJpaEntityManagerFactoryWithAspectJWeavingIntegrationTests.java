@@ -29,4 +29,5 @@ public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests exten
 				"/org/springframework/orm/jpa/memdb.xml",
 				"/org/springframework/orm/jpa/inject.xml"};
 	}
+
 }
