@@ -26,6 +26,8 @@ Package org.springframework.cache
 
 Package org.springframework.context
 * fixed AbstractApplicationContext to only send ContextStoppedEvent in case of "stop()" (i.e. not for "close()")
+* ContextTypeMatchClassLoader does not generally exclude classes in the "org.springframework" package anymore
+* DefaultContextLoadTimeWeaver only chooses GlassFishLoadTimeWeaver when running in the EAR ClassLoader
 
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
@@ -53,6 +55,10 @@ Package org.springframework.jndi
 Package org.springframework.mail
 * fixed potential NPE in MailSendException
 
+Package org.springframework.orm
+* LocalSessionFactoryBean uses LocalJtaDataSourceConnectionProvider (supporting aggressive release) in case of JTA TM
+* LocalSessionFactoryBean supports Connection release mode "after_statement" without "useTransactionAwareDataSource" too
+
 Package org.springframework.remoting
 * factored out abstract RemoteInvocationSerializingExporter base class from HttpInvokerServiceExporter
 * introduced SimpleHttpInvokerServiceExporter and SimpleHessian/BurlapServiceExporter as HttpHandlers for Sun JRE 1.6
@@ -68,6 +74,11 @@ Package org.springframework.scripting
 Package org.springframework.test
 * fixed AbstractContextLoader to detect and accept "classpath*:" URLs as well
 * AbstractTestNGSpringContextTests does not define a "SpringTestContext" group anymore (for ease of using custom groups)
+
+Package org.springframework.transaction
+* added "validateExistingTransaction" property to AbstractPlatformTransactionManager, for isolation level checks
+* JtaTransactionManager consistently throws TransactionSystemException in case of unexpected internal transaction state
+* JtaTransactionManager detects JBoss 4.2 transaction rollbacks caused by a timeout, throwing a meaningful exception
 
 Package org.springframework.ui
 * fixed ModelMap's "mergeAttributes" to correctly copy new attributes into the model
