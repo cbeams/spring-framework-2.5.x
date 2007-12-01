@@ -1425,6 +1425,7 @@
 
 	</target>
 
+
 	<target name="tigertests" if="tiger.available" description="Run JDK 1.5 tests">
 
 		<mkdir dir="${target.junit.reports.dir}"/>
@@ -1453,9 +1454,10 @@
 
 		</junit>
 
-		<antcall target="testngtests" />
+		<antcall target="testngtests"/>
 
 	</target>
+
 
 	<target name="testngtests" if="tiger.available" description="Run TestNG tests">
 
@@ -1482,6 +1484,7 @@
 		</testng>
 
 	</target>
+
 
 	<!--
 		Run test suite. This and clover.tests take their includes and excludes from
