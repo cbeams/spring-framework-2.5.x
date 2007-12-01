@@ -86,6 +86,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 	protected static final String PREFETCH_ATTRIBUTE = "prefetch";
 
+
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
 			new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
@@ -246,8 +247,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				acknowledgeMode = Session.CLIENT_ACKNOWLEDGE;
 			}
 			else if (!ACKNOWLEDGE_AUTO.equals(acknowledge)) {
-				parserContext.getReaderContext().error("Invalid listener container 'acknowledge' setting: " +
-						"only \"auto\", \"client\", \"dups-ok\" and \"transacted\" supported.", ele);
+				parserContext.getReaderContext().error("Invalid listener container 'acknowledge' setting [" +
+						acknowledge + "]: only \"auto\", \"client\", \"dups-ok\" and \"transacted\" supported.", ele);
 			}
 			return new Integer(acknowledgeMode);
 		}
@@ -258,6 +259,30 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 	protected boolean indicatesPubSubConfig(BeanDefinition configDef) {
 		return ((Boolean) configDef.getPropertyValues().getPropertyValue("pubSubDomain").getValue()).booleanValue();
+	}
+
+	protected int[] parseConcurrency(Element ele, ParserContext parserContext) {
+		String concurrency = ele.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (!StringUtils.hasText(concurrency)) {
+			return null;
+		}
+		try {
+			int separatorIndex = concurrency.indexOf('-');
+			if (separatorIndex != -1) {
+				int[] result = new int[2];
+				result[0] = Integer.parseInt(concurrency.substring(0, separatorIndex));
+				result[1] = Integer.parseInt(concurrency.substring(separatorIndex + 1, concurrency.length()));
+				return result;
+			}
+			else {
+				return new int[] {1, Integer.parseInt(concurrency)};
+			}
+		}
+		catch (NumberFormatException ex) {
+			parserContext.getReaderContext().error("Invalid concurrency value [" + concurrency + "]: only " +
+					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported.", ele, ex);
+			return null;
+		}
 	}
 
 }

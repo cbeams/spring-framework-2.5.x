@@ -159,10 +159,12 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="concurrency" type="xsd:int">
+			<xsd:attribute name="concurrency" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The maximum number of concurrent sessions/consumers to start for each listener.
+	Either a single maximum integer (e.g. "5") or a 'minimum-maximum' combo (e.g. "3-5").
+	Note that a specified minimum is just a hint and might be ignored at runtime.
 	Default is 1.
 					]]></xsd:documentation>
 				</xsd:annotation>
@@ -303,10 +305,12 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="concurrency" type="xsd:int">
+			<xsd:attribute name="concurrency" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The maximum number of concurrent sessions to activate for each listener.
+	Either a single maximum integer (e.g. "5") or a 'minimum-maximum' combo (e.g. "3-5").
+	Note that a specified minimum is just a hint and might be ignored at runtime.
 	Default is 1.
 					]]></xsd:documentation>
 				</xsd:annotation>

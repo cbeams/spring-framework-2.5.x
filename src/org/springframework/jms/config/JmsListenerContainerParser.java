@@ -110,13 +110,14 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 					new RuntimeBeanReference(transactionManagerBeanName));
 		}
 
-		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
-		if (StringUtils.hasText(concurrency)) {
+		int[] concurrency = parseConcurrency(containerEle, parserContext);
+		if (concurrency != null) {
 			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", new Integer(concurrency));
+				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency[0]));
+				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", new Integer(concurrency[1]));
 			}
 			else {
-				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency));
+				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency[1]));
 			}
 		}
 
