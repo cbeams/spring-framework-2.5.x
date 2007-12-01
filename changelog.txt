@@ -48,6 +48,7 @@ Package org.springframework.scheduling
 * fixed CommonJ TimerManagerFactoryBean to not require the "scheduledTimerListeners" property
 
 Package org.springframework.transaction
+* JtaTransactionManager consistently throws TransactionSystemException in case of unexpected internal transaction state
 * JtaTransactionManager swallows IllegalStateException when synchronizing with existing transaction (for JBoss 4.2)
 
 Package org.springframework.util
@@ -59,6 +60,7 @@ Package org.springframework.web
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
 * fixed TilesConfigurer to explicitly set the factory name to empty String by default
+* added "accept-charset" support to JSP FormTag
 
 
 Changes in version 2.0.7 (2007-10-01)
