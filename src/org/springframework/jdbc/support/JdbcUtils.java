@@ -226,7 +226,7 @@ public abstract class JdbcUtils {
 				new DatabaseMetaDataCallback() {
 					public Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException {
 						try {
-							Method method = dbmd.getClass().getMethod(metaDataMethodName, (Class[]) null);
+							Method method = DatabaseMetaData.class.getMethod(metaDataMethodName, (Class[]) null);
 							return method.invoke(dbmd, (Object[]) null);
 						}
 						catch (NoSuchMethodException ex) {
