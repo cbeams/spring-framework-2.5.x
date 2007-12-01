@@ -5,6 +5,10 @@
 -->
 <aspectj>
 
+	<!--
+	<weaver options="-showWeaveInfo"/>
+	-->
+
 	<aspects>
 		<aspect name="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"/>
 		<aspect name="org.springframework.transaction.aspectj.AnnotationTransactionAspect"/>
