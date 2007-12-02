@@ -29,7 +29,8 @@ import org.springframework.util.Assert;
  * with UI tools. Supports chained calls and generation of model attribute names.
  *
  * <p>This class serves as generic model holder for both Servlet and Portlet MVC,
- * but is not tied to either of those.
+ * but is not tied to either of those. Check out the {@link Model} interface for
+ * a Java-5-based interface variant that serves the same purpose.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -134,6 +135,15 @@ public class ModelMap extends LinkedHashMap {
 			}
 		}
 		return this;
+	}
+
+	/**
+	 * Does this model contain an attribute of the given name?
+	 * @param attributeName the name of the model attribute (never <code>null</code>)
+	 * @return whether this model contains a corresponding attribute
+	 */
+	public boolean containsAttribute(String attributeName) {
+		return containsKey(attributeName);
 	}
 
 
