@@ -416,7 +416,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 
 		@RequestMapping("VIEW")
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, Model model) {
-			if (!model.asMap().containsKey("myKey")) {
+			if (!model.containsAttribute("myKey")) {
 				model.addAttribute("myKey", "myValue");
 			}
 			return "myView";
