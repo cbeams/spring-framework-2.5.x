@@ -29,15 +29,15 @@ import org.xml.sax.InputSource;
 
 /**
  * The default {@link DocumentLoader} implementation.
- * 
+ *
  * <p>Simply loads {@link Document documents} using the standard JAXP-configured
  * XML parser. If you want to change the {@link DocumentBuilder} that is used to
- * load documents then one strategy is to use a Java define when starting your
- * application. For example, to use the Oracle {@link DocumentBuilder}, one might
- * start one's application like so:
- * 
+ * load documents, then one strategy is to define a corresponding Java system
+ * property when starting your application. For example, to use the Oracle
+ * {@link DocumentBuilder}, one might start one's application like as follows:
+ *
  * <pre code="class">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -78,7 +78,8 @@ public class DefaultDocumentLoader implements DocumentLoader {
 
 	/**
 	 * Create the {@link DocumentBuilderFactory} instance.
-	 * @param validationMode the type of validation ({@link XmlBeanDefinitionReader#VALIDATION_NONE none}, {@link XmlBeanDefinitionReader#VALIDATION_DTD DTD}, or {@link XmlBeanDefinitionReader#VALIDATION_XSD XSD})
+	 * @param validationMode the type of validation: {@link XmlBeanDefinitionReader#VALIDATION_NONE none},
+	 * {@link XmlBeanDefinitionReader#VALIDATION_DTD DTD} or {@link XmlBeanDefinitionReader#VALIDATION_XSD XSD}
 	 * @param namespaceAware <code>true</code> if the returned factory is to provide support for XML namespaces
 	 * @throws ParserConfigurationException if we failed to build a proper DocumentBuilderFactory
 	 */
@@ -101,7 +102,8 @@ public class DefaultDocumentLoader implements DocumentLoader {
 					throw new ParserConfigurationException(
 							"Unable to validate using XSD: Your JAXP provider [" + factory +
 							"] does not support XML Schema. Are you running on Java 1.4 or below with " +
-							"Apache Crimson? Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
+							"Apache Crimson? Upgrade to Apache Xerces (or Java 1.5) for full XSD support." +
+							"Root cause: " + ex);
 				}
 			}
 		}
