@@ -44,7 +44,8 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.style.StylerUtils;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -196,7 +197,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		ModelMap implicitModel = new ModelMap();
+		ExtendedModelMap implicitModel = new ExtendedModelMap();
 		SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 		Set<String> sessionAttrNames = null;
 
@@ -475,7 +476,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		@SuppressWarnings("unchecked")
 		public Object[] resolveArguments(
 				Object handler, Method handlerMethod, HttpServletRequest request, HttpServletResponse response,
-				WebRequest webRequest, ModelMap implicitModel, Set<String> sessionAttrNames)
+				WebRequest webRequest, ExtendedModelMap implicitModel, Set<String> sessionAttrNames)
 				throws ServletException, IOException {
 
 			SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
@@ -656,11 +657,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ModelMap implicitModel) {
+		public ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ExtendedModelMap implicitModel) {
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
 				mav.getModelMap().mergeAttributes(implicitModel);
 				return mav;
+			}
+			else if (returnValue instanceof Model) {
+				return new ModelAndView().addAllObjects(implicitModel).addAllObjects(((Model) returnValue).asMap());
 			}
 			else if (returnValue instanceof Map) {
 				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);

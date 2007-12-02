@@ -52,7 +52,8 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.style.StylerUtils;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -151,7 +152,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 	protected ModelAndView doHandle(PortletRequest request, PortletResponse response, Object handler) throws Exception {
-		ModelMap implicitModel = null;
+		ExtendedModelMap implicitModel = null;
 		SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 		Set<String> sessionAttrNames = null;
 
@@ -176,7 +177,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			if (renderRequest.getParameter(IMPLICIT_MODEL_ATTRIBUTE) != null) {
 				PortletSession session = request.getPortletSession(false);
 				if (session != null) {
-					implicitModel = (ModelMap) session.getAttribute(IMPLICIT_MODEL_ATTRIBUTE);
+					implicitModel = (ExtendedModelMap) session.getAttribute(IMPLICIT_MODEL_ATTRIBUTE);
 				}
 			}
 			if (sessionAttributes != null) {
@@ -190,7 +191,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		if (implicitModel == null) {
-			implicitModel = new ModelMap();
+			implicitModel = new ExtendedModelMap();
 		}
 
 		WebRequest webRequest = new PortletWebRequest(request);
@@ -451,7 +452,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		@SuppressWarnings("unchecked")
 		public Object[] resolveArguments(
 				Object handler, Method handlerMethod, PortletRequest request, PortletResponse response,
-				WebRequest webRequest, ModelMap implicitModel, Set<String> sessionAttrNames)
+				WebRequest webRequest, ExtendedModelMap implicitModel, Set<String> sessionAttrNames)
 				throws PortletException, IOException {
 
 			SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
@@ -649,11 +650,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ModelMap implicitModel) {
+		public ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ExtendedModelMap implicitModel) {
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
 				mav.getModelMap().mergeAttributes(implicitModel);
 				return mav;
+			}
+			else if (returnValue instanceof Model) {
+				return new ModelAndView().addAllObjects(implicitModel).addAllObjects(((Model) returnValue).asMap());
 			}
 			else if (returnValue instanceof Map) {
 				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);

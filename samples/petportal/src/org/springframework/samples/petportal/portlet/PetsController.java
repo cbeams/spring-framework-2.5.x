@@ -13,7 +13,7 @@ import org.springframework.samples.petportal.domain.Pet;
 import org.springframework.samples.petportal.service.PetService;
 import org.springframework.samples.petportal.validation.PetValidator;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -70,21 +70,21 @@ public class PetsController {
 	}
 
 	@RequestMapping  // default render (action=list)
-	public String listPets(ModelMap model) {
+	public String listPets(Model model) {
 		model.addAttribute("pets", this.petService.getAllPets());
 		return "pets";
 	}
 
 	@RequestMapping(params = "action=view")  // render phase
-	public String viewPet(@RequestParam("pet") int petId, ModelMap model) {
+	public String viewPet(@RequestParam("pet") int petId, Model model) {
 		model.addAttribute("pet", this.petService.getPet(petId));
 		return "petView";
 	}
 
 	@RequestMapping(params = "action=add")  // render phase
-	public String showPetForm(ModelMap model) {
+	public String showPetForm(Model model) {
 		// Used for the initial form as well as for redisplaying with errors.
-		if (!model.containsKey("pet")) {
+		if (!model.containsAttribute("pet")) {
 			model.addAttribute("pet", new Pet());
 			model.addAttribute("page", 0);
 		}
@@ -95,7 +95,7 @@ public class PetsController {
 	public void submitPage(
 			ActionRequest request, ActionResponse response,
 			@ModelAttribute("pet") Pet pet, BindingResult result,
-			@RequestParam("_page") int currentPage, ModelMap model) {
+			@RequestParam("_page") int currentPage, Model model) {
 
 		if (request.getParameter("_cancel") != null) {
 			response.setRenderParameter("action", "list");

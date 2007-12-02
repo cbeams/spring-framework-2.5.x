@@ -48,6 +48,7 @@ import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -143,6 +144,28 @@ public class PortletAnnotationControllerTests extends TestCase {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
+				wac.refresh();
+				return wac;
+			}
+			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
+				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		request.addParameter("name", "name1");
+		request.addParameter("age", "value2");
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
+	}
+
+	public void testModelFormController() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyModelFormController.class));
 				wac.refresh();
 				return wac;
 			}
@@ -373,7 +396,28 @@ public class PortletAnnotationControllerTests extends TestCase {
 		@RequestMapping("VIEW")
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
-				model.addObject("myKey", "myValue");
+				model.addAttribute("myKey", "myValue");
+			}
+			return "myView";
+		}
+	}
+
+
+	@Controller
+	private static class MyModelFormController {
+
+		@ModelAttribute("testBeans")
+		public List<TestBean> getTestBeans() {
+			List<TestBean> list = new LinkedList<TestBean>();
+			list.add(new TestBean("tb1"));
+			list.add(new TestBean("tb2"));
+			return list;
+		}
+
+		@RequestMapping("VIEW")
+		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, Model model) {
+			if (!model.asMap().containsKey("myKey")) {
+				model.addAttribute("myKey", "myValue");
 			}
 			return "myView";
 		}

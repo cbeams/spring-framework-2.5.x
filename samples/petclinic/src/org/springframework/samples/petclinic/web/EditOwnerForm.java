@@ -5,7 +5,7 @@ import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.validation.OwnerValidator;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +33,7 @@ public class EditOwnerForm {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String setupForm(@RequestParam("ownerId") int ownerId, ModelMap model) {
+	public String setupForm(@RequestParam("ownerId") int ownerId, Model model) {
 		Owner owner = this.clinic.loadOwner(ownerId);
 		model.addAttribute(owner);
 		return "ownerForm";

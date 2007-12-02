@@ -7,7 +7,7 @@ import javax.portlet.ActionResponse;
 import org.springframework.samples.petportal.domain.PetSite;
 import org.springframework.samples.petportal.validation.PetSiteValidator;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,9 +47,9 @@ public class PetSitesEditController {
 	}
 
 	@RequestMapping(params = "action=add")  // render phase
-	public String showSiteForm(ModelMap model) {
+	public String showSiteForm(Model model) {
 		// Used for the initial form as well as for redisplaying with errors.
-		if (!model.containsKey("site")) {
+		if (!model.containsAttribute("site")) {
 			model.addAttribute("site", new PetSite());
 		}
 		return "petSitesAdd";

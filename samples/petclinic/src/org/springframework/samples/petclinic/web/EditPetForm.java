@@ -8,7 +8,7 @@ import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
 import org.springframework.samples.petclinic.validation.PetValidator;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +41,7 @@ public class EditPetForm {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
+	public String setupForm(@RequestParam("petId") int petId, Model model) {
 		Pet pet = this.clinic.loadPet(petId);
 		model.addAttribute("pet", pet);
 		return "petForm";

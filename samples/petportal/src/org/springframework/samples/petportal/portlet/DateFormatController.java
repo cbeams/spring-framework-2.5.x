@@ -7,7 +7,7 @@ import javax.portlet.PortletPreferences;
 
 import org.springframework.samples.petportal.service.PetService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -37,7 +37,7 @@ public class DateFormatController {
 	 * exposed to the 'dateFormat' view via the model.
 	 */
 	@RequestMapping
-	public String showPreferences(PortletPreferences preferences, ModelMap model) {
+	public String showPreferences(PortletPreferences preferences, Model model) {
 		model.addAttribute("currentFormat", preferences.getValue("dateFormat", PetService.DEFAULT_DATE_FORMAT));
 		model.addAttribute("availableFormats", this.availableFormats);
 		return "dateFormat";

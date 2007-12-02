@@ -6,7 +6,7 @@ import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.samples.petclinic.validation.VisitValidator;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +35,7 @@ public class AddVisitForm {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
+	public String setupForm(@RequestParam("petId") int petId, Model model) {
 		Pet pet = this.clinic.loadPet(petId);
 		Visit visit = new Visit();
 		pet.addVisit(visit);

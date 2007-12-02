@@ -44,6 +44,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -179,6 +180,27 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testFormController() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("name", "name1");
+		request.addParameter("age", "value2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
+	}
+
+	public void testModelFormController() throws Exception {
 		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
@@ -480,6 +502,27 @@ public class ServletAnnotationControllerTests extends TestCase {
 		@RequestMapping("/myPath.do")
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
+				model.addAttribute("myKey", "myValue");
+			}
+			return "myView";
+		}
+	}
+
+
+	@Controller
+	public static class MyModelFormController {
+
+		@ModelAttribute("testBeans")
+		public List<TestBean> getTestBeans() {
+			List<TestBean> list = new LinkedList<TestBean>();
+			list.add(new TestBean("tb1"));
+			list.add(new TestBean("tb2"));
+			return list;
+		}
+
+		@RequestMapping("/myPath.do")
+		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, Model model) {
+			if (!model.asMap().containsKey("myKey")) {
 				model.addAttribute("myKey", "myValue");
 			}
 			return "myView";
