@@ -31,15 +31,15 @@ import org.springframework.util.xml.XmlValidationModeDetector;
 
 /**
  * The default {@link DocumentLoader} implementation.
- * 
+ *
  * <p>Simply loads {@link Document documents} using the standard JAXP-configured
  * XML parser. If you want to change the {@link DocumentBuilder} that is used to
- * load documents then one strategy is to use a Java define when starting your
- * application. For example, to use the Oracle {@link DocumentBuilder}, one might
- * start one's application like so:
- * 
+ * load documents, then one strategy is to define a corresponding Java system property
+ * when starting your JVM. For example, to use the Oracle {@link DocumentBuilder},
+ * you might start your application like as follows:
+ *
  * <pre code="class">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -80,7 +80,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 
 	/**
 	 * Create the {@link DocumentBuilderFactory} instance.
-	 * @param validationMode the type of validation {@link XmlValidationModeDetector#VALIDATION_DTD DTD}
+	 * @param validationMode the type of validation: {@link XmlValidationModeDetector#VALIDATION_DTD DTD}
 	 * or {@link XmlValidationModeDetector#VALIDATION_XSD XSD})
 	 * @param namespaceAware <code>true</code> if the returned factory is to provide support for XML namespaces
 	 * @return the JAXP DocumentBuilderFactory
