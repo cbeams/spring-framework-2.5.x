@@ -42,12 +42,14 @@ Package org.springframework.instrument
 * ShadowingClassLoader excludes the "com.ibm." package by default as well (for IBM JDK classes, DB2 JDBC driver, etc)
 
 Package org.springframework.jdbc
+* fixed JdbcUtils to not access the DatabaseMetaData implementation class for "extractDatabaseMetaData" calls
 * TransactionAwareDataSourceProxy obtains target Connections lazily when the first call comes in on the Connection proxy
 * added "reobtainTransactionalConnections" flag to TransactionAwareDataSourceProxy (for Connection handles on JBoss)
 
 Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
+* "jms:listener-container" tag supports a concurrency range (e.g. "3-5"), for specifying a minimum number of consumers
 
 Package org.springframework.jndi
 * JndiTemplate prepares a specific Hashtable for the InitialContext, exposing default environment properties as well
@@ -82,6 +84,8 @@ Package org.springframework.transaction
 
 Package org.springframework.ui
 * fixed ModelMap's "mergeAttributes" to correctly copy new attributes into the model
+* added "containsAttribute" method to ModelMap, as a more specific alternative to a general "containsKey" call
+* introduced Java-5-specific Model interface (for use with MVC handler methods) and corresponding ExtendedModelMap impl
 
 Package org.springframework.util
 * AutoPopulatingList is serializable now
