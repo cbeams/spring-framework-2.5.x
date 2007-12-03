@@ -294,6 +294,9 @@ public class CallMetaDataContext {
 				declaredParameters.put(parameterNameToMatch, parameter);
 				if (parameter instanceof SqlOutParameter) {
 					outParameterNames.add(parameter.getName());
+					if (logger.isDebugEnabled()) {
+						logger.debug("Added metadata out parameter for: " + parameter.getName());
+					}
 					if (this.isFunction()) {
 						if (!returnDeclared)
 							this.setFunctionReturnName(parameter.getName());
