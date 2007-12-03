@@ -48,6 +48,8 @@ import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.jndi.JndiLocatorSupport;
@@ -159,7 +161,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
-		PriorityOrdered, BeanFactoryAware, Serializable {
+		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
 
 	private transient Map<String, String> persistenceUnits;
 
@@ -169,7 +171,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 	private transient String defaultPersistenceUnitName = "";
 
-	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+	private int order = Ordered.LOWEST_PRECEDENCE - 1;
 
 	private transient ListableBeanFactory beanFactory;
 
@@ -287,6 +289,13 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		}
 	}
 
+
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+		if (beanType != null) {
+			InjectionMetadata metadata = findPersistenceMetadata(beanType);
+			metadata.checkConfigMembers(beanDefinition);
+		}
+	}
 
 	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
 		return null;

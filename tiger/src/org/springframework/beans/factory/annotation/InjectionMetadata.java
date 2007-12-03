@@ -22,10 +22,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -41,31 +43,47 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InjectionMetadata {
 
-	private Set<InjectedElement> resourceFields = new LinkedHashSet<InjectedElement>();
+	private Set<InjectedElement> injectedFields = new LinkedHashSet<InjectedElement>();
 
-	private Set<InjectedElement> resourceMethods = new LinkedHashSet<InjectedElement>();
+	private Set<InjectedElement> injectedMethods = new LinkedHashSet<InjectedElement>();
 
 
 	public void addInjectedField(InjectedElement element) {
-		this.resourceFields.add(element);
+		this.injectedFields.add(element);
 	}
 
 	public void addInjectedMethod(InjectedElement element) {
-		this.resourceMethods.add(element);
+		this.injectedMethods.add(element);
 	}
 
+	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
+		doRegisterConfigMembers(beanDefinition, this.injectedFields);
+		doRegisterConfigMembers(beanDefinition, this.injectedMethods);
+	}
+
+	private void doRegisterConfigMembers(RootBeanDefinition beanDefinition, Set<InjectedElement> members) {
+		for (Iterator<InjectedElement> it = members.iterator(); it.hasNext();) {
+			Member member = it.next().getMember();
+			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
+				beanDefinition.registerExternallyManagedConfigMember(member);
+			}
+			else {
+				it.remove();
+			}
+		}
+	}
 
 	public void injectFields(Object target, String beanName) throws Throwable {
-		if (!this.resourceFields.isEmpty()) {
-			for (InjectedElement element : this.resourceFields) {
+		if (!this.injectedFields.isEmpty()) {
+			for (InjectedElement element : this.injectedFields) {
 				element.inject(target, beanName, null);
 			}
 		}
 	}
 
 	public void injectMethods(Object target, String beanName, PropertyValues pvs) throws Throwable {
-		if (!this.resourceMethods.isEmpty()) {
-			for (InjectedElement element : this.resourceMethods) {
+		if (!this.injectedMethods.isEmpty()) {
+			for (InjectedElement element : this.injectedMethods) {
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -86,6 +104,10 @@ public class InjectionMetadata {
 			this.member = member;
 			this.isField = (member instanceof Field);
 			this.pd = pd;
+		}
+
+		public final Member getMember() {
+			return this.member;
 		}
 
 		protected final Class getResourceType() {

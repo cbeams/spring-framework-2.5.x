@@ -46,6 +46,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -90,7 +92,7 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements PriorityOrdered, BeanFactoryAware {
+		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
 
@@ -100,7 +102,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	
 	private boolean requiredParameterValue = true;
 
-	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+	private int order = Ordered.LOWEST_PRECEDENCE - 1;
 
 	private ConfigurableListableBeanFactory beanFactory;
 
@@ -168,6 +170,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
+
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+		if (beanType != null) {
+			InjectionMetadata metadata = findAutowiringMetadata(beanType);
+			metadata.checkConfigMembers(beanDefinition);
+		}
+	}
 
 	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
 		// Quick check on the concurrent map first, with minimal locking.

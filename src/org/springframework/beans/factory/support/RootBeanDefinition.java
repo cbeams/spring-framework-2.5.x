@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Member;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,6 +44,8 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  * @see ChildBeanDefinition
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
+
+	private final Set externallyManagedConfigMembers = Collections.synchronizedSet(new HashSet());
 
 	private final Set externallyManagedInitMethods = Collections.synchronizedSet(new HashSet());
 
@@ -209,6 +212,14 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		}
 	}
 
+
+	public void registerExternallyManagedConfigMember(Member configMember) {
+		this.externallyManagedConfigMembers.add(configMember);
+	}
+
+	public boolean isExternallyManagedConfigMember(Member configMember) {
+		return this.externallyManagedConfigMembers.contains(configMember);
+	}
 
 	public void registerExternallyManagedInitMethod(String initMethod) {
 		this.externallyManagedInitMethods.add(initMethod);

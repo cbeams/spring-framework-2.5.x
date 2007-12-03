@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +71,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	private Class<? extends Annotation> destroyAnnotationType;
 
-	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+	private int order = Ordered.LOWEST_PRECEDENCE - 1;
 
 	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache =
 			new ConcurrentHashMap<Class<?>, LifecycleMetadata>();
@@ -110,11 +111,23 @@ public class InitDestroyAnnotationBeanPostProcessor
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
 		if (beanType != null) {
 			LifecycleMetadata metadata = findLifecycleMetadata(beanType);
-			for (LifecycleElement lifecycleElement : metadata.getInitMethods()) {
-				beanDefinition.registerExternallyManagedInitMethod(lifecycleElement.getMethod().getName());
+			for (Iterator<LifecycleElement> it = metadata.getInitMethods().iterator(); it.hasNext();) {
+				String methodName = it.next().getMethod().getName();
+				if (!beanDefinition.isExternallyManagedInitMethod(methodName)) {
+					beanDefinition.registerExternallyManagedInitMethod(methodName);
+				}
+				else {
+					it.remove();
+				}
 			}
-			for (LifecycleElement lifecycleElement : metadata.getDestroyMethods()) {
-				beanDefinition.registerExternallyManagedDestroyMethod(lifecycleElement.getMethod().getName());
+			for (Iterator<LifecycleElement> it = metadata.getDestroyMethods().iterator(); it.hasNext();) {
+				String methodName = it.next().getMethod().getName();
+				if (!beanDefinition.isExternallyManagedDestroyMethod(methodName)) {
+					beanDefinition.registerExternallyManagedDestroyMethod(methodName);
+				}
+				else {
+					it.remove();
+				}
 			}
 		}
 	}
@@ -203,8 +216,10 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void invokeInitMethods(Object target) throws Throwable {
-			for (LifecycleElement lifecycleElement : this.initMethods) {
-				lifecycleElement.invoke(target);
+			if (!this.initMethods.isEmpty()) {
+				for (LifecycleElement lifecycleElement : this.initMethods) {
+					lifecycleElement.invoke(target);
+				}
 			}
 		}
 
@@ -217,8 +232,10 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void invokeDestroyMethods(Object target) throws Throwable {
-			for (LifecycleElement lifecycleElement : this.destroyMethods) {
-				lifecycleElement.invoke(target);
+			if (!this.destroyMethods.isEmpty()) {
+				for (LifecycleElement lifecycleElement : this.destroyMethods) {
+					lifecycleElement.invoke(target);
+				}
 			}
 		}
 	}

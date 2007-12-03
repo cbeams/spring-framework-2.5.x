@@ -25,6 +25,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -133,7 +134,10 @@ public class AnnotationConfigUtils {
 	private static BeanDefinitionHolder registerBeanPostProcessor(
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 
+		// Default infrastructure bean: lowest order value; role infrastructure.
+		definition.getPropertyValues().addPropertyValue("order", new Integer(Ordered.LOWEST_PRECEDENCE));
 		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+
 		registry.registerBeanDefinition(beanName, definition);
 		return new BeanDefinitionHolder(definition, beanName);
 	}

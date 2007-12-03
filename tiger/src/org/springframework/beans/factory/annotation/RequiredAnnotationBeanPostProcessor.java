@@ -29,6 +29,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
@@ -63,9 +65,12 @@ import org.springframework.util.Assert;
  * @see #setRequiredAnnotationType
  * @see Required
  */
-public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
+public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
+		implements PriorityOrdered {
 
 	private Class<? extends Annotation> requiredAnnotationType = Required.class;
+
+	private int order = Ordered.LOWEST_PRECEDENCE - 1;
 
 	/** Cache for validated bean names, skipping re-validation for the same bean */
 	private final Set<String> validatedBeanNames = Collections.synchronizedSet(new HashSet<String>());
@@ -90,6 +95,14 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 */
 	protected Class<? extends Annotation> getRequiredAnnotationType() {
 		return this.requiredAnnotationType;
+	}
+
+	public void setOrder(int order) {
+	  this.order = order;
+	}
+
+	public int getOrder() {
+	  return this.order;
 	}
 
 

@@ -57,6 +57,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodParameter;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.util.Assert;
@@ -252,6 +253,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
+
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
+		if (beanType != null) {
+			InjectionMetadata metadata = findResourceMetadata(beanType);
+			metadata.checkConfigMembers(beanDefinition);
+		}
+	}
 
 	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
 		return null;
