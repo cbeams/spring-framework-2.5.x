@@ -16,10 +16,13 @@ Package org.springframework.beans
 * BeanWrapper supports well-known collection implementation types for generic element conversion again (like Spring 2.0)
 * DefaultListableBeanFactory supports ObjectFactory indirection for resolvable dependencies
 * revised accidental exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
+* DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
 * revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
 * revised BeanConfigurerSupport to re-initialize its default BeanWiringInfoResolver for each context refresh
 * fixed AutowiredAnnotationBeanPostProcessor to properly cache dependencies that do not correspond to a registered bean
+* annotation processors detect already managed methods/fields, avoiding double invocation in case of multiple processors
+* explicit annotation processors override implicit default processors (as built by annotation-config / component-scan)
 
 Package org.springframework.cache
 * added "cacheManagerName" property to EhCacheManagerFactoryBean
@@ -28,6 +31,7 @@ Package org.springframework.context
 * fixed AbstractApplicationContext to only send ContextStoppedEvent in case of "stop()" (i.e. not for "close()")
 * ContextTypeMatchClassLoader does not generally exclude classes in the "org.springframework" package anymore
 * DefaultContextLoadTimeWeaver only chooses GlassFishLoadTimeWeaver when running in the EAR ClassLoader
+* DefaultContextLoadTimeWeaver removes all registered transformers from the VM Instrumentation object (if applicable)
 
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
@@ -39,6 +43,7 @@ Package org.springframework.ejb
 * introduced EJB3-compliant SpringBeanAutowiringInterceptor for processing Spring's @Autowired in EJB3 SBs/MDBs
 
 Package org.springframework.instrument
+* InstrumentationLoadTimeWeaver allows for operating on a pre-defined ClassLoader and for removing transformers again
 * ShadowingClassLoader excludes the "com.ibm." package by default as well (for IBM JDK classes, DB2 JDBC driver, etc)
 
 Package org.springframework.jdbc
@@ -98,6 +103,8 @@ Package org.springframework.web
 * SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
 * AnnotationMethodHandlerAdapter throws an exception if it cannot find a clear best path match for a specific request
+* AnnotationMethodHandlerAdapter applies @InitBinder methods for view preparation as well (like WebBindingInitializers)
+* AnnotationMethodHandlerAdapter applies binder initialization for 'end' views (with processing being complete) as well
 * reworked Spring's Tiles2 support such that it can operate against the Tiles2 (2.0.5+) JDK 1.4 version as well
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
 
