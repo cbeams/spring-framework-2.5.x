@@ -18,40 +18,54 @@ package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Load time weaver relying on {@link Instrumentation}.
+ * {@link LoadTimeWeaver} relying on VM {@link Instrumentation}.
  *
- * <p>Start the JVM specifying the java agent to be used, like so:
+ * <p>Start the JVM specifying the Java agent to be used, like as follows:
  *
  * <p><code class="code">-javaagent:path/to/spring-agent.jar</code>
  *
  * <p>where <code>spring-agent.jar</code> is a JAR file containing the
  * {@link InstrumentationSavingAgent} class.
  *
- * <p>In Eclipse, for example, set the Run configuration's JVM args to be of
- * the form:
+ * <p>In Eclipse, for example, set the "Run configuration"'s JVM args
+ * to be of the form:
  *
  * <p><code class="code">-javaagent:${project_loc}/lib/spring-agent.jar</code>
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  * @see InstrumentationSavingAgent
  */
 public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
+	private final ClassLoader classLoader;
+
+	private final List<ClassFileTransformer> transformers = new ArrayList<ClassFileTransformer>(4);
+
+
+	public InstrumentationLoadTimeWeaver() {
+		this.classLoader = ClassUtils.getDefaultClassLoader();
+	}
+
+	public InstrumentationLoadTimeWeaver(ClassLoader classLoader) {
+		Assert.notNull(classLoader, "ClassLoader must not be null");
+		this.classLoader = classLoader;
+	}
+
+
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
-		Instrumentation instrumentation = InstrumentationSavingAgent.getInstrumentation();
-		if (instrumentation == null) {
-			throw new IllegalStateException(
-					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
-		}
-		instrumentation.addTransformer(transformer);
+		getInstrumentation().addTransformer(transformer);
+		this.transformers.add(transformer);
 	}
 
 	/**
@@ -60,7 +74,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * current loader.
 	 */
 	public ClassLoader getInstrumentableClassLoader() {
-		return ClassUtils.getDefaultClassLoader();
+		return this.classLoader;
 	}
 
 	/**
@@ -68,6 +82,31 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
+	}
+
+	/**
+	 * Remove all registered transformers, in inverse order of registration.
+	 */
+	public void removeTransformers() {
+		Instrumentation instrumentation = getInstrumentation();
+		for (int i = this.transformers.size() - 1; i >= 0; i--) {
+			instrumentation.removeTransformer(this.transformers.get(i));
+		}
+		this.transformers.clear();
+	}
+
+	/**
+	 * Obtain the Instrumentation instance for the current VM, if available
+	 * @return the Instrumentation instance (never <code>null</code>)
+	 * @throws IllegalStateException if instrumentation is not available
+	 */
+	private Instrumentation getInstrumentation() {
+		Instrumentation instrumentation = InstrumentationSavingAgent.getInstrumentation();
+		if (instrumentation == null) {
+			throw new IllegalStateException(
+					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
+		}
+		return instrumentation;
 	}
 
 }
