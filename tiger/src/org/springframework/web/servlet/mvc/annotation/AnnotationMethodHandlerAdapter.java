@@ -56,6 +56,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -254,27 +255,25 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					}
 				}
 			}
-			else {
-				// Expose model attributes as session attributes, if required.
-				Map<String, Object> model = (mav != null ? mav.getModel() : implicitModel);
-				Set<Object> sessionAttributeSet = new HashSet<Object>();
-				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.value()));
-				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.types()));
-				for (Map.Entry entry : new HashSet<Map.Entry>(model.entrySet())) {
-					String attrName = (String) entry.getKey();
-					Object attrValue = entry.getValue();
-					if (sessionAttributeSet.contains(attrName) ||
-							(attrValue != null && sessionAttributeSet.contains(attrValue.getClass()))) {
+			// Expose model attributes as session attributes, if required.
+			Map<String, Object> model = (mav != null ? mav.getModel() : implicitModel);
+			Set<Object> sessionAttributeSet = new HashSet<Object>();
+			sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.value()));
+			sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.types()));
+			for (Map.Entry entry : new HashSet<Map.Entry>(model.entrySet())) {
+				String attrName = (String) entry.getKey();
+				Object attrValue = entry.getValue();
+				if (sessionAttributeSet.contains(attrName) ||
+						(attrValue != null && sessionAttributeSet.contains(attrValue.getClass()))) {
+					if (!argResolver.isProcessingComplete()) {
 						sessionAttrNames.add(attrName);
 						this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
-						String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
-						if (mav != null && !model.containsKey(bindingResultKey)) {
-							ServletRequestDataBinder binder = new ServletRequestDataBinder(attrValue, attrName);
-							if (this.webBindingInitializer != null) {
-								this.webBindingInitializer.initBinder(binder, webRequest);
-							}
-							mav.addObject(bindingResultKey, binder.getBindingResult());
-						}
+					}
+					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
+					if (mav != null && !model.containsKey(bindingResultKey)) {
+						ServletRequestDataBinder binder = new ServletRequestDataBinder(attrValue, attrName);
+						argResolver.initBinder(handler, attrName, binder, webRequest, request, response);
+						mav.addObject(bindingResultKey, binder.getBindingResult());
 					}
 				}
 			}
@@ -573,30 +572,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 							bindObject = BeanUtils.instantiateClass(param.getParameterType());
 						}
 						ServletRequestDataBinder binder = new ServletRequestDataBinder(bindObject, attrName);
-						if (webBindingInitializer != null) {
-							webBindingInitializer.initBinder(binder, webRequest);
-						}
-						for (Method initBinderMethod : this.initBinderMethods) {
-							String[] targetNames = initBinderMethod.getAnnotation(InitBinder.class).value();
-							if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
-								Class[] initBinderParams = initBinderMethod.getParameterTypes();
-								Object[] initBinderArgs = new Object[initBinderParams.length];
-								for (int j = 0; j < initBinderArgs.length; j++) {
-									initBinderArgs[j] = resolveStandardArgument(initBinderParams[j], request, response, webRequest);
-									if (initBinderArgs[j] == null) {
-										if (initBinderParams[j].isInstance(binder)) {
-											initBinderArgs[j] = binder;
-										}
-									}
-								}
-								ReflectionUtils.makeAccessible(initBinderMethod);
-								Object attrValue = ReflectionUtils.invokeMethod(initBinderMethod, handler, initBinderArgs);
-								if (attrValue != null) {
-									throw new IllegalStateException(
-											"InitBinder methods must not have a return value: " + initBinderMethod);
-								}
-							}
-						}
+						initBinder(handler, attrName, binder, webRequest, request, response);
 						binder.bind(request);
 						args[i] = bindObject;
 						implicitModel.putAll(binder.getBindingResult().getModel());
@@ -649,6 +625,36 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			else {
 				return null;
+			}
+		}
+
+		public void initBinder(Object handler, String attrName, WebDataBinder binder,
+				WebRequest webRequest, HttpServletRequest request, HttpServletResponse response)
+				throws IOException {
+
+			if (webBindingInitializer != null) {
+				webBindingInitializer.initBinder(binder, webRequest);
+			}
+			for (Method initBinderMethod : this.initBinderMethods) {
+				String[] targetNames = initBinderMethod.getAnnotation(InitBinder.class).value();
+				if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
+					Class[] initBinderParams = initBinderMethod.getParameterTypes();
+					Object[] initBinderArgs = new Object[initBinderParams.length];
+					for (int j = 0; j < initBinderArgs.length; j++) {
+						initBinderArgs[j] = resolveStandardArgument(initBinderParams[j], request, response, webRequest);
+						if (initBinderArgs[j] == null) {
+							if (initBinderParams[j].isInstance(binder)) {
+								initBinderArgs[j] = binder;
+							}
+						}
+					}
+					ReflectionUtils.makeAccessible(initBinderMethod);
+					Object attrValue = ReflectionUtils.invokeMethod(initBinderMethod, handler, initBinderArgs);
+					if (attrValue != null) {
+						throw new IllegalStateException(
+								"InitBinder methods must not have a return value: " + initBinderMethod);
+					}
+				}
 			}
 		}
 
