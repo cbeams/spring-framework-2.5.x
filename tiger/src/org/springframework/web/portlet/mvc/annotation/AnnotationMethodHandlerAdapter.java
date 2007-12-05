@@ -171,7 +171,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 		}
 
-		if (request instanceof RenderRequest) {
+		if (request instanceof RenderRequest && response instanceof RenderResponse) {
 			RenderRequest renderRequest = (RenderRequest) request;
 			RenderResponse renderResponse = (RenderResponse) response;
 			// Detect implicit model from associated action phase.
@@ -197,7 +197,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		WebRequest webRequest = new PortletWebRequest(request);
 		HandlerMethodResolver methodResolver = getMethodResolver(handler.getClass());
-		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
+		Method handlerMethod = methodResolver.resolveHandlerMethod(request, response);
 		ArgumentsResolver argResolver = new ArgumentsResolver(methodResolver.getInitBinderMethods());
 
 		for (Method attributeMethod : methodResolver.getModelAttributeMethods()) {
@@ -302,7 +302,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			});
 		}
 
-		public Method resolveHandlerMethod(PortletRequest request) {
+		public Method resolveHandlerMethod(PortletRequest request, PortletResponse response) {
 			String lookupMode = request.getPortletMode().toString();
 			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
 			for (Method handlerMethod : this.handlerMethods) {
@@ -316,7 +316,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				if (mappingInfo.modes.length > 0) {
 					for (String mappedMode : mappingInfo.modes) {
 						if (mappedMode.equalsIgnoreCase(lookupMode)) {
-							if (checkParameters(request, mappingInfo)) {
+							if (checkParameters(request, response, mappingInfo)) {
 								match = true;
 							}
 							else {
@@ -327,7 +327,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 				else {
 					// No modes specified: parameter match sufficient.
-					match = checkParameters(request, mappingInfo);
+					match = checkParameters(request, response, mappingInfo);
 				}
 				if (match) {
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
@@ -361,18 +361,18 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 			else {
 				throw new IllegalStateException("No matching handler method found for portlet request: mode '" +
-						request.getPortletMode() + "', type '" + (request instanceof ActionRequest ? "action" : "render") +
+						request.getPortletMode() + "', type '" + (response instanceof ActionResponse ? "action" : "render") +
 						"', parameters " + StylerUtils.style(request.getParameterMap()));
 			}
 		}
 
-		private boolean checkParameters(PortletRequest request, RequestMappingInfo mapping) {
-			if (request instanceof RenderRequest) {
+		private boolean checkParameters(PortletRequest request, PortletResponse response, RequestMappingInfo mapping) {
+			if (response instanceof RenderResponse) {
 				if (mapping.action) {
 					return false;
 				}
 			}
-			else if (request instanceof ActionRequest) {
+			else if (response instanceof ActionResponse) {
 				if (mapping.render) {
 					return false;
 				}
