@@ -225,6 +225,10 @@ public class UrlPathHelper {
 		if (contextPath == null) {
 			contextPath = request.getContextPath();
 		}
+		if ("/".equals(contextPath)) {
+			// Invalid case, but happens for includes on Jetty: silently adapt it.
+			contextPath = "";
+		}
 		return decodeRequestString(request, contextPath);
 	}
 
