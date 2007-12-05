@@ -63,7 +63,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	/**
 	 * Create a new <code>TomcatInstrumentableClassLoader</code> using the
 	 * current context class loader.
-	 * @see #TomcatInstrumentableClassLoader(ClassLoader) 
+	 * @see #TomcatInstrumentableClassLoader(ClassLoader)
 	 */
 	public TomcatInstrumentableClassLoader() {
 		super();
@@ -71,12 +71,12 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	}
 
 	/**
-	 * Create a new <code>TomcatInstrumentableClassLoader</code> using the
-	 * supplied class loader.
-	 * @param classLoader the {@link ClassLoader} to be used
+	 * Create a new <code>TomcatInstrumentableClassLoader</code> with the
+	 * supplied class loader as parent.
+	 * @param parent the parent {@link ClassLoader} to be used
 	 */
-	public TomcatInstrumentableClassLoader(ClassLoader classLoader) {
-		super(classLoader);
+	public TomcatInstrumentableClassLoader(ClassLoader parent) {
+		super(parent);
 		this.weavingTransformer = new WeavingTransformer(this);
 	}
 
