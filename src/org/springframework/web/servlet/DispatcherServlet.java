@@ -725,7 +725,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					continue;
 				}
 				try {
-					Class clazz = ClassUtils.forName(className, getClass().getClassLoader());
+					Class clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add(strategy);
 				}

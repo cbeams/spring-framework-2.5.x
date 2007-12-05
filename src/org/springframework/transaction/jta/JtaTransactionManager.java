@@ -608,8 +608,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieving JTA TransactionSynchronizationRegistry from JNDI location [" + registryName + "]");
 			}
-			Class registryClass =
-					ClassUtils.forName(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME, getClass().getClassLoader());
+			Class registryClass = ClassUtils.forName(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME,
+					JtaTransactionManager.class.getClassLoader());
 			return getJndiTemplate().lookup(registryName, registryClass);
 		}
 		catch (ClassNotFoundException ex) {
@@ -736,8 +736,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			throws TransactionSystemException {
 
 		try {
-			Class registryClass =
-					ClassUtils.forName(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME, getClass().getClassLoader());
+			Class registryClass = ClassUtils.forName(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME,
+					JtaTransactionManager.class.getClassLoader());
 
 			// If we came here, we might be on Java EE 5, since the JTA 1.1 API is present.
 			if (this.userTransactionObtainedFromJndi) {

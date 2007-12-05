@@ -51,7 +51,7 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 		BeanDefinitionParser parser = null;
 		if (JdkVersion.isAtLeastJava15()) {
 			try {
-				Class parserClass = ClassUtils.forName(parserClassName, getClass().getClassLoader());
+				Class parserClass = ClassUtils.forName(parserClassName, ContextNamespaceHandler.class.getClassLoader());
 				parser = (BeanDefinitionParser) parserClass.newInstance();
 			}
 			catch (Throwable ex) {

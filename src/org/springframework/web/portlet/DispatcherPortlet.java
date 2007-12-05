@@ -588,7 +588,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 					continue;
 				}
 				try {
-					Class clazz = ClassUtils.forName(className, getClass().getClassLoader());
+					Class clazz = ClassUtils.forName(className, DispatcherPortlet.class.getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add(strategy);
 				}

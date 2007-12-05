@@ -453,7 +453,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Register the (JDK 1.5 specific) LoadTimeWeaverAwareProcessor.
 			try {
 				Class ltwapClass = ClassUtils.forName(
-						"org.springframework.context.weaving.LoadTimeWeaverAwareProcessor", getClass().getClassLoader());
+						"org.springframework.context.weaving.LoadTimeWeaverAwareProcessor",
+						AbstractApplicationContext.class.getClassLoader());
 				BeanPostProcessor ltwap = (BeanPostProcessor) BeanUtils.instantiateClass(ltwapClass);
 				((BeanFactoryAware) ltwap).setBeanFactory(beanFactory);
 				beanFactory.addBeanPostProcessor(ltwap);
