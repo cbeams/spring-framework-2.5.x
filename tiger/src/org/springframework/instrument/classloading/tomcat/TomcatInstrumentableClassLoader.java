@@ -48,6 +48,7 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * <p><b>NOTE:</b> Requires Apache Tomcat version 5.0 or higher.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  * @see #addTransformer
  * @see #getThrowawayClassLoader
@@ -66,7 +67,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	 */
 	public TomcatInstrumentableClassLoader() {
 		super();
-		this.weavingTransformer = new WeavingTransformer();
+		this.weavingTransformer = new WeavingTransformer(this);
 	}
 
 	/**
@@ -76,7 +77,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	 */
 	public TomcatInstrumentableClassLoader(ClassLoader classLoader) {
 		super(classLoader);
-		this.weavingTransformer = new WeavingTransformer(classLoader);
+		this.weavingTransformer = new WeavingTransformer(this);
 	}
 
 
