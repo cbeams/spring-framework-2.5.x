@@ -15,6 +15,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * DefaultListableBeanFactory freshly resolves autowired arguments even for cached constructors (re-resolving prototypes)
 * fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
+* DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
 
 Package org.springframework.cache
 * added "cacheManagerName" property to EhCacheManagerFactoryBean
@@ -26,9 +27,11 @@ Package org.springframework.core
 * OverridingClassLoader excludes the "oracle." package by default as well (e.g. for TopLink's custom annotations)
 
 Package org.springframework.instrument
+* TomcatInstrumentableClassLoader always passes local ClassLoader into ClassFileTransformers
 * ShadowingClassLoader excludes the "com.ibm." package by default as well (for IBM JDK classes, DB2 JDBC driver, etc)
 
 Package org.springframework.jdbc
+* fixed JdbcUtils to not access the DatabaseMetaData implementation class for "extractDatabaseMetaData" calls
 * fixed SingleColumnRowMapper to use passed-in required type in the default "convertValueToRequiredType" implementation
 
 Package org.springframework.jms
@@ -56,6 +59,7 @@ Package org.springframework.util
 
 Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
+* UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
 * DispatcherPortlet swallows IllegalStateException when setting implicit render parameter (e.g. after sendRedirect call)
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
