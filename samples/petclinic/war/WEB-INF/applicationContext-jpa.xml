@@ -72,26 +72,20 @@
 	<context:annotation-config/>
 
 	<!--
-		Instruct Spring to retrieve and apply @AspectJ aspects which are defined
-		as beans in this context (such as the UsageLogAspect below).
-	-->
-	<aop:aspectj-autoproxy/>
-
-	<!--
 		Instruct Spring to perform declarative transaction management
 		automatically on annotated classes.
 	-->
-	<tx:annotation-driven/>
+	<tx:annotation-driven mode="aspectj"/>
 
 	<!--
 		Simply defining this bean will cause requests to owner names to be saved.
-		Spring automatically deploys the @Aspect when AspectJ autoproxying is enabled.
+		This aspect is defined in petclinic.jar's META-INF/aop.xml file.
 		Note that we can dependency inject this bean like any other bean.
 	-->
 	<bean class="org.springframework.samples.petclinic.aspects.UsageLogAspect" p:historySize="300"/>
 
 	<!--
-		PostProcessors to perform exception translation on @Repository classes (from native
+		Post-processor to perform exception translation on @Repository classes (from native
 		exceptions such as JPA PersistenceExceptions to Spring's DataAccessException hierarchy).
 	-->
 	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
