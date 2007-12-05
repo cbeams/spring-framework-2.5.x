@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,14 @@ import org.springframework.instrument.classloading.WeavingTransformer;
 
 /**
  * Extension of Tomcat's default class loader which adds instrumentation
- * to loaded classes without the need of using a VM-wide agent.
+ * to loaded classes without the need to use a VM-wide agent.
  *
  * <p>To be registered using a <code>Loader</code> tag in Tomcat's <code>Context</code>
  * definition in the <code>server.xml</code> file, with the Spring-provided
  * "spring-tomcat-weaver.jar" file deployed into Tomcat's "server/lib" directory.
  * The required configuration tag looks as follows:
  *
- * <pre>
- * &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;</pre>
+ * <pre class="code">&lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;</pre>
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver}
@@ -49,6 +48,7 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * <p><b>NOTE:</b> Requires Apache Tomcat version 5.0 or higher.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  * @see #addTransformer
  * @see #getThrowawayClassLoader
@@ -60,14 +60,24 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	private final WeavingTransformer weavingTransformer;
 
 
+	/**
+	 * Create a new <code>TomcatInstrumentableClassLoader</code> using the
+	 * current context class loader.
+	 * @see #TomcatInstrumentableClassLoader(ClassLoader)
+	 */
 	public TomcatInstrumentableClassLoader() {
 		super();
-		this.weavingTransformer = new WeavingTransformer();
+		this.weavingTransformer = new WeavingTransformer(this);
 	}
 
-	public TomcatInstrumentableClassLoader(ClassLoader classLoader) {
-		super(classLoader);
-		this.weavingTransformer = new WeavingTransformer(classLoader);
+	/**
+	 * Create a new <code>TomcatInstrumentableClassLoader</code> with the
+	 * supplied class loader as parent.
+	 * @param parent the parent {@link ClassLoader} to be used
+	 */
+	public TomcatInstrumentableClassLoader(ClassLoader parent) {
+		super(parent);
+		this.weavingTransformer = new WeavingTransformer(this);
 	}
 
 
