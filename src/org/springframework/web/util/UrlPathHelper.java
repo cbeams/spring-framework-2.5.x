@@ -122,14 +122,14 @@ public class UrlPathHelper {
 	 * Return the default character encoding to use for URL decoding.
 	 */
 	protected String getDefaultEncoding() {
-		return defaultEncoding;
+		return this.defaultEncoding;
 	}
 
 
 	/**
 	 * Return the mapping lookup path for the given request, within the current
 	 * servlet mapping if applicable, else within the web application.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
+	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @return the lookup path
 	 * @see #getPathWithinApplication
@@ -154,7 +154,7 @@ public class UrlPathHelper {
 	 * Return the path within the servlet mapping for the given request,
 	 * i.e. the part of the request's URL beyond the part that called the servlet,
 	 * or "" if the whole URL has been used to identify the servlet.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
+	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * <p>E.g.: servlet mapping = "/test/*"; request URI = "/test/a" -> "/a".
 	 * <p>E.g.: servlet mapping = "/test"; request URI = "/test" -> "".
 	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" -> "".
@@ -178,7 +178,7 @@ public class UrlPathHelper {
 
 	/**
 	 * Return the path within the web application for the given request.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
+	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @return the path within the web application
 	 */
@@ -228,6 +228,10 @@ public class UrlPathHelper {
 		String contextPath = (String) request.getAttribute(WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
 		if (contextPath == null) {
 			contextPath = request.getContextPath();
+		}
+		if ("/".equals(contextPath)) {
+			// Invalid case, but happens for includes on Jetty: silently adapt it.
+			contextPath = "";
 		}
 		return decodeRequestString(request, contextPath);
 	}
@@ -306,7 +310,7 @@ public class UrlPathHelper {
 	/**
 	 * Decode the given source string with a URLDecoder. The encoding will be taken
 	 * from the request, falling back to the default "ISO-8859-1".
-	 * <p>Default implementation uses <code>URLDecoder.decode(input, enc)</code>
+	 * <p>The default implementation uses <code>URLDecoder.decode(input, enc)</code>
 	 * on JDK 1.4+, falling back to <code>URLDecoder.decode(input)</code>
 	 * (which uses the platform default encoding) on JDK 1.3.
 	 * @param request current HTTP request
