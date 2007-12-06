@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import javax.management.modelmbean.RequiredModelMBean;
 /**
  * Extension of the {@link RequiredModelMBean} class that ensures the
  * {@link Thread#getContextClassLoader() thread context ClassLoader} is switched
- * for the managed resources {@link ClassLoader} before any invocations occur.
+ * for the managed resource's {@link ClassLoader} before any invocations occur.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -79,7 +79,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#invoke
 	 */
-	public Object invoke(final String opName, final Object[] opArgs, final String[] sig)
+	public Object invoke(String opName, Object[] opArgs, String[] sig)
 			throws MBeanException, ReflectionException {
 
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
@@ -97,7 +97,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#getAttribute
 	 */
-	public Object getAttribute(final String attrName)
+	public Object getAttribute(String attrName)
 			throws AttributeNotFoundException, MBeanException, ReflectionException {
 
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
