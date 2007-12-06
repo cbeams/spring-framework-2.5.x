@@ -212,7 +212,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	/**
 	 * Does the database support the use of catalog name in procedure calls
 	 */
-	protected boolean isSupportsCatalogsInProcedureCalls() {
+	public boolean isSupportsCatalogsInProcedureCalls() {
 		return this.supportsCatalogsInProcedureCalls;
 	}
 
@@ -226,7 +226,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	/**
 	 * Does the database support the use of schema name in procedure calls
 	 */
-	protected boolean isSupportsSchemasInProcedureCalls() {
+	public boolean isSupportsSchemasInProcedureCalls() {
 		return this.supportsSchemasInProcedureCalls;
 	}
 

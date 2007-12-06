@@ -481,8 +481,19 @@ public class CallMetaDataContext {
 	public String createCallString() {
 		String callString;
 		int parameterCount = 0;
-		String catalogNameToUse = metaDataProvider.catalogNameToUse(this.getCatalogName());
-		String schemaNameToUse = metaDataProvider.schemaNameToUse(this.getSchemaName());
+		String catalogNameToUse = null;
+		String schemaNameToUse = null;
+		// For Oracle where catalogs are not supported we need to reverse the schema name
+		// and the catalog name since the cataog is used for the package name
+		if (metaDataProvider.isSupportsSchemasInProcedureCalls() &&
+				!metaDataProvider.isSupportsCatalogsInProcedureCalls()) {
+			schemaNameToUse = metaDataProvider.catalogNameToUse(this.getCatalogName());
+			catalogNameToUse = metaDataProvider.schemaNameToUse(this.getSchemaName());
+		}
+		else {
+			catalogNameToUse = metaDataProvider.catalogNameToUse(this.getCatalogName());
+			schemaNameToUse = metaDataProvider.schemaNameToUse(this.getSchemaName());
+		}
 		String procedureNameToUse = metaDataProvider.procedureNameToUse(this.getProcedureName());
 		if (this.isFunction() || this.isReturnValueRequired()) {
 			callString = "{? = call " +

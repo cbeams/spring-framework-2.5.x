@@ -153,4 +153,14 @@ public interface CallMetaDataProvider {
 	 */
 	List<CallParameterMetaData> getCallParameterMetaData();
 
+	/**
+	 * Does the database support the use of catalog name in procedure calls
+	 */
+	boolean isSupportsCatalogsInProcedureCalls();
+
+	/**
+	 * Does the database support the use of schema name in procedure calls
+	 */
+	boolean isSupportsSchemasInProcedureCalls();
+
 }
