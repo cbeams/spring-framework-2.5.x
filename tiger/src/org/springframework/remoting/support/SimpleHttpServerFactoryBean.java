@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.remoting.support.server;
+package org.springframework.remoting.support;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
