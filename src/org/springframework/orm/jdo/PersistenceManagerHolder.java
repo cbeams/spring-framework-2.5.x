@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,6 +37,8 @@ public class PersistenceManagerHolder extends ResourceHolderSupport {
 
 	private final PersistenceManager persistenceManager;
 
+	private boolean transactionActive;
+
 
 	/**
 	 * Create a new PersistenceManagerHolder for the given JDO PersistenceManager.
@@ -47,11 +49,25 @@ public class PersistenceManagerHolder extends ResourceHolderSupport {
 		this.persistenceManager = persistenceManager;
 	}
 
+
 	/**
 	 * Return this holder's JDO PersistenceManager.
 	 */
 	public PersistenceManager getPersistenceManager() {
-		return persistenceManager;
+		return this.persistenceManager;
+	}
+
+	protected void setTransactionActive(boolean transactionActive) {
+		this.transactionActive = transactionActive;
+	}
+
+	protected boolean isTransactionActive() {
+		return this.transactionActive;
+	}
+
+	public void clear() {
+		super.clear();
+		this.transactionActive = false;
 	}
 
 }

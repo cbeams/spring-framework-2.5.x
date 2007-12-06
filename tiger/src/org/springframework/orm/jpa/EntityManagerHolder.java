@@ -38,6 +38,8 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 
 	private final EntityManager entityManager;
 
+	private boolean transactionActive;
+
 	private SavepointManager savepointManager;
 
 
@@ -51,16 +53,25 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 		return this.entityManager;
 	}
 
-	public void setSavepointManager(SavepointManager savepointManager) {
+	protected void setTransactionActive(boolean transactionActive) {
+		this.transactionActive = transactionActive;
+	}
+
+	protected boolean isTransactionActive() {
+		return this.transactionActive;
+	}
+
+	protected void setSavepointManager(SavepointManager savepointManager) {
 		this.savepointManager = savepointManager;
 	}
 
-	public SavepointManager getSavepointManager() {
+	protected SavepointManager getSavepointManager() {
 		return this.savepointManager;
 	}
 
 	public void clear() {
 		super.clear();
+		this.transactionActive = false;
 		this.savepointManager = null;
 	}
 
