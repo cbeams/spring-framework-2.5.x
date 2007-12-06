@@ -93,6 +93,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	public void setSendCollectionType(boolean sendCollectionType) {
 		this.proxyFactory.getSerializerFactory().setSendCollectionType(sendCollectionType);
 	}
+
 	/**
 	 * Set the username that this factory should use to access the remote service.
 	 * Default is none.

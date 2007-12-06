@@ -459,7 +459,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testParticipatingTransactionWithWithRequiresNew() {
+	public void testParticipatingTransactionWithRequiresNew() {
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
@@ -518,7 +518,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testParticipatingTransactionWithWithRequiresNewAndPrebound() {
+	public void testParticipatingTransactionWithRequiresNewAndPrebound() {
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
@@ -877,13 +877,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		transactionManager.setDataSource(ds);
-		
+
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		txControl.expectAndReturn(tx.getRollbackOnly(), false);
 		tx.commit();
 		manager.flush();
-		
+
 		factoryControl.replay();
 		managerControl.replay();
 		txControl.replay();
@@ -907,7 +907,7 @@ public class JpaTransactionManagerTests extends TestCase {
 				});
 			}
 		});
-		
+
 		assertTrue(result == l);
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
