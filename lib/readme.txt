@@ -45,8 +45,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
 
-* caucho/hessian-3.0.20.jar
-- Hessian/Burlap 3.0.20 (http://www.caucho.com/hessian)
+* caucho/hessian-3.1.3.jar
+- Hessian/Burlap 3.1.3 (http://www.caucho.com/hessian)
 - required for building the framework
 - required at runtime when using Spring's Hessian/Burlap remoting support
 
