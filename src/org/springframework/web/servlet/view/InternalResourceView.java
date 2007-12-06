@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,18 +131,18 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 		// If already included or response already committed, perform include, else forward.
 		if (useInclude(request, response)) {
-			rd.include(request, response);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+				logger.debug("Including resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
+			rd.include(request, response);
 		}
 
 		else {
 			exposeForwardRequestAttributes(request);
-			rd.forward(request, response);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+				logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
+			rd.forward(request, response);
 		}
 	}
 

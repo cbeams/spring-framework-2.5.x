@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,36 +18,37 @@ package org.springframework.web.servlet.view;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.util.StringUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Simply transforms the URI of the incoming request into the view name.
- * 
+ * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * that simply transforms the URI of the incoming request into a view name.
+ *
  * <p>Can be explicitly defined as the "viewNameTranslator" bean in a
- * {@link org.springframework.web.servlet.DispatcherServlet} context; else,
- * a plain default instance will be used.
+ * {@link org.springframework.web.servlet.DispatcherServlet} context.
+ * Otherwise, a plain default instance will be used.
  *
  * <p>The default transformation simply strips the leading slash and file
  * extension of the URI and returns the result as the view name with the
- * configured {@link #setPrefix(String) "prefix"} and and
+ * configured {@link #setPrefix(String) "prefix"} and a
  * {@link #setSuffix(String) "suffix"} added as appropriate.
  *
  * <p>The stripping of the leading slash and file extension can be disabled
- * using the {@link #setStripLeadingSlash(boolean) "stripLeadingSlash"} and
- * {@link #setStripExtension(boolean) "stripExtension"} properties,
- * respectively.
- * 
+ * using the {@link #setStripLeadingSlash "stripLeadingSlash"} and
+ * {@link #setStripExtension "stripExtension"} properties, respectively.
+ *
  * <p>Find below some examples of request to view name translation.
- * 
- * <pre class="code"> http://localhost:8080/gamecast/display.html -> display
+ *
+ * <pre class="code">http://localhost:8080/gamecast/display.html -> display
  * http://localhost:8080/gamecast/displayShoppingCart.html -> displayShoppingCart
  * http://localhost:8080/gamecast/admin/index.html -> admin/index
  * </pre>
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.servlet.RequestToViewNameTranslator
  * @see org.springframework.web.servlet.ViewResolver
@@ -75,7 +76,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @param prefix the prefix to prepend to generated view names
 	 */
 	public void setPrefix(String prefix) {
-		this.prefix = (prefix == null ? "" : prefix);
+		this.prefix = (prefix != null ? prefix : "");
 	}
 
 	/**
@@ -83,7 +84,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @param suffix the suffix to append to generated view names
 	 */
 	public void setSuffix(String suffix) {
-		this.suffix = (suffix == null ? "" : suffix);
+		this.suffix = (suffix != null ? suffix : "");
 	}
 
 	/**
@@ -151,24 +152,23 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @throws IllegalArgumentException if the supplied UrlPathHelper is <code>null</code>
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		Assert.notNull(urlPathHelper);
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
 	}
 
 
 	/**
-	 * Translates the request URI of the incoming {@link HttpServletRequest} to the
-	 * view name based on the configured parameters.
+	 * Translates the request URI of the incoming {@link HttpServletRequest}
+	 * into the view name based on the configured parameters.
 	 * @see org.springframework.web.util.UrlPathHelper#getLookupPathForRequest
 	 * @see #transformPath
 	 */
-	public final String getViewName(HttpServletRequest request) {
+	public String getViewName(HttpServletRequest request) {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		return this.prefix + transformPath(lookupPath) + this.suffix;
+		return (this.prefix + transformPath(lookupPath) + this.suffix);
 	}
 
-
-    /**
+	/**
 	 * Transform the request URI (in the context of the webapp) stripping
 	 * slashes and extensions, and replacing the separator as required.
 	 * @param lookupPath the lookup path for the current request,
