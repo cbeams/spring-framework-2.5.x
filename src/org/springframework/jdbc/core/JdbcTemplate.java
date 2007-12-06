@@ -974,7 +974,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Extract output parameters from the completed stored procedure.
 	 * @param cs JDBC wrapper for the stored procedure
 	 * @param parameters parameter list for the stored procedure
-	 * @return parameters to the stored procedure
 	 * @return Map that contains returned results
 	 */
 	protected Map extractOutputParameters(CallableStatement cs, List parameters) throws SQLException {
