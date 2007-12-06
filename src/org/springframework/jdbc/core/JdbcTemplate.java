@@ -34,6 +34,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
@@ -46,7 +47,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
-import org.springframework.core.CollectionFactory;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -1033,7 +1033,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Extract output parameters from the completed stored procedure.
 	 * @param cs JDBC wrapper for the stored procedure
 	 * @param parameters parameter list for the stored procedure
-	 * @return parameters to the stored procedure
 	 * @return Map that contains returned results
 	 */
 	protected Map extractOutputParameters(CallableStatement cs, List parameters) throws SQLException {
