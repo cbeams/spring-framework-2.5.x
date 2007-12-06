@@ -234,7 +234,7 @@
         new String[] {"services.xml", "daos.xml"});
 
 <lineannotation>// an <interfacename>ApplicationContext</interfacename> is also a <interfacename>BeanFactory</interfacename> (via inheritance)</lineannotation>
-BeanFactory factory = (BeanFactory) context;</programlisting>
+BeanFactory factory = context;</programlisting>
 
       <section id="beans-factory-xml-import">
         <title>Composing XML-based configuration metadata</title>
