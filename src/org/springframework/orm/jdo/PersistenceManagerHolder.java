@@ -40,19 +40,12 @@ public class PersistenceManagerHolder extends ResourceHolderSupport {
 	private boolean transactionActive;
 
 
-	/**
-	 * Create a new PersistenceManagerHolder for the given JDO PersistenceManager.
-	 * @param persistenceManager the JDO PersistenceManager
-	 */
 	public PersistenceManagerHolder(PersistenceManager persistenceManager) {
 		Assert.notNull(persistenceManager, "PersistenceManager must not be null");
 		this.persistenceManager = persistenceManager;
 	}
 
 
-	/**
-	 * Return this holder's JDO PersistenceManager.
-	 */
 	public PersistenceManager getPersistenceManager() {
 		return this.persistenceManager;
 	}
