@@ -1015,7 +1015,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						ucName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
 						logger.info("Added default SqlReturnUpdateCount parameter named " + ucName);
 					}
-					returnedResults.put(ucName, Integer.valueOf(updateCount));
+					returnedResults.put(ucName, new Integer(updateCount));
 					updateIndex++;
 				}
 				moreResults = cs.getMoreResults();
