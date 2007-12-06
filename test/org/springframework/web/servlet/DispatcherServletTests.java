@@ -53,6 +53,7 @@ import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -769,6 +770,24 @@ public class DispatcherServletTests extends TestCase {
 
 		complexDispatcherServlet.service(request, response);
 		assertEquals("noview/simple.jsp", response.getForwardedUrl());
+	}
+
+	public void testWithNoViewAndSamePath() throws Exception {
+		InternalResourceViewResolver vr = (InternalResourceViewResolver)
+				complexDispatcherServlet.getWebApplicationContext().getBean("viewResolver2");
+		vr.setSuffix("");
+
+		MockServletContext servletContext = new MockServletContext();
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/noview");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		try {
+			complexDispatcherServlet.service(request, response);
+			fail("Should have thrown ServletException");
+		}
+		catch (ServletException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	public void testDispatcherServletRefresh() throws ServletException {

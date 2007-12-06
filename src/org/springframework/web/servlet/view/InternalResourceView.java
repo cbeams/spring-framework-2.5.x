@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ContextExposingHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
@@ -145,8 +146,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		// Determine the path for the request dispatcher.
 		String dispatcherPath = prepareForRendering(requestToExpose, response);
 
-		// Forward to the resource (typically a JSP).
-		// Note: The JSP is supposed to determine the content type itself.
+		// Obtain a RequestDispatcher for the target resource (typically a JSP).
 		RequestDispatcher rd = requestToExpose.getRequestDispatcher(dispatcherPath);
 		if (rd == null) {
 			throw new ServletException(
@@ -156,18 +156,19 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		// If already included or response already committed, perform include, else forward.
 		if (useInclude(requestToExpose, response)) {
 			response.setContentType(getContentType());
-			rd.include(requestToExpose, response);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+				logger.debug("Including resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
+			rd.include(requestToExpose, response);
 		}
 
 		else {
+			// Note: The forwarded resource is supposed to determine the content type itself.
 			exposeForwardRequestAttributes(requestToExpose);
-			rd.forward(requestToExpose, response);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+				logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
+			rd.forward(requestToExpose, response);
 		}
 	}
 
@@ -196,13 +197,19 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @param response current HTTP response
 	 * @return the request dispatcher path to use
 	 * @throws Exception if preparations failed
-	 * @see #getUrl
+	 * @see #getUrl()
 	 * @see org.springframework.web.servlet.view.tiles.TilesView#prepareForRendering
 	 */
 	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		return getUrl();
+		String path = getUrl();
+		String uri = request.getRequestURI();
+		if (uri.equals(StringUtils.applyRelativePath(uri, path))) {
+			throw new ServletException("Invalid view path [" + path + "]: would dispatch back " +
+					"to the current handler path [" + uri + "] again. Check your ViewResolver setup!");
+		}
+		return path;
 	}
 
 	/**
