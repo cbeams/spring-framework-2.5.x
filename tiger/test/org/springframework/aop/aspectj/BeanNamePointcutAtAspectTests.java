@@ -18,7 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
@@ -35,6 +35,7 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 
 	protected ITestBean testBean1;
 	protected ITestBean testBean2;
+	protected ITestBean testBean3;
 	protected CounterAspect counterAspect;
 
 
@@ -57,12 +58,12 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 		// Call two methods to test for SPR-3953-like condition
 		testBean1.setAge(20);
 		testBean1.setName("");
-		assertEquals(2, counterAspect.count);
+		assertEquals(2 /*make this 3 when SPR-3688 is fixed and advice in CounterAspect are uncommented*/, counterAspect.count);
 	}
 
 	public void testNonMatchingBeanName() {
-		assertFalse("Didn't expect a proxy", testBean2 instanceof Advised);
-		testBean2.setAge(20);
+		assertFalse("Didn't expect a proxy", testBean3 instanceof Advised);
+		testBean3.setAge(20);
 		assertEquals(0, counterAspect.count);
 	}
 
