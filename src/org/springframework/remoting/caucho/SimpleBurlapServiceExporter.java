@@ -19,15 +19,9 @@ package org.springframework.remoting.caucho;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.caucho.burlap.io.BurlapInput;
-import com.caucho.burlap.io.BurlapOutput;
-import com.caucho.burlap.server.BurlapSkeleton;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.remoting.support.RemoteExporter;
-import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -51,40 +45,19 @@ import org.springframework.util.FileCopyUtils;
  * @see SimpleHessianServiceExporter
  * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter
  */
-public class SimpleBurlapServiceExporter extends RemoteExporter implements HttpHandler, InitializingBean {
-
-	private BurlapSkeleton skeleton;
-
-
-	public void afterPropertiesSet() {
-		prepare();
-	}
-
-	/**
-	 * Initialize this service exporter.
-	 */
-	public void prepare() {
-		checkService();
-		checkServiceInterface();
-		this.skeleton = new BurlapSkeleton(getProxyForService(), getServiceInterface());
-	}
-
+public class SimpleBurlapServiceExporter extends BurlapExporter implements HttpHandler {
 
 	/**
 	 * Processes the incoming Burlap request and creates a Burlap response.
 	 */
 	public void handle(HttpExchange exchange) throws IOException {
-		Assert.notNull(this.skeleton, "BurlapServiceExporter has not been initialized");
-
 		if (!"POST".equals(exchange.getRequestMethod())) {
-			throw new IOException("BurlapServiceExporter only supports POST requests");
+			throw new IOException("SimpleBurlapServiceExporter only supports POST requests");
 		}
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream(1024);
 		try {
-			BurlapInput in = new BurlapInput(exchange.getRequestBody());
-			BurlapOutput out = new BurlapOutput(output);
-			this.skeleton.invoke(in, out);
+			invoke(exchange.getRequestBody(), output);
 		}
 		catch (Throwable ex) {
 			exchange.sendResponseHeaders(500, -1);

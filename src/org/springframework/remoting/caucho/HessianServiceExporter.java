@@ -17,21 +17,11 @@
 package org.springframework.remoting.caucho;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.hessian.io.SerializerFactory;
-import com.caucho.hessian.server.HessianSkeleton;
-import org.apache.commons.logging.Log;
-
-import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.remoting.support.RemoteExporter;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.util.NestedServletException;
@@ -63,86 +53,7 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
-public class HessianServiceExporter extends RemoteExporter implements HttpRequestHandler, InitializingBean {
-
-	private static final boolean hessian2Available =
-			ClassUtils.isPresent("com.caucho.hessian.io.Hessian2Input", HessianServiceExporter.class.getClassLoader());
-
-
-	private SerializerFactory serializerFactory = new SerializerFactory();
-
-	private Log debugLogger;
-
-	private HessianSkeletonInvoker skeletonInvoker;
-
-
-	/**
-	 * Specify the Hessian SerializerFactory to use.
-	 * <p>This will typically be passed in as an inner bean definition
-	 * of type <code>com.caucho.hessian.io.SerializerFactory</code>,
-	 * with custom bean property values applied.
-	 */
-	public void setSerializerFactory(SerializerFactory serializerFactory) {
-		this.serializerFactory = (serializerFactory != null ? serializerFactory : new SerializerFactory());
-	}
-
-	/**
-	 * Set whether to send the Java collection type for each serialized
-	 * collection. Default is "true".
-	 */
-	public void setSendCollectionType(boolean sendCollectionType) {
-		this.serializerFactory.setSendCollectionType(sendCollectionType);
-	}
-
-	/**
-	 * Set whether Hessian's debug mode should be enabled, logging to
-	 * this exporter's Commons Logging log. Default is "false".
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setDebug
-	 */
-	public void setDebug(boolean debug) {
-		this.debugLogger = (debug ? logger : null);
-	}
-
-
-	public void afterPropertiesSet() {
-		prepare();
-	}
-
-	/**
-	 * Initialize this service exporter.
-	 */
-	public void prepare() {
-		HessianSkeleton skeleton = null;
-
-		try {
-			try {
-				// Try Hessian 3.x (with service interface argument).
-				Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
-				checkService();
-				checkServiceInterface();
-				skeleton = (HessianSkeleton)
-						ctor.newInstance(new Object[] {getProxyForService(), getServiceInterface()});
-			}
-			catch (NoSuchMethodException ex) {
-				// Fall back to Hessian 2.x (without service interface argument).
-				Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class});
-				skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
-			}
-		}
-		catch (Throwable ex) {
-			throw new BeanInitializationException("Hessian skeleton initialization failed", ex);
-		}
-
-		if (hessian2Available) {
-			// Hessian 2 (version 3.0.20+).
-			this.skeletonInvoker = new Hessian2SkeletonInvoker(skeleton, this.serializerFactory, this.debugLogger);
-		}
-		else {
-			// Hessian 1 (version 3.0.19-).
-			this.skeletonInvoker = new Hessian1SkeletonInvoker(skeleton, this.serializerFactory);
-		}
-	}
-
+public class HessianServiceExporter extends HessianExporter implements HttpRequestHandler {
 
 	/**
 	 * Processes the incoming Hessian request and creates a Hessian response.
@@ -150,15 +61,13 @@ public class HessianServiceExporter extends RemoteExporter implements HttpReques
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		Assert.notNull(this.skeletonInvoker, "HessianServiceExporter has not been initialized");
-
 		if (!"POST".equals(request.getMethod())) {
-			throw new HttpRequestMethodNotSupportedException(
-					"POST", "HessianServiceExporter only supports POST requests");
+			throw new HttpRequestMethodNotSupportedException("POST",
+					"HessianServiceExporter only supports POST requests");
 		}
 
 		try {
-		  this.skeletonInvoker.invoke(request.getInputStream(), response.getOutputStream());
+		  invoke(request.getInputStream(), response.getOutputStream());
 		}
 		catch (Throwable ex) {
 		  throw new NestedServletException("Hessian skeleton invocation failed", ex);

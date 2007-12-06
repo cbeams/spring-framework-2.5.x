@@ -107,13 +107,20 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 		this.beanClassLoader = classLoader;
 	}
 
+	/**
+	 * Return the environment's bean ClassLoader, if available.
+	 */
+	protected ClassLoader getBeanClassLoader() {
+		return this.beanClassLoader;
+	}
+
 
 	/**
 	 * Check whether the service reference has been set.
 	 * @see #setService
 	 */
 	protected void checkService() throws IllegalArgumentException {
-		if (this.service == null) {
+		if (getService() == null) {
 			throw new IllegalArgumentException("Property 'service' is required");
 		}
 	}
@@ -125,19 +132,20 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 * @see #setService
 	 */
 	protected void checkServiceInterface() throws IllegalArgumentException {
-		if (this.serviceInterface == null) {
+		Class serviceInterface = getServiceInterface();
+		Object service = getService();
+		if (serviceInterface == null) {
 			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
-		if (this.service instanceof String) {
-			throw new IllegalArgumentException("Service [" + this.service + "] is a String " +
+		if (service instanceof String) {
+			throw new IllegalArgumentException("Service [" + service + "] is a String " +
 					"rather than an actual service reference: Have you accidentally specified " +
 					"the service bean name as value instead of as reference?");
 		}
-		if (!this.serviceInterface.isInstance(this.service)) {
-			throw new IllegalArgumentException(
-					"Service interface [" + this.serviceInterface.getName() +
-					"] needs to be implemented by service [" + this.service +
-					"] of class [" + this.service.getClass().getName() + "]");
+		if (!serviceInterface.isInstance(service)) {
+			throw new IllegalArgumentException("Service interface [" + serviceInterface.getName() +
+					"] needs to be implemented by service [" + service + "] of class [" +
+					service.getClass().getName() + "]");
 		}
 	}
 
@@ -161,7 +169,7 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 			proxyFactory.addAdvice(new RemoteInvocationTraceInterceptor(getExporterName()));
 		}
 		proxyFactory.setTarget(getService());
-		return proxyFactory.getProxy(this.beanClassLoader);
+		return proxyFactory.getProxy(getBeanClassLoader());
 	}
 
 	/**
@@ -175,6 +183,37 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 */
 	protected String getExporterName() {
 		return ClassUtils.getShortName(getClass());
+	}
+
+	/**
+	 * Override the thread context ClassLoader with the environment's bean ClassLoader
+	 * if necessary, i.e. if the bean ClassLoader is not equivalent to the thread
+	 * context ClassLoader already.
+	 * @return the original thread context ClassLoader,
+	 * or <code>null</code> if not overridden
+	 */
+	protected ClassLoader overrideThreadContextClassLoader() {
+		Thread currentThread = Thread.currentThread();
+		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
+		ClassLoader beanClassLoader = getBeanClassLoader();
+		if (beanClassLoader != null && !beanClassLoader.equals(threadContextClassLoader)) {
+			currentThread.setContextClassLoader(beanClassLoader);
+			return threadContextClassLoader;
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Reset the original thread context ClassLoader if necessary.
+	 * @param original the original thread context ClassLoader,
+	 * or <code>null</code> if not overridden (and hence nothing to reset)
+	 */
+	protected void resetThreadContextClassLoader(ClassLoader original) {
+		if (original != null) {
+			Thread.currentThread().setContextClassLoader(original);
+		}
 	}
 
 }
