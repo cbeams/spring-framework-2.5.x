@@ -186,7 +186,7 @@ BeanFactory factory = new XmlBeanFactory(resource);]]></programlisting>
         new String[] {"applicationContext.xml", "applicationContext-part2.xml"});
 
 ]]><lineannotation>// of course, an <interfacename>ApplicationContext</interfacename> is just a <interfacename>BeanFactory</interfacename></lineannotation><![CDATA[
-BeanFactory factory = (BeanFactory) context;]]></programlisting>
+BeanFactory factory = context;]]></programlisting>
                 <section id="beans-factory-xml-import">
                     <title>Composing XML-based configuration metadata</title>
                     <para>It can often be useful to split up container definitions into multiple
