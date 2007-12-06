@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,48 @@ package org.springframework.remoting.caucho;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.hessian.io.HessianDebugOutputStream;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
+import org.apache.commons.logging.Log;
+
+import org.springframework.util.CommonsLogWriter;
 
 /**
  * Concrete HessianSkeletonInvoker for the Hessian 2 protocol
  * (version 3.0.20 or higher).
  *
  * @author Juergen Hoeller
+ * @author Andy Piper
  * @since 2.0
  */
 class Hessian2SkeletonInvoker extends HessianSkeletonInvoker {
 
-	public Hessian2SkeletonInvoker(HessianSkeleton skeleton, SerializerFactory serializerFactory) {
+	private final Log debugLogger;
+
+	public Hessian2SkeletonInvoker(HessianSkeleton skeleton, SerializerFactory serializerFactory, Log debugLog) {
 		super(skeleton, serializerFactory);
+		this.debugLogger = debugLog;
 	}
 
-	public void invoke(InputStream inputStream, OutputStream outputStream) throws Throwable {
-		Hessian2Input in = new Hessian2Input(inputStream);
+	public void invoke(final InputStream inputStream, final OutputStream outputStream) throws Throwable {
+		InputStream isToUse = inputStream;
+		OutputStream osToUse = outputStream;
+
+		if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
+			PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
+			isToUse = new HessianDebugInputStream(inputStream, debugWriter);
+			osToUse = new HessianDebugOutputStream(outputStream, debugWriter);
+		}
+
+		Hessian2Input in = new Hessian2Input(isToUse);
 		if (this.serializerFactory != null) {
 			in.setSerializerFactory(this.serializerFactory);
 		}
@@ -55,10 +74,10 @@ class Hessian2SkeletonInvoker extends HessianSkeletonInvoker {
 		int major = in.read();
 		int minor = in.read();
 		if (major >= 2) {
-			out = new Hessian2Output(outputStream);
+			out = new Hessian2Output(osToUse);
 		}
 		else {
-			out = new HessianOutput(outputStream);
+			out = new HessianOutput(osToUse);
 		}
 		if (this.serializerFactory != null) {
 			out.setSerializerFactory(this.serializerFactory);

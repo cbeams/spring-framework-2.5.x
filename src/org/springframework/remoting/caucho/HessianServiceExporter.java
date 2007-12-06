@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
+import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
@@ -70,6 +71,8 @@ public class HessianServiceExporter extends RemoteExporter implements HttpReques
 
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
+	private Log debugLogger;
+
 	private HessianSkeletonInvoker skeletonInvoker;
 
 
@@ -89,6 +92,15 @@ public class HessianServiceExporter extends RemoteExporter implements HttpReques
 	 */
 	public void setSendCollectionType(boolean sendCollectionType) {
 		this.serializerFactory.setSendCollectionType(sendCollectionType);
+	}
+
+	/**
+	 * Set whether Hessian's debug mode should be enabled, logging to
+	 * this exporter's Commons Logging log. Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setDebug
+	 */
+	public void setDebug(boolean debug) {
+		this.debugLogger = (debug ? logger : null);
 	}
 
 
@@ -123,7 +135,7 @@ public class HessianServiceExporter extends RemoteExporter implements HttpReques
 
 		if (hessian2Available) {
 			// Hessian 2 (version 3.0.20+).
-			this.skeletonInvoker = new Hessian2SkeletonInvoker(skeleton, this.serializerFactory);
+			this.skeletonInvoker = new Hessian2SkeletonInvoker(skeleton, this.serializerFactory, this.debugLogger);
 		}
 		else {
 			// Hessian 1 (version 3.0.19-).

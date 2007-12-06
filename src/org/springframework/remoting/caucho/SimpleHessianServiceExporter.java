@@ -23,6 +23,7 @@ import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
@@ -54,6 +55,8 @@ public class SimpleHessianServiceExporter extends RemoteExporter implements Http
 
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
+	private Log debugLogger;
+
 	private HessianSkeletonInvoker skeletonInvoker;
 
 
@@ -75,6 +78,15 @@ public class SimpleHessianServiceExporter extends RemoteExporter implements Http
 		this.serializerFactory.setSendCollectionType(sendCollectionType);
 	}
 
+	/**
+	 * Set whether Hessian's debug mode should be enabled, logging to
+	 * this exporter's Commons Logging log. Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setDebug
+	 */
+	public void setDebug(boolean debug) {
+		this.debugLogger = (debug ? logger : null);
+	}
+
 
 	public void afterPropertiesSet() {
 		prepare();
@@ -87,7 +99,7 @@ public class SimpleHessianServiceExporter extends RemoteExporter implements Http
 		checkService();
 		checkServiceInterface();
 		HessianSkeleton skeleton = new HessianSkeleton(getProxyForService(), getServiceInterface());
-		this.skeletonInvoker = new Hessian2SkeletonInvoker(skeleton, this.serializerFactory);
+		this.skeletonInvoker = new Hessian2SkeletonInvoker(skeleton, this.serializerFactory, this.debugLogger);
 	}
 
 

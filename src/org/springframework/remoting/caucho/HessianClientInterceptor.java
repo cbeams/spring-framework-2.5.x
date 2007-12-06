@@ -93,6 +93,16 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	public void setSendCollectionType(boolean sendCollectionType) {
 		this.proxyFactory.getSerializerFactory().setSendCollectionType(sendCollectionType);
 	}
+
+	/**
+	 * Set whether overloaded methods should be enabled for remote invocations.
+	 * Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
+	 */
+	public void setOverloadEnabled(boolean overloadEnabled) {
+		this.proxyFactory.setOverloadEnabled(overloadEnabled);
+	}
+
 	/**
 	 * Set the username that this factory should use to access the remote service.
 	 * Default is none.
@@ -114,12 +124,56 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	}
 
 	/**
-	 * Set whether overloaded methods should be enabled for remote invocations.
+	 * Set whether Hessian's debug mode should be enabled.
 	 * Default is "false".
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setDebug
 	 */
-	public void setOverloadEnabled(boolean overloadEnabled) {
-		this.proxyFactory.setOverloadEnabled(overloadEnabled);
+	public void setDebug(boolean debug) {
+		this.proxyFactory.setDebug(debug);
+	}
+
+	/**
+	 * Set whether to use a chunked post for sending a Hessian request.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setChunkedPost
+	 */
+	public void setChunkedPost(boolean chunkedPost) {
+		this.proxyFactory.setChunkedPost(chunkedPost);
+	}
+
+	/**
+	 * Set the timeout to use when waiting for a reply from the Hessian service.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setReadTimeout
+	 */
+	public void setReadTimeout(long timeout) {
+		this.proxyFactory.setReadTimeout(timeout);
+	}
+
+	/**
+	 * Set whether version 2 of the Hessian protocol should be used for
+	 * parsing requests and replies. Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setHessian2Request
+	 */
+	public void setHessian2(boolean hessian2) {
+		this.proxyFactory.setHessian2Request(hessian2);
+		this.proxyFactory.setHessian2Reply(hessian2);
+	}
+
+	/**
+	 * Set whether version 2 of the Hessian protocol should be used for
+	 * parsing requests. Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setHessian2Request
+	 */
+	public void setHessian2Request(boolean hessian2) {
+		this.proxyFactory.setHessian2Request(hessian2);
+	}
+
+	/**
+	 * Set whether version 2 of the Hessian protocol should be used for
+	 * parsing replies. Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setHessian2Reply
+	 */
+	public void setHessian2Reply(boolean hessian2) {
+		this.proxyFactory.setHessian2Reply(hessian2);
 	}
 
 
