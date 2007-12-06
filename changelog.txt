@@ -8,6 +8,7 @@ Changes in version 2.5.1 (2007-12-20)
 
 General
 * added section on J2EE RAR deployment to the reference documentation
+* updated Hessian jar in "-with-dependencies" distribution to Hessian 3.1.3
 
 Package org.springframework.aop
 * ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
@@ -69,6 +70,10 @@ Package org.springframework.orm
 * LocalSessionFactoryBean supports Connection release mode "after_statement" without "useTransactionAwareDataSource" too
 
 Package org.springframework.remoting
+* HessianClientInterceptor/ProxyFactoryBean supports "debug", "chunkedPost", "readTimeout" and "hessian2" properties
+* HessianServiceExporter supports "debug" property analogous to Hessian 3.1.3's HessianServlet
+* HessianServiceExporter and BurlapServiceExporter expose the bean ClassLoader as thread context CL (if necessary)
+* factored out stream-based HessianExporter and BurlapExporter classes
 * factored out abstract RemoteInvocationSerializingExporter base class from HttpInvokerServiceExporter
 * introduced SimpleHttpInvokerServiceExporter and SimpleHessian/BurlapServiceExporter as HttpHandlers for Sun JRE 1.6
 * introduced SimpleHttpServerFactoryBean for Spring-style set-up of a Sun JRE 1.6 HttpServer
