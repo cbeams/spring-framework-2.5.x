@@ -304,7 +304,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		public boolean isRollbackOnly() {
-			return getResourceHolder().isRollbackOnly();
+			return this.resourceHolder.isRollbackOnly();
 		}
 	}
 
