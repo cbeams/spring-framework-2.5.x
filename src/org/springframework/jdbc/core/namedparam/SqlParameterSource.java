@@ -73,4 +73,12 @@ public interface SqlParameterSource {
 	 */
 	int getSqlType(String paramName);
 
+	/**
+	 * Determine the type ane for the specified named parameter.
+	 * @param paramName the name of the parameter
+	 * @return the type name of the specified parameter,
+	 * or <code>null</code> if not known
+	 */
+	String getTypeName(String paramName);
+
 }

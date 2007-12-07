@@ -30,6 +30,8 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 
 	private final Map sqlTypes = new HashMap();
 
+	private final Map typeNames = new HashMap();
+
 
 	/**
 	 * Register a SQL type for the given parameter.
@@ -38,6 +40,15 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 */
 	public void registerSqlType(String paramName, int sqlType) {
 		this.sqlTypes.put(paramName, new Integer(sqlType));
+	}
+
+	/**
+	 * Register a SQL type for the given parameter.
+	 * @param paramName the name of the parameter
+	 * @param typeName the type name of the parameter
+	 */
+	public void registerTypeName(String paramName, String typeName) {
+		this.typeNames.put(paramName, typeName);
 	}
 
 	/**
@@ -54,6 +65,16 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 		else {
 			return TYPE_UNKNOWN;
 		}
+	}
+
+	/**
+	 * Return the type name for the given parameter, if registered.
+	 * @param paramName the name of the parameter
+	 * @return the type name of the parameter,
+	 * or <code>null</code> if not registered
+	 */
+	public String getTypeName(String paramName) {
+		return (String) this.typeNames.get(paramName);
 	}
 
 }

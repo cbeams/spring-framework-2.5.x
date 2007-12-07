@@ -16,7 +16,9 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 
 import org.springframework.jdbc.core.SqlParameterValue;
 
@@ -69,11 +71,40 @@ public class SqlParameterSourceUtils {
 	public static Object getTypedValue(SqlParameterSource source, String parameterName) {
 		int sqlType = source.getSqlType(parameterName);
 		if (sqlType != SqlParameterSource.TYPE_UNKNOWN) {
-			return new SqlParameterValue(sqlType, source.getValue(parameterName));
+			if (source.getTypeName(parameterName) != null) {
+				return new SqlParameterValue(sqlType, source.getTypeName(parameterName), source.getValue(parameterName));
+			}
+			else {
+				return new SqlParameterValue(sqlType, source.getValue(parameterName));
+			}
 		}
 		else {
 			return source.getValue(parameterName);
 		}
+	}
+
+/**
+ * Create a Map of case insensitive parameter names together with the original name.
+ * @param parameterSource the source of paramer names
+ * @return the Map that can be used for case insensitive matching of parameter names
+ */
+	public static Map extractCaseInsensitiveParameterNames(SqlParameterSource parameterSource) {
+		Map caseInsensitiveParameterNames = new HashMap();
+		if (parameterSource instanceof BeanPropertySqlParameterSource) {
+			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getReadablePropertyNames();
+			for (int i = 0; i < propertyNames.length; i++) {
+				String name = propertyNames[i];
+				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
+			}
+		}
+		else if (parameterSource instanceof MapSqlParameterSource) {
+			for (Iterator it = ((MapSqlParameterSource) parameterSource).getValues().keySet().iterator(); it.hasNext();)
+			{
+				String name = (String) it.next();
+				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
+			}
+		}
+		return caseInsensitiveParameterNames;
 	}
 
 }

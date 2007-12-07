@@ -213,20 +213,8 @@ public class TableMetaDataContext {
 		List<Object> values = new ArrayList<Object>();
 		// for parameter source lookups we need to provide caseinsensitive lookup support since the
 		// database metadata is not necessarily providing case sensitive column names
-		// TODO make this instance level cached?
-		Map<String, String> caseInsensitiveParameterNames = new HashMap<String, String>();
-		if (parameterSource instanceof BeanPropertySqlParameterSource) {
-			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getReadablePropertyNames();
-			for (String name : propertyNames) {
-				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
-			}
-		}
-		else if (parameterSource instanceof MapSqlParameterSource) {
-			for (Object key : ((MapSqlParameterSource)parameterSource).getValues().keySet()) {
-				String name = (String) key;
-				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
-			}
-		}
+		Map caseInsensitiveParameterNames =
+				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 		for (String column : tableColumns) {
 			if (parameterSource.hasValue(column)) {
 				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, column));
@@ -245,7 +233,7 @@ public class TableMetaDataContext {
 						if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
 							values.add(
 									SqlParameterSourceUtils.getTypedValue(parameterSource,
-											caseInsensitiveParameterNames.get(lowerCaseName)));
+											(String) caseInsensitiveParameterNames.get(lowerCaseName)));
 						}
 						else {
 							values.add(null);

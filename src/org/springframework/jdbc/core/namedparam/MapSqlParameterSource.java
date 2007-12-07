@@ -107,6 +107,23 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	/**
+	 * Add a parameter to this parameter source.
+	 * @param paramName the name of the parameter
+	 * @param value the value of the parameter
+	 * @param sqlType the SQL type of the parameter
+	 * @param typeName the type name of the parameter
+	 * @return a reference to this parameter source,
+	 * so it's possible to chain several calls together
+	 */
+	public MapSqlParameterSource addValue(String paramName, Object value, int sqlType, String typeName) {
+		Assert.notNull(paramName, "Parameter name must not be null");
+		this.values.put(paramName, value);
+		registerSqlType(paramName, sqlType);
+		registerTypeName(paramName, typeName);
+		return this;
+	}
+
+	/**
 	 * Add a Map of parameters to this parameter source.
 	 * @param values a Map holding existing parameter values (can be <code>null</code>)
 	 * @return a reference to this parameter source,

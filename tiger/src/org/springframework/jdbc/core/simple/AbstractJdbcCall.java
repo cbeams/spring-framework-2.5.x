@@ -332,14 +332,7 @@ public abstract class AbstractJdbcCall {
 	 */
 	protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
 		checkCompiled();
-		Map params = null;
-		if (parameterSource instanceof MapSqlParameterSource) {
-			Map<String, Object> sourceValues = ((MapSqlParameterSource)parameterSource).getValues();
-			params = matchInParameterValuesWithCallParameters(sourceValues);
-		}
-		else {
-			params = matchInParameterValuesWithCallParameters(parameterSource);
-		}
+		Map params = matchInParameterValuesWithCallParameters(parameterSource);
 		return executeCallInternal(params);
 	}
 

@@ -36,6 +36,7 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
@@ -413,29 +414,58 @@ public class CallMetaDataContext {
 	 * @param parameterSource the input values
 	 * @return a Map containing the matched parameter names with the value taken from the input
 	 */
-	//TODO provide a SqlParameterValue when sql type is specified	
 	public Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		Map<String, Object> matchedParameters = new HashMap<String, Object>(callParameters.size());
+		// for parameter source lookups we need to provide caseinsensitive lookup support since the
+		// database metadata is not necessarily providing case sensitive parameter names
+		Map caseInsensitiveParameterNames =
+				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 		for (SqlParameter parameter : callParameters) {
-			if (parameter.getName() != null) {
-				Object value = null;
-				boolean match = false;
-				if (parameterSource.hasValue(parameter.getName().toLowerCase())) {
-					value = parameterSource.getValue(parameter.getName().toLowerCase());
-					match = true;
+			if (parameterSource.hasValue(parameter.getName())) {
+				matchedParameters.put(parameter.getName(),
+						SqlParameterSourceUtils.getTypedValue(parameterSource, parameter.getName()));
+			}
+			else {
+				String lowerCaseName = parameter.getName().toLowerCase();
+				if (parameterSource.hasValue(lowerCaseName)) {
+					matchedParameters.put(parameter.getName(),
+							SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
 				}
 				else {
 					String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(parameter.getName());
 					if (parameterSource.hasValue(propertyName)) {
-						value = parameterSource.getValue(propertyName);
-						match = true;
+						matchedParameters.put(parameter.getName(),
+								SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
 					}
-				}
-				if (match) {
-					matchedParameters.put(parameter.getName(), value);
+					else {
+						if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
+							String sourceName = (String) caseInsensitiveParameterNames.get(lowerCaseName);
+							matchedParameters.put(parameter.getName(),
+									SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
+						}
+						else {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Unable to locate the corresponding parameter for \"" +
+										parameter.getName() + "\" in the parameters used: " + 
+										caseInsensitiveParameterNames.values());
+							}
+						}
+					}
 				}
 			}
 		}
+
+		if (logger.isDebugEnabled()) {
+			List<String> callParameterNames = new ArrayList();
+			for (SqlParameter parameter : callParameters) {
+				String parameterName =  parameter.getName();
+				if (parameterName != null)
+					callParameterNames.add(parameterName);
+			}
+			logger.debug("Matching " + caseInsensitiveParameterNames.values() + " with " + callParameterNames);
+			logger.debug("Found " + matchedParameters.keySet());
+		}
+
 		return matchedParameters;
 	}
 
@@ -470,6 +500,7 @@ public class CallMetaDataContext {
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Matching " + inParameters + " with " + callParameterNames);
+			logger.debug("Found " + matchedParameters.keySet());
 		}
 		return matchedParameters;
 	}
