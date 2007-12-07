@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.portlet.PortletFileUpload;
 import org.apache.commons.fileupload.portlet.PortletRequestContext;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.commons.CommonsFileUploadSupport;
@@ -35,14 +36,14 @@ import org.springframework.web.portlet.context.PortletContextAware;
 import org.springframework.web.portlet.util.PortletUtils;
 
 /**
- * PortletMultipartResolver implementation for
+ * {@link PortletMultipartResolver} implementation for
  * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * 1.1 or higher.
+ * 1.1 or above. Commons FileUpload 1.2 or above is recommended.
  *
- * <p>Provides maxUploadSize, maxInMemorySize, and defaultEncoding settings as
- * bean properties (inherited from CommonsFileUploadSupport). See respective
- * PortletFileUpload / DiskFileItemFactory properties (sizeMax, sizeThreshold,
- * headerEncoding) for details in terms of defaults and accepted values.
+ * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
+ * bean properties (inherited from {@link CommonsFileUploadSupport}). See corresponding
+ * PortletFileUpload / DiskFileItemFactory properties ("sizeMax", "sizeThreshold",
+ * "headerEncoding") for details in terms of defaults and accepted values.
  *
  * <p>Saves temporary files to the portlet container's temporary directory.
  * Needs to be initialized <i>either</i> by an application context <i>or</i>
@@ -58,6 +59,10 @@ import org.springframework.web.portlet.util.PortletUtils;
  */
 public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		implements PortletMultipartResolver, PortletContextAware {
+
+	private final boolean commonsFileUpload12Present =
+			ClassUtils.hasMethod(PortletFileUpload.class, "isMultipartContent", new Class[] {ActionRequest.class});
+
 
 	/**
 	 * Constructor for use as bean. Determines the portlet container's
@@ -80,6 +85,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		setPortletContext(portletContext);
 	}
 
+
 	/**
 	 * Initialize the underlying <code>org.apache.commons.fileupload.portlet.PortletFileUpload</code>
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
@@ -97,7 +103,12 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(ActionRequest request) {
-		return PortletFileUpload.isMultipartContent(new PortletRequestContext(request));
+		if (commonsFileUpload12Present) {
+			return PortletFileUpload.isMultipartContent(request);
+		}
+		else {
+			return PortletFileUpload.isMultipartContent(new PortletRequestContext(request));
+		}
 	}
 
 	public MultipartActionRequest resolveMultipart(ActionRequest request) throws MultipartException {

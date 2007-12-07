@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
@@ -37,14 +38,14 @@ import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequ
 import org.springframework.web.util.WebUtils;
 
 /**
- * Servlet-based MultipartResolver implementation for
- * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * 1.1 or higher.
+ * Servlet-based {@link org.springframework.web.multipart.MultipartResolver} implementation
+ * for <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
+ * 1.1 or above. Commons FileUpload 1.2 or above is recommended.
  *
- * <p>Provides maxUploadSize, maxInMemorySize, and defaultEncoding settings as
- * bean properties (inherited from CommonsFileUploadSupport). See respective
- * ServletFileUpload / DiskFileItemFactory properties (sizeMax, sizeThreshold,
- * headerEncoding) for details in terms of defaults and accepted values.
+ * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
+ * bean properties (inherited from {@link CommonsFileUploadSupport}). See corresponding
+ * ServletFileUpload / DiskFileItemFactory properties ("sizeMax", "sizeThreshold",
+ * "headerEncoding") for details in terms of defaults and accepted values.
  *
  * <p>Saves temporary files to the servlet container's temporary directory.
  * Needs to be initialized <i>either</i> by an application context <i>or</i>
@@ -66,6 +67,10 @@ import org.springframework.web.util.WebUtils;
  */
 public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		implements MultipartResolver, ServletContextAware {
+
+	private final boolean commonsFileUpload12Present =
+			ClassUtils.hasMethod(ServletFileUpload.class, "isMultipartContent", new Class[] {HttpServletRequest.class});
+
 
 	/**
 	 * Constructor for use as bean. Determines the servlet container's
@@ -89,6 +94,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		setServletContext(servletContext);
 	}
 
+
 	/**
 	 * Initialize the underlying <code>org.apache.commons.fileupload.servlet.ServletFileUpload</code>
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
@@ -107,7 +113,12 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(HttpServletRequest request) {
-		return ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+		if (commonsFileUpload12Present) {
+			return ServletFileUpload.isMultipartContent(request);
+		}
+		else {
+			return ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+		}
 	}
 
 	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
