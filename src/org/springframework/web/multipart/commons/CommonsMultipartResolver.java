@@ -40,12 +40,12 @@ import org.springframework.web.util.WebUtils;
 /**
  * Servlet-based {@link org.springframework.web.multipart.MultipartResolver} implementation
  * for <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * 1.2 or higher.
+ * 1.1 or above. Commons FileUpload 1.2 or above is recommended.
  *
- * <p>Provides maxUploadSize, maxInMemorySize, and defaultEncoding settings as
- * bean properties (inherited from CommonsFileUploadSupport). See respective
- * ServletFileUpload / DiskFileItemFactory properties (sizeMax, sizeThreshold,
- * headerEncoding) for details in terms of defaults and accepted values.
+ * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
+ * bean properties (inherited from {@link CommonsFileUploadSupport}). See corresponding
+ * ServletFileUpload / DiskFileItemFactory properties ("sizeMax", "sizeThreshold",
+ * "headerEncoding") for details in terms of defaults and accepted values.
  *
  * <p>Saves temporary files to the servlet container's temporary directory.
  * Needs to be initialized <i>either</i> by an application context <i>or</i>

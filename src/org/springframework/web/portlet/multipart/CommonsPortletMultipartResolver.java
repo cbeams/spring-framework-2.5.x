@@ -38,12 +38,12 @@ import org.springframework.web.portlet.util.PortletUtils;
 /**
  * {@link PortletMultipartResolver} implementation for
  * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * 1.1 or higher.
+ * 1.1 or above. Commons FileUpload 1.2 or above is recommended.
  *
- * <p>Provides maxUploadSize, maxInMemorySize, and defaultEncoding settings as
- * bean properties (inherited from CommonsFileUploadSupport). See respective
- * PortletFileUpload / DiskFileItemFactory properties (sizeMax, sizeThreshold,
- * headerEncoding) for details in terms of defaults and accepted values.
+ * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
+ * bean properties (inherited from {@link CommonsFileUploadSupport}). See corresponding
+ * PortletFileUpload / DiskFileItemFactory properties ("sizeMax", "sizeThreshold",
+ * "headerEncoding") for details in terms of defaults and accepted values.
  *
  * <p>Saves temporary files to the portlet container's temporary directory.
  * Needs to be initialized <i>either</i> by an application context <i>or</i>
