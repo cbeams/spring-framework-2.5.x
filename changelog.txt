@@ -19,6 +19,7 @@ Package org.springframework.beans
 * revised accidental exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
 * DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
+* factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
 * revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
 * revised BeanConfigurerSupport to re-initialize its default BeanWiringInfoResolver for each context refresh
 * fixed AutowiredAnnotationBeanPostProcessor to properly cache dependencies that do not correspond to a registered bean
@@ -31,6 +32,7 @@ Package org.springframework.cache
 Package org.springframework.context
 * fixed AbstractApplicationContext to only send ContextStoppedEvent in case of "stop()" (i.e. not for "close()")
 * fixed AbstractApplicationContext to always detect LoadTimeWeaverAwareProcessor in the local ClassLoader (for OSGi)
+* ClassPath/FileSystemXmlApplicationContext perform early check for null elements in config location array
 * ContextTypeMatchClassLoader does not generally exclude classes in the "org.springframework" package anymore
 * DefaultContextLoadTimeWeaver only chooses GlassFishLoadTimeWeaver when running in the EAR ClassLoader
 * DefaultContextLoadTimeWeaver removes all registered transformers from the VM Instrumentation object (if applicable)
@@ -68,6 +70,7 @@ Package org.springframework.mail
 Package org.springframework.orm
 * LocalSessionFactoryBean uses LocalJtaDataSourceConnectionProvider (supporting aggressive release) in case of JTA TM
 * LocalSessionFactoryBean supports Connection release mode "after_statement" without "useTransactionAwareDataSource" too
+* fixed Jpa/JdoTransactionManager to correctly nest a REQUIRES_NEW transaction within a SUPPORTS scope with early access
 
 Package org.springframework.remoting
 * HessianClientInterceptor/ProxyFactoryBean supports "debug", "chunkedPost", "readTimeout" and "hessian2" properties
@@ -110,13 +113,16 @@ Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
 * WebApplicationContext impls register request/session/ServletContext as resolvable dependencies (e.g. for @Autowired)
 * PortletApplicationContext impls register request/session/PortletContext as resolvable dependencies (for @Autowired)
+* CommonsMultipartResolver uses FileUpload 1.2's "isMultipartContent" variant when available (for stricter checks)
 * SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
+* improved NoSuchRequestHandlingMethodException's error message to include request URL and query string explicitly
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
 * AnnotationMethodHandlerAdapter throws an exception if it cannot find a clear best path match for a specific request
 * AnnotationMethodHandlerAdapter applies @InitBinder methods for view preparation as well (like WebBindingInitializers)
 * AnnotationMethodHandlerAdapter applies binder initialization for 'end' views (with processing being complete) as well
 * fixed Portlet AnnotationMethodHandlerAdapter to explicitly check for Action/Render*Response* (to work on Liferay)
+* InternalResourceView prevents dispatching to same path as handler (e.g. with default view name and default resolver)
 * reworked Spring's Tiles2 support such that it can operate against the Tiles2 (2.0.5+) JDK 1.4 version as well
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
 
