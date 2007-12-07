@@ -146,7 +146,7 @@ public abstract class Assert {
 	 */
 	public static void hasLength(String text) {
 		hasLength(text,
-				"[Assertion failed] - this String argument must have length; it must not be <code>null</code> or empty");
+				"[Assertion failed] - this String argument must have length; it must not be null or empty");
 	}
 
 	/**
@@ -172,7 +172,7 @@ public abstract class Assert {
 	 */
 	public static void hasText(String text) {
 		hasText(text,
-				"[Assertion failed] - this String argument must have text; it must not be <code>null</code>, empty, or blank");
+				"[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
 	}
 
 	/**
@@ -224,6 +224,35 @@ public abstract class Assert {
 	 */
 	public static void notEmpty(Object[] array) {
 		notEmpty(array, "[Assertion failed] - this array must not be empty: it must contain at least 1 element");
+	}
+
+	/**
+	 * Assert that an array has no null elements.
+	 * Note: Does not complain if the array is empty!
+	 * <pre class="code">Assert.noNullElements(array, "The array must have non-null elements");</pre>
+	 * @param array the array to check
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if the object array contains a <code>null</code> element
+	 */
+	public static void noNullElements(Object[] array, String message) {
+		if (array != null) {
+			for (int i = 0; i < array.length; i++) {
+				if (array[i] == null) {
+					throw new IllegalArgumentException(message);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assert that an array has no null elements.
+	 * Note: Does not complain if the array is empty!
+	 * <pre class="code">Assert.noNullElements(array);</pre>
+	 * @param array the array to check
+	 * @throws IllegalArgumentException if the object array contains a <code>null</code> element
+	 */
+	public static void noNullElements(Object[] array) {
+		noNullElements(array, "[Assertion failed] - this array must not contain any null elements");
 	}
 
 	/**

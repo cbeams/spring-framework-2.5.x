@@ -117,6 +117,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 			throws BeansException {
 
 		super(parent);
+		Assert.noNullElements(configLocations, "Config location must not be null");
 		this.configLocations = StringUtils.trimArrayElements(configLocations);
 		if (refresh) {
 			refresh();
