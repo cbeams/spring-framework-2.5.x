@@ -64,6 +64,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
  * @author Juergen Hoeller
@@ -117,6 +118,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(EmptyParameterListHandlerMethodController.class));
+				RootBeanDefinition vrDef = new RootBeanDefinition(InternalResourceViewResolver.class);
+				vrDef.getPropertyValues().addPropertyValue("suffix", ".jsp");
+				wac.registerBeanDefinition("viewResolver", vrDef);
 				wac.refresh();
 				return wac;
 			}
@@ -489,6 +493,22 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 
 	@Controller
+	private static class EmptyParameterListHandlerMethodController {
+
+		static boolean called;
+
+		@RequestMapping("/emptyParameterListHandler")
+		public void emptyParameterListHandler() {
+			EmptyParameterListHandlerMethodController.called = true;
+		}
+
+		@RequestMapping("/nonEmptyParameterListHandler")
+		public void nonEmptyParameterListHandler(HttpServletResponse response) {
+		}
+	}
+
+
+	@Controller
 	public static class MyFormController {
 
 		@ModelAttribute("testBeans")
@@ -665,21 +685,6 @@ public class ServletAnnotationControllerTests extends TestCase {
 							"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
 				}
 			};
-		}
-	}
-
-	@Controller
-	private static class EmptyParameterListHandlerMethodController {
-
-		static boolean called;
-
-		@RequestMapping("/emptyParameterListHandler")
-		public void emptyParameterListHandler() {
-			EmptyParameterListHandlerMethodController.called = true;
-		}
-
-		@RequestMapping("/nonEmptyParameterListHandler")
-		public void nonEmptyParameterListHandler(HttpServletResponse response) {
 		}
 	}
 

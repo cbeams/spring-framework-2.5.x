@@ -205,7 +205,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 		String path = getUrl();
 		String uri = request.getRequestURI();
-		if (uri.equals(StringUtils.applyRelativePath(uri, path))) {
+		if (path.startsWith("/") ? uri.equals(path) : uri.equals(StringUtils.applyRelativePath(uri, path))) {
 			throw new ServletException("Invalid view path [" + path + "]: would dispatch back " +
 					"to the current handler path [" + uri + "] again. Check your ViewResolver setup!");
 		}
