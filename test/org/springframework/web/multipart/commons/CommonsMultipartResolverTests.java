@@ -93,6 +93,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertTrue(resolver.getFileItemFactory().getRepository().getAbsolutePath().endsWith("mytemp"));
 
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
+		originalRequest.setMethod("POST");
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
 		originalRequest.addParameter("getField", "getValue");
@@ -251,6 +252,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		originalRequest.setMethod("POST");
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
 		filter.doFilter(originalRequest, response, filterChain2);
@@ -298,6 +300,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		filter.init(filterConfig);
 
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
+		originalRequest.setMethod("POST");
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
 		HttpServletResponse response = new MockHttpServletResponse();

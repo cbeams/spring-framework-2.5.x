@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
@@ -39,7 +40,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Servlet-based {@link org.springframework.web.multipart.MultipartResolver} implementation
  * for <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * 1.1 or higher.
+ * 1.2 or higher.
  *
  * <p>Provides maxUploadSize, maxInMemorySize, and defaultEncoding settings as
  * bean properties (inherited from CommonsFileUploadSupport). See respective
@@ -61,6 +62,9 @@ import org.springframework.web.util.WebUtils;
  */
 public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		implements MultipartResolver, ServletContextAware {
+
+	private final boolean commonsFileUpload12Present =
+			ClassUtils.hasMethod(ServletFileUpload.class, "isMultipartContent", new Class[] {HttpServletRequest.class});
 
 	private boolean resolveLazily = false;
 
@@ -118,7 +122,12 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(HttpServletRequest request) {
-		return ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+		if (commonsFileUpload12Present) {
+			return ServletFileUpload.isMultipartContent(request);
+		}
+		else {
+			return ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
+		}
 	}
 
 	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {

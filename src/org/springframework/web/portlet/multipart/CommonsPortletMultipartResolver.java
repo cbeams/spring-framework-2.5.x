@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.portlet.PortletFileUpload;
 import org.apache.commons.fileupload.portlet.PortletRequestContext;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.commons.CommonsFileUploadSupport;
@@ -58,6 +59,9 @@ import org.springframework.web.portlet.util.PortletUtils;
  */
 public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		implements PortletMultipartResolver, PortletContextAware {
+
+	private final boolean commonsFileUpload12Present =
+			ClassUtils.hasMethod(PortletFileUpload.class, "isMultipartContent", new Class[] {ActionRequest.class});
 
 	private boolean resolveLazily = false;
 
@@ -113,7 +117,12 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(ActionRequest request) {
-		return PortletFileUpload.isMultipartContent(new PortletRequestContext(request));
+		if (commonsFileUpload12Present) {
+			return PortletFileUpload.isMultipartContent(request);
+		}
+		else {
+			return PortletFileUpload.isMultipartContent(new PortletRequestContext(request));
+		}
 	}
 
 	public MultipartActionRequest resolveMultipart(final ActionRequest request) throws MultipartException {
