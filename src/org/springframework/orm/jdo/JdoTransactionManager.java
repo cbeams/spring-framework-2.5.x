@@ -530,13 +530,12 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		public boolean hasTransaction() {
-			return (this.persistenceManagerHolder != null &&
-					this.persistenceManagerHolder.getPersistenceManager() != null &&
-					this.persistenceManagerHolder.getPersistenceManager().currentTransaction().isActive());
+			return (this.persistenceManagerHolder != null && this.persistenceManagerHolder.isTransactionActive());
 		}
 
 		public void setTransactionData(Object transactionData) {
 			this.transactionData = transactionData;
+			this.persistenceManagerHolder.setTransactionActive(true);
 		}
 
 		public Object getTransactionData() {

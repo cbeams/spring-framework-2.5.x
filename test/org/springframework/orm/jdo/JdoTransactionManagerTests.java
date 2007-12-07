@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,12 +58,14 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class JdoTransactionManagerTests extends TestCase {
 
-	private MockControl pmfControl;
+	private MockControl pmfControl, pmControl, txControl;
+
 	private PersistenceManagerFactory pmf;
-	private MockControl pmControl;
+
 	private PersistenceManager pm;
-	private MockControl txControl;
+
 	private Transaction tx;
+
 
 	protected void setUp() {
 		pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
@@ -284,7 +286,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 4);
+		pmControl.setReturnValue(tx, 3);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -333,7 +335,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 4);
+		pmControl.setReturnValue(tx, 3);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.isActive();
@@ -383,7 +385,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 6);
+		pmControl.setReturnValue(tx, 5);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -404,7 +406,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					tx.isActive();
-					txControl.setReturnValue(true, 2);
+					txControl.setReturnValue(true, 1);
 					tx.setRollbackOnly();
 					txControl.setVoidCallable(1);
 					tx.getRollbackOnly();
@@ -443,7 +445,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 2);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 7);
+		pmControl.setReturnValue(tx, 6);
 		tx.begin();
 		txControl.setVoidCallable(1);
 		pm.flush();
@@ -496,9 +498,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 8);
-		tx.isActive();
-		txControl.setReturnValue(false, 1);
+		pmControl.setReturnValue(tx, 6);
 		tx.begin();
 		txControl.setVoidCallable(1);
 		pm.flush();
@@ -769,7 +769,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getConnectionFactory();
 		pmfControl.setReturnValue(null, 2);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 4);
+		pmControl.setReturnValue(tx, 3);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
@@ -1041,7 +1041,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, manualSavepoint ? 3 : 4);
+		pmControl.setReturnValue(tx, 3);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();

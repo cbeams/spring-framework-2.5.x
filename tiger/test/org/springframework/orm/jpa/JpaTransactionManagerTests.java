@@ -36,6 +36,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -58,6 +59,7 @@ public class JpaTransactionManagerTests extends TestCase {
 	private JpaTemplate template;
 
 	private TransactionTemplate tt;
+
 
 	protected void setUp() throws Exception {
 		factoryControl = MockControl.createControl(EntityManagerFactory.class);
@@ -83,17 +85,8 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-
-		factoryControl = null;
-		managerControl = null;
-		txControl = null;
-		manager = null;
-		factory = null;
-		transactionManager = null;
-		template = null;
-		tt = null;
-		tx = null;
 	}
+
 
 	public void testTransactionCommit() {
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
@@ -299,9 +292,7 @@ public class JpaTransactionManagerTests extends TestCase {
 	}
 
 	public void testParticipatingTransactionWithCommit() {
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 2);
 		manager.flush();
 
 		factoryControl.replay();
@@ -317,7 +308,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.reset();
-				txControl.expectAndReturn(tx.isActive(), true);
 				txControl.expectAndReturn(tx.getRollbackOnly(), false);
 				tx.commit();
 				txControl.replay();
@@ -347,9 +337,7 @@ public class JpaTransactionManagerTests extends TestCase {
 	}
 
 	public void testParticipatingTransactionWithRollback() {
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 2);
 		factoryControl.replay();
 		managerControl.replay();
 		txControl.replay();
@@ -364,9 +352,7 @@ public class JpaTransactionManagerTests extends TestCase {
 			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
-					txControl.expectAndReturn(tx.isActive(), true);
-					txControl.expectAndReturn(tx.isActive(), true);
-					txControl.expectAndReturn(tx.isActive(), true);
+					txControl.expectAndReturn(tx.isActive(), true, 2);
 					tx.setRollbackOnly();
 					tx.rollback();
 					txControl.replay();
@@ -398,10 +384,7 @@ public class JpaTransactionManagerTests extends TestCase {
 	}
 
 	public void testParticipatingTransactionWithRollbackOnly() {
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 3);
 		manager.flush();
 
 		factoryControl.replay();
@@ -418,7 +401,6 @@ public class JpaTransactionManagerTests extends TestCase {
 			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
-					txControl.expectAndReturn(tx.isActive(), true);
 					txControl.expectAndReturn(tx.isActive(), true);
 					tx.setRollbackOnly();
 					txControl.expectAndReturn(tx.getRollbackOnly(), true);
@@ -460,17 +442,13 @@ public class JpaTransactionManagerTests extends TestCase {
 	}
 
 	public void testParticipatingTransactionWithRequiresNew() {
-		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 5);
 		manager.flush();
 		manager.close();
+
 		factoryControl.replay();
 		managerControl.replay();
 		txControl.replay();
@@ -485,7 +463,6 @@ public class JpaTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.verify();
 				txControl.reset();
-				txControl.expectAndReturn(tx.isActive(), true);
 
 				tx.begin();
 				txControl.expectAndReturn(tx.getRollbackOnly(), false);
@@ -519,19 +496,11 @@ public class JpaTransactionManagerTests extends TestCase {
 	}
 
 	public void testParticipatingTransactionWithRequiresNewAndPrebound() {
-		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txControl.expectAndReturn(tx.isActive(), true);
+
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 5);
 		manager.flush();
-		manager.close();
+
 		factoryControl.replay();
 		managerControl.replay();
 		txControl.replay();
@@ -549,7 +518,6 @@ public class JpaTransactionManagerTests extends TestCase {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.verify();
 					txControl.reset();
-					txControl.expectAndReturn(tx.isActive(), true);
 
 					tx.begin();
 					txControl.expectAndReturn(tx.getRollbackOnly(), false);
@@ -561,7 +529,6 @@ public class JpaTransactionManagerTests extends TestCase {
 
 					JpaTemplate template2 = new JpaTemplate(factory);
 					template2.execute(new JpaCallback() {
-
 						public Object doInJpa(EntityManager em) throws PersistenceException {
 							return null;
 						}
@@ -592,6 +559,170 @@ public class JpaTransactionManagerTests extends TestCase {
 		factoryControl.verify();
 		managerControl.verify();
 		txControl.verify();
+	}
+
+	public void testPropagationSupportsAndRequiresNew() {
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		manager.flush();
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 2);
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
+		tx.commit();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		final List<String> l = new ArrayList<String>();
+		l.add("test");
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertFalse(TransactionSynchronizationManager.hasResource(factory));
+				TransactionTemplate tt2 = new TransactionTemplate(transactionManager);
+				tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+				return tt2.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						return template.execute(new JpaCallback() {
+							public Object doInJpa(EntityManager em2) {
+								em2.flush();
+								return l;
+							}
+						});
+					}
+				});
+			}
+		});
+		assertSame(l, result);
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testPropagationSupportsAndRequiresNewAndEarlyAccess() {
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 2);
+		manager.flush();
+		manager.close();
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
+		tx.commit();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		final List<String> l = new ArrayList<String>();
+		l.add("test");
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				JpaTemplate template2 = new JpaTemplate(factory);
+				template2.execute(new JpaCallback() {
+					public Object doInJpa(EntityManager em) throws PersistenceException {
+						return null;
+					}
+				});
+
+				assertTrue(TransactionSynchronizationManager.hasResource(factory));
+				TransactionTemplate tt2 = new TransactionTemplate(transactionManager);
+				tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+				return tt2.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						return template.execute(new JpaCallback() {
+							public Object doInJpa(EntityManager em2) {
+								em2.flush();
+								return l;
+							}
+						});
+					}
+				});
+			}
+		});
+		assertSame(l, result);
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionWithRequiresNewInAfterCompletion() {
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		MockControl managerControl2 = MockControl.createControl(EntityManager.class);
+		EntityManager manager2 = (EntityManager) managerControl2.getMock();
+		MockControl txControl2 = MockControl.createControl(EntityTransaction.class);
+		EntityTransaction tx2 = (EntityTransaction) txControl2.getMock();
+
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 2);
+		factoryControl.expectAndReturn(factory.createEntityManager(), manager2);
+		managerControl2.expectAndReturn(manager2.getTransaction(), tx2, 3);
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
+		txControl2.expectAndReturn(tx2.getRollbackOnly(), false);
+		manager.flush();
+		tx.commit();
+		tx2.begin();
+		tx2.commit();
+		manager2.flush();
+		manager2.close();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+		managerControl2.replay();
+		txControl2.replay();
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				template.execute(new JpaCallback() {
+					public Object doInJpa(EntityManager em2) {
+						em2.flush();
+						return null;
+					}
+				});
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					public void afterCompletion(int status) {
+						tt.execute(new TransactionCallback() {
+							public Object doInTransaction(TransactionStatus status) {
+								return template.execute(new JpaCallback() {
+									public Object doInJpa(EntityManager em2) {
+										em2.flush();
+										return null;
+									}
+								});
+							}
+						});
+					}
+				});
+				return null;
+			}
+		});
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+		managerControl2.verify();
+		txControl2.verify();
 	}
 
 	public void testTransactionCommitWithPropagationSupports() {
@@ -681,8 +812,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.reset();
 		txControl.reset();
 
-		managerControl.expectAndReturn(manager.getTransaction(), tx, 4);
-		txControl.expectAndReturn(tx.isActive(), false);
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 3);
 		tx.begin();
 		txControl.expectAndReturn(tx.getRollbackOnly(), false);
 		tx.commit();
@@ -729,8 +859,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.reset();
 		txControl.reset();
 
-		managerControl.expectAndReturn(manager.getTransaction(), tx, 3);
-		txControl.expectAndReturn(tx.isActive(), false);
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 2);
 		tx.begin();
 		txControl.expectAndReturn(tx.isActive(), true);
 		tx.rollback();
@@ -777,8 +906,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.reset();
 		txControl.reset();
 
-		managerControl.expectAndReturn(manager.getTransaction(), tx, 1);
-		txControl.expectAndReturn(tx.isActive(), false);
 		manager.joinTransaction();
 		manager.flush();
 
@@ -828,8 +955,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.reset();
 		txControl.reset();
 
-		managerControl.expectAndReturn(manager.getTransaction(), tx, 1);
-		txControl.expectAndReturn(tx.isActive(), false);
 		manager.joinTransaction();
 		manager.flush();
 		manager.clear();

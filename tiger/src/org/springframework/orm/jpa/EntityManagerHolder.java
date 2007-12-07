@@ -23,8 +23,8 @@ import org.springframework.util.Assert;
 
 /**
  * Holder wrapping a JPA EntityManager.
- * JpaTransactionManager binds instances of this class
- * to the thread, for a given EntityManagerFactory.
+ * JpaTransactionManager binds instances of this class to the thread,
+ * for a given EntityManagerFactory.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
@@ -37,14 +37,30 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 
 	private final EntityManager entityManager;
 
+	private boolean transactionActive;
+
 
 	public EntityManagerHolder(EntityManager entityManager) {
 		Assert.notNull(entityManager, "EntityManager must not be null");
 		this.entityManager = entityManager;
 	}
 
+
 	public EntityManager getEntityManager() {
 		return this.entityManager;
+	}
+
+	protected void setTransactionActive(boolean transactionActive) {
+		this.transactionActive = transactionActive;
+	}
+
+	protected boolean isTransactionActive() {
+		return this.transactionActive;
+	}
+
+	public void clear() {
+		super.clear();
+		this.transactionActive = false;
 	}
 
 }
