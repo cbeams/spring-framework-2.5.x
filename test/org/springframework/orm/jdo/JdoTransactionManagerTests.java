@@ -57,12 +57,14 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class JdoTransactionManagerTests extends TestCase {
 
-	private MockControl pmfControl;
+	private MockControl pmfControl, pmControl, txControl;
+
 	private PersistenceManagerFactory pmf;
-	private MockControl pmControl;
+
 	private PersistenceManager pm;
-	private MockControl txControl;
+
 	private Transaction tx;
+
 
 	protected void setUp() {
 		pmfControl = MockControl.createControl(PersistenceManagerFactory.class);

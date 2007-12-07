@@ -85,16 +85,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-
-		factoryControl = null;
-		managerControl = null;
-		txControl = null;
-		manager = null;
-		factory = null;
-		transactionManager = null;
-		template = null;
-		tt = null;
-		tx = null;
 	}
 
 
@@ -1012,13 +1002,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		transactionManager.setDataSource(ds);
-		
+
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		txControl.expectAndReturn(tx.getRollbackOnly(), false);
 		tx.commit();
 		manager.flush();
-		
+
 		factoryControl.replay();
 		managerControl.replay();
 		txControl.replay();
@@ -1042,7 +1032,7 @@ public class JpaTransactionManagerTests extends TestCase {
 				});
 			}
 		});
-		
+
 		assertTrue(result == l);
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
