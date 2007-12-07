@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Exception thrown when there's no request handling method for a request.
+ * Exception thrown when there is no handler method ("action" method)
+ * for a specific HTTP request.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see MethodNameResolver#getHandlerMethodName(javax.servlet.http.HttpServletRequest)
  */
 public class NoSuchRequestHandlingMethodException extends ServletException {
 
@@ -35,9 +37,9 @@ public class NoSuchRequestHandlingMethodException extends ServletException {
 	 * @param request the offending HTTP request
 	 */
 	public NoSuchRequestHandlingMethodException(HttpServletRequest request) {
-		super("No handling method can be found for request [" + request + "]");
+		super("No handler method found for HTTP request [" + request + "]");
 	}
-	
+
 	/**
 	 * Create a new NoSuchRequestHandlingMethodException for the given request.
 	 * @param methodName the name of the handler method that wasn't found
@@ -54,7 +56,7 @@ public class NoSuchRequestHandlingMethodException extends ServletException {
 	 * Return the name of the offending method, if known.
 	 */
 	public String getMethodName() {
-		return methodName;
+		return this.methodName;
 	}
 
 }
