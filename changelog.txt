@@ -15,6 +15,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * DefaultListableBeanFactory freshly resolves autowired arguments even for cached constructors (re-resolving prototypes)
 * fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
+* factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
 * DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
 
 Package org.springframework.cache
@@ -59,6 +60,7 @@ Package org.springframework.util
 
 Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
+* CommonsMultipartResolver uses FileUpload 1.2's "isMultipartContent" variant when available (for stricter checks)
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
 * DispatcherPortlet swallows IllegalStateException when setting implicit render parameter (e.g. after sendRedirect call)
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
