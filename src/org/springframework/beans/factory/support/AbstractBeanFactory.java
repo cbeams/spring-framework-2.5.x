@@ -17,8 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,7 +46,6 @@ import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
@@ -95,7 +92,7 @@ import org.springframework.util.StringValueResolver;
  * @see AbstractAutowireCapableBeanFactory#createBean
  * @see DefaultListableBeanFactory#getBeanDefinition
  */
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
+public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory {
 
 	/** Parent bean factory, for bean inheritance support */
 	private BeanFactory parentBeanFactory;
@@ -141,9 +138,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	/** Names of beans that are currently in creation */
 	private final ThreadLocal prototypesCurrentlyInCreation = new ThreadLocal();
-
-	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
-	private final Map factoryBeanObjectCache = new HashMap();
 
 
 	/**
@@ -203,7 +197,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 					logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
-			bean = getObjectForBeanInstance(sharedInstance, name, beanName);
+			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
 		else {
@@ -259,7 +253,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 						}
 					}
 				});
-				bean = getObjectForBeanInstance(sharedInstance, name, beanName);
+				bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 			}
 
 			else if (mbd.isPrototype()) {
@@ -272,7 +266,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				finally {
 					afterPrototypeCreation(beanName);
 				}
-				bean = getObjectForBeanInstance(prototypeInstance, name, beanName);
+				bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
 			}
 
 			else {
@@ -293,7 +287,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 							}
 						}
 					});
-					bean = getObjectForBeanInstance(scopedInstance, name, beanName);
+					bean = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);
 				}
 				catch (IllegalStateException ex) {
 					throw new BeanCreationException(beanName,
@@ -775,6 +769,25 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		return getMergedLocalBeanDefinition(beanName);
 	}
 
+	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
+		String beanName = transformedBeanName(name);
+
+		Object beanInstance = getSingleton(beanName);
+		if (beanInstance != null) {
+			return (beanInstance instanceof FactoryBean);
+		}
+
+		// No singleton instance found -> check bean definition.
+		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+			// No bean definition found in this factory -> delegate to parent.
+			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
+		}
+
+		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+		Class beanClass = predictBeanType(beanName, mbd, true);
+		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
+	}
+
 	/**
 	 * Callback before prototype creation.
 	 * <p>The default implementation register the prototype as currently in creation.
@@ -1219,25 +1232,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
-	 * Determine the type for the given FactoryBean.
-	 * @param factoryBean the FactoryBean instance to check
-	 * @return the FactoryBean's object type,
-	 * or <code>null</code> if the type cannot be determined yet
-	 */
-	protected Class getTypeForFactoryBean(FactoryBean factoryBean) {
-		try {
-			return factoryBean.getObjectType();
-		}
-		catch (Throwable ex) {
-			// Thrown from the FactoryBean's getObjectType implementation.
-			logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " +
-					"that it should return null if the type of its object cannot be determined yet", ex);
-			return null;
-		}
-	}
-
-
-	/**
 	 * Get the object for the given bean instance, either the bean
 	 * instance itself or its created object in case of a FactoryBean.
 	 * @param beanInstance the shared bean instance
@@ -1245,124 +1239,36 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param beanName the canonical bean name
 	 * @return the object to expose for the bean
 	 */
-	protected Object getObjectForBeanInstance(Object beanInstance, String name, String beanName) {
-		// Don't let calling code try to dereference the
-		// bean factory if the bean isn't a factory.
+	protected Object getObjectForBeanInstance(
+			Object beanInstance, String name, String beanName, RootBeanDefinition mbd) {
+
+		// Don't let calling code try to dereference the factory if the bean isn't a factory.
 		if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
 			throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
 		}
 
-		Object object = beanInstance;
-
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
-		if (beanInstance instanceof FactoryBean) {
-			if (!BeanFactoryUtils.isFactoryDereference(name)) {
-				// Return bean instance from factory.
-				FactoryBean factory = (FactoryBean) beanInstance;
-				// Cache object obtained from FactoryBean if it is a singleton.
-				RootBeanDefinition mbd =
-						(containsBeanDefinition(beanName) ? getMergedLocalBeanDefinition(beanName) :  null);
-				boolean shared = (mbd == null || mbd.isSingleton());
-				if (shared && factory.isSingleton()) {
-					synchronized (getSingletonMutex()) {
-						object = this.factoryBeanObjectCache.get(beanName);
-						if (object == null) {
-							object = getObjectFromFactoryBean(factory, beanName, mbd);
-							this.factoryBeanObjectCache.put(beanName, object);
-						}
-					}
-				}
-				else {
-					object = getObjectFromFactoryBean(factory, beanName, mbd);
-				}
+		if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
+			return beanInstance;
+		}
+
+		Object object = null;
+		if (mbd == null) {
+			object = getCachedObjectForFactoryBean(beanName);
+		}
+		if (object == null) {
+			// Return bean instance from factory.
+			FactoryBean factory = (FactoryBean) beanInstance;
+			// Caches object obtained from FactoryBean if it is a singleton.
+			if (mbd == null && containsBeanDefinition(beanName)) {
+				mbd = getMergedLocalBeanDefinition(beanName);
 			}
+			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
-
 		return object;
-	}
-
-	/**
-	 * Obtain an object to expose from the given FactoryBean.
-	 * @param factory the FactoryBean instance
-	 * @param beanName the name of the bean
-	 * @param mbd the merged bean definition
-	 * @return the object obtained from the FactoryBean
-	 * @throws BeanCreationException if FactoryBean object creation failed
-	 * @see org.springframework.beans.factory.FactoryBean#getObject()
-	 */
-	protected Object getObjectFromFactoryBean(
-			final FactoryBean factory, final String beanName, final RootBeanDefinition mbd)
-			throws BeanCreationException {
-
-		return AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				Object object;
-
-				try {
-					object = factory.getObject();
-				}
-				catch (FactoryBeanNotInitializedException ex) {
-					throw new BeanCurrentlyInCreationException(beanName, ex.toString());
-				}
-				catch (Throwable ex) {
-					throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
-				}
-
-				// Do not accept a null value for a FactoryBean that's not fully
-				// initialized yet: Many FactoryBeans just return null then.
-				if (object == null && isSingletonCurrentlyInCreation(beanName)) {
-					throw new BeanCurrentlyInCreationException(
-							beanName, "FactoryBean which is currently in creation returned null from getObject");
-				}
-
-				if (object != null && (mbd == null || !mbd.isSynthetic())) {
-					try {
-						object = postProcessObjectFromFactoryBean(object, beanName);
-					}
-					catch (Throwable ex) {
-						throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-								"Post-processing of the FactoryBean's object failed", ex);
-					}
-				}
-
-				return object;
-			}
-		});
-	}
-
-	/**
-	 * Post-process the given object that has been obtained from the FactoryBean.
-	 * The resulting object will get exposed for bean references.
-	 * <p>The default implementation simply returns the given object as-is.
-	 * Subclasses may override this, for example, to apply post-processors.
-	 * @param object the object obtained from the FactoryBean.
-	 * @param beanName the name of the bean
-	 * @return the object to expose
-	 * @throws BeansException if any post-processing failed
-	 */
-	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) throws BeansException {
-		return object;
-	}
-
-	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
-		String beanName = transformedBeanName(name);
-
-		Object beanInstance = getSingleton(beanName);
-		if (beanInstance != null) {
-			return (beanInstance instanceof FactoryBean);
-		}
-
-		// No singleton instance found -> check bean definition.
-		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
-			// No bean definition found in this factory -> delegate to parent.
-			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
-		}
-
-		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-		Class beanClass = predictBeanType(beanName, mbd, true);
-		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 	}
 
 	/**
@@ -1421,14 +1327,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
 			}
 		}
-	}
-
-	/**
-	 * Overridden to clear the FactoryBean object cache as well.
-	 */
-	protected void removeSingleton(String beanName) {
-		super.removeSingleton(beanName);
-		this.factoryBeanObjectCache.remove(beanName);
 	}
 
 

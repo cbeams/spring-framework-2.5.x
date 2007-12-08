@@ -19,12 +19,12 @@ package org.springframework.beans.factory.support;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.LinkedHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,7 +76,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * Internal marker for a null singleton object:
 	 * used as marker value for concurrent Maps (which don't support null values).
 	 */
-	private static final Object NULL_OBJECT = new Object();
+	protected static final Object NULL_OBJECT = new Object();
 
 
 	/** Logger available to subclasses */

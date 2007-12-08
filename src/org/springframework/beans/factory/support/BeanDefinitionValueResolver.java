@@ -219,7 +219,8 @@ class BeanDefinitionValueResolver {
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
 			this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
 			if (innerBean instanceof FactoryBean) {
-				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, mbd);
+				boolean synthetic = (mbd != null && mbd.isSynthetic());
+				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, !synthetic);
 			}
 			else {
 				return innerBean;

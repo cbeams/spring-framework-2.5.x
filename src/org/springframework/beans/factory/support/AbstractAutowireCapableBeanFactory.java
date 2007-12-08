@@ -615,14 +615,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Finished partial creation of this bean.
 				afterSingletonCreation(beanName);
 			}
-			if (!(instance instanceof FactoryBean)) {
-				throw new BeanCreationException(beanName,
-						"Bean instance of type [" + instance.getClass() + "] is not a FactoryBean");
-			}
+			FactoryBean fb = getFactoryBean(beanName, instance);
 			if (bw != null) {
 				this.factoryBeanInstanceCache.put(beanName, bw);
 			}
-			return (FactoryBean) instance;
+			return fb;
 		}
 	}
 
@@ -654,11 +651,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Finished partial creation of this bean.
 			afterPrototypeCreation(beanName);
 		}
-		if (!(instance instanceof FactoryBean)) {
-			throw new BeanCreationException(beanName,
-					"Bean instance of type [" + instance.getClass() + "] is not a FactoryBean");
-		}
-		return (FactoryBean) instance;
+		return getFactoryBean(beanName, instance);
 	}
 
 	/**
