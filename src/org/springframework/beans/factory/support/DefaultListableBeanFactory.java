@@ -17,13 +17,17 @@
 package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -366,34 +370,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);
 	}
 
-	protected String determinePrimaryCandidate(Map candidateBeans, Class type) {
-		String primaryBeanName = null;
-		for (Iterator it = candidateBeans.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String candidateBeanName = (String) entry.getKey();
-			if (isPrimary(candidateBeanName, entry.getValue())) {
-				if (primaryBeanName != null) {
-					throw new NoSuchBeanDefinitionException(type,
-							"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
-				}
-				primaryBeanName = candidateBeanName;
-			}
-		}
-		return primaryBeanName;
-	}
-
-	/**
-	 * Return whether the bean definition for the given bean name has been
-	 * marked as a primary bean.
-	 * @param beanName the name of the bean
-	 * @param beanInstance the corresponding bean instance
-	 * @return whether the given bean qualifies as primary
-	 */
-	protected boolean isPrimary(String beanName, Object beanInstance) {
-		return ((containsBeanDefinition(beanName) && getMergedLocalBeanDefinition(beanName).isPrimary()) ||
-				this.resolvableDependencies.values().contains(beanInstance));
-	}
-
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
@@ -525,6 +501,116 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
+	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+			Set autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
+
+		Class type = descriptor.getDependencyType();
+		if (type.isArray()) {
+			Class componentType = type.getComponentType();
+			Map matchingBeans = findAutowireCandidates(beanName, componentType, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					raiseNoSuchBeanDefinitionException(componentType, "array of " + componentType.getName(), descriptor);
+				}
+				return null;
+			}
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
+			return converter.convertIfNecessary(matchingBeans.values(), type);
+		}
+		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
+			Class elementType = descriptor.getCollectionType();
+			if (elementType == null) {
+				if (descriptor.isRequired()) {
+					throw new FatalBeanException("No element type declared for collection [" + type.getName() + "]");
+				}
+				return null;
+			}
+			Map matchingBeans = findAutowireCandidates(beanName, elementType, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					raiseNoSuchBeanDefinitionException(elementType, "collection of " + elementType.getName(), descriptor);
+				}
+				return null;
+			}
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
+			return converter.convertIfNecessary(matchingBeans.values(), type);
+		}
+		else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
+			Class keyType = descriptor.getMapKeyType();
+			if (keyType == null || !String.class.isAssignableFrom(keyType)) {
+				if (descriptor.isRequired()) {
+					throw new FatalBeanException("Key type [" + keyType + "] of map [" + type.getName() +
+							"] must be assignable to [java.lang.String]");
+				}
+				return null;
+			}
+			Class valueType = descriptor.getMapValueType();
+			if (valueType == null) {
+				if (descriptor.isRequired()) {
+					throw new FatalBeanException("No value type declared for map [" + type.getName() + "]");
+				}
+				return null;
+			}
+			Map matchingBeans = findAutowireCandidates(beanName, valueType, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					raiseNoSuchBeanDefinitionException(valueType, "map with value type " + valueType.getName(), descriptor);
+				}
+				return null;
+			}
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+			return matchingBeans;
+		}
+		else {
+			Map matchingBeans = findAutowireCandidates(beanName, type, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					throw new NoSuchBeanDefinitionException(type,
+							"Unsatisfied dependency of type [" + type + "]: expected at least 1 matching bean");
+				}
+				return null;
+			}
+			if (matchingBeans.size() > 1) {
+				String primaryBeanName = determinePrimaryCandidate(matchingBeans, type);
+				if (primaryBeanName == null) {
+					throw new NoSuchBeanDefinitionException(type,
+							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
+				}
+				if (autowiredBeanNames != null) {
+					autowiredBeanNames.add(primaryBeanName);
+				}
+				return matchingBeans.get(primaryBeanName);
+			}
+			// We have exactly one match.
+			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.add(entry.getKey());
+			}
+			return entry.getValue();
+		}
+	}
+
+	/**
+	 * Find bean instances that match the required type.
+	 * Called during autowiring for the specified bean.
+	 * @param beanName the name of the bean that is about to be wired
+	 * @param requiredType the actual type of bean to look for
+	 * (may be an array component type or collection element type)
+	 * @param descriptor the descriptor of the dependency to resolve
+	 * @return a Map of candidate names and candidate instances that match
+	 * the required type (never <code>null</code>)
+	 * @throws BeansException in case of errors
+	 * @see #autowireByType
+	 * @see #autowireConstructor
+	 */
 	protected Map findAutowireCandidates(String beanName, Class requiredType, DependencyDescriptor descriptor) {
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 		Map result = new LinkedHashMap(candidateNames.length);
@@ -548,6 +634,53 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Determine the primary autowire candidate in the given set of beans.
+	 * @param candidateBeans a Map of candidate names and candidate instances
+	 * that match the required type, as returned by {@link #findAutowireCandidates}
+	 * @param type the required type
+	 * @return the name of the primary candidate, or <code>null</code> if none found
+	 */
+	protected String determinePrimaryCandidate(Map candidateBeans, Class type) {
+		String primaryBeanName = null;
+		for (Iterator it = candidateBeans.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String candidateBeanName = (String) entry.getKey();
+			if (isPrimary(candidateBeanName, entry.getValue())) {
+				if (primaryBeanName != null) {
+					throw new NoSuchBeanDefinitionException(type,
+							"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
+				}
+				primaryBeanName = candidateBeanName;
+			}
+		}
+		return primaryBeanName;
+	}
+
+	/**
+	 * Return whether the bean definition for the given bean name has been
+	 * marked as a primary bean.
+	 * @param beanName the name of the bean
+	 * @param beanInstance the corresponding bean instance
+	 * @return whether the given bean qualifies as primary
+	 */
+	protected boolean isPrimary(String beanName, Object beanInstance) {
+		return ((containsBeanDefinition(beanName) && getMergedLocalBeanDefinition(beanName).isPrimary()) ||
+				this.resolvableDependencies.values().contains(beanInstance));
+	}
+
+	/**
+	 * Raise a NoSuchBeanDefinitionException for an unresolvable dependency.
+	 */
+	private void raiseNoSuchBeanDefinitionException(
+			Class type, String dependencyDescription, DependencyDescriptor descriptor)
+			throws NoSuchBeanDefinitionException {
+
+		throw new NoSuchBeanDefinitionException(type, dependencyDescription,
+				"expected at least 1 bean which qualifies as autowire candidate for this dependency. " +
+				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
 

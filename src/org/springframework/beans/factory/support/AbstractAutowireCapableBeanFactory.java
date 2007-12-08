@@ -25,7 +25,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,7 +39,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyValue;
@@ -55,7 +53,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -83,10 +80,10 @@ import org.springframework.util.StringUtils;
  * Supports autowiring constructors, properties by name, and properties by type.
  *
  * <p>The main template method to be implemented by subclasses is
- * {@link #findAutowireCandidates}, used for autowiring by type. In case of
- * a factory which is capable of searching its bean definitions, matching
- * beans will typically be implemented through such a search. For other
- * factory styles, simplified matching algorithms can be implemented.
+ * {@link #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)},
+ * used for autowiring by type. In case of a factory which is capable of searching
+ * its bean definitions, matching beans will typically be implemented through such
+ * a search. For other factory styles, simplified matching algorithms can be implemented.
  *
  * <p>Note that this class does <i>not</i> assume or implement bean definition
  * registry capabilities. See {@link DefaultListableBeanFactory} for an implementation
@@ -338,105 +335,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
 		return resolveDependency(descriptor, beanName, null, null);
-	}
-
-	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
-			Set autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
-
-		Class type = descriptor.getDependencyType();
-		if (type.isArray()) {
-			Class componentType = type.getComponentType();
-			Map matchingBeans = findAutowireCandidates(beanName, componentType, descriptor);
-			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					throw new NoSuchBeanDefinitionException(componentType,
-							"Unsatisfied dependency of type [" + componentType + "]: expected at least 1 matching bean");
-				}
-				return null;
-			}
-			if (autowiredBeanNames != null) {
-				autowiredBeanNames.addAll(matchingBeans.keySet());
-			}
-			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-			return converter.convertIfNecessary(matchingBeans.values(), type);
-		}
-		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
-			Class elementType = descriptor.getCollectionType();
-			if (elementType == null) {
-				if (descriptor.isRequired()) {
-					throw new FatalBeanException("No element type declared for collection");
-				}
-				return null;
-			}
-			Map matchingBeans = findAutowireCandidates(beanName, elementType, descriptor);
-			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					throw new NoSuchBeanDefinitionException(elementType,
-							"Unsatisfied dependency of type [" + elementType.getName() + "]: expected at least 1 matching bean");
-				}
-				return null;
-			}
-			if (autowiredBeanNames != null) {
-				autowiredBeanNames.addAll(matchingBeans.keySet());
-			}
-			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-			return converter.convertIfNecessary(matchingBeans.values(), type);
-		}
-		else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
-			Class keyType = descriptor.getMapKeyType();
-			if (keyType == null || !String.class.isAssignableFrom(keyType)) {
-				if (descriptor.isRequired()) {
-					throw new FatalBeanException("Map key type must be assignable to [" + String.class.getName() + "]");
-				}
-				return null;
-			}
-			Class valueType = descriptor.getMapValueType();
-			if (valueType == null) {
-				if (descriptor.isRequired()) {
-					throw new FatalBeanException("No value type declared for map");
-				}
-				return null;
-			}
-			Map matchingBeans = findAutowireCandidates(beanName, valueType, descriptor);
-			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					throw new NoSuchBeanDefinitionException(valueType,
-							"Unsatisfied dependency of type [" + valueType.getName() + "]: expected at least 1 matching bean");
-				}
-				return null;
-			}
-			if (autowiredBeanNames != null) {
-				autowiredBeanNames.addAll(matchingBeans.keySet());
-			}
-			return matchingBeans;
-		}
-		else {
-			Map matchingBeans = findAutowireCandidates(beanName, type, descriptor);
-			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					throw new NoSuchBeanDefinitionException(type,
-							"Unsatisfied dependency of type [" + type + "]: expected at least 1 matching bean");
-				}
-				return null;
-			}
-			if (matchingBeans.size() > 1) {
-				String primaryBeanName = determinePrimaryCandidate(matchingBeans, type);
-				if (primaryBeanName == null) {
-					throw new NoSuchBeanDefinitionException(type,
-							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
-				}
-				if (autowiredBeanNames != null) {
-					autowiredBeanNames.add(primaryBeanName);
-				}
-				return matchingBeans.get(primaryBeanName);
-			}
-			// We have exactly one match.
-			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
-			if (autowiredBeanNames != null) {
-				autowiredBeanNames.add(entry.getKey());
-			}
-			return entry.getValue();
-		}
 	}
 
 
@@ -932,7 +830,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected BeanWrapper instantiateUsingFactoryMethod(
 			String beanName, RootBeanDefinition mbd, Object[] explicitArgs) {
 
-		ConstructorResolver constructorResolver = new ConstructorResolverAdapter();
+		ConstructorResolver constructorResolver =
+				new ConstructorResolver(this, this, getInstantiationStrategy(), getCustomTypeConverter());
 		return constructorResolver.instantiateUsingFactoryMethod(beanName, mbd, explicitArgs);
 	}
 
@@ -953,7 +852,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected BeanWrapper autowireConstructor(
 			String beanName, RootBeanDefinition mbd, Constructor[] ctors, Object[] explicitArgs) {
 
-		ConstructorResolver constructorResolver = new ConstructorResolverAdapter();
+		ConstructorResolver constructorResolver =
+				new ConstructorResolver(this, this, getInstantiationStrategy(), getCustomTypeConverter());
 		return constructorResolver.autowireConstructor(beanName, mbd, ctors, explicitArgs);
 	}
 
@@ -1448,60 +1348,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void removeSingleton(String beanName) {
 		super.removeSingleton(beanName);
 		this.factoryBeanInstanceCache.remove(beanName);
-	}
-
-
-	//---------------------------------------------------------------------
-	// Template methods to be implemented by subclasses
-	//---------------------------------------------------------------------
-
-	/**
-	 * Find bean instances that match the required type.
-	 * Called during autowiring for the specified bean.
-	 * <p>If a subclass cannot obtain information about bean names by type,
-	 * a corresponding exception should be thrown.
-	 * @param beanName the name of the bean that is about to be wired
-	 * @param requiredType the actual type of bean to look for
-	 * (may be an array component type or collection element type)
-	 * @param descriptor the descriptor of the dependency to resolve
-	 * @return a Map of candidate names and candidate instances that match
-	 * the required type (never <code>null</code>)
-	 * @throws BeansException in case of errors
-	 * @see #autowireByType
-	 * @see #autowireConstructor
-	 */
-	protected abstract Map findAutowireCandidates(
-			String beanName, Class requiredType, DependencyDescriptor descriptor)
-			throws BeansException;
-
-	/**
-	 * Determine the primary autowire candidate in the given set of beans.
-	 * @param matchingBeans a Map of candidate names and candidate instances
-	 * that match the required type, as returned by {@link #findAutowireCandidates}
-	 * @param type the required type
-	 * @return the name of the primary candidate, or <code>null</code> if none found
-	 */
-	protected abstract String determinePrimaryCandidate(Map matchingBeans, Class type);
-
-
-	//---------------------------------------------------------------------
-	// Inner classes that serve as internal helpers
-	//---------------------------------------------------------------------
-
-	/**
-	 * Subclass of ConstructorResolver that delegates to surrounding
-	 * AbstractAutowireCapableBeanFactory facilities.
-	 */
-	private class ConstructorResolverAdapter extends ConstructorResolver {
-
-		public ConstructorResolverAdapter() {
-			super(AbstractAutowireCapableBeanFactory.this, getInstantiationStrategy(), getCustomTypeConverter());
-		}
-
-		protected Object resolveAutowiredArgument(
-				MethodParameter param, String beanName, Set autowiredBeanNames, TypeConverter typeConverter) {
-			return resolveDependency(new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);
-		}
 	}
 
 }

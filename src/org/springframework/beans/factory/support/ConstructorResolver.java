@@ -33,7 +33,9 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ObjectUtils;
@@ -54,9 +56,11 @@ import org.springframework.util.ReflectionUtils;
  * @see #instantiateUsingFactoryMethod
  * @see AbstractAutowireCapableBeanFactory
  */
-abstract class ConstructorResolver {
+class ConstructorResolver {
 
 	private final AbstractBeanFactory beanFactory;
+
+	private final AutowireCapableBeanFactory autowireFactory;
 
 	private final InstantiationStrategy instantiationStrategy;
 
@@ -69,10 +73,11 @@ abstract class ConstructorResolver {
 	 * @param instantiationStrategy the instantiate strategy for creating bean instances
 	 * @param typeConverter the TypeConverter to use (or <code>null</code> for using the default)
 	 */
-	public ConstructorResolver(
-			AbstractBeanFactory beanFactory, InstantiationStrategy instantiationStrategy, TypeConverter typeConverter) {
+	public ConstructorResolver(AbstractBeanFactory beanFactory, AutowireCapableBeanFactory autowireFactory,
+			InstantiationStrategy instantiationStrategy, TypeConverter typeConverter) {
 
 		this.beanFactory = beanFactory;
+		this.autowireFactory = autowireFactory;
 		this.instantiationStrategy = instantiationStrategy;
 		this.typeConverter = typeConverter;
 	}
@@ -568,9 +573,12 @@ abstract class ConstructorResolver {
 	/**
 	 * Template method for resolving the specified argument which is supposed to be autowired.
 	 */
-	protected abstract Object resolveAutowiredArgument(
-			MethodParameter param, String beanName, Set autowiredBeanNames, TypeConverter typeConverter)
-			throws BeansException;
+	protected Object resolveAutowiredArgument(
+			MethodParameter param, String beanName, Set autowiredBeanNames, TypeConverter typeConverter) {
+
+		return this.autowireFactory.resolveDependency(
+				new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);
+	}
 
 
 	/**
