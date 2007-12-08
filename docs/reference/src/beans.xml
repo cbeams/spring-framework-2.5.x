@@ -2781,8 +2781,8 @@ public class ReplacementComputeValue implements MethodReplacer {
       client code to clean up prototype scoped objects and release any
       expensive resources that the prototype bean(s) are holding onto. (One
       possible way to get the Spring container to release resources used by
-      singleton-scoped beans is through the use of a custom <link
-      linkend="beans-factory-extension-bpp">bean post processor</link> which
+      prototype-scoped beans is through the use of a custom <link
+      linkend="beans-factory-extension-bpp">bean post-processor</link> which
       would hold a reference to the beans that need to be cleaned up.)</para>
 
       <para>In some respects, you can think of the Spring containers role when
