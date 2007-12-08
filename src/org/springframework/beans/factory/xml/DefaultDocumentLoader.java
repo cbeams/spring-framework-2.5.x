@@ -30,7 +30,7 @@ import org.xml.sax.InputSource;
 import org.springframework.util.xml.XmlValidationModeDetector;
 
 /**
- * The default {@link DocumentLoader} implementation.
+ * Spring's default {@link DocumentLoader} implementation.
  *
  * <p>Simply loads {@link Document documents} using the standard JAXP-configured
  * XML parser. If you want to change the {@link DocumentBuilder} that is used to
@@ -64,13 +64,10 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured
 	 * XML parser.
 	 */
-	public Document loadDocument(
-			InputSource inputSource, EntityResolver entityResolver,
-			ErrorHandler errorHandler, int validationMode, boolean namespaceAware)
-			throws Exception {
+	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
+			ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
 
-		DocumentBuilderFactory factory =
-				createDocumentBuilderFactory(validationMode, namespaceAware);
+		DocumentBuilderFactory factory = createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using JAXP provider [" + factory.getClass().getName() + "]");
 		}
@@ -82,7 +79,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * Create the {@link DocumentBuilderFactory} instance.
 	 * @param validationMode the type of validation: {@link XmlValidationModeDetector#VALIDATION_DTD DTD}
 	 * or {@link XmlValidationModeDetector#VALIDATION_XSD XSD})
-	 * @param namespaceAware <code>true</code> if the returned factory is to provide support for XML namespaces
+	 * @param namespaceAware whether the returned factory is to provide support for XML namespaces
 	 * @return the JAXP DocumentBuilderFactory
 	 * @throws ParserConfigurationException if we failed to build a proper DocumentBuilderFactory
 	 */
@@ -96,7 +93,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 			factory.setValidating(true);
 
 			if (validationMode == XmlValidationModeDetector.VALIDATION_XSD) {
-				// enforce namespace aware for XSD
+				// Enforce namespace aware for XSD...
 				factory.setNamespaceAware(true);
 				try {
 					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
