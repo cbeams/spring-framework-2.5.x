@@ -551,7 +551,7 @@ public class BeanDefinitionParserDelegate {
 			parsePropertyElements(ele, bd);
 			parseQualifierElements(ele, bd);
 
-			bd.setResourceDescription(this.readerContext.getResource().getDescription());
+			bd.setResource(this.readerContext.getResource());
 			bd.setSource(extractSource(ele));
 
 			return bd;

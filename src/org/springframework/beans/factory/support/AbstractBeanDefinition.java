@@ -29,6 +29,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.core.io.DescriptiveResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -156,7 +158,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean synthetic = false;
 
-	private String resourceDescription;
+	private Resource resource;
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
 
@@ -202,7 +204,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setLazyInit(original.isLazyInit());
 		setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
 		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
-		setResourceDescription(original.getResourceDescription());
 		setSource(original.getSource());
 		setRole(original.getRole());
 		copyAttributesFrom(original);
@@ -224,6 +225,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setEnforceDestroyMethod(originalAbd.isEnforceDestroyMethod());
 			setMethodOverrides(new MethodOverrides(originalAbd.getMethodOverrides()));
 			setSynthetic(originalAbd.isSynthetic());
+			setResource(originalAbd.getResource());
+		}
+		else {
+			setResourceDescription(original.getResourceDescription());
 		}
 	}
 
@@ -269,7 +274,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setLazyInit(other.isLazyInit());
 		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
 		getPropertyValues().addPropertyValues(other.getPropertyValues());
-		setResourceDescription(other.getResourceDescription());
 		setSource(other.getSource());
 		setRole(other.getRole());
 		copyAttributesFrom(other);
@@ -295,6 +299,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			}
 			getMethodOverrides().addOverrides(otherAbd.getMethodOverrides());
 			setSynthetic(otherAbd.isSynthetic());
+			setResource(otherAbd.getResource());
+		}
+		else {
+			setResourceDescription(other.getResourceDescription());
 		}
 	}
 
@@ -778,11 +786,26 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
+	 * Set the resource that this bean definition came from
+	 * (for the purpose of showing context in case of errors).
+	 */
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
+
+	/**
+	 * Return the resource that this bean definition came from.
+	 */
+	public Resource getResource() {
+		return this.resource;
+	}
+
+	/**
 	 * Set a description of the resource that this bean definition
 	 * came from (for the purpose of showing context in case of errors).
 	 */
 	public void setResourceDescription(String resourceDescription) {
-		this.resourceDescription = resourceDescription;
+		this.resource = new DescriptiveResource(resourceDescription);
 	}
 
 	/**
@@ -790,7 +813,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * came from.
 	 */
 	public String getResourceDescription() {
-		return this.resourceDescription;
+		return (this.resource != null ? this.resource.getDescription() : null);
 	}
 
 	/**
@@ -936,8 +959,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		sb.append("; factoryMethodName=").append(this.factoryMethodName);
 		sb.append("; initMethodName=").append(this.initMethodName);
 		sb.append("; destroyMethodName=").append(this.destroyMethodName);
-		if (this.resourceDescription != null) {
-			sb.append("; defined in ").append(this.resourceDescription);
+		if (this.resource != null) {
+			sb.append("; defined in ").append(this.resource.getDescription());
 		}
 		return sb.toString();
 	}
