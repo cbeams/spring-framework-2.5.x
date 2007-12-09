@@ -15,8 +15,13 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * BeanWrapper supports well-known collection implementation types for generic element conversion again (like Spring 2.0)
+* factored out FactoryBeanRegistrySupport base class from AbstractBeanFactory and AbstractAutowireCapableBeanFactory
+* optimized AbstractBeanFactory's access to cached FactoryBean-exposed objects, avoiding unnecessary locks
+* revised accidental public exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
+* moved "resolveDependency" implementation from AbstractAutowireCapableBeanFactory down to DefaultListableBeanFactory
+* revised DefaultListableBeanFactory's "resolveDependency" exceptions with respect to clarity and context inclusion
 * DefaultListableBeanFactory supports ObjectFactory indirection for resolvable dependencies
-* revised accidental exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
+* AbstractBeanDefinition stores and exposes the originating Resource (rather than just the resource description)
 * DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
 * factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
