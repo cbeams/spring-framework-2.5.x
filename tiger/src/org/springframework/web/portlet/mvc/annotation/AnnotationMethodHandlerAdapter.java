@@ -22,7 +22,9 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortalContext;
-import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -204,7 +205,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			Object[] args = argResolver.resolveArguments(
 					handler, attributeMethod, request, response, webRequest, implicitModel, sessionAttrNames);
 			ReflectionUtils.makeAccessible(attributeMethod);
-			Object attrValue = ReflectionUtils.invokeMethod(attributeMethod, handler, args);
+			Object attrValue = null;
+			try {
+				attrValue = attributeMethod.invoke(handler, args);
+			}
+			catch (InvocationTargetException ex) {
+				ReflectionUtils.handleInvocationTargetException(ex);
+			}
 			String attrName = attributeMethod.getAnnotation(ModelAttribute.class).value();
 			if ("".equals(attrName)) {
 				implicitModel.addAttribute(attrValue);
@@ -217,7 +224,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		Object[] args = argResolver.resolveArguments(
 				handler, handlerMethod, request, response, webRequest, implicitModel, sessionAttrNames);
 		ReflectionUtils.makeAccessible(handlerMethod);
-		Object result = ReflectionUtils.invokeMethod(handlerMethod, handler, args);
+		Object result = null;
+		try {
+			result = handlerMethod.invoke(handler, args);
+		}
+		catch (InvocationTargetException ex) {
+			ReflectionUtils.handleInvocationTargetException(ex);
+		}
 		ModelAndView mav = argResolver.getModelAndView(handlerMethod, result, implicitModel);
 
 		if (sessionAttributes != null) {
@@ -452,7 +465,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		public Object[] resolveArguments(
 				Object handler, Method handlerMethod, PortletRequest request, PortletResponse response,
 				WebRequest webRequest, ExtendedModelMap implicitModel, Set<String> sessionAttrNames)
-				throws PortletException, IOException {
+				throws Exception {
 
 			SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 			Set sessionAttributeSet = null;
@@ -520,8 +533,16 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 						if (paramValue == null) {
 							paramValue = request.getParameterValues(paramName);
 						}
-						if (paramValue == null && paramRequired) {
-							throw new MissingPortletRequestParameterException(paramName, param.getParameterType().getName());
+						if (paramValue == null) {
+							if (paramRequired) {
+								throw new MissingPortletRequestParameterException(paramName, param.getParameterType().getName());
+							}
+							if (param.getParameterType().isPrimitive()) {
+								throw new IllegalStateException("Optional " + param.getParameterType() + " parameter '" +
+										paramName + "' is not present but cannot be translated into a null value due to " +
+										"being declared as a primitive type. Consider declaring it as object wrapper type " +
+										"for the corresponding primitive type.");
+							}
 						}
 						args[i] = converter.convertIfNecessary(paramValue, param.getParameterType());
 					}
@@ -588,6 +609,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			else if (WebRequest.class.isAssignableFrom(parameterType)) {
 				return webRequest;
 			}
+			else if (Principal.class.isAssignableFrom(parameterType)) {
+				return request.getUserPrincipal();
+			}
 			else if (Locale.class.equals(parameterType)) {
 				return request.getLocale();
 			}
@@ -621,8 +645,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		public void initBinder(Object handler, String attrName, WebDataBinder binder,
-				WebRequest webRequest, PortletRequest request, PortletResponse response)
-				throws IOException {
+				WebRequest webRequest, PortletRequest request, PortletResponse response) throws Exception {
 
 			if (webBindingInitializer != null) {
 				webBindingInitializer.initBinder(binder, webRequest);
@@ -642,7 +665,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 						}
 					}
 					ReflectionUtils.makeAccessible(initBinderMethod);
-					Object attrValue = ReflectionUtils.invokeMethod(initBinderMethod, handler, initBinderArgs);
+					Object attrValue = null;
+					try {
+						attrValue = initBinderMethod.invoke(handler, initBinderArgs);
+					}
+					catch (InvocationTargetException ex) {
+						ReflectionUtils.handleInvocationTargetException(ex);
+					}
 					if (attrValue != null) {
 						throw new IllegalStateException(
 								"InitBinder methods must not have a return value: " + initBinderMethod);
