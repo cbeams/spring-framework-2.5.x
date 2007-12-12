@@ -124,11 +124,15 @@ Package org.springframework.web
 * improved NoSuchRequestHandlingMethodException's error message to include request URL and query string explicitly
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
 * AnnotationMethodHandlerAdapter throws an exception if it cannot find a clear best path match for a specific request
+* AnnotationMethodHandlerAdapter throws descriptive exception in case of optional parameter being declared as primitive
+* AnnotationMethodHandlerAdapter automatically resolves arguments of type Principal as the request's user principal
+* AnnotationMethodHandlerAdapter propagates checked exceptions as-is for handler/attribute/init-binder methods
 * AnnotationMethodHandlerAdapter applies @InitBinder methods for view preparation as well (like WebBindingInitializers)
 * AnnotationMethodHandlerAdapter applies binder initialization for 'end' views (with processing being complete) as well
 * fixed Portlet AnnotationMethodHandlerAdapter to explicitly check for Action/Render*Response* (to work on Liferay)
 * InternalResourceView prevents dispatching to same path as handler (e.g. with default view name and default resolver)
 * reworked Spring's Tiles2 support such that it can operate against the Tiles2 (2.0.5+) JDK 1.4 version as well
+* Tiles2 TilesView explicitly checks whether the Tiles container has been initialized (throwing a descriptive exception)
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
 
 
