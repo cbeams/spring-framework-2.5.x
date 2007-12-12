@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -60,13 +61,20 @@ public class TilesView extends AbstractUrlBasedView {
 			throws Exception {
 
 		TilesContainer container = TilesAccess.getContainer(getServletContext());
+		if (container == null) {
+			throw new ServletException("Tiles container is not initialized. " +
+					"Have you added a TilesConfigurer to your web application context?");
+		}
+
 		exposeModelAsRequestAttributes(model, request);
 		JstlUtils.exposeLocalizationContext(request, this.jstlAwareMessageSource);
+
 		if (!response.isCommitted()) {
 			// Tiles is going to use a forward, but some web containers (e.g. OC4J 10.1.3)
 			// do not properly expose the Servlet 2.4 forward request attributes...
 			WebUtils.exposeForwardRequestAttributes(request);
 		}
+
 		container.render(getUrl(), new Object[] {request, response});
 	}
 
