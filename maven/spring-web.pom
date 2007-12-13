@@ -74,7 +74,7 @@
 		<dependency>
 			<groupId>hessian</groupId>
 			<artifactId>hessian</artifactId>
-			<version>3.0.20</version>
+			<version>3.1.3</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
