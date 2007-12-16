@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mock.web;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,10 +59,7 @@ public class MockRequestDispatcher implements RequestDispatcher {
 		if (response.isCommitted()) {
 			throw new IllegalStateException("Cannot perform forward - response is already committed");
 		}
-		if (!(response instanceof MockHttpServletResponse)) {
-			throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
-		}
-		((MockHttpServletResponse) response).setForwardedUrl(this.url);
+		getMockHttpServletResponse(response).setForwardedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockRequestDispatcher: forwarding to URL [" + this.url + "]");
 		}
@@ -70,13 +68,24 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	public void include(ServletRequest request, ServletResponse response) {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
-		if (!(response instanceof MockHttpServletResponse)) {
-			throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
-		}
-		((MockHttpServletResponse) response).setIncludedUrl(this.url);
+		getMockHttpServletResponse(response).setIncludedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockRequestDispatcher: including URL [" + this.url + "]");
 		}
+	}
+
+	/**
+	 * Obtain the underlying MockHttpServletResponse,
+	 * unwrapping {@link HttpServletResponseWrapper} decorators if necessary.
+	 */
+	protected MockHttpServletResponse getMockHttpServletResponse(ServletResponse response) {
+		if (response instanceof MockHttpServletResponse) {
+			return (MockHttpServletResponse) response;
+		}
+		if (response instanceof HttpServletResponseWrapper) {
+			return getMockHttpServletResponse(((HttpServletResponseWrapper) response).getResponse());
+		}
+		throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
 	}
 
 }
