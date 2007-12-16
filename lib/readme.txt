@@ -393,7 +393,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 
-* velocity/velocity-tools-view-1.3.jar
-- Velocity Tools 1.3 (http://jakarta.apache.org/velocity/tools)
+* velocity/velocity-tools-view-1.4.jar
+- Velocity Tools 1.4 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
