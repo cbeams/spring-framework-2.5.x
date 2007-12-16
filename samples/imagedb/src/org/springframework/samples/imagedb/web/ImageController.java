@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.imagedb.ImageDatabase;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +28,7 @@ public class ImageController {
 	}
 
 	@RequestMapping("/imageList")
-	public String showImageList(ModelMap model) {
+	public String showImageList(Model model) {
 		model.addAttribute("images", this.imageDatabase.getImages());
 		return "imageList";
 	}
