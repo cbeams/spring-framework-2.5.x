@@ -21,6 +21,7 @@ import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
@@ -36,9 +37,6 @@ import org.springframework.context.support.ResourceBundleMessageSource;
  * @since 20.08.2003
  */
 public abstract class JstlUtils {
-
-	private static final String REQUEST_SCOPE_SUFFIX = ".request";
-
 
 	/**
 	 * Checks JSTL's "javax.servlet.jsp.jstl.fmt.localizationContext"
@@ -81,24 +79,50 @@ public abstract class JstlUtils {
 	public static void exposeLocalizationContext(
 			HttpServletRequest request, MessageSource messageSource) {
 
-		// Add JSTL locale and LocalizationContext request attributes.
-		Locale jstlLocale = RequestContextUtils.getLocale(request);
-
-		// for JSTL implementations that stick to the config names (e.g. Resin's)
-		request.setAttribute(Config.FMT_LOCALE, jstlLocale);
-		// for JSTL implementations that append the scope to the config names (e.g. Jakarta's)
-		request.setAttribute(Config.FMT_LOCALE + REQUEST_SCOPE_SUFFIX, jstlLocale);
-
 		if (messageSource != null) {
-			// We've got a Spring MessageSource - expose it as ResourceBundle.
-			ResourceBundle bundle = new MessageSourceResourceBundle(messageSource, jstlLocale);
-			LocalizationContext jstlContext = new LocalizationContext(bundle, jstlLocale);
-
-			// for JSTL implementations that stick to the config names (e.g. Resin's)
-			request.setAttribute(Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
-			// for JSTL implementations that append the scope to the config names (e.g. Jakarta's)
-			request.setAttribute(Config.FMT_LOCALIZATION_CONTEXT + REQUEST_SCOPE_SUFFIX, jstlContext);
+			LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, request);
+			Config.set(request, Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
+		}
+		else {
+			Locale jstlLocale = RequestContextUtils.getLocale(request);
+			Config.set(request, Config.FMT_LOCALE, jstlLocale);
 		}
 	}
+
+
+	private static class SpringLocalizationContext extends LocalizationContext {
+
+		private final MessageSource messageSource;
+
+		private final HttpServletRequest request;
+
+		public SpringLocalizationContext(MessageSource messageSource, HttpServletRequest request) {
+			this.messageSource = messageSource;
+			this.request = request;
+		}
+
+		public ResourceBundle getResourceBundle() {
+			HttpSession session = this.request.getSession(false);
+			if (session != null) {
+				Object lcObject = Config.get(session, Config.FMT_LOCALIZATION_CONTEXT);
+				if (lcObject instanceof LocalizationContext) {
+					ResourceBundle lcBundle = ((LocalizationContext) lcObject).getResourceBundle();
+					return new MessageSourceResourceBundle(this.messageSource, getLocale(), lcBundle);
+				}
+			}
+			return new MessageSourceResourceBundle(this.messageSource, getLocale());
+		}
+
+		public Locale getLocale() {
+			HttpSession session = this.request.getSession(false);
+			if (session != null) {
+				Object localeObject = Config.get(session, Config.FMT_LOCALE);
+				if (localeObject instanceof Locale) {
+					return (Locale) localeObject;
+				}
+			}
+			return RequestContextUtils.getLocale(this.request);
+		}
+	};
 
 }

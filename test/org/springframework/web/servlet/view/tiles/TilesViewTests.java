@@ -35,6 +35,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -86,6 +87,8 @@ public class TilesViewTests extends TestCase {
 	}
 
 	public void testTilesJstlView() throws Exception {
+		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
+
 		StaticWebApplicationContext wac = prepareWebApplicationContext();
 
 		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
@@ -95,8 +98,8 @@ public class TilesViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
-		wac.addMessage("code1", request.getLocale(), "messageX");
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new FixedLocaleResolver(locale));
+		wac.addMessage("code1", locale, "messageX");
 		view.render(new HashMap(), request, response);
 
 		assertEquals("/WEB-INF/jsp/layout.jsp", response.getForwardedUrl());
@@ -105,20 +108,13 @@ public class TilesViewTests extends TestCase {
 		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
 		assertEquals("/WEB-INF/jsp/content.jsp", attr.getValue());
 
-		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT) instanceof LocalizationContext);
-		assertTrue("Correct JSTL attributes",
-				request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE)));
-		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + ".request") instanceof LocalizationContext);
-		assertTrue("Correct JSTL attributes",
-				request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE + ".request")));
-
-		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
+		LocalizationContext lc = (LocalizationContext) Config.get(request, Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
 	}
 
 	public void testTilesJstlViewWithContextParam() throws Exception {
+		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
+
 		StaticWebApplicationContext wac = prepareWebApplicationContext();
 		((MockServletContext) wac.getServletContext()).addInitParameter(
 				Config.FMT_LOCALIZATION_CONTEXT, "org/springframework/web/context/WEB-INF/context-messages");
@@ -130,8 +126,8 @@ public class TilesViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		wac.addMessage("code1", request.getLocale(), "messageX");
-		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		wac.addMessage("code1", locale, "messageX");
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new FixedLocaleResolver(locale));
 
 		view.render(new HashMap(), request, response);
 		assertEquals("/WEB-INF/jsp/layout.jsp", response.getForwardedUrl());
@@ -140,16 +136,7 @@ public class TilesViewTests extends TestCase {
 		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
 		assertEquals("/WEB-INF/jsp/content.jsp", attr.getValue());
 
-		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT) instanceof LocalizationContext);
-		assertTrue("Correct JSTL attributes",
-				request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE)));
-		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + ".request") instanceof LocalizationContext);
-		assertTrue("Correct JSTL attributes",
-				request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE + ".request")));
-
-		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
+		LocalizationContext lc = (LocalizationContext) Config.get(request, Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("message1", lc.getResourceBundle().getString("code1"));
 		assertEquals("message2", lc.getResourceBundle().getString("code2"));
 	}
