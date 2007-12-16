@@ -90,6 +90,10 @@ public abstract class JstlUtils {
 	}
 
 
+	/**
+	 * Spring-specific LocalizationContext adapter that merges session-scoped
+	 * JSTL LocalizationContext/Locale attributes with the local Spring request context.
+	 */
 	private static class SpringLocalizationContext extends LocalizationContext {
 
 		private final MessageSource messageSource;
