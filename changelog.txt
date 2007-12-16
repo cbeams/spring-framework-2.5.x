@@ -8,6 +8,7 @@ Changes in version 2.5.1 (2007-12-20)
 
 General
 * added section on J2EE RAR deployment to the reference documentation
+* updated Groovy jar in "-with-dependencies" distribution to Groovy 1.5.0
 * updated Hessian jar in "-with-dependencies" distribution to Hessian 3.1.3
 
 Package org.springframework.aop
@@ -72,6 +73,9 @@ Package org.springframework.jndi
 Package org.springframework.mail
 * fixed potential NPE in MailSendException
 
+Package org.springframework.mock
+* MockRequestDispatcher stores forwarded/included URL in MockHttpServletResponse even in case of wrapped response
+
 Package org.springframework.orm
 * LocalSessionFactoryBean uses LocalJtaDataSourceConnectionProvider (supporting aggressive release) in case of JTA TM
 * LocalSessionFactoryBean supports Connection release mode "after_statement" without "useTransactionAwareDataSource" too
@@ -131,6 +135,8 @@ Package org.springframework.web
 * AnnotationMethodHandlerAdapter applies binder initialization for 'end' views (with processing being complete) as well
 * fixed Portlet AnnotationMethodHandlerAdapter to explicitly check for Action/Render*Response* (to work on Liferay)
 * InternalResourceView prevents dispatching to same path as handler (e.g. with default view name and default resolver)
+* JstlView detects session-scoped JSTL LocalizationContext/Locale attributes and merges them with its own context
+* JstlView does not expose Locale attribute when exposing a LocalizationContext attribute (for lazy Locale access)
 * reworked Spring's Tiles2 support such that it can operate against the Tiles2 (2.0.5+) JDK 1.4 version as well
 * Tiles2 TilesView explicitly checks whether the Tiles container has been initialized (throwing a descriptive exception)
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
