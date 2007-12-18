@@ -29,9 +29,10 @@ import javax.servlet.jsp.JspException;
  * to the same property but with different values.
  * 
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
-public class RadioButtonTag extends AbstractHtmlInputElementTag {
+public class RadioButtonTag extends AbstractCheckedElementTag {
 
 	/**
 	 * The value of the '<code>value</code>' attribute.
@@ -87,27 +88,14 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "radio");
 
-		Object value = getValue();
-		Object resolvedValue = evaluate("value", value);
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, getPropertyEditor()));
-
-		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
-			tagWriter.writeAttribute("checked", "checked");
-		}
+		Object resolvedValue = evaluate("value", getValue());
+		renderFromValue(resolvedValue, tagWriter);
 
 		if (getLabel() != null) {
 			tagWriter.appendValue(getLabel().toString());
 		}
-
 		tagWriter.endTag();
 		return EVAL_PAGE;
-	}
-
-	/**
-	 * Return a unique ID for the bound name within the current PageContext.
-	 */
-	protected String autogenerateId() throws JspException {
-		return TagIdGenerator.nextId(getName(), this.pageContext);
 	}
 
 }

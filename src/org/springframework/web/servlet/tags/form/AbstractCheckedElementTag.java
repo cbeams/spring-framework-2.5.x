@@ -16,38 +16,41 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.beans.PropertyEditor;
+
 import javax.servlet.jsp.JspException;
+
+import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * Abstract base class to provide common methods for
  * implementing databinding-aware JSP tags for rendering an HTML '<code>input</code>'
- * element with a '<code>type</code>' of '<code>checkbox</code>'.
+ * element with a '<code>type</code>' of '<code>checkbox</code>' or '<code>radio</code>'.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
-public abstract class AbstractCheckboxTag extends AbstractHtmlInputElementTag {
+public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking the
 	 * '<code>input</code>' element as 'checked' if the supplied value matches the
 	 * bound value.
 	 */
-	protected void renderSingleValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, getPropertyEditor()));
-		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
-			tagWriter.writeAttribute("checked", "checked");
+	protected void renderFromValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
+		BindStatus bindStatus = getBindStatus();
+		PropertyEditor editor = null;
+		if (resolvedValue != null && bindStatus.getErrors() instanceof BindingResult) {
+			PropertyEditorRegistry editorRegistry = ((BindingResult) bindStatus.getErrors()).getPropertyEditorRegistry();
+			if (editorRegistry != null) {
+				editor = editorRegistry.findCustomEditor(resolvedValue.getClass(), bindStatus.getPath());
+			}
 		}
-	}
-
-	/**
-	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking
-	 * the '<code>input</code>' element as 'checked' if the supplied value is
-	 * present in the bound Collection value.
-	 */
-	protected void renderFromCollection(Object resolvedValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, getPropertyEditor()));
-		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
+		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, editor));
+		if (SelectedValueComparator.isSelected(bindStatus, resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
 	}
@@ -73,7 +76,7 @@ public abstract class AbstractCheckboxTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Writes the '<code>input(checkbox)</code>' to the supplied
+	 * Writes the '<code>input</code>' element to the supplied
 	 * {@link org.springframework.web.servlet.tags.form.TagWriter},
 	 * marking it as 'checked' if appropriate.
 	 */

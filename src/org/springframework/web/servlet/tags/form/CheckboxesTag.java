@@ -38,7 +38,7 @@ import org.springframework.web.bind.WebDataBinder;
  * @author Mark Fisher
  * @since 2.5
  */
-public class CheckboxesTag extends AbstractCheckboxTag {
+public class CheckboxesTag extends AbstractCheckedElementTag {
 
 	/**
 	 * The HTML '<code>span</code>' tag.
@@ -235,22 +235,22 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 		Object mapValue = entry.getValue();
 		BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
 		BeanWrapper mapValueWrapper = new BeanWrapperImpl(mapValue);
-		Object renderValue = (valueProperty != null ? mapKeyWrapper.getPropertyValue(valueProperty)
-				: mapKey.toString());
-		Object renderLabel = (labelProperty != null ? mapValueWrapper.getPropertyValue(labelProperty)
-				: mapValue.toString());
+		Object renderValue = (valueProperty != null ?
+				mapKeyWrapper.getPropertyValue(valueProperty) : mapKey.toString());
+		Object renderLabel = (labelProperty != null ?
+				mapValueWrapper.getPropertyValue(labelProperty) : mapValue.toString());
 		writeCheckboxTag(tagWriter, renderValue, renderLabel, itemIndex);
 	}
 
 	private void writeCheckboxTag(TagWriter tagWriter, Object value, Object label, int itemIndex) throws JspException {
 		tagWriter.startTag(getElement());
-		if (itemIndex > 0 && this.getDelimiter() != null) {
-			tagWriter.appendValue(ObjectUtils.getDisplayString(evaluate("delimiter", this.getDelimiter())));
+		if (itemIndex > 0 && getDelimiter() != null) {
+			tagWriter.appendValue(ObjectUtils.getDisplayString(evaluate("delimiter", getDelimiter())));
 		}
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "checkbox");
-		renderSingleValue(value, tagWriter);
+		renderFromValue(value, tagWriter);
 		tagWriter.appendValue(label.toString());
 		tagWriter.endTag();
 		tagWriter.endTag();

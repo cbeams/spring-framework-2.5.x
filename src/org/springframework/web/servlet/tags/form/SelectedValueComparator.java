@@ -126,13 +126,17 @@ abstract class SelectedValueComparator {
 			editorRegistry = ((BindingResult) bindStatus.getErrors()).getPropertyEditorRegistry();
 		}
 		Map convertedValueCache = new HashMap(1);
+		PropertyEditor editor = null;
+		boolean candidateIsString = (candidateValue instanceof String);
+		if (editorRegistry != null && !candidateIsString) {
+			editor = editorRegistry.findCustomEditor(candidateValue.getClass(), bindStatus.getPath());
+		}
 		for (Iterator it = collection.iterator(); it.hasNext();) {
 			Object element = it.next();
-			PropertyEditor propertyEditor = null;
-			if (element != null && editorRegistry != null) {
-				propertyEditor = editorRegistry.findCustomEditor(element.getClass(), bindStatus.getPath());
+			if (editor == null && editorRegistry != null && element != null && candidateIsString) {
+				editor = editorRegistry.findCustomEditor(element.getClass(), bindStatus.getPath());
 			}
-			if (exhaustiveCompare(element, candidateValue, propertyEditor, convertedValueCache)) {
+			if (exhaustiveCompare(element, candidateValue, editor, convertedValueCache)) {
 				return true;
 			}
 		}
@@ -140,9 +144,9 @@ abstract class SelectedValueComparator {
 	}
 
 	private static boolean exhaustiveCompare(
-			Object boundValue, Object candidate, PropertyEditor propertyEditor, Map convertedValueCache) {
+			Object boundValue, Object candidate, PropertyEditor editor, Map convertedValueCache) {
 
-		String candidateDisplayString = ValueFormatter.getDisplayString(candidate, propertyEditor, false);
+		String candidateDisplayString = ValueFormatter.getDisplayString(candidate, editor, false);
 		if (boundValue instanceof LabeledEnum) {
 			LabeledEnum labeledEnum = (LabeledEnum) boundValue;
 			String enumCodeAsString = ObjectUtils.getDisplayString(labeledEnum.getCode());
@@ -168,18 +172,18 @@ abstract class SelectedValueComparator {
 		else if (ObjectUtils.getDisplayString(boundValue).equals(candidateDisplayString)) {
 			return true;
 		}
-		else if (propertyEditor != null && candidate instanceof String) {
+		else if (editor != null && candidate instanceof String) {
 			// Try PE-based comparison (PE should *not* be allowed to escape creating thread)
 			String candidateAsString = (String) candidate;
 			Object candidateAsValue = null;
-			if (convertedValueCache != null && convertedValueCache.containsKey(propertyEditor)) {
-				candidateAsValue = convertedValueCache.get(propertyEditor);
+			if (convertedValueCache != null && convertedValueCache.containsKey(editor)) {
+				candidateAsValue = convertedValueCache.get(editor);
 			}
 			else {
-				propertyEditor.setAsText(candidateAsString);
-				candidateAsValue = propertyEditor.getValue();
+				editor.setAsText(candidateAsString);
+				candidateAsValue = editor.getValue();
 				if (convertedValueCache != null) {
-					convertedValueCache.put(propertyEditor, candidateAsValue);
+					convertedValueCache.put(editor, candidateAsValue);
 				}
 			}
 			if (ObjectUtils.nullSafeEquals(boundValue, candidateAsValue)) {

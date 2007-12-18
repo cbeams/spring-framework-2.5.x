@@ -35,9 +35,10 @@ import org.springframework.util.ObjectUtils;
  * {@link #setItems(Object) value} matches the bound value.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
-public class RadioButtonsTag extends AbstractHtmlInputElementTag {
+public class RadioButtonsTag extends AbstractCheckedElementTag {
 
 	/**
 	 * The HTML '<code>span</code>' tag.
@@ -225,10 +226,10 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 		Object mapValue = entry.getValue();
 		BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
 		BeanWrapper mapValueWrapper = new BeanWrapperImpl(mapValue);
-		Object renderValue = (valueProperty != null ? mapKeyWrapper.getPropertyValue(valueProperty)
-				: mapKey.toString());
-		Object renderLabel = (labelProperty != null ? mapValueWrapper.getPropertyValue(labelProperty)
-				: mapValue.toString());
+		Object renderValue = (valueProperty != null ?
+				mapKeyWrapper.getPropertyValue(valueProperty) : mapKey.toString());
+		Object renderLabel = (labelProperty != null ?
+				mapValueWrapper.getPropertyValue(labelProperty) : mapValue.toString());
 		writeRadioButtonTag(tagWriter, renderValue, renderLabel, itemIndex);
 	}
 
@@ -240,20 +241,10 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "radio");
-		tagWriter.writeAttribute("value", getDisplayString(value, getPropertyEditor()));
-		if (SelectedValueComparator.isSelected(getBindStatus(), value)) {
-			tagWriter.writeAttribute("checked", "checked");
-		}
+		renderFromValue(value, tagWriter);
 		tagWriter.appendValue(label.toString());
 		tagWriter.endTag();
 		tagWriter.endTag();
-	}
-
-	/**
-	 * Return a unique ID for the bound name within the current PageContext.
-	 */
-	protected String autogenerateId() throws JspException {
-		return TagIdGenerator.nextId(getName(), this.pageContext);
 	}
 
 }

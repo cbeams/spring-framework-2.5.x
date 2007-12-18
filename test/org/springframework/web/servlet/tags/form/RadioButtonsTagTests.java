@@ -1,21 +1,46 @@
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.beans.TestBean;
+import java.beans.PropertyEditorSupport;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.jsp.tagext.Tag;
+
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
 import org.springframework.beans.Colour;
 import org.springframework.beans.Pet;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import org.dom4j.io.SAXReader;
-import org.dom4j.Document;
-import org.dom4j.Element;
-
-import javax.servlet.jsp.tagext.Tag;
-import java.io.StringReader;
-import java.util.*;
 
 /**
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class RadioButtonsTagTests extends AbstractFormTagTests {
 
@@ -210,7 +235,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"   foo", "   bar", "   baz"});
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
-		RadioButtonsTagTests.MyStringTrimmerEditor editor = new RadioButtonsTagTests.MyStringTrimmerEditor();
+		MyStringTrimmerEditor editor = new MyStringTrimmerEditor();
 		bindingResult.getPropertyEditorRegistry().registerCustomEditor(String.class, editor);
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
@@ -251,14 +276,82 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	public void testCollectionOfPets() throws Exception {
 		this.tag.setPath("pets");
 		List allPets = new ArrayList();
-		allPets.add(new RadioButtonsTagTests.ItemPet("Rudiger"));
-		allPets.add(new RadioButtonsTagTests.ItemPet("Spot"));
-		allPets.add(new RadioButtonsTagTests.ItemPet("Checkers"));
-		allPets.add(new RadioButtonsTagTests.ItemPet("Fluffy"));
-		allPets.add(new RadioButtonsTagTests.ItemPet("Mufty"));
+		allPets.add(new ItemPet("Rudiger"));
+		allPets.add(new ItemPet("Spot"));
+		allPets.add(new ItemPet("Checkers"));
+		allPets.add(new ItemPet("Fluffy"));
+		allPets.add(new ItemPet("Mufty"));
 		this.tag.setItems(allPets);
 		this.tag.setItemValue("name");
 		this.tag.setItemLabel("label");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		Element radioButtonElement1 = (Element) spanElement1.elements().get(0);
+		assertEquals("input", radioButtonElement1.getName());
+		assertEquals("radio", radioButtonElement1.attribute("type").getValue());
+		assertEquals("pets", radioButtonElement1.attribute("name").getValue());
+		assertEquals("checked", radioButtonElement1.attribute("checked").getValue());
+		assertEquals("RUDIGER", radioButtonElement1.getStringValue());
+		assertEquals("Rudiger", radioButtonElement1.attribute("value").getValue());
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		Element radioButtonElement2 = (Element) spanElement2.elements().get(0);
+		assertEquals("input", radioButtonElement2.getName());
+		assertEquals("radio", radioButtonElement2.attribute("type").getValue());
+		assertEquals("pets", radioButtonElement2.attribute("name").getValue());
+		assertEquals("checked", radioButtonElement2.attribute("checked").getValue());
+		assertEquals("SPOT", radioButtonElement2.getStringValue());
+		assertEquals("Spot", radioButtonElement2.attribute("value").getValue());
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		Element radioButtonElement3 = (Element) spanElement3.elements().get(0);
+		assertEquals("input", radioButtonElement3.getName());
+		assertEquals("radio", radioButtonElement3.attribute("type").getValue());
+		assertEquals("pets", radioButtonElement3.attribute("name").getValue());
+		assertNull("not checked", radioButtonElement3.attribute("checked"));
+		assertEquals("CHECKERS", radioButtonElement3.getStringValue());
+		assertEquals("Checkers", radioButtonElement3.attribute("value").getValue());
+		Element spanElement4 = (Element) document.getRootElement().elements().get(3);
+		Element radioButtonElement4 = (Element) spanElement4.elements().get(0);
+		assertEquals("input", radioButtonElement4.getName());
+		assertEquals("radio", radioButtonElement4.attribute("type").getValue());
+		assertEquals("pets", radioButtonElement4.attribute("name").getValue());
+		assertEquals("checked", radioButtonElement4.attribute("checked").getValue());
+		assertEquals("FLUFFY", radioButtonElement4.getStringValue());
+		assertEquals("Fluffy", radioButtonElement4.attribute("value").getValue());
+		Element spanElement5 = (Element) document.getRootElement().elements().get(4);
+		Element radioButtonElement5 = (Element) spanElement5.elements().get(0);
+		assertEquals("input", radioButtonElement5.getName());
+		assertEquals("radio", radioButtonElement5.attribute("type").getValue());
+		assertEquals("pets", radioButtonElement5.attribute("name").getValue());
+		assertEquals("checked", radioButtonElement5.attribute("checked").getValue());
+		assertEquals("MUFTY", radioButtonElement5.getStringValue());
+		assertEquals("Mufty", radioButtonElement5.attribute("value").getValue());
+	}
+
+	public void testCollectionOfPetsWithEditor() throws Exception {
+		this.tag.setPath("pets");
+		List allPets = new ArrayList();
+		allPets.add(new ItemPet("Rudiger"));
+		allPets.add(new ItemPet("Spot"));
+		allPets.add(new ItemPet("Checkers"));
+		allPets.add(new ItemPet("Fluffy"));
+		allPets.add(new ItemPet("Mufty"));
+		this.tag.setItems(allPets);
+		this.tag.setItemLabel("label");
+
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		PropertyEditorSupport editor = new ItemPet.CustomEditor();
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(ItemPet.class, editor);
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
@@ -405,7 +498,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 
-	private class MyStringTrimmerEditor extends StringTrimmerEditor {
+	private static class MyStringTrimmerEditor extends StringTrimmerEditor {
 
 		public int count = 0;
 
@@ -417,29 +510,6 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 			this.count++;
 			super.setAsText(text);
 		}
-	}
-
-	public class ItemPet {
-
-		private String name;
-
-
-		public ItemPet(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getLabel() {
-			return this.name.toUpperCase();
-		}
-
 	}
 
 }

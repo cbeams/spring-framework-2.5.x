@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,30 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.beans.TestBean;
+import java.beans.PropertyEditorSupport;
+import java.io.StringReader;
+import java.util.Collections;
 
 import javax.servlet.jsp.tagext.Tag;
 
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
+import org.springframework.beans.Pet;
+import org.springframework.beans.TestBean;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class RadioButtonTagTests extends AbstractFormTagTests {
 
 	private RadioButtonTag tag;
+
+	private TestBean bean;
 
 	protected void onSetUp() {
 		this.tag = new RadioButtonTag() {
@@ -66,6 +80,27 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "checked", "checked");
 	}
 
+	public void testWithCheckedObjectValueAndEditor() throws Exception {
+		this.tag.setPath("myFloat");
+		this.tag.setValue("F12.99");
+
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		MyFloatEditor editor = new MyFloatEditor();
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(Float.class, editor);
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+		assertTagOpened(output);
+		assertTagClosed(output);
+		assertContainsAttribute(output, "name", "myFloat");
+		assertContainsAttribute(output, "type", "radio");
+		assertContainsAttribute(output, "value", "F" + getFloat().toString());
+		assertContainsAttribute(output, "checked", "checked");
+	}
+
 	public void testWithUncheckedObjectValue() throws Exception {
 		Float value = new Float("99.45");
 		this.tag.setPath("myFloat");
@@ -97,6 +132,77 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "checked");
 	}
 
+	public void testCollectionOfPets() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue(new Pet("Rudiger"));
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("radio", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("Rudiger", checkboxElement.attribute("value").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+	}
+
+	public void testCollectionOfPetsNotSelected() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue(new Pet("Santa's Little Helper"));
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("radio", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("Santa's Little Helper", checkboxElement.attribute("value").getValue());
+		assertNull(checkboxElement.attribute("checked"));
+	}
+
+	public void testCollectionOfPetsWithEditor() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue(new ItemPet("Rudiger"));
+
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		PropertyEditorSupport editor = new ItemPet.CustomEditor();
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(ItemPet.class, editor);
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("radio", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("Rudiger", checkboxElement.attribute("value").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+	}
+
 	private void assertTagOpened(String output) {
 		assertTrue(output.indexOf("<input ") > -1);
 	}
@@ -110,11 +216,23 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	protected TestBean createTestBean() {
-		TestBean bean = new TestBean();
+		this.bean = new TestBean();
 		bean.setSex("M");
 		bean.setMyFloat(getFloat());
+		bean.setPets(Collections.singletonList(new Pet("Rudiger")));
 		return bean;
 	}
 
+
+	private static class MyFloatEditor extends PropertyEditorSupport {
+
+		public void setAsText(String text) throws IllegalArgumentException {
+			setValue(text.substring(1));
+		}
+
+		public String getAsText() {
+			return "F" + (Float) getValue();
+		}
+	}
 
 }

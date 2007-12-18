@@ -46,7 +46,7 @@ import org.springframework.web.bind.WebDataBinder;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class CheckboxTag extends AbstractCheckboxTag {
+public class CheckboxTag extends AbstractCheckedElementTag {
 
 	/**
 	 * The value of the '<code>value</code>' attribute.
@@ -116,15 +116,7 @@ public class CheckboxTag extends AbstractCheckboxTag {
 				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-boolean values");
 			}
 			Object resolvedValue = (value instanceof String ? evaluate("value", (String) value) : value);
-			if (boundValue != null && boundValue.getClass().isArray()) {
-				renderFromCollection(resolvedValue, tagWriter);
-			}
-			else if (boundValue instanceof Collection) {
-				renderFromCollection(resolvedValue, tagWriter);
-			}
-			else {
-				renderSingleValue(resolvedValue, tagWriter);
-			}
+			renderFromValue(resolvedValue, tagWriter);
 		}
 
 		if (getLabel() != null) {

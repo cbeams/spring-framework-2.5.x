@@ -471,6 +471,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("Rudiger", checkboxElement.attribute("value").getValue());
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 	}
 
@@ -492,7 +493,35 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("Santa's Little Helper", checkboxElement.attribute("value").getValue());
 		assertNull(checkboxElement.attribute("checked"));
+	}
+
+	public void testCollectionOfPetsWithEditor() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue(new ItemPet("Rudiger"));
+
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		PropertyEditorSupport editor = new ItemPet.CustomEditor();
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(ItemPet.class, editor);
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("Rudiger", checkboxElement.attribute("value").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 	}
 
 	public void testWithNullValue() throws Exception {
