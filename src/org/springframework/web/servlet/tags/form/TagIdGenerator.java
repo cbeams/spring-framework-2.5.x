@@ -28,6 +28,7 @@ import javax.servlet.jsp.PageContext;
  * are generated for the same data field, with each button being a distinct tag instance.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 abstract class TagIdGenerator {
