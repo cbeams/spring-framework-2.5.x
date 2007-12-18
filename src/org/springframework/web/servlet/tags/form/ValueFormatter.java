@@ -56,7 +56,7 @@ abstract class ValueFormatter {
 	 * @see #getDisplayString(Object, boolean)
 	 */
 	public static String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
-		if (propertyEditor != null && (!(value instanceof String))) {
+		if (propertyEditor != null && !(value instanceof String)) {
 			try {
 				propertyEditor.setValue(value);
 				return getDisplayString(propertyEditor.getAsText(), htmlEscape);

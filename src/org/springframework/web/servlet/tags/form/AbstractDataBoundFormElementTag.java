@@ -148,21 +148,6 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	}
 
 	/**
-	 * Get the bound value.
-	 * @see #getBindStatus()
-	 */
-	protected final Object getBoundValue() throws JspException {
-		return getBindStatus().getValue();
-	}
-
-	/**
-	 * Get the {@link PropertyEditor}, if any, in use for value bound to this tag.
-	 */
-	protected PropertyEditor getPropertyEditor() throws JspException {
-		return getBindStatus().getEditor();
-	}
-
-	/**
 	 * Get the {@link BindStatus} for this tag.
 	 */
 	protected BindStatus getBindStatus() throws JspException {
@@ -197,8 +182,27 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 		return (expression != null ? expression : "");
 	}
 
-	public PropertyEditor getEditor() throws JspException {
+	/**
+	 * Get the bound value.
+	 * @see #getBindStatus()
+	 */
+	protected final Object getBoundValue() throws JspException {
+		return getBindStatus().getValue();
+	}
+
+	/**
+	 * Get the {@link PropertyEditor}, if any, in use for value bound to this tag.
+	 */
+	protected PropertyEditor getPropertyEditor() throws JspException {
 		return getBindStatus().getEditor();
+	}
+
+	/**
+	 * Exposes the {@link PropertyEditor} for {@link EditorAwareTag}.
+	 * <p>Use {@link #getPropertyEditor()} for internal rendering purposes.
+	 */
+	public final PropertyEditor getEditor() throws JspException {
+		return getPropertyEditor();
 	}
 
 	/**
