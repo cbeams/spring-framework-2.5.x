@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The beans that have been registered by this exporter.
 	 */
-	protected Set registeredBeans = new HashSet();
+	protected final Set registeredBeans = new HashSet();
 
 	/**
 	 * The action take when registering an MBean and finding that it already exists.
@@ -122,6 +122,13 @@ public class MBeanRegistrationSupport {
 	 */
 	public void setServer(MBeanServer server) {
 		this.server = server;
+	}
+
+	/**
+	 * Return the <code>MBeanServer</code> that the beans will be registered with.
+	 */
+	public final MBeanServer getServer() {
+		return this.server;
 	}
 
 	/**
@@ -220,6 +227,13 @@ public class MBeanRegistrationSupport {
 			}
 		}
 		this.registeredBeans.clear();
+	}
+
+	/**
+	 * Return the {@link ObjectName ObjectNames} of all registered beans.
+	 */
+	protected final ObjectName[] getRegisteredObjectNames() {
+		return (ObjectName[]) this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
 	}
 
 

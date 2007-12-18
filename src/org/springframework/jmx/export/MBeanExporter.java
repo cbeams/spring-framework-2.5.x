@@ -987,7 +987,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 		else {
 			// Mapped to all MBeans registered by the MBeanExporter.
-			return (ObjectName[]) this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
+			return getRegisteredObjectNames();
 		}
 	}
 
