@@ -108,6 +108,7 @@ public class TilesViewTests extends TestCase {
 		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
 		assertEquals("/WEB-INF/jsp/content.jsp", attr.getValue());
 
+		assertEquals(locale, Config.get(request, Config.FMT_LOCALE));
 		LocalizationContext lc = (LocalizationContext) Config.get(request, Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
 	}

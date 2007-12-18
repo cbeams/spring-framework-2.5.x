@@ -79,13 +79,12 @@ public abstract class JstlUtils {
 	public static void exposeLocalizationContext(
 			HttpServletRequest request, MessageSource messageSource) {
 
+		Locale jstlLocale = RequestContextUtils.getLocale(request);
+		Config.set(request, Config.FMT_LOCALE, jstlLocale);
+
 		if (messageSource != null) {
 			LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, request);
 			Config.set(request, Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
-		}
-		else {
-			Locale jstlLocale = RequestContextUtils.getLocale(request);
-			Config.set(request, Config.FMT_LOCALE, jstlLocale);
 		}
 	}
 

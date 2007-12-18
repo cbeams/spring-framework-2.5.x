@@ -247,6 +247,7 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct tb attribute", tb.equals(request.getAttribute("tb")));
 		assertTrue("Correct rc attribute", request.getAttribute("rc") == null);
 
+		assertEquals(locale, Config.get(request, Config.FMT_LOCALE));
 		LocalizationContext lc = (LocalizationContext) Config.get(request, Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
 	}
@@ -284,6 +285,7 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct tb attribute", tb.equals(request.getAttribute("tb")));
 		assertTrue("Correct rc attribute", request.getAttribute("rc") == null);
 
+		assertEquals(locale, Config.get(request, Config.FMT_LOCALE));
 		LocalizationContext lc = (LocalizationContext) Config.get(request, Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("message1", lc.getResourceBundle().getString("code1"));
 		assertEquals("message2", lc.getResourceBundle().getString("code2"));
