@@ -49,8 +49,8 @@ import org.springframework.util.ClassUtils;
  */
 public class InternalResourceViewResolver extends UrlBasedViewResolver {
 
-	private static final boolean jstlPresent =
-			ClassUtils.isPresent("javax.servlet.jsp.jstl.fmt.LocalizationContext");
+	private static final boolean jstlPresent = ClassUtils.isPresent(
+			"javax.servlet.jsp.jstl.fmt.LocalizationContext", InternalResourceViewResolver.class.getClassLoader());
 
 	private boolean alwaysInclude = false;
 
