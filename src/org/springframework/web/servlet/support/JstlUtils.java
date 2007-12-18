@@ -21,6 +21,7 @@ import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
@@ -91,8 +92,7 @@ public abstract class JstlUtils {
 
 		if (messageSource != null) {
 			// We've got a Spring MessageSource - expose it as ResourceBundle.
-			ResourceBundle bundle = new MessageSourceResourceBundle(messageSource, jstlLocale);
-			LocalizationContext jstlContext = new LocalizationContext(bundle, jstlLocale);
+			LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, request);
 
 			// for JSTL implementations that stick to the config names (e.g. Resin's)
 			request.setAttribute(Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
@@ -100,5 +100,45 @@ public abstract class JstlUtils {
 			request.setAttribute(Config.FMT_LOCALIZATION_CONTEXT + REQUEST_SCOPE_SUFFIX, jstlContext);
 		}
 	}
+
+
+	/**
+	 * Spring-specific LocalizationContext adapter that merges session-scoped
+	 * JSTL LocalizationContext/Locale attributes with the local Spring request context.
+	 */
+	private static class SpringLocalizationContext extends LocalizationContext {
+
+		private final MessageSource messageSource;
+
+		private final HttpServletRequest request;
+
+		public SpringLocalizationContext(MessageSource messageSource, HttpServletRequest request) {
+			this.messageSource = messageSource;
+			this.request = request;
+		}
+
+		public ResourceBundle getResourceBundle() {
+			HttpSession session = this.request.getSession(false);
+			if (session != null) {
+				Object lcObject = Config.get(session, Config.FMT_LOCALIZATION_CONTEXT);
+				if (lcObject instanceof LocalizationContext) {
+					ResourceBundle lcBundle = ((LocalizationContext) lcObject).getResourceBundle();
+					return new MessageSourceResourceBundle(this.messageSource, getLocale(), lcBundle);
+				}
+			}
+			return new MessageSourceResourceBundle(this.messageSource, getLocale());
+		}
+
+		public Locale getLocale() {
+			HttpSession session = this.request.getSession(false);
+			if (session != null) {
+				Object localeObject = Config.get(session, Config.FMT_LOCALE);
+				if (localeObject instanceof Locale) {
+					return (Locale) localeObject;
+				}
+			}
+			return RequestContextUtils.getLocale(this.request);
+		}
+	};
 
 }

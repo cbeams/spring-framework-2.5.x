@@ -53,6 +53,17 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 		this.locale = locale;
 	}
 
+	/**
+	 * Create a new MessageSourceResourceBundle for the given MessageSource and Locale.
+	 * @param source the MessageSource to retrieve messages from
+	 * @param locale the Locale to retrieve messages for
+	 * @param parent the parent ResourceBundle to delegate to if no local message found
+	 */
+	public MessageSourceResourceBundle(MessageSource source, Locale locale, ResourceBundle parent) {
+		this(source, locale);
+		setParent(parent);
+	}
+
 
 	/**
 	 * This implementation resolves the code in the MessageSource.
