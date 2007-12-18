@@ -28,6 +28,7 @@ import javax.servlet.jsp.PageContext;
  * are generated for the same data field, with each button being a distinct tag instance.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 abstract class TagIdGenerator {
@@ -35,17 +36,17 @@ abstract class TagIdGenerator {
 	/**
 	 * The prefix for all {@link PageContext} attributes created by this tag.
 	 */
-	private static final String PAGE_CONTEXT_ATTRIBUTE_PREFIX = TagIdGenerator.class.getName();
+	private static final String PAGE_CONTEXT_ATTRIBUTE_PREFIX = TagIdGenerator.class.getName() + ".";
 
 	/**
-	 * Gets the next unique ID (within the given {@link PageContext}) for the supplied name.
+	 * Get the next unique ID (within the given {@link PageContext}) for the supplied name.
 	 */
 	public static String nextId(String name, PageContext pageContext) {
-		String attributeName = PAGE_CONTEXT_ATTRIBUTE_PREFIX + "." + name;
+		String attributeName = PAGE_CONTEXT_ATTRIBUTE_PREFIX + name;
 		Integer currentCount = (Integer) pageContext.getAttribute(attributeName);
-		currentCount = (currentCount == null ? new Integer(1) : new Integer(currentCount.intValue() + 1));
+		currentCount = (currentCount != null ? new Integer(currentCount.intValue() + 1) : new Integer(1));
 		pageContext.setAttribute(attributeName, currentCount);
-		return name + currentCount.intValue();
+		return (name + currentCount.intValue());
 	}
 
 }
