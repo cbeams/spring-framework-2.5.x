@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,28 +30,22 @@ import javax.servlet.jsp.PageContext;
  * @author Rob Harrop
  * @since 2.0
  */
-final class TagIdGenerator {
+abstract class TagIdGenerator {
 
 	/**
 	 * The prefix for all {@link PageContext} attributes created by this tag.
 	 */
-	private static final String PAGE_CONTEXT_ATTRIBUTE_PREFIX = TagIdGenerator.class.getName();
+	private static final String PAGE_CONTEXT_ATTRIBUTE_PREFIX = TagIdGenerator.class.getName() + ".";
 
 	/**
-	 * Cannot create externally.
-	 */
-	private TagIdGenerator() {
-
-	}
-
-	/**
-	 * Gets the next unique ID (withing the given {@link PageContext}) for the supplied name.
+	 * Get the next unique ID (within the given {@link PageContext}) for the supplied name.
 	 */
 	public static String nextId(String name, PageContext pageContext) {
-		String attributeName = PAGE_CONTEXT_ATTRIBUTE_PREFIX + "." + name;
+		String attributeName = PAGE_CONTEXT_ATTRIBUTE_PREFIX + name;
 		Integer currentCount = (Integer) pageContext.getAttribute(attributeName);
-		currentCount = (currentCount == null ? new Integer(1) : new Integer(currentCount.intValue() + 1));
+		currentCount = (currentCount != null ? new Integer(currentCount.intValue() + 1) : new Integer(1));
 		pageContext.setAttribute(attributeName, currentCount);
-		return name + currentCount.intValue();
+		return (name + currentCount.intValue());
 	}
+
 }
