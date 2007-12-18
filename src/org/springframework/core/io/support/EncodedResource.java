@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
- * Holder that combines a Resource with an encoding.
+ * Holder that combines a {@link org.springframework.core.io.Resource}
+ * with a specific encoding to be used for reading from the resource.
  *
  * <p>Used as argument for operations that support to read content with
  * a specific encoding (usually through a <code>java.io.Reader</code>.
@@ -65,16 +66,16 @@ public class EncodedResource {
 	/**
 	 * Return the Resource held.
 	 */
-	public Resource getResource() {
-		return resource;
+	public final Resource getResource() {
+		return this.resource;
 	}
 
 	/**
 	 * Return the encoding to use for reading from the resource,
 	 * or <code>null</code> if none specified.
 	 */
-	public String getEncoding() {
-		return encoding;
+	public final String getEncoding() {
+		return this.encoding;
 	}
 
 	/**
