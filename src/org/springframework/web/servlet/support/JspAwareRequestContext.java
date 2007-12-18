@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,22 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.jstl.core.Config;
+
+import org.springframework.util.ClassUtils;
 
 /**
- * JSP-aware subclass of RequestContext, allowing population of the context
- * from a JSP PageContext.
+ * JSP-aware (and JSTL-aware) subclass of RequestContext, allowing for
+ * population of the context from a <code>javax.servlet.jsp.PageContext</code>.
  *
- * <p>This context will also detect a JSTL locale attribute in page scope,
- * in addition to the fallback locale strategy provided by the base class.
+ * <p>This context will detect a JSTL locale attribute in page/request/session/application
+ * scope, in addition to the fallback locale strategy provided by the base class.
  *
  * @author Juergen Hoeller
  * @since 1.1.4
  * @see #getFallbackLocale
  */
 public class JspAwareRequestContext extends RequestContext {
-
-	protected static final String PAGE_SCOPE_SUFFIX = ".page";
 
 	private PageContext pageContext;
 
@@ -80,24 +81,36 @@ public class JspAwareRequestContext extends RequestContext {
 	 * Return the underlying PageContext.
 	 * Only intended for cooperating classes in this package.
 	 */
-	protected PageContext getPageContext() {
-		return pageContext;
+	protected final PageContext getPageContext() {
+		return this.pageContext;
 	}
 
 	/**
-	 * This implementation looks for a JSTL locale attribute in the
-	 * JSP page scope, falling back to the superclass if not found.
-	 * @see RequestContext#getFallbackLocale
+	 * This implementation checks for a JSTL locale attribute
+	 * in page, request, session or application scope; if not found,
+	 * returns the <code>HttpServletRequest.getLocale()</code>.
 	 */
 	protected Locale getFallbackLocale() {
-		Locale locale = (Locale) getPageContext().getAttribute(JSTL_LOCALE_ATTRIBUTE);
-		if (locale == null) {
-			locale = (Locale) getPageContext().getAttribute(JSTL_LOCALE_ATTRIBUTE + PAGE_SCOPE_SUFFIX);
-			if (locale == null) {
-				locale = super.getFallbackLocale();
+		if (jstlPresent) {
+			Locale locale = JstlPageLocaleResolver.getJstlLocale(getPageContext());
+			if (locale != null) {
+				return locale;
 			}
 		}
-		return locale;
+		return getRequest().getLocale();
+	}
+
+
+	/**
+	 * Inner class that isolates the JSTL dependency.
+	 * Just called to resolve the fallback locale if the JSTL API is present.
+	 */
+	private static class JstlPageLocaleResolver {
+
+		public static Locale getJstlLocale(PageContext pageContext) {
+			Object localeObject = Config.find(pageContext, Config.FMT_LOCALE);
+			return (localeObject instanceof Locale ? (Locale) localeObject : null);
+		}
 	}
 
 }

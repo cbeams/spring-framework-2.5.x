@@ -192,7 +192,7 @@ public class VelocityViewTests extends TestCase {
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		wac.getServletContext();
-		wmc.setReturnValue(sc, 4);
+		wmc.setReturnValue(sc, 3);
 		wmc.replay();
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -247,7 +247,7 @@ public class VelocityViewTests extends TestCase {
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		wac.getServletContext();
-		wmc.setReturnValue(sc, 4);
+		wmc.setReturnValue(sc, 3);
 		wmc.replay();
 
 		HttpServletRequest request = new MockHttpServletRequest();

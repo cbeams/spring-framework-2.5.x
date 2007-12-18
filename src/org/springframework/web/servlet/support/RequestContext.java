@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.jstl.core.Config;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -31,6 +32,7 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -55,14 +57,14 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Will also work outside of DispatcherServlet requests, accessing the root
  * WebApplicationContext and using an appropriate fallback for the locale
- * (the JSTL locale if available, or the HttpServletRequest locale else).
+ * (the HttpServletRequest's primary locale).
  *
  * @author Juergen Hoeller
  * @since 03.03.2003
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
  * @see org.springframework.web.servlet.view.UrlBasedViewResolver#setRequestContextAttribute
- * @see #getFallbackLocale
+ * @see #getFallbackLocale()
  */
 public class RequestContext {
 
@@ -75,27 +77,8 @@ public class RequestContext {
 	 */
 	public final static String DEFAULT_THEME_NAME = "theme";
 
-	/**
-	 * JSTL locale attribute, as used by JSTL implementations to expose their
-	 * current locale. Used as fallback in non-DispatcherServlet requests; if not
-	 * available, the accept-header locale is used (<code>request.getLocale</code).
-	 * <p>Same as the FMT_LOCALE constant in JSTL's Config class, but not linked
-	 * in here to avoid a hard-coded dependency on JSTL. RequestContext does not
-	 * depend on JSTL except for this fallback check of JSTL's locale attribute.
-	 * @see javax.servlet.jsp.jstl.core.Config#FMT_LOCALE
-	 * @see javax.servlet.http.HttpServletRequest#getLocale
-	 */
-	public final static String JSTL_LOCALE_ATTRIBUTE = "javax.servlet.jsp.jstl.fmt.locale";
-
-
-	/** JSTL suffix for request-scoped attributes */
-	protected static final String REQUEST_SCOPE_SUFFIX = ".request";
-
-	/** JSTL suffix for session-scoped attributes */
-	protected static final String SESSION_SCOPE_SUFFIX = ".session";
-
-	/** JSTL suffix for application-scoped attributes */
-	protected static final String APPLICATION_SCOPE_SUFFIX = ".application";
+	protected static final boolean jstlPresent = ClassUtils.isPresent(
+			"javax.servlet.jsp.jstl.core.Config", JspAwareRequestContext.class.getClassLoader());
 
 
 	private HttpServletRequest request;
@@ -240,33 +223,16 @@ public class RequestContext {
 	 * in request, session or application scope; if not found,
 	 * returns the <code>HttpServletRequest.getLocale()</code>.
 	 * @return the fallback locale (never <code>null</code>)
-	 * @see javax.servlet.http.HttpServletRequest#getLocale
+	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
 	protected Locale getFallbackLocale() {
-		Locale locale = (Locale) getRequest().getAttribute(JSTL_LOCALE_ATTRIBUTE);
-		if (locale == null) {
-			locale = (Locale) getRequest().getAttribute(JSTL_LOCALE_ATTRIBUTE + REQUEST_SCOPE_SUFFIX);
-			if (locale == null) {
-				HttpSession session = getRequest().getSession(false);
-				if (session != null) {
-					locale = (Locale) session.getAttribute(JSTL_LOCALE_ATTRIBUTE);
-					if (locale == null) {
-						locale = (Locale) session.getAttribute(JSTL_LOCALE_ATTRIBUTE + SESSION_SCOPE_SUFFIX);
-					}
-				}
-				if (locale == null) {
-					locale = (Locale) getServletContext().getAttribute(JSTL_LOCALE_ATTRIBUTE);
-					if (locale == null) {
-						locale = (Locale) getServletContext().getAttribute(JSTL_LOCALE_ATTRIBUTE + APPLICATION_SCOPE_SUFFIX);
-						if (locale == null) {
-							// No JSTL locale available -> fall back to accept-header locale.
-							locale = getRequest().getLocale();
-						}
-					}
-				}
+		if (jstlPresent) {
+			Locale locale = JstlLocaleResolver.getJstlLocale(getRequest(), getServletContext());
+			if (locale != null) {
+				return locale;
 			}
 		}
-		return locale;
+		return getRequest().getLocale();
 	}
 
 	/**
@@ -725,6 +691,28 @@ public class RequestContext {
 	 */
 	public BindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
 		return new BindStatus(this, path, htmlEscape);
+	}
+
+
+	/**
+	 * Inner class that isolates the JSTL dependency.
+	 * Just called to resolve the fallback locale if the JSTL API is present.
+	 */
+	private static class JstlLocaleResolver {
+
+		public static Locale getJstlLocale(HttpServletRequest request, ServletContext servletContext) {
+			Object localeObject = Config.get(request, Config.FMT_LOCALE);
+			if (localeObject == null) {
+				HttpSession session = request.getSession(false);
+				if (session != null) {
+					localeObject = Config.get(session, Config.FMT_LOCALE);
+				}
+				if (localeObject == null) {
+					localeObject = Config.get(servletContext, Config.FMT_LOCALE);
+				}
+			}
+			return (localeObject instanceof Locale ? (Locale) localeObject : null);
+		}
 	}
 
 }
