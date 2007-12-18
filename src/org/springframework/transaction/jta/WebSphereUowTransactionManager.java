@@ -191,7 +191,8 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
 		}
 		int pb = definition.getPropagationBehavior();
-		boolean existingTx = (this.uowManager.getUOWStatus() != UOWSynchronizationRegistry.UOW_STATUS_NONE);
+		boolean existingTx = (this.uowManager.getUOWStatus() != UOWSynchronizationRegistry.UOW_STATUS_NONE &&
+				this.uowManager.getUOWType() != UOWSynchronizationRegistry.UOW_TYPE_LOCAL_TRANSACTION);
 
 		int uowType = UOWSynchronizationRegistry.UOW_TYPE_GLOBAL_TRANSACTION;
 		boolean joinTx = false;

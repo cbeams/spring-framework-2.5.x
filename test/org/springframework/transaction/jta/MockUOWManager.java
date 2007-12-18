@@ -33,7 +33,7 @@ import com.ibm.wsspi.uow.UOWManager;
  */
 public class MockUOWManager implements UOWManager {
 
-	private int type;
+	private int type = UOW_TYPE_GLOBAL_TRANSACTION;
 
 	private boolean joined;
 
