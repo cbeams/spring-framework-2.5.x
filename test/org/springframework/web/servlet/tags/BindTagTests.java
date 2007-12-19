@@ -21,8 +21,6 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.jsp.JspException;
@@ -33,7 +31,6 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -1030,6 +1027,12 @@ public class BindTagTests extends AbstractTagTests {
 		bindTag2.setPath("tb.date");
 		bindTag2.doStartTag();
 		bindTag2.doEndTag();
+
+		BindTag bindTag3 = new BindTag();
+		bindTag3.setPageContext(pc);
+		bindTag3.setPath("tb");
+		bindTag3.doStartTag();
+		bindTag3.doEndTag();
 
 		formTag.doEndTag();
 	}

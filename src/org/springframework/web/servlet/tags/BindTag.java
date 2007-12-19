@@ -108,7 +108,8 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 			String nestedPath = (String) pageContext.getAttribute(
 					NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 			// only prepend if not already an absolute path
-			if (nestedPath != null && !resolvedPath.startsWith(nestedPath)) {
+			if (nestedPath != null && !resolvedPath.startsWith(nestedPath) &&
+					!resolvedPath.equals(nestedPath.substring(0, nestedPath.length() - 1))) {
 				resolvedPath = nestedPath + resolvedPath;
 			}
 		}
