@@ -37,44 +37,44 @@ public class BeanDefinitionDefaults {
 	private String destroyMethodName;
 
 
-	public boolean isLazyInit() {
-		return this.lazyInit;
-	}
-
 	public void setLazyInit(boolean lazyInit) {
 		this.lazyInit = lazyInit;
 	}
 
-	public int getDependencyCheck() {
-		return this.dependencyCheck;
+	public boolean isLazyInit() {
+		return this.lazyInit;
 	}
 
 	public void setDependencyCheck(int dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
 	}
 
-	public int getAutowireMode() {
-		return this.autowireMode;
+	public int getDependencyCheck() {
+		return this.dependencyCheck;
 	}
 
 	public void setAutowireMode(int autowireMode) {
 		this.autowireMode = autowireMode;
 	}
 
-	public String getInitMethodName() {
-		return this.initMethodName;
+	public int getAutowireMode() {
+		return this.autowireMode;
 	}
 
 	public void setInitMethodName(String initMethodName) {
 		this.initMethodName = (StringUtils.hasText(initMethodName)) ? initMethodName : null;
 	}
 
-	public String getDestroyMethodName() {
-		return this.destroyMethodName;
+	public String getInitMethodName() {
+		return this.initMethodName;
 	}
 
 	public void setDestroyMethodName(String destroyMethodName) {
 		this.destroyMethodName = (StringUtils.hasText(destroyMethodName)) ? destroyMethodName : null;
+	}
+
+	public String getDestroyMethodName() {
+		return this.destroyMethodName;
 	}
 
 }
