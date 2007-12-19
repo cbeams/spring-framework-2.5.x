@@ -48,7 +48,6 @@ import javax.portlet.RenderResponse;
 import javax.portlet.WindowState;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -474,7 +473,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.value()));
 				sessionAttributeSet.addAll(Arrays.asList(sessionAttributes.types()));
 			}
-			SimpleTypeConverter converter = new SimpleTypeConverter();
 			Object[] args = new Object[handlerMethod.getParameterTypes().length];
 			String[] paramNames = null;
 			boolean paramNamesResolved = false;
@@ -544,7 +542,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 										"for the corresponding primitive type.");
 							}
 						}
-						args[i] = converter.convertIfNecessary(paramValue, param.getParameterType());
+						PortletRequestDataBinder binder = new PortletRequestDataBinder(null, paramName);
+						initBinder(handler, paramName, binder, webRequest, request, response);
+						args[i] = binder.convertIfNecessary(paramValue, param.getParameterType(), param);
 					}
 					else {
 						// Bind request parameter onto object...

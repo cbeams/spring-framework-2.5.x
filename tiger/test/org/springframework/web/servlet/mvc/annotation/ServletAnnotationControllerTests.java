@@ -555,7 +555,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(@RequestParam String defaultName, Map<String, Object> model) {
+		private TestBean createTestBean(
+				@RequestParam String defaultName, Map<String, Object> model, @RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
 			return new TestBean(defaultName);
 		}
@@ -579,7 +580,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
 		@SuppressWarnings("unused")
-		@InitBinder("myCommand")
+		@InitBinder({"myCommand", "date"})
 		private void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);

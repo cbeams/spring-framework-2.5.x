@@ -428,7 +428,8 @@ public class PortletAnnotationControllerTests extends TestCase {
 	private static class MyCommandProvidingFormController extends MyFormController {
 
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(@RequestParam String defaultName, Map<String, Object> model) {
+		private TestBean createTestBean(
+				@RequestParam String defaultName, Map<String, Object> model, @RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
 			return new TestBean(defaultName);
 		}
@@ -450,7 +451,8 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@Controller
 	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
-		@InitBinder("myCommand")
+		@SuppressWarnings("unused")
+		@InitBinder({"myCommand", "date"})
 		private void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);

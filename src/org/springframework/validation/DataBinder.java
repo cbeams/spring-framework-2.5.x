@@ -31,6 +31,10 @@ import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverter;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -95,7 +99,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.context.MessageSource
  * @see org.springframework.web.bind.ServletRequestDataBinder
  */
-public class DataBinder implements PropertyEditorRegistry {
+public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/** Default object name used for binding: "target" */
 	public static final String DEFAULT_OBJECT_NAME = "target";
@@ -111,6 +115,8 @@ public class DataBinder implements PropertyEditorRegistry {
 	private final String objectName;
 
 	private AbstractPropertyBindingResult bindingResult;
+
+	private SimpleTypeConverter typeConverter;
 
 	private BindException bindException;
 
@@ -142,7 +148,6 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @param objectName name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
-		Assert.notNull(target, "Target must not be null");
 		this.target = target;
 		this.objectName = objectName;
 	}
@@ -197,10 +202,43 @@ public class DataBinder implements PropertyEditorRegistry {
 
 	/**
 	 * Return the underlying PropertyAccessor of this binder's BindingResult.
-	 * To be used by binder subclasses that need property checks.
 	 */
 	protected ConfigurablePropertyAccessor getPropertyAccessor() {
 		return getInternalBindingResult().getPropertyAccessor();
+	}
+
+	/**
+	 * Return this binder's underlying SimpleTypeConverter.
+	 */
+	protected SimpleTypeConverter getSimpleTypeConverter() {
+		if (this.typeConverter == null) {
+			this.typeConverter = new SimpleTypeConverter();
+		}
+		return this.typeConverter;
+	}
+
+	/**
+	 * Return the underlying TypeConverter of this binder's BindingResult.
+	 */
+	protected PropertyEditorRegistry getPropertyEditorRegistry() {
+		if (getTarget() != null) {
+			return getInternalBindingResult().getPropertyAccessor();
+		}
+		else {
+			return getSimpleTypeConverter();
+		}
+	}
+
+	/**
+	 * Return the underlying TypeConverter of this binder's BindingResult.
+	 */
+	protected TypeConverter getTypeConverter() {
+		if (getTarget() != null) {
+			return getInternalBindingResult().getPropertyAccessor();
+		}
+		else {
+			return getSimpleTypeConverter();
+		}
 	}
 
 	/**
@@ -359,18 +397,6 @@ public class DataBinder implements PropertyEditorRegistry {
 		getPropertyAccessor().setExtractOldValueForEditor(extractOldValueForEditor);
 	}
 
-	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		getPropertyAccessor().registerCustomEditor(requiredType, propertyEditor);
-	}
-
-	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
-		getPropertyAccessor().registerCustomEditor(requiredType, field, propertyEditor);
-	}
-
-	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
-		return getPropertyAccessor().findCustomEditor(requiredType, propertyPath);
-	}
-
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to the underlying errors holder.
@@ -396,7 +422,34 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Return the strategy for processing binding errors.
 	 */
 	public BindingErrorProcessor getBindingErrorProcessor() {
-		return bindingErrorProcessor;
+		return this.bindingErrorProcessor;
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of PropertyEditorRegistry/TypeConverter interface
+	//---------------------------------------------------------------------
+
+	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+		getPropertyEditorRegistry().registerCustomEditor(requiredType, propertyEditor);
+	}
+
+	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
+		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
+	}
+
+	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
+		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
+	}
+
+	public Object convertIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
+		return getTypeConverter().convertIfNecessary(value, requiredType);
+	}
+
+	public Object convertIfNecessary(
+			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
+
+		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
 	}
 
 
