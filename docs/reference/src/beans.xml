@@ -2556,10 +2556,13 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 					<title>Choosing the type of proxy created</title>
 					<para>By default, when the Spring container is creating a proxy for a bean
 					that is marked up with the <literal>&lt;aop:scoped-proxy/&gt;</literal>
-					element, <emphasis>a CGLib-based class proxy will be created</emphasis>.
-					This means that you will need to have the CGLib library on the classapth
-					for your application.
+					element, <emphasis>a CGLIB-based class proxy will be created</emphasis>.
+					This means that you need to have the CGLIB library on the classpath
+					of your application.
 					</para>
+          <para><emphasis>Note: CGLIB proxies will only intercept public method
+          calls!</emphasis> Do not call non-public methods on such a proxy;
+          they will not be delegated to the scoped target object.</para>
 					<para>You can choose to have the Spring container create 'standard'
 					JDK interface-based proxies for such scoped beans by specifying
 					'<literal>false</literal>' for the value of the '<literal>proxy-target-class</literal>'
