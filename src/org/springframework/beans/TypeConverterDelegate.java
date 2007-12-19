@@ -337,7 +337,15 @@ class TypeConverterDelegate {
 	 * @return the converted value
 	 */
 	protected Object doConvertTextValue(Object oldValue, String newTextValue, PropertyEditor editor) {
-		editor.setValue(oldValue);
+		try {
+			editor.setValue(oldValue);
+		}
+		catch (Exception ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("PropertyEditor [" + editor.getClass().getName() + "] does not support setValue call", ex);
+			}
+			// Swallow and proceed.
+		}
 		editor.setAsText(newTextValue);
 		return editor.getValue();
 	}
