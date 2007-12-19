@@ -22,6 +22,7 @@ import java.io.Reader;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Holder that combines a {@link org.springframework.core.io.Resource}
@@ -90,6 +91,27 @@ public class EncodedResource {
 		else {
 			return new InputStreamReader(this.resource.getInputStream());
 		}
+	}
+
+
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj instanceof EncodedResource) {
+			EncodedResource otherRes = (EncodedResource) obj;
+			return (this.resource.equals(otherRes.resource) &&
+					ObjectUtils.nullSafeEquals(this.encoding, otherRes.encoding));
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return this.resource.hashCode();
+	}
+
+	public String toString() {
+		return this.resource.toString();
 	}
 
 }
