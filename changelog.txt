@@ -23,6 +23,8 @@ Package org.springframework.beans
 * revised DefaultListableBeanFactory's "resolveDependency" exceptions with respect to clarity and context inclusion
 * DefaultListableBeanFactory supports ObjectFactory indirection for resolvable dependencies
 * AbstractBeanDefinition stores and exposes the originating Resource (rather than just the resource description)
+* XmlBeanDefinitionReader detects recursive loading of the same resource (e.g. through import cycles)
+* DefaultBeanDefinitionDocumentReader sends ImportDefinition events containing the actually resolved Resource objects
 * DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
 * factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
@@ -67,6 +69,9 @@ Package org.springframework.jms
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
 * "jms:listener-container" tag supports a concurrency range (e.g. "3-5"), for specifying a minimum number of consumers
 
+Package org.springframework.jmx
+* added "getServer()" method to MBeanRegistrationSupport (MBeanExporter), exposing the underlying JMX MBeanServer
+
 Package org.springframework.jndi
 * JndiTemplate prepares a specific Hashtable for the InitialContext, exposing default environment properties as well
 
@@ -108,6 +113,7 @@ Package org.springframework.transaction
 * added "validateExistingTransaction" property to AbstractPlatformTransactionManager, for isolation level checks
 * JtaTransactionManager consistently throws TransactionSystemException in case of unexpected internal transaction state
 * JtaTransactionManager detects JBoss 4.2 transaction rollbacks caused by a timeout, throwing a meaningful exception
+* fixed WebSphereUowTransactionManager to correctly detect an existing global transaction (ignoring local tx contexts)
 
 Package org.springframework.ui
 * fixed ModelMap's "mergeAttributes" to correctly copy new attributes into the model
@@ -117,6 +123,9 @@ Package org.springframework.ui
 Package org.springframework.util
 * AutoPopulatingList is serializable now
 * FreeMarker "formSingleSelect" macro also accepts options from a sequence (list) as both labels and values
+
+Package org.springframework.validation
+* clarified that BindingResult's "getPropertyEditorRegistry()" method may return null to indicate no support for editors
 
 Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
@@ -136,10 +145,11 @@ Package org.springframework.web
 * fixed Portlet AnnotationMethodHandlerAdapter to explicitly check for Action/Render*Response* (to work on Liferay)
 * InternalResourceView prevents dispatching to same path as handler (e.g. with default view name and default resolver)
 * JstlView detects session-scoped JSTL LocalizationContext/Locale attributes and merges them with its own context
-* JstlView does not expose Locale attribute when exposing a LocalizationContext attribute (for lazy Locale access)
+* JstlView and (JspAware)RequestContext consistently use JSTL Config class for scoped attribute access
 * reworked Spring's Tiles2 support such that it can operate against the Tiles2 (2.0.5+) JDK 1.4 version as well
 * Tiles2 TilesView explicitly checks whether the Tiles container has been initialized (throwing a descriptive exception)
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
+* JSP CheckboxTag/CheckboxesTag and RadioButtonTag/RadioButtonsTag use registered property editor for value rendering
 
 
 Changes in version 2.5 final (2007-11-19)
