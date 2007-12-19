@@ -62,18 +62,18 @@ public class AliasDefinition implements BeanMetadataElement {
 	/**
 	 * Return the canonical name of the bean.
 	 */
-	public String getBeanName() {
+	public final String getBeanName() {
 		return this.beanName;
 	}
 
 	/**
 	 * Return the alias registered for the bean.
 	 */
-	public String getAlias() {
+	public final String getAlias() {
 		return this.alias;
 	}
 
-	public Object getSource() {
+	public final Object getSource() {
 		return this.source;
 	}
 
