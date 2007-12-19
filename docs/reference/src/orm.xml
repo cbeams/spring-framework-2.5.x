@@ -2050,7 +2050,7 @@
         VM.</para>
 
         <section id="orm-jpa-setup-lcemfb-tomcat">
-          <title>Tomcat load-time weaving setup (4.1+)</title>
+          <title>Tomcat load-time weaving setup (5.0+)</title>
 
           <para><ulink url="http://tomcat.apache.org/">Jakarta
           Tomcat's</ulink> default ClassLoader does not support class
@@ -2069,7 +2069,7 @@
 
           <itemizedlist>
             <listitem>
-              <para>Tomcat 4.1.x/5.0.x/5.5.x</para>
+              <para>Tomcat 5.0.x/5.5.x</para>
             </listitem>
             
           <orderedlist>
@@ -2116,17 +2116,10 @@
               If you are using Tomcat 5.5.20+ you can set <emphasis>useSystemClassLoaderAsParent</emphasis> to
               <literal>false</literal> to fix the problem:
               <programlisting><![CDATA[<Context path="/myWebApp" docBase="/my/webApp/location">
-   <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" 
-                          useSystemClassLoaderAsParent="false"/>
+    <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
+            useSystemClassLoaderAsParent="false"/>
 </Context>]]></programlisting>
               </para>
-
-              <para>In Tomcat 4.x, one can use the same contex.xml and place
-              it under <emphasis>$CATALINA_HOME</emphasis>/webapps or modify
-              <emphasis>$CATALINA_HOME/</emphasis>conf/server.xml to use the
-              custom ClassLoader by default. See the Tomcat 4.x <ulink
-              url="http://tomcat.apache.org/tomcat-4.1-doc/config/context.html">documentation</ulink>
-              for more information.</para>
             </listitem>
 
           </orderedlist>
@@ -2148,7 +2141,7 @@
               the default one) by editing the web application context file:</para>
 
               <programlisting><![CDATA[<Context path="/myWebApp" docBase="/my/webApp/location">
-   <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
+    <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
 </Context>]]></programlisting>
 
               <para>Tomcat 6.0.x (similar to 5.0.x/5.5.x) series support several context
@@ -2229,7 +2222,7 @@
         </section>
         
         <section id="orm-jpa-resin">
-          <title>Resin load-time weaving setup (3.1.0+)</title>
+          <title>Resin load-time weaving setup (3.1+)</title>
 
           <para>Caucho <ulink
           url="http://www.caucho.com/resin-3.1/">Resin 3.1</ulink>
@@ -2303,8 +2296,8 @@
 
         <para>Note that the default implementation allows customization of the
         persistence unit infos before feeding them to the JPA provider
-        declaratively through its properties (which affect *all* housed units)
-        or programatically, through the
+        declaratively through its properties (which affect <emphasis>all</emphasis>
+        housed units) or programmatically, through the
         <literal>PersistenceUnitPostProcessor</literal> (which allow
         persistence unit selection). If no persistenceUnitManager is
         specified, one will be created and used internally by
