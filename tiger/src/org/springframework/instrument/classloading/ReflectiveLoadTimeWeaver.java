@@ -27,7 +27,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * LoadTimeWeaver which uses reflection to delegate to an underlying ClassLoader
+ * {@link LoadTimeWeaver} which uses reflection to delegate to an underlying ClassLoader
  * with well-known transformation hooks. The underlying ClassLoader is expected to
  * support the following weaving methods (as defined in the {@link LoadTimeWeaver}
  * interface):
@@ -45,13 +45,14 @@ import org.springframework.util.ReflectionUtils;
  * to the application's class loader.
  *
  * <p>The reflective nature of this LoadTimeWeaver is particularly useful when the
- * underlying class loader implementation is loaded in a different class loader
+ * underlying ClassLoader implementation is loaded in a different class loader itself
  * (such as the application server's class loader which is not visible to the
  * web application). There is no direct API dependency between this LoadTimeWeaver
  * adapter and the underlying ClassLoader, just a 'loose' method contract.
  *
  * <p>This is the LoadTimeWeaver to use in combination with Spring's
- * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}.
+ * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}
+ * for Tomcat 5.0+ as well as with the Resin application server version 3.1+.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -89,8 +90,6 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	 * Create a new SimpleLoadTimeWeaver for the given class loader.
 	 * @param classLoader the <code>ClassLoader</code> to delegate to for
 	 * weaving (<i>must</i> support the required weaving methods).
-	 * @throws IllegalArgumentException if the supplied <code>ClassLoader</code>
-	 * is <code>null</code>
 	 * @throws IllegalStateException if the supplied <code>ClassLoader</code>
 	 * does not support the required weaving methods
 	 */
