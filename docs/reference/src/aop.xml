@@ -2816,7 +2816,7 @@ public class Account {
       this (see for example the <ulink
       url="http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html">AspectJ
       Development Environment Guide</ulink>) or load-time weaving (see <xref
-      linkend="aop-aj-ltw" />). The
+      linkend="aop-aj-ltw"/>). The
       <classname>AnnotationBeanConfigurerAspect</classname> itself needs
       configuring by Spring (in order to obtain a reference to the bean
       factory that is to be used to configure new objects). The Spring <link
@@ -3416,38 +3416,28 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
             <thead>
               <row>
                 <entry>Runtime Environment</entry>
-
-                <entry><interfacename>LoadTimeWeaver</interfacename>
-                implementation</entry>
+                <entry><interfacename>LoadTimeWeaver</interfacename> implementation</entry>
               </row>
             </thead>
 
             <tbody>
-              <!-- 
-							<row>
-								<entry>
-									<para>Running in <ulink url="https://glassfish.dev.java.net//">GlassFish</ulink></para>
-								</entry>
-								<entry>
-									<para><classname>org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver</classname></para>
-								</entry>
-							</row>
-							 -->
+              <row>
+                <entry><para>Running in <ulink
+                url="http://www.bea.com/framework.jsp?CNT=index.htm&amp;FP=/content/products/weblogic/server">BEA's
+                Weblogic 10</ulink></para></entry>
+                <entry><para><classname>WebLogicLoadTimeWeaver</classname></para></entry>
+              </row>
 
               <row>
                 <entry><para>Running in <ulink
                 url="http://www.oracle.com/technology/products/oc4j/index.html">Oracle's
                 OC4J</ulink></para></entry>
-
-                <entry><para><classname>org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver</classname></para></entry>
+                <entry><para><classname>OC4JLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>Running in <ulink
-                url="http://www.bea.com/framework.jsp?CNT=index.htm&amp;FP=/content/products/weblogic/server">BEA's
-                Weblogic 10</ulink></para></entry>
-
-                <entry><para><classname>org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver</classname></para></entry>
+                <entry><para>Running in <ulink url="http://glassfish.dev.java.net/">GlassFish</ulink></para></entry>
+                <entry><para><classname>GlassFishLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
@@ -3455,14 +3445,13 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
                 <classname>InstrumentationSavingAgent</classname></para>
                 <para><emphasis><literal>(java
                 -javaagent:path/to/spring-agent.jar)</literal></emphasis></para></entry>
-
-                <entry><para><classname>org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver</classname></para></entry>
+                <entry><para><classname>InstrumentationLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>(Fallback)</para></entry>
-
-                <entry><para><classname>org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver</classname></para></entry>
+                <entry><para>Fallback, expecting the underlying ClassLoader to follow common conventions
+                (e.g. applicable to <classname>TomcatInstrumentableClassLoader</classname> and to Resin)</para></entry>
+                <entry><para><classname>ReflectiveLoadTimeWeaver</classname></para></entry>
               </row>
             </tbody>
           </tgroup>
@@ -3524,7 +3513,6 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
             <thead>
               <row>
                 <entry>Attribute Value</entry>
-
                 <entry>Explanation</entry>
               </row>
             </thead>
@@ -3532,21 +3520,18 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
             <tbody>
               <row>
                 <entry><para><literal>on</literal></para></entry>
-
                 <entry><para>AspectJ weaving is on, and aspects will be woven
                 at load-time as appropriate.</para></entry>
               </row>
 
               <row>
                 <entry><para><literal>off</literal></para></entry>
-
                 <entry><para>LTW is off... no aspect will be woven at
                 load-time.</para></entry>
               </row>
 
               <row>
                 <entry><para><literal>autodetect</literal></para></entry>
-
                 <entry><para>If the Spring LTW infrastructure can find at
                 least one '<filename>META-INF/aop.xml</filename>' file, then
                 AspectJ weaving is on, else it is off. This is the default
@@ -3562,48 +3547,72 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
         <para>This last section contains any additional settings and
         configuration that you will need when using Spring's LTW support in
-        environments such as application- and web-servers.</para>
-
-        <section id="aop-aj-ltw-environments-weblogic10-oc4j">
-          <title>Weblogic 10 and OC4J</title>
-
-          <para>BEA Weblogic version 10 and Oracle Containers for Java EE (OC4J) use a classloader that
-          is capable of working with any instrumentation agent. Spring's
-          native LTW leverages that classloader to enable AspectJ weaving. You
-          can enable LTW by simply modifying the application context as
-          described earlier. Specifically, you do <emphasis>not</emphasis>
-          need to modify the launch script to add
-          -javaagent:path/to/spring-agent.jar.</para>
-        </section>
-
-        <note>
-          <para>Currently, OC4J and Weblogic 10 are the only application servers supported
-          directly by the Spring's native LTW mechanism. In future, we plan to
-          extend this support to other application servers such as certain
-          versions of Tomcat and Glassfish.</para>
-        </note>
+        environments such as application servers and web containers.</para>
 
         <section id="aop-aj-ltw-environment-generic">
           <title>Generic Java applications</title>
 
-          <para>You may enables Spring support for LTW in any Java application
-          (including the ones not using an application or web server), through
-          the use of Spring provided instrumentation agent. To do so, start
-          the VM by by specifying the -javaagent:path/to/spring-agent.jar
-          option.</para>
+          <para>You may enable Spring's support for LTW in any Java application
+          (standalone as well as application server based) through the use of
+          the Spring-provided instrumentation agent. To do so, start
+          the VM by by specifying the
+          <literal>-javaagent:path/to/spring-agent.jar</literal> option.
+          Note that this requires modification of the VM launch script
+          which may prevent you from using this in application server
+          environments (depending on your operation policies).</para>
         </section>
 
-        <!-- 
-				<section id="aop-aj-ltw-environments-tomcat">
-					<title>Tomcat</title>
-					<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
-				</section>
+        <section id="aop-aj-ltw-environment-tomcat">
+          <title>Tomcat</title>
 
-				<section id="aop-aj-ltw-environments-glassfish">
-					<title>GlassFish</title>
-					<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
-				</section>
- 				-->
+          <para>For web applications deployed onto Apache Tomcat 5.0 and above,
+          Spring provides a <classname>TomcatInstrumentableClassLoader</classname>
+          to be registered as the web app class loader. The required Tomcat setup
+          looks as follows, to be included either in Tomcat's central
+          <literal>server.xml</literal> file or in an application-specific
+          <literal>META-INF/context.xml</literal> file within the WAR root.
+          Spring's <literal>spring-tomcat-weaver.jar</literal> needs to be
+          included in Tomcat's common lib directory in order to make this
+          setup work.</para>
+
+          <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
+            useSystemClassLoaderAsParent="false"/&gt;
+&lt;/Context&gt;
+</programlisting>
+
+          <para><emphasis>Note: We generally recommend Tomcat 5.5.20 or above
+          when enabling load-time weaving.</emphasis> Prior versions have known
+          issues with custom <classname>ClassLoader</classname> setup.</para>
+
+          <para>Alternatively, consider the use of the Spring-provided generic
+          VM agent, to be specified in Tomcat's launch script (see above).
+          This will make instrumentation available to all deployed web
+          applications, no matter which ClassLoader they happen to run on.</para>
+
+          <para>For a more detailed discussion of Tomcat-based weaving setup,
+          check out the <xref linkend="orm-jpa-setup-lcemfb-tomcat"/> section
+          which discusses specifics of various Tomcat versions. While the primary
+          focus of that section is on JPA persistence provider setup, the Tomcat
+          setup characteristics apply to general load-time weaving as well.</para>
+        </section>
+
+        <section id="aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish">
+          <title>WebLogic, OC4J, Resin, GlassFish</title>
+
+          <para>Recent versions of BEA WebLogic (version 10 and above), Oracle
+          Containers for Java EE (OC4J 10.1.3.1 and above) and Resin (3.1 and above)
+          provide a ClassLoader that is capable of local instrumentation.
+          Spring's native LTW leverages such ClassLoaders to enable AspectJ weaving.
+          You can enable LTW by simply activating <literal>context:load-time-weaver</literal>
+          as described earlier. Specifically, you do <emphasis>not</emphasis>
+          need to modify the launch script to add
+          <literal>-javaagent:path/to/spring-agent.jar</literal>.</para>
+
+          <para>GlassFish provides an instrumentation-capable ClassLoader as well,
+          but only in its EAR environment. For GlassFish web applications,
+          follow the Tomcat setup instructions as outlined above.</para>
+        </section>
       </section>
     </section>
   </section>
@@ -3620,7 +3629,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
     <para>The book <emphasis>AspectJ in Action</emphasis> by Ramnivas Laddad
     (Manning, 2003) comes highly recommended; the focus of the book is on
-    AspectJ, but a lot of general AOP themes are explored (in some
-    depth).</para>
+    AspectJ, but a lot of general AOP themes are explored (in some depth).</para>
   </section>
+
 </chapter>

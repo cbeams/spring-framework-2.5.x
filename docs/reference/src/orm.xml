@@ -2065,13 +2065,13 @@
         tests with sophisticated persistence requirements.</emphasis></para>
 
         <sidebar>
-          <title>When is load time weaving required?</title>
+          <title>When is load-time weaving required?</title>
 
           <para>Not all JPA providers impose the need of a JVM agent
           (Hibernate being an example). If your provider does not require an
           agent or you have other alternatives (for example applying
           enhancements at build time through a custom compiler or an ant task)
-          the load time weaver <emphasis role="bold">should not</emphasis> be
+          the load-time weaver <emphasis role="bold">should not</emphasis> be
           used.</para>
         </sidebar>
 
@@ -2080,7 +2080,7 @@
         <interfacename>ClassTransformer</interfacename> instances to be
         plugged in a specific manner depending on the environment (web
         container/application server). Hooking
-        <literal>ClassTransformers</literal> through a JDK 5.0 <ulink
+        <literal>ClassTransformers</literal> through a Java 5 <ulink
         url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agent</ulink>
         is typically not efficient - the agents work against the
         <emphasis>entire virtual machine</emphasis> and inspect
@@ -2091,13 +2091,18 @@
         <interfacename>LoadTimeWeaver</interfacename> implementations for
         various environments, allowing
         <interfacename>ClassTransformer</interfacename> instances to be
-        applied only <emphasis>per ClassLoader</emphasis> and not per
-        VM.</para>
+        applied only <emphasis>per ClassLoader</emphasis> and not per VM.</para>
+
+        <para>The following sections will discuss typical JPA weaving setup on
+        Tomcat as well as using Spring's VM agent. See the AOP chapter section
+        entitled <xref linkend="aop-aj-ltw-spring"/> for details on how to set
+        up general load-time weaving, covering Tomcat and the VM agent as well
+        as WebLogic, OC4J, GlassFish and Resin.</para>
 
         <section id="orm-jpa-setup-lcemfb-tomcat">
-          <title>Tomcat load-time weaving setup (4.1+)</title>
+          <title>Tomcat load-time weaving setup (5.0+)</title>
 
-          <para><ulink url="http://tomcat.apache.org/">Jakarta
+          <para><ulink url="http://tomcat.apache.org/">Apache
           Tomcat's</ulink> default ClassLoader does not support class
           transformation but allows custom ClassLoaders to be used. Spring
           offers the <classname>TomcatInstrumentableClassLoader</classname>
@@ -2114,7 +2119,7 @@
 
           <itemizedlist>
             <listitem>
-              <para>Tomcat 4.1.x/5.0.x/5.5.x</para>
+              <para>Tomcat 5.0.x/5.5.x</para>
             </listitem>
 
             <orderedlist>
@@ -2131,7 +2136,7 @@
                 file:</para>
 
                 <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-   &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" /&gt;
+    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
                 <para>Tomcat 5.0.x and 5.5.x series support several context
@@ -2152,7 +2157,7 @@
 
                 <para>Note that versions prior to 5.5.20 contained a bug in
                 the XML configuration parsing preventing usage of
-                <literal>Loader </literal>tag inside
+                <literal>Loader</literal> tag inside
                 <emphasis>server.xml</emphasis> (no matter if a ClassLoader is
                 specified or not (be it the official or a custom one). See
                 Tomcat's bugzilla for <ulink
@@ -2162,16 +2167,9 @@
                 <para>If you are using Tomcat 5.5.20+ you can set
                 <emphasis>useSystemClassLoaderAsParent</emphasis> to
                 <literal>false</literal> to fix the problem: <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-   &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" 
-                          useSystemClassLoaderAsParent="false"/&gt;
+    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
+            useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;</programlisting></para>
-
-                <para>In Tomcat 4.x, one can use the same contex.xml and place
-                it under <emphasis>$CATALINA_HOME</emphasis>/webapps or modify
-                <emphasis>$CATALINA_HOME/</emphasis>conf/server.xml to use the
-                custom ClassLoader by default. See the Tomcat 4.x <ulink
-                url="http://tomcat.apache.org/tomcat-4.1-doc/config/context.html">documentation</ulink>
-                for more information.</para>
               </listitem>
             </orderedlist>
 
@@ -2193,7 +2191,7 @@
                 file:</para>
 
                 <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-   &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
                 <para>Tomcat 6.0.x (similar to 5.0.x/5.5.x) series support
@@ -2220,7 +2218,7 @@
           configuring
           <classname>LocalContainerEntityManagerFactoryBean</classname>:</para>
 
-          <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+          <programlisting>&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;
     &lt;bean class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/&gt;
   &lt;/property&gt;
@@ -2241,55 +2239,8 @@
           </note>
         </section>
 
-        <section id="orm-jpa-oc4j">
-          <title>OC4J load-time weaving setup (10.1.3.1+)</title>
-
-          <para>As Oracle's <ulink
-          url="http://www.oracle.com/technology/tech/java/oc4j/index.html">OC4J</ulink>
-          ClassLoader has native bytecode transformation support, switching
-          from an JDK agent to a <interfacename>LoadTimeWeaver</interfacename>
-          can be done just through the application Spring
-          configuration:</para>
-
-          <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
-  &lt;property name="loadTimeWeaver"&gt;
-    &lt;bean class="org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver"/&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
-        </section>
-
-        <section id="orm-jpa-glassfish">
-          <title>GlassFish load-time weaving setup</title>
-
-          <para><ulink url="https://glassfish.dev.java.net/">GlassFish</ulink>
-          application server provides out of the box, an instrumentation cable
-          ClassLoader. Spring supports it through
-          <classname>GlassFishLoadTimeWeaver</classname>:</para>
-
-          <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
-  &lt;property name="loadTimeWeaver"&gt;
-    &lt;bean class="org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver"/&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
-        </section>
-
-        <section id="orm-jpa-resin">
-          <title>Resin load-time weaving setup (3.1.0+)</title>
-
-          <para>Caucho <ulink url="http://www.caucho.com/resin-3.1/">Resin
-          3.1</ulink> sesies ClassLoader provides native bytecode capabilities
-          which can be used by Spring through
-          <classname>ReflectiveLoadTimeWeaver</classname>:</para>
-
-          <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
-  &lt;property name="loadTimeWeaver"&gt;
-    &lt;bean class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
-        </section>
-
-        <section id="orm-jpa-loadtimeweaver">
-          <title>General <interfacename>LoadTimeWeaver</interfacename></title>
+        <section id="orm-jpa-setup-lcemfb-agent">
+          <title>General load-time weaving using the VM agent</title>
 
           <para>For environments where class instrumentation is required but
           are not supported by the existing LoadTimeWeaver implementations, a
@@ -2298,7 +2249,7 @@
           a Spring-specific (but very general) VM agent (<filename
           class="libraryfile">spring-agent.jar</filename>):</para>
 
-          <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+          <programlisting>&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;
     &lt;bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/&gt;
   &lt;/property&gt;
@@ -2309,6 +2260,30 @@
 
           <programlisting>-javaagent:/path/to/spring-agent.jar</programlisting>
         </section>
+
+        <section id="orm-jpa-setup-lcemfb-weaver">
+          <title>Context-wide load-time weaver setup</title>
+
+          <para>Since Spring 2.5, a context-wide <interfacename>LoadTimeWeaver</interfacename>
+          can be configured using the <literal>context:load-time-weaver</literal> configuration
+          element. Such a 'global' weaver will be picked up by all JPA
+          <classname>LocalContainerEntityManagerFactoryBeans</classname> automatically.</para>
+
+          <para>This is the preferred way of setting up a load-time weaver, delivering
+          autodetection of the platform (WebLogic, OC4J, GlassFish, Tomcat, Resin, VM agent)
+          as well as automatic propagation of the weaver to all weaver-aware beans.</para>
+
+          <programlisting>&lt;context:load-time-weaver/&gt;
+
+&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+    ...
+&lt;/bean&gt;</programlisting>
+
+          <para>See the section entitled <xref linkend="aop-aj-ltw-spring"/>
+          for details on how to set up general load-time weaving, covering Tomcat
+          and the VM agent as well as WebLogic, OC4J, GlassFish and Resin.</para>
+        </section>
+
       </section>
 
       <section id="orm-jpa-multiple-pu">
@@ -2325,7 +2300,7 @@
         parsed and later on retrieved through the persistence unit
         name:</para>
 
-        <programlisting>&lt;bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager"&gt;
+        <programlisting>&lt;bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager"&gt;
   &lt;property name="persistenceXmlLocation"&gt;
     &lt;list&gt;
      &lt;value&gt;org/springframework/orm/jpa/domain/persistence-multi.xml&lt;/value&gt;
@@ -2344,14 +2319,14 @@
   
 &lt;/bean&gt;
 
-&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
- &lt;property name="persistenceUnitManager" ref="persistenceUnitManager"/&gt;
+&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+  &lt;property name="persistenceUnitManager" ref="pum"/&gt;
 &lt;/bean&gt;</programlisting>
 
         <para>Note that the default implementation allows customization of the
         persistence unit infos before feeding them to the JPA provider
-        declaratively through its properties (which affect *all* housed units)
-        or programatically, through the
+        declaratively through its properties (which affect <emphasis>all</emphasis>
+        housed units) or programmatically, through the
         <literal>PersistenceUnitPostProcessor</literal> (which allow
         persistence unit selection). If no persistenceUnitManager is
         specified, one will be created and used internally by
@@ -2577,8 +2552,8 @@
 
         <para>What about class level annotations?</para>
 
-        <para>On JEE 5 platform, they are used for dependency declaration and
-        not for resource injection.</para>
+        <para>On the Java EE 5 platform, they are used for dependency declaration
+        and not for resource injection.</para>
       </sidebar>
 
       <para>The injected <interfacename>EntityManager</interfacename> is
