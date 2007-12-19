@@ -1089,20 +1089,27 @@ public class DefaultFooService implements FooService {
             <emphasis>switches on</emphasis> the transactional behavior.</para>
 
             <para>The Spring team's recommendation is that you only annotate concrete
-			classes with the <interfacename>@Transactional</interfacename> annotation,
-			as opposed to annotating interfaces. You certainly can place the
-			<interfacename>@Transactional</interfacename> annotation on an interface (or
-			an interface method), but this will only work as you would expect it to if
+            classes with the <interfacename>@Transactional</interfacename> annotation,
+            as opposed to annotating interfaces. You certainly can place the
+            <interfacename>@Transactional</interfacename> annotation on an interface (or
+            an interface method), but this will only work as you would expect it to if
             you are using interface-based proxies. The fact that annotations are
-			<emphasis>not inherited</emphasis> means that if you are using class-based
-			proxies then the transaction settings will not be recognised by the
-			class-based proxying infrastructure and the object will not be wrapped in a
-			transactional proxy (which would be decidedly <emphasis>bad</emphasis>).
-			So please do take the Spring team's advice and only annotate concrete classes
-			(and the methods of concrete classes) with the
-			<interfacename>@Transactional</interfacename> annotation.</para>
-			
-			<para>
+            <emphasis>not inherited</emphasis> means that if you are using class-based
+            proxies then the transaction settings will not be recognised by the
+            class-based proxying infrastructure and the object will not be wrapped in a
+            transactional proxy (which would be decidedly <emphasis>bad</emphasis>).
+            So please do take the Spring team's advice and only annotate concrete classes
+            (and the methods of concrete classes) with the
+            <interfacename>@Transactional</interfacename> annotation.</para>
+
+            <para><emphasis>Note: Since this mechanism is based on proxies, only 'external'
+            method calls coming in through the proxy will be intercepted.</emphasis>
+            This means that 'self-invocation', i.e. a method within the target object
+            calling some other method of the target object, won't lead to an actual
+            transaction at runtime even if the invoked method is marked with
+            <interfacename>@Transactional</interfacename>!</para>
+
+            <para>
                 <table id="tx-annotation-driven-settings">
                     <title><literal>&lt;tx:annotation-driven/&gt;</literal> settings</title>
                     <tgroup cols="4">
