@@ -74,6 +74,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -704,6 +705,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			else if (returnValue instanceof Map) {
 				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);
+			}
+			else if (returnValue instanceof View) {
+				return new ModelAndView((View) returnValue).addAllObjects(implicitModel);
 			}
 			else if (returnValue instanceof String) {
 				return new ModelAndView((String) returnValue).addAllObjects(implicitModel);
