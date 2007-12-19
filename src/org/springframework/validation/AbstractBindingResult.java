@@ -390,11 +390,10 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	}
 
 	/**
-	 * This implementation throws an UnsupportedOperationException.
+	 * This implementation returns <code>null</code>.
 	 */
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
-		throw new UnsupportedOperationException(
-				"[" + getClass().getName() + "] does not support a PropertyEditorRegistry");
+		return null;
 	}
 
 	/**

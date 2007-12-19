@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,8 @@ public interface BindingResult extends Errors {
 
 	/**
 	 * Return the underlying PropertyEditorRegistry.
-	 * @throws UnsupportedOperationException if the BindingResult
-	 * does not support a PropertyEditorRegistry
+	 * @return the PropertyEditorRegistry, or <code>null</code> if none
+	 * available for this BindingResult
 	 */
 	PropertyEditorRegistry getPropertyEditorRegistry();
 
