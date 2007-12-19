@@ -105,6 +105,10 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 		}
 	}
 
+	public Object convertIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
+		return convertIfNecessary(value, requiredType, null);
+	}
+
 
 	// Redefined with public visibility.
 	public Class getPropertyType(String propertyPath) {

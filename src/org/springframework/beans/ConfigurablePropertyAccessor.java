@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ package org.springframework.beans;
  * Also extends the PropertyEditorRegistry interface, which defines methods
  * for PropertyEditor management.
  *
- * <p>Serves as base interface for BeanWrapper.
+ * <p>Serves as base interface for {@link BeanWrapper}.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see BeanWrapper
  */
-public interface ConfigurablePropertyAccessor extends PropertyAccessor, PropertyEditorRegistry {
+public interface ConfigurablePropertyAccessor extends PropertyAccessor, PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set whether to extract the old property value when applying a

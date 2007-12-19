@@ -343,20 +343,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return false;
 	}
 
-
-	//---------------------------------------------------------------------
-	// Implementation of TypeConverter interface
-	//---------------------------------------------------------------------
-
 	/**
 	 * @deprecated in favor of <code>convertIfNecessary</code>
 	 * @see #convertIfNecessary(Object, Class)
 	 */
 	public Object doTypeConversionIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
-		return convertIfNecessary(value, requiredType, null);
-	}
-
-	public Object convertIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
 		return convertIfNecessary(value, requiredType, null);
 	}
 
