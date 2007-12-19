@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,9 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
-import org.springframework.jms.listener.serversession.ListenerSessionManager;
-
 /**
- * ServerSessionFactory implementation that holds ServerSessions
- * in a configurable Jakarta Commons Pool.
+ * {@link ServerSessionFactory} implementation that holds JMS
+ * <code>ServerSessions</code> in a configurable Jakarta Commons Pool.
  *
  * <p>By default, an instance of <code>GenericObjectPool</code> is created.
  * Subclasses may change the type of <code>ObjectPool</code> used by
@@ -78,6 +76,7 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 		setMaxSize(GenericObjectPool.DEFAULT_MAX_ACTIVE);
 	}
 
+
 	/**
 	 * Set the maximum number of idle ServerSessions in the pool.
 	 * Default is 8.
@@ -91,7 +90,7 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	 * Return the maximum number of idle ServerSessions in the pool.
 	 */
 	public int getMaxIdle() {
-		return maxIdle;
+		return this.maxIdle;
 	}
 
 	/**
@@ -107,7 +106,7 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	 * Return the minimum number of idle ServerSessions in the pool.
 	 */
 	public int getMinIdle() {
-		return minIdle;
+		return this.minIdle;
 	}
 
 	/**
@@ -123,7 +122,7 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	 * Return the maximum waiting time for fetching a ServerSession from the pool.
 	 */
 	public long getMaxWait() {
-		return maxWait;
+		return this.maxWait;
 	}
 
 	/**
@@ -140,7 +139,7 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	 * Return the time between eviction runs that check idle ServerSessions.
 	 */
 	public long getTimeBetweenEvictionRunsMillis() {
-		return timeBetweenEvictionRunsMillis;
+		return this.timeBetweenEvictionRunsMillis;
 	}
 
 	/**
@@ -159,7 +158,7 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	 * Return the minimum time that an idle ServerSession can sit in the pool.
 	 */
 	public long getMinEvictableIdleTimeMillis() {
-		return minEvictableIdleTimeMillis;
+		return this.minEvictableIdleTimeMillis;
 	}
 
 
@@ -267,6 +266,7 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 					logger.error("Failed to close ServerSession pool", ex);
 				}
 			}
+			this.serverSessionPools.clear();
 		}
 	}
 
