@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2007-12-20)
+Changes in version 2.5.1 (2007-12-21)
 -------------------------------------
 
 General
@@ -15,7 +15,9 @@ Package org.springframework.aop
 * ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
 
 Package org.springframework.beans
+* ConfigurablePropertyAccessor extends the TypeConverter interface (moved up from BeanWrapper interface)
 * BeanWrapper supports well-known collection implementation types for generic element conversion again (like Spring 2.0)
+* TypeConverterDelegate protects its text conversion step against PropertyEditors which don't support "setValue" calls
 * factored out FactoryBeanRegistrySupport base class from AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * optimized AbstractBeanFactory's access to cached FactoryBean-exposed objects, avoiding unnecessary locks
 * revised accidental public exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
@@ -26,6 +28,7 @@ Package org.springframework.beans
 * XmlBeanDefinitionReader detects recursive loading of the same resource (e.g. through import cycles)
 * DefaultBeanDefinitionDocumentReader sends ImportDefinition events containing the actually resolved Resource objects
 * DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
+* ClassPathBeanDefinitionScanner marks default init/destroy methods as not enforced (accepting beans without those)
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
 * factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
 * revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
@@ -67,6 +70,8 @@ Package org.springframework.jdbc
 Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
+* ServerSessionMessageListenerContainer always establishes a shared Connection (even if autoStart="false")
+* CommonsPoolServerSessionFactory clears ServerSessionPool Map on close (for proper reuse on stop and restart)
 * "jms:listener-container" tag supports a concurrency range (e.g. "3-5"), for specifying a minimum number of consumers
 
 Package org.springframework.jmx
@@ -126,6 +131,7 @@ Package org.springframework.util
 
 Package org.springframework.validation
 * clarified that BindingResult's "getPropertyEditorRegistry()" method may return null to indicate no support for editors
+* DataBinder implements the TypeConverter interface, delegating to the underlying PropertyAccessor
 
 Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
@@ -136,12 +142,14 @@ Package org.springframework.web
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
 * improved NoSuchRequestHandlingMethodException's error message to include request URL and query string explicitly
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
+* @InitBinder methods apply to @RequestParam parameters as well, with the @InitBinder value matched against param names
 * AnnotationMethodHandlerAdapter throws an exception if it cannot find a clear best path match for a specific request
 * AnnotationMethodHandlerAdapter throws descriptive exception in case of optional parameter being declared as primitive
 * AnnotationMethodHandlerAdapter automatically resolves arguments of type Principal as the request's user principal
 * AnnotationMethodHandlerAdapter propagates checked exceptions as-is for handler/attribute/init-binder methods
 * AnnotationMethodHandlerAdapter applies @InitBinder methods for view preparation as well (like WebBindingInitializers)
 * AnnotationMethodHandlerAdapter applies binder initialization for 'end' views (with processing being complete) as well
+* Servlet AnnotationMethodHandlerAdapter supports View return value for handler methods (as alternative to view name)
 * fixed Portlet AnnotationMethodHandlerAdapter to explicitly check for Action/Render*Response* (to work on Liferay)
 * InternalResourceView prevents dispatching to same path as handler (e.g. with default view name and default resolver)
 * JstlView detects session-scoped JSTL LocalizationContext/Locale attributes and merges them with its own context
@@ -149,6 +157,7 @@ Package org.springframework.web
 * reworked Spring's Tiles2 support such that it can operate against the Tiles2 (2.0.5+) JDK 1.4 version as well
 * Tiles2 TilesView explicitly checks whether the Tiles container has been initialized (throwing a descriptive exception)
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
+* fixed JSP BindTag to correctly detect and ignore a repeated nested path for the global errors case
 * JSP CheckboxTag/CheckboxesTag and RadioButtonTag/RadioButtonsTag use registered property editor for value rendering
 
 
