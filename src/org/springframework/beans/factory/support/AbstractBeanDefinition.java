@@ -311,11 +311,13 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @param defaults the defaults to apply
 	 */
 	public void applyDefaults(BeanDefinitionDefaults defaults) {
-		this.setLazyInit(defaults.isLazyInit());
-		this.setDependencyCheck(defaults.getDependencyCheck());
-		this.setAutowireMode(defaults.getAutowireMode());
-		this.setInitMethodName(defaults.getInitMethodName());
-		this.setDestroyMethodName(defaults.getDestroyMethodName());
+		setLazyInit(defaults.isLazyInit());
+		setDependencyCheck(defaults.getDependencyCheck());
+		setAutowireMode(defaults.getAutowireMode());
+		setInitMethodName(defaults.getInitMethodName());
+		setEnforceInitMethod(false);
+		setDestroyMethodName(defaults.getDestroyMethodName());
+		setEnforceDestroyMethod(false);
 	}
 
 
