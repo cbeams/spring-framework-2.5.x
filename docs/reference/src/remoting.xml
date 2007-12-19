@@ -48,10 +48,17 @@
 				</listitem>
 				<listitem>
 					<para>
-						<emphasis>JAX RPC</emphasis>. Spring provides remoting support
-						for web services via JAX-RPC.
+						<emphasis>JAX-RPC</emphasis>. Spring provides remoting support
+						for web services via JAX-RPC (J2EE 1.4's web service API).
 					</para>
 				</listitem>
+        <listitem>
+          <para>
+            <emphasis>JAX-WS</emphasis>. Spring provides remoting support
+            for web services via JAX-WS (the successor of JAX-RPC, as
+            introduced in Java EE 5 and Java 6).
+          </para>
+        </listitem>
 				<listitem>
 					<para>
 						<emphasis>JMS</emphasis>. Remoting using JMS as the underlying protocol
