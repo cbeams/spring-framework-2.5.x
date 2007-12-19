@@ -126,6 +126,8 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * @see #createConsumer
 	 */
 	protected void doInitialize() throws JMSException {
+		establishSharedConnection();
+
 		Connection con = getSharedConnection();
 		Destination destination = getDestination();
 		if (destination == null) {
