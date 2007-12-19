@@ -119,6 +119,10 @@ public class ReaderContext {
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, source));
 	}
 
+	public void fireImportProcessed(String importedResource, Resource[] actualResources, Object source) {
+		this.eventListener.importProcessed(new ImportDefinition(importedResource, actualResources, source));
+	}
+
 
 	public SourceExtractor getSourceExtractor() {
 		return this.sourceExtractor;

@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
@@ -30,6 +31,8 @@ public class ImportDefinition implements BeanMetadataElement {
 
 	private final String importedResource;
 
+	private final Resource[] actualResources;
+
 	private final Object source;
 
 
@@ -38,7 +41,7 @@ public class ImportDefinition implements BeanMetadataElement {
 	 * @param importedResource the location of the imported resource
 	 */
 	public ImportDefinition(String importedResource) {
-		this(importedResource, null);
+		this(importedResource, null, null);
 	}
 
 	/**
@@ -47,8 +50,18 @@ public class ImportDefinition implements BeanMetadataElement {
 	 * @param source the source object (may be <code>null</code>)
 	 */
 	public ImportDefinition(String importedResource, Object source) {
+		this(importedResource, null, source);
+	}
+
+	/**
+	 * Create a new ImportDefinition.
+	 * @param importedResource the location of the imported resource
+	 * @param source the source object (may be <code>null</code>)
+	 */
+	public ImportDefinition(String importedResource, Resource[] actualResources, Object source) {
 		Assert.notNull(importedResource, "Imported resource must not be null");
 		this.importedResource = importedResource;
+		this.actualResources = actualResources;
 		this.source = source;
 	}
 
@@ -56,11 +69,15 @@ public class ImportDefinition implements BeanMetadataElement {
 	/**
 	 * Return the location of the imported resource.
 	 */
-	public String getImportedResource() {
+	public final String getImportedResource() {
 		return this.importedResource;
 	}
 
-	public Object getSource() {
+	public final Resource[] getActualResources() {
+		return this.actualResources;
+	}
+
+	public final Object getSource() {
 		return this.source;
 	}
 

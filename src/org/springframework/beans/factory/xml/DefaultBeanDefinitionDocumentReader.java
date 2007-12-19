@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -168,10 +170,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 		if (ResourcePatternUtils.isUrl(location)) {
 			try {
-				int importCount = getReaderContext().getReader().loadBeanDefinitions(location);
+				Set actualResources = new LinkedHashSet(4);
+				int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Imported " + importCount + " bean definitions from URL location [" + location + "]");
 				}
+				Resource[] actResArray = (Resource[]) actualResources.toArray(new Resource[actualResources.size()]);
+				getReaderContext().fireImportProcessed(location, actResArray, extractSource(ele));
 			}
 			catch (BeanDefinitionStoreException ex) {
 				getReaderContext().error(
@@ -186,6 +191,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				if (logger.isDebugEnabled()) {
 					logger.debug("Imported " + importCount + " bean definitions from relative location [" + location + "]");
 				}
+				getReaderContext().fireImportProcessed(location, new Resource[] {relativeResource}, extractSource(ele));
 			}
 			catch (IOException ex) {
 				getReaderContext().error(
@@ -196,8 +202,6 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						"Failed to import bean definitions from relative location [" + location + "]", ele, ex);
 			}
 		}
-
-		getReaderContext().fireImportProcessed(location, extractSource(ele));
 	}
 
 	/**

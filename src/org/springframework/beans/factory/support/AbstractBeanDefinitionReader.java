@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -145,6 +146,25 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	}
 
 	public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
+		return loadBeanDefinitions(location, null);
+	}
+
+	/**
+	 * Load bean definitions from the specified resource location.
+	 * <p>The location can also be a location pattern, provided that the
+	 * ResourceLoader of this bean definition reader is a ResourcePatternResolver.
+	 * @param location the resource location, to be loaded with the ResourceLoader
+	 * (or ResourcePatternResolver) of this bean definition reader
+	 * @param actualResources a Set to be filled with the actual Resource objects
+	 * that have been resolved during the loading process. May be <code>null</code>
+	 * to indicate that the caller is not interested in those Resource objects.
+	 * @return the number of bean definitions found
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 * @see #getResourceLoader()
+	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource)
+	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
+	 */
+	public int loadBeanDefinitions(String location, Set actualResources) throws BeanDefinitionStoreException {
 		ResourceLoader resourceLoader = getResourceLoader();
 		if (resourceLoader == null) {
 			throw new BeanDefinitionStoreException(
@@ -156,6 +176,11 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 			try {
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
 				int loadCount = loadBeanDefinitions(resources);
+				if (actualResources != null) {
+					for (int i = 0; i < resources.length; i++) {
+						actualResources.add(resources[i]);
+					}
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Loaded " + loadCount + " bean definitions from location pattern [" + location + "]");
 				}
@@ -170,6 +195,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 			// Can only load single resources by absolute URL.
 			Resource resource = resourceLoader.getResource(location);
 			int loadCount = loadBeanDefinitions(resource);
+			if (actualResources != null) {
+				actualResources.add(resource);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + loadCount + " bean definitions from location [" + location + "]");
 			}
