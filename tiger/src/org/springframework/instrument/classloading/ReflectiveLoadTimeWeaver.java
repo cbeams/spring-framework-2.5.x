@@ -51,7 +51,8 @@ import org.springframework.util.ReflectionUtils;
  * adapter and the underlying ClassLoader, just a 'loose' method contract.
  *
  * <p>This is the LoadTimeWeaver to use in combination with Spring's
- * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}.
+ * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}
+ * for Tomcat 5.0+ as well as with the Resin application server version 3.1+.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
