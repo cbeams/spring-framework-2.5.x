@@ -1060,7 +1060,19 @@ public class XmlBeanFactoryTests extends TestCase {
 		// comes from "resource.xml"
 		xbf.getBean("resource2", ResourceTestBean.class);
 	}
-	
+
+	public void testRecursiveImport() {
+		try {
+			XmlBeanFactory xbf = new XmlBeanFactory(
+					new ClassPathResource("org/springframework/beans/factory/xml/recursiveImport.xml"));
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// expected
+			ex.printStackTrace();
+		}
+	}
+
 
 	public void testLookupOverrideMethodsWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
