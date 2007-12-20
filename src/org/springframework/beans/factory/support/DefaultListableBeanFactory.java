@@ -206,12 +206,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 					// Only check bean definition if it is complete.
 					if (!mbd.isAbstract() &&
-							(allowEagerInit || mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) {
+							(allowEagerInit || ((mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) &&
+									!requiresEagerInitForType(mbd.getFactoryBeanName()))) {
 						// In case of FactoryBean, match object created by FactoryBean.
 						Class beanClass = predictBeanType(beanName, mbd, true);
 						boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 						boolean matchFound =
-								(allowEagerInit || !requiresEagerInitForType(beanName, isFactoryBean, mbd.getFactoryBeanName())) &&
+								(allowEagerInit || !isFactoryBean || containsSingleton(beanName)) &&
 								(includePrototypes || isSingleton(beanName)) && isTypeMatch(beanName, type);
 						if (!matchFound && isFactoryBean) {
 							// In case of FactoryBean, try to match FactoryBean instance itself next.
@@ -275,15 +276,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Check whether the specified bean would need to be eagerly initialized
 	 * in order to determine its type.
-	 * @param beanName the name of the bean
-	 * @param isFactoryBean whether the bean itself is a FactoryBean
 	 * @param factoryBeanName a factory-bean reference that the bean definition
 	 * defines a factory method for
 	 * @return whether eager initialization is necessary
 	 */
-	private boolean requiresEagerInitForType(String beanName, boolean isFactoryBean, String factoryBeanName) {
-		return (isFactoryBean && !containsSingleton(beanName)) ||
-				(factoryBeanName != null && isFactoryBean(factoryBeanName) && !containsSingleton(factoryBeanName));
+	private boolean requiresEagerInitForType(String factoryBeanName) {
+		return (factoryBeanName != null && isFactoryBean(factoryBeanName) && !containsSingleton(factoryBeanName));
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {
