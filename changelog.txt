@@ -23,6 +23,8 @@ Package org.springframework.beans
 * revised accidental public exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
 * moved "resolveDependency" implementation from AbstractAutowireCapableBeanFactory down to DefaultListableBeanFactory
 * revised DefaultListableBeanFactory's "resolveDependency" exceptions with respect to clarity and context inclusion
+* DefaultListableBeanFactory does not eagerly initialize FactoryBeans for type checks even with factory-bean reference
+* DefaultListableBeanFactory throws descriptive exception in case of factory-bean circular reference
 * DefaultListableBeanFactory supports ObjectFactory indirection for resolvable dependencies
 * AbstractBeanDefinition stores and exposes the originating Resource (rather than just the resource description)
 * XmlBeanDefinitionReader detects recursive loading of the same resource (e.g. through import cycles)
@@ -52,6 +54,7 @@ Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
 * OverridingClassLoader excludes the "oracle." package by default as well (e.g. for TopLink's custom annotations)
 * MethodParameter uses reflection to obtain parameter annotations (for compatibility with the IBM 1.4.2 VM's debug mode)
+* LocalVariableTableParameterNameDiscoverer caches parameter names per method and obtained ASM ClassReaders per class
 
 Package org.springframework.ejb
 * "jee:local-slsb" and "jee:remote-slsb" work for EJB3 Session Beans as well (as alternative to "jee:jndi-lookup")
@@ -71,7 +74,7 @@ Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
 * ServerSessionMessageListenerContainer always establishes a shared Connection (even if autoStart="false")
-* CommonsPoolServerSessionFactory clears ServerSessionPool Map on close (for proper reuse on stop and restart)
+* CommonsPoolServerSessionFactory removes specific ServerSessionPool on close (for proper reuse on stop and restart)
 * "jms:listener-container" tag supports a concurrency range (e.g. "3-5"), for specifying a minimum number of consumers
 
 Package org.springframework.jmx
@@ -143,6 +146,8 @@ Package org.springframework.web
 * improved NoSuchRequestHandlingMethodException's error message to include request URL and query string explicitly
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
 * @InitBinder methods apply to @RequestParam parameters as well, with the @InitBinder value matched against param names
+* @ModelAttribute's default attribute names are consistently derived from the *declared* parameter/return type
+* AnnotationMethodHandlerAdapter maps relative paths specified at method level analogous to default method name mappings
 * AnnotationMethodHandlerAdapter throws an exception if it cannot find a clear best path match for a specific request
 * AnnotationMethodHandlerAdapter throws descriptive exception in case of optional parameter being declared as primitive
 * AnnotationMethodHandlerAdapter automatically resolves arguments of type Principal as the request's user principal
