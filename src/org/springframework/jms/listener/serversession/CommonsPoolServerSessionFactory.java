@@ -18,7 +18,6 @@ package org.springframework.jms.listener.serversession;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.jms.JMSException;
@@ -244,6 +243,9 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	 */
 	protected void serverSessionFinished(ServerSession serverSession, ListenerSessionManager sessionManager) {
 		ObjectPool pool = (ObjectPool) this.serverSessionPools.get(sessionManager);
+		if (pool == null) {
+			throw new IllegalStateException("No pool found for session manager [" + sessionManager + "]");
+		}
 		try {
 			pool.returnObject(serverSession);
 		}
@@ -253,20 +255,17 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	}
 
 	/**
-	 * Closes all pools held by this ServerSessionFactory.
+	 * Closes and removes the pool for the given session manager.
 	 */
 	public void close(ListenerSessionManager sessionManager) {
-		synchronized (this.serverSessionPools) {
-			for (Iterator it = this.serverSessionPools.values().iterator(); it.hasNext();) {
-				ObjectPool pool = (ObjectPool) it.next();
-				try {
-					pool.close();
-				}
-				catch (Exception ex) {
-					logger.error("Failed to close ServerSession pool", ex);
-				}
+		ObjectPool pool = (ObjectPool) this.serverSessionPools.remove(sessionManager);
+		if (pool != null) {
+			try {
+				pool.close();
 			}
-			this.serverSessionPools.clear();
+			catch (Exception ex) {
+				logger.error("Failed to close ServerSession pool", ex);
+			}
 		}
 	}
 
