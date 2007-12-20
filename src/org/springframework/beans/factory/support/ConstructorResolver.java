@@ -213,8 +213,17 @@ abstract class ConstructorResolver {
 		Object factoryBean = null;
 		boolean isStatic = true;
 
-		if (mbd.getFactoryBeanName() != null) {
-			factoryBean = this.beanFactory.getBean(mbd.getFactoryBeanName());
+		String factoryBeanName = mbd.getFactoryBeanName();
+		if (factoryBeanName != null) {
+			if (factoryBeanName.equals(beanName)) {
+				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+						"factory-bean reference points back to the same bean definition");
+			}
+			factoryBean = this.beanFactory.getBean(factoryBeanName);
+			if (factoryBean == null) {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+						"factory-bean '" + factoryBeanName + "' returned null");
+			}
 			factoryClass = factoryBean.getClass();
 			isStatic = false;
 		}
@@ -322,7 +331,9 @@ abstract class ConstructorResolver {
 			}
 
 			if (factoryMethodToUse == null) {
-				throw new BeanDefinitionStoreException("No matching factory method found: " +
+				throw new BeanCreationException(
+						mbd.getResourceDescription(), beanName,
+						"No matching factory method found: " +
 						(mbd.getFactoryBeanName() != null ?
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "'");
