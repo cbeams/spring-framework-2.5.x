@@ -262,7 +262,7 @@ class ConstructorResolver {
 		boolean isStatic = true;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
-		if (mbd.getFactoryBeanName() != null) {
+		if (factoryBeanName != null) {
 			if (factoryBeanName.equals(beanName)) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 						"factory-bean reference points back to the same bean definition");
