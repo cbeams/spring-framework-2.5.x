@@ -111,9 +111,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
+	private WebBindingInitializer webBindingInitializer;
+
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
-	private WebBindingInitializer webBindingInitializer;
+	private final ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	private final Map<Class<?>, HandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, HandlerMethodResolver>();
@@ -552,8 +554,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						// Request parameter value...
 						if ("".equals(paramName)) {
 							if (!paramNamesResolved) {
-								ParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
-								paramNames = discoverer.getParameterNames(handlerMethod);
+								paramNames = parameterNameDiscoverer.getParameterNames(handlerMethod);
 								paramNamesResolved = true;
 							}
 							if (paramNames == null) {

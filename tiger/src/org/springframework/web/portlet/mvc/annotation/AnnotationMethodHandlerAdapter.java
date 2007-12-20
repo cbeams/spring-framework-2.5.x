@@ -109,6 +109,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
+	private final ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+
 	private final Map<Class<?>, HandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, HandlerMethodResolver>();
 
@@ -514,8 +516,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 						// Request parameter value...
 						if ("".equals(paramName)) {
 							if (!paramNamesResolved) {
-								ParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
-								paramNames = discoverer.getParameterNames(handlerMethod);
+								paramNames = parameterNameDiscoverer.getParameterNames(handlerMethod);
 								paramNamesResolved = true;
 							}
 							if (paramNames == null) {

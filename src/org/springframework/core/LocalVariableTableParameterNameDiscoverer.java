@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,11 +37,14 @@ import org.objectweb.asm.commons.EmptyVisitor;
 import org.springframework.util.ClassUtils;
 
 /**
- * Implementation of ParameterNameDiscover that uses the LocalVariableTable
+ * Implementation of {@link ParameterNameDiscoverer} that uses the LocalVariableTable
  * information in the method attributes to discover parameter names. Returns
  * <code>null</code> if the class file was compiled without debug information.
  *
- * <p>Uses ObjectWeb's ASM library for analyzing class files.
+ * <p>Uses ObjectWeb's ASM library for analyzing class files. Each discoverer
+ * instance caches the ASM ClassReader for each introspected Class, in a
+ * thread-safe manner. It is recommended to reuse discoverer instances
+ * as far as possible.
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -49,53 +54,63 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 	private static Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
+	private final Map parameterNamesCache = CollectionFactory.createConcurrentMapIfPossible(16);
+
+	private final Map classReaderCache = new HashMap();
+
 
 	public String[] getParameterNames(Method method) {
-		ParameterNameDiscoveringVisitor visitor = null;
-		try {
-			visitor = visitMethod(method);
-			if (visitor.foundTargetMember()) {
-				return visitor.getParameterNames();
-			} 
-		} 
-		catch (IOException ex) {
-			// We couldn't load the class file, which is not fatal as it
-			// simply means this method of discovering parameter names won't work.
-			if (logger.isDebugEnabled()) {
-				logger.debug("IOException whilst attempting to read '.class' file for class [" +
-						method.getDeclaringClass().getName() +
-						"] - unable to determine parameter names for method: " + method, ex);
+		String[] paramNames = (String[]) this.parameterNamesCache.get(method);
+		if (paramNames == null) {
+			try {
+				ParameterNameDiscoveringVisitor visitor = visitMethod(method);
+				if (visitor.foundTargetMember()) {
+					paramNames = visitor.getParameterNames();
+					this.parameterNamesCache.put(method, paramNames);
+				}
+			}
+			catch (IOException ex) {
+				// We couldn't load the class file, which is not fatal as it
+				// simply means this method of discovering parameter names won't work.
+				if (logger.isDebugEnabled()) {
+					logger.debug("IOException whilst attempting to read '.class' file for class [" +
+							method.getDeclaringClass().getName() +
+							"] - unable to determine parameter names for method: " + method, ex);
+				}
 			}
 		}
-		return null;
+		return paramNames;
 	}
 
 	public String[] getParameterNames(Constructor ctor) {
-		ParameterNameDiscoveringVisitor visitor = null;
-		try {
-			visitor = visitConstructor(ctor);
-			if (visitor.foundTargetMember()) {
-				return visitor.getParameterNames();
-			} 
-		}
-		catch (IOException ex) {
-			// We couldn't load the class file, which is not fatal as it
-			// simply means this method of discovering parameter names won't work.
-			if (logger.isDebugEnabled()) {
-				logger.debug("IOException whilst attempting to read '.class' file for class [" +
-						ctor.getDeclaringClass().getName() +
-						"] - unable to determine parameter names for constructor: " + ctor,
-						ex);
+		String[] paramNames = (String[]) this.parameterNamesCache.get(ctor);
+		if (paramNames == null) {
+			try {
+				ParameterNameDiscoveringVisitor visitor = visitConstructor(ctor);
+				if (visitor.foundTargetMember()) {
+					paramNames = visitor.getParameterNames();
+					this.parameterNamesCache.put(ctor, paramNames);
+				}
+			}
+			catch (IOException ex) {
+				// We couldn't load the class file, which is not fatal as it
+				// simply means this method of discovering parameter names won't work.
+				if (logger.isDebugEnabled()) {
+					logger.debug("IOException whilst attempting to read '.class' file for class [" +
+							ctor.getDeclaringClass().getName() +
+							"] - unable to determine parameter names for constructor: " + ctor,
+							ex);
+				}
 			}
 		}
-		return null;
+		return paramNames;
 	}
 
 	/**
 	 * Visit the given method and discover its parameter names.
 	 */
 	private ParameterNameDiscoveringVisitor visitMethod(Method method) throws IOException {
-		ClassReader classReader = createClassReader(method.getDeclaringClass());
+		ClassReader classReader = getClassReader(method.getDeclaringClass());
 		FindMethodParameterNamesClassVisitor classVisitor = new FindMethodParameterNamesClassVisitor(method);
 		classReader.accept(classVisitor, false);
 		return classVisitor;
@@ -105,25 +120,32 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 * Visit the given constructor and discover its parameter names.
 	 */
 	private ParameterNameDiscoveringVisitor visitConstructor(Constructor ctor) throws IOException {
-		ClassReader classReader = createClassReader(ctor.getDeclaringClass());
+		ClassReader classReader = getClassReader(ctor.getDeclaringClass());
 		FindConstructorParameterNamesClassVisitor classVisitor = new FindConstructorParameterNamesClassVisitor(ctor);
 		classReader.accept(classVisitor, false);
 		return classVisitor;
 	}
 
 	/**
-	 * Create a ClassReader for the given class.
+	 * Obtain a (cached) ClassReader for the given class.
 	 */
-	private ClassReader createClassReader(Class clazz) throws IOException {
-		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
-		if (is == null) {
-			throw new FileNotFoundException("Class file for class [" + clazz.getName() + "] not found");
-		}
-		try {
-			return new ClassReader(is);
-		}
-		finally {
-			is.close();
+	private ClassReader getClassReader(Class clazz) throws IOException {
+		synchronized (this.classReaderCache) {
+			ClassReader classReader = (ClassReader) this.classReaderCache.get(clazz);
+			if (classReader == null) {
+				InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
+				if (is == null) {
+					throw new FileNotFoundException("Class file for class [" + clazz.getName() + "] not found");
+				}
+				try {
+					classReader = new ClassReader(is);
+					this.classReaderCache.put(clazz, classReader);
+				}
+				finally {
+					is.close();
+				}
+			}
+			return classReader;
 		}
 	}
 
