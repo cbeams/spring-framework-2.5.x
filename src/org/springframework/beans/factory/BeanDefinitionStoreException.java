@@ -19,9 +19,8 @@ package org.springframework.beans.factory;
 import org.springframework.beans.FatalBeanException;
 
 /**
- * Exception thrown when a BeanFactory encounters an internal error, and
- * its definitions are invalid: for example, if an XML document containing
- * bean definitions isn't well-formed.
+ * Exception thrown when a BeanFactory encounters an invalid bean definition:
+ * e.g. in case of incomplete or contradictory bean metadata.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -92,7 +91,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * @param cause the root cause (may be <code>null</code>)
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg, Throwable cause) {
-		super("Error registering bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, cause);
+		super("Invalid bean definition with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 	}

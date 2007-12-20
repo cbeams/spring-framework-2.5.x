@@ -513,9 +513,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Class factoryClass = null;
 		boolean isStatic = true;
 
-		if (mbd.getFactoryBeanName() != null) {
+		String factoryBeanName = mbd.getFactoryBeanName();
+		if (factoryBeanName != null) {
+			if (factoryBeanName.equals(beanName)) {
+				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+						"factory-bean reference points back to the same bean definition");
+			}
 			// Check declared factory method return type on factory class.
-			factoryClass = getType(mbd.getFactoryBeanName());
+			factoryClass = getType(factoryBeanName);
 			isStatic = false;
 		}
 		else {
