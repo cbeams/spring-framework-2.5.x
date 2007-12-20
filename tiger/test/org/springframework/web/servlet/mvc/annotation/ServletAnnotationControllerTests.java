@@ -430,6 +430,39 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
+	public void testRelativePathDispatchingController() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyRelativePathDispatchingController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myHandle");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myApp/myOther");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myOtherView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myApp/myLang");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myLangView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myApp/surprise.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("mySurpriseView", response.getContentAsString());
+	}
+
 
 	@RequestMapping("/myPath.do")
 	private static class MyController extends AbstractController {
@@ -658,6 +691,32 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping
+		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("mySurpriseView");
+		}
+	}
+
+
+	@Controller
+	@RequestMapping("/myApp/*")
+	private static class MyRelativePathDispatchingController {
+
+		@RequestMapping("myHandle")
+		public void myHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myView");
+		}
+
+		@RequestMapping("*Other")
+		public void myOtherHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myOtherView");
+		}
+
+		@RequestMapping("myLang")
+		public void myLangHandle(HttpServletResponse response) throws IOException {
+			response.getWriter().write("myLangView");
+		}
+
+		@RequestMapping("surprise")
 		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
 		}

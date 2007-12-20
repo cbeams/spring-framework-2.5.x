@@ -349,8 +349,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				boolean match = false;
 				if (mappingInfo.paths.length > 0) {
 					for (String mappedPath : mappingInfo.paths) {
-						if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath, lookupPath) ||
-								(mappedPath.indexOf('.') == -1 && pathMatcher.match(mappedPath + ".*", lookupPath))) {
+						if (isPathMatch(mappedPath, lookupPath)) {
 							if (checkParameters(request, mappingInfo)) {
 								match = true;
 								targetPathMatches.put(mappingInfo, mappedPath);
@@ -425,6 +424,19 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						lookupPath + "', method '" + request.getMethod() + "', parameters " +
 						StylerUtils.style(request.getParameterMap()));
 			}
+		}
+
+		private boolean isPathMatch(String mappedPath, String lookupPath) {
+			if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath, lookupPath)) {
+				return true;
+			}
+			boolean hasSuffix = (mappedPath.indexOf('.') != -1);
+			if (!hasSuffix && pathMatcher.match(mappedPath + ".*", lookupPath)) {
+				return true;
+			}
+			return (!mappedPath.startsWith("/") &&
+					(lookupPath.endsWith(mappedPath) || pathMatcher.match("/**/" + mappedPath, lookupPath) ||
+							(!hasSuffix && pathMatcher.match("/**/" + mappedPath + ".*", lookupPath))));
 		}
 
 		private boolean checkParameters(HttpServletRequest request, RequestMappingInfo mapping) {
