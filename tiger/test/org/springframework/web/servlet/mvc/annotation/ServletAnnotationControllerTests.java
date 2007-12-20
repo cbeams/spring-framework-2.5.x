@@ -209,7 +209,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyModelFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				wac.refresh();
 				return wac;
@@ -544,7 +544,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	@Controller
 	public static class MyFormController {
 
-		@ModelAttribute("testBeans")
+		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
 			List<TestBean> list = new LinkedList<TestBean>();
 			list.add(new TestBean("tb1"));
@@ -565,7 +565,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	@Controller
 	public static class MyModelFormController {
 
-		@ModelAttribute("testBeans")
+		@ModelAttribute
 		public List<TestBean> getTestBeans() {
 			List<TestBean> list = new LinkedList<TestBean>();
 			list.add(new TestBean("tb1"));
@@ -740,7 +740,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 					if (errors.hasFieldErrors("date")) {
 						throw new IllegalStateException();
 					}
-					List<TestBean> testBeans = (List<TestBean>) model.get("testBeans");
+					List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 					response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
 							"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
 				}

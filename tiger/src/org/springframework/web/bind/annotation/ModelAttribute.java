@@ -48,9 +48,11 @@ public @interface ModelAttribute {
 
 	/**
 	 * The name of the model attribute to bind to.
-	 * <p>The default model attribute name is inferred from the
-	 * attribute type, based on the non-qualified class name:
-	 * e.g. "orderAddress" for class "mypackage.OrderAddress".
+	 * <p>The default model attribute name is inferred from the declared
+	 * attribute type (i.e. the method parameter type or method return type),
+	 * based on the non-qualified class name:
+	 * e.g. "orderAddress" for class "mypackage.OrderAddress",
+	 * or "orderAddressList" for "List&lt;mypackage.OrderAddress&gt;".
 	 */
 	String value() default "";
 

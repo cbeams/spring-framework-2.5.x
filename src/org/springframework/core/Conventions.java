@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.io.Externalizable;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.HashSet;
@@ -69,6 +70,8 @@ public abstract class Conventions {
 	 * For <code>Collection</code>s we attempt to 'peek ahead' in the
 	 * <code>Collection</code> to determine the component type and
 	 * return the pluralized version of that component type.
+	 * @param value the value to generate a variable name for
+	 * @return the generated variable name
 	 */
 	public static String getVariableName(Object value) {
 		Assert.notNull(value, "Value must not be null");
@@ -90,6 +93,97 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = getClassForValue(value);
+		}
+
+		String name = ClassUtils.getShortNameAsProperty(valueClass);
+		return (pluralize ? pluralize(name) : name);
+	}
+
+	/**
+	 * Determine the conventional variable name for the supplied parameter,
+	 * taking the generic collection type (if any) into account.
+	 * @param parameter the method or constructor parameter to generate a variable name for
+	 * @return the generated variable name
+	 */
+	public static String getVariableNameForParameter(MethodParameter parameter) {
+		Assert.notNull(parameter, "Parameter must not be null");
+		Class valueClass = null;
+		boolean pluralize = false;
+
+		if (parameter.getParameterType().isArray()) {
+			valueClass = parameter.getParameterType().getComponentType();
+			pluralize = true;
+		}
+		else if (Collection.class.isAssignableFrom(parameter.getParameterType())) {
+			valueClass = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+			if (valueClass == null) {
+				throw new IllegalArgumentException("Cannot generate variable name for non-typed Collection parameter type");
+			}
+			pluralize = true;
+		}
+		else {
+			valueClass = parameter.getParameterType();
+		}
+
+		String name = ClassUtils.getShortNameAsProperty(valueClass);
+		return (pluralize ? pluralize(name) : name);
+	}
+
+	/**
+	 * Determine the conventional variable name for the return type of the supplied method,
+	 * taking the generic collection type (if any) into account.
+	 * @param method the method to generate a variable name for
+	 * @return the generated variable name
+	 */
+	public static String getVariableNameForReturnType(Method method) {
+		return getVariableNameForReturnType(method, null);
+	}
+
+	/**
+	 * Determine the conventional variable name for the return type of the supplied method,
+	 * taking the generic collection type (if any) into account, falling back to the
+	 * given return value if the method declaration is not specific enough (i.e. in case of
+	 * the return type being declared as <code>Object</code> or as untyped collection).
+	 * @param method the method to generate a variable name for
+	 * @param value the return value (may be <code>null</code> if not available)
+	 * @return the generated variable name
+	 */
+	public static String getVariableNameForReturnType(Method method, Object value) {
+		Assert.notNull(method, "Method must not be null");
+
+		if (Object.class.equals(method.getReturnType())) {
+			if (value == null) {
+				throw new IllegalArgumentException("Cannot generate variable name for an Object return type with null value");
+			}
+			return getVariableName(value);
+		}
+
+		Class valueClass = null;
+		boolean pluralize = false;
+
+		if (method.getReturnType().isArray()) {
+			valueClass = method.getReturnType().getComponentType();
+			pluralize = true;
+		}
+		else if (Collection.class.isAssignableFrom(method.getReturnType())) {
+			valueClass = GenericCollectionTypeResolver.getCollectionReturnType(method);
+			if (valueClass == null) {
+				if (!(value instanceof Collection)) {
+					throw new IllegalArgumentException(
+							"Cannot generate variable name for non-typed Collection return type and a non-Collection value");
+				}
+				Collection collection = (Collection) value;
+				if (collection.isEmpty()) {
+					throw new IllegalArgumentException(
+							"Cannot generate variable name for non-typed Collection return type and an empty Collection value");
+				}
+				Object valueToCheck = peekAhead(collection);
+				valueClass = getClassForValue(valueToCheck);
+			}
+			pluralize = true;
+		}
+		else {
+			valueClass = method.getReturnType();
 		}
 
 		String name = ClassUtils.getShortNameAsProperty(valueClass);
@@ -125,6 +219,18 @@ public abstract class Conventions {
 		}
 		return new String(result, 0, currPos);
 	}
+
+	/**
+	 * Return an attribute name qualified by the supplied enclosing {@link Class}. For example,
+	 * the attribute name '<code>foo</code>' qualified by {@link Class} '<code>com.myapp.SomeClass</code>'
+	 * would be '<code>com.myapp.SomeClass.foo</code>'
+	 */
+	public static String getQualifiedAttributeName(Class enclosingClass, String attributeName) {
+		Assert.notNull(enclosingClass, "'enclosingClass' must not be null");
+		Assert.notNull(attributeName, "'attributeName' must not be null");
+		return enclosingClass.getName() + "." + attributeName;
+	}
+
 
 	/**
 	 * Determines the class to use for naming a variable that contains
@@ -172,18 +278,6 @@ public abstract class Conventions {
 					"Unable to peek ahead in non-empty collection - only null element found");
 		}
 		return value;
-	}
-
-
-	/**
-	 * Return an attribute name qualified by the supplied enclosing {@link Class}. For example,
-	 * the attribute name '<code>foo</code>' qualified by {@link Class} '<code>com.myapp.SomeClass</code>'
-	 * would be '<code>com.myapp.SomeClass.foo</code>'
-	 */
-	public static String getQualifiedAttributeName(Class enclosingClass, String attributeName) {
-		Assert.notNull(enclosingClass, "'enclosingClass' must not be null");
-		Assert.notNull(attributeName, "'attributeName' must not be null");
-		return enclosingClass.getName() + "." + attributeName;
 	}
 
 }

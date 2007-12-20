@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.Conventions;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -49,7 +50,6 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
@@ -242,11 +242,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			String attrName = attributeMethod.getAnnotation(ModelAttribute.class).value();
 			if ("".equals(attrName)) {
-				implicitModel.addAttribute(attrValue);
+				attrName = Conventions.getVariableNameForReturnType(attributeMethod, attrValue);
 			}
-			else {
-				implicitModel.addAttribute(attrName, attrValue);
-			}
+			implicitModel.addAttribute(attrName, attrValue);
 		}
 
 		Object[] args = argResolver.resolveArguments(
@@ -529,7 +527,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					boolean isParam = false;
 					String paramName = "";
 					boolean paramRequired = false;
-					String attrName = ClassUtils.getShortNameAsProperty(param.getParameterType());
+					String attrName = null;
 					Annotation[] paramAnns = (Annotation[]) param.getParameterAnnotations();
 					for (int j = 0; j < paramAnns.length; j++) {
 						Annotation paramAnn = paramAnns[j];
@@ -546,6 +544,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 								attrName = attr.value();
 							}
 						}
+					}
+					if (attrName == null) {
+						attrName = Conventions.getVariableNameForParameter(param);
 					}
 					if (isParam || BeanUtils.isSimpleProperty(param.getParameterType())) {
 						// Request parameter value...

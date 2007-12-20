@@ -385,7 +385,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@Controller
 	private static class MyFormController {
 
-		@ModelAttribute("testBeans")
+		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
 			List<TestBean> list = new LinkedList<TestBean>();
 			list.add(new TestBean("tb1"));
@@ -406,7 +406,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 	@Controller
 	private static class MyModelFormController {
 
-		@ModelAttribute("testBeans")
+		@ModelAttribute
 		public List<TestBean> getTestBeans() {
 			List<TestBean> list = new LinkedList<TestBean>();
 			list.add(new TestBean("tb1"));
@@ -521,7 +521,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 			if (errors.hasFieldErrors("date")) {
 				throw new IllegalStateException();
 			}
-			List<TestBean> testBeans = (List<TestBean>) model.get("testBeans");
+			List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 			response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
 					"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
 		}
