@@ -5539,6 +5539,11 @@ public @interface Genre {
 &lt;/beans&gt;
 </programlisting>
 
+      <para>In the next section, entitled <xref linkend="beans-classpath-scanning"/>,
+      you will see an annotation-based alternative to providing the qualifier
+      metadata in XML. Specifically, see: <xref linkend="beans-scanning-qualifiers"/>.
+      </para>
+
       <para>In some cases, it may be sufficient to use an annotation without a
       value. This may be useful when the annotation serves a more generic
       purpose and could be applied across several different types of
@@ -6145,6 +6150,50 @@ public class MovieFinderImpl implements MovieFinder {
                              scoped-proxy="interfaces" /&gt;
      
 &lt;/beans&gt;</programlisting>
+    </section>
+
+    <section id="beans-scanning-qualifiers">
+      <title>Providing qualifier metadata with annotations</title>
+
+      <para>The <interfacename>@Qualifier</interfacename> annotation was
+      introduced in the section above entitled
+      <xref linkend="beans-autowired-annotation-qualifiers"/>. The
+      examples in that section demonstrated use of the
+      <interfacename>@Qualifier</interfacename> annotation as well
+      as custom qualifier annotations to provide fine-grained control
+      when resolving autowire candidates. Since those examples were
+      based on XML bean definitions, the qualifier metadata was provided
+      on the candidate bean definitions using the '<literal>qualifier</literal>'
+      or '<literal>meta</literal>' sub-elements of the '<literal>bean</literal>'
+      element in the XML. When relying upon classpath scanning for 
+      autodetection of components, then the qualifier metadata may
+      be provided with type-level annotations on the candidate class.
+      The following three examples demonstrate this technique.</para>
+
+      <programlisting>@Component
+<emphasis role="bold">@Qualifier("Action")</emphasis>
+public class ActionMovieCatalog implements MovieCatalog {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <programlisting>@Component
+<emphasis role="bold">@Genre("Action")</emphasis>
+public class ActionMovieCatalog implements MovieCatalog {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <programlisting>@Component
+<emphasis role="bold">@Offline</emphasis>
+public class CachingMovieCatalog implements MovieCatalog {
+    <lineannotation>// ...</lineannotation>
+}</programlisting>
+
+      <note>As with most of the annotation-based alternatives, keep
+      in mind that the annotation metadata is bound to the class
+      definition itself, while the use of XML allows for multiple
+      beans <emphasis>of the same type</emphasis> to provide variations
+      in their qualifier metadata since that metadata is provided
+      per-instance rather than per-class.</note>
     </section>
   </section>
 
