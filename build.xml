@@ -72,6 +72,7 @@
 		<exclude name="org/springframework/beans/factory/aspectj/**"/>
 		<exclude name="org/springframework/transaction/aspectj/**"/>
 		<!-- exclude content of spring-webmvc-*.jar -->
+    <exclude name="org/springframework/web/bind/**"/>
 		<exclude name="org/springframework/web/portlet/**"/>
 		<exclude name="org/springframework/web/servlet/**"/>
 		<exclude name="org/springframework/web/struts/**"/>
@@ -154,6 +155,7 @@
 
 	<patternset id="spring.web.packages">
 		<include name="org/springframework/web/**"/>
+    <exclude name="org/springframework/web/bind/**"/>
 		<exclude name="org/springframework/web/servlet/**"/>
 		<exclude name="org/springframework/web/portlet/**"/>
 		<exclude name="org/springframework/web/struts/**"/>
@@ -165,6 +167,7 @@
 
 	<patternset id="spring.webmvc.packages">
 		<include name="META-INF/*.tld"/>
+    <include name="org/springframework/web/bind/**"/>
 		<include name="org/springframework/web/servlet/**"/>
 		<exclude name="org/springframework/web/servlet/view/tiles/**"/>
 	</patternset>
