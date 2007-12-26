@@ -16,10 +16,10 @@
 
 package org.springframework.context.annotation;
 
+import junit.framework.TestCase;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import junit.framework.TestCase;
 
 /**
  * @author Mark Fisher
@@ -45,5 +45,14 @@ public class ComponentScanParserTests extends TestCase {
 				"org/springframework/context/annotation/matchingResourcePatternTests.xml");
 		assertTrue(context.containsBean("fooServiceImpl"));
 	}
+
+	/* TODO: Fails unless order of elements ('bean' and 'context:component-scan') in the XML file is reversed */
+//	public void testComponentScanWithAutowiredQualifier() {
+//		ApplicationContext context = new ClassPathXmlApplicationContext(
+//				"org/springframework/context/annotation/componentScanWithAutowiredQualifierTests.xml");
+//		AutowiredQualifierFooService fooService = (AutowiredQualifierFooService) context.getBean("fooService");
+//		assertTrue(fooService.isInitCalled());
+//		assertEquals("bar", fooService.foo(123));
+//	}
 
 }

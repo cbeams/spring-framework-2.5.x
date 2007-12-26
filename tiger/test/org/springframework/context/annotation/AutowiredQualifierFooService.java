@@ -16,18 +16,36 @@
 
 package org.springframework.context.annotation;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author Mark Fisher
  */
-@Repository
-@Qualifier("testing")
-public class StubFooDao implements FooDao {
+public class AutowiredQualifierFooService implements FooService {
 
-	public String findFoo(int id) {
-		return "bar";
+	@Autowired
+	@Qualifier("testing")
+	private FooDao fooDao;
+
+	private boolean initCalled = false;
+
+	@PostConstruct
+	private void init() {
+		if (this.initCalled) {
+			throw new IllegalStateException("Init already called");
+		}
+		this.initCalled = true;
+	}
+
+	public String foo(int id) {
+		return this.fooDao.findFoo(id);
+	}
+
+	public boolean isInitCalled() {
+		return this.initCalled;
 	}
 
 }
