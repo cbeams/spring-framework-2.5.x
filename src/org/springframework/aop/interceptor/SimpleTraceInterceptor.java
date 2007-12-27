@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,7 @@ import org.apache.commons.logging.Log;
  * invocations, with method entry and method exit info.
  *
  * <p>Consider using <code>CustomizableTraceInterceptor</code> for more
- * advanced needs. Note that <code>CustomizableTraceInterceptor</code>
- * requires JDK 1.4 or later.
+ * advanced needs.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
