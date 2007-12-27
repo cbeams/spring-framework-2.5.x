@@ -37,8 +37,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * {@link org.springframework.web.servlet.HandlerAdapter}.
  *
  * <p>Supports HTTP cache control options. The usage of corresponding
- * HTTP headers can be determined via the "useExpiresHeader" and
- * "userCacheControlHeader" properties.
+ * HTTP headers can be controlled via the "useExpiresHeader" and
+ * "useCacheControlHeader" properties.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -123,7 +123,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Set whether to use the HTTP 1.0 expires header. Default is "true".
 	 * <p>Note: Cache headers will only get applied if caching is enabled
-	 * for the current request.
+	 * (or explicitly prevented) for the current request.
 	 */
 	public final void setUseExpiresHeader(boolean useExpiresHeader) {
 		this.useExpiresHeader = useExpiresHeader;
@@ -139,7 +139,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Set whether to use the HTTP 1.1 cache-control header. Default is "true".
 	 * <p>Note: Cache headers will only get applied if caching is enabled
-	 * for the current request.
+	 * (or explicitly prevented) for the current request.
 	 */
 	public final void setUseCacheControlHeader(boolean useCacheControlHeader) {
 		this.useCacheControlHeader = useCacheControlHeader;
@@ -222,7 +222,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Prevent the response from being cached.
-	 * See www.mnot.net.cache docs.
+	 * See <code>http://www.mnot.net/cache_docs</code>.
 	 */
 	protected final void preventCaching(HttpServletResponse response) {
 		response.setHeader(HEADER_PRAGMA, "No-cache");
