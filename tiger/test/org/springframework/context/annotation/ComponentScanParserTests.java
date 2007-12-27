@@ -46,13 +46,12 @@ public class ComponentScanParserTests extends TestCase {
 		assertTrue(context.containsBean("fooServiceImpl"));
 	}
 
-	/* TODO: Fails unless order of elements ('bean' and 'context:component-scan') in the XML file is reversed */
-//	public void testComponentScanWithAutowiredQualifier() {
-//		ApplicationContext context = new ClassPathXmlApplicationContext(
-//				"org/springframework/context/annotation/componentScanWithAutowiredQualifierTests.xml");
-//		AutowiredQualifierFooService fooService = (AutowiredQualifierFooService) context.getBean("fooService");
-//		assertTrue(fooService.isInitCalled());
-//		assertEquals("bar", fooService.foo(123));
-//	}
+	public void testComponentScanWithAutowiredQualifier() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/context/annotation/componentScanWithAutowiredQualifierTests.xml");
+		AutowiredQualifierFooService fooService = (AutowiredQualifierFooService) context.getBean("fooService");
+		assertTrue(fooService.isInitCalled());
+		assertEquals("bar", fooService.foo(123));
+	}
 
 }
