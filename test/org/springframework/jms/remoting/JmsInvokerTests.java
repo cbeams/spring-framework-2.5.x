@@ -108,7 +108,7 @@ public class JmsInvokerTests extends TestCase {
 		exporter.afterPropertiesSet();
 
 		JmsInvokerProxyFactoryBean pfb = new JmsInvokerProxyFactoryBean() {
-			protected Message doExecuteRequest(QueueSession session, Queue queue, Message requestMessage) throws JMSException {
+			protected Message doExecuteRequest(Session session, Queue queue, Message requestMessage) throws JMSException {
 				MockControl exporterSessionControl = MockControl.createControl(Session.class);
 				Session mockExporterSession = (Session) exporterSessionControl.getMock();
 				ResponseStoringProducer mockProducer = new ResponseStoringProducer();

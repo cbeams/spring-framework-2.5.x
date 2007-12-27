@@ -16,13 +16,16 @@
 
 package org.springframework.jms.remoting;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageFormatException;
+import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueReceiver;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
@@ -71,7 +74,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  */
 public class JmsInvokerClientInterceptor implements MethodInterceptor, InitializingBean {
 
-	private QueueConnectionFactory connectionFactory;
+	private ConnectionFactory connectionFactory;
 
 	private Object queue;
 
@@ -87,14 +90,14 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	/**
 	 * Set the QueueConnectionFactory to use for obtaining JMS QueueConnections.
 	 */
-	public void setConnectionFactory(QueueConnectionFactory connectionFactory) {
+	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
 	/**
 	 * Return the QueueConnectionFactory to use for obtaining JMS QueueConnections.
 	 */
-	protected QueueConnectionFactory getConnectionFactory() {
+	protected ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
 	}
 
@@ -235,10 +238,10 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * @see #doExecuteRequest
 	 */
 	protected RemoteInvocationResult executeRequest(RemoteInvocation invocation) throws JMSException {
-		QueueConnection con = getConnectionFactory().createQueueConnection();
-		QueueSession session = null;
+		Connection con = createConnection();
+		Session session = null;
 		try {
-			session = con.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+			session = createSession(con);
 			Queue queueToUse = resolveQueue(session);
 			Message requestMessage = createRequestMessage(session, invocation);
 			con.start();
@@ -248,6 +251,43 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 		finally {
 			JmsUtils.closeSession(session);
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory(), true);
+		}
+	}
+
+	/**
+	 * Create a new JMS Connection for this JMS invoker,
+	 * ideally a <code>javax.jms.QueueConnection</code>.
+	 * <p>The default implementation uses the
+	 * <code>javax.jms.QueueConnectionFactory</code> API if available,
+	 * falling back to a standard JMS 1.1 ConnectionFactory otherwise.
+	 * This is necessary for working with generic JMS 1.1 connection pools
+	 * (such as ActiveMQ's <code>org.apache.activemq.pool.PooledConnectionFactory</code>).
+	 */
+	protected Connection createConnection() throws JMSException {
+		ConnectionFactory cf = getConnectionFactory();
+		if (cf instanceof QueueConnectionFactory) {
+			return ((QueueConnectionFactory) cf).createQueueConnection();
+		}
+		else {
+			return cf.createConnection();
+		}
+	}
+
+	/**
+	 * Create a new JMS Session for this JMS invoker,
+	 * ideally a <code>javax.jms.QueueSession</code>.
+	 * <p>The default implementation uses the
+	 * <code>javax.jms.QueueConnection</code> API if available,
+	 * falling back to a standard JMS 1.1 Connection otherwise.
+	 * This is necessary for working with generic JMS 1.1 connection pools
+	 * (such as ActiveMQ's <code>org.apache.activemq.pool.PooledConnectionFactory</code>).
+	 */
+	protected Session createSession(Connection con) throws JMSException {
+		if (con instanceof QueueConnection) {
+			return ((QueueConnection) con).createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+		}
+		else {
+			return con.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		}
 	}
 
@@ -307,24 +347,35 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * @return the RemoteInvocationResult object
 	 * @throws JMSException in case of JMS failure
 	 */
-	protected Message doExecuteRequest(
-			QueueSession session, Queue queue, Message requestMessage) throws JMSException {
-
+	protected Message doExecuteRequest(Session session, Queue queue, Message requestMessage) throws JMSException {
 		TemporaryQueue responseQueue = null;
-		QueueSender sender = null;
-		QueueReceiver receiver = null;
+		MessageProducer producer = null;
+		MessageConsumer consumer = null;
 		try {
-			responseQueue = session.createTemporaryQueue();
-			sender = session.createSender(queue);
-			receiver = session.createReceiver(responseQueue);
-			requestMessage.setJMSReplyTo(responseQueue);
-			sender.send(requestMessage);
+			if (session instanceof QueueSession) {
+				// Perform all calls on QueueSession reference for JMS 1.0.2 compatibility...
+				QueueSession queueSession = (QueueSession) session;
+				responseQueue = queueSession.createTemporaryQueue();
+				QueueSender sender = queueSession.createSender(queue);
+				producer = sender;
+				consumer = queueSession.createReceiver(responseQueue);
+				requestMessage.setJMSReplyTo(responseQueue);
+				sender.send(requestMessage);
+			}
+			else {
+				// Standard JMS 1.1 API usage...
+				responseQueue = session.createTemporaryQueue();
+				producer = session.createProducer(queue);
+				consumer = session.createConsumer(responseQueue);
+				requestMessage.setJMSReplyTo(responseQueue);
+				producer.send(requestMessage);
+			}
 			long timeout = getReceiveTimeout();
-			return (timeout > 0 ? receiver.receive(timeout) : receiver.receive());
+			return (timeout > 0 ? consumer.receive(timeout) : consumer.receive());
 		}
 		finally {
-			JmsUtils.closeMessageConsumer(receiver);
-			JmsUtils.closeMessageProducer(sender);
+			JmsUtils.closeMessageConsumer(consumer);
+			JmsUtils.closeMessageProducer(producer);
 			if (responseQueue != null) {
 				responseQueue.delete();
 			}
