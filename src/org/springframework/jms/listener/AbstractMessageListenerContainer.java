@@ -126,9 +126,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer {
 
-	private Object destination;
+	private volatile Object destination;
 
-	private String messageSelector;
+	private volatile String messageSelector;
 
 	private volatile Object messageListener;
 
@@ -147,6 +147,10 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Set the destination to receive messages from.
 	 * <p>Alternatively, specify a "destinationName", to be dynamically
 	 * resolved via the {@link org.springframework.jms.support.destination.DestinationResolver}.
+	 * <p>Note: The destination may be replaced at runtime, with the listener
+	 * container picking up the new destination immediately (works e.g. with
+	 * DefaultMessageListenerContainer, as long as the cache level is less than
+	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 * @see #setDestinationName(String)
 	 */
 	public void setDestination(Destination destination) {
@@ -172,6 +176,10 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * <p>The specified name will be dynamically resolved via the configured
 	 * {@link #setDestinationResolver destination resolver}.
 	 * <p>Alternatively, specify a JMS {@link Destination} object as "destination".
+	 * <p>Note: The destination may be replaced at runtime, with the listener
+	 * container picking up the new destination immediately (works e.g. with
+	 * DefaultMessageListenerContainer, as long as the cache level is less than
+	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 * @param destinationName the desired destination (can be <code>null</code>)
 	 * @see #setDestination(javax.jms.Destination)
 	 */
@@ -194,6 +202,10 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Set the JMS message selector expression (or <code>null</code> if none).
 	 * Default is none.
 	 * <p>See the JMS specification for a detailed definition of selector expressions.
+	 * <p>Note: The message selector may be replaced at runtime, with the listener
+	 * container picking up the new selector value immediately (works e.g. with
+	 * DefaultMessageListenerContainer, as long as the cache level is less than
+	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 */
 	public void setMessageSelector(String messageSelector) {
 		this.messageSelector = messageSelector;
@@ -211,6 +223,10 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Set the message listener implementation to register.
 	 * This can be either a standard JMS {@link MessageListener} object
 	 * or a Spring {@link SessionAwareMessageListener} object.
+	 * <p>Note: The message listener may be replaced at runtime, with the listener
+	 * container picking up the new listener object immediately (works e.g. with
+	 * DefaultMessageListenerContainer, as long as the cache level is less than
+	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 * @throws IllegalArgumentException if the supplied listener is not a
 	 * {@link MessageListener} or a {@link SessionAwareMessageListener}
 	 * @see javax.jms.MessageListener
