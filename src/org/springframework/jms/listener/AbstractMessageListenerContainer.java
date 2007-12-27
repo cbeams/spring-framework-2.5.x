@@ -126,9 +126,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer {
 
-	private Object destination;
+	private volatile Object destination;
 
-	private String messageSelector;
+	private volatile String messageSelector;
 
 	private volatile Object messageListener;
 
