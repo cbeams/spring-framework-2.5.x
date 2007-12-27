@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,36 +24,44 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Plain handler interface for components that process HTTP requests,
- * analogous to a Servlet. Only throws ServletException and IOException,
- * to allow for usage within any HttpServlet. Essentially the direct
- * equivalent of an HttpServlet, reduced to a handle method.
+ * analogous to a Servlet. Only declares {@link javax.servlet.ServletException}
+ * and {@link java.io.IOException}, to allow for usage within any
+ * {@link javax.servlet.http.HttpServlet}}. This interface is ssentially the
+ * direct equivalent of an HttpServlet, reduced to a central handle method.
  *
  * <p>The easiest way to expose an HttpRequestHandler bean in Spring style
  * is to define it in Spring's root web application context and define
- * an HttpRequestHandlerServlet in <code>web.xml</code>, pointing at the
- * target HttpRequestHandler bean through its servlet-name which needs
- * to match the target bean name.
+ * an {@link org.springframework.web.context.support.HttpRequestHandlerServlet}
+ * in <code>web.xml</code>, pointing at the target HttpRequestHandler bean
+ * through its <code>servlet-name</code> which needs to match the target bean name.
  *
- * <p>Supported as a handler type within Spring's DispatcherServlet,
- * being able to leverage the dispatcher's advanced mapping and interception
+ * <p>Supported as a handler type within Spring's
+ * {@link org.springframework.web.servlet.DispatcherServlet}, being able
+ * to interact with the dispatcher's advanced mapping and interception
  * facilities. This is the recommended way of exposing an HttpRequestHandler,
  * while keeping the handler implementations free of direct dependencies
  * on a DispatcherServlet environment.
  *
  * <p>Typically implemented to generate binary responses directly,
- * with no separate view resource involved. This differentiates it from
- * a Controller within Spring's Web MVC framework. The lack of a ModelAndView
+ * with no separate view resource involved. This differentiates it from a
+ * {@link org.springframework.web.servlet.mvc.Controller} within Spring's Web MVC
+ * framework. The lack of a {@link org.springframework.web.servlet.ModelAndView}
  * return value gives a clearer signature to callers other than the
- * DispatcherServlet, indicating there will never be a view to render.
+ * DispatcherServlet, indicating that there will never be a view to render.
  *
  * <p>As of Spring 2.0, Spring's HTTP-based remote exporters, such as
- * HttpInvokerServiceExporter and HessianServiceExporter, implement this
- * interface rather than the more extensive Controller interface,
+ * {@link org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter}
+ * and {@link org.springframework.remoting.caucho.HessianServiceExporter},
+ * implement this interface rather than the more extensive Controller interface,
  * for minimal dependencies on Spring-specific web infrastructure.
  *
- * <p>Note that RequestHandlers can optionally implement the LastModified
- * interface, just like Controllers can, provided that they run within
- * Spring's DispatcherServlet.
+ * <p>Note that HttpRequestHandlers may optionally implement the
+ * {@link org.springframework.web.servlet.mvc.LastModified} interface,
+ * just like Controllers can, <i>provided that they run within Spring's
+ * DispatcherServlet</i>. However, this is usually not necessary, since
+ * HttpRequestHandlers typically only support POST requests to begin with.
+ * Alternatively, a handler may implement the "If-Modified-Since" HTTP
+ * header processing manually within its <code>handle</code> method.
  *
  * @author Juergen Hoeller
  * @since 2.0

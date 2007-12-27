@@ -37,8 +37,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * {@link org.springframework.web.servlet.HandlerAdapter}.
  *
  * <p>Supports HTTP cache control options. The usage of corresponding
- * HTTP headers can be determined via the "useExpiresHeader" and
- * "userCacheControlHeader" properties.
+ * HTTP headers can be controlled via the "useExpiresHeader",
+ * "useCacheControlHeader" and "useCacheControlNoStore" properties.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
