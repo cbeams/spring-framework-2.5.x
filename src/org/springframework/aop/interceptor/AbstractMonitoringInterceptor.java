@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.aop.interceptor;
+
+import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -40,9 +42,12 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 
 	private String suffix = "";
 
+	private boolean logTargetClassInvocation = false;
+
 
 	/**
 	 * Set the text that will get appended to the trace data.
+	 * <p>Default is none.
 	 */
 	public void setPrefix(String prefix) {
 		this.prefix = (prefix != null ? prefix : "");
@@ -52,11 +57,12 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 	 * Return the text that will get appended to the trace data.
 	 */
 	protected String getPrefix() {
-		return prefix;
+		return this.prefix;
 	}
 
 	/**
 	 * Set the text that will get prepended to the trace data.
+	 * <p>Default is none.
 	 */
 	public void setSuffix(String suffix) {
 		this.suffix = (suffix != null ? suffix : "");
@@ -66,7 +72,17 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 	 * Return the text that will get prepended to the trace data.
 	 */
 	protected String getSuffix() {
-		return suffix;
+		return this.suffix;
+	}
+
+	/**
+	 * Set whether to log the invocation on the target class, if applicable
+	 * (i.e. if the method is actually delegated to the target class).
+	 * <p>Default is "false", logging the invocation based on the proxy
+	 * interface/class name.
+	 */
+	public void setLogTargetClassInvocation(boolean logTargetClassInvocation) {
+		this.logTargetClassInvocation = logTargetClassInvocation;
 	}
 
 
@@ -80,8 +96,13 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 	 */
 	protected String createInvocationTraceName(MethodInvocation invocation) {
 		StringBuffer sb = new StringBuffer(getPrefix());
-		sb.append(invocation.getMethod().getDeclaringClass().getName());
-		sb.append('.').append(invocation.getMethod().getName());
+		Method method = invocation.getMethod();
+		Class clazz = method.getDeclaringClass();
+		if (this.logTargetClassInvocation && clazz.isInstance(invocation.getThis())) {
+			clazz = invocation.getThis().getClass();
+		}
+		sb.append(clazz.getName());
+		sb.append('.').append(method.getName());
 		sb.append(getSuffix());
 		return sb.toString();
 	}
