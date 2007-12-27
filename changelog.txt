@@ -3,16 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2007-12-21)
+Changes in version 2.5.1 (2007-12-28)
 -------------------------------------
 
 General
 * added section on J2EE RAR deployment to the reference documentation
+* moved "org.springframework.web.bind/multipart" packages from spring-web.jar to spring-webmvc.jar
+* updated AspectJ jar in "-with-dependencies" distribution to AspectJ 1.5.4
 * updated Groovy jar in "-with-dependencies" distribution to Groovy 1.5.0
 * updated Hessian jar in "-with-dependencies" distribution to Hessian 3.1.3
 
 Package org.springframework.aop
 * ProxyFactory caches CGLIB proxies only when underlying (Smart)ClassLoader does not indicate a reloadable Class
+* added "logTargetClassInvocation" property to AbstractMonitoringInterceptor, for logging the target invocation trace
 
 Package org.springframework.beans
 * ConfigurablePropertyAccessor extends the TypeConverter interface (moved up from BeanWrapper interface)
@@ -26,6 +29,7 @@ Package org.springframework.beans
 * DefaultListableBeanFactory does not eagerly initialize FactoryBeans for type checks even with factory-bean reference
 * DefaultListableBeanFactory throws descriptive exception in case of factory-bean circular reference
 * DefaultListableBeanFactory supports ObjectFactory indirection for resolvable dependencies
+* DefaultListableBeanFactory always resolves bean class before checking a bean definition as autowire candidate
 * AbstractBeanDefinition stores and exposes the originating Resource (rather than just the resource description)
 * XmlBeanDefinitionReader detects recursive loading of the same resource (e.g. through import cycles)
 * DefaultBeanDefinitionDocumentReader sends ImportDefinition events containing the actually resolved Resource objects
@@ -72,6 +76,8 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
+* DelegatingConnectionFactory adapts specific create(Queue/Topic)Connection calls to a generic JMS 1.1 ConnectionFactory
+* JmsInvokerClientInterceptor accepts any JMS 1.1 ConnectionFactory, not insisting on a QueueConnectionFactory anymore
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
 * ServerSessionMessageListenerContainer always establishes a shared Connection (even if autoStart="false")
 * CommonsPoolServerSessionFactory removes specific ServerSessionPool on close (for proper reuse on stop and restart)
@@ -141,6 +147,7 @@ Package org.springframework.web
 * WebApplicationContext impls register request/session/ServletContext as resolvable dependencies (e.g. for @Autowired)
 * PortletApplicationContext impls register request/session/PortletContext as resolvable dependencies (for @Autowired)
 * CommonsMultipartResolver uses FileUpload 1.2's "isMultipartContent" variant when available (for stricter checks)
+* added "useCacheControlNoStore" property to WebContentGenerator, allowing to suppress the "no-store" header value
 * SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
 * improved NoSuchRequestHandlingMethodException's error message to include request URL and query string explicitly
