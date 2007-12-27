@@ -29,7 +29,10 @@ import org.springframework.util.Assert;
 
 /**
  * {@link javax.jms.ConnectionFactory} implementation that delegates all calls
- * to a given target {@link javax.jms.ConnectionFactory}.
+ * to a given target {@link javax.jms.ConnectionFactory}, adapting specific
+ * <code>create(Queue/Topic)Connection</code> calls to the target ConnectionFactory
+ * if necessary (e.g. when running JMS 1.0.2 API based code against a generic
+ * JMS 1.1 ConnectionFactory, such as ActiveMQ's PooledConnectionFactory).
  *
  * <p>This class allows for being subclassed, with subclasses overriding only
  * those methods (such as {@link #createConnection()}) that should not simply
@@ -99,34 +102,58 @@ public class DelegatingConnectionFactory
 
 	public QueueConnection createQueueConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
-		if (!(cf instanceof QueueConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a QueueConnectionFactory");
+		if (cf instanceof QueueConnectionFactory) {
+			return ((QueueConnectionFactory) cf).createQueueConnection();
 		}
-		return ((QueueConnectionFactory) cf).createQueueConnection();
+		else {
+			Connection con = cf.createConnection();
+			if (!(con instanceof QueueConnection)) {
+				throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a QueueConnectionFactory");
+			}
+			return (QueueConnection) con;
+		}
 	}
 
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
-		if (!(cf instanceof QueueConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a QueueConnectionFactory");
+		if (cf instanceof QueueConnectionFactory) {
+			return ((QueueConnectionFactory) cf).createQueueConnection(username, password);
 		}
-		return ((QueueConnectionFactory) cf).createQueueConnection(username, password);
+		else {
+			Connection con = cf.createConnection(username, password);
+			if (!(con instanceof QueueConnection)) {
+				throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a QueueConnectionFactory");
+			}
+			return (QueueConnection) con;
+		}
 	}
 
 	public TopicConnection createTopicConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
-		if (!(cf instanceof TopicConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
+		if (cf instanceof TopicConnectionFactory) {
+			return ((TopicConnectionFactory) cf).createTopicConnection();
 		}
-		return ((TopicConnectionFactory) cf).createTopicConnection();
+		else {
+			Connection con = cf.createConnection();
+			if (!(con instanceof TopicConnection)) {
+				throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
+			}
+			return (TopicConnection) con;
+		}
 	}
 
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
-		if (!(cf instanceof TopicConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
+		if (cf instanceof TopicConnectionFactory) {
+			return ((TopicConnectionFactory) cf).createTopicConnection(username, password);
 		}
-		return ((TopicConnectionFactory) cf).createTopicConnection(username, password);
+		else {
+			Connection con = cf.createConnection(username, password);
+			if (!(con instanceof TopicConnection)) {
+				throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
+			}
+			return (TopicConnection) con;
+		}
 	}
 
 	public boolean shouldStop(Connection con) {
