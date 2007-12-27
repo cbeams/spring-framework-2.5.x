@@ -75,6 +75,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/** Use HTTP 1.1 cache-control header? */
 	private boolean useCacheControlHeader = true;
 
+	/** Use HTTP 1.1 cache-control header value "no-store"? */
+	private boolean useCacheControlNoStore = true;
+
 	private int cacheSeconds = -1;
 
 
@@ -123,7 +126,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Set whether to use the HTTP 1.0 expires header. Default is "true".
 	 * <p>Note: Cache headers will only get applied if caching is enabled
-	 * for the current request.
+	 * (or explicitly prevented) for the current request.
 	 */
 	public final void setUseExpiresHeader(boolean useExpiresHeader) {
 		this.useExpiresHeader = useExpiresHeader;
@@ -139,7 +142,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Set whether to use the HTTP 1.1 cache-control header. Default is "true".
 	 * <p>Note: Cache headers will only get applied if caching is enabled
-	 * for the current request.
+	 * (or explicitly prevented) for the current request.
 	 */
 	public final void setUseCacheControlHeader(boolean useCacheControlHeader) {
 		this.useCacheControlHeader = useCacheControlHeader;
@@ -150,6 +153,21 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public final boolean isUseCacheControlHeader() {
 		return this.useCacheControlHeader;
+	}
+
+	/**
+	 * Set whether to use the HTTP 1.1 cache-control header value "no-store"
+	 * when preventing caching. Default is "true".
+	 */
+	public final void setUseCacheControlNoStore(boolean useCacheControlNoStore) {
+		this.useCacheControlNoStore = useCacheControlNoStore;
+	}
+
+	/**
+	 * Return whether the HTTP 1.1 cache-control header value "no-store" is used.
+	 */
+	public final boolean isUseCacheControlNoStore() {
+		return this.useCacheControlNoStore;
 	}
 
 	/**
@@ -222,7 +240,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Prevent the response from being cached.
-	 * See www.mnot.net.cache docs.
+	 * See <code>http://www.mnot.net/cache_docs</code>.
 	 */
 	protected final void preventCaching(HttpServletResponse response) {
 		response.setHeader(HEADER_PRAGMA, "No-cache");
@@ -234,7 +252,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			// HTTP 1.1 header: "no-cache" is the standard value,
 			// "no-store" is necessary to prevent caching on FireFox.
 			response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
-			response.addHeader(HEADER_CACHE_CONTROL, "no-store");
+			if (this.useCacheControlNoStore) {
+				response.addHeader(HEADER_CACHE_CONTROL, "no-store");
+			}
 		}
 	}
 
