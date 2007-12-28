@@ -97,11 +97,9 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/axis">
 				<include name="axis.jar"/>
-				<include name="saaj.jar"/>
 				<include name="wsdl4j.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/caucho">
-				<include name="burlap*.jar"/>
 				<include name="hessian*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/hsqldb">
@@ -127,6 +125,9 @@
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
+      <fileset dir="${spring.root}/lib/jaxws">
+        <include name="saaj-api.jar"/>
+      </fileset>
 			<fileset dir="${spring.root}/lib/struts">
 				<include name="struts.jar"/>
 			</fileset>
