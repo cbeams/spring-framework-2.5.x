@@ -763,8 +763,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("DispatcherServlet with name '" + getServletName() + "' received request for [" +
-					request.getRequestURI() + "]");
+			String requestUri = new UrlPathHelper().getRequestUri(request);
+			logger.debug(
+					"DispatcherServlet with name '" + getServletName() + "' received request for [" + requestUri + "]");
 		}
 
 		// Keep a snapshot of the request attributes in case of an include,
@@ -935,7 +936,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 			long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
 			if (logger.isDebugEnabled()) {
-				logger.debug("Last-Modified value for [" + request.getRequestURI() + "] is [" + lastModified + "]");
+				String requestUri = new UrlPathHelper().getRequestUri(request);
+				logger.debug("Last-Modified value for [" + requestUri + "] is: " + lastModified);
 			}
 			return lastModified;
 		}
