@@ -3,10 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2007-12-28)
+Changes in version 2.5.1 (2007-12-30)
 -------------------------------------
 
 General
+* added coverage of JAX-WS support to the reference documentation
 * added section on J2EE RAR deployment to the reference documentation
 * moved "org.springframework.web.bind/multipart" packages from spring-web.jar to spring-webmvc.jar
 * updated AspectJ jar in "-with-dependencies" distribution to AspectJ 1.5.4
@@ -53,6 +54,7 @@ Package org.springframework.context
 * ContextTypeMatchClassLoader does not generally exclude classes in the "org.springframework" package anymore
 * DefaultContextLoadTimeWeaver only chooses GlassFishLoadTimeWeaver when running in the EAR ClassLoader
 * DefaultContextLoadTimeWeaver removes all registered transformers from the VM Instrumentation object (if applicable)
+* CommonAnnotationBeanPostProcessor properly ignores @Resource-annotated JAX-WS WebServiceContext references
 
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
@@ -144,6 +146,8 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
+* introduced static "getCurrentWebApplicationContext()" accessor on ContextLoader, for context lookup by thread
+* introduced SpringBeanAutowiringSupport class for self-autowiring classes within a web app (e.g. JAX-WS endpoints)
 * WebApplicationContext impls register request/session/ServletContext as resolvable dependencies (e.g. for @Autowired)
 * PortletApplicationContext impls register request/session/PortletContext as resolvable dependencies (for @Autowired)
 * CommonsMultipartResolver uses FileUpload 1.2's "isMultipartContent" variant when available (for stricter checks)
@@ -151,6 +155,7 @@ Package org.springframework.web
 * SimpleUrlHandlerMapping explicitly trims specified handler bean names (in order to ignore unintended whitespace)
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
 * improved NoSuchRequestHandlingMethodException's error message to include request URL and query string explicitly
+* DispatcherServlet consistently logs correct request URI for include requests (even in debug log messages)
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
 * @InitBinder methods apply to @RequestParam parameters as well, with the @InitBinder value matched against param names
 * @ModelAttribute's default attribute names are consistently derived from the *declared* parameter/return type
