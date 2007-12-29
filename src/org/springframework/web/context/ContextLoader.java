@@ -17,8 +17,6 @@
 package org.springframework.web.context;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -34,6 +32,7 @@ import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
@@ -146,7 +145,12 @@ public class ContextLoader {
 
 	private static final Log logger = LogFactory.getLog(ContextLoader.class);
 
-	private static final Map currentContextPerThread = Collections.synchronizedMap(new HashMap(1));
+	/**
+	 * Map from (thread context) ClassLoader to WebApplicationContext.
+	 * Often just holding one reference - if the ContextLoader class is
+	 * deployed in the web app ClassLoader itself!
+	 */
+	private static final Map currentContextPerThread = CollectionFactory.createConcurrentMapIfPossible(1);
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
