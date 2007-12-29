@@ -17,6 +17,9 @@
 package org.springframework.web.context;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -141,7 +144,9 @@ public class ContextLoader {
 	}
 
 
-	private final Log logger = LogFactory.getLog(ContextLoader.class);
+	private static final Log logger = LogFactory.getLog(ContextLoader.class);
+
+	private static final Map currentContextPerThread = Collections.synchronizedMap(new HashMap(1));
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
@@ -189,6 +194,7 @@ public class ContextLoader {
 			// it is available on ServletContext shutdown.
 			this.context = createWebApplicationContext(servletContext, parent);
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
+			currentContextPerThread.put(Thread.currentThread().getContextClassLoader(), this.context);
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
@@ -358,11 +364,25 @@ public class ContextLoader {
 			}
 		}
 		finally {
+			currentContextPerThread.remove(Thread.currentThread().getContextClassLoader());
 			servletContext.removeAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 			if (this.parentContextRef != null) {
 				this.parentContextRef.release();
 			}
 		}
+	}
+
+
+	/**
+	 * Obtain the Spring root web application context for the current thread
+	 * (i.e. for the current thread's context ClassLoader, which needs to be
+	 * the web application's ClassLoader).
+	 * @return the current root web application context, or <code>null</code>
+	 * if none found
+	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
+	 */
+	public static WebApplicationContext getCurrentWebApplicationContext() {
+		return (WebApplicationContext) currentContextPerThread.get(Thread.currentThread().getContextClassLoader());
 	}
 
 }
