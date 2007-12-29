@@ -29,6 +29,7 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -157,6 +158,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
+	private final Set<String> ignoredResourceTypes = new HashSet<String>(1);
+
 	private boolean fallbackToDefaultTypeMatch = true;
 
 	private boolean alwaysUseJndiLookup = false;
@@ -180,8 +183,21 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	public CommonAnnotationBeanPostProcessor() {
 		setInitAnnotationType(PostConstruct.class);
 		setDestroyAnnotationType(PreDestroy.class);
+		ignoreResourceType("javax.xml.ws.WebServiceContext");
 	}
 
+
+	/**
+	 * Ignore the given resource type when resolving <code>@Resource</code>
+	 * annotations.
+	 * <p>By default, the <code>javax.xml.ws.WebServiceContext</code> interface
+	 * will be ignored, since it will be resolved by the JAX-WS runtime.
+	 * @param resourceType the resource type to ignore
+	 */
+	public void ignoreResourceType(String resourceType) {
+		Assert.notNull(resourceType, "Ignored resource type must not be null");
+		this.ignoredResourceTypes.add(resourceType);
+	}
 
 	/**
 	 * Set whether to allow a fallback to a type match if no explicit name has been
@@ -317,7 +333,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("@Resource annotation is not supported on static fields");
 								}
-								newMetadata.addInjectedField(new ResourceElement(field, null));
+								if (!ignoredResourceTypes.contains(field.getType().getName())) {
+									newMetadata.addInjectedField(new ResourceElement(field, null));
+								}
 							}
 						}
 					});
@@ -347,11 +365,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("@Resource annotation is not supported on static methods");
 								}
-								if (method.getParameterTypes().length != 1) {
+								Class[] paramTypes = method.getParameterTypes();
+								if (paramTypes.length != 1) {
 									throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
 								}
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								newMetadata.addInjectedMethod(new ResourceElement(method, pd));
+								if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
+									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+									newMetadata.addInjectedMethod(new ResourceElement(method, pd));
+								}
 							}
 						}
 					});
