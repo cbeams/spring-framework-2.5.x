@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,14 +117,15 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 
 
 	/**
-	 * Return the ApplicationContext instance used by this object.
+	 * Return the ApplicationContext that this object is associated with.
+	 * @throws IllegalStateException if not running in an ApplicationContext
 	 */
 	public final ApplicationContext getApplicationContext() throws IllegalStateException {
 		if (this.applicationContext == null && isContextRequired()) {
 			throw new IllegalStateException(
 					"ApplicationObjectSupport instance [" + this + "] does not run in an ApplicationContext");
 		}
-		return applicationContext;
+		return this.applicationContext;
 	}
 
 	/**

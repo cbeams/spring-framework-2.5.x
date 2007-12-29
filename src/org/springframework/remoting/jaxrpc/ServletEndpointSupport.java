@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,9 +42,10 @@ import org.springframework.web.util.WebUtils;
  * In case of Axis, copy the AxisServlet definition into your web.xml,
  * and set up the endpoint in "server-config.wsdd" (or use the deploy tool).
  *
- * <p>This class does not extend WebApplicationContextSupport to not expose
- * any public setters. For some reason, Axis tries to resolve public setters
- * in a special way...
+ * <p>This class does not extend
+ * {@link org.springframework.web.context.support.WebApplicationObjectSupport}
+ * to not expose any public setters. For some reason, Axis tries to
+ * resolve public setters in a special way...
  *
  * <p>JAX-RPC service endpoints are usually required to implement an
  * RMI port interface. However, many JAX-RPC implementations accept plain
@@ -56,7 +57,6 @@ import org.springframework.web.util.WebUtils;
  * @since 16.12.2003
  * @see #init
  * @see #getWebApplicationContext
- * @see org.springframework.web.context.support.WebApplicationObjectSupport
  */
 public abstract class ServletEndpointSupport implements ServiceLifecycle {
 
@@ -91,7 +91,7 @@ public abstract class ServletEndpointSupport implements ServiceLifecycle {
 	 * Return the current JAX-RPC ServletEndpointContext.
 	 */
 	protected final ServletEndpointContext getServletEndpointContext() {
-		return servletEndpointContext;
+		return this.servletEndpointContext;
 	}
 
 	/**
