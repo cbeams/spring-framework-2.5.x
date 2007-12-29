@@ -17,7 +17,9 @@
 package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,8 +66,10 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
-		getInstrumentation().addTransformer(transformer);
-		this.transformers.add(transformer);
+		FilteringClassFileTransformer actualTransformer =
+				new FilteringClassFileTransformer(transformer, this.classLoader);
+		getInstrumentation().addTransformer(actualTransformer);
+		this.transformers.add(actualTransformer);
 	}
 
 	/**
@@ -107,6 +111,36 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
 		}
 		return instrumentation;
+	}
+
+
+	/**
+	 * Decorator that only applies the given target transformer to a specific ClassLoader.
+	 */
+	private static class FilteringClassFileTransformer implements ClassFileTransformer {
+
+		private final ClassFileTransformer targetTransformer;
+
+		private final ClassLoader targetClassLoader;
+
+		public FilteringClassFileTransformer(ClassFileTransformer targetTransformer, ClassLoader targetClassLoader) {
+			this.targetTransformer = targetTransformer;
+			this.targetClassLoader = targetClassLoader;
+		}
+
+		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+
+			if (!this.targetClassLoader.equals(loader)) {
+				return null;
+			}
+			return this.targetTransformer.transform(
+					loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+		}
+
+		public String toString() {
+			return "FilteringClassFileTransformer for: " + this.targetTransformer.toString();
+		}
 	}
 
 }
