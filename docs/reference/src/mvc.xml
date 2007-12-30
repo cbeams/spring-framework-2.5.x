@@ -3698,6 +3698,15 @@ public class EditPetForm {
       the method signature can contain the same types as documented above for
       the <classname>@RequestMapping</classname> annotation.</para>
 
+      <para><emphasis>Note:</emphasis> <classname>@ModelAttribute</classname>
+      annotated methods will be executed <emphasis>before</emphasis> the
+      chosen <classname>@RequestMapping</classname> annotated handler method.
+      They effectively pre-populate the implicit model with specific attributes,
+      often loaded from a database. Such an attribute can then already be
+      accessed through <classname>@ModelAttribute</classname> annotated
+      handler method parameters in the chosen handler method, potentially
+      with binding and validation applied to it.</para>
+
       <para>The following code snippet shows these two usages of this
       annotation:</para>
 
