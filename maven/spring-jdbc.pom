@@ -9,7 +9,7 @@
 	<artifactId>spring-jdbc</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Framework: JDBC</name>
-	<version>2.5.1-SNAPSHOT</version>
+	<version>2.5.1</version>
 	<description>Spring Framework: JDBC</description>
 	<url>http://www.springframework.org</url>
 	<licenses>
