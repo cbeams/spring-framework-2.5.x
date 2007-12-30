@@ -104,12 +104,14 @@ public class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanDefinitions.add(registerBeanPostProcessor(registry, def, REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanDefinitions.add(registerBeanPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -117,6 +119,7 @@ public class AnnotationConfigUtils {
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanDefinitions.add(registerBeanPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -125,6 +128,7 @@ public class AnnotationConfigUtils {
 			RootBeanDefinition def = new RootBeanDefinition();
 			def.setBeanClassName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME);
 			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanDefinitions.add(registerBeanPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
