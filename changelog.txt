@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2007-12-30)
+Changes in version 2.5.1 (2007-12-31)
 -------------------------------------
 
 General
@@ -113,6 +113,7 @@ Package org.springframework.remoting
 
 Package org.springframework.samples
 * PetClinic's JPA version showcases AspectJ load-time weaving, including @Transactional handling in AspectJ mode
+* PetClinic's JPA EntityManagerClinic uses explicit flushing and id assigning to make sure that the id is available
 
 Package org.springframework.scheduling
 * ThreadPoolTaskExecutor supports Java 6's "allowCoreThreadTimeOut" feature (for both native and backport-concurrent)
