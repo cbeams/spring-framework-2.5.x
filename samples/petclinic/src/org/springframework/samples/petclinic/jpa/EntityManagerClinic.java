@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic.jpa;
 
 import java.util.Collection;
@@ -17,9 +16,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * <p>
  * JPA implementation of the Clinic interface using EntityManager.
+ * </p>
  * <p>
  * The mappings are defined in "orm.xml" located in the META-INF directory.
+ * </p>
  *
  * @author Mike Keith
  * @author Rod Johnson
@@ -67,19 +69,25 @@ public class EntityManagerClinic implements Clinic {
 	public void storeOwner(Owner owner) {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
-		this.em.merge(owner);
+		Owner merged = this.em.merge(owner);
+		this.em.flush();
+		owner.setId(merged.getId());
 	}
 
 	public void storePet(Pet pet) {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
-		this.em.merge(pet);
+		Pet merged = this.em.merge(pet);
+		this.em.flush();
+		pet.setId(merged.getId());
 	}
 
 	public void storeVisit(Visit visit) {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
-		this.em.merge(visit);
+		Visit merged = this.em.merge(visit);
+		this.em.flush();
+		visit.setId(merged.getId());
 	}
 
 }
