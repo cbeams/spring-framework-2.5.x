@@ -1,7 +1,7 @@
-
 package org.springframework.samples.petclinic.hibernate;
 
 import java.util.Collection;
+
 import org.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +15,20 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * <p>
  * Hibernate implementation of the Clinic interface.
+ * </p>
  * <p>
  * The mappings are defined in "petclinic.hbm.xml", located in the root of the
  * class path.
+ * </p>
  * <p>
  * Note that transactions are declared with annotations and that some methods
  * contain "readOnly = true" which is an optimization that is particularly
  * valuable when using Hibernate (to suppress unnecessary flush attempts for
  * read-only operations).
- * 
+ * </p>
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Mark Fisher
