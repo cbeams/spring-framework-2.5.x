@@ -583,15 +583,61 @@
       </section>
 
       <section id="new-in-2-migrating-packaging">
-        <title>Jar packaging</title>
+        <title>Jar packaging in Spring 2.5</title>
 
-        <para>As of Spring 2.5, Spring MVC is no longer part of the <filename
-        class="libraryfile">'spring.jar'</filename> file. Spring MVC
+        <para>As of Spring 2.5, Spring Web MVC is no longer part of the
+        <filename class="libraryfile">'spring.jar'</filename> file. Spring MVC
         can be found in <filename class="libraryfile">'spring-webmvc.jar'</filename>
         and <filename class="libraryfile">'spring-webmvc-portlet.jar'</filename>
         in the <literal>lib/modules</literal> directory of the distribution.
         Furthermore, the Struts 1.x support has been factored out into
         <filename class="libraryfile">'spring-webmvc-struts.jar'</filename>.</para>
+
+        <para><emphasis>Note: The commonly used Spring's <classname>DispatcherServlet</classname>
+        is part of Spring's Web MVC framework.</emphasis> As a consequence,
+        you need to add <filename class="libraryfile">'spring-webmvc.jar'</filename>
+        (or <filename class="libraryfile">'spring-webmvc-portlet/struts.jar'</filename>)
+        to a <filename class="libraryfile">'spring.jar'</filename> scenario,
+        even if you are just using <classname>DispatcherServlet</classname>
+        for remoting purposes (e.g. exporting Hessian or HTTP invoker services).</para>
+
+        <para>Spring 2.0's <filename class="libraryfile">'spring-jmx.jar'</filename>
+        and <filename class="libraryfile">'spring-remoting.jar'</filename> have been
+        merged into Spring 2.5's <filename class="libraryfile">'spring-context.jar'</filename>
+        (for the JMX and non-HTTP remoting support) and partly into
+        <filename class="libraryfile">'spring-web.jar'</filename>
+        (for the HTTP remoting support).</para>
+
+        <para>Spring 2.0's <filename class="libraryfile">'spring-support.jar'</filename>
+        has been renamed to <filename class="libraryfile">'spring-context-support.jar'</filename>,
+        expressing the actual support relationship more closely.
+        <filename class="libraryfile">'spring-portlet.jar'</filename> has been
+        renamed to <filename class="libraryfile">'spring-webmvc-portlet.jar'</filename>,
+        since it is technically a submodule of Spring's Web MVC framework.
+        Analogously, <filename class="libraryfile">'spring-struts.jar'</filename>
+        has been renamed to <filename class="libraryfile">'spring-webmvc-struts.jar'</filename>.
+        </para>
+
+        <para>Spring 2.0's <filename class="libraryfile">'spring-jdo.jar'</filename>,
+        <filename class="libraryfile">'spring-jpa.jar'</filename>,
+        <filename class="libraryfile">'spring-hibernate3.jar'</filename>,
+        <filename class="libraryfile">'spring-toplink.jar'</filename>
+        and <filename class="libraryfile">'spring-ibatis.jar'</filename>
+        have been combined into Spring 2.5's coarse-granular
+        <filename class="libraryfile">'spring-orm.jar'</filename>.</para>
+
+        <para>Spring 2.5's <filename class="libraryfile">'spring-test.jar'</filename>
+        supersedes the previous <filename class="libraryfile">'spring-mock.jar'</filename>,
+        indicating the stronger focus on the test context framework.
+        Note that <filename class="libraryfile">'spring-test.jar'</filename>
+        contains everything <filename class="libraryfile">'spring-mock.jar'</filename>
+        contained in previous Spring versions; hence it can be used as a
+        straightforward replacement for unit and integration testing purposes.</para>
+
+        <para>Spring 2.5's <filename class="libraryfile">'spring-tx.jar'</filename>
+        supersedes the previous <filename class="libraryfile">'spring-dao.jar'</filename>
+        and <filename class="libraryfile">'spring-jca.jar'</filename> files,
+        indicating the stronger focus on the transaction framework.</para>
 
         <para>Spring 2.5 ships its framework jars as OSGi-compliant bundles
         out of the box. This facilitates use of Spring in OSGi environments,
@@ -675,7 +721,7 @@
 
         <para>If you need to stick with Hibernate 2.1 or 3.0 for the time
         being, we recommend to keep using the Spring Framework version
-        2.0.6/2.0.8 which still supports those versions of Hibernate.</para>
+        2.0.7/2.0.8 which still supports those versions of Hibernate.</para>
       </section>
 
       <section id="new-in-2-migrating-jdo">
