@@ -1,12 +1,12 @@
-THE SPRING FRAMEWORK, release 2.0.8 (December 2007)
----------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0.8 (January 2008)
+--------------------------------------------------
 http://www.springframework.org
 
 
 1. INTRODUCTION
 
-Spring is a layered Java/J2EE application framework, based on code published in "Expert One-on-One J2EE Design
-and Development" by Rod Johnson (Wrox, 2002). Spring includes:
+Spring is a modular Java/J2EE application framework, based on code published in "Expert One-on-One
+J2EE Design and Development" by Rod Johnson (Wrox, 2002). Spring includes:
 
 * Powerful JavaBeans-based configuration management, applying Inversion-of-Control principles. This makes
 wiring up applications quick and easy. No more singletons littered throughout your codebase, no more arbitrary

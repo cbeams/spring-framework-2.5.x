@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.8 (2007-12-19)
+Changes in version 2.0.8 (2008-01-28)
 -------------------------------------
 
 General
@@ -13,6 +13,8 @@ Package org.springframework.aop
 * fixed garbage collection problem with CGLIB proxies, now holding onto the Advised configuration independent of factory
 
 Package org.springframework.beans
+* TypeConverterDelegate protects its text conversion step against PropertyEditors which don't support "setValue" calls
+* DefaultListableBeanFactory throws descriptive exception in case of factory-bean circular reference
 * DefaultListableBeanFactory freshly resolves autowired arguments even for cached constructors (re-resolving prototypes)
 * fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
 * factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
@@ -37,6 +39,8 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * DefaultMessageListenerContainer avoids deadlock between Connection and Session through the use of a shared monitor
+* ServerSessionMessageListenerContainer always establishes a shared Connection (even if autoStart="false")
+* CommonsPoolServerSessionFactory removes specific ServerSessionPool on close (for proper reuse on stop and restart)
 
 Package org.springframework.jndi
 * JndiTemplate prepares a specific Hashtable for the InitialContext, exposing default environment properties as well
@@ -62,7 +66,9 @@ Package org.springframework.web
 * ContextLoader(Listener/Servlet) explicitly removes the context attribute from the ServletContext (for WLS hot deploy)
 * CommonsMultipartResolver uses FileUpload 1.2's "isMultipartContent" variant when available (for stricter checks)
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
+* DispatcherServlet consistently logs correct request URI for include requests (even in debug log messages)
 * DispatcherPortlet swallows IllegalStateException when setting implicit render parameter (e.g. after sendRedirect call)
+* JstlView detects session-scoped JSTL LocalizationContext/Locale attributes and merges them with its own context
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
 * fixed TilesConfigurer to explicitly set the factory name to empty String by default
