@@ -42,6 +42,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
+ * @see AopNamespaceUtils
  */
 public abstract class AopConfigUtils {
 
@@ -121,9 +122,9 @@ public abstract class AopConfigUtils {
 			return null;
 		}
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
-		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		beanDefinition.setSource(source);
 		beanDefinition.getPropertyValues().addPropertyValue("order", new Integer(Ordered.HIGHEST_PRECEDENCE));
+		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
 		return beanDefinition;
 	}
