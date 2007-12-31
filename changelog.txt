@@ -3,11 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.8 (2008-01-28)
+Changes in version 2.0.8 (2007-12-31)
 -------------------------------------
 
 General
-* various documentation fixes and clarifications
+* various documentation revisions and clarifications
 
 Package org.springframework.aop
 * fixed garbage collection problem with CGLIB proxies, now holding onto the Advised configuration independent of factory
