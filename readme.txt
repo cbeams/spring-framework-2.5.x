@@ -5,8 +5,8 @@ http://www.springframework.org
 
 1. INTRODUCTION
 
-Spring is a layered Java/J2EE application framework, based on code published in "Expert One-on-One J2EE Design
-and Development" by Rod Johnson (Wrox, 2002). Spring includes:
+Spring is a modular Java/J2EE application framework, based on code published in "Expert One-on-One
+J2EE Design and Development" by Rod Johnson (Wrox, 2002). Spring includes:
 
 * Powerful JavaBeans-based configuration management, applying Inversion-of-Control principles. This makes
 wiring up applications quick and easy. No more singletons littered throughout your codebase, no more arbitrary
@@ -54,10 +54,10 @@ knowledge about it immediately.
 The Spring Framework 2.5 requires JDK 1.4.2 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5.3, Commons Attributes 2.2, JMX 1.2, JCA 1.0/1.5,
-Hibernate 3.1/3.2, TopLink 10.1.3/11, JDO 2.0, JPA 1.0, iBATIS SQL Maps 2.3, Caucho's Hessian & Burlap 2.1/3.0,
-JAX-RPC 1.1, JAX-WS 2.0, Quartz 1.5/1.6, EHCache 1.2, Commons FileUpload 1.2, Velocity 1.5, FreeMarker 2.3,
-JasperReports 1.3, JSTL 1.0/1.1, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 1.2/2.0, etc.
+Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5, Commons Attributes 2.2, JMX 1.2, JCA 1.0/1.5,
+Hibernate 3.1/3.2, TopLink 10.1.3/11, JDO 2.0, JPA 1.0, iBATIS SQL Maps 2.3, Caucho's Hessian 2.1/3.0/3.1,
+JAX-RPC 1.1, JAX-WS 2.0, Quartz 1.5/1.6, EHCache 1.2/1.3, Commons FileUpload 1.2, Velocity 1.5, FreeMarker 2.3,
+JasperReports 1.3/2.0, JSTL 1.0/1.1, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 1.2/2.0, etc.
 
 Basic release contents (~5 MB):
 * "dist" contains the Spring binary jar files
@@ -101,7 +101,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2775 KB)
+* "spring" (~2760 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Spring MVC/Portlet/Struts support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc.jar, spring-webmvc-portlet.jar and spring-webmvc-struts.jar!
@@ -112,11 +112,11 @@ MODULE JARS (dist/modules):
 - Contents: AOP framework
 - Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-beans" (~450 KB)
+* "spring-beans" (~460 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
-* "spring-context" (~435 KB)
+* "spring-context" (~445 KB)
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
@@ -124,11 +124,11 @@ MODULE JARS (dist/modules):
 - Contents: Quartz and CommonJ scheduling, UI templating, mail, caching
 - Dependencies: spring-context, (spring-aop, spring-jdbc)
 
-* "spring-core" (~265 KB)
+* "spring-core" (~270 KB)
 - Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
 - Dependencies: Commons Logging, (Commons Attributes)
 
-* "spring-jdbc" (~300 KB)
+* "spring-jdbc" (~305 KB)
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
@@ -148,15 +148,15 @@ MODULE JARS (dist/modules):
 - Contents: transaction infrastructure, JCA support, DAO support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
 
-* "spring-web" (~220 KB)
+* "spring-web" (~180 KB)
 - Contents: web application context, multipart resolver, HTTP-based remoting support
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
-* "spring-webmvc" (~325 KB)
+* "spring-webmvc" (~380 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-context-support)
 
-* "spring-webmvc-portlet" (~145 KB)
+* "spring-webmvc-portlet" (~150 KB)
 - Contents: framework portlets, portlet MVC framework, portlet controllers
 - Dependencies: spring-web, Portlet API, (spring-webmvc)
 
