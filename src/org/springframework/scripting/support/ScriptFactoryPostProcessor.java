@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 		catch (Exception ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Could not determine the scripted object type for script factory [" + scriptFactory + "]", ex);
+				logger.debug("Could not determine the scripted object type for: " + scriptFactory, ex);
 			}
 		}
 
@@ -280,13 +280,14 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		boolean isFactoryBean = false;
 		try {
 			Class scriptedObjectType = scriptFactory.getScriptedObjectType(scriptSource);
-			// returned type may be null if the factory is unable to determine
+			// Returned type may be null if the factory is unable to determine the type.
 			if (scriptedObjectType != null) {
 				isFactoryBean = FactoryBean.class.isAssignableFrom(scriptedObjectType);
 			}
 		}
-		catch (Exception e) {
-			throw new BeanCreationException("Unable to create scripted object: " + beanName, e);
+		catch (Exception ex) {
+			throw new BeanCreationException(
+					beanName, "Could not determine the scripted object type for: " + scriptFactory, ex);
 		}
 
 		long refreshCheckDelay = resolveRefreshCheckDelay(bd);
