@@ -248,16 +248,17 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		if (scriptedType != null) {
 			return scriptedType;
 		}
-		else if (ObjectUtils.isEmpty(interfaces)) {
-			if (bd.isSingleton()) {
-				return this.scriptBeanFactory.getBean(scriptedObjectBeanName).getClass();
-			}
-			else {
-				return null;
-			}
+		else if (!ObjectUtils.isEmpty(interfaces)) {
+			return (interfaces.length == 1 ? interfaces[0] : createCompositeInterface(interfaces));
 		}
 		else {
-			return (interfaces.length == 1 ? interfaces[0] : createCompositeInterface(interfaces));
+			if (bd.isSingleton()) {
+				Object bean = this.scriptBeanFactory.getBean(scriptedObjectBeanName);
+				if (bean != null) {
+					return bean.getClass();
+				}
+			}
+			return null;
 		}
 	}
 
