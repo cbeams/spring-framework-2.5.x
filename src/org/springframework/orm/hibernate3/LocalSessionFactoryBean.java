@@ -633,6 +633,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				}
 			}
 
+			// Tell Hibernate to eagerly compile the mappings that we registered,
+			// for availability of the mapping information in further processing.
+			config.buildMappings();
+
 			if (this.entityCacheStrategies != null) {
 				// Register cache strategies for mapped entities.
 				for (Enumeration classNames = this.entityCacheStrategies.propertyNames(); classNames.hasMoreElements();) {
