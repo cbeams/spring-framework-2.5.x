@@ -23,7 +23,7 @@
 		<provider> com.acme.AcmePersistence  </provider>
 		<non-jta-data-source>jdbc/MyDB  </non-jta-data-source>
 		<mapping-file>order2.xml </mapping-file>
-		<jar-file>   order-supplemental.jar</jar-file>
+		<jar-file>   order-*.jar</jar-file>
 		<exclude-unlisted-classes />
 	</persistence-unit>
 

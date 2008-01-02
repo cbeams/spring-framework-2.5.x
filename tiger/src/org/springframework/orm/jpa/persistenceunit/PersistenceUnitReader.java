@@ -346,8 +346,10 @@ class PersistenceUnitReader {
 		for (Element element : jars) {
 			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
-				Resource resource = this.resourcePatternResolver.getResource(value);
-				unitInfo.addJarFileUrl(resource.getURL());
+				Resource[] resources = this.resourcePatternResolver.getResources(value);
+				for (int i = 0; i < resources.length; i++) {
+					unitInfo.addJarFileUrl(resources[i].getURL());
+				}
 			}
 		}
 	}
