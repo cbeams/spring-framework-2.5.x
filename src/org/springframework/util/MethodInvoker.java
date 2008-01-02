@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,32 +213,24 @@ public class MethodInvoker {
 		int argCount = arguments.length;
 
 		Method[] candidates = getTargetClass().getMethods();
+		int minTypeDiffWeight = Integer.MAX_VALUE;
 		Method matchingMethod = null;
-		int numberOfMatchingMethods = 0;
 
 		for (int i = 0; i < candidates.length; i++) {
 			Method candidate = candidates[i];
-			Class[] paramTypes = candidate.getParameterTypes();
-			int paramCount = paramTypes.length;
-			if (candidate.getName().equals(targetMethod) && paramCount == argCount) {
-				boolean match = true;
-				for (int j = 0; j < paramCount && match; j++) {
-					match = match && ClassUtils.isAssignableValue(paramTypes[j], arguments[j]);
-				}
-				if (match) {
-					matchingMethod = candidate;
-					numberOfMatchingMethods++;
+			if (candidate.getName().equals(targetMethod)) {
+				Class[] paramTypes = candidate.getParameterTypes();
+				if (paramTypes.length == argCount) {
+					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
+					if (typeDiffWeight < minTypeDiffWeight) {
+						minTypeDiffWeight = typeDiffWeight;
+						matchingMethod = candidate;
+					}
 				}
 			}
 		}
 
-		// Only return matching method if exactly one found.
-		if (numberOfMatchingMethods == 1) {
-			return matchingMethod;
-		}
-		else {
-			return null;
-		}
+		return matchingMethod;
 	}
 
 	/**
@@ -281,6 +273,54 @@ public class MethodInvoker {
 			throw new IllegalArgumentException("Target method must not be non-static without a target");
 		}
 		return preparedMethod.invoke(targetObject, getArguments());
+	}
+
+
+	/**
+	 * Algorithm that judges the match between the declared parameter types of a candidate method
+	 * and a specific list of arguments that this method is supposed to be invoked with.
+	 * <p>Determines a weight that represents the class hierarchy difference between types and
+	 * arguments. A direct match, i.e. type Integer -> arg of class Integer, does not increase
+	 * the result - all direct matches means weight 0. A match between type Object and arg of
+	 * class Integer would increase the weight by 2, due to the superclass 2 steps up in the
+	 * hierarchy (i.e. Object) being the last one that still matches the required type Object.
+	 * Type Number and class Integer would increase the weight by 1 accordingly, due to the
+	 * superclass 1 step up the hierarchy (i.e. Number) still matching the required type Number.
+	 * Therefore, with an arg of type Integer, a constructor (Integer) would be preferred to a
+	 * constructor (Number) which would in turn be preferred to a constructor (Object).
+	 * All argument weights get accumulated.
+	 * @param paramTypes the parameter types to match
+	 * @param args the arguments to match
+	 * @return the accumulated weight for all arguments
+	 */
+	public static int getTypeDifferenceWeight(Class[] paramTypes, Object[] args) {
+		int result = 0;
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (!ClassUtils.isAssignableValue(paramTypes[i], args[i])) {
+				return Integer.MAX_VALUE;
+			}
+			if (args[i] != null) {
+				Class paramType = paramTypes[i];
+				Class superClass = args[i].getClass().getSuperclass();
+				while (superClass != null) {
+					if (paramType.equals(superClass)) {
+						result = result + 2;
+						superClass = null;
+					}
+					else if (ClassUtils.isAssignable(paramType, superClass)) {
+						result = result + 2;
+						superClass = superClass.getSuperclass();
+					}
+					else {
+						superClass = null;
+					}
+				}
+				if (paramType.isInterface()) {
+					result = result + 1;
+				}
+			}
+		}
+		return result;
 	}
 
 }

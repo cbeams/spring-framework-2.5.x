@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -71,6 +72,7 @@ class ConstructorResolver {
 	/**
 	 * Create a new ConstructorResolver for the given factory and instantiation strategy.
 	 * @param beanFactory the BeanFactory to work with
+	 * @param autowireFactory the BeanFactory as AutowireCapableBeanFactory
 	 * @param instantiationStrategy the instantiate strategy for creating bean instances
 	 * @param typeConverter the TypeConverter to use (or <code>null</code> for using the default)
 	 */
@@ -619,8 +621,8 @@ class ConstructorResolver {
 			// Try type difference weight on both the converted arguments and
 			// the raw arguments. If the raw weight is better, use it.
 			// Decrease raw weight by 1024 to prefer it over equal converted weight.
-			int typeDiffWeight = AutowireUtils.getTypeDifferenceWeight(paramTypes, this.arguments);
-			int rawTypeDiffWeight = AutowireUtils.getTypeDifferenceWeight(paramTypes, this.rawArguments) - 1024;
+			int typeDiffWeight = MethodInvoker.getTypeDifferenceWeight(paramTypes, this.arguments);
+			int rawTypeDiffWeight = MethodInvoker.getTypeDifferenceWeight(paramTypes, this.rawArguments) - 1024;
 			return (rawTypeDiffWeight < typeDiffWeight ? rawTypeDiffWeight : typeDiffWeight);
 		}
 	}

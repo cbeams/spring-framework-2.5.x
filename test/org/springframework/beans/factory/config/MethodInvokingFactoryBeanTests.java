@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.MethodInvoker;
+import org.springframework.util.MethodInvokerTests;
 
 /**
  * @author Colin Sampaleanu
@@ -59,7 +60,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		// bogus static method
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("some.bogus.Method.name");
 		try {
 			mcfb.afterPropertiesSet();
@@ -71,7 +72,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		// bogus static method
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("method1");
 		try {
 			mcfb.afterPropertiesSet();
@@ -105,14 +106,14 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 
 		// static method
-		TestClass1._staticField1 = 0;
+		MethodInvokerTests.TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("staticMethod1");
 		mcfb.afterPropertiesSet();
 
 		// non-static method
-		TestClass1 tc1 = new TestClass1();
+		MethodInvokerTests.TestClass1 tc1 = new MethodInvokerTests.TestClass1();
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
@@ -120,7 +121,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 	}
 
 	public void testGetObjectType() throws Exception {
-		TestClass1 tc1 = new TestClass1();
+		MethodInvokerTests.TestClass1 tc1 = new MethodInvokerTests.TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(tc1);
@@ -129,7 +130,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		assertTrue(int.class.equals(mcfb.getObjectType()));
 
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("voidRetvalMethod");
 		mcfb.afterPropertiesSet();
 		Class objType = mcfb.getObjectType();
@@ -137,9 +138,9 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		// verify that we can call a method with args that are subtypes of the
 		// target method arg types
-		TestClass1._staticField1 = 0;
+		MethodInvokerTests.TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
 		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
 		mcfb.afterPropertiesSet();
@@ -148,7 +149,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		// fail on improper argument types at afterPropertiesSet
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.registerCustomEditor(String.class, new StringTrimmerEditor(false));
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
 		mcfb.setArguments(new Object[] {"1", new Object()});
 		try {
@@ -162,7 +163,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 	public void testGetObject() throws Exception {
 		// singleton, non-static
-		TestClass1 tc1 = new TestClass1();
+		MethodInvokerTests.TestClass1 tc1 = new MethodInvokerTests.TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
@@ -173,7 +174,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		assertEquals(1, i.intValue());
 
 		// non-singleton, non-static
-		tc1 = new TestClass1();
+		tc1 = new MethodInvokerTests.TestClass1();
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
@@ -185,9 +186,9 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		assertEquals(2, i.intValue());
 
 		// singleton, static
-		TestClass1._staticField1 = 0;
+		MethodInvokerTests.TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("staticMethod1");
 		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
@@ -196,7 +197,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		assertEquals(1, i.intValue());
 
 		// non-singleton, static
-		TestClass1._staticField1 = 0;
+		MethodInvokerTests.TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setStaticMethod("org.springframework.beans.factory.config.MethodInvokingFactoryBeanTests$TestClass1.staticMethod1");
 		mcfb.setSingleton(false);
@@ -208,14 +209,14 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		// void return value
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("voidRetvalMethod");
 		mcfb.afterPropertiesSet();
 		assertNull(mcfb.getObject());
 
 		// now see if we can match methods with arguments that have supertype arguments
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
 		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
 		// should pass
@@ -224,7 +225,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 	public void testArgumentConversion() throws Exception {
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
 		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
 		try {
@@ -236,7 +237,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
 		mcfb.setArguments(new Object[] {new Integer(1), new Object()});
 		try {
@@ -249,14 +250,14 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
 		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
 		mcfb.afterPropertiesSet();
 		assertEquals("hello", mcfb.getObject());
 
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetClass(MethodInvokerTests.TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
 		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), new Object()});
 		try {
@@ -270,7 +271,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 	public void testInvokeWithNullArgument() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetClass(TestClass1.class);
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
 		methodInvoker.setTargetMethod("nullArgument");
 		methodInvoker.setArguments(new Object[] {null});
 		methodInvoker.prepare();
@@ -279,102 +280,18 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 	public void testInvokeWithIntArgument() throws Exception {
 		ArgumentConvertingMethodInvoker methodInvoker = new ArgumentConvertingMethodInvoker();
-		methodInvoker.setTargetClass(TestClass1.class);
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
 		methodInvoker.setTargetMethod("intArgument");
 		methodInvoker.setArguments(new Object[] {new Integer(5)});
 		methodInvoker.prepare();
 		methodInvoker.invoke();
 
 		methodInvoker = new ArgumentConvertingMethodInvoker();
-		methodInvoker.setTargetClass(TestClass1.class);
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
 		methodInvoker.setTargetMethod("intArgument");
 		methodInvoker.setArguments(new Object[] {"5"});
 		methodInvoker.prepare();
 		methodInvoker.invoke();
-	}
-
-	public void testPlainMethodInvoker() throws Exception {
-		// sanity check: singleton, non-static should work
-		TestClass1 tc1 = new TestClass1();
-		MethodInvoker mi = new MethodInvoker();
-		mi.setTargetObject(tc1);
-		mi.setTargetMethod("method1");
-		mi.prepare();
-		Integer i = (Integer) mi.invoke();
-		assertEquals(1, i.intValue());
-
-		// sanity check: check that argument count matching works
-		mi = new MethodInvoker();
-		mi.setTargetClass(TestClass1.class);
-		mi.setTargetMethod("supertypes");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
-		mi.prepare();
-		assertEquals("hello", mi.invoke());
-
-		mi = new MethodInvoker();
-		mi.setTargetClass(TestClass1.class);
-		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
-		mi.prepare();
-		assertEquals("hello", mi.invoke());
-
-		// Sanity check: check that argument conversion doesn't work with plain MethodInvoker
-		mi = new MethodInvoker();
-		mi.setTargetClass(TestClass1.class);
-		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", Boolean.TRUE});
-		try {
-			mi.prepare();
-			fail("Shouldn't have matched without argument conversion");
-		}
-		catch (NoSuchMethodException ex) {
-			// expected
-		}
-	}
-
-
-	public static class TestClass1 {
-
-		public static int _staticField1;
-
-		public int _field1 = 0;
-
-		public int method1() {
-			return ++_field1;
-		}
-
-		public static int staticMethod1() {
-			return ++_staticField1;
-		}
-
-		public static void voidRetvalMethod() {
-		}
-
-		public static void nullArgument(Object arg) {
-		}
-
-		public static void intArgument(int arg) {
-		}
-
-		public static String supertypes(Collection c, Integer i) {
-			return i.toString();
-		}
-
-		public static String supertypes(Collection c, List l, String s) {
-			return s;
-		}
-
-		public static String supertypes2(Collection c, List l, Integer i) {
-			return i.toString();
-		}
-
-		public static String supertypes2(Collection c, List l, String s, Integer i) {
-			return s;
-		}
-
-		public static String supertypes2(Collection c, List l, String s, String s2) {
-			return s;
-		}
 	}
 
 }
