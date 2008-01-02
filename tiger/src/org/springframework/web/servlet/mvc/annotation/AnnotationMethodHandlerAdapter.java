@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,13 @@ import org.springframework.core.Conventions;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
@@ -242,7 +244,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			catch (InvocationTargetException ex) {
 				ReflectionUtils.handleInvocationTargetException(ex);
 			}
-			String attrName = attributeMethod.getAnnotation(ModelAttribute.class).value();
+			String attrName = AnnotationUtils.findAnnotation(attributeMethod, ModelAttribute.class).value();
 			if ("".equals(attrName)) {
 				attrName = Conventions.getVariableNameForReturnType(attributeMethod, attrValue);
 			}
@@ -302,10 +304,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 
 	private HandlerMethodResolver getMethodResolver(Object handler) {
-		HandlerMethodResolver resolver = this.methodResolverCache.get(handler.getClass());
+		Class handlerClass = ClassUtils.getUserClass(handler);
+		HandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
 		if (resolver == null) {
-			resolver = new HandlerMethodResolver(handler.getClass());
-			this.methodResolverCache.put(handler.getClass(), resolver);
+			resolver = new HandlerMethodResolver(handlerClass);
+			this.methodResolverCache.put(handlerClass, resolver);
 		}
 		return resolver;
 	}
@@ -323,13 +326,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
 					if (method.isAnnotationPresent(RequestMapping.class)) {
-						handlerMethods.add(method);
+						handlerMethods.add(ClassUtils.getMostSpecificMethod(method, handlerType));
 					}
 					else if (method.isAnnotationPresent(InitBinder.class)) {
-						initBinderMethods.add(method);
+						initBinderMethods.add(ClassUtils.getMostSpecificMethod(method, handlerType));
 					}
 					else if (method.isAnnotationPresent(ModelAttribute.class)) {
-						modelAttributeMethods.add(method);
+						modelAttributeMethods.add(ClassUtils.getMostSpecificMethod(method, handlerType));
 					}
 				}
 			});
@@ -342,7 +345,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			String resolvedMethodName = null;
 			for (Method handlerMethod : this.handlerMethods) {
 				RequestMappingInfo mappingInfo = new RequestMappingInfo();
-				RequestMapping mapping = handlerMethod.getAnnotation(RequestMapping.class);
+				RequestMapping mapping = AnnotationUtils.findAnnotation(handlerMethod, RequestMapping.class);
 				mappingInfo.paths = mapping.value();
 				mappingInfo.methods = mapping.method();
 				mappingInfo.params = mapping.params();
@@ -675,7 +678,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				webBindingInitializer.initBinder(binder, webRequest);
 			}
 			for (Method initBinderMethod : this.initBinderMethods) {
-				String[] targetNames = initBinderMethod.getAnnotation(InitBinder.class).value();
+				String[] targetNames = AnnotationUtils.findAnnotation(initBinderMethod, InitBinder.class).value();
 				if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
 					Class[] initBinderParams = initBinderMethod.getParameterTypes();
 					Object[] initBinderArgs = new Object[initBinderParams.length];
@@ -738,7 +741,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			else if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
 				// Assume a single model attribute...
-				String attrName = handlerMethod.getAnnotation(ModelAttribute.class).value();
+				String attrName = AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class).value();
 				ModelAndView mav = new ModelAndView().addAllObjects(implicitModel);
 				if ("".equals(attrName)) {
 					return mav.addObject(returnValue);
