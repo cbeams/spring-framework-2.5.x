@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,20 @@ import java.util.Map;
 
 /**
  * See the MessageListenerAdapterTests class for usage.
- * 
+ *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public interface MessageContentsDelegate {
 
-    void handleMessage(String message);
+	void handleMessage(CharSequence message);
 
-    void handleMessage(Map message);
+	void handleMessage(Map message);
 
-    void handleMessage(byte[] message);
+	void handleMessage(byte[] message);
 
-    void handleMessage(Object message);
+	void handleMessage(Number message);
+
+	void handleMessage(Object message);
 
 }

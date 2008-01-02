@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import javax.jms.TextMessage;
  */
 public interface MessageDelegate {
 
-    void handleMessage(TextMessage message);
+	void handleMessage(TextMessage message);
 
-    void handleMessage(MapMessage message);
+	void handleMessage(MapMessage message);
 
-    void handleMessage(BytesMessage message);
+	void handleMessage(BytesMessage message);
 
-    void handleMessage(ObjectMessage message);
+	void handleMessage(ObjectMessage message);
 
 }

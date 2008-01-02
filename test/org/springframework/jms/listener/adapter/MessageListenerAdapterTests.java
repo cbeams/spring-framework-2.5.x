@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.jms.listener.adapter;
 
+import java.io.Serializable;
+
 import javax.jms.BytesMessage;
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
@@ -37,14 +40,20 @@ import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class MessageListenerAdapterTests extends TestCase {
+public class MessageListenerAdapterTests extends TestCase {
 
 	private static final String TEXT = "I fancy a good cuppa right now";
+
+	private static final Integer NUMBER = new Integer(1);
+
+	private static final SerializableObject OBJECT = new SerializableObject();
 
 	private static final String CORRELATION_ID = "100";
 
 	private static final String RESPONSE_TEXT = "... wi' some full fat creamy milk. Top banana.";
+
 
 	public void testWithMessageContentsDelegateForTextMessage() throws Exception {
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
@@ -90,6 +99,46 @@ public final class MessageListenerAdapterTests extends TestCase {
 
 		mockDelegate.verify();
 		mockBytesMessage.verify();
+	}
+
+	public void testWithMessageContentsDelegateForObjectMessage() throws Exception {
+		MockControl mockObjectMessage = MockControl.createControl(ObjectMessage.class);
+		ObjectMessage objectMessage = (ObjectMessage) mockObjectMessage.getMock();
+		objectMessage.getObject();
+		mockObjectMessage.setReturnValue(NUMBER);
+		mockObjectMessage.replay();
+
+		MockControl mockDelegate = MockControl.createControl(MessageContentsDelegate.class);
+		MessageContentsDelegate delegate = (MessageContentsDelegate) mockDelegate.getMock();
+		delegate.handleMessage(NUMBER);
+		mockDelegate.setVoidCallable();
+		mockDelegate.replay();
+
+		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
+		adapter.onMessage(objectMessage);
+
+		mockDelegate.verify();
+		mockObjectMessage.verify();
+	}
+
+	public void testWithMessageContentsDelegateForObjectMessageWithPlainObject() throws Exception {
+		MockControl mockObjectMessage = MockControl.createControl(ObjectMessage.class);
+		ObjectMessage objectMessage = (ObjectMessage) mockObjectMessage.getMock();
+		objectMessage.getObject();
+		mockObjectMessage.setReturnValue(OBJECT);
+		mockObjectMessage.replay();
+
+		MockControl mockDelegate = MockControl.createControl(MessageContentsDelegate.class);
+		MessageContentsDelegate delegate = (MessageContentsDelegate) mockDelegate.getMock();
+		delegate.handleMessage(OBJECT);
+		mockDelegate.setVoidCallable();
+		mockDelegate.replay();
+
+		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
+		adapter.onMessage(objectMessage);
+
+		mockDelegate.verify();
+		mockObjectMessage.verify();
 	}
 
 	public void testWithMessageDelegate() throws Exception {
@@ -598,6 +647,10 @@ public final class MessageListenerAdapterTests extends TestCase {
 		mockSession.verify();
 		mockQueueSender.verify();
 		mockResponseMessage.verify();
+	}
+
+
+	private static class SerializableObject implements Serializable {
 	}
 
 }
