@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,8 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	private Class scriptClass;
 
 	private Class scriptResultClass;
+
+	private CachedResultHolder cachedResult;
 
 	private final Object scriptClassMonitor = new Object();
 
@@ -139,6 +141,11 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 			Class scriptClassToExecute = null;
 
 			synchronized (this.scriptClassMonitor) {
+				if (this.cachedResult != null) {
+					Object result = this.cachedResult.object;
+					this.cachedResult = null;
+					return result;
+				}
 				if (this.scriptClass == null || scriptSource.isModified()) {
 					this.scriptClass = this.groovyClassLoader.parseClass(
 							scriptSource.getScriptAsString(), scriptSource.toString());
@@ -176,6 +183,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 					// A Groovy script, probably creating an instance: let's execute it.
 					Object result = executeScript(scriptSource, this.scriptClass);
 					this.scriptResultClass = (result != null ? result.getClass() : null);
+					this.cachedResult = new CachedResultHolder(result);
 				}
 				else {
 					this.scriptResultClass = this.scriptClass;
@@ -224,6 +232,19 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	public String toString() {
 		return "GroovyScriptFactory: script source locator [" + this.scriptSourceLocator + "]";
+	}
+
+
+	/**
+	 * Wrapper that holds a temporarily cached result object.
+	 */
+	private static class CachedResultHolder {
+
+		public final Object object;
+
+		public CachedResultHolder(Object object) {
+			this.object = object;
+		}
 	}
 
 }
