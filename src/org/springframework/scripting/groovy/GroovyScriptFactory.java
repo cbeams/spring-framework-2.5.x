@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,14 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 		this.groovyClassLoader = new GroovyClassLoader(classLoader);
 	}
 
+	/**
+	 * Return the GroovyClassLoader used by this script factory.
+	 */
+	public GroovyClassLoader getGroovyClassLoader() {
+		return this.groovyClassLoader;
+	}
+
+
 	public String getScriptSourceLocator() {
 		return this.scriptSourceLocator;
 	}
@@ -128,7 +136,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 
 			synchronized (this.scriptClassMonitor) {
 				if (this.scriptClass == null || scriptSource.isModified()) {
-					this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
+					this.scriptClass = getGroovyClassLoader().parseClass(scriptSource.getScriptAsString());
 
 					if (Script.class.isAssignableFrom(this.scriptClass)) {
 						// A Groovy script, probably creating an instance: let's execute it.
@@ -157,7 +165,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 
 		synchronized (this.scriptClassMonitor) {
 			if (this.scriptClass == null || scriptSource.isModified()) {
-				this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
+				this.scriptClass = getGroovyClassLoader().parseClass(scriptSource.getScriptAsString());
 
 				if (Script.class.isAssignableFrom(this.scriptClass)) {
 					// A Groovy script, probably creating an instance: let's execute it.
