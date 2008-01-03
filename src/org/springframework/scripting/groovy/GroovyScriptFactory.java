@@ -56,7 +56,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	
 	private final GroovyObjectCustomizer groovyObjectCustomizer;
 
-	private GroovyClassLoader groovyClassLoader = new GroovyClassLoader(ClassUtils.getDefaultClassLoader());
+	private GroovyClassLoader groovyClassLoader;
 
 	private Class scriptClass;
 
@@ -107,6 +107,18 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 		this.groovyClassLoader = new GroovyClassLoader(classLoader);
 	}
 
+	/**
+	 * Return the GroovyClassLoader used by this script factory.
+	 */
+	public GroovyClassLoader getGroovyClassLoader() {
+		synchronized (this.scriptClassMonitor) {
+			if (this.groovyClassLoader == null) {
+				this.groovyClassLoader = new GroovyClassLoader(ClassUtils.getDefaultClassLoader());
+			}
+			return this.groovyClassLoader;
+		}
+	}
+
 
 	public String getScriptSourceLocator() {
 		return this.scriptSourceLocator;
@@ -147,7 +159,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 					return result;
 				}
 				if (this.scriptClass == null || scriptSource.isModified()) {
-					this.scriptClass = this.groovyClassLoader.parseClass(
+					this.scriptClass = getGroovyClassLoader().parseClass(
 							scriptSource.getScriptAsString(), scriptSource.toString());
 
 					if (Script.class.isAssignableFrom(this.scriptClass)) {
@@ -176,7 +188,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 		synchronized (this.scriptClassMonitor) {
 			if (this.scriptClass == null || scriptSource.isModified()) {
-				this.scriptClass = this.groovyClassLoader.parseClass(
+				this.scriptClass = getGroovyClassLoader().parseClass(
 						scriptSource.getScriptAsString(), scriptSource.toString());
 
 				if (Script.class.isAssignableFrom(this.scriptClass)) {
