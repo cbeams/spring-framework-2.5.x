@@ -32,6 +32,7 @@ import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
 import org.easymock.MockControl;
+import org.hibernate.ejb.HibernateEntityManager;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.SimpleMapScope;
@@ -71,6 +72,20 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				"&" + FactoryBeanWithPersistenceContextField.class.getName());
 		assertNotNull(bean.em);
 		assertNotNull(bean2.em);
+	}
+
+	public void testPrivateVendorSpecificPersistenceContextField() {
+		GenericApplicationContext gac = new GenericApplicationContext();
+		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
+		gac.registerBeanDefinition("annotationProcessor",
+				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+		gac.registerBeanDefinition(DefaultVendorSpecificPrivatePersistenceContextField.class.getName(),
+				new RootBeanDefinition(DefaultVendorSpecificPrivatePersistenceContextField.class));
+		gac.refresh();
+
+		DefaultVendorSpecificPrivatePersistenceContextField bean = (DefaultVendorSpecificPrivatePersistenceContextField)
+				gac.getBean(DefaultVendorSpecificPrivatePersistenceContextField.class.getName());
+		assertNotNull(bean.em);
 	}
 
 	public void testPublicExtendedPersistenceContextSetter() throws Exception {
@@ -659,6 +674,13 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		@PersistenceContext
 		private EntityManager em;
+	}
+
+
+	public static class DefaultVendorSpecificPrivatePersistenceContextField {
+
+		@PersistenceContext
+		private HibernateEntityManager em;
 	}
 
 

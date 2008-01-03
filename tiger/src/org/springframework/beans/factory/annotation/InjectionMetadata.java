@@ -118,16 +118,16 @@ public class InjectionMetadata {
 		protected final void checkResourceType(Class resourceType) {
 			if (this.isField) {
 				Class fieldType = ((Field) this.member).getType();
-				if (!fieldType.isAssignableFrom(resourceType)) {
-					throw new IllegalStateException("Specified resource type [" + resourceType.getName() +
-							"] is not assignable to field type [" + fieldType + "]");
+				if (!resourceType.isAssignableFrom(fieldType) && !fieldType.equals(Object.class)) {
+					throw new IllegalStateException("Specified field type [" + fieldType +
+							"] is incompatible with resource type [" + resourceType.getName() + "]");
 				}
 			}
 			else {
 				Class paramType = ((Method) this.member).getParameterTypes()[0];
-				if (!paramType.isAssignableFrom(resourceType)) {
-					throw new IllegalStateException("Specified resource type [" + resourceType.getName() +
-							"] is not assignable to method parameter type [" + paramType + "]");
+				if (!resourceType.isAssignableFrom(paramType) && !paramType.equals(Object.class)) {
+					throw new IllegalStateException("Specified parameter type [" + paramType +
+							"] is incompatible with resource type [" + resourceType.getName() + "]");
 				}
 			}
 		}
