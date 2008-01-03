@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,6 +277,109 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
+	}
+
+	public void testTransactionCommitWithEarlyFlush() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		final List list = new ArrayList();
+		list.add("test");
+		con.getTransactionIsolation();
+		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED);
+		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+		conControl.setVoidCallable(1);
+		con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getTransaction();
+		sessionControl.setReturnValue(tx, 1);
+		tx.setTimeout(10);
+		txControl.setVoidCallable(1);
+		tx.begin();
+		txControl.setVoidCallable(1);
+		session.connection();
+		sessionControl.setReturnValue(con, 3);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		session.isConnected();
+		sessionControl.setReturnValue(true, 1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+
+		dsControl.replay();
+		conControl.replay();
+		sfControl.replay();
+		sessionControl.replay();
+		txControl.replay();
+		queryControl.replay();
+
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
+				return sf;
+			}
+		};
+		lsfb.afterPropertiesSet();
+		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+
+		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
+		tm.setSessionFactory(sfProxy);
+		tm.setDataSource(ds);
+		tm.setEarlyFlushBeforeCommit(true);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+		tt.setTimeout(10);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+				HibernateTemplate ht = new HibernateTemplate(sfProxy);
+				return ht.find("some query string");
+			}
+		});
+		assertTrue("Correct result list", result == list);
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		dsControl.verify();
+		conControl.verify();
+		sfControl.verify();
+		sessionControl.verify();
+		txControl.verify();
+		queryControl.verify();
 	}
 
 	public void testParticipatingTransactionWithCommit() throws Exception {

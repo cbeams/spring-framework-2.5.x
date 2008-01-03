@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private boolean prepareConnection = true;
 
+	private boolean earlyFlushBeforeCommit = false;
+
 	private Object entityInterceptor;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
@@ -260,6 +262,23 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
 		this.prepareConnection = prepareConnection;
+	}
+
+	/**
+	 * Set whether to perform an early flush before proceeding with a commit.
+	 * <p>Default is "false", performing an implicit flush as part of the
+	 * actual commit step. Switch this to "true" in order to enforce an
+	 * explicit flush before the before-commit synchronization phase, making
+	 * flushed state visible to <code>beforeCommit</code> callbacks of registered
+	 * {@link org.springframework.transaction.support.TransactionSynchronization}
+	 * objects.
+	 * <p>Such explicit flush behavior is also consistent with Spring-driven
+	 * flushing in a JTA transaction environment, so may also be enforced for
+	 * consistency with JTA transaction behavior.
+	 * @see #prepareForCommit
+	 */
+	public void setEarlyFlushBeforeCommit(boolean earlyFlushBeforeCommit) {
+		this.earlyFlushBeforeCommit = earlyFlushBeforeCommit;
 	}
 
 	/**
@@ -545,6 +564,25 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		TransactionSynchronizationManager.bindResource(getSessionFactory(), resourcesHolder.getSessionHolder());
 		if (getDataSource() != null) {
 			TransactionSynchronizationManager.bindResource(getDataSource(), resourcesHolder.getConnectionHolder());
+		}
+	}
+
+	protected void prepareForCommit(DefaultTransactionStatus status) {
+		if (this.earlyFlushBeforeCommit) {
+			HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
+			Session session = txObject.getSessionHolder().getSession();
+			if (!session.getFlushMode().lessThan(FlushMode.COMMIT)) {
+				logger.debug("Performing an early flush for Hibernate transaction");
+				try {
+					session.flush();
+				}
+				catch (HibernateException ex) {
+					throw convertHibernateAccessException(ex);
+				}
+				finally {
+					session.setFlushMode(FlushMode.NEVER);
+				}
+			}
 		}
 	}
 

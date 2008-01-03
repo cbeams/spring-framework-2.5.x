@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -688,6 +688,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		try {
 			boolean beforeCompletionInvoked = false;
 			try {
+				prepareForCommit(status);
 				triggerBeforeCommit(status);
 				triggerBeforeCompletion(status);
 				beforeCompletionInvoked = true;
@@ -1127,6 +1128,18 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected boolean shouldCommitOnGlobalRollbackOnly() {
 		return false;
+	}
+
+	/**
+	 * Make preparations for commit, to be performed before the
+	 * <code>beforeCommit</code> synchronization callbacks occur.
+	 * <p>Note that exceptions will get propagated to the commit caller
+	 * and cause a rollback of the transaction.
+	 * @param status the status representation of the transaction
+	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
+	 * (note: do not throw TransactionException subclasses here!)
+	 */
+	protected void prepareForCommit(DefaultTransactionStatus status) {
 	}
 
 	/**
