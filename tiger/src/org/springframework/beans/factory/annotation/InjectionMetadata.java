@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,14 +118,14 @@ public class InjectionMetadata {
 		protected final void checkResourceType(Class resourceType) {
 			if (this.isField) {
 				Class fieldType = ((Field) this.member).getType();
-				if (!resourceType.isAssignableFrom(fieldType) && !fieldType.equals(Object.class)) {
+				if (!(resourceType.isAssignableFrom(fieldType) || fieldType.isAssignableFrom(resourceType))) {
 					throw new IllegalStateException("Specified field type [" + fieldType +
 							"] is incompatible with resource type [" + resourceType.getName() + "]");
 				}
 			}
 			else {
 				Class paramType = ((Method) this.member).getParameterTypes()[0];
-				if (!resourceType.isAssignableFrom(paramType) && !paramType.equals(Object.class)) {
+				if (!(resourceType.isAssignableFrom(paramType) || paramType.isAssignableFrom(resourceType))) {
 					throw new IllegalStateException("Specified parameter type [" + paramType +
 							"] is incompatible with resource type [" + resourceType.getName() + "]");
 				}
