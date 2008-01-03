@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2007-12-31)
+Changes in version 2.5.1 (2008-01-05)
 -------------------------------------
 
 General
@@ -24,6 +24,7 @@ Package org.springframework.beans
 * TypeConverterDelegate protects its text conversion step against PropertyEditors which don't support "setValue" calls
 * factored out FactoryBeanRegistrySupport base class from AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * optimized AbstractBeanFactory's access to cached FactoryBean-exposed objects, avoiding unnecessary locks
+* ConstructorResolver prefers concrete class matches over interface matches at the same level when checking arguments
 * revised accidental public exposure of "isPrimary" method in ConfigurableListableBeanFactory/DefaultListableBeanFactory
 * moved "resolveDependency" implementation from AbstractAutowireCapableBeanFactory down to DefaultListableBeanFactory
 * revised DefaultListableBeanFactory's "resolveDependency" exceptions with respect to clarity and context inclusion
@@ -80,6 +81,7 @@ Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
 * DelegatingConnectionFactory adapts specific create(Queue/Topic)Connection calls to a generic JMS 1.1 ConnectionFactory
 * JmsInvokerClientInterceptor accepts any JMS 1.1 ConnectionFactory, not insisting on a QueueConnectionFactory anymore
+* MethodListenerAdapter uses type difference weight algorithm to choose between ambiguous listener methods
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
 * ServerSessionMessageListenerContainer always establishes a shared Connection (even if autoStart="false")
 * CommonsPoolServerSessionFactory removes specific ServerSessionPool on close (for proper reuse on stop and restart)
@@ -100,7 +102,9 @@ Package org.springframework.mock
 Package org.springframework.orm
 * LocalSessionFactoryBean uses LocalJtaDataSourceConnectionProvider (supporting aggressive release) in case of JTA TM
 * LocalSessionFactoryBean supports Connection release mode "after_statement" without "useTransactionAwareDataSource" too
+* LocalSessionFactoryBean eagerly compiles registered mappings, for availability in the post-processing phase
 * fixed Jpa/JdoTransactionManager to correctly nest a REQUIRES_NEW transaction within a SUPPORTS scope with early access
+* JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
 
 Package org.springframework.remoting
 * HessianClientInterceptor/ProxyFactoryBean supports "debug", "chunkedPost", "readTimeout" and "hessian2" properties
@@ -119,7 +123,9 @@ Package org.springframework.scheduling
 * ThreadPoolTaskExecutor supports Java 6's "allowCoreThreadTimeOut" feature (for both native and backport-concurrent)
 
 Package org.springframework.scripting
+* fixed ScriptFactoryPostProcessor to avoid NPE in case of script that produces null value and no interfaces specified
 * StaticScriptSource exposes "StaticScript" as toString result, in order for Groovy to derive a valid class name from it
+* GroovyScriptFactory caches a temporarily created result object from "getScriptedObjectType" until "getScriptedObject"
 * "lang:groovy/jruby/bsh" does not insist on an id for a scripted bean anymore (i.e. allows for anonymous scripts)
 
 Package org.springframework.test
@@ -139,6 +145,7 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * AutoPopulatingList is serializable now
+* MethodInvoker (and subclasses) use type difference weight algorithm to choose between multiple matching methods
 * FreeMarker "formSingleSelect" macro also accepts options from a sequence (list) as both labels and values
 
 Package org.springframework.validation
@@ -160,6 +167,7 @@ Package org.springframework.web
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
 * @InitBinder methods apply to @RequestParam parameters as well, with the @InitBinder value matched against param names
 * @ModelAttribute's default attribute names are consistently derived from the *declared* parameter/return type
+* AnnotationMethodHandlerAdapter properly handles overridden handler methods with overridden @RequestMapping annotation
 * AnnotationMethodHandlerAdapter maps relative paths specified at method level analogous to default method name mappings
 * AnnotationMethodHandlerAdapter throws an exception if it cannot find a clear best path match for a specific request
 * AnnotationMethodHandlerAdapter throws descriptive exception in case of optional parameter being declared as primitive
