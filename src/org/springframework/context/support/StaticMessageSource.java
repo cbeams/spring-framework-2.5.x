@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,11 @@ package org.springframework.context.support;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+
+import org.springframework.util.Assert;
 
 /**
  * Simple implementation of {@link org.springframework.context.MessageSource}
@@ -48,9 +51,26 @@ public class StaticMessageSource extends AbstractMessageSource {
 	 * @param msg the message associated with this lookup code
 	 */
 	public void addMessage(String code, Locale locale, String msg) {
+		Assert.notNull(code, "Code must not be null");
+		Assert.notNull(locale, "Locale must not be null");
+		Assert.notNull(msg, "Message must not be null");
 		this.messages.put(code + "_" + locale.toString(), createMessageFormat(msg, locale));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added message [" + msg + "] for code [" + code + "] and Locale [" + locale + "]");
+		}
+	}
+
+	/**
+	 * Associate the given message values with the given keys as codes.
+	 * @param messages the messages to register, with messages codes
+	 * as keys and message texts as values
+   * @param locale the locale that the messages should be found within
+	 */
+	public void addMessages(Map messages, Locale locale) {
+		Assert.notNull(messages, "Messages Map must not be null");
+		for (Iterator it = messages.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			addMessage(entry.getKey().toString(), locale, entry.getValue().toString());
 		}
 	}
 

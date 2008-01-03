@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
@@ -220,9 +221,11 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		sac.addListener(listener);
 
 		StaticMessageSource messageSource = sac.getStaticMessageSource();
-		messageSource.addMessage("message.format.example1", Locale.US, MSG_TXT1_US);
-		messageSource.addMessage("message.format.example2", Locale.US, MSG_TXT2_US);
-		messageSource.addMessage("message.format.example3", Locale.US, MSG_TXT3_US);
+		Map usMessages = new HashMap(3);
+		usMessages.put("message.format.example1", MSG_TXT1_US);
+		usMessages.put("message.format.example2", MSG_TXT2_US);
+		usMessages.put("message.format.example3", MSG_TXT3_US);
+		messageSource.addMessages(usMessages, Locale.US);
 		messageSource.addMessage("message.format.example1", Locale.UK, MSG_TXT1_UK);
 
 		return sac;
