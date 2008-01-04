@@ -31,7 +31,7 @@ to Spring's generic transaction and DAO exception hierarchies.
 * AOP functionality, fully integrated into Spring configuration management. You can AOP-enable any object
 managed by Spring, adding aspects such as declarative transaction management. With Spring, you can have
 declarative transaction management without EJB... even without JTA, if you're using a single database in
-Tomcat or another web container without JTA support.
+Tomcat (or another web container without JTA support).
 
 * Flexible MVC web application framework, built on core Spring functionality. This dispatcher framework
 is highly configurable via strategy interfaces, and accommodates multiple view technologies: e.g. JSP, Tiles,
@@ -99,7 +99,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2645 KB)
+* "spring" (~2650 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -110,7 +110,7 @@ MODULE JARS (dist/modules):
 - Contents: core abstractions and utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~380 KB)
+* "spring-beans" (~385 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
