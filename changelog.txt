@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.8 (2007-12-31)
+Changes in version 2.0.8 (2008-01-04)
 -------------------------------------
 
 General
@@ -54,6 +54,10 @@ Package org.springframework.orm
 
 Package org.springframework.scheduling
 * fixed CommonJ TimerManagerFactoryBean to not require the "scheduledTimerListeners" property
+
+Package org.springframework.scripting
+* fixed ScriptFactoryPostProcessor to avoid NPE in case of script that produces null value and no interfaces specified
+* GroovyScriptFactory exposes "getGroovyClassLoader()" method
 
 Package org.springframework.transaction
 * JtaTransactionManager consistently throws TransactionSystemException in case of unexpected internal transaction state
