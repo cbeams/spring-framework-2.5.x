@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,10 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractSingleBeanDefiniti
 
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
 		String location = element.getAttribute("location");
-		String[] locations = StringUtils.commaDelimitedListToStringArray(location);
-		builder.addPropertyValue("locations", locations);
+		if (StringUtils.hasLength(location)) {
+			String[] locations = StringUtils.commaDelimitedListToStringArray(location);
+			builder.addPropertyValue("locations", locations);
+		}
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 	}
 

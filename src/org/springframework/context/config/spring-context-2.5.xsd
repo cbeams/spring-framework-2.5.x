@@ -23,7 +23,7 @@
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Activates replacement of ${...} placeholders, resolved against the specified properties file
-	(as a Spring resource location: a URL, a "classpath:" pseudo URL, or a relative file path).
+	(if any). Falls back to resolving placeholders against JVM system properties.
 	Alternatively, define a parameterized PropertyPlaceholderConfigurer bean in the context.
 			]]></xsd:documentation>
 			<xsd:appinfo>
@@ -33,7 +33,15 @@
 			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:attribute name="location" type="xsd:string" use="required"/>
+			<xsd:attribute name="location" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[
+  The location of the properties file to resolve placeholders against, as a Spring
+  resource location: a URL, a "classpath:" pseudo URL, or a relative file path.
+  Multiple locations may be specified, separated by commas.
+          ]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -72,7 +80,7 @@
 				<xsd:element name="exclude-filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:sequence>
 			<xsd:attribute name="base-package" type="xsd:string" use="required"/>
-            <xsd:attribute name="resource-pattern" type="xsd:string"/>
+      <xsd:attribute name="resource-pattern" type="xsd:string"/>
 			<xsd:attribute name="use-default-filters" type="xsd:boolean" default="true"/>
 			<xsd:attribute name="annotation-config" type="xsd:boolean" default="true"/>
 			<xsd:attribute name="name-generator" type="xsd:string"/>
