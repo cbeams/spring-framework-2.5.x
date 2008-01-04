@@ -236,8 +236,8 @@
 	<bean id="propsViaMap" class="org.springframework.beans.factory.HasMap">
 		<property name="props">
 			<map>
-				<entry key="foo"><value>bar</value></entry>
-				<entry key="2"><value>TWO</value></entry>
+				<entry key="foo" value="bar"/>
+				<entry key="2" value="TWO"/>
 			</map>
 		</property>
 	</bean>
