@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.5.1 (December 2007)
----------------------------------------------------
+THE SPRING FRAMEWORK, release 2.5.1 (January 2008)
+--------------------------------------------------
 http://www.springframework.org
 
 
@@ -31,7 +31,7 @@ to Spring's generic transaction and DAO exception hierarchies.
 * AOP functionality, fully integrated into Spring configuration management. You can AOP-enable any object
 managed by Spring, adding aspects such as declarative transaction management. With Spring, you can have
 declarative transaction management without EJB... even without JTA, if you're using a single database in
-Tomcat or another web container without JTA support.
+Tomcat (or another web container without JTA support).
 
 * Flexible MVC web application framework, built on core Spring functionality. This dispatcher framework
 is highly configurable via strategy interfaces, and accommodates multiple view technologies: e.g. JSP, Tiles,
@@ -102,9 +102,9 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 FULL JAR (dist):
 
 * "spring" (~2760 KB)
-- Convenient jar file combining all standard modules (except for the test module and the Spring MVC/Portlet/Struts support)
+- Convenient jar file combining all standard modules (except for the test module and the Spring MVC support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
-- Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc.jar, spring-webmvc-portlet.jar and spring-webmvc-struts.jar!
+- Does not include contents of spring-aspects.jar, spring-test.jar and spring-webmvc*.jar!
 
 MODULE JARS (dist/modules):
 
@@ -171,15 +171,12 @@ WEAVING JARS (dist/weaving)
 - Dependencies: none (for use at JVM startup: "-javaagent:spring-agent.jar")
 
 * "spring-aspects" (~20 KB)
-- Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
+- Contents: AspectJ aspects, e.g. for explicitly linking aspects into an IDE (Eclipse AJDT)
 - Dependencies: spring-aop, AspectJ, (spring-tx)
 
 * "spring-tomcat-weaver" (~10 KB)
 - Contents: extension of Tomcat's ClassLoader, capable of class instrumentation
 - Dependencies: none (for deployment into Tomcat's "server/lib" directory)
-
-Note: In order to use the JSP expression language for arguments of Spring's web MVC tags, JSP 2.0 is required.
-Alternatively, the Jakarta implementation of the JSTL (standard.jar) has to be available on the class path.
 
 
 4. WHERE TO START?
