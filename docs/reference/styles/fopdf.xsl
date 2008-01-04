@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 
 <!-- 
-
     This is the XSL FO (PDF) stylesheet for the Spring reference
     documentation.
     
-    Thanks are due to Christian Bauer of the Hibernate project
-    team for writing the original stylesheet upon which this one
-    is based.
+    Thanks are due to Christian Bauer of the Hibernate project team
+    for writing the original stylesheet upon which this one is based.
 -->
 
 <!DOCTYPE xsl:stylesheet [
@@ -162,11 +160,12 @@
         </xsl:variable>
 
         <!-- justify-end removed from block attributes (space problem in title.markup) -->
-        <fo:block  end-indent="{$toc.indent.width}pt"
-                   last-line-end-indent="-{$toc.indent.width}pt"
-                   white-space-treatment="preserve"
-                   text-align="left"
-                   white-space-collapse="false">
+        <fo:block end-indent="{$toc.indent.width}pt"
+                  last-line-end-indent="-{$toc.indent.width}pt"
+                  white-space-treatment="ignore"
+                  linefeed-treatment="ignore"
+                  text-align-last="justify"
+                  white-space-collapse="true">
             <fo:inline keep-with-next.within-line="always">
                 <!-- print Chapters in bold style -->
                 <xsl:choose>
@@ -177,8 +176,9 @@
                 <fo:basic-link internal-destination="{$id}">
                     <xsl:if test="$label != ''">
                         <xsl:copy-of select="$label"/>
-                        <fo:inline white-space-treatment="preserve"
-                                    white-space-collapse="false">
+                        <fo:inline white-space-treatment="ignore"
+                                   linefeed-treatment="ignore"
+                                   white-space-collapse="true">
                             <xsl:value-of select="$autotoc.label.separator"/>
                         </fo:inline>
                     </xsl:if>
@@ -340,6 +340,7 @@
         <xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
         <xsl:attribute name="space-after.maximum">0.1em</xsl:attribute>
     </xsl:attribute-set>
+
     <xsl:attribute-set name="section.title.level2.properties">
         <xsl:attribute name="space-before.optimum">0.6em</xsl:attribute>
         <xsl:attribute name="space-before.minimum">0.6em</xsl:attribute>
@@ -352,6 +353,7 @@
         <xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
         <xsl:attribute name="space-after.maximum">0.1em</xsl:attribute>
     </xsl:attribute-set>
+
     <xsl:attribute-set name="section.title.level3.properties">
         <xsl:attribute name="space-before.optimum">0.4em</xsl:attribute>
         <xsl:attribute name="space-before.minimum">0.4em</xsl:attribute>
@@ -459,20 +461,37 @@
 <!--###################################################
               colored and hyphenated links 
     ################################################### --> 
-	<xsl:template match="ulink"> 
-	<fo:basic-link external-destination="{@url}" 
-			xsl:use-attribute-sets="xref.properties" 
-			text-decoration="underline" 
-			color="blue"> 
-			<xsl:choose> 
-			<xsl:when test="count(child::node())=0"> 
-			<xsl:value-of select="@url"/> 
-			</xsl:when> 
-			<xsl:otherwise> 
-			<xsl:apply-templates/> 
-			</xsl:otherwise> 
-			</xsl:choose> 
-			</fo:basic-link> 
-	</xsl:template> 
-    
+
+    <xsl:template match="ulink">
+        <fo:basic-link external-destination="{@url}"
+                       xsl:use-attribute-sets="xref.properties"
+                       text-decoration="underline"
+                       color="blue">
+            <xsl:choose>
+            <xsl:when test="count(child::node())=0">
+            <xsl:value-of select="@url"/>
+            </xsl:when>
+            <xsl:otherwise>
+            <xsl:apply-templates/>
+            </xsl:otherwise>
+            </xsl:choose>
+            </fo:basic-link>
+    </xsl:template>
+
+    <xsl:template match="link">
+        <fo:basic-link internal-destination="{@linkend}"
+                       xsl:use-attribute-sets="xref.properties"
+                       text-decoration="underline"
+                       color="blue">
+            <xsl:choose>
+                <xsl:when test="count(child::node())=0">
+                    <xsl:value-of select="@linkend"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </fo:basic-link>
+    </xsl:template>
+
 </xsl:stylesheet>
