@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2008-01-05)
+Changes in version 2.5.1 (2008-01-07)
 -------------------------------------
 
 General
@@ -52,6 +52,7 @@ Package org.springframework.context
 * fixed AbstractApplicationContext to only send ContextStoppedEvent in case of "stop()" (i.e. not for "close()")
 * fixed AbstractApplicationContext to always detect LoadTimeWeaverAwareProcessor in the local ClassLoader (for OSGi)
 * ClassPath/FileSystemXmlApplicationContext perform early check for null elements in config location array
+* added "addMessages(Map, Locale)" method to StaticMessageSource, for bulk adding messages
 * ContextTypeMatchClassLoader does not generally exclude classes in the "org.springframework" package anymore
 * DefaultContextLoadTimeWeaver only chooses GlassFishLoadTimeWeaver when running in the EAR ClassLoader
 * DefaultContextLoadTimeWeaver removes all registered transformers from the VM Instrumentation object (if applicable)
@@ -103,8 +104,10 @@ Package org.springframework.orm
 * LocalSessionFactoryBean uses LocalJtaDataSourceConnectionProvider (supporting aggressive release) in case of JTA TM
 * LocalSessionFactoryBean supports Connection release mode "after_statement" without "useTransactionAwareDataSource" too
 * LocalSessionFactoryBean eagerly compiles registered mappings, for availability in the post-processing phase
+* added "earlyFlushBeforeCommit" flag to HibernateTransactionManager, allowing to enforce a flush before synchronization
 * fixed Jpa/JdoTransactionManager to correctly nest a REQUIRES_NEW transaction within a SUPPORTS scope with early access
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
+* PersistenceAnnotationBeanPostProcessor accepts vendor-specific EntityManager interfaces for @PersistenceContext again
 
 Package org.springframework.remoting
 * HessianClientInterceptor/ProxyFactoryBean supports "debug", "chunkedPost", "readTimeout" and "hessian2" properties
@@ -126,6 +129,7 @@ Package org.springframework.scripting
 * fixed ScriptFactoryPostProcessor to avoid NPE in case of script that produces null value and no interfaces specified
 * StaticScriptSource exposes "StaticScript" as toString result, in order for Groovy to derive a valid class name from it
 * GroovyScriptFactory caches a temporarily created result object from "getScriptedObjectType" until "getScriptedObject"
+* GroovyScriptFactory exposes "getGroovyClassLoader()" method and lazily initializes the GroovyClassLoader
 * "lang:groovy/jruby/bsh" does not insist on an id for a scripted bean anymore (i.e. allows for anonymous scripts)
 
 Package org.springframework.test
@@ -134,6 +138,7 @@ Package org.springframework.test
 
 Package org.springframework.transaction
 * added "validateExistingTransaction" property to AbstractPlatformTransactionManager, for isolation level checks
+* added "prepareForCommit" template method to AbstractPlatformTransactionManager, called before commit synchronization
 * JtaTransactionManager consistently throws TransactionSystemException in case of unexpected internal transaction state
 * JtaTransactionManager detects JBoss 4.2 transaction rollbacks caused by a timeout, throwing a meaningful exception
 * fixed WebSphereUowTransactionManager to correctly detect an existing global transaction (ignoring local tx contexts)
