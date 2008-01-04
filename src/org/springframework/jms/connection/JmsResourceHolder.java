@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,9 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private static final Log logger = LogFactory.getLog(JmsResourceHolder.class);
 
-	private boolean frozen;
+	private ConnectionFactory connectionFactory;
 
-	private final ConnectionFactory connectionFactory;
+	private boolean frozen = false;
 
 	private final List connections = new LinkedList();
 
@@ -68,7 +68,6 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @see #addSession
 	 */
 	public JmsResourceHolder() {
-		this(null);
 	}
 
 	/**
@@ -78,7 +77,15 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 */
 	public JmsResourceHolder(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
-		this.frozen = false;
+	}
+
+	/**
+	 * Create a new JmsResourceHolder for the given JMS Session.
+	 * @param session the JMS Session
+	 */
+	public JmsResourceHolder(Session session) {
+		addSession(session);
+		this.frozen = true;
 	}
 
 	/**
@@ -87,7 +94,9 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param session the JMS Session
 	 */
 	public JmsResourceHolder(Connection connection, Session session) {
-		this(null, connection, session);
+		addConnection(connection);
+		addSession(session, connection);
+		this.frozen = true;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -328,11 +328,16 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Set whether to expose the listener JMS Session to a registered
-	 * {@link SessionAwareMessageListener}. Default is "true", reusing
-	 * the listener's {@link Session}.
-	 * <p>Turn this off to expose a fresh JMS Session fetched from the same
+	 * {@link SessionAwareMessageListener} as well as to
+	 * {@link org.springframework.jms.core.JmsTemplate} calls.
+	 * <p>Default is "true", reusing the listener's {@link Session}.
+	 * Turn this off to expose a fresh JMS Session fetched from the same
 	 * underlying JMS {@link Connection} instead, which might be necessary
 	 * on some JMS providers.
+	 * <p>Note that Sessions managed by an external transaction manager will
+	 * always get exposed to {@link org.springframework.jms.core.JmsTemplate}
+	 * calls. So in terms of JmsTemplate exposure, this setting only affects
+	 * locally transacted Sessions.
 	 * @see SessionAwareMessageListener
 	 */
 	public void setExposeListenerSession(boolean exposeListenerSession) {

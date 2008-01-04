@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Base class for listener container implementations which are based on polling.
@@ -305,6 +306,12 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 							sessionToUse + "]");
 				}
 				messageReceived(message, session);
+				boolean exposeResource = (!transactional && isExposeListenerSession() &&
+						!TransactionSynchronizationManager.hasResource(getConnectionFactory()));
+				if (exposeResource) {
+					TransactionSynchronizationManager.bindResource(
+							getConnectionFactory(), new JmsResourceHolder(sessionToUse));
+				}
 				try {
 					doExecuteListener(sessionToUse, message);
 				}
@@ -316,6 +323,11 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 						status.setRollbackOnly();
 					}
 					handleListenerException(ex);
+				}
+				finally {
+					if (exposeResource) {
+						TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+					}
 				}
 				return true;
 			}
