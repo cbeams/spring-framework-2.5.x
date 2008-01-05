@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -394,6 +394,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 
+	//-------------------------------------------------------------------------
+	// JmsOperations execute methods
+	//-------------------------------------------------------------------------
+
+	public Object execute(SessionCallback action) throws JmsException {
+		return execute(action, false);
+	}
+
 	/**
 	 * Execute the action specified by the given action object within a
 	 * JMS Session. Generalized version of <code>execute(SessionCallback)</code>,
@@ -410,7 +418,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	public Object execute(SessionCallback action, boolean startConnection) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
-
 		Connection conToClose = null;
 		Session sessionToClose = null;
 		try {
@@ -425,7 +432,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 				sessionToUse = sessionToClose;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing callback on JMS Session [" + sessionToUse + "]");
+				logger.debug("Executing callback on JMS Session: " + sessionToUse);
 			}
 			return action.doInJms(sessionToUse);
 		}
@@ -436,10 +443,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			JmsUtils.closeSession(sessionToClose);
 			ConnectionFactoryUtils.releaseConnection(conToClose, getConnectionFactory(), startConnection);
 		}
-	}
-
-	public Object execute(SessionCallback action) throws JmsException {
-		return execute(action, false);
 	}
 
 	public Object execute(final ProducerCallback action) throws JmsException {
@@ -503,12 +506,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			throws JMSException {
 
 		Assert.notNull(messageCreator, "MessageCreator must not be null");
-
 		MessageProducer producer = createProducer(session, destination);
 		try {
 			Message message = messageCreator.createMessage(session);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Sending created message [" + message + "]");
+				logger.debug("Sending created message: " + message);
 			}
 			doSend(producer, message);
 			// Check commit - avoid commit call within a JTA transaction.
