@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -153,22 +154,54 @@ public abstract class ReflectionUtils {
 	 * @param target the target object to invoke the method on
 	 * @param args the invocation arguments (may be <code>null</code>)
 	 * @return the invocation result, if any
-	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target, Object[] args) {
 		try {
 			return method.invoke(target, args);
 		}
+		catch (Exception ex) {
+			handleReflectionException(ex);
+		}
+		throw new IllegalStateException("Should never get here");
+	}
+
+	/**
+	 * Invoke the specified JDBC API {@link Method} against the supplied
+	 * target object with no arguments.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @return the invocation result, if any
+	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
+	 * @see #invokeJdbcMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeJdbcMethod(Method method, Object target) throws SQLException {
+		return invokeJdbcMethod(method, target, null);
+	}
+
+	/**
+	 * Invoke the specified JDBC API {@link Method} against the supplied
+	 * target object with the supplied arguments.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @param args the invocation arguments (may be <code>null</code>)
+	 * @return the invocation result, if any
+	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeJdbcMethod(Method method, Object target, Object[] args) throws SQLException {
+		try {
+			return method.invoke(target, args);
+		}
 		catch (IllegalAccessException ex) {
 			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
 		}
 		catch (InvocationTargetException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+			if (ex.getTargetException() instanceof SQLException) {
+				throw (SQLException) ex.getTargetException();
+			}
+			handleInvocationTargetException(ex);
 		}
+		throw new IllegalStateException("Should never get here");
 	}
 
 	/**
@@ -189,8 +222,10 @@ public abstract class ReflectionUtils {
 		if (ex instanceof InvocationTargetException) {
 			handleInvocationTargetException((InvocationTargetException) ex);
 		}
-		throw new IllegalStateException(
-				"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		if (ex instanceof RuntimeException) {
+			throw (RuntimeException) ex;
+		}
+		handleUnexpectedException(ex);
 	}
 
 	/**
@@ -201,15 +236,7 @@ public abstract class ReflectionUtils {
 	 * @param ex the invocation target exception to handle
 	 */
 	public static void handleInvocationTargetException(InvocationTargetException ex) {
-		if (ex.getTargetException() instanceof RuntimeException) {
-			throw (RuntimeException) ex.getTargetException();
-		}
-		if (ex.getTargetException() instanceof Error) {
-			throw (Error) ex.getTargetException();
-		}
-		throw new IllegalStateException(
-				"Unexpected exception thrown by method - " + ex.getTargetException().getClass().getName() +
-				": " + ex.getTargetException().getMessage());
+		rethrowRuntimeException(ex.getTargetException());
 	}
 
 	/**
@@ -217,7 +244,28 @@ public abstract class ReflectionUtils {
 	 * <em>target exception</em> of an {@link InvocationTargetException}.
 	 * Should only be called if no checked exception is expected to be thrown by
 	 * the target method.
-	 * <p> Rethrows the underlying exception cast to an {@link Exception} or
+	 * <p>Rethrows the underlying exception cast to an {@link RuntimeException}
+	 * or {@link Error} if appropriate; otherwise, throws an
+	 * {@link IllegalStateException}.
+	 * @param ex the exception to rethrow
+	 * @throws RuntimeException the rethrown exception
+	 */
+	public static void rethrowRuntimeException(Throwable ex) {
+		if (ex instanceof RuntimeException) {
+			throw (RuntimeException) ex;
+		}
+		if (ex instanceof Error) {
+			throw (Error) ex;
+		}
+		handleUnexpectedException(ex);
+	}
+
+	/**
+	 * Rethrow the given {@link Throwable exception}, which is presumably the
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown by
+	 * the target method.
+	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
 	 * {@link Error} if appropriate; otherwise, throws an
 	 * {@link IllegalStateException}.
 	 * @param ex the exception to rethrow
@@ -230,8 +278,18 @@ public abstract class ReflectionUtils {
 		if (ex instanceof Error) {
 			throw (Error) ex;
 		}
-		throw new IllegalStateException(
-				"Unexpected exception thrown by method - " + ex.getClass().getName() + ": " + ex.getMessage());
+		handleUnexpectedException(ex);
+	}
+
+	/**
+	 * Throws an IllegalStateException with the given exception as root cause.
+	 * @param ex the unexpected exception
+	 */
+	private static void handleUnexpectedException(Throwable ex) {
+		// Needs to avoid the chained constructor for JDK 1.4 compatibility.
+		IllegalStateException isex = new IllegalStateException("Unexpected exception thrown");
+		isex.initCause(ex);
+		throw isex;
 	}
 
 	/**
@@ -427,13 +485,13 @@ public abstract class ReflectionUtils {
 			throw new IllegalArgumentException("Destination class [" + dest.getClass().getName() +
 					"] must be same or subclass as source class [" + src.getClass().getName() + "]");
 		}
-		doWithFields(src.getClass(), new ReflectionUtils.FieldCallback() {
+		doWithFields(src.getClass(), new FieldCallback() {
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 				makeAccessible(field);
 				Object srcValue = field.get(src);
 				field.set(dest, srcValue);
 			}
-		}, ReflectionUtils.COPYABLE_FIELDS);
+		}, COPYABLE_FIELDS);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 					getTargetDataSource() + "], using ConnectionSpec [" + connSpec + "]");
 		}
 		// Create Connection through invoking WSDataSource.getConnection(JDBCConnectionSpec)
-		return (Connection) ReflectionUtils.invokeMethod(
+		return (Connection) ReflectionUtils.invokeJdbcMethod(
 				this.wsDataSourceGetConnectionMethod, getTargetDataSource(), new Object[] {connSpec});
 	}
 
@@ -158,18 +158,18 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	protected Object createConnectionSpec(
 			Integer isolationLevel, Boolean readOnlyFlag, String username, String password) throws SQLException {
 
-		Object connSpec = ReflectionUtils.invokeMethod(this.newJdbcConnSpecMethod, null);
+		Object connSpec = ReflectionUtils.invokeJdbcMethod(this.newJdbcConnSpecMethod, null);
 		if (isolationLevel != null) {
-			ReflectionUtils.invokeMethod(this.setTransactionIsolationMethod, connSpec, new Object[] {isolationLevel});
+			ReflectionUtils.invokeJdbcMethod(this.setTransactionIsolationMethod, connSpec, new Object[] {isolationLevel});
 		}
 		if (readOnlyFlag != null) {
-			ReflectionUtils.invokeMethod(this.setReadOnlyMethod, connSpec, new Object[] {readOnlyFlag});
+			ReflectionUtils.invokeJdbcMethod(this.setReadOnlyMethod, connSpec, new Object[] {readOnlyFlag});
 		}
 		// If the username is empty, we'll simply let the target DataSource
 		// use its default credentials.
 		if (StringUtils.hasLength(username)) {
-			ReflectionUtils.invokeMethod(this.setUserNameMethod, connSpec, new Object[] {username});
-			ReflectionUtils.invokeMethod(this.setPasswordMethod, connSpec, new Object[] {password});
+			ReflectionUtils.invokeJdbcMethod(this.setUserNameMethod, connSpec, new Object[] {username});
+			ReflectionUtils.invokeJdbcMethod(this.setPasswordMethod, connSpec, new Object[] {password});
 		}
 		return connSpec;
 	}
