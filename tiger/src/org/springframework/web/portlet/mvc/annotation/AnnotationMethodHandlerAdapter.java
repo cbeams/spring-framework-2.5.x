@@ -258,7 +258,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 					}
 					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
 					if (mav != null && !model.containsKey(bindingResultKey)) {
-						PortletRequestDataBinder binder = new PortletRequestDataBinder(attrValue, attrName);
+						PortletRequestDataBinder binder = createBinder(request, attrValue, attrName);
 						argResolver.initBinder(handler, attrName, binder, webRequest, request, response);
 						mav.addObject(bindingResultKey, binder.getBindingResult());
 					}
@@ -282,6 +282,28 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 
+	/**
+	 * Template method for creating a new PortletRequestDataBinder instance.
+	 * <p>The default implementation creates a standard PortletRequestDataBinder.
+	 * This can be overridden for custom PortletRequestDataBinder subclasses.
+	 * @param request current portlet request
+	 * @param target the target object to bind onto (or <code>null</code>
+	 * if the binder is just used to convert a plain parameter value)
+	 * @param objectName the objectName of the target object
+	 * @return the PortletRequestDataBinder instance to use
+	 * @throws Exception in case of invalid state or arguments
+	 * @see PortletRequestDataBinder#bind(javax.portlet.PortletRequest)
+	 * @see PortletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
+	 */
+	protected PortletRequestDataBinder createBinder(
+			PortletRequest request, Object target, String objectName) throws Exception {
+
+		return new PortletRequestDataBinder(target, objectName);
+	}
+
+	/**
+	 * Build a HandlerMethodResolver for the given handler type.
+	 */
 	private HandlerMethodResolver getMethodResolver(Object handler) {
 		Class handlerClass = ClassUtils.getUserClass(handler);
 		HandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
@@ -547,7 +569,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 										"for the corresponding primitive type.");
 							}
 						}
-						PortletRequestDataBinder binder = new PortletRequestDataBinder(null, paramName);
+						PortletRequestDataBinder binder = createBinder(request, null, paramName);
 						initBinder(handler, paramName, binder, webRequest, request, response);
 						args[i] = binder.convertIfNecessary(paramValue, param.getParameterType(), param);
 					}
@@ -568,7 +590,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 						if (bindObject == null) {
 							bindObject = BeanUtils.instantiateClass(param.getParameterType());
 						}
-						PortletRequestDataBinder binder = new PortletRequestDataBinder(bindObject, attrName);
+						PortletRequestDataBinder binder = createBinder(request, bindObject, attrName);
 						initBinder(handler, attrName, binder, webRequest, request, response);
 						binder.bind(request);
 						args[i] = bindObject;

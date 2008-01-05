@@ -287,7 +287,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					}
 					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
 					if (mav != null && !model.containsKey(bindingResultKey)) {
-						ServletRequestDataBinder binder = new ServletRequestDataBinder(attrValue, attrName);
+						ServletRequestDataBinder binder = createBinder(request, attrValue, attrName);
 						argResolver.initBinder(handler, attrName, binder, webRequest, request, response);
 						mav.addObject(bindingResultKey, binder.getBindingResult());
 					}
@@ -303,6 +303,28 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 
+	/**
+	 * Template method for creating a new ServletRequestDataBinder instance.
+	 * <p>The default implementation creates a standard ServletRequestDataBinder.
+	 * This can be overridden for custom ServletRequestDataBinder subclasses.
+	 * @param request current HTTP request
+	 * @param target the target object to bind onto (or <code>null</code>
+	 * if the binder is just used to convert a plain parameter value)
+	 * @param objectName the objectName of the target object
+	 * @return the ServletRequestDataBinder instance to use
+	 * @throws Exception in case of invalid state or arguments
+	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
+	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
+	 */
+	protected ServletRequestDataBinder createBinder(
+			HttpServletRequest request, Object target, String objectName) throws Exception {
+
+		return new ServletRequestDataBinder(target, objectName);
+	}
+
+	/**
+	 * Build a HandlerMethodResolver for the given handler type.
+	 */
 	private HandlerMethodResolver getMethodResolver(Object handler) {
 		Class handlerClass = ClassUtils.getUserClass(handler);
 		HandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
@@ -585,7 +607,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 										"for the corresponding primitive type.");
 							}
 						}
-						ServletRequestDataBinder binder = new ServletRequestDataBinder(null, paramName);
+						ServletRequestDataBinder binder = createBinder(request, null, paramName);
 						initBinder(handler, paramName, binder, webRequest, request, response);
 						args[i] = binder.convertIfNecessary(paramValue, param.getParameterType(), param);
 					}
@@ -611,7 +633,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						if (bindObject == null) {
 							bindObject = BeanUtils.instantiateClass(param.getParameterType());
 						}
-						ServletRequestDataBinder binder = new ServletRequestDataBinder(bindObject, attrName);
+						ServletRequestDataBinder binder = createBinder(request, bindObject, attrName);
 						initBinder(handler, attrName, binder, webRequest, request, response);
 						binder.bind(request);
 						args[i] = bindObject;
