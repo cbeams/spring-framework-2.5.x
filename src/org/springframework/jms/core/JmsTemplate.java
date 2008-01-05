@@ -442,7 +442,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 				sessionToUse = sessionToClose;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing callback on JMS Session [" + sessionToUse + "]");
+				logger.debug("Executing callback on JMS Session: " + sessionToUse);
 			}
 			return action.doInJms(sessionToUse);
 		}
@@ -540,12 +540,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			throws JMSException {
 
 		Assert.notNull(messageCreator, "MessageCreator must not be null");
-
 		MessageProducer producer = createProducer(session, destination);
 		try {
 			Message message = messageCreator.createMessage(session);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Sending created message [" + message + "]");
+				logger.debug("Sending created message: " + message);
 			}
 			doSend(producer, message);
 			// Check commit - avoid commit call within a JTA transaction.
