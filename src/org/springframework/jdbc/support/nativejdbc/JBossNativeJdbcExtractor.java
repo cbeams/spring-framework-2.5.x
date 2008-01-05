@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 */
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.wrappedConnectionClass.isAssignableFrom(con.getClass())) {
-			return (Connection) ReflectionUtils.invokeMethod(this.getUnderlyingConnectionMethod, con);
+			return (Connection) ReflectionUtils.invokeJdbcMethod(this.getUnderlyingConnectionMethod, con);
 		}
 		return con;
 	}
@@ -104,7 +104,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 */
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		if (this.wrappedStatementClass.isAssignableFrom(stmt.getClass())) {
-			return (Statement) ReflectionUtils.invokeMethod(this.getUnderlyingStatementMethod, stmt);
+			return (Statement) ReflectionUtils.invokeJdbcMethod(this.getUnderlyingStatementMethod, stmt);
 		}
 		return stmt;
 	}
@@ -128,7 +128,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 */
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		if (this.wrappedResultSetClass.isAssignableFrom(rs.getClass())) {
-			return (ResultSet) ReflectionUtils.invokeMethod(this.getUnderlyingResultSetMethod, rs);
+			return (ResultSet) ReflectionUtils.invokeJdbcMethod(this.getUnderlyingResultSetMethod, rs);
 		}
 		return rs;
 	}

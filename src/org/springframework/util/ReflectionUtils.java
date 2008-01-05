@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Simple utility class for handling reflection exceptions.
- * Only intended for internal use.
+ * Simple utility class for working with the reflection API and handling
+ * reflection exceptions.
+ *
+ * <p>Only intended for internal use.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -97,22 +100,54 @@ public abstract class ReflectionUtils {
 	 * @param target the target object to invoke the method on
 	 * @param args the invocation arguments (may be <code>null</code>)
 	 * @return the invocation result, if any
-	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target, Object[] args) {
 		try {
 			return method.invoke(target, args);
 		}
+		catch (Exception ex) {
+			handleReflectionException(ex);
+		}
+		throw new IllegalStateException("Should never get here");
+	}
+
+	/**
+	 * Invoke the specified JDBC API {@link Method} against the supplied
+	 * target object with no arguments.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @return the invocation result, if any
+	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
+	 * @see #invokeJdbcMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeJdbcMethod(Method method, Object target) throws SQLException {
+		return invokeJdbcMethod(method, target, null);
+	}
+
+	/**
+	 * Invoke the specified JDBC API {@link Method} against the supplied
+	 * target object with the supplied arguments.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @param args the invocation arguments (may be <code>null</code>)
+	 * @return the invocation result, if any
+	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeJdbcMethod(Method method, Object target, Object[] args) throws SQLException {
+		try {
+			return method.invoke(target, args);
+		}
 		catch (IllegalAccessException ex) {
 			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
 		}
 		catch (InvocationTargetException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+			if (ex.getTargetException() instanceof SQLException) {
+				throw (SQLException) ex.getTargetException();
+			}
+			handleInvocationTargetException(ex);
 		}
+		throw new IllegalStateException("Should never get here");
 	}
 
 	/**

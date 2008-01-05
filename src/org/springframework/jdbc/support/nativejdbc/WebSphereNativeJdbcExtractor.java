@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		if (this.webSphere5ConnectionClass != null &&
 				this.webSphere5ConnectionClass.isAssignableFrom(con.getClass())) {
 			// WebSphere 5's WSJdbcUtil.getNativeConnection(wsJdbcConnection)
-			return (Connection) ReflectionUtils.invokeMethod(
+			return (Connection) ReflectionUtils.invokeJdbcMethod(
 					this.webSphere5NativeConnectionMethod, null, new Object[] {con});
 		}
 
@@ -135,7 +135,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		else if (this.webSphere4ConnectionClass != null &&
 				this.webSphere4ConnectionClass.isAssignableFrom(con.getClass())) {
 			// WebSphere 4's connectionProxy.getPhysicalConnection()
-			return (Connection) ReflectionUtils.invokeMethod(this.webSphere4PhysicalConnectionMethod, con);
+			return (Connection) ReflectionUtils.invokeJdbcMethod(this.webSphere4PhysicalConnectionMethod, con);
 		}
 
 		// No known WebSphere connection -> return as-is.
