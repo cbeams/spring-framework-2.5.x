@@ -20,6 +20,7 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.QueueBrowser;
 import javax.jms.QueueRequestor;
 import javax.jms.Session;
 
@@ -158,6 +159,26 @@ public abstract class JmsUtils {
 					// Reset the interrupted flag as it was before.
 					Thread.currentThread().interrupt();
 				}
+			}
+		}
+	}
+
+	/**
+	 * Close the given JMS QueueBrowser and ignore any thrown exception.
+	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
+	 * @param browser the JMS QueueBrowser to close (may be <code>null</code>)
+	 */
+	public static void closeQueueBrowser(QueueBrowser browser) {
+		if (browser != null) {
+			try {
+				browser.close();
+			}
+			catch (JMSException ex) {
+				logger.debug("Could not close JMS QueueBrowser", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the JMS provider: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing JMS QueueBrowser", ex);
 			}
 		}
 	}

@@ -50,7 +50,7 @@
 	<classpathentry kind="lib" path="lib/fop/fop.jar"/>
 	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="lib/glassfish/glassfish-clapi.jar"/>
-	<classpathentry kind="lib" path="lib/groovy/groovy-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/groovy/groovy-1.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-commons-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-entitymanager.jar"/>

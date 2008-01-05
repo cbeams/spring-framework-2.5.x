@@ -24,6 +24,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.QueueBrowser;
 import javax.jms.Session;
 
 import org.springframework.jms.JmsException;
@@ -418,7 +420,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	public Object execute(SessionCallback action, boolean startConnection) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
-
 		Connection conToClose = null;
 		Session sessionToClose = null;
 		try {
@@ -452,7 +453,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	public Object execute(final ProducerCallback action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
-
 		return execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
 				MessageProducer producer = createProducer(session, null);
@@ -461,6 +461,37 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 				}
 				finally {
 					JmsUtils.closeMessageProducer(producer);
+				}
+			}
+		}, false);
+	}
+
+	public Object execute(final String queueName, final String messageSelector, final BrowserCallback action) throws JmsException {
+		Assert.notNull(action, "Callback object must not be null");
+		return execute(new SessionCallback() {
+			public Object doInJms(Session session) throws JMSException {
+				Queue queue = (Queue) getDestinationResolver().resolveDestinationName(session, queueName, false);
+				QueueBrowser browser = createBrowser(session, queue, messageSelector);
+				try {
+					return action.doInJms(session, browser);
+				}
+				finally {
+					JmsUtils.closeQueueBrowser(browser);
+				}
+			}
+		}, false);
+	}
+
+	public Object execute(final Queue queue, final String messageSelector, final BrowserCallback action) throws JmsException {
+		Assert.notNull(action, "Callback object must not be null");
+		return execute(new SessionCallback() {
+			public Object doInJms(Session session) throws JMSException {
+				QueueBrowser browser = createBrowser(session, queue, messageSelector);
+				try {
+					return action.doInJms(session, browser);
+				}
+				finally {
+					JmsUtils.closeQueueBrowser(browser);
 				}
 			}
 		}, false);
@@ -888,6 +919,23 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		else {
 			return session.createConsumer(destination, messageSelector);
 		}
+	}
+
+	/**
+	 * Create a JMS MessageProducer for the given Session and Destination,
+	 * configuring it to disable message ids and/or timestamps (if necessary).
+	 * <p>Delegates to <code>doCreateProducer</code> for creation of the raw
+	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
+	 * @param session the JMS Session to create a MessageProducer for
+	 * @param destination the JMS Destination to create a MessageProducer for
+	 * @return the new JMS MessageProducer
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #doCreateProducer
+	 * @see #setMessageIdEnabled
+	 * @see #setMessageTimestampEnabled
+	 */
+	protected QueueBrowser createBrowser(Session session, Queue queue, String messageSelector) throws JMSException {
+		return session.createBrowser(queue, messageSelector);
 	}
 
 
