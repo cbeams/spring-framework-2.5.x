@@ -7,11 +7,12 @@ Changes in version 2.5.1 (2008-01-07)
 -------------------------------------
 
 General
+* refined PDF formatting settings for the reference documentation
 * added coverage of JAX-WS support to the reference documentation
 * added section on J2EE RAR deployment to the reference documentation
 * moved "org.springframework.web.bind/multipart" packages from spring-web.jar to spring-webmvc.jar
 * updated AspectJ jar in "-with-dependencies" distribution to AspectJ 1.5.4
-* updated Groovy jar in "-with-dependencies" distribution to Groovy 1.5.0
+* updated Groovy jar in "-with-dependencies" distribution to Groovy 1.5.1
 * updated Hessian jar in "-with-dependencies" distribution to Hessian 3.1.3
 
 Package org.springframework.aop
@@ -38,6 +39,7 @@ Package org.springframework.beans
 * DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
 * ClassPathBeanDefinitionScanner marks default init/destroy methods as not enforced (accepting beans without those)
 * SingletonBeanFactoryLocator falls back to a single bean of type BeanFactory (if any) when given a null locator key
+* SingletonBeanFactoryLocator removes bean factory group definition if its initialization fails
 * factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
 * revised BeanConfigurerSupport to allow for usage as a delegate as well, not just as a base class
 * revised BeanConfigurerSupport to re-initialize its default BeanWiringInfoResolver for each context refresh
@@ -57,6 +59,7 @@ Package org.springframework.context
 * DefaultContextLoadTimeWeaver only chooses GlassFishLoadTimeWeaver when running in the EAR ClassLoader
 * DefaultContextLoadTimeWeaver removes all registered transformers from the VM Instrumentation object (if applicable)
 * CommonAnnotationBeanPostProcessor properly ignores @Resource-annotated JAX-WS WebServiceContext references
+* "context:property-placeholder" configuration element does not require a "location" attribute (for system properties)
 
 Package org.springframework.core
 * introduced SmartClassLoader marker interface, declaring a "boolean isClassReloadable(Class clazz)" operation
@@ -77,13 +80,18 @@ Package org.springframework.jdbc
 * fixed JdbcUtils to not access the DatabaseMetaData implementation class for "extractDatabaseMetaData" calls
 * TransactionAwareDataSourceProxy obtains target Connections lazily when the first call comes in on the Connection proxy
 * added "reobtainTransactionalConnections" flag to TransactionAwareDataSourceProxy (for Connection handles on JBoss)
+* WebSphereDataSourceAdapter, JBossNativeJdbcExtractor and CommonsDbcpNativeJdbcExtractor propagate SQLExceptions as-is
 
 Package org.springframework.jms
 * JmsUtils protects against misbehaving JMS providers (such as ActiveMQ) when closing an interrupted MessageConsumer
+* JmsTemplate's standard "execute(ProducerCallback)" pre-initializes producer with default destination (if available)
+* added overloaded execute methods with Destination/destination name and ProducerCallback to JmsOperations/JmsTemplate
+* added various "browse"/"browseSelected" methods JmsOperations/JmsTemplate, for browsing a queue with a BrowserCallback
 * DelegatingConnectionFactory adapts specific create(Queue/Topic)Connection calls to a generic JMS 1.1 ConnectionFactory
 * JmsInvokerClientInterceptor accepts any JMS 1.1 ConnectionFactory, not insisting on a QueueConnectionFactory anymore
 * MethodListenerAdapter uses type difference weight algorithm to choose between ambiguous listener methods
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
+* DefaultMessageListenerContainer exposes locally cached Session as thread-bound resource (for JmsTemplate calls)
 * ServerSessionMessageListenerContainer always establishes a shared Connection (even if autoStart="false")
 * CommonsPoolServerSessionFactory removes specific ServerSessionPool on close (for proper reuse on stop and restart)
 * "jms:listener-container" tag supports a concurrency range (e.g. "3-5"), for specifying a minimum number of consumers
@@ -180,6 +188,7 @@ Package org.springframework.web
 * AnnotationMethodHandlerAdapter propagates checked exceptions as-is for handler/attribute/init-binder methods
 * AnnotationMethodHandlerAdapter applies @InitBinder methods for view preparation as well (like WebBindingInitializers)
 * AnnotationMethodHandlerAdapter applies binder initialization for 'end' views (with processing being complete) as well
+* factored out "createBinder" template method within AnnotationMethodHandlerAdapter, called for each binding attempt
 * Servlet AnnotationMethodHandlerAdapter supports View return value for handler methods (as alternative to view name)
 * fixed Portlet AnnotationMethodHandlerAdapter to explicitly check for Action/Render*Response* (to work on Liferay)
 * InternalResourceView prevents dispatching to same path as handler (e.g. with default view name and default resolver)
