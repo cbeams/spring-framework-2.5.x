@@ -94,7 +94,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 			this.wsDataSourceClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSDataSource");
 			Class jdbcConnSpecClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.JDBCConnectionSpec");
 			Class wsrraFactoryClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSRRAFactory");
-			this.newJdbcConnSpecMethod = wsrraFactoryClass.getMethod("createJDBCConnectionSpec", null);
+			this.newJdbcConnSpecMethod = wsrraFactoryClass.getMethod("createJDBCConnectionSpec", (Class[]) null);
 			this.wsDataSourceGetConnectionMethod =
 					this.wsDataSourceClass.getMethod("getConnection", new Class[] {jdbcConnSpecClass});
 			this.setTransactionIsolationMethod =
