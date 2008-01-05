@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jms.core;
 
 import javax.jms.Destination;
 import javax.jms.Message;
+import javax.jms.Queue;
 
 import org.springframework.jms.JmsException;
 
@@ -43,14 +44,10 @@ import org.springframework.jms.JmsException;
 public interface JmsOperations {
 
 	/**
-	 * Execute the action specified by the given action object within
-	 * a JMS Session.
+	 * Execute the action specified by the given action object within a JMS Session.
 	 * <p>When used with a 1.0.2 provider, you may need to downcast
 	 * to the appropriate domain implementation, either QueueSession or
 	 * TopicSession in the action objects doInJms callback method.
-	 * <p>Note: The value of isPubSubDomain affects the behavior of this method.
-	 * If isPubSubDomain equals true, then a TopicSession is passed to the callback.
-	 * If false, then a QueueSession is passed to the callback.
 	 * @param action callback object that exposes the session
 	 * @return the result object from working with the session
 	 * @throws JmsException if there is any problem
@@ -58,14 +55,35 @@ public interface JmsOperations {
 	Object execute(SessionCallback action) throws JmsException;
 
 	/**
-	 * Send a message to a JMS destination. The callback gives access to
-	 * the JMS session and MessageProducer in order to do more complex
-	 * send operations.
+	 * Send messages to the default JMS destination (or one specified
+	 * for each send operation). The callback gives access to the JMS Session
+	 * and MessageProducer in order to perform complex send operations.
 	 * @param action callback object that exposes the session/producer pair
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object execute(ProducerCallback action) throws JmsException;
+
+	/**
+	 * Send messages to a JMS destination. The callback gives access to the JMS Session
+	 * and MessageProducer in order to perform complex send operations.
+	 * @param destination the destination to send messages to
+	 * @param action callback object that exposes the session/producer pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object execute(Destination destination, ProducerCallback action) throws JmsException;
+
+	/**
+	 * Send messages to a JMS destination. The callback gives access to the JMS Session
+	 * and MessageProducer in order to perform complex send operations.
+	 * @param destinationName the name of the destination to send messages to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param action callback object that exposes the session/producer pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object execute(String destinationName, ProducerCallback action) throws JmsException;
 
 
 	//-------------------------------------------------------------------------
@@ -332,5 +350,76 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for browsing messages
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Browse messages in the default JMS queue. The callback gives access to the JMS
+	 * Session and QueueBrowser in order to browse the queue and react to the contents.
+	 * @param action callback object that exposes the session/browser pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object browse(BrowserCallback action) throws JmsException;
+
+	/**
+	 * Browse messages in a JMS queue. The callback gives access to the JMS Session
+	 * and QueueBrowser in order to browse the queue and react to the contents.
+	 * @param queue the queue to browse
+	 * @param action callback object that exposes the session/browser pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object browse(Queue queue, BrowserCallback action) throws JmsException;
+
+	/**
+	 * Browse messages in a JMS queue. The callback gives access to the JMS Session
+	 * and QueueBrowser in order to browse the queue and react to the contents.
+	 * @param queueName the name of the queue to browse
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param action callback object that exposes the session/browser pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object browse(String queueName, BrowserCallback action) throws JmsException;
+
+	/**
+	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
+	 * Session and QueueBrowser in order to browse the queue and react to the contents.
+	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @param action callback object that exposes the session/browser pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object browseSelected(String messageSelector, BrowserCallback action) throws JmsException;
+
+	/**
+	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
+	 * Session and QueueBrowser in order to browse the queue and react to the contents.
+	 * @param queue the queue to browse
+	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @param action callback object that exposes the session/browser pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object browseSelected(Queue queue, String messageSelector, BrowserCallback action) throws JmsException;
+
+	/**
+	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
+	 * Session and QueueBrowser in order to browse the queue and react to the contents.
+	 * @param queueName the name of the queue to browse
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @param action callback object that exposes the session/browser pair
+	 * @return the result object from working with the session
+	 * @throws JmsException checked JMSException converted to unchecked
+	 */
+	Object browseSelected(String queueName, String messageSelector, BrowserCallback action) throws JmsException;
 
 }

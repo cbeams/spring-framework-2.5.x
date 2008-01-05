@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,9 +240,8 @@ public abstract class JmsUtils {
 	}
 
 	/**
-	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to
-	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
-	 * equivalent.
+	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to a
+	 * Spring runtime {@link org.springframework.jms.JmsException JmsException} equivalent.
 	 * @param ex the original checked JMSException to convert
 	 * @return the Spring runtime JmsException wrapping the given exception
 	 */

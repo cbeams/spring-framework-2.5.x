@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import javax.jms.Session;
 
 /**
  * Callback for sending a message to a JMS destination.
- * 
- * <p>To be used with the {@link JmsTemplate#execute(ProducerCallback)}
- * method, often implemented as an anonymous inner class.
+ *
+ * <p>To be used with JmsTemplate's callback methods that take a ProducerCallback
+ * argument, often implemented as an anonymous inner class.
  *
  * <p>The typical implementation will perform multiple operations on the
  * supplied JMS {@link Session} and {@link MessageProducer}. When used with
@@ -35,12 +35,15 @@ import javax.jms.Session;
  * @author Mark Pollack
  * @since 1.1
  * @see JmsTemplate#execute(ProducerCallback)
+ * @see JmsTemplate#execute(javax.jms.Destination, ProducerCallback)
+ * @see JmsTemplate#execute(String, ProducerCallback)
  */
 public interface ProducerCallback {
 
 	/**
 	 * Perform operations on the given {@link Session} and {@link MessageProducer}.
-	 * <p>The message producer is not associated with any destination.
+	 * <p>The message producer is not associated with any destination unless
+	 * when specified in the JmsTemplate call.
 	 * @param session the JMS <code>Session</code> object to use
 	 * @param producer the JMS <code>MessageProducer</code> object to use
 	 * @return a result object from working with the <code>Session</code>, if any (can be <code>null</code>) 

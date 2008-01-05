@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
+import javax.jms.QueueBrowser;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSender;
@@ -205,6 +206,17 @@ public class JmsTemplate102 extends JmsTemplate {
 		}
 		else {
 			return ((QueueSession) session).createReceiver((Queue) destination, messageSelector);
+		}
+	}
+
+	protected QueueBrowser createBrowser(Session session, Queue queue, String messageSelector)
+			throws JMSException {
+
+		if (isPubSubDomain()) {
+			throw new javax.jms.IllegalStateException("Cannot create QueueBrowser for a TopicSession");
+		}
+		else {
+			return ((QueueSession) session).createBrowser(queue, messageSelector);
 		}
 	}
 

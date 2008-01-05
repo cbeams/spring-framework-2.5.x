@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -404,6 +404,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 
+	//-------------------------------------------------------------------------
+	// JmsOperations execute methods
+	//-------------------------------------------------------------------------
+
+	public Object execute(SessionCallback action) throws JmsException {
+		return execute(action, false);
+	}
+
 	/**
 	 * Execute the action specified by the given action object within a
 	 * JMS Session. Generalized version of <code>execute(SessionCallback)</code>,
@@ -447,15 +455,20 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
-	public Object execute(SessionCallback action) throws JmsException {
-		return execute(action, false);
+	public Object execute(ProducerCallback action) throws JmsException {
+		if (getDefaultDestinationName() != null) {
+			return execute(getDefaultDestinationName(), action);
+		}
+		else {
+			return execute(getDefaultDestination(), action);
+		}
 	}
 
-	public Object execute(final ProducerCallback action) throws JmsException {
+	public Object execute(final Destination destination, final ProducerCallback action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
-				MessageProducer producer = createProducer(session, null);
+				MessageProducer producer = createProducer(session, destination);
 				try {
 					return action.doInJms(session, producer);
 				}
@@ -466,32 +479,17 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}, false);
 	}
 
-	public Object execute(final String queueName, final String messageSelector, final BrowserCallback action) throws JmsException {
+	public Object execute(final String destinationName, final ProducerCallback action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
-				Queue queue = (Queue) getDestinationResolver().resolveDestinationName(session, queueName, false);
-				QueueBrowser browser = createBrowser(session, queue, messageSelector);
+				Destination destination = resolveDestinationName(session, destinationName);
+				MessageProducer producer = createProducer(session, destination);
 				try {
-					return action.doInJms(session, browser);
+					return action.doInJms(session, producer);
 				}
 				finally {
-					JmsUtils.closeQueueBrowser(browser);
-				}
-			}
-		}, false);
-	}
-
-	public Object execute(final Queue queue, final String messageSelector, final BrowserCallback action) throws JmsException {
-		Assert.notNull(action, "Callback object must not be null");
-		return execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
-				QueueBrowser browser = createBrowser(session, queue, messageSelector);
-				try {
-					return action.doInJms(session, browser);
-				}
-				finally {
-					JmsUtils.closeQueueBrowser(browser);
+					JmsUtils.closeMessageProducer(producer);
 				}
 			}
 		}, false);
@@ -661,20 +659,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	public Message receive(final Destination destination) throws JmsException {
-		return (Message) execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
-				return doReceive(session, destination, null);
-			}
-		}, true);
+		return receiveSelected(destination, null);
 	}
 
 	public Message receive(final String destinationName) throws JmsException {
-		return (Message) execute(new SessionCallback() {
-			public Object doInJms(Session session) throws JMSException {
-				Destination destination = resolveDestinationName(session, destinationName);
-				return doReceive(session, destination, null);
-			}
-		}, true);
+		return receiveSelected(destinationName, null);
 	}
 
 	public Message receiveSelected(String messageSelector) throws JmsException {
@@ -820,6 +809,82 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 
 	//-------------------------------------------------------------------------
+	// Convenience methods for browsing messages
+	//-------------------------------------------------------------------------
+
+	public Object browse(final BrowserCallback action) throws JmsException {
+		if (getDefaultDestinationName() != null) {
+			return browse(getDefaultDestinationName(), action);
+		}
+		else {
+			Destination defaultDestination = getDefaultDestination();
+			if (!(defaultDestination instanceof Queue)) {
+				throw new IllegalStateException(
+						"defaultDestination does not correspond to a Queue. Check configuration of JmsTemplate.");
+			}
+			return browse((Queue) defaultDestination, action);
+		}
+	}
+
+	public Object browse(final Queue queue, final BrowserCallback action) throws JmsException {
+		return browseSelected(queue, null, action);
+	}
+
+	public Object browse(final String queueName, final BrowserCallback action) throws JmsException {
+		return browseSelected(queueName, null, action);
+	}
+
+	public Object browseSelected(final String messageSelector, final BrowserCallback action) throws JmsException {
+		if (getDefaultDestinationName() != null) {
+			return browseSelected(getDefaultDestinationName(), messageSelector, action);
+		}
+		else {
+			Destination defaultDestination = getDefaultDestination();
+			if (!(defaultDestination instanceof Queue)) {
+				throw new IllegalStateException(
+						"defaultDestination does not correspond to a Queue. Check configuration of JmsTemplate.");
+			}
+			return browseSelected((Queue) defaultDestination, messageSelector, action);
+		}
+	}
+
+	public Object browseSelected(final Queue queue, final String messageSelector, final BrowserCallback action)
+			throws JmsException {
+
+		Assert.notNull(action, "Callback object must not be null");
+		return execute(new SessionCallback() {
+			public Object doInJms(Session session) throws JMSException {
+				QueueBrowser browser = createBrowser(session, queue, messageSelector);
+				try {
+					return action.doInJms(session, browser);
+				}
+				finally {
+					JmsUtils.closeQueueBrowser(browser);
+				}
+			}
+		}, true);
+	}
+
+	public Object browseSelected(final String queueName, final String messageSelector, final BrowserCallback action)
+			throws JmsException {
+
+		Assert.notNull(action, "Callback object must not be null");
+		return execute(new SessionCallback() {
+			public Object doInJms(Session session) throws JMSException {
+				Queue queue = (Queue) getDestinationResolver().resolveDestinationName(session, queueName, false);
+				QueueBrowser browser = createBrowser(session, queue, messageSelector);
+				try {
+					return action.doInJms(session, browser);
+				}
+				finally {
+					JmsUtils.closeQueueBrowser(browser);
+				}
+			}
+		}, true);
+	}
+
+
+	//-------------------------------------------------------------------------
 	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
 	//-------------------------------------------------------------------------
 
@@ -926,15 +991,18 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * configuring it to disable message ids and/or timestamps (if necessary).
 	 * <p>Delegates to <code>doCreateProducer</code> for creation of the raw
 	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
-	 * @param session the JMS Session to create a MessageProducer for
-	 * @param destination the JMS Destination to create a MessageProducer for
-	 * @return the new JMS MessageProducer
+	 * @param session the JMS Session to create a QueueBrowser for
+	 * @param queue the JMS Queue to create a QueueBrowser for
+	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
+	 * @return the new JMS QueueBrowser
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #doCreateProducer
 	 * @see #setMessageIdEnabled
 	 * @see #setMessageTimestampEnabled
 	 */
-	protected QueueBrowser createBrowser(Session session, Queue queue, String messageSelector) throws JMSException {
+	protected QueueBrowser createBrowser(Session session, Queue queue, String messageSelector)
+			throws JMSException {
+
 		return session.createBrowser(queue, messageSelector);
 	}
 
