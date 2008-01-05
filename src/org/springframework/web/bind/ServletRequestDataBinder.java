@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@ import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
- * Special DataBinder to perform data binding from servlet request parameters
- * to JavaBeans, including support for multipart files.
+ * Special {@link org.springframework.validation.DataBinder} to perform data binding
+ * from servlet request parameters to JavaBeans, including support for multipart files.
  *
  * <p>See the DataBinder/WebDataBinder superclasses for customization options,
  * which include specifying allowed/required fields, and registering custom
  * property editors.
  *
- * <p>Used by Spring web MVC's BaseCommandController and MultiActionController.
+ * <p>Used by Spring Web MVC's BaseCommandController and MultiActionController.
  * Note that BaseCommandController and its subclasses allow for easy customization
  * of the binder instances that they use through overriding <code>initBinder</code>.
  *
@@ -39,7 +39,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * handler method. Simply instantiate a ServletRequestDataBinder for each binding
  * process, and invoke <code>bind</code> with the current ServletRequest as argument:
  *
- * <pre>
+ * <pre class="code">
  * MyBean myBean = new MyBean();
  * // apply binder to custom target object
  * ServletRequestDataBinder binder = new ServletRequestDataBinder(myBean);
@@ -64,7 +64,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new ServletRequestDataBinder instance, with default object name.
-	 * @param target target object to bind onto
+	 * @param target the target object to bind onto
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
 	public ServletRequestDataBinder(Object target) {
@@ -73,8 +73,8 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new ServletRequestDataBinder instance.
-	 * @param target target object to bind onto
-	 * @param objectName objectName of the target object
+	 * @param target the target object to bind onto
+	 * @param objectName the name of the target object
 	 */
 	public ServletRequestDataBinder(Object target, String objectName) {
 		super(target, objectName);

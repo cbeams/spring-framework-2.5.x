@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public class DataBinder implements PropertyEditorRegistry {
 
 	/**
 	 * Create a new DataBinder instance, with default object name.
-	 * @param target target object to bind onto
+	 * @param target the target object to bind onto
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
 	public DataBinder(Object target) {
@@ -138,8 +138,8 @@ public class DataBinder implements PropertyEditorRegistry {
 
 	/**
 	 * Create a new DataBinder instance.
-	 * @param target target object to bind onto
-	 * @param objectName name of the target object
+	 * @param target the target object to bind onto
+	 * @param objectName the name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
 		Assert.notNull(target, "Target must not be null");
@@ -197,7 +197,6 @@ public class DataBinder implements PropertyEditorRegistry {
 
 	/**
 	 * Return the underlying PropertyAccessor of this binder's BindingResult.
-	 * To be used by binder subclasses that need property checks.
 	 */
 	protected ConfigurablePropertyAccessor getPropertyAccessor() {
 		return getInternalBindingResult().getPropertyAccessor();
@@ -396,7 +395,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Return the strategy for processing binding errors.
 	 */
 	public BindingErrorProcessor getBindingErrorProcessor() {
-		return bindingErrorProcessor;
+		return this.bindingErrorProcessor;
 	}
 
 
