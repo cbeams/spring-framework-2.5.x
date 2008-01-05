@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -384,6 +384,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 					initializeDefinition(groupContext);
 				}
 				catch (BeansException ex) {
+					this.bfgInstancesByKey.remove(this.resourceLocation);
+					this.bfgInstancesByObj.remove(groupContext);
 					throw new BootstrapException("Unable to initialize group definition. " +
 						"Group resource name [" + this.resourceLocation + "], factory key [" + factoryKey + "]", ex);
 				}
