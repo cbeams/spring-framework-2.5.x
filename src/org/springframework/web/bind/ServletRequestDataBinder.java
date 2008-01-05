@@ -76,7 +76,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * Create a new ServletRequestDataBinder instance.
 	 * @param target the target object to bind onto (or <code>null</code>
 	 * if the binder is just used to convert a plain parameter value)
-	 * @param objectName the objectName of the target object
+	 * @param objectName the name of the target object
 	 */
 	public ServletRequestDataBinder(Object target, String objectName) {
 		super(target, objectName);
