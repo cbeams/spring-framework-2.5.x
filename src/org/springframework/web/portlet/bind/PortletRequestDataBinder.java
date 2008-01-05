@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
 
 /**
- * Special DataBinder to perform data binding from PortletRequest parameters
- * to JavaBeans.
+ * Special {@link org.springframework.validation.DataBinder} to perform data binding
+ * from portlet request parameters to JavaBeans, including support for multipart files.
  *
  * <p>See the DataBinder/WebDataBinder superclasses for customization options,
  * which include specifying allowed/required fields, and registering custom
@@ -40,7 +40,7 @@ import org.springframework.web.portlet.multipart.MultipartActionRequest;
  * a PortletRequestDataBinder for each binding process, and invoke <code>bind</code>
  * with the current PortletRequest as argument:
  *
- * <pre>
+ * <pre class="code">
  * MyBean myBean = new MyBean();
  * // apply binder to custom target object
  * PortletRequestDataBinder binder = new PortletRequestDataBinder(myBean);
@@ -66,7 +66,8 @@ public class PortletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new PortletRequestDataBinder instance, with default object name.
-	 * @param target target object to bind onto
+	 * @param target the target object to bind onto (or <code>null</code>
+	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
 	public PortletRequestDataBinder(Object target) {
@@ -75,8 +76,9 @@ public class PortletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new PortletRequestDataBinder instance.
-	 * @param target target object to bind onto
-	 * @param objectName objectName of the target object
+	 * @param target the target object to bind onto (or <code>null</code>
+	 * if the binder is just used to convert a plain parameter value)
+	 * @param objectName the name of the target object
 	 */
 	public PortletRequestDataBinder(Object target, String objectName) {
 		super(target, objectName);
