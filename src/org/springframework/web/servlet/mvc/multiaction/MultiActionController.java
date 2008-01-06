@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,8 @@ import org.springframework.web.util.NestedServletException;
  * response directly to the supplied {@link HttpServletResponse}.
  *
  * <p>This model allows for rapid coding, but loses the advantage of
- * compile-time checking. It is similar to a Struts 1.1
- * <code>DispatchAction</code>, but more sophisticated. Also supports
- * delegation to another object.
+ * compile-time checking. It is similar to a Struts <code>DispatchAction</code>,
+ * but more sophisticated. Also supports delegation to another object.
  *
  * <p>An implementation of the {@link MethodNameResolver} interface defined in
  * this package should return a method name for a given request, based on any
@@ -107,13 +106,12 @@ import org.springframework.web.util.NestedServletException;
  * {@link AbstractController the superclass} (in that section of the class
  * level Javadoc entitled 'workflow').
  *
- * <p><b>Note:</b> For maximum data binding flexibility, consider direct usage
- * of a {@link ServletRequestDataBinder} in your controller method, instead of
- * relying on a declared command argument. This allows for full control over
- * the entire binder setup and usage, including the invocation of
- * {@link Validator Validators} and the subsequent evaluation of
- * binding/validation errors.
- * 
+ * <p><b>Note:</b> For maximum data binding flexibility, consider direct usage of a
+ * {@link ServletRequestDataBinder} in your controller method, instead of relying
+ * on a declared command argument. This allows for full control over the entire
+ * binder setup and usage, including the invocation of {@link Validator Validators}
+ * and the subsequent evaluation of binding/validation errors.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -125,8 +123,8 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
  * @see org.springframework.web.bind.ServletRequestDataBinder
  */
-public class MultiActionController extends AbstractController implements LastModified  {
-		
+public class MultiActionController extends AbstractController implements LastModified {
+
 	/** Suffix for last-modified methods */
 	public static final String LAST_MODIFIED_METHOD_SUFFIX = "LastModified";
 
@@ -145,25 +143,23 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
+	/** Object we'll invoke methods on. Defaults to this. */
+	private Object delegate;
 
 	/**
 	 * Helper object that knows how to return method names from incoming requests.
-	 * <p>Can be overridden via the methodNameResolver bean property.
 	 */
 	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
 	/** List of Validators to apply to commands */
 	private Validator[] validators;
 
-	/** Object we'll invoke methods on. Defaults to this. */
-	private Object delegate;
-
 	/** Methods, keyed by name */
 	private Map handlerMethodMap = new HashMap();
-	
+
 	/** LastModified methods, keyed by handler method name (without LAST_MODIFIED_SUFFIX) */
 	private Map lastModifiedMethodMap = new HashMap();
-	
+
 	/** Methods, keyed by exception class */
 	private Map exceptionHandlerMap = new HashMap();
 
@@ -171,56 +167,23 @@ public class MultiActionController extends AbstractController implements LastMod
 	/**
 	 * Constructor for <code>MultiActionController</code> that looks for
 	 * handler methods in the present subclass.
-	 * <p>Caches methods for quick invocation later. This class's use of
-	 * reflection will impose little overhead at runtime.
 	 */
 	public MultiActionController() {
 		this.delegate = this;
 		registerHandlerMethods(this.delegate);
 		// We'll accept no handler methods found here - a delegate might be set later on.
 	}
-	
+
 	/**
 	 * Constructor for <code>MultiActionController</code> that looks for
 	 * handler methods in delegate, rather than a subclass of this class.
-	 * <p>Caches methods for quick invocation later.
-	 * @param delegate handler object; this does not need to implement any
+	 * @param delegate handler object. This does not need to implement any
 	 * particular interface, as everything is done using reflection.
 	 */
 	public MultiActionController(Object delegate) {
 		setDelegate(delegate);
 	}
-	
-	
-	/**
-	 * Set the method name resolver that this class should use.
-	 * <p>Allows parameterization of handler method mappings.
-	 */
-	public final void setMethodNameResolver(MethodNameResolver methodNameResolver) {
-		this.methodNameResolver = methodNameResolver;
-	}
-	
-	/**
-	 * Return the MethodNameResolver used by this class.
-	 */
-	public final MethodNameResolver getMethodNameResolver() {
-		return this.methodNameResolver;
-	}
-	
-	/**
-	 * Set the {@link Validator Validators} for this controller.
-	 * <p>The <code>Validators</code> must support the specified command class.
-	 */
-	public final void setValidators(Validator[] validators) {
-		this.validators = validators;
-	}
 
-	/**
-	 * Return the Validators for this controller.
-	 */
-	public final Validator[] getValidators() {
-		return this.validators;
-	}
 
 	/**
 	 * Set the delegate used by this class; the default is <code>this</code>,
@@ -237,6 +200,36 @@ public class MultiActionController extends AbstractController implements LastMod
 		if (this.handlerMethodMap.isEmpty()) {
 			throw new IllegalStateException("No handler methods in class [" + this.delegate.getClass() + "]");
 		}
+	}
+
+	/**
+	 * Set the method name resolver that this class should use.
+	 * <p>Allows parameterization of handler method mappings.
+	 */
+	public final void setMethodNameResolver(MethodNameResolver methodNameResolver) {
+		this.methodNameResolver = methodNameResolver;
+	}
+
+	/**
+	 * Return the MethodNameResolver used by this class.
+	 */
+	public final MethodNameResolver getMethodNameResolver() {
+		return this.methodNameResolver;
+	}
+
+	/**
+	 * Set the {@link Validator Validators} for this controller.
+	 * <p>The <code>Validators</code> must support the specified command class.
+	 */
+	public final void setValidators(Validator[] validators) {
+		this.validators = validators;
+	}
+
+	/**
+	 * Return the Validators for this controller.
+	 */
+	public final Validator[] getValidators() {
+		return this.validators;
 	}
 
 
@@ -356,7 +349,7 @@ public class MultiActionController extends AbstractController implements LastMod
 					// We can't do anything useful except log this, as we can't throw an exception.
 					logger.error("Failed to invoke last-modified method", ex);
 				}
-			}	// if we had a lastModified method for this request
+			}
 		}
 		catch (NoSuchRequestHandlingMethodException ex) {
 			// No handler method for this request. This shouldn't happen, as this
@@ -378,7 +371,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see #handleNoSuchRequestHandlingMethod
 	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception {
+			throws Exception {
 		try {
 			String methodName = this.methodNameResolver.getHandlerMethodName(request);
 			return invokeNamedMethod(methodName, request, response);
@@ -415,18 +408,19 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	protected final ModelAndView invokeNamedMethod(
 			String methodName, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
+
 		Method method = (Method) this.handlerMethodMap.get(methodName);
 		if (method == null) {
 			throw new NoSuchRequestHandlingMethodException(methodName, getClass());
 		}
 
 		try {
+			Class[] paramTypes = method.getParameterTypes();
 			List params = new ArrayList(4);
 			params.add(request);
 			params.add(response);
-				
-			if (method.getParameterTypes().length >= 3 && method.getParameterTypes()[2].equals(HttpSession.class) ){
+
+			if (paramTypes.length >= 3 && paramTypes[2].equals(HttpSession.class)) {
 				HttpSession session = request.getSession(false);
 				if (session == null) {
 					throw new HttpSessionRequiredException(
@@ -434,15 +428,15 @@ public class MultiActionController extends AbstractController implements LastMod
 				}
 				params.add(session);
 			}
-			
+
 			// If last parameter isn't of HttpSession type, it's a command.
-			if (method.getParameterTypes().length >= 3 &&
-					!method.getParameterTypes()[method.getParameterTypes().length - 1].equals(HttpSession.class)) {
-				Object command = newCommandObject(method.getParameterTypes()[method.getParameterTypes().length - 1]);
+			if (paramTypes.length >= 3 &&
+					!paramTypes[paramTypes.length - 1].equals(HttpSession.class)) {
+				Object command = newCommandObject(paramTypes[paramTypes.length - 1]);
 				params.add(command);
 				bind(request, command);
 			}
-			
+
 			Object returnValue = method.invoke(this.delegate, params.toArray(new Object[params.size()]));
 			return massageReturnValueIfNecessary(returnValue);
 		}
@@ -486,7 +480,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	protected Object newCommandObject(Class clazz) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Must create new command of class [" + clazz.getName() + "]");
+			logger.debug("Creating new command of class [" + clazz.getName() + "]");
 		}
 		return BeanUtils.instantiateClass(clazz);
 	}
@@ -510,12 +504,12 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 		binder.closeNoCatch();
 	}
-	
+
 	/**
 	 * Create a new binder instance for the given command and request.
 	 * <p>Called by <code>bind</code>. Can be overridden to plug in custom
 	 * ServletRequestDataBinder subclasses.
-	 * <p>Default implementation creates a standard ServletRequestDataBinder,
+	 * <p>The default implementation creates a standard ServletRequestDataBinder,
 	 * and invokes <code>initBinder</code>. Note that <code>initBinder</code>
 	 * will not be invoked if you override this method!
 	 * @param request current HTTP request
@@ -533,7 +527,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Return the command name to use for the given command object.
-	 * Default is "command".
+	 * <p>Default is "command".
 	 * @param command the command object
 	 * @return the command name to use
 	 * @see #DEFAULT_COMMAND_NAME
@@ -549,7 +543,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
 	 * and still be able to set and display them in an HTML interface.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * <p>Note: the command object is not directly passed to this method, but it's available
 	 * via {@link org.springframework.validation.DataBinder#getTarget()}
 	 * @param request current HTTP request
@@ -560,7 +554,6 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
 	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
-
 		initBinder((ServletRequest) request, binder);
 	}
 
@@ -575,7 +568,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Determine the exception handler method for the given exception.
-	 * Can return null if not found.
+	 * <p>Can return <code>null</code> if not found.
 	 * @return a handler for the given exception type, or <code>null</code>
 	 * @param exception the exception to handle
 	 */
@@ -596,9 +589,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 
 	/**
-	 * We've encountered an exception which may be recoverable
-	 * (InvocationTargetException or HttpSessionRequiredException).
-	 * Allow the subclass a chance to handle it.
+	 * We've encountered an exception thrown from a handler method.
+	 * Invoke an appropriate exception handler method, if any.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param ex the exception that got thrown
@@ -630,16 +622,12 @@ public class MultiActionController extends AbstractController implements LastMod
 			Method handler, HttpServletRequest request, HttpServletResponse response, Throwable ex)
 			throws Exception {
 
-		if (handler == null) {
-			throw new NestedServletException("No handler for exception", ex);
-		}
-
 		// If we get here, we have a handler.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking exception handler [" + handler + "] for exception [" + ex + "]");
 		}
 		try {
-			Object returnValue =  handler.invoke(this.delegate, new Object[] {request, response, ex});
+			Object returnValue = handler.invoke(this.delegate, new Object[] {request, response, ex});
 			return massageReturnValueIfNecessary(returnValue);
 		}
 		catch (InvocationTargetException ex2) {
