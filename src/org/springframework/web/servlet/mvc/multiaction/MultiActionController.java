@@ -294,7 +294,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 
 	/**
-	 * Registers a LastModified handler method for the supplied handler method
+	 * Registers a last-modified handler method for the supplied handler method
 	 * if one exists.
 	 */
 	private void registerLastModifiedMethodIfExists(Object delegate, Method method) {
@@ -303,10 +303,15 @@ public class MultiActionController extends AbstractController implements LastMod
 			Method lastModifiedMethod = delegate.getClass().getMethod(
 					method.getName() + LAST_MODIFIED_METHOD_SUFFIX,
 					new Class[] {HttpServletRequest.class});
+			Class returnType = lastModifiedMethod.getReturnType();
+			if (!(long.class.equals(returnType) || Long.class.equals(returnType))) {
+				throw new IllegalStateException("last-modified method [" + lastModifiedMethod +
+						"] declares an invalid return type - needs to be 'long' or 'Long'");
+			}
 			// Put in cache, keyed by handler method name.
 			this.lastModifiedMethodMap.put(method.getName(), lastModifiedMethod);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found last modified method for action method [" + method + "]");
+				logger.debug("Found last-modified method for handler method [" + method + "]");
 			}
 		}
 		catch (NoSuchMethodException ex) {
@@ -331,7 +336,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Try to find an XXXXLastModified method, where XXXX is the name of a handler.
-	 * Return -1, indicating that content must be updated, if there's no such handler.
+	 * Return -1 if there's no such handler, indicating that content must be updated.
 	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified(HttpServletRequest)
 	 */
 	public long getLastModified(HttpServletRequest request) {
@@ -340,9 +345,9 @@ public class MultiActionController extends AbstractController implements LastMod
 			Method lastModifiedMethod = (Method) this.lastModifiedMethodMap.get(handlerMethodName);
 			if (lastModifiedMethod != null) {
 				try {
-					// invoke the last-modified method
-					Long wrappedLong = (Long) lastModifiedMethod.invoke(this.delegate, new Object[] { request });
-					return wrappedLong.longValue();
+					// Invoke the last-modified method...
+					Long wrappedLong = (Long) lastModifiedMethod.invoke(this.delegate, new Object[] {request});
+					return (wrappedLong != null ? wrappedLong.longValue() : -1);
 				}
 				catch (Exception ex) {
 					// We encountered an error invoking the last-modified method.
