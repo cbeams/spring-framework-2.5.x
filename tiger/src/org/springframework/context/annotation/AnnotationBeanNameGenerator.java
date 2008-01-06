@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * name will be built based on the short name of the class (with the first
  * letter lower-cased). For example:
  *
- * <p><code>com.xyz.FooServiceImpl -&gt; fooServiceImpl</code>
+ * <pre class="code">com.xyz.FooServiceImpl -&gt; fooServiceImpl</pre>
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -66,11 +66,9 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				return beanName;
 			}
 		}
-
-		// Generate a unique default bean name.
+		// Fallback: generate a unique default bean name.
 		return buildDefaultBeanName(definition);
 	}
-
 
 	/**
 	 * Derive a bean name from one of the annotations on the class.
@@ -84,15 +82,13 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		for (String type : types) {
 			Map<String, Object> attributes = amd.getAnnotationAttributes(type);
 			if (isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
-				if (attributes != null) {
-					String value = (String) attributes.get("value");
-					if (StringUtils.hasLength(value)) {
-						if (beanName != null && !value.equals(beanName)) {
-							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-									"component names: '" + beanName + "' versus '" + value + "'");
-						}
-						beanName = value;
+				String value = (String) attributes.get("value");
+				if (StringUtils.hasLength(value)) {
+					if (beanName != null && !value.equals(beanName)) {
+						throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+								"component names: '" + beanName + "' versus '" + value + "'");
 					}
+					beanName = value;
 				}
 			}
 		}
