@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -50,12 +51,24 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 		return new EmptyVisitor() {
 			public void visit(String name, Object value) {
+				// Explicitly defined annotation attribute value.
 				attributes.put(name, value);
 			}
 			public void visitEnd() {
 				try {
-					Class clazz = getClass().getClassLoader().loadClass(className);
-					Annotation[] metaAnnotations = clazz.getAnnotations();
+					Class annotationClass = getClass().getClassLoader().loadClass(className);
+					// Check declared default values of attributes in the annotation type.
+					Method[] annotationAttributes = annotationClass.getMethods();
+					for (int i = 0; i < annotationAttributes.length; i++) {
+						Method annotationAttribute = annotationAttributes[i];
+						String attributeName = annotationAttribute.getName();
+						Object defaultValue = annotationAttribute.getDefaultValue();
+						if (defaultValue != null && !attributes.containsKey(attributeName)) {
+							attributes.put(attributeName, defaultValue);
+						}
+					}
+					// Register annotations that the annotation type is annotated with.
+					Annotation[] metaAnnotations = annotationClass.getAnnotations();
 					Set<String> metaAnnotationTypeNames = new HashSet<String>();
 					for (Annotation metaAnnotation : metaAnnotations) {
 						metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());

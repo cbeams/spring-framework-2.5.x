@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 
 package org.springframework.context.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
@@ -54,12 +49,12 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 		control.verify();
 	}
 
-	public void testGenerateBeanNameWithNamedCustomComponent() {
+	public void testGenerateBeanNameWithDefaultNamedComponent() {
 		MockControl control = MockControl.createControl(BeanDefinitionRegistry.class);
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
 		control.replay();
 
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(CustomComponent.class);
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(DefaultNamedComponent.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
 		assertNotNull("The generated beanName must *never* be null.", beanName);
 		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
@@ -115,19 +110,6 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 
 	@Component
 	private static class AnonymousComponent {
-	}
-
-
-	@Target(ElementType.TYPE)
-	@Retention(RetentionPolicy.RUNTIME)
-	@Component
-	public static @interface CustomStereotype {
-		String value()  default "";
-	}
-
-
-	@CustomStereotype("thoreau")
-	private static class CustomComponent {
 	}
 
 }

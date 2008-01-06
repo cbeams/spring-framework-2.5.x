@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
@@ -50,6 +51,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
+		assertTrue(context.containsBean("thoreau"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
