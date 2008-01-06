@@ -68,8 +68,8 @@ public class MultiActionControllerTests extends TestCase {
 		doTestCustomizedInternalPathMethodNameResolver("/Bugal.xyz", "your", "Method", "yourBugalMethod");
 	}
 
-	private void doTestCustomizedInternalPathMethodNameResolver(
-			String in, String prefix, String suffix, String expected) throws Exception {
+	private void doTestCustomizedInternalPathMethodNameResolver(String in, String prefix, String suffix, String expected)
+			throws Exception {
 
 		MultiActionController rc = new MultiActionController();
 		InternalPathMethodNameResolver resolver = new InternalPathMethodNameResolver();
@@ -130,7 +130,7 @@ public class MultiActionControllerTests extends TestCase {
 	public void testParameterMethodNameResolverWithParamNames() throws NoSuchRequestHandlingMethodException {
 		ParameterMethodNameResolver resolver = new ParameterMethodNameResolver();
 		resolver.setDefaultMethodName("default");
-		resolver.setMethodParamNames(new String[] {"hello", "spring", "colin"});
+		resolver.setMethodParamNames(new String[] { "hello", "spring", "colin" });
 		Properties logicalMappings = new Properties();
 		logicalMappings.setProperty("hello", "goodbye");
 		logicalMappings.setProperty("nina", "colin");
@@ -320,7 +320,7 @@ public class MultiActionControllerTests extends TestCase {
 			fail("Should have thrown exception");
 		}
 		catch (HttpSessionRequiredException ex) {
-			//assertTrue("session required", ex.equals(t));
+			// assertTrue("session required", ex.equals(t));
 		}
 		request = new MockHttpServletRequest("GET", "/testSession.html");
 		response = new MockHttpServletResponse();
@@ -404,7 +404,6 @@ public class MultiActionControllerTests extends TestCase {
 		testExceptionNoHandler(mc, new SQLException());
 		testExceptionNoHandler(mc, new Exception());
 
-
 		mc = new TestRuntimeExceptionHandler();
 		mv = testHandlerCaughtException(mc, new RuntimeException());
 		assertTrue(mv.getViewName().equals("handle(RTE)"));
@@ -474,8 +473,32 @@ public class MultiActionControllerTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mav = mac.handleRequest(request, response);
 
-		assertNull("ModelAndView cannot be null", mav);
+		assertNull("ModelAndView must be null", mav);
 		assertEquals("exception", response.getContentAsString());
+	}
+
+	public void testHandlerReturnsString() throws Exception {
+		MultiActionController mac = new StringMultiActionController();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = mac.handleRequest(request, response);
+
+		assertNotNull("ModelAndView cannot be null", mav);
+		assertTrue("ModelAndView must have a view", mav.hasView());
+		assertEquals("Verifying view name", "welcomeString", mav.getViewName());
+	}
+
+	public void testExceptionHandlerReturnsString() throws Exception {
+		MultiActionController mac = new StringMultiActionController();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = mac.handleRequest(request, response);
+
+		assertNotNull("ModelAndView cannot be null", mav);
+		assertTrue("ModelAndView must have a view", mav.hasView());
+		assertEquals("Verifying view name", "handleIllegalStateExceptionString", mav.getViewName());
 	}
 
 
@@ -487,97 +510,102 @@ public class MultiActionControllerTests extends TestCase {
 		/** Method name -> object */
 		protected Map invoked = new HashMap();
 
+
 		public void clear() {
-			invoked.clear();
+			this.invoked.clear();
 		}
 
 		public ModelAndView welcome(HttpServletRequest request, HttpServletResponse response) {
-			invoked.put("welcome", Boolean.TRUE);
+			this.invoked.put("welcome", Boolean.TRUE);
 			return new ModelAndView("welcome");
 		}
 
 		public ModelAndView commandNoSession(HttpServletRequest request, HttpServletResponse response, TestBean command) {
-			invoked.put("commandNoSession", Boolean.TRUE);
+			this.invoked.put("commandNoSession", Boolean.TRUE);
 
 			String pname = request.getParameter("name");
 			String page = request.getParameter("age");
 			// ALLOW FOR NULL
-			if (pname == null)
+			if (pname == null) {
 				assertTrue("name null", command.getName() == null);
-			else
+			}
+			else {
 				assertTrue("name param set", pname.equals(command.getName()));
-			//			if (page == null)
-			//				assertTrue("age default", command.getAge() == 0);
-			//			else
-			//				assertTrue("age set", command.getName().equals(pname));
-			//assertTrue("a", command.getAge().equals(request.getParameter("name")));
+			}
+			// if (page == null)
+			// assertTrue("age default", command.getAge() == 0);
+			// else
+			// assertTrue("age set", command.getName().equals(pname));
+			// assertTrue("a",
+			// command.getAge().equals(request.getParameter("name")));
 			return new ModelAndView("commandNoSession");
 		}
 
 		public ModelAndView inSession(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
-			invoked.put("inSession", Boolean.TRUE);
+			this.invoked.put("inSession", Boolean.TRUE);
 			assertTrue("session non null", session != null);
 			return new ModelAndView("inSession");
 		}
 
-		public ModelAndView commandInSession(HttpServletRequest request, HttpServletResponse response, HttpSession session, TestBean command) {
-			invoked.put("commandInSession", Boolean.TRUE);
+		public ModelAndView commandInSession(HttpServletRequest request, HttpServletResponse response,
+				HttpSession session, TestBean command) {
+			this.invoked.put("commandInSession", Boolean.TRUE);
 			assertTrue("session non null", session != null);
 			return new ModelAndView("commandInSession");
 		}
 
 		public ModelAndView test(HttpServletRequest request, HttpServletResponse response) {
-			invoked.put("test", Boolean.TRUE);
+			this.invoked.put("test", Boolean.TRUE);
 			return new ModelAndView("test");
 		}
 
 		public ModelAndView testException(HttpServletRequest request, HttpServletResponse response) throws Throwable {
-			invoked.put("testException", Boolean.TRUE);
+			this.invoked.put("testException", Boolean.TRUE);
 			Throwable t = (Throwable) request.getAttribute(THROWABLE_ATT);
-			if (t != null)
+			if (t != null) {
 				throw t;
-			else
+			}
+			else {
 				return new ModelAndView("no throwable");
+			}
 		}
 
 		public boolean wasInvoked(String method) {
-			return invoked.get(method) != null;
+			return this.invoked.get(method) != null;
 		}
 
 		public int getInvokedMethods() {
-			return invoked.size();
+			return this.invoked.size();
 		}
 	}
-
 
 	public static class TestDelegate {
 
 		boolean invoked;
 
+
 		public ModelAndView test(HttpServletRequest request, HttpServletResponse response) {
-			invoked = true;
+			this.invoked = true;
 			return new ModelAndView("test");
 		}
 	}
 
-
 	public static class TestExceptionHandler extends TestMaController {
 
 		public ModelAndView handleAnyException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-			invoked.put("handle(Exception)", Boolean.TRUE);
+			this.invoked.put("handle(Exception)", Boolean.TRUE);
 			return new ModelAndView("handle(Exception)");
 		}
 	}
 
-
 	public static class TestRuntimeExceptionHandler extends TestMaController {
 
-		public ModelAndView handleRuntimeProblem(HttpServletRequest request, HttpServletResponse response, RuntimeException ex) {
-			invoked.put("handle(RTE)", Boolean.TRUE);
+		public ModelAndView handleRuntimeProblem(HttpServletRequest request, HttpServletResponse response,
+				RuntimeException ex) {
+			this.invoked.put("handle(RTE)", Boolean.TRUE);
 			return new ModelAndView("handle(RTE)");
 		}
 	}
-
 
 	public static class TestSessionRequiredController extends TestMaController {
 
@@ -586,25 +614,24 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
-
 	/** Extends previous to handle exception */
 	public static class TestSessionRequiredExceptionHandler extends TestSessionRequiredController {
 
-		public ModelAndView handleServletException(HttpServletRequest request, HttpServletResponse response, HttpSessionRequiredException ex) {
-			invoked.put("handle(SRE)", Boolean.TRUE);
+		public ModelAndView handleServletException(HttpServletRequest request, HttpServletResponse response,
+				HttpSessionRequiredException ex) {
+			this.invoked.put("handle(SRE)", Boolean.TRUE);
 			return new ModelAndView("handle(SRE)");
 		}
 	}
 
-
 	public static class TestServletExceptionHandler extends TestMaController {
 
-		public ModelAndView handleServletException(HttpServletRequest request, HttpServletResponse response, ServletException ex) {
-			invoked.put("handle(ServletException)", Boolean.TRUE);
+		public ModelAndView handleServletException(HttpServletRequest request, HttpServletResponse response,
+				ServletException ex) {
+			this.invoked.put("handle(ServletException)", Boolean.TRUE);
 			return new ModelAndView("handle(ServletException)");
 		}
 	}
-
 
 	public static class LastModController extends MultiActionController {
 
@@ -613,12 +640,13 @@ public class MultiActionControllerTests extends TestCase {
 		/** Method name -> object */
 		protected HashMap invoked = new HashMap();
 
+
 		public void clear() {
-			invoked.clear();
+			this.invoked.clear();
 		}
 
 		public ModelAndView welcome(HttpServletRequest request, HttpServletResponse response) {
-			invoked.put("welcome", Boolean.TRUE);
+			this.invoked.put("welcome", Boolean.TRUE);
 			return new ModelAndView("welcome");
 		}
 
@@ -628,29 +656,29 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
-
 	public static class ModelOnlyMultiActionController extends MultiActionController {
 
 		private final Map model;
+
 
 		public ModelOnlyMultiActionController(Map model) throws ApplicationContextException {
 			this.model = model;
 		}
 
 		public Map welcome(HttpServletRequest request, HttpServletResponse response) {
-			return model;
+			return this.model;
 		}
 
 		public Map index(HttpServletRequest request, HttpServletResponse response) {
 			throw new IllegalStateException();
 		}
 
-		public Map handleIllegalStateException(HttpServletRequest request, HttpServletResponse response, IllegalStateException ex) {
-			model.put("exception", ex);
-			return model;
+		public Map handleIllegalStateException(HttpServletRequest request, HttpServletResponse response,
+				IllegalStateException ex) {
+			this.model.put("exception", ex);
+			return this.model;
 		}
 	}
-
 
 	public static class VoidMultiActionController extends MultiActionController {
 
@@ -661,8 +689,25 @@ public class MultiActionControllerTests extends TestCase {
 			throw new IllegalStateException();
 		}
 
-		public void handleIllegalStateException(HttpServletRequest request, HttpServletResponse response, IllegalStateException ex) throws IOException {
+		public void handleIllegalStateException(HttpServletRequest request, HttpServletResponse response,
+				IllegalStateException ex) throws IOException {
 			response.getWriter().write("exception");
+		}
+	}
+
+	public static class StringMultiActionController extends MultiActionController {
+
+		public String welcome(HttpServletRequest request, HttpServletResponse response) {
+			return "welcomeString";
+		}
+
+		public String index(HttpServletRequest request, HttpServletResponse response) {
+			throw new IllegalStateException();
+		}
+
+		public String handleIllegalStateException(HttpServletRequest request, HttpServletResponse response,
+				IllegalStateException ex) throws IOException {
+			return "handleIllegalStateExceptionString";
 		}
 	}
 
