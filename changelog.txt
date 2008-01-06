@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.8 (2008-01-04)
+Changes in version 2.0.8 (2008-01-07)
 -------------------------------------
 
 General
@@ -19,6 +19,7 @@ Package org.springframework.beans
 * fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
 * factored out protected "getTargetBean" method in ObjectFactoryCreatingFactoryBean (for easier overriding)
 * DefaultDocumentLoader includes the JAXP IllegalArgumentException in the rethrown ParserConfigurationException
+* SingletonBeanFactoryLocator removes bean factory group definition if its initialization fails
 
 Package org.springframework.cache
 * added "cacheManagerName" property to EhCacheManagerFactoryBean
@@ -36,6 +37,7 @@ Package org.springframework.instrument
 Package org.springframework.jdbc
 * fixed JdbcUtils to not access the DatabaseMetaData implementation class for "extractDatabaseMetaData" calls
 * fixed SingleColumnRowMapper to use passed-in required type in the default "convertValueToRequiredType" implementation
+* WebSphereDataSourceAdapter, JBossNativeJdbcExtractor and CommonsDbcpNativeJdbcExtractor propagate SQLExceptions as-is
 
 Package org.springframework.jms
 * DefaultMessageListenerContainer avoids deadlock between Connection and Session through the use of a shared monitor
@@ -72,6 +74,7 @@ Package org.springframework.web
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
 * DispatcherServlet consistently logs correct request URI for include requests (even in debug log messages)
 * DispatcherPortlet swallows IllegalStateException when setting implicit render parameter (e.g. after sendRedirect call)
+* MultiActionController detects and rejects invalid last-modified method return types
 * JstlView detects session-scoped JSTL LocalizationContext/Locale attributes and merges them with its own context
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * AbstractJasperReportsSingleFormatView converts exporter parameter values in the model (if appropriate)
