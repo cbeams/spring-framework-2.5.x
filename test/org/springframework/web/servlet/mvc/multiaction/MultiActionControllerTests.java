@@ -40,10 +40,12 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * Unit tests for {@link MultiActionController}.
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
  * @author Rob Harrop
+ * @author Sam Brannen
  */
 public class MultiActionControllerTests extends TestCase {
 

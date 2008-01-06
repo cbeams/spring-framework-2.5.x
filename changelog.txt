@@ -199,6 +199,7 @@ Package org.springframework.web
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
 * fixed JSP BindTag to correctly detect and ignore a repeated nested path for the global errors case
 * JSP CheckboxTag/CheckboxesTag and RadioButtonTag/RadioButtonsTag use registered property editor for value rendering
+* MultiActionController now supports String return types for handler methods
 
 
 Changes in version 2.5 final (2007-11-19)
