@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.aspectj.weaver.reflect.ReflectionVar;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -173,15 +174,15 @@ class RuntimeTestWalker {
 		}
 
 		public void visit(Instanceof i) {
-			ResolvedType type = (ResolvedType)i.getType();
-			int varType = getVarType((ReflectionVar)i.getVar());
-			if (varType != matchVarType) {
+			ResolvedType type = (ResolvedType) i.getType();
+			int varType = getVarType((ReflectionVar) i.getVar());
+			if (varType != this.matchVarType) {
 				return;
 			}
 			try {
-				Class typeClass = Class.forName(type.getName());
+				Class typeClass = ClassUtils.forName(type.getName(), this.matchClass.getClassLoader());
 				// Don't use ReflectionType.isAssignableFrom() as it won't be aware of (Spring) mixins
-				this.matches = typeClass.isAssignableFrom(matchClass);
+				this.matches = typeClass.isAssignableFrom(this.matchClass);
 			}
 			catch (ClassNotFoundException ex) {
 				this.matches = false;

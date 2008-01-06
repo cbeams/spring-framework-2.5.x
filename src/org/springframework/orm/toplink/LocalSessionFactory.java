@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,7 +350,7 @@ public class LocalSessionFactory {
 		Method setLoginMethod = null;
 		try {
 			// Search for the new 10.1.3 Login interface...
-			Class loginClass = Class.forName("oracle.toplink.sessions.Login");
+			Class loginClass = DatabaseSession.class.getClassLoader().loadClass("oracle.toplink.sessions.Login");
 			setLoginMethod = DatabaseSession.class.getMethod("setLogin", new Class[] {loginClass});
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using TopLink 10.1.3 setLogin(Login) API");
@@ -389,7 +389,8 @@ public class LocalSessionFactory {
 		Method getSessionMethod = null;
 		Object loader = null;
 		try {
-			Class loaderClass = Class.forName("oracle.toplink.tools.sessionconfiguration.XMLSessionConfigLoader");
+			Class loaderClass = SessionManager.class.getClassLoader().loadClass(
+					"oracle.toplink.tools.sessionconfiguration.XMLSessionConfigLoader");
 			getSessionMethod = SessionManager.class.getMethod("getSession",
 					new Class[] {loaderClass, String.class, ClassLoader.class, boolean.class, boolean.class, boolean.class});
 			if (logger.isDebugEnabled()) {

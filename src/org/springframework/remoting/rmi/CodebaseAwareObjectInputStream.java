@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.lang.reflect.Proxy;
 import java.rmi.server.RMIClassLoader;
+
+import org.springframework.util.ClassUtils;
 
 /**
  * Special ObjectInputStream subclass that falls back to a specified codebase
@@ -95,7 +97,7 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 		try {
 			if (this.classLoader != null) {
 				// Use the specified ClassLoader to resolve local classes.
-				return Class.forName(classDesc.getName(), false, this.classLoader);
+				return ClassUtils.forName(classDesc.getName(), this.classLoader);
 			}
 			else {
 				// Let RMI use it's default ClassLoader...
@@ -122,7 +124,7 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 			Class[] resolvedInterfaces = new Class[interfaces.length];
 			for (int i = 0; i < interfaces.length; i++) {
 				try {
-					resolvedInterfaces[i] = Class.forName(interfaces[i], false, this.classLoader);
+					resolvedInterfaces[i] = ClassUtils.forName(interfaces[i], this.classLoader);
 				}
 				catch (ClassNotFoundException ex) {
 					if (this.codebaseUrl == null) {
