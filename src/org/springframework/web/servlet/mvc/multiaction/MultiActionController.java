@@ -391,20 +391,17 @@ public class MultiActionController extends AbstractController implements LastMod
 				}
 				catch (Exception ex) {
 					// We encountered an error invoking the last-modified
-					// method.
-					// We can't do anything useful except log this, as we can't
-					// throw an exception.
+					// method. We can't do anything useful except log this, as
+					// we can't throw an exception.
 					this.logger.error("Failed to invoke last-modified method", ex);
 				}
 			} // if we had a lastModified method for this request
 		}
 		catch (NoSuchRequestHandlingMethodException ex) {
 			// No handler method for this request. This shouldn't happen, as
-			// this
-			// method shouldn't be called unless a previous invocation of this
-			// class
-			// has generated content. Do nothing, that's OK: We'll return
-			// default.
+			// this method shouldn't be called unless a previous invocation of
+			// this class has generated content. Do nothing, that's OK: We'll
+			// return default.
 		}
 		return -1L;
 	}
