@@ -169,7 +169,7 @@ public abstract class AnnotationUtils {
 
 	/**
 	 * Determine whether an annotation for the specified <code>annotationType</code>
-	 * is declared locally on the supplied <code>clazz</code>, else <code>false</code>.
+	 * is declared locally on the supplied <code>clazz</code>.
 	 * The supplied {@link Class} object may represent any type.
 	 * <p>Note: This method does <strong>not</strong> determine if the annotation
 	 * is {@link java.lang.annotation.Inherited inherited}. For greater clarity
@@ -200,7 +200,7 @@ public abstract class AnnotationUtils {
 	 * Determine whether an annotation for the specified <code>annotationType</code>
 	 * is present on the supplied <code>clazz</code> and is
 	 * {@link java.lang.annotation.Inherited inherited}
-	 * (i.e., not declared locally for the class), else <code>false</code>.
+	 * (i.e., not declared locally for the class).
 	 * <p>If the supplied <code>clazz</code> is an interface, only the interface
 	 * itself will be checked. In accord with standard meta-annotation
 	 * semantics, the inheritance hierarchy for interfaces will not be
