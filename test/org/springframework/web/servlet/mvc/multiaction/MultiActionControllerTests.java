@@ -40,7 +40,6 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Unit tests for {@link MultiActionController}.
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -512,7 +511,6 @@ public class MultiActionControllerTests extends TestCase {
 		/** Method name -> object */
 		protected Map invoked = new HashMap();
 
-
 		public void clear() {
 			this.invoked.clear();
 		}
@@ -581,16 +579,17 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+
 	public static class TestDelegate {
 
 		boolean invoked;
-
 
 		public ModelAndView test(HttpServletRequest request, HttpServletResponse response) {
 			this.invoked = true;
 			return new ModelAndView("test");
 		}
 	}
+
 
 	public static class TestExceptionHandler extends TestMaController {
 
@@ -599,6 +598,7 @@ public class MultiActionControllerTests extends TestCase {
 			return new ModelAndView("handle(Exception)");
 		}
 	}
+
 
 	public static class TestRuntimeExceptionHandler extends TestMaController {
 
@@ -609,12 +609,14 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+
 	public static class TestSessionRequiredController extends TestMaController {
 
 		public ModelAndView testSession(HttpServletRequest request, HttpServletResponse response, HttpSession sess) {
 			return null;
 		}
 	}
+
 
 	/** Extends previous to handle exception */
 	public static class TestSessionRequiredExceptionHandler extends TestSessionRequiredController {
@@ -635,13 +637,13 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+
 	public static class LastModController extends MultiActionController {
 
 		public static final String THROWABLE_ATT = "throwable";
 
 		/** Method name -> object */
 		protected HashMap invoked = new HashMap();
-
 
 		public void clear() {
 			this.invoked.clear();
@@ -658,10 +660,10 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+
 	public static class ModelOnlyMultiActionController extends MultiActionController {
 
 		private final Map model;
-
 
 		public ModelOnlyMultiActionController(Map model) throws ApplicationContextException {
 			this.model = model;
@@ -682,6 +684,7 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+
 	public static class VoidMultiActionController extends MultiActionController {
 
 		public void welcome(HttpServletRequest request, HttpServletResponse response) {
@@ -696,6 +699,7 @@ public class MultiActionControllerTests extends TestCase {
 			response.getWriter().write("exception");
 		}
 	}
+
 
 	public static class StringMultiActionController extends MultiActionController {
 
