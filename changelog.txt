@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2008-01-07)
+Changes in version 2.5.1 (2008-01-08)
 -------------------------------------
 
 General
@@ -59,6 +59,7 @@ Package org.springframework.context
 * DefaultContextLoadTimeWeaver only chooses GlassFishLoadTimeWeaver when running in the EAR ClassLoader
 * DefaultContextLoadTimeWeaver removes all registered transformers from the VM Instrumentation object (if applicable)
 * CommonAnnotationBeanPostProcessor properly ignores @Resource-annotated JAX-WS WebServiceContext references
+* AnnotationBeanNameGenerator (used by "context:component-scan") detects default name values in custom annotation types
 * "context:property-placeholder" configuration element does not require a "location" attribute (for system properties)
 
 Package org.springframework.core
@@ -177,6 +178,8 @@ Package org.springframework.web
 * UrlPathHelper detects a context path of "/" (as exposed by Jetty for includes) and processes it as root context ("")
 * improved NoSuchRequestHandlingMethodException's error message to include request URL and query string explicitly
 * DispatcherServlet consistently logs correct request URI for include requests (even in debug log messages)
+* MultiActionController properly supports String return types for handler methods (for consistency with @RequestMapping)
+* MultiActionController detects and rejects invalid last-modified method return types
 * @RequestMapping paths are considered a match even without suffix (e.g. "/users" matches a request for "/users.do")
 * @InitBinder methods apply to @RequestParam parameters as well, with the @InitBinder value matched against param names
 * @ModelAttribute's default attribute names are consistently derived from the *declared* parameter/return type
@@ -199,7 +202,6 @@ Package org.springframework.web
 * Tiles2 TilesView exposes Servlet 2.4 forward request attributes (for non-2.4-compliant web containers like OC4J)
 * fixed JSP BindTag to correctly detect and ignore a repeated nested path for the global errors case
 * JSP CheckboxTag/CheckboxesTag and RadioButtonTag/RadioButtonsTag use registered property editor for value rendering
-* MultiActionController now supports String return types for handler methods
 
 
 Changes in version 2.5 final (2007-11-19)
