@@ -39,8 +39,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - BND tool 0.0.208 (http://www.aqute.biz/Code/Bnd)
 - required for adding OSGi entries to the jar manifests at build time
 
-* c3p0/c3p0-0.9.1.1.jar
-- C3P0 0.9.1.1 connection pool (http://sourceforge.net/projects/c3p0)
+* c3p0/c3p0-0.9.1.2.jar
+- C3P0 0.9.1.2 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
@@ -121,8 +121,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.x support
 
-* itext/itext-1.4.8.jar
-- iText PDF 1.4.8 (http://www.lowagie.com/itext)
+* itext/iText-2.0.7.jar
+- iText PDF 2.0.7 (http://www.lowagie.com/itext)
 - required for building the framework
 - required at runtime when using Spring's AbstractPdfView
 
@@ -210,7 +210,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 * jakarta-commons/commons-collections.jar
 - Commons Collections 3.2 (http://jakarta.apache.org/commons/collections)
 - required for building the framework
-- optional for using linked/identity maps in Spring core (on JDK < 1.4)
 - required for running PetClinic, JPetStore (by Commons DBCP, Hibernate)
 
 * jakarta-commons/commons-dbcp.jar
@@ -233,7 +232,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 3.0.1 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 3.1 (http://hc.apache.org/httpclient-3.x)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
@@ -286,7 +285,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JDO support (or jdo.jar for JDO 1.0)
 
 * jexcelapi/jxl.jar
-- JExcelApi 2.5.7 (http://jexcelapi.sourceforge.net)
+- JExcelApi 2.6.6 (http://jexcelapi.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's AbstractJExcelView
 
@@ -335,8 +334,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
-* poi/poi-2.5.1.jar
-- Apache POI 2.5.1 (http://jakarta.apache.org/poi)
+* poi/poi-3.0.1.jar
+- Apache POI 3.0.1 (http://jakarta.apache.org/poi)
 - required for building the framework
 - required at runtime when using Spring's AbstractExcelView
 
