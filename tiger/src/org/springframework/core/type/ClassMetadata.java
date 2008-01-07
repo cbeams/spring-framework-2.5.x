@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,29 @@ public interface ClassMetadata {
 	 * i.e. neither an interface nor an abstract class.
 	 */
 	boolean isConcrete();
+
+	/**
+	 * Determine whether the underlying class is independent,
+	 * i.e. whether it is a top-level class or a nested class
+	 * (static inner class) that can be constructed independent
+	 * from an enclosing class.
+	 */
+	boolean isIndependent();
+
+	/**
+	 * Return whether the underlying class has an enclosing class
+	 * (i.e. the underlying class is an inner/nested class or
+	 * a local class within a method).
+	 * <p>If this method returns <code>false</code>, then the
+	 * underlying class is a top-level class.
+	 */
+	boolean hasEnclosingClass();
+
+	/**
+	 * Return the name of the enclosing class of the underlying class,
+	 * or <code>null</code> if the underlying class is a top-level class.
+	 */
+	String getEnclosingClassName();
 
 	/**
 	 * Return whether the underlying class has a super class.

@@ -30,6 +30,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Mark Fisher
@@ -367,5 +368,10 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 			return beanName.replace("Impl", "");
 		}
 	}
-	
+
+
+	@Component("toBeIgnored")
+	public class NonStaticInnerClass {
+	}
+
 }

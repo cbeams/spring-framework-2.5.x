@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,21 @@ public class StandardClassMetadata implements ClassMetadata {
 
 	public boolean isConcrete() {
 		return !(isInterface() || isAbstract());
+	}
+
+	public boolean isIndependent() {
+		return (!hasEnclosingClass() ||
+				(getIntrospectedClass().getDeclaringClass() != null &&
+						Modifier.isStatic(getIntrospectedClass().getModifiers())));
+	}
+
+	public boolean hasEnclosingClass() {
+		return (getIntrospectedClass().getEnclosingClass() != null);
+	}
+
+	public String getEnclosingClassName() {
+		Class enclosingClass = getIntrospectedClass().getEnclosingClass();
+		return (enclosingClass != null ? enclosingClass.getName() : null);
 	}
 
 	public boolean hasSuperClass() {

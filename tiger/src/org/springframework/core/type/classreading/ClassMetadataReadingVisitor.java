@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,10 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 
 	private boolean isAbstract;
 
+	private String enclosingClassName;
+
+	private boolean independentInnerClass;
+
 	private String superClassName;
 
 	private String[] interfaces;
@@ -56,6 +60,17 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 		this.interfaces = new String[interfaces.length];
 		for (int i = 0; i < interfaces.length; i++) {
 			this.interfaces[i] = ClassUtils.convertResourcePathToClassName(interfaces[i]);
+		}
+	}
+
+	public void visitOuterClass(String owner, String name, String desc) {
+		this.enclosingClassName = ClassUtils.convertResourcePathToClassName(owner);
+	}
+
+	public void visitInnerClass(String name, String outerName, String innerName, int access) {
+		if (outerName != null) {
+			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerName);
+			this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);
 		}
 	}
 
@@ -76,12 +91,24 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 		return !(this.isInterface || this.isAbstract);
 	}
 
-	public String getSuperClassName() {
-		return this.superClassName;
+	public boolean isIndependent() {
+		return (this.enclosingClassName == null || this.independentInnerClass);
+	}
+
+	public boolean hasEnclosingClass() {
+		return (this.enclosingClassName != null);
+	}
+
+	public String getEnclosingClassName() {
+		return this.enclosingClassName;
 	}
 
 	public boolean hasSuperClass() {
 		return (this.superClassName != null);
+	}
+
+	public String getSuperClassName() {
+		return this.superClassName;
 	}
 
 	public String[] getInterfaceNames() {
