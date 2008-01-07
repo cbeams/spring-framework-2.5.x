@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,8 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * order to post-process the merged bean definition that the Spring BeanFactory
  * uses to create a specific bean instance.
  *
- * <p>Note that the {@link #postProcessMergedBeanDefinition} method will be invoked
- * for <i>every instance</code> of a bean. It may for example introspect the bean
- * definition in order to prepare some cached metadata before post-processing
+ * <p>The {@link #postProcessMergedBeanDefinition} method may for example introspect
+ * the bean definition in order to prepare some cached metadata before post-processing
  * actual instances of a bean. It is also allowed to modify the bean definition
  * but <i>only</i> for bean definition properties which are actually intended
  * for concurrent modification. Basically, this only applies to operations
