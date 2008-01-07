@@ -35,20 +35,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * A simple JDBC-based implementation of the {@link Clinic} interface.
- * </p>
- * <p>
- * This class uses Java 5 language features and the {@link SimpleJdbcTemplate}
+ *
+ * <p>This class uses Java 5 language features and the {@link SimpleJdbcTemplate}
  * plus {@link SimpleJdbcInsert}. It also takes advantage of classes like
  * {@link BeanPropertySqlParameterSource} and
  * {@link ParameterizedBeanPropertyRowMapper} which provide automatic mapping
  * between JavaBean properties and JDBC parameters or query results.
- * </p>
- * <p>
- * SimpleJdbcClinic is a rewrite of the AbstractJdbcClinic which was the base
+ *
+ * <p>SimpleJdbcClinic is a rewrite of the AbstractJdbcClinic which was the base
  * class for JDBC implementations of the Clinic interface for Spring 2.0.
- * </p>
  *
  * @author Ken Krebs
  * @author Juergen Hoeller

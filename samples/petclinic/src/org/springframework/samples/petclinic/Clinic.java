@@ -5,13 +5,10 @@ import java.util.Collection;
 import org.springframework.dao.DataAccessException;
 
 /**
- * <p>
  * The high-level PetClinic business interface.
- * </p>
- * <p>
- * This is basically a data access object.
+ *
+ * <p>This is basically a data access object.
  * PetClinic doesn't have a dedicated business facade.
- * </p>
  *
  * @author Ken Krebs
  * @author Juergen Hoeller

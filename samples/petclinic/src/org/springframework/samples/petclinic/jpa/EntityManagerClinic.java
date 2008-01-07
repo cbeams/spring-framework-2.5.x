@@ -16,12 +16,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * JPA implementation of the Clinic interface using EntityManager.
- * </p>
- * <p>
- * The mappings are defined in "orm.xml" located in the META-INF directory.
- * </p>
+ *
+ * <p>The mappings are defined in "orm.xml" located in the META-INF directory.
  *
  * @author Mike Keith
  * @author Rod Johnson
