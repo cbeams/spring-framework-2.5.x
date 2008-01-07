@@ -101,7 +101,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2760 KB)
+* "spring" (~2765 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Spring MVC support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar and spring-webmvc*.jar!
@@ -132,7 +132,7 @@ MODULE JARS (dist/modules):
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
-* "spring-jms" (~170 KB)
+* "spring-jms" (~175 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-tx, JMS API
 
