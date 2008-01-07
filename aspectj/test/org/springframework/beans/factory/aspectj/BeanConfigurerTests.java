@@ -163,11 +163,25 @@ public class BeanConfigurerTests extends TestCase {
 		assertTrue("Injection didn't occur before construction", bean.preConstructionConfigured);
 	}
 	
+	public void testPreConstructionConfiguredBeanDeserializationReinjection() throws Exception {
+		PreConstructionConfiguredBean bean = new PreConstructionConfiguredBean();
+		PreConstructionConfiguredBean deserialized = serializeAndDeserialize(bean);
+		assertTrue("Injection didn't occur before construction", deserialized.preConstructionConfigured);
+		assertEquals("Injection didn't occur upon deserialization", "ramnivas", deserialized.getName());
+	}
+	
 	public void testPostConstructionConfiguredBean() {
 		PostConstructionConfiguredBean bean = new PostConstructionConfiguredBean();
 		assertFalse("Injection occurred before construction", bean.preConstructionConfigured);
 	}
 
+	public void testPostConstructionConfiguredBeanDeserializationReinjection() throws Exception {
+		PostConstructionConfiguredBean bean = new PostConstructionConfiguredBean();
+		PostConstructionConfiguredBean deserialized = serializeAndDeserialize(bean);
+		assertFalse("Injection didn't occur before construction", deserialized.preConstructionConfigured);
+		assertEquals("Injection didn't occur upon deserialization", "ramnivas", deserialized.getName());
+	}
+	
 	@SuppressWarnings("unchecked")
 	private <T> T serializeAndDeserialize(T serializable) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -416,7 +430,7 @@ public class BeanConfigurerTests extends TestCase {
 
 	
 	@Configurable
-	private static class PreOrPostConstructionConfiguredBean {
+	private static class PreOrPostConstructionConfiguredBean implements Serializable {
 
 		private String name;
 		protected boolean preConstructionConfigured;
@@ -427,6 +441,10 @@ public class BeanConfigurerTests extends TestCase {
 		
 		public void setName(String name) {
 			this.name = name;
+		}
+		
+		public String getName() {
+			return this.name;
 		}
 	}
 
