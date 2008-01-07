@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,10 +93,36 @@ public interface WebRequest extends RequestAttributes {
 	boolean isSecure();
 
 	/**
+	 * Check whether the request qualifies as not modified given the
+	 * supplied last-modified timestamp (as determined by the application).
+	 * <p>This will also transparently set the appropriate response headers,
+	 * for both the modified case and the not-modified case.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 *   long lastModified = // application-specific calculation
+	 *   if (request.checkNotModified(lastModified)) {
+	 *     // shortcut exit - no further processing necessary
+	 *     return null;
+	 *   }
+	 *   // further request processing, actually building content
+	 *   model.addAttribute(...);
+	 *   return "myViewName";
+	 * }</pre>
+	 * @param lastModifiedTimestamp the last-modified timestamp that
+	 * the application determined for the underlying resource
+	 * @return whether the request qualifies as not modified,
+	 * allowing to abort request processing and relying on the response
+	 * telling the client that the content has not been modified
+	 */
+	boolean checkNotModified(long lastModifiedTimestamp);
+
+	/**
 	 * Get a short description of this request,
 	 * typically containing request URI and session id.
 	 * @param includeClientInfo whether to include client-specific
 	 * information such as session id and user name
+	 * @return the requested description as String
 	 */
 	String getDescription(boolean includeClientInfo);
 

@@ -210,7 +210,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		if (sessionAttributes != null) {
 			// Always prevent caching in case of session attribute management.
-			checkAndPrepare(request, response, 0, false);
+			checkAndPrepare(request, response, 0, true);
 			// Prepare cached set of session attributes names.
 			sessionAttrNames = this.sessionAttributeNames.get(handler.getClass());
 			if (sessionAttrNames == null) {
@@ -225,10 +225,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 		else {
 			// Uses configured default cacheSeconds setting.
-			checkAndPrepare(request, response, false);
+			checkAndPrepare(request, response, true);
 		}
 
-		WebRequest webRequest = new ServletWebRequest(request);
+		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		HandlerMethodResolver methodResolver = getMethodResolver(handler);
 		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
 		ArgumentsResolver argResolver = new ArgumentsResolver(methodResolver.getInitBinderMethods());
@@ -261,7 +261,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		catch (InvocationTargetException ex) {
 			ReflectionUtils.handleInvocationTargetException(ex);
 		}
-		ModelAndView mav = argResolver.getModelAndView(handlerMethod, result, implicitModel);
+		ModelAndView mav = argResolver.getModelAndView(handlerMethod, result, implicitModel, webRequest);
 
 		if (sessionAttributes != null) {
 			if (argResolver.isProcessingComplete()) {
@@ -733,7 +733,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ExtendedModelMap implicitModel) {
+		public ModelAndView getModelAndView(
+				Method handlerMethod, Object returnValue, ExtendedModelMap implicitModel, ServletWebRequest webRequest) {
+
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
 				mav.getModelMap().mergeAttributes(implicitModel);
@@ -753,12 +755,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			else if (returnValue == null) {
 				// Either returned null or was 'void' return.
-				if (!this.responseArgumentUsed) {
-					// Assuming view name translation...
-					return new ModelAndView().addAllObjects(implicitModel);
+				if (this.responseArgumentUsed || webRequest.isNotModified()) {
+					return null;
 				}
 				else {
-					return null;
+					// Assuming view name translation...
+					return new ModelAndView().addAllObjects(implicitModel);
 				}
 			}
 			else if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {

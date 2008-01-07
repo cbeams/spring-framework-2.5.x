@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,15 @@ import javax.servlet.http.HttpServletRequest;
  * Supports last-modified HTTP requests to facilitate content caching.
  * Same contract as for the Servlet API's <code>getLastModified</code> method.
  *
- * <p>Delegated to by a HandlerAdapter's <code>getLastModified</code> implementation.
- * By default, any Controller or HttpRequestHandler within Spring's default framework
- * can implement this interface to enable last-modified checking.
+ * <p>Delegated to by a {@link org.springframework.web.servlet.HandlerAdapter#getLastModified}
+ * implementation. By default, any Controller or HttpRequestHandler within Spring's
+ * default framework can implement this interface to enable last-modified checking.
+ *
+ * <p><b>Note:</b> Alternative handler implementation approaches have different
+ * last-modified handling styles. For example, Spring 2.5's annotated controller
+ * approach (using <code>@RequestMapping</code>) provides last-modified support
+ * through the {@link org.springframework.web.context.request.WebRequest#checkNotModified}
+ * method, allowing for last-modified checking within the main handler method.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -35,7 +41,7 @@ import javax.servlet.http.HttpServletRequest;
  * @see HttpRequestHandlerAdapter
  */
 public interface LastModified {
-	
+
 	/**
 	 * Same contract as for HttpServlet's <code>getLastModified</code> method.
 	 * Invoked <b>before</b> request processing.
@@ -49,5 +55,5 @@ public interface LastModified {
 	 * @see javax.servlet.http.HttpServlet#getLastModified
 	 */
 	long getLastModified(HttpServletRequest request);
-	
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.StringUtils;
@@ -33,12 +34,32 @@ import org.springframework.util.StringUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements WebRequest {
 
+	private static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+
+	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
+
+
+	private HttpServletResponse response;
+
+	private boolean notModified = false;
+
+
 	/**
 	 * Create a new ServletWebRequest instance for the given request.
 	 * @param request current HTTP request
 	 */
 	public ServletWebRequest(HttpServletRequest request) {
 		super(request);
+	}
+
+	/**
+	 * Create a new ServletWebRequest instance for the given request/response pair.
+	 * @param request current HTTP request
+	 * @param response current HTTP response (for automatic last-modified handling)
+	 */
+	public ServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
+		super(request);
+		this.response = response;
 	}
 
 
@@ -76,6 +97,28 @@ public class ServletWebRequest extends ServletRequestAttributes implements WebRe
 
 	public boolean isSecure() {
 		return getRequest().isSecure();
+	}
+
+
+	public boolean checkNotModified(long lastModifiedTimestamp) {
+		if (lastModifiedTimestamp >= 0 && !this.notModified &&
+				(this.response == null || !this.response.containsHeader(HEADER_LAST_MODIFIED))) {
+			long ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
+			this.notModified = (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
+			if (this.response != null) {
+				if (this.notModified) {
+					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+				}
+				else {
+					this.response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+				}
+			}
+		}
+		return this.notModified;
+	}
+
+	public boolean isNotModified() {
+		return this.notModified;
 	}
 
 
