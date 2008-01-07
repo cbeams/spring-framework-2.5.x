@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 			if (mapping != null) {
 				if (mapping.method().length > 0 || mapping.params().length > 0) {
 					throw new IllegalStateException("Only portlet mode value supported for RequestMapping annotation " +
-							"at the type level - map or parameters at the method level! Offending type: " + handlerType);
+							"at the type level - map parameters at the method level! Offending type: " + handlerType);
 				}
 				String[] modeKeys = mapping.value();
 				for (String modeKey : modeKeys) {
