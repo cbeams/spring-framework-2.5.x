@@ -40,8 +40,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's BeanShell support
 
-* c3p0/c3p0-0.9.1.1.jar
-- C3P0 0.9.1.1 connection pool (http://sourceforge.net/projects/c3p0)
+* c3p0/c3p0-0.9.1.2.jar
+- C3P0 0.9.1.2 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
@@ -77,7 +77,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
-- required for building and running the framework test suite
+- required for building and running the framework's test suite
 
 * ehcache/ehcache-1.3.0.jar
 - EHCache 1.3.0 (http://ehcache.sourceforge.net)
@@ -86,7 +86,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.10 (http://www.freemarker.org)
+- FreeMarker 2.3.11 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
