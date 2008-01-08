@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,18 +73,28 @@ import java.lang.annotation.Target;
  * <li>A <code>ModelAndView</code> object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute} annotated reference data accessor methods.
+ * <li>A {@link org.springframework.ui.Model Model} object,
+ * with the model implicitly enriched with command objects and the results
+ * of {@link ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link java.util.Map} object for exposing a model,
  * with the view name implicitly determined through a
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute} annotated reference data accessor methods.
+ * <li>A {@link org.springframework.web.servlet.View View} object, with the
+ * model implicitly determined through command objects and
+ * {@link ModelAttribute} annotated reference data accessor methods.
+ * The handler method may also programmatically enrich the model by
+ * declaring a {@link org.springframework.ui.ModelMap ModelMap} argument
+ * (see above).
  * <li>A {@link java.lang.String} value which is interpreted as view name,
  * with the model implicitly determined through command objects and
  * {@link ModelAttribute} annotated reference data accessor methods.
- * The handler method may also programmatically enrich the model through
- * declaring a {@link org.springframework.ui.ModelMap} attribute (see above).
+ * The handler method may also programmatically enrich the model by
+ * declaring a {@link org.springframework.ui.ModelMap ModelMap} argument
+ * (see above).
  * <li><code>void</code> if the method handles the response itself
- * (e.g. through writing the response content directly).
+ * (e.g. by writing the response content directly).
  * </ul>
  *
  * <p><b>NOTE: <code>@RequestMapping</code> will only be processed if a
@@ -100,6 +110,7 @@ import java.lang.annotation.Target;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 2.5
  * @see RequestParam
  * @see ModelAttribute
