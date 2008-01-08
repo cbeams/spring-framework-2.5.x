@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -795,6 +795,25 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 					session.lock(entity, lockMode);
 				}
 				session.delete(entity);
+				return null;
+			}
+		}, true);
+	}
+
+	public void delete(String entityName, Object entity) throws DataAccessException {
+		delete(entityName, entity, null);
+	}
+
+	public void delete(final String entityName, final Object entity, final LockMode lockMode)
+			throws DataAccessException {
+
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
+				if (lockMode != null) {
+					session.lock(entityName, entity, lockMode);
+				}
+				session.delete(entityName, entity);
 				return null;
 			}
 		}, true);

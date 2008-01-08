@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -550,6 +550,28 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session#delete(Object)
 	 */
 	void delete(Object entity, LockMode lockMode) throws DataAccessException;
+
+	/**
+	 * Delete the given persistent instance.
+	 * @param entityName the name of the persistent entity
+	 * @param entity the persistent instance to delete
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#delete(Object)
+	 */
+	void delete(String entityName, Object entity) throws DataAccessException;
+
+	/**
+	 * Delete the given persistent instance.
+	 * <p>Obtains the specified lock mode if the instance exists, implicitly
+	 * checking whether the corresponding database entry still exists.
+	 * @param entityName the name of the persistent entity
+	 * @param entity the persistent instance to delete
+	 * @param lockMode the lock mode to obtain
+	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#delete(Object)
+	 */
+	void delete(String entityName, Object entity, LockMode lockMode) throws DataAccessException;
 
 	/**
 	 * Delete all given persistent instances.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1473,7 +1473,7 @@ public class HibernateTemplateTests extends TestCase {
 		ht.delete(tb);
 	}
 
-	public void testDeleteWithLock() throws HibernateException {
+	public void testDeleteWithLockMode() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1494,6 +1494,50 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.delete(tb, LockMode.UPGRADE);
+	}
+
+	public void testDeleteWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.delete("myEntity", tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.delete("myEntity", tb);
+	}
+
+	public void testDeleteWithEntityNameAndLockMode() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.lock("myEntity", tb, LockMode.UPGRADE);
+		sessionControl.setVoidCallable(1);
+		session.delete("myEntity", tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.delete("myEntity", tb, LockMode.UPGRADE);
 	}
 
 	public void testDeleteAll() throws HibernateException {
