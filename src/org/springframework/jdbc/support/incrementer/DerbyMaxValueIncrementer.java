@@ -15,7 +15,7 @@ import java.sql.Statement;
  * Class to increment maximum value of a given Derby table with the equivalent
  * of an auto-increment column. Note: If you use this class, your Derby key
  * column should <i>NOT</i> be defined as an IDENTITY column, as the sequence table does the job.
- * Thanks to Endre St¿lsvik for the suggestion!
+ * Thanks to Endre Stolsvik for the suggestion!
  *
  * <p>The sequence is kept in a table. There should be one sequence table per
  * table that needs an auto-generated key.

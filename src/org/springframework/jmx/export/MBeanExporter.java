@@ -301,7 +301,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * Indicates whether or not the managed resource should be exposed on the
 	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before
 	 * allowing any invocations on the MBean to occur.
-	 * <ü>The default value is <code>true</code>, exposing a {@link SpringModelMBean}
+	 * <p>The default value is <code>true</code>, exposing a {@link SpringModelMBean}
 	 * which performs thread context ClassLoader management. Switch this flag off to
 	 * expose a standard JMX {@link javax.management.modelmbean.RequiredModelMBean}.
 	 */
