@@ -55,7 +55,7 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * applied at the type level (since such a handler usually implements the
  * {@link org.springframework.web.servlet.mvc.Controller} interface). However,
  * {@link Controller} is required for detecting {@link RequestMapping} annotations
- * at the method level.
+ * at the method level if {@link RequestMapping} is not present at the type level.
  *
  * <p><b>NOTE:</b> Method-level mappings are only allowed to narrow the mapping
  * expressed at the class level (if any). HTTP paths need to uniquely map onto
