@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.1 (2008-01-08)
+Changes in version 2.5.1 (2008-01-09)
 -------------------------------------
 
 General
@@ -117,6 +117,8 @@ Package org.springframework.orm
 * LocalSessionFactoryBean uses LocalJtaDataSourceConnectionProvider (supporting aggressive release) in case of JTA TM
 * LocalSessionFactoryBean supports Connection release mode "after_statement" without "useTransactionAwareDataSource" too
 * LocalSessionFactoryBean eagerly compiles registered mappings, for availability in the post-processing phase
+* added "cacheProvider" property to LocalSessionFactoryBean, allowing for a Spring-managed CacheProvider instance
+* added overloaded "delete" methods with "entityName" argument to HibernateOperations and HibernateTemplate
 * added "earlyFlushBeforeCommit" flag to HibernateTransactionManager, allowing to enforce a flush before synchronization
 * fixed Jpa/JdoTransactionManager to correctly nest a REQUIRES_NEW transaction within a SUPPORTS scope with early access
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
