@@ -16,8 +16,14 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import junit.framework.TestCase;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -52,6 +58,36 @@ public class ComponentScanParserTests extends TestCase {
 		AutowiredQualifierFooService fooService = (AutowiredQualifierFooService) context.getBean("fooService");
 		assertTrue(fooService.isInitCalled());
 		assertEquals("bar", fooService.foo(123));
+	}
+
+	public void testCustomAnnotationUsedForBothComponentScanAndQualifier() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/context/annotation/customAnnotationUsedForBothComponentScanAndQualifierTests.xml");
+		CustomAnnotationAutowiredBean testBean = (CustomAnnotationAutowiredBean) context.getBean("testBean");
+		assertNotNull(testBean.getDependency());
+	}
+
+
+	@Target({ElementType.TYPE, ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface CustomAnnotation {	
+	}
+
+
+	public static class CustomAnnotationAutowiredBean {
+
+		@Autowired
+		@CustomAnnotation
+		private CustomAnnotationDependencyBean dependency;
+
+		public CustomAnnotationDependencyBean getDependency() {
+			return this.dependency;
+		}
+	}
+
+
+	@CustomAnnotation
+	public static class CustomAnnotationDependencyBean {	
 	}
 
 }
