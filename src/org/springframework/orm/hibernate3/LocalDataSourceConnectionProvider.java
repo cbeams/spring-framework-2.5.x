@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
 			throw new HibernateException("No local DataSource found for configuration - " +
-			    "dataSource property must be set on LocalSessionFactoryBean");
+			    "'dataSource' property must be set on LocalSessionFactoryBean");
 		}
 		this.dataSourceToUse = getDataSourceToUse(this.dataSource);
 	}

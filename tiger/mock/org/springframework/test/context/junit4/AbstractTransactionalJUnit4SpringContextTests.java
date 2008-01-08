@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,21 +75,18 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners( { TransactionalTestExecutionListener.class })
+@TestExecutionListeners({TransactionalTestExecutionListener.class})
 @Transactional
 public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 
 	/**
-	 * The SimpleJdbcTemplate that this base class manages, available to
-	 * subclasses.
+	 * The SimpleJdbcTemplate that this base class manages, available to subclasses.
 	 */
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
 
 
 	/**
 	 * Set the DataSource, typically provided via Dependency Injection.
-	 *
-	 * @param dataSource The DataSource to inject.
 	 */
 	@Autowired
 	public void setDataSource(final DataSource dataSource) {
@@ -114,8 +111,8 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 * Use with caution outside of a transaction!
 	 * </p>
 	 *
-	 * @param names The names of the tables from which to delete.
-	 * @return The total number of rows deleted from all specified tables.
+	 * @param names the names of the tables from which to delete
+	 * @return the total number of rows deleted from all specified tables
 	 */
 	protected int deleteFromTables(final String... names) {
 		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);

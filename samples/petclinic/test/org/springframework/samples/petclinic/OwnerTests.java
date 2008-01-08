@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic;
 
 import static org.junit.Assert.assertEquals;
@@ -7,7 +6,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**
- * JUnit test for {@link Owner}.
+ * JUnit test for the {@link Owner} class.
  *
  * @author Ken Krebs
  */
@@ -24,4 +23,5 @@ public class OwnerTests {
 		assertEquals(fido, owner.getPet("Fido"));
 		assertEquals(fido, owner.getPet("fido"));
 	}
+
 }

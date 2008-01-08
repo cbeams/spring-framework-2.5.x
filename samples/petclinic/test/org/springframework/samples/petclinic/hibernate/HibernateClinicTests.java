@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic.hibernate;
 
 import org.springframework.samples.petclinic.AbstractClinicTests;
@@ -17,4 +16,5 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @ContextConfiguration
 public class HibernateClinicTests extends AbstractClinicTests {
+
 }
