@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.cache.CacheProvider;
+import org.hibernate.cache.NoCacheProvider;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.ImprovedNamingStrategy;
@@ -77,15 +79,48 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
-				    config.getProperty(Environment.CONNECTION_PROVIDER));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				invocations.add("newSessionFactory");
 				return null;
 			}
 		};
 		sfb.setDataSource(ds);
+		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
+		assertEquals("newSessionFactory", invocations.get(0));
+	}
+
+	public void testLocalSessionFactoryBeanWithCacheProvider() throws Exception {
+		final CacheProvider cacheProvider = new NoCacheProvider();
+		final List invocations = new ArrayList();
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public Configuration addInputStream(InputStream is) {
+						try {
+							is.close();
+						}
+						catch (IOException ex) {
+						}
+						invocations.add("addResource");
+						return this;
+					}
+				};
+			}
+
+			protected SessionFactory newSessionFactory(Configuration config) {
+				assertEquals(LocalCacheProviderProxy.class.getName(),
+						config.getProperty(Environment.CACHE_PROVIDER));
+				assertSame(cacheProvider, LocalSessionFactoryBean.getConfigTimeCacheProvider());
+				invocations.add("newSessionFactory");
+				return null;
+			}
+		};
+		sfb.setCacheProvider(cacheProvider);
 		sfb.afterPropertiesSet();
 		assertTrue(sfb.getConfiguration() != null);
 		assertEquals("newSessionFactory", invocations.get(0));
@@ -108,9 +143,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(TransactionAwareDataSourceConnectionProvider.class.getName(),
-				    config.getProperty(Environment.CONNECTION_PROVIDER));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				invocations.add("newSessionFactory");
 				return null;
@@ -142,20 +178,21 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalJtaDataSourceConnectionProvider.class.getName(),
-				    config.getProperty(Environment.CONNECTION_PROVIDER));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				assertEquals(LocalTransactionManagerLookup.class.getName(),
-				    config.getProperty(Environment.TRANSACTION_MANAGER_STRATEGY));
+						config.getProperty(Environment.TRANSACTION_MANAGER_STRATEGY));
 				assertEquals(tm, LocalSessionFactoryBean.getConfigTimeTransactionManager());
 				invocations.add("newSessionFactory");
 				return null;
 			}
 		};
-		sfb.setMappingResources(new String[] {
-			"/org/springframework/beans/factory/xml/test.xml",
-			"/org/springframework/beans/factory/xml/child.xml"});
+		sfb.setMappingResources(new String[]{
+				"/org/springframework/beans/factory/xml/test.xml",
+				"/org/springframework/beans/factory/xml/child.xml"});
 		sfb.setDataSource(ds);
 		sfb.setJtaTransactionManager(tm);
 		sfb.afterPropertiesSet();
@@ -177,16 +214,17 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
-				    config.getProperty(Environment.CONNECTION_PROVIDER));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				invocations.add("newSessionFactory");
 				return null;
 			}
 		};
-		sfb.setMappingJarLocations(new Resource[] {
-			new FileSystemResource("mapping.hbm.jar"), new FileSystemResource("mapping2.hbm.jar")});
+		sfb.setMappingJarLocations(new Resource[]{
+				new FileSystemResource("mapping.hbm.jar"), new FileSystemResource("mapping2.hbm.jar")});
 		sfb.setDataSource(ds);
 		sfb.afterPropertiesSet();
 		assertTrue(sfb.getConfiguration() != null);
@@ -212,17 +250,18 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
-				    config.getProperty(Environment.CONNECTION_PROVIDER));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				assertEquals("myValue", config.getProperty("myProperty"));
 				invocations.add("newSessionFactory");
 				return null;
 			}
 		};
-		sfb.setMappingLocations(new Resource[] {
-			new ClassPathResource("/org/springframework/beans/factory/xml/test.xml")});
+		sfb.setMappingLocations(new Resource[]{
+				new ClassPathResource("/org/springframework/beans/factory/xml/test.xml")});
 		sfb.setDataSource(ds);
 		Properties prop = new Properties();
 		prop.setProperty(Environment.CONNECTION_PROVIDER, "myClass");
@@ -239,7 +278,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(UserSuppliedConnectionProvider.class.getName(),
-				    config.getProperty(Environment.CONNECTION_PROVIDER));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
 				assertEquals("myValue", config.getProperty("myProperty"));
 				invocations.add("newSessionFactory");
 				return null;
@@ -270,7 +309,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 
 	public void testLocalSessionFactoryBeanWithInvalidMappings() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean();
-		sfb.setMappingResources(new String[] {"mapping.hbm.xml"});
+		sfb.setMappingResources(new String[]{"mapping.hbm.xml"});
 		try {
 			sfb.afterPropertiesSet();
 		}
@@ -358,12 +397,14 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 						registeredClassCache.setProperty(clazz, concurrencyStrategy);
 						return this;
 					}
+
 					public Configuration setCollectionCacheConcurrencyStrategy(String collectionRole, String concurrencyStrategy) {
 						registeredCollectionCache.setProperty(collectionRole, concurrencyStrategy);
 						return this;
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -392,11 +433,13 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					public void setCacheConcurrencyStrategy(String clazz, String concurrencyStrategy, String regionName) {
 						registeredClassCache.setProperty(clazz, concurrencyStrategy + "," + regionName);
 					}
+
 					public void setCollectionCacheConcurrencyStrategy(String collectionRole, String concurrencyStrategy, String regionName) {
 						registeredCollectionCache.setProperty(collectionRole, concurrencyStrategy + "," + regionName);
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -426,6 +469,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -451,6 +495,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
+
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -513,6 +558,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				}
 			};
 		}
+
 		protected SessionFactory newSessionFactory(Configuration config) {
 			return null;
 		}

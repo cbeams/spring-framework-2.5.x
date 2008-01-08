@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cache.CacheProvider;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.Mappings;
@@ -113,6 +114,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	private static final ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
 
+	private static final ThreadLocal configTimeCacheProviderHolder = new ThreadLocal();
+
 	private static final ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
 
 	/**
@@ -139,6 +142,18 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 */
 	public static TransactionManager getConfigTimeTransactionManager() {
 		return (TransactionManager) configTimeTransactionManagerHolder.get();
+	}
+
+	/**
+	 * Return the CacheProvider for the currently configured Hibernate SessionFactory,
+	 * to be used by LocalCacheProviderProxy.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * SessionFactory, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setCacheProvider
+	 */
+	public static CacheProvider getConfigTimeCacheProvider() {
+		return (CacheProvider) configTimeCacheProviderHolder.get();
 	}
 
 	/**
@@ -174,6 +189,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	private Properties hibernateProperties;
 
 	private TransactionManager jtaTransactionManager;
+
+	private CacheProvider cacheProvider;
 
 	private LobHandler lobHandler;
 
@@ -331,8 +348,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	/**
 	 * Set the JTA TransactionManager to be used for Hibernate's
-	 * TransactionManagerLookup. If set, this will override corresponding
-	 * settings in Hibernate properties. Allows to use a Spring-managed
+	 * TransactionManagerLookup. Allows for using a Spring-managed
 	 * JTA TransactionManager for Hibernate's cache synchronization.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * transaction manager lookup to avoid meaningless double configuration.
@@ -340,6 +356,17 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 */
 	public void setJtaTransactionManager(TransactionManager jtaTransactionManager) {
 		this.jtaTransactionManager = jtaTransactionManager;
+	}
+
+	/**
+	 * Set the Hibernate CacheProvider to use for the SessionFactory.
+	 * Allows for using a Spring-managed CacheProvider instance.
+	 * <p>Note: If this is set, the Hibernate settings should not define a
+	 * cache provider to avoid meaningless double configuration.
+	 * @see LocalCacheProviderProxy
+	 */
+	public void setCacheProvider(CacheProvider cacheProvider) {
+		this.cacheProvider = cacheProvider;
 	}
 
 	/**
@@ -499,6 +526,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			// Make Spring-provided JTA TransactionManager available.
 			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
+		if (this.cacheProvider != null) {
+			// Make Spring-provided Hibernate CacheProvider available.
+			configTimeCacheProviderHolder.set(this.cacheProvider);
+		}
 		if (this.lobHandler != null) {
 			// Make given LobHandler available for SessionFactory configuration.
 			// Do early because because mapping resource might refer to custom types.
@@ -588,6 +619,11 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				}
 				// Set Spring-provided DataSource as Hibernate ConnectionProvider.
 				config.setProperty(Environment.CONNECTION_PROVIDER, providerClass.getName());
+			}
+
+			if (this.cacheProvider != null) {
+				// Expose Spring-provided Hibernate CacheProvider.
+				config.setProperty(Environment.CACHE_PROVIDER, LocalCacheProviderProxy.class.getName());
 			}
 
 			if (this.mappingResources != null) {
@@ -705,6 +741,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			if (this.jtaTransactionManager != null) {
 				// Reset TransactionManager holder.
 				configTimeTransactionManagerHolder.set(null);
+			}
+			if (this.cacheProvider != null) {
+				// Reset CacheProvider holder.
+				configTimeCacheProviderHolder.set(null);
 			}
 			if (this.lobHandler != null) {
 				// Reset LobHandler holder.
