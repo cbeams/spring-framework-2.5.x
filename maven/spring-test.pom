@@ -33,13 +33,13 @@
 		<dependency>
 			<groupId>aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
-			<version>1.5.3</version>
+			<version>1.5.4</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
-			<version>1.5.3</version>
+			<version>1.5.4</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
