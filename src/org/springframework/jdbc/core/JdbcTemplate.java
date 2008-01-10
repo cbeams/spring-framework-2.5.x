@@ -130,6 +130,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private boolean skipResultsProcessing = false;
 
 	/**
+	 * If this variable is set to true then all results from a stored procedure call
+	 * that don't have a correpsonding SqlOutParameter declaration will be bypassed.
+	 * All other results processng will be take place unless the variable 
+	 * <code>skipResultsProcessing</code> is set to <code>true</code> 
+	 */
+	private boolean skipUndeclaredResults = false;
+
+	/**
 	 * If this variable is set to true then execution of a CallableStatement will return the results in a Map
 	 * that uses case insensitive names for the parameters if Commons Collections are available on the classpath.
 	 */
@@ -277,6 +285,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 */
 	public boolean isSkipResultsProcessing() {
 		return this.skipResultsProcessing;
+	}
+
+	/**
+	 * Set whether undelared results should be skipped.
+	 */
+	public void setSkipUndeclaredResults(boolean skipUndeclaredResults) {
+		this.skipUndeclaredResults = skipUndeclaredResults;
+	}
+
+	/**
+	 * Return whether undeclared results should be skipped.
+	 */
+	public boolean isSkipUndeclaredResults() {
+		return this.skipUndeclaredResults;
 	}
 
 	/**
@@ -993,30 +1015,36 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (!skipResultsProcessing) {
 			do {
 				if (updateCount == -1) {
-					SqlReturnResultSet rsParam = null;
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
-						rsParam = (SqlReturnResultSet)resultSetParameters.get(rsIndex);
+						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet)resultSetParameters.get(rsIndex);
+						returnedResults.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
+						rsIndex++;
 					}
 					else {
-						String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
-						rsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
-						logger.info("Added default SqlReturnResultSet parameter named " + rsName);
+						if (!skipUndeclaredResults) {
+							String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
+							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
+							logger.info("Added default SqlReturnResultSet parameter named " + rsName);
+							returnedResults.putAll(processResultSet(cs.getResultSet(), undeclaredRsParam));
+							rsIndex++;
+						}
 					}
-					returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
-					rsIndex++;
 				}
 				else {
-					String ucName = null;
 					if (updateCountParameters != null && updateCountParameters.size() > rsIndex) {
 						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount)updateCountParameters.get(rsIndex);
-						ucName = ucParam.getName();
+						String declaredUcName = ucParam.getName();
+						returnedResults.put(declaredUcName, new Integer(updateCount));
+						updateIndex++;
 					}
 					else {
-						ucName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
-						logger.info("Added default SqlReturnUpdateCount parameter named " + ucName);
+						if (!skipUndeclaredResults) {
+							String undeclaredUcName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
+							logger.info("Added default SqlReturnUpdateCount parameter named " + undeclaredUcName);
+							returnedResults.put(undeclaredUcName, new Integer(updateCount));
+							updateIndex++;
+						}
 					}
-					returnedResults.put(ucName, new Integer(updateCount));
-					updateIndex++;
 				}
 				moreResults = cs.getMoreResults();
 				updateCount = cs.getUpdateCount();

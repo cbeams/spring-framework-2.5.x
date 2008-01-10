@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -428,6 +429,187 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 	}
 
+	public void testStoredProcedureWithUndeclaredResults() throws Exception {
+		MockControl ctrlResultSet1 = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet1 = (ResultSet) ctrlResultSet1.getMock();
+		mockResultSet1.next();
+		ctrlResultSet1.setReturnValue(true);
+		mockResultSet1.getString(2);
+		ctrlResultSet1.setReturnValue("Foo");
+		mockResultSet1.next();
+		ctrlResultSet1.setReturnValue(true);
+		mockResultSet1.getString(2);
+		ctrlResultSet1.setReturnValue("Bar");
+		mockResultSet1.next();
+		ctrlResultSet1.setReturnValue(false);
+		mockResultSet1.close();
+		ctrlResultSet1.setVoidCallable();
+
+		MockControl ctrlMetaData = MockControl.createControl(ResultSetMetaData.class);
+		ResultSetMetaData mockMetaData = (ResultSetMetaData) ctrlMetaData.getMock();
+		mockMetaData.getColumnCount();
+		ctrlMetaData.setReturnValue(2);
+		mockMetaData.getColumnLabel(1);
+		ctrlMetaData.setReturnValue("spam");
+		mockMetaData.getColumnLabel(2);
+		ctrlMetaData.setReturnValue("eggs");
+
+		MockControl ctrlResultSet2 = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet2 = (ResultSet) ctrlResultSet2.getMock();
+		mockResultSet2.getMetaData();
+		ctrlResultSet2.setReturnValue(mockMetaData);
+		mockResultSet2.next();
+		ctrlResultSet2.setReturnValue(true);
+		mockResultSet2.getObject(1);
+		ctrlResultSet2.setReturnValue("Spam");
+		mockResultSet2.getObject(2);
+		ctrlResultSet2.setReturnValue("Eggs");
+		mockResultSet2.next();
+		ctrlResultSet2.setReturnValue(false);
+		mockResultSet2.close();
+		ctrlResultSet2.setVoidCallable();
+
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getResultSet();
+		ctrlCallable.setReturnValue(mockResultSet1);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getResultSet();
+		ctrlCallable.setReturnValue(mockResultSet2);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(0);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		ctrlResultSet1.replay();
+		ctrlMetaData.replay();
+		ctrlResultSet2.replay();
+
+		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(mockDataSource);
+		Map res = sproc.execute();
+
+		ctrlResultSet1.verify();
+		ctrlResultSet2.verify();
+
+		assertEquals("incorrect number of returns", 3, res.size());
+
+		List rs1 = (List) res.get("rs");
+		assertEquals(2, rs1.size());
+		assertEquals("Foo", rs1.get(0));
+		assertEquals("Bar", rs1.get(1));
+
+		List rs2 = (List) res.get("#result-set-2");
+		assertEquals(1, rs2.size());
+		Object o2 = rs2.get(0);
+		assertTrue("wron type returned for result set 2", o2 instanceof Map);
+		Map m2 = (Map) o2;
+		assertEquals("Spam", m2.get("spam"));
+		assertEquals("Eggs", m2.get("eggs"));
+
+		Number n = (Number) res.get("#update-count-1");
+		assertEquals("wrong update count", 0, n.intValue());
+
+	}
+
+	public void testStoredProcedureSkippingResultsProcessing() throws Exception {
+
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(mockDataSource);
+		jdbcTemplate.setSkipResultsProcessing(true);
+		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(jdbcTemplate);
+		Map res = sproc.execute();
+
+		assertEquals("incorrect number of returns", 0, res.size());
+
+	}
+
+	public void testStoredProcedureSkippingUndeclaredResults() throws Exception {
+		MockControl ctrlResultSet1 = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet1 = (ResultSet) ctrlResultSet1.getMock();
+		mockResultSet1.next();
+		ctrlResultSet1.setReturnValue(true);
+		mockResultSet1.getString(2);
+		ctrlResultSet1.setReturnValue("Foo");
+		mockResultSet1.next();
+		ctrlResultSet1.setReturnValue(true);
+		mockResultSet1.getString(2);
+		ctrlResultSet1.setReturnValue("Bar");
+		mockResultSet1.next();
+		ctrlResultSet1.setReturnValue(false);
+		mockResultSet1.close();
+		ctrlResultSet1.setVoidCallable();
+
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getResultSet();
+		ctrlCallable.setReturnValue(mockResultSet1);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		ctrlResultSet1.replay();
+
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(mockDataSource);
+		jdbcTemplate.setSkipUndeclaredResults(true);
+		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(jdbcTemplate);
+		Map res = sproc.execute();
+
+		ctrlResultSet1.verify();
+
+		assertEquals("incorrect number of returns", 1, res.size());
+
+		List rs1 = (List) res.get("rs");
+		assertEquals(2, rs1.size());
+		assertEquals("Foo", rs1.get(0));
+		assertEquals("Bar", rs1.get(1));
+
+	}
+
 	public void testParameterMapper() throws Exception {
 		mockCallable.setString(1, "EasyMock for interface java.sql.Connection");
 		ctrlCallable.setVoidCallable();
@@ -651,6 +833,14 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 		public StoredProcedureWithResultSetMapped(DataSource ds) {
 			setDataSource(ds);
+			setSql(SQL);
+			declareParameter(
+				new SqlReturnResultSet("rs", new RowMapperImpl()));
+			compile();
+		}
+
+		public StoredProcedureWithResultSetMapped(JdbcTemplate jt) {
+			setJdbcTemplate(jt);
 			setSql(SQL);
 			declareParameter(
 				new SqlReturnResultSet("rs", new RowMapperImpl()));
