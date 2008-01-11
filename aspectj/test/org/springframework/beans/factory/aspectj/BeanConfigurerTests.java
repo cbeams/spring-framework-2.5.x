@@ -33,6 +33,8 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 /**
  * @author Adrian Colyer
@@ -149,6 +151,11 @@ public class BeanConfigurerTests extends TestCase {
 		assertEquals("Property injected more than once", 1, subBean.setterCount);
 	}
 
+	public void testSubBeanConfiguredOnlyOnceForPreConstruction() throws Exception {
+		SubBeanPreConstruction subBean = new SubBeanPreConstruction();
+		assertEquals("Property injected more than once", 1, subBean.setterCount);
+	}
+
 	public void testSubSerializableBeanConfiguredOnlyOnce() throws Exception {
 		SubSerializableBean subBean = new SubSerializableBean();
 		assertEquals("Property injected more than once", 1, subBean.setterCount);
@@ -166,7 +173,6 @@ public class BeanConfigurerTests extends TestCase {
 	public void testPreConstructionConfiguredBeanDeserializationReinjection() throws Exception {
 		PreConstructionConfiguredBean bean = new PreConstructionConfiguredBean();
 		PreConstructionConfiguredBean deserialized = serializeAndDeserialize(bean);
-		assertTrue("Injection didn't occur before construction", deserialized.preConstructionConfigured);
 		assertEquals("Injection didn't occur upon deserialization", "ramnivas", deserialized.getName());
 	}
 	
@@ -178,10 +184,32 @@ public class BeanConfigurerTests extends TestCase {
 	public void testPostConstructionConfiguredBeanDeserializationReinjection() throws Exception {
 		PostConstructionConfiguredBean bean = new PostConstructionConfiguredBean();
 		PostConstructionConfiguredBean deserialized = serializeAndDeserialize(bean);
-		assertFalse("Injection didn't occur before construction", deserialized.preConstructionConfigured);
 		assertEquals("Injection didn't occur upon deserialization", "ramnivas", deserialized.getName());
 	}
 	
+	public void testInterfaceDrivenDependencyInjection() {
+		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
+		Order testOrder = new Order();
+		assertNotNull("Interface driven injection didn't occur for direct construction", testOrder.getMailSender());
+	}
+
+	public void testInterfaceDrivenDependencyInjectionMultipleInterfaces() {
+		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
+		PaymentProcessorDependencyInjectionAspect.aspectOf().setPaymentProcessor(new PaymentProcessor());
+		
+		ShoppingCart testCart = new ShoppingCart();
+		
+		assertNotNull("Interface driven injection didn't occur for direct construction", testCart.getMailSender());
+		assertNotNull("Interface driven injection didn't occur for direct construction", testCart.getPaymentProcessor());
+	}
+	
+	public void testInterfaceDrivenDependencyInjectionUponDeserialization() throws Exception {
+		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
+		Order testOrder = new Order();
+		Order deserializedOrder = serializeAndDeserialize(testOrder);
+		assertNotNull("Interface driven injection didn't occur for deserialization", testOrder.getMailSender());
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T> T serializeAndDeserialize(T serializable) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -387,6 +415,9 @@ public class BeanConfigurerTests extends TestCase {
 	private static class SubBean extends BaseBean {
 	} 
 	
+	@Configurable(preConstruction=true)
+	private static class SubBeanPreConstruction extends BaseBean {
+	} 
 
 	@Configurable
 	private static class BaseSerializableBean implements Serializable {
@@ -423,17 +454,94 @@ public class BeanConfigurerTests extends TestCase {
 		protected void beanCreation(Object beanInstance){
 		}
 	}
+	
+	private static aspect MailClientDependencyInjectionAspect extends AbstractInterfaceDrivenDependencyInjectionAspect {
+		private MailSender mailSender;
+		
+		public pointcut inConfigurableBean() : within(MailSenderClient+);
+		
+		public void configureBean(Object bean) {
+			((MailSenderClient)bean).setMailSender(this.mailSender);
+		}
+		
+		declare parents: MailSenderClient implements IConfigurable;
+		
+		public void setMailSender(MailSender mailSender) {
+			this.mailSender = mailSender;
+		}
+	}
+	
+	private static aspect PaymentProcessorDependencyInjectionAspect extends AbstractInterfaceDrivenDependencyInjectionAspect {
+		private PaymentProcessor paymentProcessor;
+		
+		public pointcut inConfigurableBean() : within(PaymentProcessorClient+);
+		
+		public void configureBean(Object bean) {
+			((PaymentProcessorClient)bean).setPaymentProcessor(this.paymentProcessor);
+		}
+		
+		declare parents: PaymentProcessorClient implements IConfigurable;
+		
+		public void setPaymentProcessor(PaymentProcessor paymentProcessor) {
+			this.paymentProcessor = paymentProcessor;
+		}
+	}
 
+	public static interface MailSenderClient {
+		public void setMailSender(MailSender mailSender);
+	}
+	
+	public static interface PaymentProcessorClient {
+		public void setPaymentProcessor(PaymentProcessor paymentProcessor);
+	}
+	
+	public static class PaymentProcessor {
+		
+	}
+	
+	public static class Order implements MailSenderClient, Serializable {
+		private transient MailSender mailSender;
+		
+		public void setMailSender(MailSender mailSender) {
+			this.mailSender = mailSender;
+		}
+		
+		public MailSender  getMailSender() {
+			return this.mailSender;
+		}
+	}
+	
+	public static class ShoppingCart implements MailSenderClient, PaymentProcessorClient {
+		private transient MailSender mailSender;
+		private transient PaymentProcessor paymentProcessor;
+		
+		public void setMailSender(MailSender mailSender) {
+			this.mailSender = mailSender;
+		}
+		
+		public MailSender  getMailSender() {
+			return this.mailSender;
+		}
+
+		public void setPaymentProcessor(PaymentProcessor paymentProcessor) {
+			this.paymentProcessor = paymentProcessor;
+		}
+		
+		public PaymentProcessor getPaymentProcessor() {
+			return this.paymentProcessor;
+		}
+		
+	}
+	
 	private static class ClassThatWillNotActuallyBeWired {
 
 	}
 
-	
 	@Configurable
 	private static class PreOrPostConstructionConfiguredBean implements Serializable {
-
-		private String name;
-		protected boolean preConstructionConfigured;
+		private transient String name;
+		protected transient boolean preConstructionConfigured;
+		transient int count;
 
 		public PreOrPostConstructionConfiguredBean() {
 			preConstructionConfigured = (this.name != null);
@@ -450,7 +558,7 @@ public class BeanConfigurerTests extends TestCase {
 
 
 	@Configurable(preConstruction=true)
-	private static class PreConstructionConfiguredBean extends PreOrPostConstructionConfiguredBean {
+	public static class PreConstructionConfiguredBean extends PreOrPostConstructionConfiguredBean {
 	}
 
 

@@ -25,6 +25,11 @@
 		<property name="name" value="Ramnivas"/>
 	</bean>
 
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$SubBeanPreConstruction"
+			lazy-init="true">
+		<property name="name" value="Ramnivas"/>
+	</bean>
+
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$SubSerializableBean"
 			lazy-init="true">
 		<property name="name" value="Ramnivas"/>

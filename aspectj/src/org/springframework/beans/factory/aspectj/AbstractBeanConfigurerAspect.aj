@@ -34,6 +34,7 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * @author Adrian Colyer
  * @author Ramnivas Laddad
  * @since 2.0
+ * @deprecated Use AbstractDependencyInjectionAspect or its subaspects
  */
 public abstract aspect AbstractBeanConfigurerAspect extends BeanConfigurerSupport {
 
