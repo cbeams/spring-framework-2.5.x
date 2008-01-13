@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,9 @@ public interface ConfigurableListableBeanFactory
 	 * be a base interface such as BeanFactory, with extensions of it resolved
 	 * as well if declared as an autowiring dependency (e.g. ListableBeanFactory),
 	 * as long as the given value actually implements the extended interface.
-	 * @param autowiredValue the corresponding autowired value
+	 * @param autowiredValue the corresponding autowired value. This may also be an
+	 * implementation of the {@link org.springframework.beans.factory.ObjectFactory}
+	 * interface, which allows for lazy resolution of the actual target value.
 	 */
 	void registerResolvableDependency(Class dependencyType, Object autowiredValue);
 
