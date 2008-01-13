@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,11 @@ import org.springframework.util.ObjectUtils;
  * {@link #setListeners(MBeanExporterListener[]) listeners} property,
  * allowing application code to be notified of MBean registration and
  * unregistration events.
+ *
+ * <p>This exporter is compatible with JMX 1.0 or higher for its basic
+ * functionality. However, for adapting AOP proxies where the target
+ * bean is a native MBean, JMX 1.2 is required. As of Spring 2.5,
+ * this class also autodetects and exports JDK 1.6 MXBeans.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -616,8 +621,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private void replaceNotificationListenerBeanNameMappingKeysIfNecessary(String beanName, ObjectName objectName) {
 		Set mappedListeners = new HashSet();
 		String objectNameString = objectName.getCanonicalName();
-		for (int i = 0; i < notificationListeners.length; i++) {
-			NotificationListenerBean bean = notificationListeners[i];
+		for (int i = 0; i < this.notificationListeners.length; i++) {
+			NotificationListenerBean bean = this.notificationListeners[i];
 			NotificationListener listener = bean.getNotificationListener();
 			Set newMappedNames = new HashSet();
 			String[] mappedNames = bean.getMappedObjectNames();
@@ -780,7 +785,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			if (ifc != null) {
 				if (!(ifc.isInstance(bean))) {
 					throw new NotCompliantMBeanException("Managed bean [" + bean +
-							"] has a target class with an MXBean interface but does not exposed it in the proxy");
+							"] has a target class with an MXBean interface but does not expose it in the proxy");
 				}
 				return new StandardMBean(bean, ifc, true);
 			}
@@ -789,7 +794,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				if (ifc != null) {
 					if (!(ifc.isInstance(bean))) {
 						throw new NotCompliantMBeanException("Managed bean [" + bean +
-								"] has a target class with an MXBean interface but does not exposed it in the proxy");
+								"] has a target class with an MBean interface but does not expose it in the proxy");
 					}
 					return new StandardMBean(bean, ifc);
 				}
