@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.jca.context;
 
 import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.work.WorkManager;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.context.ApplicationContext} implementation
@@ -44,6 +47,7 @@ public class ResourceAdapterApplicationContext extends GenericApplicationContext
 	 * has been started with
 	 */
 	public ResourceAdapterApplicationContext(BootstrapContext bootstrapContext) {
+		Assert.notNull(bootstrapContext, "BootstrapContext must not be null");
 		this.bootstrapContext = bootstrapContext;
 	}
 
@@ -51,6 +55,14 @@ public class ResourceAdapterApplicationContext extends GenericApplicationContext
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		beanFactory.addBeanPostProcessor(new BootstrapContextAwareProcessor(this.bootstrapContext));
 		beanFactory.ignoreDependencyInterface(BootstrapContextAware.class);
+		beanFactory.registerResolvableDependency(BootstrapContext.class, this.bootstrapContext);
+
+		// JCA WorkManager resolved lazily - may not be available.
+		beanFactory.registerResolvableDependency(WorkManager.class, new ObjectFactory() {
+			public Object getObject() {
+				return bootstrapContext.getWorkManager();
+			}
+		});
 	}
 
 }
