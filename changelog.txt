@@ -3,6 +3,23 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5.2 (2008-02-09)
+-------------------------------------
+
+General
+* updated transaction management chapter in the reference documentation
+
+Package org.springframework.ejb
+* Local/SimpleRemoteSlsbInvokerInterceptor use EJB(Local)Home for EJB 2.x detection, for WebSphere compatibility
+
+Package org.springframework.jca
+* ResourceAdapterApplicationContext registers BootstrapContext as resolvable dependency type (for @Autowired)
+* ResourceAdapterApplicationContext registers WorkManager as lazily resolvable dependency type (for @Autowired)
+* added "workManagerName" property to WorkManagerTaskExecutor, for J2EE env lookups in JNDI (e.g. a Geronimo gbean-ref)
+* introduced JBossWorkManagerTaskExecutor as adapter for the JBoss JCA WorkManager (analogous to CommonJ)
+* introduced GlassFishWorkManagerTaskExecutor as adapter for the GlassFish JCA WorkManager (analogous to CommonJ)
+
+
 Changes in version 2.5.1 (2008-01-09)
 -------------------------------------
 
