@@ -699,7 +699,7 @@ BeanFactory factory = context;</programlisting>
 <lineannotation>&lt;!-- the bean to be created via the factory bean --&gt;</lineannotation>
 &lt;bean id="exampleBean"
       factory-bean="serviceLocator"
-      factory-method="createService"/&gt;</programlisting>
+      factory-method="createInstance"/&gt;</programlisting>
 
           <para>Although the mechanisms for <link
           linkend="beans-factory-properties-detailed">setting bean
