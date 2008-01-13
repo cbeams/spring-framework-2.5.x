@@ -245,7 +245,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's OpenJPA support (by OpenJPA)
 
 * jakarta-commons/commons-logging.jar
-- Commons Logging 1.1 (http://jakarta.apache.org/commons/logging)
+- Commons Logging 1.1.1 (http://jakarta.apache.org/commons/logging)
 - required for building the framework
 - required at runtime, as Spring uses it for all logging
 
