@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public interface PlatformTransactionManager {
 	 * to new transactions, and thus be ignored when participating in active ones.
 	 * <p>Furthermore, not all transaction definition settings will be supported
 	 * by every transaction manager: A proper transaction manager implementation
-	 * should thrown an exception when unsupported settings are encountered.
+	 * should throw an exception when unsupported settings are encountered.
 	 * <p>An exception to the above rule is the read-only flag, which should be
 	 * ignored if no explicit read-only mode is supported. Essentially, the
 	 * read-only flag is just a hint for potential optimization.
