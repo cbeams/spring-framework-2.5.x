@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.ejb.CreateException;
+import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
 
@@ -105,7 +106,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		if (this.homeAsComponent) {
 			return null;
 		}
-		if (home instanceof EJBLocalObject) {
+		if (!(home instanceof EJBLocalHome)) {
 			// An EJB3 Session Bean...
 			this.homeAsComponent = true;
 			return null;
