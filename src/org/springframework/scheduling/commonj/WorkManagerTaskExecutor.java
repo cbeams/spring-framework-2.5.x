@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,17 +53,23 @@ import org.springframework.util.Assert;
  * <p><b>Note: At the time of this writing, the CommonJ WorkManager facility
  * is only supported on IBM WebSphere 6.0+ and BEA WebLogic 9.0+,
  * despite being such a crucial API for an application server.</b>
- * (There is a similar facility available on WebSphere 5.0 Enterprise,
+ * (There is a similar facility available on WebSphere 5.1 Enterprise,
  * though, which we will discuss below.)
  *
- * <p>A similar facility is available on WebSphere 5.0/5.1, under the name
+ * <p><b>On JBoss and GlassFish, a similar facility is available through
+ * the JCA WorkManager.</b> See the
+ * {@link org.springframework.jca.work.jboss.JBossWorkManagerTaskExecutor}
+ * {@link org.springframework.jca.work.glassfish.GlassFishWorkManagerTaskExecutor}
+ * classes which are the direct equivalent of this CommonJ adapter class.
+ *
+ * <p>A similar facility is available on WebSphere 5.1, under the name
  * "Asynch Beans". Its central interface is called WorkManager too and is
  * also obtained from JNDI, just like a standard CommonJ WorkManager.
  * However, this WorkManager variant is notably different: The central
  * execution method is called "startWork" instead of "schedule",
  * and takes a slightly different Work interface as parameter.
  *
- * <p>Support for this WebSphere 5 variant can be built with this class
+ * <p>Support for this WebSphere 5.1 variant can be built with this class
  * and its helper DelegatingWork as template: Call the WorkManager's
  * <code>startWork(Work)</code> instead of <code>schedule(Work)</code>
  * in the <code>execute(Runnable)</code> implementation. Furthermore,

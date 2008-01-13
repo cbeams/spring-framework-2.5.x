@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jca.work;
 
+import javax.naming.NamingException;
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.work.ExecutionContext;
 import javax.resource.spi.work.Work;
@@ -24,10 +25,12 @@ import javax.resource.spi.work.WorkListener;
 import javax.resource.spi.work.WorkManager;
 import javax.resource.spi.work.WorkRejectedException;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.core.task.TaskTimeoutException;
 import org.springframework.jca.context.BootstrapContextAware;
+import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -46,15 +49,29 @@ import org.springframework.util.Assert;
  * to talk to this executor through the Spring TaskExecutor interface or the
  * JCA 1.5 WorkManager interface.
  *
+ * <p>This adapter is also capable of obtaining a JCA WorkManager from JNDI.
+ * This is for example appropriate on the Geronimo application server, where
+ * WorkManager GBeans (e.g. Geronimo's default "DefaultWorkManager" GBean)
+ * can be linked into the J2EE environment through "gbean-ref" entries
+ * in the <code>geronimo-web.xml</code> deployment descriptor.
+ *
+ * <p><b>On JBoss and GlassFish, obtaining the default JCA WorkManager
+ * requires special lookup steps.</b> See the
+ * {@link org.springframework.jca.work.jboss.JBossWorkManagerTaskExecutor}
+ * {@link org.springframework.jca.work.glassfish.GlassFishWorkManagerTaskExecutor}
+ * classes which are the direct equivalent of this generic JCA adapter class.
+ *
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see #setWorkManager
  * @see javax.resource.spi.work.WorkManager#scheduleWork
  */
-public class WorkManagerTaskExecutor
-		implements SchedulingTaskExecutor, AsyncTaskExecutor, WorkManager, BootstrapContextAware {
+public class WorkManagerTaskExecutor extends JndiLocatorSupport
+		implements SchedulingTaskExecutor, AsyncTaskExecutor, WorkManager, BootstrapContextAware, InitializingBean {
 
-	private WorkManager workManager = new SimpleTaskWorkManager();
+	private WorkManager workManager;
+
+	private String workManagerName;
 
 	private boolean blockUntilStarted = false;
 
@@ -80,11 +97,23 @@ public class WorkManagerTaskExecutor
 
 
 	/**
-	 * Specify the JCA WorkManager to delegate to.
+	 * Specify the JCA WorkManager instance to delegate to.
 	 */
 	public void setWorkManager(WorkManager workManager) {
 		Assert.notNull(workManager, "WorkManager must not be null");
 		this.workManager = workManager;
+	}
+
+	/**
+	 * Set the JNDI name of the JCA WorkManager.
+	 * <p>This can either be a fully qualified JNDI name,
+	 * or the JNDI name relative to the current environment
+	 * naming context if "resourceRef" is set to "true".
+	 * @see #setWorkManager
+	 * @see #setResourceRef
+	 */
+	public void setWorkManagerName(String workManagerName) {
+		this.workManagerName = workManagerName;
 	}
 
 	/**
@@ -127,6 +156,27 @@ public class WorkManagerTaskExecutor
 	 */
 	public void setWorkListener(WorkListener workListener) {
 		this.workListener = workListener;
+	}
+
+	public void afterPropertiesSet() throws NamingException {
+		if (this.workManager == null) {
+			if (this.workManagerName != null) {
+				this.workManager = (WorkManager) lookup(this.workManagerName, WorkManager.class);
+			}
+			else {
+				this.workManager = getDefaultWorkManager();
+			}
+		}
+	}
+
+	/**
+	 * Obtain a default WorkManager to delegate to.
+	 * Called if no explicit WorkManager or WorkManager JNDI name has been specified.
+	 * <p>The default implementation returns a {@link SimpleTaskWorkManager}.
+	 * Can be overridden in subclasses.
+	 */
+	protected WorkManager getDefaultWorkManager() {
+		return new SimpleTaskWorkManager();
 	}
 
 
