@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -367,15 +367,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		catch (TransactionException ex) {
-			if (txObject.isNewEntityManagerHolder()) {
-				em.close();
-			}
+			closeEntityManagerAfterFailedBegin(txObject);
 			throw ex;
 		}
 		catch (Exception ex) {
-			if (txObject.isNewEntityManagerHolder()) {
-				em.close();
-			}
+			closeEntityManagerAfterFailedBegin(txObject);
 			throw new CannotCreateTransactionException("Could not open JPA EntityManager for transaction", ex);
 		}
 	}
@@ -395,6 +391,28 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		Map properties = getJpaPropertyMap();
 		return (!CollectionUtils.isEmpty(properties) ?
 				emf.createEntityManager(properties) : emf.createEntityManager());
+	}
+
+	/**
+	 * Close the current transaction's EntityManager.
+	 * Called after a transaction begin attempt failed.
+	 * @param txObject the current transaction
+	 */
+	protected void closeEntityManagerAfterFailedBegin(JpaTransactionObject txObject) {
+		if (txObject.isNewEntityManagerHolder()) {
+			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
+			try {
+				if (em.getTransaction().isActive()) {
+					em.getTransaction().rollback();
+				}
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not rollback EntityManager after failed transaction begin", ex);
+			}
+			finally {
+				EntityManagerFactoryUtils.closeEntityManager(em);
+			}
+		}
 	}
 
 	protected Object doSuspend(Object transaction) {
@@ -515,7 +533,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing JPA EntityManager [" + em + "] after transaction");
 			}
-			em.close();
+			EntityManagerFactoryUtils.closeEntityManager(em);
 		}
 		else {
 			logger.debug("Not closing pre-bound JPA EntityManager after transaction");

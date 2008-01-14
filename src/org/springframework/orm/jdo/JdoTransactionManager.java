@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -351,12 +351,34 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		catch (TransactionException ex) {
-			PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
+			closePersistenceManagerAfterFailedBegin(txObject);
 			throw ex;
 		}
 		catch (Exception ex) {
-			PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
+			closePersistenceManagerAfterFailedBegin(txObject);
 			throw new CannotCreateTransactionException("Could not open JDO PersistenceManager for transaction", ex);
+		}
+	}
+
+	/**
+	 * Close the current transaction's EntityManager.
+	 * Called after a transaction begin attempt failed.
+	 * @param txObject the current transaction
+	 */
+	protected void closePersistenceManagerAfterFailedBegin(JdoTransactionObject txObject) {
+		if (txObject.isNewPersistenceManagerHolder()) {
+			PersistenceManager pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
+			try {
+				if (pm.currentTransaction().isActive()) {
+					pm.currentTransaction().rollback();
+				}
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not rollback PersistenceManager after failed transaction begin", ex);
+			}
+			finally {
+				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
+			}
 		}
 	}
 

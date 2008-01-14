@@ -535,7 +535,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		catch (Exception ex) {
 			if (txObject.isNewSessionHolder()) {
-				SessionFactoryUtils.closeSession(session);
+				try {
+					if (session.getTransaction().isActive()) {
+						session.getTransaction().rollback();
+					}
+				}
+				catch (Throwable ex2) {
+					logger.debug("Could not rollback Session after failed transaction begin", ex);
+				}
+				finally {
+					SessionFactoryUtils.closeSession(session);
+				}
 			}
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
 		}
