@@ -68,7 +68,7 @@ class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata 
 	}
 
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		if (outerName != null) {
+		if (outerName != null && this.className.equals(ClassUtils.convertResourcePathToClassName(name))) {
 			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerName);
 			this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);
 		}
