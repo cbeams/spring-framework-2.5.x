@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.5.1 (January 2008)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 2.5.2 (February 2008)
+---------------------------------------------------
 http://www.springframework.org
 
 
