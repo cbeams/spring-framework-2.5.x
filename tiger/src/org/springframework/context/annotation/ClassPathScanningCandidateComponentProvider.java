@@ -45,8 +45,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * A component provider that scans the classpath from a base package. It then
- * applies exclude and include filters to the resulting classes to find
- * candidates.
+ * applies exclude and include filters to the resulting classes to find candidates.
  *
  * <p>This implementation is based on Spring's
  * {@link org.springframework.core.type.classreading.MetadataReader MetadataReader}
@@ -78,11 +77,10 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	/**
 	 * Create a ClassPathScanningCandidateComponentProvider.
-	 *
 	 * @param useDefaultFilters whether to register the default filters for the
-	 *        {@link Component @Component}, {@link Repository @Repository},
-	 *        {@link Service @Service}, and {@link Controller @Controller}
-	 *        stereotype annotations.
+	 * {@link Component @Component}, {@link Repository @Repository},
+	 * {@link Service @Service}, and {@link Controller @Controller}
+	 * stereotype annotations
 	 * @see #registerDefaultFilters()
 	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters) {
@@ -132,11 +130,10 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	/**
 	 * Reset the configured type filters.
-	 *
 	 * @param useDefaultFilters whether to re-register the default filters for
-	 *        the {@link Component @Component}, {@link Repository @Repository},
-	 *        {@link Service @Service}, and {@link Controller @Controller}
-	 *        stereotype annotations.
+	 * the {@link Component @Component}, {@link Repository @Repository},
+	 * {@link Service @Service}, and {@link Controller @Controller}
+	 * stereotype annotations
 	 * @see #registerDefaultFilters()
 	 */
 	public void resetFilters(boolean useDefaultFilters) {
