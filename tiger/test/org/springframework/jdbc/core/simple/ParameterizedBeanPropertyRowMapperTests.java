@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 package org.springframework.jdbc.core.simple;
 
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.AbstractRowMapperTests;
-import org.springframework.jdbc.core.test.Person;
-import org.springframework.jdbc.core.test.ConcretePerson;
-
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.AbstractRowMapperTests;
+import org.springframework.jdbc.core.test.ConcretePerson;
+import org.springframework.jdbc.core.test.Person;
+
 /**
- * Mock object based tests for ParameterizedBeanPropertyRowMapper.
- *
- * @author trisberg
+ * @author Thomas Risberg
  */
 public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
@@ -42,10 +40,12 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 		ParameterizedBeanPropertyRowMapper<Person> mapper =
 				ParameterizedBeanPropertyRowMapper.newInstance(Person.class);
 		try {
-			((ParameterizedBeanPropertyRowMapper)mapper).setMappedClass(Long.class);
+			((ParameterizedBeanPropertyRowMapper) mapper).setMappedClass(Long.class);
 			fail("Setting new class should have thrown InvalidDataAccessApiUsageException");
 		}
-		catch (InvalidDataAccessApiUsageException ex) {}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// expected
+		}
 		try {
 			mapper.setMappedClass(Person.class);
 		}
@@ -55,28 +55,19 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 	}
 
 	public void testStaticQueryWithRowMapper() throws SQLException {
-
 		List<Person> result = simpleJdbcTemplate.query("select name, age, birth_date, balance from people",
 				ParameterizedBeanPropertyRowMapper.newInstance(Person.class));
-
 		assertEquals(1, result.size());
-
 		Person bean = result.get(0);
-
 		verifyPerson(bean);
-
 	}
 
 	public void testMappingWithInheritance() throws SQLException {
-
 		List<ConcretePerson> result = simpleJdbcTemplate.query("select name, age, birth_date, balance from people",
 				ParameterizedBeanPropertyRowMapper.newInstance(ConcretePerson.class));
-
 		assertEquals(1, result.size());
-
 		ConcretePerson bean = result.get(0);
-
 		verifyConcretePerson(bean);
-
 	}
+
 }
