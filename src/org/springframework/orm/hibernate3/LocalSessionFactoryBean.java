@@ -671,6 +671,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			// Tell Hibernate to eagerly compile the mappings that we registered,
 			// for availability of the mapping information in further processing.
+			postProcessMappings(config);
 			config.buildMappings();
 
 			if (this.entityCacheStrategies != null) {
@@ -774,11 +775,27 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
+	 * To be implemented by subclasses that want to to register further mappings
+	 * on the Configuration object after this FactoryBean registered its specified
+	 * mappings.
+	 * <p>Invoked <i>before</i> the <code>Configuration.buildMappings()</code> call,
+	 * so that it can still extend and modify the mapping information.
+	 * @param config the current Configuration object
+	 * @throws HibernateException in case of Hibernate initialization errors
+	 * @see org.hibernate.cfg.Configuration#buildMappings()
+	 */
+	protected void postProcessMappings(Configuration config) throws HibernateException {
+	}
+
+	/**
 	 * To be implemented by subclasses that want to to perform custom
 	 * post-processing of the Configuration object after this FactoryBean
 	 * performed its default initialization.
+	 * <p>Invoked <i>after</i> the <code>Configuration.buildMappings()</code> call,
+	 * so that it can operate on the completed and fully parsed mapping information.
 	 * @param config the current Configuration object
 	 * @throws HibernateException in case of Hibernate initialization errors
+	 * @see org.hibernate.cfg.Configuration#buildMappings()
 	 */
 	protected void postProcessConfiguration(Configuration config) throws HibernateException {
 	}

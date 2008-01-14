@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,13 +95,9 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean {
 	/**
 	 * Reads metadata from annotated classes and packages into the
 	 * AnnotationConfiguration instance.
-	 * <p>Calls <code>postProcessAnnotationConfiguration</code> afterwards,
-	 * to give subclasses the chance to perform custom post-processing.
-	 * @see #postProcessAnnotationConfiguration
 	 */
-	protected final void postProcessConfiguration(Configuration config) throws HibernateException {
+	protected final void postProcessMappings(Configuration config) throws HibernateException {
 		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
-
 		if (this.annotatedClasses != null) {
 			for (int i = 0; i < this.annotatedClasses.length; i++) {
 				annConfig.addAnnotatedClass(this.annotatedClasses[i]);
@@ -112,9 +108,13 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean {
 				annConfig.addPackage(this.annotatedPackages[i]);
 			}
 		}
+	}
 
-		// Perform custom post-processing in subclasses.
-		postProcessAnnotationConfiguration(annConfig);
+	/**
+	 * Delegates to {@link #postProcessAnnotationConfiguration}.
+	 */
+	protected final void postProcessConfiguration(Configuration config) throws HibernateException {
+		postProcessAnnotationConfiguration((AnnotationConfiguration) config);
 	}
 
 	/**
