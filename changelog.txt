@@ -3,11 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-09)
+Changes in version 2.5.2 (2008-02-06)
 -------------------------------------
 
 General
 * updated transaction management chapter in the reference documentation
+
+Package org.springframework.beans
+* refactored AbstractBeanConfigurerAspect into Abstract(InterfaceDriven)DependencyInjectionAspect
+
+Package org.springframework.core
+* fixed ClassMetadataReadingVisitor (as used by "context:component-scan") to correctly ignore *usage* of inner classes
 
 Package org.springframework.ejb
 * Local/SimpleRemoteSlsbInvokerInterceptor use EJB(Local)Home for EJB 2.x detection, for WebSphere compatibility
@@ -18,6 +24,20 @@ Package org.springframework.jca
 * added "workManagerName" property to WorkManagerTaskExecutor, for J2EE env lookups in JNDI (e.g. a Geronimo gbean-ref)
 * introduced JBossWorkManagerTaskExecutor as adapter for the JBoss JCA WorkManager (analogous to CommonJ)
 * introduced GlassFishWorkManagerTaskExecutor as adapter for the GlassFish JCA WorkManager (analogous to CommonJ)
+
+Package org.springframework.jdbc
+* merged AbstractBeanPropertyRowMapper into concrete BeanPropertyRowMapper class
+* deprecated BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
+* added ParameterizedSingleColumnRowMapper with a convenient "newInstance" method to specify the required type only once
+
+Package org.springframework.orm
+* introduced "postProcessMappings" template method in Hibernate LocalSessionFactoryBean
+* fixed Hibernate AnnotationSessionFactoryBean to allow for mixed mapping sources (despite 2.5.1's "buildMappings" call)
+* introduced "EntityManagerFactoryUtils.closeEntityManager" method that protects against exceptions thrown from close
+* Hibernate/Jpa/JdoTransactionManager explicitly rollback an active transaction before closing when begin failed
+
+Package org.springframework.test
+* TestContextManager ignores default TestExecutionListeners that cannot be instantiated (i.e. due to spring-tx missing)
 
 
 Changes in version 2.5.1 (2008-01-09)
