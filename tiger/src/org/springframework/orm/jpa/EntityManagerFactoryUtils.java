@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,6 +300,27 @@ public abstract class EntityManagerFactoryUtils {
 		return null;				
 	}
 
+	/**
+	 * Close the given JPA EntityManager,
+	 * catching and logging any cleanup exceptions thrown.
+	 * @param em the JPA EntityManager to close (may be <code>null</code>)
+	 * @see javax.persistence.EntityManager#close()
+	 */
+	public static void closeEntityManager(EntityManager em) {
+		if (em != null) {
+			logger.debug("Closing JPA EntityManager");
+			try {
+				em.close();
+			}
+			catch (PersistenceException ex) {
+				logger.debug("Could not close JPA EntityManager", ex);
+			}
+			catch (Throwable ex) {
+				logger.debug("Unexpected exception on closing JPA EntityManager", ex);
+			}
+		}
+	}
+
 
 	/**
 	 * Callback for resource cleanup at the end of a non-JPA transaction
@@ -346,7 +367,7 @@ public abstract class EntityManagerFactoryUtils {
 			if (this.newEntityManager) {
 				TransactionSynchronizationManager.unbindResource(this.entityManagerFactory);
 				this.holderActive = false;
-				this.entityManagerHolder.getEntityManager().close();
+				closeEntityManager(this.entityManagerHolder.getEntityManager());
 			}
 		}
 

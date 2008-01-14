@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.WebRequest;
@@ -105,7 +106,7 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 			EntityManagerHolder emHolder = (EntityManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
 			logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewInterceptor");
-			emHolder.getEntityManager().close();
+			EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
 		}
 	}
 

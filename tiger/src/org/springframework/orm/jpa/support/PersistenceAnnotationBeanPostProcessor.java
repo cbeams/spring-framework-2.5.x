@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,9 +335,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);
-		if (emToClose != null) {
-			emToClose.close();
-		}
+		EntityManagerFactoryUtils.closeEntityManager(emToClose);
 	}
 
 
