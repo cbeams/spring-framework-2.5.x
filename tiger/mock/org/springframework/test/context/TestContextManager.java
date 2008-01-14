@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,7 @@ public class TestContextManager {
 		final Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
 		final List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
+		boolean defaultListeners = false;
 
 		// Use defaults?
 		if (declaringClass == null) {
@@ -143,34 +144,43 @@ public class TestContextManager {
 				logger.info("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
 			}
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
+			defaultListeners = true;
 		}
 		else {
 			// Traverse the class hierarchy
 			while (declaringClass != null) {
-
 				final TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Retrieved @TestExecutionListeners [" + testExecutionListeners
 							+ "] for declaring class [" + declaringClass + "].");
 				}
-
 				Class<? extends TestExecutionListener>[] classes = testExecutionListeners.value();
 				if (classes != null) {
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(classes));
 				}
-
-				declaringClass = testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(
-						annotationType, declaringClass.getSuperclass())
-						: null;
+				declaringClass = (testExecutionListeners.inheritListeners() ?
+						AnnotationUtils.findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass()) : null);
 			}
 		}
 
-		final TestExecutionListener[] listeners = new TestExecutionListener[classesList.size()];
-		int i = 0;
-		for (final Class<? extends TestExecutionListener> listenerClass : classesList) {
-			listeners[i++] = (TestExecutionListener) BeanUtils.instantiateClass(listenerClass);
+		final List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
+		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
+			try {
+				listeners.add((TestExecutionListener) BeanUtils.instantiateClass(listenerClass));
+			}
+			catch (NoClassDefFoundError err) {
+				if (defaultListeners) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not instantiate default TestExecutionListener class [" + listenerClass.getName()
+								+ "]. Specify custom listener classes or make the default listener classes available.");
+					}
+				}
+				else {
+					throw err;
+				}
+			}
 		}
-		return listeners;
+		return listeners.toArray(new TestExecutionListener[listeners.size()]);
 	}
 
 	/**
@@ -186,9 +196,9 @@ public class TestContextManager {
 				defaultListenerClasses.add((Class<? extends TestExecutionListener>) getClass().getClassLoader().loadClass(
 						className));
 			}
-			catch (ClassNotFoundException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Could not load default TestExecutionListener class [" + className
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not load default TestExecutionListener class [" + className
 							+ "]. Specify custom listener classes or make the default listener classes available.");
 				}
 			}
