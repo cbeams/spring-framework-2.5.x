@@ -60,7 +60,15 @@
 	<target name="mavendeploy" depends="maventasks"
 			description="Uploads all jars,sources, and POMs to a remote m2 repository">
 
-		<maven:install-provider groupId="org.springframework.aws" artifactId="spring-aws-maven" version="1.2"/>
+		<maven:remoteRepository id="spring-release" url="http://s3.amazonaws.com/maven.springframework.org/release"/>
+		<maven:remoteRepository id="spring-external" url="http://s3.amazonaws.com/maven.springframework.org/external"/>
+		<maven:remoteRepository id="central" url="http://repo1.maven.org/maven2"/>
+
+		<maven:install-provider groupId="org.springframework.aws" artifactId="spring-aws-maven" version="1.2.2">
+			<remoteRepository refid="spring-release"/>
+			<remoteRepository refid="spring-external"/>
+			<remoteRepository refid="central"/>
+		</maven:install-provider>
 
 		<maven:deploy file="${dist.dir}/spring.jar">
 			<pom file="${dist.dir}/maven/spring.pom" />
