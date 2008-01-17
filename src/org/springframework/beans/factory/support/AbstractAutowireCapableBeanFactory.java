@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -863,13 +863,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bw BeanWrapper with bean instance
 	 */
 	protected void populateBean(String beanName, AbstractBeanDefinition mbd, BeanWrapper bw) {
+		PropertyValues pvs = mbd.getPropertyValues();
+
+		if (bw == null) {
+			if (!pvs.isEmpty()) {
+				throw new BeanCreationException(
+						mbd.getResourceDescription(), beanName, "Cannot apply property values to null instance");
+			}
+			else {
+				// Skip property population phase for null instance.
+				return;
+			}
+		}
+
 		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
 		// state of the bean before properties are set. This can be used, for example,
 		// to support styles of field injection.
 		boolean continueWithPropertyPopulation = true;
 
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
+			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 				BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 				if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
@@ -883,19 +896,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (!continueWithPropertyPopulation) {
 			return;
-		}
-
-		PropertyValues pvs = mbd.getPropertyValues();
-
-		if (bw == null) {
-			if (!pvs.isEmpty()) {
-				throw new BeanCreationException(
-						mbd.getResourceDescription(), beanName, "Cannot apply property values to null instance");
-			}
-			else {
-				// Skip property population phase for null instance.
-				return;
-			}
 		}
 
 		if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
