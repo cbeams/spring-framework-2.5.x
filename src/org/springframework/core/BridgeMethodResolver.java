@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@ package org.springframework.core;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -102,7 +100,7 @@ public abstract class BridgeMethodResolver {
 	 * @return the bridged method, or <code>null</code> if none found
 	 */
 	private static Method searchCandidates(List candidateMethods, Method bridgeMethod) {
-		Map typeParameterMap = createTypeVariableMap(bridgeMethod.getDeclaringClass());
+		Map typeParameterMap = GenericTypeResolver.getTypeVariableMap(bridgeMethod.getDeclaringClass());
 		for (int i = 0; i < candidateMethods.size(); i++) {
 			Method candidateMethod = (Method) candidateMethods.get(i);
 			if (isBridgeMethodFor(bridgeMethod, candidateMethod, typeParameterMap)) {
@@ -133,7 +131,7 @@ public abstract class BridgeMethodResolver {
 			return true;
 		}
 		Method method = findGenericDeclaration(bridgeMethod);
-		return (method != null ? isResolvedTypeMatch(method, candidateMethod, typeVariableMap) : false);
+		return (method != null && isResolvedTypeMatch(method, candidateMethod, typeVariableMap));
 	}
 
 	/**
@@ -169,7 +167,7 @@ public abstract class BridgeMethodResolver {
 	 * Return <code>true</code> if the {@link Type} signature of both the supplied
 	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
 	 * are equal after resolving all {@link TypeVariable TypeVariables} using the supplied
-	 * {@link #createTypeVariableMap TypeVariable Map}, otherwise returns <code>false</code>.
+	 * TypeVariable Map, otherwise returns <code>false</code>.
 	 */
 	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Map typeVariableMap) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
@@ -182,38 +180,21 @@ public abstract class BridgeMethodResolver {
 			Class candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
-				Type rawType = getRawType(genericParameter, typeVariableMap);
+				Type rawType = GenericTypeResolver.getRawType(genericParameter, typeVariableMap);
 				if (rawType instanceof GenericArrayType) {
 					if (!candidateParameter.getComponentType().equals(
-							getRawType(((GenericArrayType) rawType).getGenericComponentType(), typeVariableMap))) {
+							GenericTypeResolver.resolveType(((GenericArrayType) rawType).getGenericComponentType(), typeVariableMap))) {
 						return false;
 					}
 					break;
 				}
 			}
 			// A non-array type: compare the type itself.
-			if (!candidateParameter.equals(getRawType(genericParameter, typeVariableMap))) {
+			if (!candidateParameter.equals(GenericTypeResolver.resolveType(genericParameter, typeVariableMap))) {
 				return false;
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * Determine the raw type for the given generic parameter type.
-	 */
-	private static Type getRawType(Type genericType, Map typeVariableMap) {
-		if (genericType instanceof TypeVariable) {
-			TypeVariable tv = (TypeVariable) genericType;
-			Type result = (Type) typeVariableMap.get(tv);
-			return (result != null ? result : Object.class);
-		}
-		else if (genericType instanceof ParameterizedType) {
-			return ((ParameterizedType) genericType).getRawType();
-		}
-		else {
-			return genericType;
-		}
 	}
 
 	/**
@@ -223,132 +204,6 @@ public abstract class BridgeMethodResolver {
 	 */
 	private static Method searchForMatch(Class type, Method bridgeMethod) {
 		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
-	}
-
-	/**
-	 * Build a mapping of {@link TypeVariable#getName TypeVariable names} to concrete
-	 * {@link Class} for the specified {@link Class}. Searches all super types,
-	 * enclosing types and interfaces.
-	 */
-	static Map createTypeVariableMap(Class cls) {
-		Map typeVariableMap = new HashMap();
-
-		// interfaces
-		extractTypeVariablesFromGenericInterfaces(cls.getGenericInterfaces(), typeVariableMap);
-
-		// super class
-		Type genericType = cls.getGenericSuperclass();
-		Class type = cls.getSuperclass();
-		while (!Object.class.equals(type)) {
-			if (genericType instanceof ParameterizedType) {
-				ParameterizedType pt = (ParameterizedType) genericType;
-				populateTypeMapFromParameterizedType(pt, typeVariableMap);
-			}
-			extractTypeVariablesFromGenericInterfaces(type.getGenericInterfaces(), typeVariableMap);
-			genericType = type.getGenericSuperclass();
-			type = type.getSuperclass();
-		}
-
-		// enclosing class
-		type = cls;
-		while (type.isMemberClass()) {
-			genericType = type.getGenericSuperclass();
-			if (genericType instanceof ParameterizedType) {
-				ParameterizedType pt = (ParameterizedType) genericType;
-				populateTypeMapFromParameterizedType(pt, typeVariableMap);
-			}
-			type = type.getEnclosingClass();
-		}
-
-		return typeVariableMap;
-	}
-
-	private static void extractTypeVariablesFromGenericInterfaces(Type[] genericInterfaces, Map typeVariableMap) {
-		for (int i = 0; i < genericInterfaces.length; i++) {
-			Type genericInterface = genericInterfaces[i];
-			if (genericInterface instanceof ParameterizedType) {
-				ParameterizedType pt = (ParameterizedType) genericInterface;
-				populateTypeMapFromParameterizedType(pt, typeVariableMap);
-				if (pt.getRawType() instanceof Class) {
-					extractTypeVariablesFromGenericInterfaces(
-							((Class) pt.getRawType()).getGenericInterfaces(), typeVariableMap);
-				}
-			}
-			else if (genericInterface instanceof Class) {
-				extractTypeVariablesFromGenericInterfaces(
-						((Class) genericInterface).getGenericInterfaces(), typeVariableMap);
-			}
-		}
-	}
-
-
-	/**
-	 * Read the {@link TypeVariable TypeVariables} from the supplied {@link ParameterizedType}
-	 * and add mappings corresponding to the {@link TypeVariable#getName TypeVariable name} ->
-	 * concrete type to the supplied {@link Map}.
-	 * <p>Consider this case:
-	 * <pre class="code>
-	 * public interface Foo<S, T> {
-	 *  ..
-	 * }
-	 *
-	 * public class FooImpl implements Foo<String, Integer> {
-	 *  ..
-	 * }</pre>
-	 * For '<code>FooImpl</code>' the following mappings would be added to the {@link Map}:
-	 * {S=java.lang.String, T=java.lang.Integer}.
-	 */
-	private static void populateTypeMapFromParameterizedType(ParameterizedType type, Map typeVariableMap) {
-		if (type.getRawType() instanceof Class) {
-			Type[] actualTypeArguments = type.getActualTypeArguments();
-			TypeVariable[] typeVariables = ((Class) type.getRawType()).getTypeParameters();
-			for (int i = 0; i < actualTypeArguments.length; i++) {
-				Type actualTypeArgument = actualTypeArguments[i];
-				TypeVariable variable = typeVariables[i];
-				if (actualTypeArgument instanceof Class) {
-					typeVariableMap.put(variable, actualTypeArgument);
-				}
-				else if (actualTypeArgument instanceof GenericArrayType) {
-					typeVariableMap.put(variable, actualTypeArgument);
-				}
-				else if (actualTypeArgument instanceof ParameterizedType) {
-					typeVariableMap.put(variable, ((ParameterizedType) actualTypeArgument).getRawType());
-				}
-				else if (actualTypeArgument instanceof TypeVariable) {
-					// We have a type that is parameterized at instantiation time
-					// the nearest match on the bridge method will be the bounded type.
-					TypeVariable typeVariableArgument = (TypeVariable) actualTypeArgument;
-					Type resolvedType = (Type) typeVariableMap.get(typeVariableArgument);
-					if (resolvedType == null) {
-						resolvedType = extractClassForTypeVariable(typeVariableArgument);
-					}
-					if (resolvedType != null) {
-						typeVariableMap.put(variable, resolvedType);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Extracts the bound '<code>Class</code>' for a give {@link TypeVariable}.
-	 */
-	private static Class extractClassForTypeVariable(TypeVariable typeVariable) {
-		Type[] bounds = typeVariable.getBounds();
-		Type result = null;
-		if (bounds.length > 0) {
-			Type bound = bounds[0];
-			if (bound instanceof ParameterizedType) {
-				result = ((ParameterizedType) bound).getRawType();
-			}
-			else if (bound instanceof Class) {
-				result = bound;
-			}
-			else if (bound instanceof TypeVariable) {
-				result = extractClassForTypeVariable((TypeVariable) bound);
-			}
-		}
-		return (result instanceof Class ? (Class) result : null);
 	}
 
 }

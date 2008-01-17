@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public abstract class Conventions {
 	 * @return the generated variable name
 	 */
 	public static String getVariableNameForParameter(MethodParameter parameter) {
-		Assert.notNull(parameter, "Parameter must not be null");
+		Assert.notNull(parameter, "MethodParameter must not be null");
 		Class valueClass = null;
 		boolean pluralize = false;
 
@@ -115,7 +115,9 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(parameter.getParameterType())) {
-			valueClass = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+			if (JdkVersion.isAtLeastJava15()) {
+				valueClass = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+			}
 			if (valueClass == null) {
 				throw new IllegalArgumentException("Cannot generate variable name for non-typed Collection parameter type");
 			}
@@ -136,7 +138,7 @@ public abstract class Conventions {
 	 * @return the generated variable name
 	 */
 	public static String getVariableNameForReturnType(Method method) {
-		return getVariableNameForReturnType(method, null);
+		return getVariableNameForReturnType(method, method.getReturnType(), null);
 	}
 
 	/**
@@ -149,9 +151,23 @@ public abstract class Conventions {
 	 * @return the generated variable name
 	 */
 	public static String getVariableNameForReturnType(Method method, Object value) {
+		return getVariableNameForReturnType(method, method.getReturnType(), value);
+	}
+
+	/**
+	 * Determine the conventional variable name for the return type of the supplied method,
+	 * taking the generic collection type (if any) into account, falling back to the
+	 * given return value if the method declaration is not specific enough (i.e. in case of
+	 * the return type being declared as <code>Object</code> or as untyped collection).
+	 * @param method the method to generate a variable name for
+	 * @param resolvedType the resolved return type of the method
+	 * @param value the return value (may be <code>null</code> if not available)
+	 * @return the generated variable name
+	 */
+	public static String getVariableNameForReturnType(Method method, Class resolvedType, Object value) {
 		Assert.notNull(method, "Method must not be null");
 
-		if (Object.class.equals(method.getReturnType())) {
+		if (Object.class.equals(resolvedType)) {
 			if (value == null) {
 				throw new IllegalArgumentException("Cannot generate variable name for an Object return type with null value");
 			}
@@ -161,12 +177,14 @@ public abstract class Conventions {
 		Class valueClass = null;
 		boolean pluralize = false;
 
-		if (method.getReturnType().isArray()) {
-			valueClass = method.getReturnType().getComponentType();
+		if (resolvedType.isArray()) {
+			valueClass = resolvedType.getComponentType();
 			pluralize = true;
 		}
-		else if (Collection.class.isAssignableFrom(method.getReturnType())) {
-			valueClass = GenericCollectionTypeResolver.getCollectionReturnType(method);
+		else if (Collection.class.isAssignableFrom(resolvedType)) {
+			if (JdkVersion.isAtLeastJava15()) {
+				valueClass = GenericCollectionTypeResolver.getCollectionReturnType(method);
+			}
 			if (valueClass == null) {
 				if (!(value instanceof Collection)) {
 					throw new IllegalArgumentException(
@@ -183,7 +201,7 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else {
-			valueClass = method.getReturnType();
+			valueClass = resolvedType;
 		}
 
 		String name = ClassUtils.getShortNameAsProperty(valueClass);
