@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,9 @@ public class SimpleMessageConverter implements MessageConverter {
 			return createMessageForSerializable(((Serializable) object), session);
 		}
 		else {
-			throw new MessageConversionException("Cannot convert object [" + object + "] to JMS message");
+			throw new MessageConversionException("Cannot convert object of type [" +
+					ObjectUtils.nullSafeClassName(object) + "] to JMS message. Supported message " +
+					"payloads are: String, byte array, Map<String,?>, Serializable object.");
 		}
 	}
 
