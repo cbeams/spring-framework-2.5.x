@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public void testIsBridgeMethodFor() throws Exception {
-		Map typeParameterMap = BridgeMethodResolver.createTypeVariableMap(MyBar.class);
+		Map typeParameterMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
 		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
@@ -105,15 +105,15 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public void testCreateTypeVariableMap() throws Exception {
-		Map<String, Class> typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MyBar.class);
+		Map<String, Class> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		TypeVariable barT = findTypeVariable(InterBar.class, "T");
 		assertEquals(String.class, typeVariableMap.get(barT));
 
-		typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MyFoo.class);
+		typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyFoo.class);
 		TypeVariable fooT = findTypeVariable(Foo.class, "T");
 		assertEquals(String.class, typeVariableMap.get(fooT));
 
-		typeVariableMap = BridgeMethodResolver.createTypeVariableMap(ExtendsEnclosing.ExtendsEnclosed.ExtendsReallyDeepNow.class);
+		typeVariableMap = GenericTypeResolver.getTypeVariableMap(ExtendsEnclosing.ExtendsEnclosed.ExtendsReallyDeepNow.class);
 		TypeVariable r = findTypeVariable(Enclosing.Enclosed.ReallyDeepNow.class, "R");
 		TypeVariable s = findTypeVariable(Enclosing.Enclosed.class, "S");
 		TypeVariable t = findTypeVariable(Enclosing.class, "T");
@@ -216,7 +216,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		Method otherMethod = MessageBroadcasterImpl.class.getMethod("receive", NewMessageEvent.class);
 		assertFalse(otherMethod.isBridge());
 
-		Map typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MessageBroadcasterImpl.class);
+		Map typeVariableMap = GenericTypeResolver.getTypeVariableMap(MessageBroadcasterImpl.class);
 		assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, typeVariableMap));
 		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, typeVariableMap));
 
@@ -224,7 +224,7 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public void testSPR2454() throws Exception {
-		Map typeVariableMap = BridgeMethodResolver.createTypeVariableMap(YourHomer.class);
+		Map typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
 		TypeVariable variable2 = findTypeVariable(YourHomer.class, "L");
 		TypeVariable variable = findTypeVariable(MyHomer.class, "L");
 		assertEquals(AbstractBounded.class, typeVariableMap.get(variable));

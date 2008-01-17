@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,26 +238,8 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	private static Class getGenericParameterType(MethodParameter methodParam, Class source, int typeIndex) {
-		return extractType(methodParam, getTargetType(methodParam), source, typeIndex, methodParam.getNestingLevel(), 1);
-	}
-
-	/**
-	 * Determine the target type for the given parameter specification.
-	 * @param methodParam the method parameter specification
-	 * @return the corresponding generic parameter or return type
-	 */
-	private static Type getTargetType(MethodParameter methodParam) {
-		if (methodParam.getConstructor() != null) {
-			return methodParam.getConstructor().getGenericParameterTypes()[methodParam.getParameterIndex()];
-		}
-		else {
-			if (methodParam.getParameterIndex() >= 0) {
-				return methodParam.getMethod().getGenericParameterTypes()[methodParam.getParameterIndex()];
-			}
-			else {
-				return methodParam.getMethod().getGenericReturnType();
-			}
-		}
+		return extractType(methodParam, GenericTypeResolver.getTargetType(methodParam),
+				source, typeIndex, methodParam.getNestingLevel(), 1);
 	}
 
 	/**
