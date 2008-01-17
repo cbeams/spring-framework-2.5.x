@@ -39,6 +39,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 import org.hibernate.engine.SessionImplementor;
+import org.hibernate.event.EventSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -445,11 +446,16 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	protected Session createSessionProxy(Session session) {
 		Class[] sessionIfcs = null;
-		if (session instanceof SessionImplementor) {
-			sessionIfcs = new Class[] {Session.class, SessionImplementor.class};
+		Class mainIfc = (session instanceof org.hibernate.classic.Session ?
+				org.hibernate.classic.Session.class : Session.class);
+		if (session instanceof EventSource) {
+			sessionIfcs = new Class[] {mainIfc, EventSource.class};
+		}
+		else if (session instanceof SessionImplementor) {
+			sessionIfcs = new Class[] {mainIfc, SessionImplementor.class};
 		}
 		else {
-			sessionIfcs = new Class[] {Session.class};
+			sessionIfcs = new Class[] {mainIfc};
 		}
 		return (Session) Proxy.newProxyInstance(
 				getClass().getClassLoader(), sessionIfcs,
