@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,6 +266,13 @@ public class BeanDefinitionParserDelegate {
 	 */
 	protected Object extractSource(Element ele) {
 		return this.readerContext.extractSource(ele);
+	}
+
+	/**
+	 * Report an error with the given message for the given source element.
+	 */
+	protected void error(String message, Node source) {
+		this.readerContext.error(message, source, this.parseState.snapshot());
 	}
 
 	/**
@@ -1273,6 +1280,9 @@ public class BeanDefinitionParserDelegate {
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 			if (handler != null) {
 				return handler.decorate(node, originalDefinition, new ParserContext(this.readerContext, this));
+			}
+			else if (namespaceUri.startsWith("http://www.springframework.org/")) {
+				error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", node);
 			}
 			else {
 				// A custom namespace, not to be handled by Spring - maybe "xml:...".
