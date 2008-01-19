@@ -169,12 +169,14 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			for (int i = 0; i < resources.length; i++) {
 				Resource resource = resources[i];
-				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
-				if (isCandidateComponent(metadataReader)) {
-					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
-					sbd.setSource(resource);
-					if (isCandidateComponent(sbd)) {
-						candidates.add(sbd);
+				if (resource.isReadable()) {
+					MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+					if (isCandidateComponent(metadataReader)) {
+						ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+						sbd.setSource(resource);
+						if (isCandidateComponent(sbd)) {
+							candidates.add(sbd);
+						}
 					}
 				}
 			}

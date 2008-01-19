@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,16 @@ public class FileSystemResource extends AbstractResource {
 	 */
 	public boolean exists() {
 		return this.file.exists();
+	}
+
+	/**
+	 * This implementation checks whether the underlying file is marked as readable
+	 * (and corresponds to an actual file with content, not to a directory).
+	 * @see java.io.File#canRead()
+	 * @see java.io.File#isDirectory()
+	 */
+	public boolean isReadable() {
+		return (this.file.canRead() && !this.file.isDirectory());
 	}
 
 	/**

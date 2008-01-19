@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.io.InputStream;
  * Simple {@link Resource} implementation that holds a resource description
  * but does not point to an actually readable resource.
  *
- * <p>To be used as placeholder if a Resource argument is demanded
- * but not necessarily used for reading.
+ * <p>To be used as placeholder if a <code>Resource</code> argument is
+ * expected by an API but not necessarily used for actual reading.
  *
  * @author Juergen Hoeller
  * @since 1.2.6
@@ -43,6 +43,14 @@ public class DescriptiveResource extends AbstractResource {
 		this.description = (description != null ? description : "");
 	}
 
+
+	public boolean exists() {
+		return false;
+	}
+
+	public boolean isReadable() {
+		return false;
+	}
 
 	public InputStream getInputStream() throws IOException {
 		throw new FileNotFoundException(
