@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -350,6 +351,22 @@ public abstract class BeanUtils {
 			}
 		}
 		return Object.class;
+	}
+
+	/**
+	 * Obtain a new MethodParameter object for the write method of the
+	 * specified property.
+	 * @param pd the PropertyDescriptor for the property
+	 * @return a corresponding MethodParameter object
+	 */
+	public static MethodParameter getWriteMethodParameter(PropertyDescriptor pd) {
+		if (pd instanceof GenericTypeAwarePropertyDescriptor) {
+			return new MethodParameter(
+					((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodParameter());
+		}
+		else {
+			return new MethodParameter(pd.getWriteMethod(), 0);
+		}
 	}
 
 	/**

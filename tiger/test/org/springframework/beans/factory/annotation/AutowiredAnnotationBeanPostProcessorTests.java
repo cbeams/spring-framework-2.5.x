@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,13 +67,13 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class, false));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(TypedExtendedResourceInjectionBean.class, false));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 		NestedTestBean ntb = new NestedTestBean();
 		bf.registerSingleton("nestedTestBean", ntb);
 
-		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		TypedExtendedResourceInjectionBean bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb, bean.getTestBean2());
 		assertSame(tb, bean.getTestBean3());
@@ -81,7 +81,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(ntb, bean.getNestedTestBean());
 		assertSame(bf, bean.getBeanFactory());
 
-		bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb, bean.getTestBean2());
 		assertSame(tb, bean.getTestBean3());
@@ -96,7 +96,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		RootBeanDefinition annotatedBd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
+		RootBeanDefinition annotatedBd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
 		TestBean tb2 = new TestBean();
 		annotatedBd.getPropertyValues().addPropertyValue("testBean2", tb2);
 		bf.registerBeanDefinition("annotatedBean", annotatedBd);
@@ -105,7 +105,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		NestedTestBean ntb = new NestedTestBean();
 		bf.registerSingleton("nestedTestBean", ntb);
 
-		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		TypedExtendedResourceInjectionBean bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb2, bean.getTestBean2());
 		assertSame(tb, bean.getTestBean3());
@@ -745,12 +745,12 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 	}
 
 
-	public static class ExtendedResourceInjectionBean extends ResourceInjectionBean {
+	public static class ExtendedResourceInjectionBean<T> extends ResourceInjectionBean {
 
 		@Autowired
 		protected ITestBean testBean3;
 
-		private NestedTestBean nestedTestBean;
+		private T nestedTestBean;
 
 		private ITestBean testBean4;
 
@@ -765,7 +765,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 
 		@Autowired
-		private void inject(ITestBean testBean4, NestedTestBean nestedTestBean) {
+		private void inject(ITestBean testBean4, T nestedTestBean) {
 			this.testBean4 = testBean4;
 			this.nestedTestBean = nestedTestBean;
 		}
@@ -783,13 +783,18 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 			return this.testBean4;
 		}
 
-		public NestedTestBean getNestedTestBean() {
+		public T getNestedTestBean() {
 			return this.nestedTestBean;
 		}
 
 		public BeanFactory getBeanFactory() {
 			return this.beanFactory;
 		}
+	}
+
+
+	public static class TypedExtendedResourceInjectionBean extends ExtendedResourceInjectionBean<NestedTestBean> {
+
 	}
 
 

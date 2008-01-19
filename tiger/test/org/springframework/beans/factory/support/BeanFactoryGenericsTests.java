@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.beans.GenericBean;
+import org.springframework.beans.GenericIntegerBean;
+import org.springframework.beans.GenericSetOfIntegerBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.ClassPathResource;
@@ -77,9 +79,9 @@ public class BeanFactoryGenericsTests extends TestCase {
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("genericBean");
 
 		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
 		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
@@ -113,7 +115,7 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 	public void testGenericListOfArraysProperty() throws MalformedURLException {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
-		GenericBean gb = (GenericBean) bf.getBean("listOfArrays");
+		GenericBean<?> gb = (GenericBean) bf.getBean("listOfArrays");
 
 		assertEquals(1, gb.getListOfArrays().size());
 		String[] array = gb.getListOfArrays().get(0);
@@ -524,6 +526,22 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(1, map.size());
 		assertEquals(new Integer(10), map.keySet().iterator().next());
 		assertEquals(new URL("http://localhost:8080"), map.values().iterator().next());
+	}
+
+	public void testGenericallyTypedIntegerBean() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
+		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("integerBean");
+		assertEquals(new Integer(10), gb.getGenericProperty());
+		assertEquals(new Integer(20), gb.getGenericListProperty().get(0));
+		assertEquals(new Integer(30), gb.getGenericListProperty().get(1));
+	}
+
+	public void testGenericallyTypedSetOfIntegerBean() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
+		GenericSetOfIntegerBean gb = (GenericSetOfIntegerBean) bf.getBean("setOfIntegerBean");
+		assertEquals(new Integer(10), gb.getGenericProperty().iterator().next());
+		assertEquals(new Integer(20), gb.getGenericListProperty().get(0).iterator().next());
+		assertEquals(new Integer(30), gb.getGenericListProperty().get(1).iterator().next());
 	}
 
 

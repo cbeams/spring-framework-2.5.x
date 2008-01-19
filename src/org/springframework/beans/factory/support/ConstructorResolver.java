@@ -38,6 +38,8 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
@@ -126,15 +128,17 @@ class ConstructorResolver {
 					argsToUse = new Object[argsToResolve.length];
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
+						MethodParameter methodParam = new MethodParameter(constructorToUse, i);
+						if (JdkVersion.isAtLeastJava15()) {
+							GenericTypeResolver.resolveParameterType(methodParam, constructorToUse.getDeclaringClass());
+						}
 						if (argValue instanceof AutowiredArgumentMarker) {
-							argValue = resolveAutowiredArgument(
-									new MethodParameter(constructorToUse, i), beanName, null, converter);
+							argValue = resolveAutowiredArgument(methodParam, beanName, null, converter);
 						}
 						else if (argValue instanceof BeanMetadataElement) {
 							argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
 						}
-						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
-								new MethodParameter(constructorToUse, i));
+						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i], methodParam);
 					}
 				}
 			}
@@ -302,15 +306,17 @@ class ConstructorResolver {
 					argsToUse = new Object[argsToResolve.length];
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
+						MethodParameter methodParam = new MethodParameter(factoryMethodToUse, i);
+						if (JdkVersion.isAtLeastJava15()) {
+							GenericTypeResolver.resolveParameterType(methodParam, factoryClass);
+						}
 						if (argValue instanceof AutowiredArgumentMarker) {
-							argValue = resolveAutowiredArgument(
-									new MethodParameter(factoryMethodToUse, i), beanName, null, converter);
+							argValue = resolveAutowiredArgument(methodParam, beanName, null, converter);
 						}
 						else if (argValue instanceof BeanMetadataElement) {
 							argValue = valueResolver.resolveValueIfNecessary("factory method argument", argValue);
 						}
-						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
-								new MethodParameter(factoryMethodToUse, i));
+						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i], methodParam);
 					}
 				}
 			}

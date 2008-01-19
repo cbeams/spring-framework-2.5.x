@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.core.JdkVersion;
 
 /**
  * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
@@ -267,6 +269,10 @@ public class CachedIntrospectionResults {
 							" of type [" + pd.getPropertyType().getName() + "]" : "") +
 							(pd.getPropertyEditorClass() != null ?
 							"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
+				}
+				if (JdkVersion.isAtLeastJava15()) {
+					pd = new GenericTypeAwarePropertyDescriptor(
+							beanClass, pd.getName(), pd.getReadMethod(), pd.getWriteMethod());
 				}
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}

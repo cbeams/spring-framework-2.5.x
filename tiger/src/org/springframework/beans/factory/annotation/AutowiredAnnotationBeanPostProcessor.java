@@ -48,6 +48,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -490,8 +491,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					TypeConverter typeConverter = beanFactory.getTypeConverter();
 					this.cachedMethodArguments = new Object[arguments.length];
 					for (int i = 0; i < arguments.length; i++) {
-						DependencyDescriptor descriptor =
-								new DependencyDescriptor(new MethodParameter(method, i), this.required);
+						MethodParameter methodParam = new MethodParameter(method, i);
+						GenericTypeResolver.resolveParameterType(methodParam, bean.getClass());
+						DependencyDescriptor descriptor = new DependencyDescriptor(methodParam, this.required);
 						this.cachedMethodArguments[i] = descriptor;
 						arguments[i] = beanFactory.resolveDependency(
 								descriptor, beanName, autowiredBeanNames, typeConverter);

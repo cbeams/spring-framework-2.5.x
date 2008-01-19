@@ -62,10 +62,12 @@ public class MethodParameter {
 
 	private Object[] parameterAnnotations;
 
-	private int nestingLevel;
+	private int nestingLevel = 1;
 
 	/** Map from Integer level to Integer type index */
 	private Map typeIndexesPerLevel;
+
+	Map typeVariableMap;
 
 
 	/**
@@ -116,6 +118,21 @@ public class MethodParameter {
 		this.constructor = constructor;
 		this.parameterIndex = parameterIndex;
 		this.nestingLevel = nestingLevel;
+	}
+
+	/**
+	 * Copy constructor, resulting in an independent MethodParameter object
+	 * based on the same metadata and cache state that the original object was in.
+	 * @param original the original MethodParameter object to copy from
+	 */
+	public MethodParameter(MethodParameter original) {
+		Assert.notNull(original, "Original must not be null");
+		this.method = original.method;
+		this.constructor = original.constructor;
+		this.parameterIndex = original.parameterIndex;
+		this.parameterType = original.parameterType;
+		this.parameterAnnotations = original.parameterAnnotations;
+		this.typeVariableMap = original.typeVariableMap;
 	}
 
 

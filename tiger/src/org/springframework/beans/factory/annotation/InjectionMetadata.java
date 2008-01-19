@@ -111,8 +111,15 @@ public class InjectionMetadata {
 		}
 
 		protected final Class getResourceType() {
-			return (this.isField ?
-					((Field) this.member).getType() : ((Method) this.member).getParameterTypes()[0]);
+			if (this.isField) {
+				return ((Field) this.member).getType();
+			}
+			else if (this.pd != null) {
+				return this.pd.getPropertyType();
+			}
+			else {
+				return ((Method) this.member).getParameterTypes()[0];
+			}
 		}
 
 		protected final void checkResourceType(Class resourceType) {
@@ -124,7 +131,8 @@ public class InjectionMetadata {
 				}
 			}
 			else {
-				Class paramType = ((Method) this.member).getParameterTypes()[0];
+				Class paramType =
+						(this.pd != null ? this.pd.getPropertyType() : ((Method) this.member).getParameterTypes()[0]);
 				if (!(resourceType.isAssignableFrom(paramType) || paramType.isAssignableFrom(resourceType))) {
 					throw new IllegalStateException("Specified parameter type [" + paramType +
 							"] is incompatible with resource type [" + resourceType.getName() + "]");

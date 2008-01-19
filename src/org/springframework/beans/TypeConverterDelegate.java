@@ -137,7 +137,7 @@ class TypeConverterDelegate {
 
 		return convertIfNecessary(
 				descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(), descriptor,
-				new MethodParameter(descriptor.getWriteMethod(), 0));
+				BeanUtils.getWriteMethodParameter(descriptor));
 	}
 
 

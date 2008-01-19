@@ -43,4 +43,24 @@
 			autowire="constructor">
 	</bean>
 
+  <bean id="integerBean" class="org.springframework.beans.GenericIntegerBean">
+    <property name="genericProperty" value="10"/>
+    <property name="genericListProperty">
+      <list>
+        <value>20</value>
+        <value>30</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="setOfIntegerBean" class="org.springframework.beans.GenericSetOfIntegerBean">
+    <property name="genericProperty" value="10"/>
+    <property name="genericListProperty">
+      <list>
+        <value>20</value>
+        <value>30</value>
+      </list>
+    </property>
+  </bean>
+
 </beans>

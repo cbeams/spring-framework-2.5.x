@@ -997,9 +997,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String propertyName = propertyNames[i];
 			try {
 				PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
+				MethodParameter methodParam = BeanUtils.getWriteMethodParameter(pd);
 				Object autowiredArgument = resolveDependency(
-						new DependencyDescriptor(new MethodParameter(pd.getWriteMethod(), 0), false),
-						beanName, autowiredBeanNames, converter);
+						new DependencyDescriptor(methodParam, false), beanName, autowiredBeanNames, converter);
 				if (autowiredArgument != null) {
 					pvs.addPropertyValue(propertyName, autowiredArgument);
 				}
@@ -1211,9 +1211,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return ((BeanWrapperImpl) converter).convertForProperty(value, propertyName);
 		}
 		else {
-			PropertyDescriptor descriptor = bw.getPropertyDescriptor(propertyName);
-			return converter.convertIfNecessary(
-					value, descriptor.getPropertyType(), new MethodParameter(descriptor.getWriteMethod(), 0));
+			PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
+			MethodParameter methodParam = BeanUtils.getWriteMethodParameter(pd);
+			return converter.convertIfNecessary(value, pd.getPropertyType(), methodParam);
 		}
 	}
 

@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Date;
@@ -225,18 +226,15 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	public void testSPR2454() throws Exception {
 		Map typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
-		TypeVariable variable2 = findTypeVariable(YourHomer.class, "L");
 		TypeVariable variable = findTypeVariable(MyHomer.class, "L");
-		assertEquals(AbstractBounded.class, typeVariableMap.get(variable));
+		assertEquals(AbstractBounded.class, ((ParameterizedType) typeVariableMap.get(variable)).getRawType());
 	}
 
 	public void testSPR2603() throws Exception {
 		Method objectBridge = YourHomer.class.getDeclaredMethod("foo", Bounded.class);
-
 		Method abstractBoundedFoo = YourHomer.class.getDeclaredMethod("foo", AbstractBounded.class);
 
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(objectBridge);
-
 		assertEquals("foo(AbstractBounded) not resolved.", abstractBoundedFoo, bridgedMethod);
 	}
 

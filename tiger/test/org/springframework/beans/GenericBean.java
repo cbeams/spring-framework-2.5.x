@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.core.io.Resource;
 /**
  * @author Juergen Hoeller
  */
-public class GenericBean {
+public class GenericBean<T> {
 
 	private Set<Integer> integerSet;
 
@@ -55,6 +55,10 @@ public class GenericBean {
 	private Map<Integer, List<Integer>> mapOfLists;
 
 	private CustomEnum customEnum;
+
+	private T genericProperty;
+
+	private List<T> genericListProperty;
 
 
 	public GenericBean() {
@@ -175,6 +179,22 @@ public class GenericBean {
 
 	public void setMapOfLists(Map<Integer, List<Integer>> mapOfLists) {
 		this.mapOfLists = mapOfLists;
+	}
+
+	public T getGenericProperty() {
+		return genericProperty;
+	}
+
+	public void setGenericProperty(T genericProperty) {
+		this.genericProperty = genericProperty;
+	}
+
+	public List<T> getGenericListProperty() {
+		return genericListProperty;
+	}
+
+	public void setGenericListProperty(List<T> genericListProperty) {
+		this.genericListProperty = genericListProperty;
 	}
 
 	public CustomEnum getCustomEnum() {

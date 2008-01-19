@@ -22,6 +22,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.Map;
@@ -281,14 +282,23 @@ public abstract class GenericCollectionTypeResolver {
 	private static Class extractType(
 			MethodParameter methodParam, Type type, Class source, int typeIndex, int nestingLevel, int currentLevel) {
 
-		if (type instanceof ParameterizedType) {
+		Type resolvedType = type;
+		if (type instanceof TypeVariable && methodParam != null && methodParam.typeVariableMap != null) {
+			Type mappedType = (Type) methodParam.typeVariableMap.get(type);
+			if (mappedType != null) {
+				resolvedType = mappedType;
+			}
+		}
+		if (resolvedType instanceof ParameterizedType) {
 			return extractTypeFromParameterizedType(
-					methodParam, (ParameterizedType) type, source, typeIndex, nestingLevel, currentLevel);
+					methodParam, (ParameterizedType) resolvedType, source, typeIndex, nestingLevel, currentLevel);
 		}
-		if (type instanceof Class) {
-			return extractTypeFromClass(methodParam, (Class) type, source, typeIndex, nestingLevel, currentLevel);
+		else if (resolvedType instanceof Class) {
+			return extractTypeFromClass(methodParam, (Class) resolvedType, source, typeIndex, nestingLevel, currentLevel);
 		}
-		return null;
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -329,6 +339,12 @@ public abstract class GenericCollectionTypeResolver {
 			return null;
 		}
 		Type paramType = paramTypes[typeIndex];
+		if (paramType instanceof TypeVariable && methodParam != null && methodParam.typeVariableMap != null) {
+			Type mappedType = (Type) methodParam.typeVariableMap.get(paramType);
+			if (mappedType != null) {
+				paramType = mappedType;
+			}
+		}
 		if (paramType instanceof WildcardType) {
 			Type[] lowerBounds = ((WildcardType) paramType).getLowerBounds();
 			if (lowerBounds != null && lowerBounds.length > 0) {
