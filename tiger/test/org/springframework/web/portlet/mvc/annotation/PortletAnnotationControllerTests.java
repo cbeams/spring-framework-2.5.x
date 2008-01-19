@@ -35,6 +35,8 @@ import javax.portlet.RenderResponse;
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.DerivedTestBean;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -48,6 +50,7 @@ import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -147,6 +150,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.refresh();
 				return wac;
 			}
+
 			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -169,6 +173,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.refresh();
 				return wac;
 			}
+
 			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -194,6 +199,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.refresh();
 				return wac;
 			}
+
 			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -206,7 +212,42 @@ public class PortletAnnotationControllerTests extends TestCase {
 		request.addParameter("date", "2007-10-02");
 		MockRenderResponse response = new MockRenderResponse();
 		portlet.render(request, response);
-		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+	}
+
+	public void testTypedCommandProvidingFormController() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+
+			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
+				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		request.addParameter("defaultName", "10");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView-Integer:10-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("defaultName", "10");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView-myName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
 	public void testBinderInitializingCommandProvidingFormController() throws Exception {
@@ -217,6 +258,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.refresh();
 				return wac;
 			}
+
 			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -229,7 +271,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		request.addParameter("date", "2007-10-02");
 		MockRenderResponse response = new MockRenderResponse();
 		portlet.render(request, response);
-		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
 	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
@@ -240,6 +282,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.refresh();
 				return wac;
 			}
+
 			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -252,7 +295,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		request.addParameter("date", "2007-10-02");
 		MockRenderResponse response = new MockRenderResponse();
 		portlet.render(request, response);
-		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
 	public void testParameterDispatchingController() throws Exception {
@@ -315,17 +358,17 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("EDIT")
-		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2, RenderResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1")String p1, @RequestParam("param2")int p2, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2);
 		}
 
 		@RequestMapping("HELP")
-		public void myHandle(TestBean tb, RenderResponse response) throws IOException  {
+		public void myHandle(TestBean tb, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("VIEW")
-		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}
@@ -340,17 +383,17 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("EDIT")
-		public void myHandle(@RequestParam("param1") String p1, int param2, RenderResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1")String p1, int param2, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("HELP")
-		public void myHandle(TestBean tb, RenderResponse response) throws IOException  {
+		public void myHandle(TestBean tb, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("VIEW")
-		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}
@@ -366,17 +409,17 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("EDIT")
-		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2, RenderResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1")String p1, @RequestParam("param2")int p2, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2);
 		}
 
 		@RequestMapping("HELP")
-		public void myHandle(TestBean tb, RenderResponse response) throws IOException  {
+		public void myHandle(TestBean tb, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping
-		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}
@@ -394,7 +437,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("VIEW")
-		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, ModelMap model) {
 			if (!model.containsKey("myKey")) {
 				model.addAttribute("myKey", "myValue");
 			}
@@ -415,7 +458,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("VIEW")
-		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, Model model) {
+		public String myHandle(@ModelAttribute("myCommand")TestBean tb, BindingResult errors, Model model) {
 			if (!model.containsAttribute("myKey")) {
 				model.addAttribute("myKey", "myValue");
 			}
@@ -425,13 +468,13 @@ public class PortletAnnotationControllerTests extends TestCase {
 
 
 	@Controller
-	private static class MyCommandProvidingFormController extends MyFormController {
+	private static class MyCommandProvidingFormController<T, TB, TB2> extends MyFormController {
 
 		@ModelAttribute("myCommand")
 		private TestBean createTestBean(
-				@RequestParam String defaultName, Map<String, Object> model, @RequestParam Date date) {
+				@RequestParam T defaultName, Map<String, Object> model, @RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
-			return new TestBean(defaultName);
+			return new TestBean(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
 		}
 
 		@RequestMapping("VIEW")
@@ -441,6 +484,26 @@ public class PortletAnnotationControllerTests extends TestCase {
 			}
 			return "myView";
 		}
+
+		@RequestMapping("EDIT")
+		public String myOtherHandle(TB tb, BindingResult errors, ExtendedModelMap model) {
+			TestBean tbReal = (TestBean) tb;
+			tbReal.setName("myName");
+			assertTrue(model.get("ITestBean") instanceof DerivedTestBean);
+			return super.myHandle(tbReal, errors, model);
+		}
+
+		@ModelAttribute
+		protected TB2 getModelAttr() {
+			return (TB2) new DerivedTestBean();
+		}
+	}
+
+
+	@Controller
+	private static class MyTypedCommandProvidingFormController
+			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
+
 	}
 
 
@@ -521,11 +584,17 @@ public class PortletAnnotationControllerTests extends TestCase {
 	private static class TestView {
 
 		public void render(String viewName, Map model, RenderRequest request, RenderResponse response) throws Exception {
-			TestBean tb = (TestBean) model.get("myCommand");
-			if ("myDefaultName".equals(tb.getName())) {
+			TestBean tb = (TestBean) model.get("testBean");
+			if (tb == null) {
+				tb = (TestBean) model.get("myCommand");
+			}
+			if (tb.getName().endsWith("myDefaultName")) {
 				assertTrue(tb.getDate().getYear() == 107);
 			}
-			Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
+			Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
+			if (errors == null) {
+				errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
+			}
 			if (errors.hasFieldErrors("date")) {
 				throw new IllegalStateException();
 			}

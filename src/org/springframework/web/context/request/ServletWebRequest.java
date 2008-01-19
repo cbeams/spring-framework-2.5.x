@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class ServletWebRequest extends ServletRequestAttributes implements WebRequest {
+public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
 	private static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
 
@@ -60,6 +60,22 @@ public class ServletWebRequest extends ServletRequestAttributes implements WebRe
 	public ServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request);
 		this.response = response;
+	}
+
+
+	/**
+	 * Exposes the native {@link HttpServletRequest} that we're wrapping (if any).
+	 */
+	public final HttpServletResponse getResponse() {
+		return this.response;
+	}
+
+	public Object getNativeRequest() {
+		return getRequest();
+	}
+
+	public Object getNativeResponse() {
+		return getResponse();
 	}
 
 

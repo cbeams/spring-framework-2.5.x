@@ -21,10 +21,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * {@link org.springframework.web.context.request.WebRequest} adapter
@@ -33,7 +34,10 @@ import org.springframework.web.context.request.WebRequest;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class PortletWebRequest extends PortletRequestAttributes implements WebRequest {
+public class PortletWebRequest extends PortletRequestAttributes implements NativeWebRequest {
+
+	private PortletResponse response;
+
 
 	/**
 	 * Create a new PortletWebRequest instance for the given request.
@@ -41,6 +45,32 @@ public class PortletWebRequest extends PortletRequestAttributes implements WebRe
 	 */
 	public PortletWebRequest(PortletRequest request) {
 		super(request);
+	}
+
+	/**
+	 * Create a new PortletWebRequest instance for the given request/response pair.
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 */
+	public PortletWebRequest(PortletRequest request, PortletResponse response) {
+		super(request);
+		this.response = response;
+	}
+
+
+	/**
+	 * Exposes the native {@link PortletResponse} that we're wrapping (if any).
+	 */
+	public final PortletResponse getResponse() {
+		return this.response;
+	}
+
+	public Object getNativeRequest() {
+		return getRequest();
+	}
+
+	public Object getNativeResponse() {
+		return getResponse();
 	}
 
 

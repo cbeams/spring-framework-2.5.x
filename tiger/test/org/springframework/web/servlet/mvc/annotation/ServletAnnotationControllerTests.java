@@ -34,6 +34,8 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.DerivedTestBean;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -44,6 +46,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -271,7 +274,40 @@ public class ServletAnnotationControllerTests extends TestCase {
 		request.addParameter("date", "2007-10-02");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+	}
+
+	public void testTypedCommandProvidingFormController() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("defaultName", "10");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView-Integer:10-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myOtherPath.do");
+		request.addParameter("defaultName", "10");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView-myName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
 	public void testBinderInitializingCommandProvidingFormController() throws Exception {
@@ -293,7 +329,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		request.addParameter("date", "2007-10-02");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
 	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
@@ -315,7 +351,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		request.addParameter("date", "2007-10-02");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
 	public void testParameterDispatchingController() throws Exception {
@@ -584,20 +620,39 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 
 	@Controller
-	private static class MyCommandProvidingFormController extends MyFormController {
+	private static class MyCommandProvidingFormController<T, TB, TB2> extends MyFormController {
 
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
 		private TestBean createTestBean(
-				@RequestParam String defaultName, Map<String, Object> model, @RequestParam Date date) {
+				@RequestParam T defaultName, Map<String, Object> model, @RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
-			return new TestBean(defaultName);
+			return new TestBean(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
 		}
 
 		@RequestMapping("/myPath.do")
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
 			return super.myHandle(tb, errors, model);
 		}
+
+		@RequestMapping("/myOtherPath.do")
+		public String myOtherHandle(TB tb, BindingResult errors, ExtendedModelMap model) {
+			TestBean tbReal = (TestBean) tb;
+			tbReal.setName("myName");
+			assertTrue(model.get("ITestBean") instanceof DerivedTestBean);
+			return super.myHandle(tbReal, errors, model);
+		}
+
+		@ModelAttribute
+		protected TB2 getModelAttr() {
+			return (TB2) new DerivedTestBean();
+		}
+	}
+
+
+	@Controller
+	private static class MyTypedCommandProvidingFormController
+			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
 	}
 
 
@@ -737,11 +792,17 @@ public class ServletAnnotationControllerTests extends TestCase {
 				}
 				@SuppressWarnings({ "unchecked", "deprecation" })
 				public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-					TestBean tb = (TestBean) model.get("myCommand");
-					if ("myDefaultName".equals(tb.getName())) {
+					TestBean tb = (TestBean) model.get("testBean");
+					if (tb == null) {
+						tb = (TestBean) model.get("myCommand");
+					}
+					if (tb.getName().endsWith("myDefaultName")) {
 						assertTrue(tb.getDate().getYear() == 107);
 					}
-					Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
+					Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
+					if (errors == null) {
+						errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
+					}
 					if (errors.hasFieldErrors("date")) {
 						throw new IllegalStateException();
 					}
