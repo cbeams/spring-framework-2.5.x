@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.servlet.ServletContext;
@@ -68,7 +69,7 @@ public class ServletContextResource extends AbstractResource implements ContextR
 		this.servletContext = servletContext;
 
 		// check path
-		Assert.notNull(path, "path is required");
+		Assert.notNull(path, "Path is required");
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -89,6 +90,20 @@ public class ServletContextResource extends AbstractResource implements ContextR
 		return this.path;
 	}
 
+
+	/**
+	 * This implementation checks <code>ServletContext.getResource</code>.
+	 * @see javax.servlet.ServletContext#getResource(String)
+	 */
+	public boolean exists() {
+		try {
+			URL url = this.servletContext.getResource(this.path);
+			return (url != null);
+		}
+		catch (MalformedURLException ex) {
+			return false;
+		}
+	}
 
 	/**
 	 * This implementation delegates to <code>ServletContext.getResourceAsStream</code>,

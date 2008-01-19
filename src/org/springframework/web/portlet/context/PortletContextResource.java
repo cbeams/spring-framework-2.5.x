@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.portlet.PortletContext;
@@ -68,7 +69,7 @@ public class PortletContextResource extends AbstractResource implements ContextR
 		this.portletContext = portletContext;
 
 		// check path
-		Assert.notNull(path, "path is required");
+		Assert.notNull(path, "Path is required");
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
@@ -91,9 +92,23 @@ public class PortletContextResource extends AbstractResource implements ContextR
 
 
 	/**
-	 * This implementation delegates to PortletContext.getResourceAsStream,
+	 * This implementation checks <code>PortletContext.getResource</code>.
+	 * @see javax.portlet.PortletContext#getResource(String)
+	 */
+	public boolean exists() {
+		try {
+			URL url = this.portletContext.getResource(this.path);
+			return (url != null);
+		}
+		catch (MalformedURLException ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * This implementation delegates to <code>PortletContext.getResourceAsStream</code>,
 	 * but throws a FileNotFoundException if not found.
-	 * @see javax.portlet.PortletContext#getResourceAsStream
+	 * @see javax.portlet.PortletContext#getResourceAsStream(String)
 	 */
 	public InputStream getInputStream() throws IOException {
 		InputStream is = this.portletContext.getResourceAsStream(this.path);
@@ -103,6 +118,11 @@ public class PortletContextResource extends AbstractResource implements ContextR
 		return is;
 	}
 
+	/**
+	 * This implementation delegates to <code>PortletContext.getResource</code>,
+	 * but throws a FileNotFoundException if no resource found.
+	 * @see javax.portlet.PortletContext#getResource(String)
+	 */
 	public URL getURL() throws IOException {
 		URL url = this.portletContext.getResource(this.path);
 		if (url == null) {
@@ -113,9 +133,9 @@ public class PortletContextResource extends AbstractResource implements ContextR
 	}
 
 	/**
-	 * This implementation delegates to PortletContext.getRealPath,
+	 * This implementation delegates to <code>PortletContext.getRealPath</code>,
 	 * but throws a FileNotFoundException if not found or not resolvable.
-	 * @see javax.portlet.PortletContext#getRealPath
+	 * @see javax.portlet.PortletContext#getRealPath(String)
 	 */
 	public File getFile() throws IOException {
 		String realPath = PortletUtils.getRealPath(this.portletContext, this.path);
