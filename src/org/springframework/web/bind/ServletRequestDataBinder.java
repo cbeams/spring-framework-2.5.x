@@ -111,8 +111,8 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	}
 
 	/**
-	 * Treats errors as fatal. Use this method only if
-	 * it's an error if the input isn't valid.
+	 * Treats errors as fatal.
+	 * <p>Use this method only if it's an error if the input isn't valid.
 	 * This might be appropriate if all input is from dropdowns, for example.
 	 * @throws ServletRequestBindingException subclass of ServletException on any binding problem
 	 */
