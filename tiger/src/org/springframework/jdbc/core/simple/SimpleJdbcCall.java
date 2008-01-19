@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * A SimpleJdbcCall is a multi-threaded, reusable object representing a call
  * to a stored procedure or a stored function. It provides meta data processing
  * to simplify the code needed to access basic stored procedures/functions.
- * All you need to provide is the name of the procedure/fumnction and a Map
+ * All you need to provide is the name of the procedure/function and a Map
  * containing the parameters when you execute the call. The names of the
  * supplied parameters will be matched up with in and out parameters declared
  * when the stored procedure was created.
@@ -42,7 +42,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * can only be used for databases that are known to provide accurate meta data.
  * These currently include Derby, MySQL, Microsoft SQL Server, Oracle and DB2.
  * For any other databases you are required to declare all parameters explicitly.
- * You can of course declare all parameters explictly even if the database provides
+ * You can of course declare all parameters explicitly even if the database provides
  * the necessary meta data. In that case your declared parameters will take precedence.
  * You can also turn off any mete data processing if you want to use parameter names
  * that do not match what is declared during the stored procedure compilation.
@@ -51,7 +51,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * <p>Many of the configuration methods return the current instance of the SimpleJdbcCall
- * to provide the ablity to string multiple ones together in a "fluid" interface style.
+ * to provide the ability to string multiple ones together in a "fluid" interface style.
  *
  * @author Thomas Risberg
  * @since 2.5

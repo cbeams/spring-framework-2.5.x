@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,9 +30,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ConcurrentExecutorAdapter;
 
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a simple
- * HTTP server, based on the HTTP server that is included Sun's JRE 1.6.
+ * HTTP server, based on the HTTP server that is included in Sun's JRE 1.6.
  * Starts the HTTP server on initialization and stops it on destruction.
  * Exposes the resulting {@link com.sun.net.httpserver.HttpServer} object.
  *
@@ -119,8 +120,8 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 
 
 	public void afterPropertiesSet() throws IOException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Initializing HttpServer for port " + this.port);
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Initializing HttpServer for port " + this.port);
 		}
 		this.server = HttpServer.create(new InetSocketAddress(this.port), this.backlog);
 		if (this.executor != null) {
