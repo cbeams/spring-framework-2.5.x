@@ -10,9 +10,14 @@ General
 * updated transaction management chapter in the reference documentation
 
 Package org.springframework.beans
+* BeanWrapperImpl resolves the target type for a generically typed bean property, performing appropriate type conversion
+* AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
+* AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
+* fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
 * refactored AbstractBeanConfigurerAspect into Abstract(InterfaceDriven)DependencyInjectionAspect
 
 Package org.springframework.core
+* factored out GenericTypeResolver from BridgeMethodResolver and GenericCollectionTypeResolver
 * fixed ClassMetadataReadingVisitor (as used by "context:component-scan") to correctly ignore *usage* of inner classes
 
 Package org.springframework.ejb
@@ -30,14 +35,23 @@ Package org.springframework.jdbc
 * deprecated BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
 * added ParameterizedSingleColumnRowMapper with a convenient "newInstance" method to specify the required type only once
 
+Package org.springframework.jms
+* improved SimpleMessageConverter's exception message for an unsupported message payload
+
 Package org.springframework.orm
 * introduced "postProcessMappings" template method in Hibernate LocalSessionFactoryBean
 * fixed Hibernate AnnotationSessionFactoryBean to allow for mixed mapping sources (despite 2.5.1's "buildMappings" call)
+* HibernateTemplate exposes the "org.hibernate.event.EventSource" and "org.hibernate.classic.Session" interfaces as well
 * introduced "EntityManagerFactoryUtils.closeEntityManager" method that protects against exceptions thrown from close
 * Hibernate/Jpa/JdoTransactionManager explicitly rollback an active transaction before closing when begin failed
 
 Package org.springframework.test
-* TestContextManager ignores default TestExecutionListeners that cannot be instantiated (i.e. due to spring-tx missing)
+* TestContextManager ignores default TestExecutionListeners that cannot be instantiated (e.g. due to spring-tx missing)
+
+Package org.springframework.web
+* introduced NativeWebRequest and MultipartRequest interfaces for even finer-grained generic request access options
+* factored out common HandlerMethodResolver/Invoker classes from Servlet/Portlet AnnotationMethodHandlerAdapter
+* AnnotationMethodHandlerAdapter resolves the target type for a generically typed @RequestParam/@ModelAttribute argument
 
 
 Changes in version 2.5.1 (2008-01-09)
