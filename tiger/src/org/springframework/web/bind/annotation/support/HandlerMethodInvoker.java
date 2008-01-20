@@ -62,6 +62,9 @@ import org.springframework.web.multipart.MultipartRequest;
  */
 public class HandlerMethodInvoker {
 
+	protected static final Object UNRESOLVED = new Object();
+
+
 	private final HandlerMethodResolver methodResolver;
 
 	private final WebBindingInitializer bindingInitializer;
@@ -120,6 +123,7 @@ public class HandlerMethodInvoker {
 		Object[] args = new Object[paramTypes.length];
 		String[] paramNames = null;
 		boolean paramNamesResolved = false;
+
 		for (int i = 0; i < args.length; i++) {
 			MethodParameter param = new MethodParameter(handlerMethod, i);
 			GenericTypeResolver.resolveParameterType(param, handler.getClass());
@@ -128,6 +132,7 @@ public class HandlerMethodInvoker {
 			boolean paramRequired = false;
 			String attrName = null;
 			Annotation[] paramAnns = (Annotation[]) param.getParameterAnnotations();
+
 			for (int j = 0; j < paramAnns.length; j++) {
 				Annotation paramAnn = paramAnns[j];
 				if (RequestParam.class.isInstance(paramAnn)) {
@@ -146,19 +151,21 @@ public class HandlerMethodInvoker {
 				throw new IllegalStateException("@RequestParam and @ModelAttribute are an exclusive choice -" +
 						"do not specify both on the same parameter: " + handlerMethod);
 			}
+
+			Class paramType = param.getParameterType();
 			if (!isParam && attrName == null) {
-				args[i] = resolveStandardArgument(webRequest, param.getParameterType());
-				if (args[i] == null) {
-					if (Model.class.isAssignableFrom(param.getParameterType()) ||
-							Map.class.isAssignableFrom(param.getParameterType())) {
+				Object argValue = resolveStandardArgument(webRequest, paramType);
+				if (argValue != UNRESOLVED) {
+					args[i] = argValue;
+				}
+				else {
+					if (Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType)) {
 						args[i] = implicitModel;
 					}
-					else if (SessionStatus.class.isAssignableFrom(param.getParameterType())) {
+					else if (SessionStatus.class.isAssignableFrom(paramType)) {
 						args[i] = this.sessionStatus;
 					}
-				}
-				if (args[i] == null) {
-					if (BeanUtils.isSimpleProperty(param.getParameterType())) {
+					else if (BeanUtils.isSimpleProperty(paramType)) {
 						isParam = true;
 					}
 					else {
@@ -174,9 +181,8 @@ public class HandlerMethodInvoker {
 						paramNamesResolved = true;
 					}
 					if (paramNames == null) {
-						throw new IllegalStateException("No parameter specified for @RequestParam argument " +
-								"of type [" + param.getParameterType().getName() + "], and no parameter name " +
-								"information found in class file either.");
+						throw new IllegalStateException("No parameter specified for @RequestParam argument of type [" +
+								paramType.getName() + "], and no parameter name information found in class file either.");
 					}
 					paramName = paramNames[i];
 				}
@@ -192,26 +198,24 @@ public class HandlerMethodInvoker {
 				}
 				if (paramValue == null) {
 					if (paramRequired) {
-						raiseMissingParameterException(paramName, param.getParameterType());
+						raiseMissingParameterException(paramName, paramType);
 					}
-					if (param.getParameterType().isPrimitive()) {
-						throw new IllegalStateException("Optional " + param.getParameterType() + " parameter '" +
-								paramName + "' is not present but cannot be translated into a null value due to " +
-								"being declared as a primitive type. Consider declaring it as object wrapper type " +
-								"for the corresponding primitive type.");
+					if (paramType.isPrimitive()) {
+						throw new IllegalStateException("Optional " + paramType + " parameter '" + paramName +
+								"' is not present but cannot be translated into a null value due to being declared as a " +
+								"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
 					}
 				}
 				WebDataBinder binder = createBinder(webRequest, null, paramName);
 				initBinder(handler, paramName, binder, webRequest);
-				args[i] = binder.convertIfNecessary(paramValue, param.getParameterType(), param);
+				args[i] = binder.convertIfNecessary(paramValue, paramType, param);
 			}
 			else if (attrName != null) {
 				// Bind request parameter onto object...
 				if ("".equals(attrName)) {
 					attrName = Conventions.getVariableNameForParameter(param);
 				}
-				if (!implicitModel.containsKey(attrName) &&
-						this.methodResolver.isSessionAttribute(attrName, param.getParameterType())) {
+				if (!implicitModel.containsKey(attrName) && this.methodResolver.isSessionAttribute(attrName, paramType)) {
 					Object sessionAttr = this.sessionAttributeStore.retrieveAttribute(webRequest, attrName);
 					if (sessionAttr == null) {
 						raiseSessionRequiredException("Session attribute '" + attrName + "' required - not found in session");
@@ -220,7 +224,7 @@ public class HandlerMethodInvoker {
 				}
 				Object bindObject = implicitModel.get(attrName);
 				if (bindObject == null) {
-					bindObject = BeanUtils.instantiateClass(param.getParameterType());
+					bindObject = BeanUtils.instantiateClass(paramType);
 				}
 				WebDataBinder binder = createBinder(webRequest, bindObject, attrName);
 				initBinder(handler, attrName, binder, webRequest);
@@ -252,10 +256,18 @@ public class HandlerMethodInvoker {
 				Class[] initBinderParams = initBinderMethod.getParameterTypes();
 				Object[] initBinderArgs = new Object[initBinderParams.length];
 				for (int j = 0; j < initBinderArgs.length; j++) {
-					initBinderArgs[j] = resolveStandardArgument(webRequest, initBinderParams[j]);
-					if (initBinderArgs[j] == null) {
-						if (initBinderParams[j].isInstance(binder)) {
+					Class paramType = initBinderParams[j];
+					Object argValue = resolveStandardArgument(webRequest, paramType);
+					if (argValue != UNRESOLVED) {
+						initBinderArgs[j] = argValue;
+					}
+					else {
+						if (paramType.isInstance(binder)) {
 							initBinderArgs[j] = binder;
+						}
+						else {
+							throw new IllegalStateException("Unsupported argument [" + paramType.getName() +
+									"] for InitBinder method: " + initBinderMethod);
 						}
 					}
 				}
@@ -342,7 +354,7 @@ public class HandlerMethodInvoker {
 			return webRequest;
 		}
 		else {
-			return null;
+			return UNRESOLVED;
 		}
 	}
 

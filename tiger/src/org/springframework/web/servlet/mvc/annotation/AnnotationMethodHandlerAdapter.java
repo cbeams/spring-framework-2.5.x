@@ -64,7 +64,6 @@ import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -497,9 +496,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			else if (HttpSession.class.isAssignableFrom(parameterType)) {
 				return request.getSession();
 			}
-			else if (WebRequest.class.isAssignableFrom(parameterType)) {
-				return webRequest;
-			}
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
 			}
@@ -521,7 +517,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				return response.getWriter();
 			}
 			else {
-				return null;
+				return super.resolveStandardArgument(webRequest, parameterType);
 			}
 		}
 

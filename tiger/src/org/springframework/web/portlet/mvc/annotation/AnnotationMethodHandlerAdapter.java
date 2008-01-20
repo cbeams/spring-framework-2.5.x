@@ -16,7 +16,6 @@
 
 package org.springframework.web.portlet.mvc.annotation;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -63,7 +62,6 @@ import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
@@ -439,7 +437,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		@Override
 		protected Object resolveStandardArgument(NativeWebRequest webRequest, Class<?> parameterType)
-				throws IOException {
+				throws Exception {
 
 			PortletRequest request = (PortletRequest) webRequest.getNativeRequest();
 			PortletResponse response = (PortletResponse) webRequest.getNativeResponse();
@@ -464,9 +462,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 			else if (PortalContext.class.isAssignableFrom(parameterType)) {
 				return request.getPortalContext();
-			}
-			else if (WebRequest.class.isAssignableFrom(parameterType)) {
-				return webRequest;
 			}
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
@@ -499,7 +494,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				return ((RenderResponse) response).getWriter();
 			}
 			else {
-				return null;
+				return super.resolveStandardArgument(webRequest, parameterType);
 			}
 		}
 
