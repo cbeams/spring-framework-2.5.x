@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,22 @@ package org.springframework.scripting.support;
 
 import org.springframework.aop.target.dynamic.BeanFactoryRefreshableTargetSource;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 
 /**
- * Subclass of BeanFactoryRefreshableTargetSource that determines whether a
- * refresh is required through the given ScriptSource.
+ * Subclass of {@link BeanFactoryRefreshableTargetSource} that determines whether
+ * a refresh is required through the given {@link ScriptFactory}.
  *
  * @author Rob Harrop
- * @author Rod Johnson
+ * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.0
  */
 public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetSource {
+
+	private final ScriptFactory scriptFactory;
 
 	private final ScriptSource scriptSource;
 
@@ -39,35 +42,40 @@ public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetS
 
 	/**
 	 * Create a new RefreshableScriptTargetSource.
-	 * @param beanFactory the BeanFactory to fetch beans from
+	 * @param beanFactory the BeanFactory to fetch the scripted bean from
 	 * @param beanName the name of the target bean
-	 * @param scriptSource the ScriptSource to delegate to
-	 * for determining whether a refresh is required
+	 * @param scriptFactory the ScriptFactory to delegate to for determining
+	 * whether a refresh is required
+	 * @param scriptSource the ScriptSource for the script definition
+	 * @param isFactoryBean whether the target script defines a FactoryBean
 	 */
-	public RefreshableScriptTargetSource(BeanFactory beanFactory, String beanName, ScriptSource scriptSource, boolean isFactoryBean) {
+	public RefreshableScriptTargetSource(BeanFactory beanFactory, String beanName,
+			ScriptFactory scriptFactory, ScriptSource scriptSource, boolean isFactoryBean) {
+
 		super(beanFactory, beanName);
+		Assert.notNull(scriptFactory, "ScriptFactory must not be null");
 		Assert.notNull(scriptSource, "ScriptSource must not be null");
+		this.scriptFactory = scriptFactory;
 		this.scriptSource = scriptSource;
 		this.isFactoryBean = isFactoryBean;
 	}
 
+
 	/**
 	 * Determine whether a refresh is required through calling
-	 * ScriptSource's <code>isModified()</code> method.
-	 * @see org.springframework.scripting.ScriptSource#isModified()
+	 * ScriptFactory's <code>requiresScriptedObjectRefresh</code> method.
+	 * @see ScriptFactory#requiresScriptedObjectRefresh(ScriptSource)
 	 */
 	protected boolean requiresRefresh() {
-		return this.scriptSource.isModified();
+		return this.scriptFactory.requiresScriptedObjectRefresh(this.scriptSource);
 	}
 
 	/**
 	 * Obtain a fresh target object, retrieving a FactoryBean if necessary.
 	 */
 	protected Object obtainFreshBean(BeanFactory beanFactory, String beanName) {
-		if (isFactoryBean) {
-			beanName = BeanFactory.FACTORY_BEAN_PREFIX + beanName;
-		}
-		return super.obtainFreshBean(beanFactory, beanName);
+		return super.obtainFreshBean(beanFactory,
+				(this.isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName));
 	}
 
 }

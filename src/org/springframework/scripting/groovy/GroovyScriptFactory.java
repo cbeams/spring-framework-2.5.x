@@ -66,6 +66,8 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	private final Object scriptClassMonitor = new Object();
 
+	private boolean wasModifiedForTypeCheck = false;
+
 
 	/**
 	 * Create a new GroovyScriptFactory for the given script source.
@@ -153,12 +155,16 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 			Class scriptClassToExecute = null;
 
 			synchronized (this.scriptClassMonitor) {
+				this.wasModifiedForTypeCheck = false;
+
 				if (this.cachedResult != null) {
 					Object result = this.cachedResult.object;
 					this.cachedResult = null;
 					return result;
 				}
+
 				if (this.scriptClass == null || scriptSource.isModified()) {
+					// New script content...
 					this.scriptClass = getGroovyClassLoader().parseClass(
 							scriptSource.getScriptAsString(), scriptSource.toString());
 
@@ -188,6 +194,8 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 		synchronized (this.scriptClassMonitor) {
 			if (this.scriptClass == null || scriptSource.isModified()) {
+				// New script content...
+				this.wasModifiedForTypeCheck = true;
 				this.scriptClass = getGroovyClassLoader().parseClass(
 						scriptSource.getScriptAsString(), scriptSource.toString());
 
@@ -204,6 +212,13 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 			return this.scriptResultClass;
 		}
 	}
+
+	public boolean requiresScriptedObjectRefresh(ScriptSource scriptSource) {
+		synchronized (this.scriptClassMonitor) {
+			return (scriptSource.isModified() || this.wasModifiedForTypeCheck);
+		}
+	}
+
 
 	/**
 	 * Instantiate the given Groovy script class and run it if necessary.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,5 +93,16 @@ public interface ScriptFactory {
 	 */
 	Class getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException;
+
+	/**
+	 * Determine whether a refresh is required (e.g. through
+	 * ScriptSource's <code>isModified()</code> method).
+	 * @param scriptSource the actual ScriptSource to retrieve
+	 * the script source text from (never <code>null</code>)
+	 * @return whether a fresh {@link #getScriptedObject} call is required
+	 * @since 2.5.2
+	 * @see ScriptSource#isModified()
+	 */
+	boolean requiresScriptedObjectRefresh(ScriptSource scriptSource);
 
 }

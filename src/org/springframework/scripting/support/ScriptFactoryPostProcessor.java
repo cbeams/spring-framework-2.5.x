@@ -293,8 +293,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 		if (refreshCheckDelay >= 0) {
 			Class[] interfaces = scriptFactory.getScriptInterfaces();
-			RefreshableScriptTargetSource ts =
-					new RefreshableScriptTargetSource(this.scriptBeanFactory, scriptedObjectBeanName, scriptSource, isFactoryBean);
+			RefreshableScriptTargetSource ts = new RefreshableScriptTargetSource(
+					this.scriptBeanFactory, scriptedObjectBeanName, scriptFactory, scriptSource, isFactoryBean);
 			ts.setRefreshCheckDelay(refreshCheckDelay);
 			return createRefreshableProxy(ts, interfaces);
 		}

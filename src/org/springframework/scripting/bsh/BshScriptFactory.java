@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,8 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	private Class scriptClass;
 
 	private final Object scriptClassMonitor = new Object();
+
+	private boolean wasModifiedForTypeCheck = false;
 
 
 	/**
@@ -111,8 +113,12 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 		try {
 			Class clazz = null;
+
 			synchronized (this.scriptClassMonitor) {
-				if (scriptSource.isModified()) {
+				boolean requiresScriptEvaluation = (this.wasModifiedForTypeCheck && this.scriptClass == null);
+				this.wasModifiedForTypeCheck = false;
+
+				if (scriptSource.isModified() || requiresScriptEvaluation) {
 					// New script content: Let's check whether it evaluates to a Class.
 					Object result = BshScriptUtils.evaluateBshScript(
 							scriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
@@ -131,6 +137,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 				}
 				clazz = this.scriptClass;
 			}
+
 			if (clazz != null) {
 				// A Class: We need to create an instance for every call.
 				try {
@@ -159,6 +166,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 			synchronized (this.scriptClassMonitor) {
 				if (scriptSource.isModified()) {
 					// New script content: Let's check whether it evaluates to a Class.
+					this.wasModifiedForTypeCheck = true;
 					this.scriptClass = BshScriptUtils.determineBshObjectType(scriptSource.getScriptAsString());
 				}
 				return this.scriptClass;
@@ -166,6 +174,12 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 		catch (EvalError ex) {
 			throw new ScriptCompilationException(scriptSource, ex);
+		}
+	}
+
+	public boolean requiresScriptedObjectRefresh(ScriptSource scriptSource) {
+		synchronized (this.scriptClassMonitor) {
+			return (scriptSource.isModified() || this.wasModifiedForTypeCheck);
 		}
 	}
 
