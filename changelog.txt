@@ -9,15 +9,23 @@ Changes in version 2.5.2 (2008-02-06)
 General
 * updated transaction management chapter in the reference documentation
 
+Package org.springframework.aop
+* marked AbstractRefreshableTargetSource's status accessors as synchronized
+
 Package org.springframework.beans
 * BeanWrapperImpl resolves the target type for a generically typed bean property, performing appropriate type conversion
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
 * refactored AbstractBeanConfigurerAspect into Abstract(InterfaceDriven)DependencyInjectionAspect
+* nested XML decoration elements (e.g. "aop:scoped-proxy") are explicitly rejected if no corresponding handler present
+
+Package org.springframework.context
+* "context:component-scan" explictly ignores directories that accidentally match a specified custom resource pattern
 
 Package org.springframework.core
 * factored out GenericTypeResolver from BridgeMethodResolver and GenericCollectionTypeResolver
+* added "isReadable()" method to Resource interface, giving a readability hint upfront (supported by FileSystemResource)
 * fixed ClassMetadataReadingVisitor (as used by "context:component-scan") to correctly ignore *usage* of inner classes
 
 Package org.springframework.ejb
@@ -45,13 +53,22 @@ Package org.springframework.orm
 * introduced "EntityManagerFactoryUtils.closeEntityManager" method that protects against exceptions thrown from close
 * Hibernate/Jpa/JdoTransactionManager explicitly rollback an active transaction before closing when begin failed
 
+Package org.springframework.scripting
+* introduced "ScriptFactory.requiresScriptedObjectRefresh(ScriptSource)" for object refresh even after a type check call
+* GroovyScriptFactory and JRubyScriptFactory refresh scripted object instances even after an intermediate type check
+* introduced "ScriptSource.suggestedClassName()" for dynamic Groovy scripts that do not define a class themselves
+* GroovyScriptFactory uses resource filename (for files) or bean name (for inline scripts) as suggested class name
+
 Package org.springframework.test
 * TestContextManager ignores default TestExecutionListeners that cannot be instantiated (e.g. due to spring-tx missing)
 
 Package org.springframework.web
+* optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
 * introduced NativeWebRequest and MultipartRequest interfaces for even finer-grained generic request access options
 * factored out common HandlerMethodResolver/Invoker classes from Servlet/Portlet AnnotationMethodHandlerAdapter
 * AnnotationMethodHandlerAdapter resolves the target type for a generically typed @RequestParam/@ModelAttribute argument
+* AnnotationMethodHandlerAdapter properly allows for resolving a Principal argument to null (in case of none defined)
+* added "synchronizeOnSession" property to AnnotationMethodHandlerAdapter, analogous to AbstractController
 
 
 Changes in version 2.5.1 (2008-01-09)
