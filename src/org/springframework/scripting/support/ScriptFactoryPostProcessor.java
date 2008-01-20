@@ -401,7 +401,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		synchronized (this.scriptSourceCache) {
 			ScriptSource scriptSource = (ScriptSource) this.scriptSourceCache.get(beanName);
 			if (scriptSource == null) {
-				scriptSource = convertToScriptSource(scriptSourceLocator, this.resourceLoader);
+				scriptSource = convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader);
 				this.scriptSourceCache.put(beanName, scriptSource);
 			}
 			return scriptSource;
@@ -413,13 +413,16 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * <p>By default, supported locators are Spring resource locations
 	 * (such as "file:C:/myScript.bsh" or "classpath:myPackage/myScript.bsh")
 	 * and inline scripts ("inline:myScriptText...").
+	 * @param beanName the name of the scripted bean
 	 * @param scriptSourceLocator the script source locator
 	 * @param resourceLoader the ResourceLoader to use (if necessary)
 	 * @return the ScriptSource instance
 	 */
-	protected ScriptSource convertToScriptSource(String scriptSourceLocator, ResourceLoader resourceLoader) {
+	protected ScriptSource convertToScriptSource(
+			String beanName, String scriptSourceLocator, ResourceLoader resourceLoader) {
+
 		if (scriptSourceLocator.startsWith(INLINE_SCRIPT_PREFIX)) {
-			return new StaticScriptSource(scriptSourceLocator.substring(INLINE_SCRIPT_PREFIX.length()));
+			return new StaticScriptSource(scriptSourceLocator.substring(INLINE_SCRIPT_PREFIX.length()), beanName);
 		}
 		else {
 			return new ResourceScriptSource(resourceLoader.getResource(scriptSourceLocator));

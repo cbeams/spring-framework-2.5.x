@@ -166,7 +166,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 				if (this.scriptClass == null || scriptSource.isModified()) {
 					// New script content...
 					this.scriptClass = getGroovyClassLoader().parseClass(
-							scriptSource.getScriptAsString(), scriptSource.toString());
+							scriptSource.getScriptAsString(), scriptSource.suggestedClassName());
 
 					if (Script.class.isAssignableFrom(this.scriptClass)) {
 						// A Groovy script, probably creating an instance: let's execute it.
@@ -197,7 +197,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 				// New script content...
 				this.wasModifiedForTypeCheck = true;
 				this.scriptClass = getGroovyClassLoader().parseClass(
-						scriptSource.getScriptAsString(), scriptSource.toString());
+						scriptSource.getScriptAsString(), scriptSource.suggestedClassName());
 
 				if (Script.class.isAssignableFrom(this.scriptClass)) {
 					// A Groovy script, probably creating an instance: let's execute it.

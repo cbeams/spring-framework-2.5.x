@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,5 +42,11 @@ public interface ScriptSource {
 	 * @return whether the script data has been modified
 	 */
 	boolean isModified();
+
+	/**
+	 * Determine a class name for the underlying script.
+	 * @return the suggested class name, or <code>null</code> if none available
+	 */
+	String suggestedClassName();
 
 }

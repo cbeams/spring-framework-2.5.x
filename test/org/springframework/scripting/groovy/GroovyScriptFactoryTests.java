@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,6 +181,8 @@ public class GroovyScriptFactoryTests extends TestCase {
 		script.getScriptAsString();
 		final String badScript = "class Foo { public Foo(String foo) {}}";
 		mock.setReturnValue(badScript);
+		script.suggestedClassName();
+		mock.setReturnValue("someName");
 		mock.replay();
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
 		try {
@@ -199,6 +201,8 @@ public class GroovyScriptFactoryTests extends TestCase {
 		script.getScriptAsString();
 		final String badScript = "class Foo { protected Foo() {}}";
 		mock.setReturnValue(badScript);
+		script.suggestedClassName();
+		mock.setReturnValue("someName");
 		mock.replay();
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
 		try {
@@ -273,7 +277,9 @@ public class GroovyScriptFactoryTests extends TestCase {
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource scriptSource = (ScriptSource) mock.getMock();
 		scriptSource.getScriptAsString();
-		mock.setDefaultReturnValue("class Bar {}");
+		mock.setReturnValue("class Bar {}");
+		scriptSource.suggestedClassName();
+		mock.setReturnValue("someName");
 		mock.replay();
 
 		GroovyScriptFactory factory = new GroovyScriptFactory("a script source locator (doesn't matter here)");
