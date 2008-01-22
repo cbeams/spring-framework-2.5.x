@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,11 +299,11 @@ class PersistenceUnitReader {
 			unitInfo.setExcludeUnlistedClasses(true);
 		}
 
-		// mapping file
 		parseMappingFiles(persistenceUnit, unitInfo);
 		parseJarFiles(persistenceUnit, unitInfo);
 		parseClass(persistenceUnit, unitInfo);
 		parseProperty(persistenceUnit, unitInfo);
+
 		return unitInfo;
 	}
 
@@ -346,8 +346,10 @@ class PersistenceUnitReader {
 		for (Element element : jars) {
 			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
-				Resource resource = this.resourcePatternResolver.getResource(value);
-				unitInfo.addJarFileUrl(resource.getURL());
+				Resource[] resources = this.resourcePatternResolver.getResources(value);
+				for (int i = 0; i < resources.length; i++) {
+					unitInfo.addJarFileUrl(resources[i].getURL());
+				}
 			}
 		}
 	}
@@ -360,8 +362,9 @@ class PersistenceUnitReader {
 		List<Element> files = DomUtils.getChildElementsByTagName(persistenceUnit, MAPPING_FILE_NAME);
 		for (Element element : files) {
 			String value = DomUtils.getTextValue(element).trim();
-			if (StringUtils.hasText(value))
+			if (StringUtils.hasText(value)) {
 				unitInfo.addMappingFileName(value);
+			}
 		}
 	}
 
