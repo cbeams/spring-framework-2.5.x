@@ -104,17 +104,12 @@ public class SingleColumnRowMapper implements RowMapper {
 
 	/**
 	 * Retrieve a JDBC object value for the specified column.
-	 * <p>The default implementation calls <code>ResultSet.getString(index)</code> etc
-	 * for all standard value types (String, Boolean, number types, date types, etc).
-	 * It calls <code>ResultSet.getObject(index)</code> else.
-	 * <p>If no required type has been specified, this method delegates to
+	 * <p>The default implementation calls
+	 * {@link JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)}.
+	 * If no required type has been specified, this method delegates to
 	 * <code>getColumnValue(rs, index)</code>, which basically calls
 	 * <code>ResultSet.getObject(index)</code> but applies some additional
 	 * default conversion to appropriate value types.
-	 * <p>Explicit extraction of a String is necessary to properly extract an Oracle
-	 * RAW value as a String, for example. For the other given types, it is also
-	 * recommendable to extract the desired types explicitly, to let the JDBC driver
-	 * perform appropriate (potentially database-specific) conversion.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param requiredType the type that each result object is expected to match

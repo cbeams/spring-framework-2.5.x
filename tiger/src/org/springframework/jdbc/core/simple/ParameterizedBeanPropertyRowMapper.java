@@ -30,13 +30,13 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * method to be the type parameter <code>T</code>.
  *
  * <p>Column values are mapped based on matching the column name as obtained from result set
- * metadata to public setters for the corresponding properties.  The names are matched either
+ * metadata to public setters for the corresponding properties. The names are matched either
  * directly or by transforming a name separating the parts with underscores to the same name
  * using "camel" case.
  *
- * <p>Mapping is provided for fields in the target class that are defined as any of the
- * following types: String, byte, Byte, short, Short, int, Integer, long, Long, float, Float,
- * double, Double, BigDecimal, boolean, Boolean and java.util.Date.
+ * <p>Mapping is provided for fields in the target class for many common types, e.g.:
+ * String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long, Long,
+ * float, Float, double, Double, BigDecimal, <code>java.util.Date</code>, etc.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".

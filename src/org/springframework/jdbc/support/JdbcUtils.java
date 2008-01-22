@@ -142,7 +142,7 @@ public abstract class JdbcUtils {
 			value = rs.getString(index);
 		}
 		else if (boolean.class.equals(requiredType) || Boolean.class.equals(requiredType)) {
-			value = (rs.getBoolean(index) ? Boolean.TRUE : Boolean.FALSE);
+			value = Boolean.valueOf(rs.getBoolean(index));
 			wasNullCheck = true;
 		}
 		else if (byte.class.equals(requiredType) || Byte.class.equals(requiredType)) {

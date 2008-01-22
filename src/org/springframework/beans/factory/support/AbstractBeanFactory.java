@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,11 +106,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Whether to cache bean metadata or rather reobtain it for every access */
 	private boolean cacheBeanMetadata = true;
 
-	/** Custom PropertyEditors to apply to the beans of this factory */
-	private final Map customEditors = new HashMap();
-
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
-	private final Set propertyEditorRegistrars = new LinkedHashSet(16);
+	private final Set propertyEditorRegistrars = new LinkedHashSet(4);
+
+	/** Custom PropertyEditors to apply to the beans of this factory */
+	private final Map customEditors = new HashMap(4);
 
 	/** A custom TypeConverter to use, overriding the default PropertyEditor mechanism */
 	private TypeConverter typeConverter;
