@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		businessContext.refresh();
 
 		BeanDefinitionBuilder scriptedBeanBuilder = BeanDefinitionBuilder.rootBeanDefinition(GroovyScriptFactory.class);
-		scriptedBeanBuilder.addConstructorArg(DELEGATING_SCRIPT);
+		scriptedBeanBuilder.addConstructorArgValue(DELEGATING_SCRIPT);
 		scriptedBeanBuilder.addPropertyReference("messenger", "messenger");
 
 		GenericApplicationContext presentationCtx = new GenericApplicationContext(businessContext);
@@ -209,7 +209,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 
 		BeanDefinitionBuilder scriptedBeanBuilder = BeanDefinitionBuilder.rootBeanDefinition(GroovyScriptFactory.class);
 		scriptedBeanBuilder.setSingleton(false);
-		scriptedBeanBuilder.addConstructorArg(DELEGATING_SCRIPT);
+		scriptedBeanBuilder.addConstructorArgValue(DELEGATING_SCRIPT);
 		scriptedBeanBuilder.addPropertyReference("messenger", "messenger");
 
 		final String BEAN_WITH_DEPENDENCY_NAME = "needsMessenger";
@@ -238,7 +238,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 
 	private static BeanDefinition createScriptedGroovyBean() {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(GroovyScriptFactory.class);
-		builder.addConstructorArg("inline:package org.springframework.scripting;\n" +
+		builder.addConstructorArgValue("inline:package org.springframework.scripting;\n" +
 				"class GroovyMessenger implements Messenger {\n" +
 				"  private String message = \"Bingo\"\n" +
 				"  public String getMessage() {\n" +

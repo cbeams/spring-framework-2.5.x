@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class BeanConfigurerSupportTests extends TestCase {
 		TestBean beanInstance = new TestBean();
 		// spouse for autowiring by name...
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
-		builder.addConstructorArg("David Gavurin");
+		builder.addConstructorArgValue("David Gavurin");
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("spouse", builder.getBeanDefinition());
@@ -107,7 +107,7 @@ public class BeanConfigurerSupportTests extends TestCase {
 		TestBean beanInstance = new TestBean();
 		// spouse for autowiring by type...
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
-		builder.addConstructorArg("David Gavurin");
+		builder.addConstructorArgValue("David Gavurin");
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("Mmm, I fancy a salad!", builder.getBeanDefinition());

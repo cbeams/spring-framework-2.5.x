@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * properties and configuration methods.
 	 * @see #setBeanClass
 	 * @see #setBeanClassName
-	 * @see #setSingleton
+	 * @see #setScope
 	 * @see #setAutowireMode
 	 * @see #setDependencyCheck
 	 * @see #setConstructorArgumentValues
@@ -98,6 +98,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Create a new RootBeanDefinition with the given singleton status.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param singleton the singleton status of the bean
+	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
 	 */
 	public RootBeanDefinition(Class beanClass, boolean singleton) {
 		super();
@@ -151,6 +152,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param beanClass the class of the bean to instantiate
 	 * @param pvs the property values to apply
 	 * @param singleton the singleton status of the bean
+	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
 	 */
 	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs, boolean singleton) {
 		super(null, pvs);

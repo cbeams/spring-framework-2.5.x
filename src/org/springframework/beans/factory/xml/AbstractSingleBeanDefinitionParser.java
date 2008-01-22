@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 				builder.getRawBeanDefinition().setBeanClassName(beanClassName);
 			}
 		}
-		builder.setSource(parserContext.extractSource(element));
+		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
 		if (parserContext.isNested()) {
 			// Inner bean definition must receive same scope as containing bean.
 			builder.setScope(parserContext.getContainingBeanDefinition().getScope());

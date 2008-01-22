@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -525,7 +525,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf = new DefaultListableBeanFactory();
 		p = new Properties();
 		p.setProperty("kerry.(class)", "org.springframework.beans.TestBean");
-		p.setProperty("kerry.(singleton)", "false");
+		p.setProperty("kerry.(scope)", "prototype");
 		p.setProperty("kerry.age", "35");
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		kerry1 = (TestBean) lbf.getBean("kerry");
@@ -536,7 +536,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf = new DefaultListableBeanFactory();
 		p = new Properties();
 		p.setProperty("kerry.(class)", "org.springframework.beans.TestBean");
-		p.setProperty("kerry.(singleton)", "true");
+		p.setProperty("kerry.(scope)", "singleton");
 		p.setProperty("kerry.age", "35");
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		kerry1 = (TestBean) lbf.getBean("kerry");

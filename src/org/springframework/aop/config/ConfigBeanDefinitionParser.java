@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@ import org.springframework.util.xml.DomUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Adrian Colyer
- * @author Rod Johnson
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @since 2.0
@@ -311,24 +310,26 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private AbstractBeanDefinition parseDeclareParents(Element declareParentsElement, ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class);
-		builder.addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
-		builder.addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN));
+		builder.addConstructorArgValue(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
+		builder.addConstructorArgValue(declareParentsElement.getAttribute(TYPE_PATTERN));
 		
 		String defaultImpl = declareParentsElement.getAttribute(DEFAULT_IMPL);
 		String delegateRef = declareParentsElement.getAttribute(DELEGATE_REF);
 		
 		if (StringUtils.hasText(defaultImpl) && !StringUtils.hasText(delegateRef)) {
-			builder.addConstructorArg(defaultImpl);
-		} else if (StringUtils.hasText(delegateRef) && !StringUtils.hasText(defaultImpl)) {
+			builder.addConstructorArgValue(defaultImpl);
+		}
+		else if (StringUtils.hasText(delegateRef) && !StringUtils.hasText(defaultImpl)) {
 			builder.addConstructorArgReference(delegateRef);
-		} else {
+		}
+		else {
 			parserContext.getReaderContext().error(
 					"Exactly one of the " + DEFAULT_IMPL + " or " + DELEGATE_REF + " attributes must be specified",
 					declareParentsElement, this.parseState.snapshot());
 		}
 
-		builder.setSource(parserContext.extractSource(declareParentsElement));
 		AbstractBeanDefinition definition = builder.getBeanDefinition();
+		definition.setSource(parserContext.extractSource(declareParentsElement));
 		parserContext.getReaderContext().registerWithGeneratedName(definition);
 		return definition;
 	}
@@ -533,7 +534,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	protected AbstractBeanDefinition createPointcutDefinition(String expression) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(AspectJExpressionPointcut.class);
-		beanDefinition.setSingleton(false);
+		beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		beanDefinition.setSynthetic(true);
 		beanDefinition.getPropertyValues().addPropertyValue(EXPRESSION, expression);
 		return beanDefinition;

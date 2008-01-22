@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * Bean definition reader for a simple properties format.
  *
  * <p>Provides bean definition registration methods for Map/Properties and
- * ResourceBundle. Typically applied to a DefaultListableBeanFactory.</p>
+ * ResourceBundle. Typically applied to a DefaultListableBeanFactory.
  *
  * <p><b>Example:</b>
  *
@@ -59,23 +59,15 @@ import org.springframework.util.StringUtils;
  * salesrep.department=Sales      // real property
  *
  * techie.(parent)=employee       // derives from "employee" bean definition
- * techie.(singleton)=false       // bean is a prototype (not a shared instance)
+ * techie.(scope)=prototype       // bean is a prototype (not a shared instance)
  * techie.manager(ref)=jeff       // reference to another bean
  * techie.department=Engineering  // real property
  * techie.usesDialUp=true         // real property (overriding parent value)
  *
  * ceo.$0(ref)=secretary          // inject 'secretary' bean as 0th constructor arg
  * ceo.$1=1000000                 // inject value '1000000' at 1st constructor arg
- *</pre>
+ * </pre>
  * 
- * <em><b>Note:</b> As of Spring 1.2.6, the use of <code>class</code> and
- * <code>parent</code> has been deprecated in favor of <code>(class)</code> and
- * <code>(parent)</code>, for consistency with all other special properties.
- * Users should note that support for <code>class</code> and <code>parent</code>
- * as special properties rather then actual bean properties will be removed in a
- * future version.</em>
- * </p>
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -97,42 +89,48 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String SEPARATOR = ".";
 
 	/**
-	 * Special key to distinguish owner.(class)=com.myapp.MyClass
+	 * Special key to distinguish <code>owner.(class)=com.myapp.MyClass</code>-
 	 */
 	public static final String CLASS_KEY = "(class)";
 
 	/**
-	 * Special key to distinguish owner.class=com.myapp.MyClass
+	 * Special key to distinguish <code>owner.class=com.myapp.MyClass</code>.
 	 * Deprecated in favor of .(class)=
 	 */
 	private static final String DEPRECATED_CLASS_KEY = "class";
 
 	/**
-	 * Special key to distinguish owner.(parent)=parentBeanName
+	 * Special key to distinguish <code>owner.(parent)=parentBeanName</code>.
 	 */
 	public static final String PARENT_KEY = "(parent)";
 
 	/**
-	 * Special key to distinguish owner.(abstract)=true
-	 * Default is "false".
+	 * Special key to distinguish <code>owner.(scope)=prototype</code>.
+	 * Default is "true".
 	 */
-	public static final String ABSTRACT_KEY = "(abstract)";
+	public static final String SCOPE_KEY = "(scope)";
 
 	/**
-	 * Special key to distinguish owner.(singleton)=true
+	 * Special key to distinguish <code>owner.(singleton)=false</code>.
 	 * Default is "true".
 	 */
 	public static final String SINGLETON_KEY = "(singleton)";
 
 	/**
-	 * Special key to distinguish owner.(lazy-init)=true
+	 * Special key to distinguish <code>owner.(abstract)=true</code>
+	 * Default is "false".
+	 */
+	public static final String ABSTRACT_KEY = "(abstract)";
+
+	/**
+	 * Special key to distinguish <code>owner.(lazy-init)=true</code>
 	 * Default is "false".
 	 */
 	public static final String LAZY_INIT_KEY = "(lazy-init)";
 
 	/**
 	 * Property suffix for references to other beans in the current
-	 * BeanFactory: e.g. owner.dog(ref)=fido.
+	 * BeanFactory: e.g. <code>owner.dog(ref)=fido</code>.
 	 * Whether this is a reference to a singleton or a prototype
 	 * will depend on the definition of the target bean.
 	 */
@@ -415,8 +413,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 		String className = null;
 		String parent = null;
+		String scope = GenericBeanDefinition.SCOPE_SINGLETON;
 		boolean isAbstract = false;
-		boolean singleton = true;
 		boolean lazyInit = false;
 
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
@@ -437,9 +435,15 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					isAbstract = TRUE_VALUE.equals(val);
 				}
+				else if (SCOPE_KEY.equals(property)) {
+					// Spring 2.0 style
+					scope = StringUtils.trimWhitespace((String) entry.getValue());
+				}
 				else if (SINGLETON_KEY.equals(property)) {
+					// Spring 1.2 style
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					singleton = (val == null) || TRUE_VALUE.equals(val);
+					scope = ((val == null || TRUE_VALUE.equals(val) ?
+							GenericBeanDefinition.SCOPE_SINGLETON : GenericBeanDefinition.SCOPE_PROTOTYPE));
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
@@ -487,8 +491,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		try {
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
 					parent, className, getBeanClassLoader());
+			bd.setScope(scope);
 			bd.setAbstract(isAbstract);
-			bd.setSingleton(singleton);
 			bd.setLazyInit(lazyInit);
 			bd.setConstructorArgumentValues(cas);
 			bd.setPropertyValues(pvs);
