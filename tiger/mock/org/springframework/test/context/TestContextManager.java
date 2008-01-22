@@ -97,15 +97,55 @@ public class TestContextManager {
 	 * the test class via the
 	 * {@link TestExecutionListeners @TestExecutionListeners} annotation.
 	 * </p>
-	 *
 	 * @param testClass the Class object corresponding to the test class to be managed
 	 * @see #registerTestExecutionListeners(TestExecutionListener...)
 	 * @see #retrieveTestExecutionListeners(Class)
 	 */
-	public TestContextManager(final Class<?> testClass) {
-
+	public TestContextManager(Class<?> testClass) {
 		this.testContext = new TestContext(testClass, getContextCache());
 		registerTestExecutionListeners(retrieveTestExecutionListeners(testClass));
+	}
+
+
+	/**
+	 * Returns the {@link TestContext} managed by this <code>TestContextManager</code>.
+	 */
+	protected final TestContext getTestContext() {
+		return this.testContext;
+	}
+
+	/**
+	 * Gets the {@link ContextCache} used by this <code>TestContextManager</code>.
+	 * <p>The default implementation returns a reference to a static cache shared
+	 * by all <code>TestContextManager</code>s.
+	 * @return the context cache
+	 */
+	protected ContextCache<String, ApplicationContext> getContextCache() {
+		return contextCache;
+	}
+
+
+	/**
+	 * Register the supplied
+	 * {@link TestExecutionListener TestExecutionListeners} by appending them to
+	 * the set of listeners used by this <code>TestContextManager</code>.
+	 */
+	public void registerTestExecutionListeners(TestExecutionListener... testExecutionListeners) {
+		for (TestExecutionListener listener : testExecutionListeners) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Registering TestExecutionListener [" + listener + "]");
+			}
+			this.testExecutionListeners.add(listener);
+		}
+	}
+
+	/**
+	 * Gets an {@link Collections#unmodifiableList(List) unmodifiable} copy of
+	 * the {@link TestExecutionListener TestExecutionListeners} registered for
+	 * this <code>TestContextManager</code>.
+	 */
+	public final List<TestExecutionListener> getTestExecutionListeners() {
+		return Collections.unmodifiableList(this.testExecutionListeners);
 	}
 
 	/**
@@ -125,16 +165,15 @@ public class TestContextManager {
 	 * flag is set to <code>true</code>, listeners defined in the annotated
 	 * class will be appended to the listeners defined in superclasses.
 	 * </p>
-	 *
 	 * @param clazz the Class object corresponding to the test class for which
 	 * the listeners should be retrieved
 	 * @return an array of TestExecutionListeners for the specified class
 	 */
-	private TestExecutionListener[] retrieveTestExecutionListeners(final Class<?> clazz) {
-
-		Assert.notNull(clazz, "Can not retrieve TestExecutionListeners for a NULL class");
-		final Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
-		final List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
+	private TestExecutionListener[] retrieveTestExecutionListeners(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
+		List<Class<? extends TestExecutionListener>> classesList =
+				new ArrayList<Class<? extends TestExecutionListener>>();
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
 		boolean defaultListeners = false;
 
@@ -147,9 +186,9 @@ public class TestContextManager {
 			defaultListeners = true;
 		}
 		else {
-			// Traverse the class hierarchy
+			// Traverse the class hierarchy...
 			while (declaringClass != null) {
-				final TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
+				TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Retrieved @TestExecutionListeners [" + testExecutionListeners
 							+ "] for declaring class [" + declaringClass + "].");
@@ -163,7 +202,7 @@ public class TestContextManager {
 			}
 		}
 
-		final List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
+		List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
 			try {
 				listeners.add((TestExecutionListener) BeanUtils.instantiateClass(listenerClass));
@@ -184,17 +223,16 @@ public class TestContextManager {
 	}
 
 	/**
-	 * <p>
 	 * Determine the default {@link TestExecutionListener} classes.
-	 * </p>
 	 */
 	@SuppressWarnings("unchecked")
 	protected Set<Class<? extends TestExecutionListener>> getDefaultTestExecutionListenerClasses() {
-		final Set<Class<? extends TestExecutionListener>> defaultListenerClasses = new LinkedHashSet<Class<? extends TestExecutionListener>>();
+		Set<Class<? extends TestExecutionListener>> defaultListenerClasses =
+				new LinkedHashSet<Class<? extends TestExecutionListener>>();
 		for (String className : DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES) {
 			try {
-				defaultListenerClasses.add((Class<? extends TestExecutionListener>) getClass().getClassLoader().loadClass(
-						className));
+				defaultListenerClasses.add(
+						(Class<? extends TestExecutionListener>) getClass().getClassLoader().loadClass(className));
 			}
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
@@ -205,6 +243,7 @@ public class TestContextManager {
 		}
 		return defaultListenerClasses;
 	}
+
 
 	/**
 	 * <p>
@@ -222,18 +261,15 @@ public class TestContextManager {
 	 * listener throws an exception, however, the remaining registered listeners
 	 * will <strong>not</strong> be called.
 	 * </p>
-	 *
 	 * @param testInstance the test instance to prepare (never <code>null</code>)
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
-	public void prepareTestInstance(final Object testInstance) throws Exception {
-
+	public void prepareTestInstance(Object testInstance) throws Exception {
 		Assert.notNull(testInstance, "testInstance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("prepareTestInstance(): instance [" + testInstance + "]");
 		}
-
 		getTestContext().updateState(testInstance, null, null);
 
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
@@ -266,20 +302,17 @@ public class TestContextManager {
 	 * execution. If a listener throws an exception, however, the remaining
 	 * registered listeners will <strong>not</strong> be called.
 	 * </p>
-	 *
 	 * @param testInstance the current test instance (never <code>null</code>)
 	 * @param testMethod the test method which is about to be executed on the
 	 * test instance
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
-	public void beforeTestMethod(final Object testInstance, final Method testMethod) throws Exception {
-
-		Assert.notNull(testInstance, "testInstance must not be null.");
+	public void beforeTestMethod(Object testInstance, Method testMethod) throws Exception {
+		Assert.notNull(testInstance, "testInstance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("beforeTestMethod(): instance [" + testInstance + "], method [" + testMethod + "]");
 		}
-
 		getTestContext().updateState(testInstance, testMethod, null);
 
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
@@ -316,7 +349,6 @@ public class TestContextManager {
 	 * listeners have executed. Note that registered listeners will be executed
 	 * in the opposite order in which they were registered.
 	 * </p>
-	 *
 	 * @param testInstance the current test instance (never <code>null</code>)
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
@@ -326,21 +358,18 @@ public class TestContextManager {
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
-	public void afterTestMethod(final Object testInstance, final Method testMethod, final Throwable exception)
-			throws Exception {
-
+	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
 		Assert.notNull(testInstance, "testInstance must not be null");
 		if (logger.isTraceEnabled()) {
-			logger.trace("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod + "], exception ["
-					+ exception + "]");
+			logger.trace("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod +
+					"], exception [" + exception + "]");
 		}
-
 		getTestContext().updateState(testInstance, testMethod, exception);
 
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
 		// "wrapper"-style execution of listeners.
-		final List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
-				getTestExecutionListeners());
+		List<TestExecutionListener> listenersReversed =
+				new ArrayList<TestExecutionListener>(getTestExecutionListeners());
 		Collections.reverse(listenersReversed);
 
 		Exception afterTestMethodException = null;
@@ -361,63 +390,6 @@ public class TestContextManager {
 
 		if (afterTestMethodException != null) {
 			throw afterTestMethodException;
-		}
-	}
-
-	/**
-	 * <p>
-	 * Gets the {@link ContextCache} used by this
-	 * <code>TestContextManager</code>.
-	 * </p>
-	 * <p>
-	 * The default implementation returns a reference to a static cache shared
-	 * by all <code>TestContextManager</code>s.
-	 * </p>
-	 *
-	 * @return the context cache
-	 */
-	protected ContextCache<String, ApplicationContext> getContextCache() {
-		return contextCache;
-	}
-
-	/**
-	 * <p>
-	 * Gets the {@link TestContext} managed by this
-	 * <code>TestContextManager</code>.
-	 * </p>
-	 *
-	 * @return the test context.
-	 */
-	protected final TestContext getTestContext() {
-		return this.testContext;
-	}
-
-	/**
-	 * <p>
-	 * Gets an {@link Collections#unmodifiableList(List) unmodifiable} copy of
-	 * the {@link TestExecutionListener TestExecutionListeners} registered for
-	 * this <code>TestContextManager</code>.
-	 * </p>
-	 *
-	 * @return a copy of the TestExecutionListeners
-	 */
-	public final List<TestExecutionListener> getTestExecutionListeners() {
-		return Collections.unmodifiableList(this.testExecutionListeners);
-	}
-
-	/**
-	 * <p>
-	 * Registers the supplied
-	 * {@link TestExecutionListener TestExecutionListeners} by appending them to
-	 * the set of listeners used by this <code>TestContextManager</code>.
-	 * </p>
-	 */
-	public void registerTestExecutionListeners(final TestExecutionListener... testExecutionListeners) {
-		for (final TestExecutionListener listener : testExecutionListeners) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Registering TestExecutionListener [" + listener + "]");
-			}
-			this.testExecutionListeners.add(listener);
 		}
 	}
 
