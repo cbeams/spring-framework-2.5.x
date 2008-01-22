@@ -396,3 +396,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Velocity Tools 1.4 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
+
+* websphere/websphere_uow_api.jar
+- IBM WebSphere UOWManager API (extract from WebSphere 6.0/6.1)
+- required for building the framework
+- contained in the WebSphere Application Server libraries at runtime
