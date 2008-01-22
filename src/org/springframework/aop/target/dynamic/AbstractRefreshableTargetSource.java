@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,11 +101,11 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 		logger.debug("Target refreshed successfully");
 	}
 
-	public long getRefreshCount() {
+	public synchronized long getRefreshCount() {
 		return this.refreshCount;
 	}
 
-	public long getLastRefreshTime() {
+	public synchronized long getLastRefreshTime() {
 		return this.lastRefreshTime;
 	}
 
@@ -118,7 +118,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 		long currentTimeMillis = System.currentTimeMillis();
 
 		if (this.lastRefreshCheck < 0 || currentTimeMillis - this.lastRefreshCheck > this.refreshCheckDelay) {
-			// Going to perform a refresh check - update the time.
+			// Going to perform a refresh check - update the timestamp.
 			this.lastRefreshCheck = currentTimeMillis;
 			logger.debug("Refresh check delay elapsed - checking whether refresh is required");
 			return true;
