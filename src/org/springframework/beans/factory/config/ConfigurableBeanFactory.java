@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * given type. To be invoked during factory configuration.
 	 * <p>Note that this method will register a shared custom editor instance;
 	 * access to that instance will be synchronized for thread-safety. It is
-	 * generally prefable to use {@link #addPropertyEditorRegistrar} instead
+	 * generally preferable to use {@link #addPropertyEditorRegistrar} instead
 	 * of this method, to avoid for the need for synchronization on custom editors.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
