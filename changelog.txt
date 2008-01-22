@@ -3,6 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.9 (2008-03-18)
+-------------------------------------
+
+Package org.springframework.aop
+* marked AbstractRefreshableTargetSource's status accessors as synchronized
+
+Package org.springframework.jms
+* improved SimpleMessageConverter's exception message for an unsupported message payload
+
+Package org.springframework.orm
+* JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
+
+
 Changes in version 2.0.8 (2008-01-07)
 -------------------------------------
 
