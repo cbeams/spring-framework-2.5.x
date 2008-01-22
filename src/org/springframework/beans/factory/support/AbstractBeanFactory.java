@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,11 +102,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	/** Whether to cache bean metadata or rather reobtain it for every access */
 	private boolean cacheBeanMetadata = true;
 
-	/** Custom PropertyEditors to apply to the beans of this factory */
-	private final Map customEditors = new HashMap();
-
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
 	private final Set propertyEditorRegistrars = CollectionFactory.createLinkedSetIfPossible(16);
+
+	/** Custom PropertyEditors to apply to the beans of this factory */
+	private final Map customEditors = new HashMap();
 
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
