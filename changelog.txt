@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-06)
+Changes in version 2.5.2 (2008-02-07)
 -------------------------------------
 
 General
@@ -17,6 +17,11 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
+* deprecated AbstractBeanDefinition's Spring 1.2 style "setSingleton" method in favor of Spring 2.0's "setScope"
+* deprecated BeanDefinitionBuilder's "addConstructorArg" in favor of the consistently named "addConstructorArgValue"
+* deprecated various rarely used BeanDefinitionBuilder methods in favor of settings on the raw BeanDefinition object
+* added overloaded "genericBeanDefinition(beanClass)" method and "setParentName" method to BeanDefinitionBuilder
+* added support for "(scope)" key to PropertiesBeanDefinitionReader: e.g. "myBean.(scope)=prototype"
 * refactored AbstractBeanConfigurerAspect into Abstract(InterfaceDriven)DependencyInjectionAspect
 * nested XML decoration elements (e.g. "aop:scoped-proxy") are explicitly rejected if no corresponding handler present
 
@@ -40,7 +45,11 @@ Package org.springframework.jca
 
 Package org.springframework.jdbc
 * merged AbstractBeanPropertyRowMapper into concrete BeanPropertyRowMapper class
-* deprecated BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
+* removed BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
+* revised BeanPropertyRowMapper to use JavaBean property introspection instead of expecting field/setter name matches
+* factored out "initBeanWrapper"/"getColumnValue" template methods in BeanPropertyRowMapper, allowing for customization
+* BeanPropertyRowMapper shares ResultSet value access logic with SingleColumnRowMapper
+* BeanPropertyRowMapper and SingleColumnRowMapper perform Oracle-specific "getObject" checks for unknown specified types
 * added ParameterizedSingleColumnRowMapper with a convenient "newInstance" method to specify the required type only once
 
 Package org.springframework.jms
@@ -61,6 +70,7 @@ Package org.springframework.scripting
 
 Package org.springframework.test
 * TestContextManager ignores default TestExecutionListeners that cannot be instantiated (e.g. due to spring-tx missing)
+* AbstractJUnit38SpringContextTests runs "afterTestMethod" callbacks even when "beforeTestMethod" or "setUp" failed
 
 Package org.springframework.web
 * optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
