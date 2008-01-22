@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,17 @@
 
 package org.springframework.jdbc.core;
 
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.test.Person;
-import org.springframework.jdbc.core.test.ConcretePerson;
-
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.test.ConcretePerson;
+import org.springframework.jdbc.core.test.Person;
+
 /**
- * Mock object based tests for BeanPropertyRowMapper.
- *
- * @author trisberg
+ * @author Thomas Risberg
  */
 public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
-
-	protected void setUp() throws SQLException {
-		super.setUp();
-	}
 
 	public void testOverridingClassDefinedForMapping() {
 		BeanPropertyRowMapper mapper = new BeanPropertyRowMapper(Person.class);
@@ -49,31 +43,21 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 			fail("Setting same class should not have thrown InvalidDataAccessApiUsageException");
 		}
 	}
-	
-	public void testStaticQueryWithRowMapper() throws SQLException {
 
+	public void testStaticQueryWithRowMapper() throws SQLException {
 		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper(Person.class));
-
 		assertEquals(1, result.size());
-
 		Person bean = (Person) result.get(0);
-
 		verifyPerson(bean);
-
 	}
 
 	public void testMappingWithInheritance() throws SQLException {
-
 		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper(ConcretePerson.class));
-
 		assertEquals(1, result.size());
-
 		ConcretePerson bean = (ConcretePerson) result.get(0);
-
 		verifyConcretePerson(bean);
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -113,6 +114,94 @@ public abstract class JdbcUtils {
 				logger.debug("Unexpected exception on closing JDBC ResultSet", ex);
 			}
 		}
+	}
+
+	/**
+	 * Retrieve a JDBC column value from a ResultSet, using the specified value type.
+	 * <p>Uses the specifically typed ResultSet accessor methods, falling back to
+	 * {@link #getResultSetValue(java.sql.ResultSet, int)} for unknown types.
+	 * <p>Note that the returned value may not be assignable to the specified
+	 * required type, in case of an unknown type. Calling code needs to deal
+	 * with this case appropriately, e.g. throwing a corresponding exception.
+	 * @param rs is the ResultSet holding the data
+	 * @param index is the column index
+	 * @param requiredType the required value type (may be <code>null</code>)
+	 * @return the value object
+	 * @throws SQLException if thrown by the JDBC API
+	 */
+	public static Object getResultSetValue(ResultSet rs, int index, Class requiredType) throws SQLException {
+		if (requiredType == null) {
+			return getResultSetValue(rs, index);
+		}
+
+		Object value = null;
+		boolean wasNullCheck = false;
+
+		// Explicitly extract typed value, as far as possible.
+		if (String.class.equals(requiredType)) {
+			value = rs.getString(index);
+		}
+		else if (boolean.class.equals(requiredType) || Boolean.class.equals(requiredType)) {
+			value = (rs.getBoolean(index) ? Boolean.TRUE : Boolean.FALSE);
+			wasNullCheck = true;
+		}
+		else if (byte.class.equals(requiredType) || Byte.class.equals(requiredType)) {
+			value = new Byte(rs.getByte(index));
+			wasNullCheck = true;
+		}
+		else if (short.class.equals(requiredType) || Short.class.equals(requiredType)) {
+			value = new Short(rs.getShort(index));
+			wasNullCheck = true;
+		}
+		else if (int.class.equals(requiredType) || Integer.class.equals(requiredType)) {
+			value = new Integer(rs.getInt(index));
+			wasNullCheck = true;
+		}
+		else if (long.class.equals(requiredType) || Long.class.equals(requiredType)) {
+			value = new Long(rs.getLong(index));
+			wasNullCheck = true;
+		}
+		else if (float.class.equals(requiredType) || Float.class.equals(requiredType)) {
+			value = new Float(rs.getFloat(index));
+			wasNullCheck = true;
+		}
+		else if (double.class.equals(requiredType) || Double.class.equals(requiredType) ||
+				Number.class.equals(requiredType)) {
+			value = new Double(rs.getDouble(index));
+			wasNullCheck = true;
+		}
+		else if (byte[].class.equals(requiredType)) {
+			value = rs.getBytes(index);
+		}
+		else if (java.sql.Date.class.equals(requiredType)) {
+			value = rs.getDate(index);
+		}
+		else if (java.sql.Time.class.equals(requiredType)) {
+			value = rs.getTime(index);
+		}
+		else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
+			value = rs.getTimestamp(index);
+		}
+		else if (BigDecimal.class.equals(requiredType)) {
+			value = rs.getBigDecimal(index);
+		}
+		else if (Blob.class.equals(requiredType)) {
+			value = rs.getBlob(index);
+		}
+		else if (Clob.class.equals(requiredType)) {
+			value = rs.getClob(index);
+		}
+		else {
+			// Some unknown type desired -> rely on getObject.
+			value = getResultSetValue(rs, index);
+		}
+
+		// Perform was-null check if demanded (for results that the
+		// JDBC driver returns as primitives).
+		if (wasNullCheck && value != null && rs.wasNull()) {
+			value = null;
+		}
+		return value;
 	}
 
 	/**

@@ -16,8 +16,7 @@
 
 package org.springframework.jdbc.core;
 
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
+import java.beans.PropertyDescriptor;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -35,21 +34,20 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
- * {@link} RowMapper implementation that converts a row into a new instance
+ * {@link RowMapper} implementation that converts a row into a new instance
  * of the specified mapped target class. The mapped target class must be a
  * top-level class and it must have a default or no-arg constructor.
  *
  * <p>Column values are mapped based on matching the column name as obtained from result set
- * metadata to public setters for the corresponding properties.  The names are matched either
+ * metadata to public setters for the corresponding properties. The names are matched either
  * directly or by transforming a name separating the parts with underscores to the same name
  * using "camel" case.
  *
  * <p>Mapping is provided for fields in the target class that are defined as any of the
  * following types: String, byte, Byte, short, Short, int, Integer, long, Long, float, Float,
- * double, Double, BigDecimal, boolean, Boolean and java.util.Date.
+ * double, Double, BigDecimal, boolean, Boolean and <code>java.util.Date</code>.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
@@ -60,7 +58,6 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.5
- * @see RowMapper
  */
 public class BeanPropertyRowMapper implements RowMapper {
 
@@ -112,21 +109,16 @@ public class BeanPropertyRowMapper implements RowMapper {
 	protected void initialize(Class mappedClass) {
 		this.mappedClass = mappedClass;
 		this.mappedFields = new HashMap();
-		Class metaDataClass = mappedClass;
-		while (metaDataClass != null) {
-			Field[] f = metaDataClass.getDeclaredFields();
-			for (int i = 0; i < f.length; i++) {
-				PersistentField pf = new PersistentField();
-				pf.setFieldName(f[i].getName());
-				pf.setJavaType(f[i].getType());
-				this.mappedFields.put(f[i].getName().toLowerCase(), pf);
-				String underscoredName = underscoreName(f[i].getName());
-				if (!f[i].getName().toLowerCase().equals(underscoredName)) {
-					this.mappedFields.put(underscoredName, pf);
+		PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
+		for (int i = 0; i < pds.length; i++) {
+			PropertyDescriptor pd = pds[i];
+			if (pd.getWriteMethod() != null) {
+				this.mappedFields.put(pd.getName().toLowerCase(), pd);
+				String underscoredName = underscoreName(pd.getName());
+				if (!pd.getName().toLowerCase().equals(underscoredName)) {
+					this.mappedFields.put(underscoredName, pd);
 				}
 			}
-			// try any superclass
-			metaDataClass = metaDataClass.getSuperclass();
 		}
 	}
 
@@ -170,76 +162,31 @@ public class BeanPropertyRowMapper implements RowMapper {
 	public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
 		Object result = BeanUtils.instantiateClass(this.mappedClass);
+
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columns = rsmd.getColumnCount();
 		for (int i = 1; i <= columns; i++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, i).toLowerCase();
-			PersistentField fieldMeta = (PersistentField) this.mappedFields.get(column);
-			if (fieldMeta != null) {
+			PropertyDescriptor pd = (PropertyDescriptor) this.mappedFields.get(column);
+			if (pd != null) {
 				BeanWrapper bw = new BeanWrapperImpl(result);
-				bw.setWrappedInstance(result);
-				fieldMeta.setSqlType(rsmd.getColumnType(i));
-				Object value = null;
-				Class fieldType = fieldMeta.getJavaType();
-				if (fieldType.equals(String.class)) {
-					value = rs.getString(column);
-				}
-				else if (fieldType.equals(byte.class) || fieldType.equals(Byte.class)) {
-					value = new Byte(rs.getByte(column));
-				}
-				else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
-					value = new Short(rs.getShort(column));
-				}
-				else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
-					value = new Integer(rs.getInt(column));
-				}
-				else if (fieldType.equals(long.class) || fieldType.equals(Long.class)) {
-					value = new Long(rs.getLong(column));
-				}
-				else if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
-					value = new Float(rs.getFloat(column));
-				}
-				else if (fieldType.equals(double.class) || fieldType.equals(Double.class)) {
-					value = new Double(rs.getDouble(column));
-				}
-				else if (fieldType.equals(BigDecimal.class)) {
-					value = rs.getBigDecimal(column);
-				}
-				else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
-					value = (rs.getBoolean(column)) ? Boolean.TRUE : Boolean.FALSE;
-				}
-				else if (fieldType.equals(java.util.Date.class) ||
-						fieldType.equals(java.sql.Timestamp.class) ||
-						fieldType.equals(java.sql.Time.class) ||
-						fieldType.equals(Number.class)) {
-					value = JdbcUtils.getResultSetValue(rs, rs.findColumn(column));
-				}
-				if (value != null) {
-					if (bw.isWritableProperty(fieldMeta.getFieldName())) {
-						try {
-							if (logger.isDebugEnabled() && rowNumber == 0) {
-								logger.debug("Mapping column named \"" + column + "\"" +
-										" containing values of SQL type " + fieldMeta.getSqlType() +
-										" to property \"" + fieldMeta.getFieldName() + "\"" +
-										" of type " + fieldMeta.getJavaType());
-							}
-							bw.setPropertyValue(fieldMeta.getFieldName(), value);
-						}
-						catch (NotWritablePropertyException ex) {
-							throw new DataRetrievalFailureException(
-									"Unable to map column " + column + " to property " + fieldMeta.getFieldName(), ex);
-						}
+				try {
+					Object value = JdbcUtils.getResultSetValue(rs, rs.findColumn(column), pd.getPropertyType());
+					if (logger.isDebugEnabled() && rowNumber == 0) {
+						logger.debug("Mapping column named \"" + column + "\"" +
+								" containing values of SQL type " + rsmd.getColumnType(i) +
+								" to property \"" + pd.getName() + "\"" +
+								" of type " + pd.getPropertyType());
 					}
-					else {
-						if (rowNumber == 0) {
-							logger.warn("Unable to access the setter for " + fieldMeta.getFieldName() +
-									".  Check that " + "set" + StringUtils.capitalize(fieldMeta.getFieldName()) +
-									" is declared and has public access.");
-						}
-					}
+					bw.setPropertyValue(pd.getName(), value);
+				}
+				catch (NotWritablePropertyException ex) {
+					throw new DataRetrievalFailureException(
+							"Unable to map column " + column + " to property " + pd.getName(), ex);
 				}
 			}
 		}
+
 		return result;
 	}
 
@@ -252,44 +199,6 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 */
 	public static BeanPropertyRowMapper newInstance(Class mappedClass) {
 		return new BeanPropertyRowMapper(mappedClass);
-	}
-
-
-	/**
-	 * A PersistentField represents the info we are interested in knowing about
-	 * the fields and their relationship to the columns of the database table.
-	 */
-	private static class PersistentField {
-
-		private String fieldName;
-
-		private Class javaType;
-
-		private int sqlType;
-
-		public void setFieldName(String fieldName) {
-			this.fieldName = fieldName;
-		}
-
-		public String getFieldName() {
-			return this.fieldName;
-		}
-
-		public void setJavaType(Class javaType) {
-			this.javaType = javaType;
-		}
-
-		public Class getJavaType() {
-			return this.javaType;
-		}
-
-		public void setSqlType(int sqlType) {
-			this.sqlType = sqlType;
-		}
-
-		public int getSqlType() {
-			return this.sqlType;
-		}
 	}
 
 }

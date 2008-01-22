@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.jdbc.core;
 
-import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -89,7 +86,7 @@ public class SingleColumnRowMapper implements RowMapper {
 			throw new IncorrectResultSetColumnCountException(1, nrOfColumns);
 		}
 
-		// Extract column value from JDBC ResultSet
+		// Extract column value from JDBC ResultSet.
 		Object result = getColumnValue(rs, 1, this.requiredType);
 		if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
 			// Extracted value does not match already: try to convert it.
@@ -124,81 +121,13 @@ public class SingleColumnRowMapper implements RowMapper {
 	 * (or <code>null</code> if none specified)
 	 * @return the Object value
 	 * @throws SQLException in case of extraction failure
-	 * @see java.sql.ResultSet#getString(int)
-	 * @see java.sql.ResultSet#getObject(int)
+	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)
 	 * @see #getColumnValue(java.sql.ResultSet, int)
 	 */
 	protected Object getColumnValue(ResultSet rs, int index, Class requiredType) throws SQLException {
 		if (requiredType != null) {
-			Object value = null;
-			boolean wasNullCheck = false;
-
-			// Explicitly extract typed value, as far as possible.
-			if (String.class.equals(requiredType)) {
-				value = rs.getString(index);
-			}
-			else if (Boolean.class.equals(requiredType)) {
-				value = (rs.getBoolean(index) ? Boolean.TRUE : Boolean.FALSE);
-				wasNullCheck = true;
-			}
-			else if (Byte.class.equals(requiredType)) {
-				value = new Byte(rs.getByte(index));
-				wasNullCheck = true;
-			}
-			else if (Short.class.equals(requiredType)) {
-				value = new Short(rs.getShort(index));
-				wasNullCheck = true;
-			}
-			else if (Integer.class.equals(requiredType)) {
-				value = new Integer(rs.getInt(index));
-				wasNullCheck = true;
-			}
-			else if (Long.class.equals(requiredType)) {
-				value = new Long(rs.getLong(index));
-				wasNullCheck = true;
-			}
-			else if (Float.class.equals(requiredType)) {
-				value = new Float(rs.getFloat(index));
-				wasNullCheck = true;
-			}
-			else if (Double.class.equals(requiredType) || Number.class.equals(requiredType)) {
-				value = new Double(rs.getDouble(index));
-				wasNullCheck = true;
-			}
-			else if (byte[].class.equals(requiredType)) {
-				value = rs.getBytes(index);
-			}
-			else if (java.sql.Date.class.equals(requiredType)) {
-				value = rs.getDate(index);
-			}
-			else if (java.sql.Time.class.equals(requiredType)) {
-				value = rs.getTime(index);
-			}
-			else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
-				value = rs.getTimestamp(index);
-			}
-			else if (BigDecimal.class.equals(requiredType)) {
-				value = rs.getBigDecimal(index);
-			}
-			else if (Blob.class.equals(requiredType)) {
-				value = rs.getBlob(index);
-			}
-			else if (Clob.class.equals(requiredType)) {
-				value = rs.getClob(index);
-			}
-			else {
-				// Some unknown type desired -> rely on getObject.
-				value = rs.getObject(index);
-			}
-
-			// Perform was-null check if demanded (for results that the
-			// JDBC driver returns as primitives).
-			if (wasNullCheck && value != null && rs.wasNull()) {
-				value = null;
-			}
-			return value;
+			return JdbcUtils.getResultSetValue(rs, index, requiredType);
 		}
-
 		else {
 			// No required type specified -> perform default extraction.
 			return getColumnValue(rs, index);

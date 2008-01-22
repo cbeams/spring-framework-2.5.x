@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,28 @@
 
 package org.springframework.jdbc.core;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
+
 import junit.framework.TestCase;
 import org.easymock.MockControl;
-import org.springframework.jdbc.core.test.Person;
+
 import org.springframework.jdbc.core.test.ConcretePerson;
+import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
-import java.math.BigDecimal;
-import java.sql.*;
-
 /**
- * Mock object based abstract class for RowMapper tests.  Initializes mock objects and verifies results.
+ * Mock object based abstract class for RowMapper tests.
+ * Initializes mock objects and verifies results.
  *
- * @author trisberg
+ * @author Thomas Risberg
  */
 public abstract class AbstractRowMapperTests extends TestCase {
 
@@ -63,20 +71,12 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		rsmdControl.setReturnValue(4, 1);
 		rsmd.getColumnLabel(1);
 		rsmdControl.setReturnValue("name", 1);
-		rsmd.getColumnType(1);
-		rsmdControl.setReturnValue(Types.VARCHAR, 1);
 		rsmd.getColumnLabel(2);
 		rsmdControl.setReturnValue("age", 1);
-		rsmd.getColumnType(2);
-		rsmdControl.setReturnValue(Types.NUMERIC, 1);
 		rsmd.getColumnLabel(3);
 		rsmdControl.setReturnValue("birth_date", 1);
-		rsmd.getColumnType(3);
-		rsmdControl.setReturnValue(Types.TIMESTAMP, 1);
 		rsmd.getColumnLabel(4);
 		rsmdControl.setReturnValue("balance", 1);
-		rsmd.getColumnType(4);
-		rsmdControl.setReturnValue(Types.DECIMAL, 1);
 		rsmdControl.replay();
 
 		rsControl = MockControl.createControl(ResultSet.class);
@@ -85,15 +85,23 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		rsControl.setReturnValue(rsmd, 1);
 		rs.next();
 		rsControl.setReturnValue(true, 1);
-		rs.getString("name");
+		rs.findColumn("name");
+		rsControl.setReturnValue(1, 1);
+		rs.getString(1);
 		rsControl.setReturnValue("Bubba", 1);
-		rs.getLong("age");
+		rs.findColumn("age");
+		rsControl.setReturnValue(2, 1);
+		rs.wasNull();
+		rsControl.setReturnValue(false, 1);
+		rs.getLong(2);
 		rsControl.setReturnValue(22, 1);
 		rs.findColumn("birth_date");
 		rsControl.setReturnValue(3, 1);
-		rs.getObject(3);
-		rsControl.setReturnValue(new java.sql.Timestamp(1221222L), 1);
-		rs.getBigDecimal("balance");
+		rs.getTimestamp(3);
+		rsControl.setReturnValue(new Timestamp(1221222L), 1);
+		rs.findColumn("balance");
+		rsControl.setReturnValue(4, 1);
+		rs.getBigDecimal(4);
 		rsControl.setReturnValue(new BigDecimal("1234.56"), 1);
 		rs.next();
 		rsControl.setReturnValue(false, 1);
@@ -143,7 +151,6 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		rsControl.verify();
 		rsmdControl.verify();
 		stmtControl.verify();
-
 	}
 
 }
