@@ -45,9 +45,9 @@ import org.springframework.util.Assert;
  * directly or by transforming a name separating the parts with underscores to the same name
  * using "camel" case.
  *
- * <p>Mapping is provided for fields in the target class that are defined as any of the
- * following types: String, byte, Byte, short, Short, int, Integer, long, Long, float, Float,
- * double, Double, BigDecimal, boolean, Boolean and <code>java.util.Date</code>.
+ * <p>Mapping is provided for fields in the target class for many common types, e.g.:
+ * String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long, Long,
+ * float, Float, double, Double, BigDecimal, <code>java.util.Date</code>, etc.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
@@ -161,22 +161,21 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 */
 	public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
-		Object result = BeanUtils.instantiateClass(this.mappedClass);
+		BeanWrapper bw = new BeanWrapperImpl(this.mappedClass);
+		initBeanWrapper(bw);
 
 		ResultSetMetaData rsmd = rs.getMetaData();
-		int columns = rsmd.getColumnCount();
-		for (int i = 1; i <= columns; i++) {
-			String column = JdbcUtils.lookupColumnName(rsmd, i).toLowerCase();
+		int columnCount = rsmd.getColumnCount();
+		for (int index = 1; index <= columnCount; index++) {
+			String column = JdbcUtils.lookupColumnName(rsmd, index).toLowerCase();
 			PropertyDescriptor pd = (PropertyDescriptor) this.mappedFields.get(column);
 			if (pd != null) {
-				BeanWrapper bw = new BeanWrapperImpl(result);
 				try {
-					Object value = JdbcUtils.getResultSetValue(rs, rs.findColumn(column), pd.getPropertyType());
+					Object value = getColumnValue(rs, index, pd);
 					if (logger.isDebugEnabled() && rowNumber == 0) {
-						logger.debug("Mapping column named \"" + column + "\"" +
-								" containing values of SQL type " + rsmd.getColumnType(i) +
-								" to property \"" + pd.getName() + "\"" +
-								" of type " + pd.getPropertyType());
+						logger.debug("Mapping column '" + column + "'" +
+								" containing values of SQL type " + rsmd.getColumnType(index) +
+								" to property '" + pd.getName() + "' of type " + pd.getPropertyType());
 					}
 					bw.setPropertyValue(pd.getName(), value);
 				}
@@ -187,18 +186,34 @@ public class BeanPropertyRowMapper implements RowMapper {
 			}
 		}
 
-		return result;
+		return bw.getWrappedInstance();
 	}
 
+	/**
+	 * Initialize the given BeanWrapper to be used for row mapping.
+	 * To be called for each row.
+	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * @param bw the BeanWrapper to initialize
+	 */
+	protected void initBeanWrapper(BeanWrapper bw) {
+	}
 
 	/**
-	 * Static factory method to create a new BeanPropertyRowMapper.
-	 * @param mappedClass the class that each row should be mapped to
-	 * @deprecated as of Spring 2.5.2; use the standard constructor instead
-	 * @see #BeanPropertyRowMapper(Class)
+	 * Retrieve a JDBC object value for the specified column.
+	 * <p>The default implementation calls
+	 * {@link JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)}.
+	 * Subclasses may override this to check specific value types upfront,
+	 * or to post-process values return from <code>getResultSetValue</code>.
+	 * @param rs is the ResultSet holding the data
+	 * @param index is the column index
+	 * @param pd the bean property that each result object is expected to match
+	 * (or <code>null</code> if none specified)
+	 * @return the Object value
+	 * @throws SQLException in case of extraction failure
+	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)
 	 */
-	public static BeanPropertyRowMapper newInstance(Class mappedClass) {
-		return new BeanPropertyRowMapper(mappedClass);
+	protected Object getColumnValue(ResultSet rs, int index, PropertyDescriptor pd) throws SQLException {
+		return JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType());
 	}
 
 }
