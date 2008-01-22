@@ -54,7 +54,7 @@ public aspect AnnotationBeanConfigurerAspect
 	
 	public pointcut preConstructionConfiguration() : preConstructionConfigurationSupport(*); 
 
-	declare parents: @Configurable * implements IConfigurable;
+	declare parents: @Configurable * implements ConfigurableObject;
 
 	public void configureBean(Object bean) {
 		beanConfigurerSupport.configureBean(bean);

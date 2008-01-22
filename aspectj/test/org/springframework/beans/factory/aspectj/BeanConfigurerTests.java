@@ -464,7 +464,7 @@ public class BeanConfigurerTests extends TestCase {
 			((MailSenderClient)bean).setMailSender(this.mailSender);
 		}
 		
-		declare parents: MailSenderClient implements IConfigurable;
+		declare parents: MailSenderClient implements ConfigurableObject;
 		
 		public void setMailSender(MailSender mailSender) {
 			this.mailSender = mailSender;
@@ -480,7 +480,7 @@ public class BeanConfigurerTests extends TestCase {
 			((PaymentProcessorClient)bean).setPaymentProcessor(this.paymentProcessor);
 		}
 		
-		declare parents: PaymentProcessorClient implements IConfigurable;
+		declare parents: PaymentProcessorClient implements ConfigurableObject;
 		
 		public void setPaymentProcessor(PaymentProcessor paymentProcessor) {
 			this.paymentProcessor = paymentProcessor;

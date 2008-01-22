@@ -19,7 +19,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 /**
- * An aspect that injects dependency into any object whose type implements the {@link IConfigurable} interface.
+ * An aspect that injects dependency into any object whose type implements the {@link ConfigurableObject} interface.
  * <p>
  * This aspect supports injecting into domain objects when they are created for the first time as well as
  * upon deserialization. Subaspects need to simply provide definition for the configureBean() method. This
@@ -58,9 +58,9 @@ import java.io.Serializable;
  * </ol>
 
  * <p>
- * While having type implement the {@link IConfigurable} interface is certainly a valid choice, an alternative
+ * While having type implement the {@link ConfigurableObject} interface is certainly a valid choice, an alternative
  * is to use a 'declare parents' statement another aspect (a subaspect of this aspect would be a logical choice)
- * that declares the classes that need to be configured by supplying the {@link IConfigurable} interface.
+ * that declares the classes that need to be configured by supplying the {@link ConfigurableObject} interface.
  * </p>
  * 
  * @author Ramnivas Laddad
@@ -71,7 +71,7 @@ public abstract aspect AbstractInterfaceDrivenDependencyInjectionAspect extends 
 	 * Select initialization join point as object construction
 	 */
 	public pointcut beanConstruction(Object bean) : 
-		initialization(IConfigurable+.new(..)) && this(bean); 
+		initialization(ConfigurableObject+.new(..)) && this(bean); 
 
 	/**
 	 * Select deserialization join point made available through ITDs for ConfigurableDeserializationSupport
@@ -80,26 +80,26 @@ public abstract aspect AbstractInterfaceDrivenDependencyInjectionAspect extends 
 		execution(Object ConfigurableDeserializationSupport+.readResolve()) &&
 		this(bean);
 			
-	public pointcut leastSpecificSuperTypeConstruction() : initialization(IConfigurable.new(..));
+	public pointcut leastSpecificSuperTypeConstruction() : initialization(ConfigurableObject.new(..));
 	
 	
 	
 	// Implementation to support re-injecting dependencies once an object is deserialized
 	/**
-	 * Declare any class implementing Serializable and IConfigurable as also implementing 
+	 * Declare any class implementing Serializable and ConfigurableObject as also implementing 
 	 * ConfigurableDeserializationSupport. This allows us to introduce the readResolve() 
 	 * method and select it with the beanDeserialization() pointcut.
 	 * 
 	 * <p>Here is an improved version that uses the hasmethod() pointcut and lifts
 	 * even the minor requirement on user classes:
 	 *
-	 * <pre class="code">declare parents: IConfigurable+ Serializable+
+	 * <pre class="code">declare parents: ConfigurableObject+ Serializable+
 	 *		            && !hasmethod(Object readResolve() throws ObjectStreamException) 
 	 *		            implements ConfigurableDeserializationSupport;
 	 * </pre>
 	 */
 	declare parents: 
-		IConfigurable+ && Serializable+	implements ConfigurableDeserializationSupport;
+		ConfigurableObject+ && Serializable+	implements ConfigurableDeserializationSupport;
 	
 	/**
 	 * A marker interface to which the <code>readResolve()</code> is introduced.
@@ -112,7 +112,7 @@ public abstract aspect AbstractInterfaceDrivenDependencyInjectionAspect extends 
 	 * execution to configure the object.
 	 * 
 	 * <p>Note if a method with the same signature already exists in a
-	 * <code>Serializable</code> class of IConfigurable type,
+	 * <code>Serializable</code> class of ConfigurableObject type,
 	 * that implementation will take precedence (a good thing, since we are
 	 * merely interested in an opportunity to detect deserialization.)
 	 */

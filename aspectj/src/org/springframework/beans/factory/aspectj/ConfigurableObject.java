@@ -21,6 +21,6 @@ package org.springframework.beans.factory.aspectj;
  * @author Ramnivas Laddad
  * @since 2.5
  */
-public interface IConfigurable {
+public interface ConfigurableObject {
 
 }
