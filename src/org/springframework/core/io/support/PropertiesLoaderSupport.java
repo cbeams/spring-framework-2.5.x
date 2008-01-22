@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,15 @@ package org.springframework.core.io.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for JavaBean-style components that need to load properties
@@ -89,6 +88,10 @@ public abstract class PropertiesLoaderSupport {
 	 * Set locations of properties files to be loaded.
 	 * <p>Can point to classic properties files or to XML files
 	 * that follow JDK 1.5's properties XML format.
+	 * <p>Note: Properties defined in later files will override
+	 * properties defined earlier files, in case of overlapping keys.
+	 * Hence, make sure that the most specific files are the last
+	 * ones in the given list of locations.
 	 */
 	public void setLocations(Resource[] locations) {
 		this.locations = locations;
@@ -96,7 +99,7 @@ public abstract class PropertiesLoaderSupport {
 
 	/**
 	 * Set whether local properties override properties from files.
-	 * Default is "false": properties from files override local defaults.
+	 * <p>Default is "false": Properties from files override local defaults.
 	 * Can be switched to "true" to let local properties override defaults
 	 * from files.
 	 */
