@@ -31,6 +31,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.mail.MailSender;
@@ -190,7 +191,7 @@ public class BeanConfigurerTests extends TestCase {
 	public void testInterfaceDrivenDependencyInjection() {
 		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
 		Order testOrder = new Order();
-		assertNotNull("Interface driven injection didn't occur for direct construction", testOrder.getMailSender());
+		assertNotNull("Interface driven injection didn't occur for direct construction", testOrder.mailSender);
 	}
 
 	public void testInterfaceDrivenDependencyInjectionMultipleInterfaces() {
@@ -199,15 +200,31 @@ public class BeanConfigurerTests extends TestCase {
 		
 		ShoppingCart testCart = new ShoppingCart();
 		
-		assertNotNull("Interface driven injection didn't occur for direct construction", testCart.getMailSender());
-		assertNotNull("Interface driven injection didn't occur for direct construction", testCart.getPaymentProcessor());
+		assertNotNull("Interface driven injection didn't occur for direct construction", testCart.mailSender);
+		assertNotNull("Interface driven injection didn't occur for direct construction", testCart.paymentProcessor);
 	}
 	
 	public void testInterfaceDrivenDependencyInjectionUponDeserialization() throws Exception {
 		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
 		Order testOrder = new Order();
 		Order deserializedOrder = serializeAndDeserialize(testOrder);
-		assertNotNull("Interface driven injection didn't occur for deserialization", testOrder.getMailSender());
+		assertNotNull("Interface driven injection didn't occur for deserialization", testOrder.mailSender);
+	}
+
+	public void testFieldAutoWiredAnnotationInjection() {
+		FieldAutoWiredServiceBean bean = new FieldAutoWiredServiceBean();
+		assertNotNull(bean.testService);
+	}
+	
+	public void testMethodAutoWiredAnnotationInjection() {
+		MethodAutoWiredServiceBean bean = new MethodAutoWiredServiceBean();
+		assertNotNull(bean.testService);
+	}
+
+	public void testMultiArgumentMethodAutoWiredAnnotationInjection() {
+		MultiArgumentMethodAutoWiredServiceBean bean = new MultiArgumentMethodAutoWiredServiceBean();
+		assertNotNull(bean.testService);
+		assertNotNull(bean.paymentService);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -505,10 +522,6 @@ public class BeanConfigurerTests extends TestCase {
 		public void setMailSender(MailSender mailSender) {
 			this.mailSender = mailSender;
 		}
-		
-		public MailSender  getMailSender() {
-			return this.mailSender;
-		}
 	}
 	
 	public static class ShoppingCart implements MailSenderClient, PaymentProcessorClient {
@@ -518,19 +531,10 @@ public class BeanConfigurerTests extends TestCase {
 		public void setMailSender(MailSender mailSender) {
 			this.mailSender = mailSender;
 		}
-		
-		public MailSender  getMailSender() {
-			return this.mailSender;
-		}
 
 		public void setPaymentProcessor(PaymentProcessor paymentProcessor) {
 			this.paymentProcessor = paymentProcessor;
 		}
-		
-		public PaymentProcessor getPaymentProcessor() {
-			return this.paymentProcessor;
-		}
-		
 	}
 	
 	private static class ClassThatWillNotActuallyBeWired {
@@ -566,4 +570,39 @@ public class BeanConfigurerTests extends TestCase {
 	private static class PostConstructionConfiguredBean extends PreOrPostConstructionConfiguredBean {
 	}
 	
+	@Configurable
+	public static class FieldAutoWiredServiceBean {
+		@Autowired transient private TestService testService;
+	}
+
+	@Configurable
+	public static class MethodAutoWiredServiceBean {
+		transient private TestService testService;
+		
+		@Autowired
+		public void setTestService(TestService testService) {
+			this.testService = testService;
+		}
+	}
+	
+	@Configurable
+	public static class MultiArgumentMethodAutoWiredServiceBean {
+		transient private TestService testService;
+		transient private PaymentService paymentService;
+		
+		@Autowired
+		public void setDependencies(TestService testService, PaymentService paymentService) {
+			this.testService = testService;
+			this.paymentService = paymentService;
+		}
+	}
+
+	public static class TestService {
+		
+	}
+
+	public static class PaymentService {
+		
+	}
+
 }

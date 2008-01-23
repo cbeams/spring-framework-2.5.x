@@ -7,6 +7,8 @@
 
 	<context:spring-configured/>
 
+	<context:annotation-config/>
+
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$WireArbitraryExistingPojo"
 			factory-method="aspectOf"/>
 
@@ -55,5 +57,8 @@
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PostConstructionConfiguredBean">
 		<property name="name" value="ramnivas"/>
 	</bean>
+
+	<bean id="testService" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$TestService"/>
+	<bean id="paymentService" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PaymentService"/>
 
 </beans>
