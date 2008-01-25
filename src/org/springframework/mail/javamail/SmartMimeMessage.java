@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Special subclass of the standard JavaMail MimeMessage, carrying a
- * default encoding to be used when populating the message and a default
- * Java Activation FileTypeMap to be used for resolving attachment types.
+ * Special subclass of the standard JavaMail {@link MimeMessage}, carrying a
+ * default encoding to be used when populating the message and a default Java
+ * Activation {@link FileTypeMap} to be used for resolving attachment types.
  *
- * <p>Created by JavaMailSenderImpl in case of a specified default encoding
- * and/or default FileTypeMap. Autodetected by MimeMessageHelper, which will
- * use the carried encoding and FileTypeMap unless explicitly overridden.
+ * <p>Created by {@link JavaMailSenderImpl} in case of a specified default encoding
+ * and/or default FileTypeMap. Autodetected by {@link MimeMessageHelper}, which
+ * will use the carried encoding and FileTypeMap unless explicitly overridden.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -54,18 +54,19 @@ class SmartMimeMessage extends MimeMessage {
 		this.defaultFileTypeMap = defaultFileTypeMap;
 	}
 
+
 	/**
 	 * Return the default encoding of this message, or <code>null</code> if none.
 	 */
-	public String getDefaultEncoding() {
-		return defaultEncoding;
+	public final String getDefaultEncoding() {
+		return this.defaultEncoding;
 	}
 
 	/**
 	 * Return the default FileTypeMap of this message, or <code>null</code> if none.
 	 */
-	public FileTypeMap getDefaultFileTypeMap() {
-		return defaultFileTypeMap;
+	public final FileTypeMap getDefaultFileTypeMap() {
+		return this.defaultFileTypeMap;
 	}
 
 }
