@@ -49,12 +49,14 @@
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Activates various annotations to be detected in bean classes: Spring's @Required and
-	@Autowired, as well as JSR 250's @PostConstruct, @PreDestroy and @Resource (if available)
-	and JPA's @PersistenceContext and @PersistenceUnit (if available). Alternatively,
-	you can choose to activate the individual BeanPostProcessors for those annotations.
+	@Autowired, as well as JSR 250's @PostConstruct, @PreDestroy and @Resource (if available),
+	JAX-WS's @WebServiceRef (if available), EJB3's @EJB (if available), and JPA's
+	@PersistenceContext and @PersistenceUnit (if available). Alternatively, you may
+	choose to activate the individual BeanPostProcessors for those annotations.
 
-	Note: This tag does not activate processing of Spring's @Transactional annotation.
-	Consider the use of the <tx:annotation-driven> tag for that purpose.
+	Note: This tag does not activate processing of Spring's @Transactional or EJB3's
+	@TransactionAttribute annotation. Consider the use of the <tx:annotation-driven>
+	tag for that purpose.
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
