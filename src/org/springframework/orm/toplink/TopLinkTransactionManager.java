@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,19 +285,6 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 			txObject.setSessionHolder(new SessionHolder(session));
 			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 
-			// Check isolation level.
-			switch (definition.getIsolationLevel()) {
-				case TransactionDefinition.ISOLATION_READ_UNCOMMITTED:
-					// TODO warn when queries are executed without the conformResultsInUnitOfWork setting
-					break;
-				case TransactionDefinition.ISOLATION_REPEATABLE_READ:
-					// TODO warn when queries are executed against a read-only Session
-					break;
-				case TransactionDefinition.ISOLATION_SERIALIZABLE:
-					// TODO warn if the TransactionIsolation settings on the DatabaseLogin are wrong
-					break;
-			}
-
 			// Register transaction timeout.
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -312,7 +299,8 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 
 			// Register the TopLink Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
-				Connection con = getJdbcConnection(session);
+				Session mostSpecificSession = (!definition.isReadOnly() ? session.getActiveUnitOfWork() : session);
+				Connection con = getJdbcConnection(mostSpecificSession);
 				if (con != null) {
 					ConnectionHolder conHolder = new ConnectionHolder(con);
 					if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
