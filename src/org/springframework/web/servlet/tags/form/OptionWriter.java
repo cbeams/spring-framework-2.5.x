@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,7 @@ class OptionWriter {
 		this.htmlEscape = htmlEscape;
 	}
 
+
 	/**
 	 * Write the '<code>option</code>' tags for the configured {@link #optionSource} to
 	 * the supplied {@link TagWriter}.
@@ -154,18 +155,18 @@ class OptionWriter {
 	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
 	private void renderFromMap(final TagWriter tagWriter) throws JspException {
-		final Map optionMap = (Map) this.optionSource;
+		Map optionMap = (Map) this.optionSource;
 		for (Iterator iterator = optionMap.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();
 			Object mapKey = entry.getKey();
 			Object mapValue = entry.getValue();
 			BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
 			BeanWrapper mapValueWrapper = new BeanWrapperImpl(mapValue);
-			Object renderValue = (this.valueProperty != null ? mapKeyWrapper.getPropertyValue(this.valueProperty)
-					: mapKey.toString());
-			Object renderLabel = (this.labelProperty != null ? mapValueWrapper.getPropertyValue(this.labelProperty)
-					: mapValue.toString());
-			renderOption(tagWriter, entry, renderValue, renderLabel);
+			Object renderValue = (this.valueProperty != null ?
+					mapKeyWrapper.getPropertyValue(this.valueProperty) : mapKey.toString());
+			Object renderLabel = (this.labelProperty != null ?
+					mapValueWrapper.getPropertyValue(this.labelProperty) : mapValue.toString());
+			renderOption(tagWriter, mapKey, renderValue, renderLabel);
 		}
 	}
 
