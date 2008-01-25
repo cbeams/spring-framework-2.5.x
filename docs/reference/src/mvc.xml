@@ -585,7 +585,7 @@
             </row>
 
             <row>
-              <entry><literal>synchronizeSession</literal></entry>
+              <entry><literal>synchronizeOnSession</literal></entry>
               <entry>use this if you want handling by this controller to be
               synchronized on the user's HTTP session.</entry>
             </row>
