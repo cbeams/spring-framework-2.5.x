@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	private boolean ignoreUnresolvablePlaceholders = false;
 
+	private String nullValue;
+
 	private String beanName;
 
 	private BeanFactory beanFactory;
@@ -206,6 +208,19 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 */
 	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
+	}
+
+	/**
+	 * Set a value that should be treated as <code>null</value> when
+	 * resolved as a placeholder value: e.g. "" (empty String) or "null".
+	 * <p>Note that this will only apply to full property values,
+	 * not to parts of concatenated values.
+	 * <p>By default, no such null value is defined. This means that
+	 * there is no way to express <code>null</value> as a property
+	 * value unless you explictly map a corresponding value here.
+	 */
+	public void setNullValue(String nullValue) {
+		this.nullValue = nullValue;
 	}
 
 	/**
@@ -310,7 +325,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			}
 		}
 
-		return buf.toString();
+		String value = buf.toString();
+		return (value.equals(this.nullValue) ? null : value);
 	}
 
 	/**

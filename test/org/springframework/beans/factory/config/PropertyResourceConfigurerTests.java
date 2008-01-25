@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -389,14 +389,22 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("ignoreUnresolvablePlaceholders", Boolean.TRUE);
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
-		try {
-			ac.refresh();
-			TestBean tb = (TestBean) ac.getBean("tb");
-			assertEquals("${ref}", tb.getName());
-		}
-		catch (BeanDefinitionStoreException ex) {
-			fail("Should not have thrown BeanDefinitionStoreException");
-		}
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("${ref}", tb.getName());
+	}
+
+	public void testPropertyPlaceholderConfigurerWithEmptyStringAsNull() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("nullValue", "");
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertNull(tb.getName());
 	}
 
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
