@@ -2308,7 +2308,7 @@
      &lt;value&gt;classpath*:META-INF/persistence.xml&lt;/value&gt;
     &lt;/list&gt;
   &lt;/property&gt;
-  &lt;property&gt;
+  &lt;property name="dataSources"&gt;
    &lt;map&gt;
     &lt;entry key="localDataSource" value-ref="local-db"/&gt;
     &lt;entry key="remoteDataSource" value-ref="remote-db"/&gt;
@@ -2316,7 +2316,6 @@
   &lt;/property&gt;
   <lineannotation>&lt;!-- if no datasource is specified, use this one --&gt;</lineannotation>
   &lt;property name="defaultDataSource" ref="remoteDataSource"/&gt;
-  
 &lt;/bean&gt;
 
 &lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
@@ -2326,11 +2325,12 @@
         <para>Note that the default implementation allows customization of the
         persistence unit infos before feeding them to the JPA provider
         declaratively through its properties (which affect <emphasis>all</emphasis>
-        housed units) or programmatically, through the
-        <literal>PersistenceUnitPostProcessor</literal> (which allow
-        persistence unit selection). If no persistenceUnitManager is
+        hosted units) or programmatically, through the
+        <interfacename>PersistenceUnitPostProcessor</interfacename>
+        (which allows persistence unit selection). If no
+        <interfacename>PersistenceUnitManager</interfacename> is
         specified, one will be created and used internally by
-        <literal>LocalContainerEntityManagerFactoryBean</literal>.</para>
+        <classname>LocalContainerEntityManagerFactoryBean</classname>.</para>
       </section>
     </section>
 
