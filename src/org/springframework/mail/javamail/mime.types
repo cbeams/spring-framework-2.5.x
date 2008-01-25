@@ -39,6 +39,7 @@ video/x-msvideo				avi
 
 text/x-speech				talk
 text/css				css
+text/csv				csv
 
 # IMAGE TYPES
 
