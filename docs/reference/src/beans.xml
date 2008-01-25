@@ -6,10 +6,9 @@
     <title>Introduction</title>
 
     <para>This chapter covers the Spring Framework's implementation of the
-    Inversion of Control (IoC) <footnote>
-        <para>See the section entitled <xref
-        linkend="background-ioc" /></para>
-      </footnote> principle.</para>
+    Inversion of Control (IoC)
+    <footnote><para>See the section entitled <xref linkend="background-ioc"/></para></footnote>
+    principle.</para>
 
     <sidebar>
       <title><interfacename>BeanFactory</interfacename> or
@@ -5192,7 +5191,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
 
     <para>Since Spring 2.5, it is possible to deploy a Spring ApplicationContext
     as a RAR file, encapsulating the context and all of its required bean classes
-    and libary JARs in a J2EE RAR deployment unit. This is the equivalent of
+    and library JARs in a J2EE RAR deployment unit. This is the equivalent of
     bootstrapping a standalone ApplicationContext, just hosted in J2EE environment,
     being able to access the J2EE server's facilities. RAR deployment is intended
     as a more 'natural' alternative to the not uncommon scenario of deploying a
