@@ -130,10 +130,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	/**
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
-	 * <p>More specifically, the execution of the <code>handleActionRequestInternal</code>
-	 * method will get synchronized if this flag is "true". The best available
-	 * session mutex will be used for the synchronization; ideally, this will
-	 * be a mutex exposed by HttpSessionMutexListener.
+	 * <p>More specifically, the execution of each handler method will get
+	 * synchronized if this flag is "true". The best available session mutex
+	 * will be used for the synchronization; ideally, this will be a mutex
+	 * exposed by HttpSessionMutexListener.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
 	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
