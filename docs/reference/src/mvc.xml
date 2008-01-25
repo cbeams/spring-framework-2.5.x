@@ -688,7 +688,7 @@
             </row>
 
             <row>
-              <entry><literal>synchronizeSession</literal></entry>
+              <entry><literal>synchronizeOnSession</literal></entry>
 
               <entry>use this if you want handling by this controller to be
               synchronized on the user's HTTP session.</entry>
@@ -3384,6 +3384,21 @@ public class FileUploadBean {
       and/or <classname>AnnotationMethodHandlerAdapter</classname> is defined as well
       - provided that you intend to use <interfacename>@RequestMapping</interfacename>.</para>
 
+      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+
+    &lt;bean class="org.springframework.web.servlet.mvc.DefaultAnnotationHandlerMapping"/&gt;
+
+    &lt;bean class="org.springframework.web.servlet.mvc.AnnotationMethodHandlerAdapter"/&gt;
+
+    ... (controller bean definitions) ...
+
+&lt;/beans&gt;
+</programlisting>
+
       <para>Defining a <classname>DefaultAnnotationHandlerMapping</classname>
       and/or <classname>AnnotationMethodHandlerAdapter</classname> explicitly
       also makes sense if you would like to customize the mapping strategy,
@@ -3430,7 +3445,7 @@ public class FileUploadBean {
         http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context-2.5.xsd"&gt;
 
-    &lt;context:component-scan base-package="org.springframework.samples.petclinic.web" /&gt;
+    &lt;context:component-scan base-package="org.springframework.samples.petclinic.web"/&gt;
 
     ...
 
@@ -3571,76 +3586,104 @@ public class ClinicController {
       <classname>@RequestMapping</classname> are allowed to have very flexible
       signatures. They may have arguments of the following types, in arbitrary
       order (except for validation results, which need to follow right after
-      the corresponding command object, if desired): <itemizedlist>
-          <listitem>
-            <para>request / response / session (Servlet API or Portlet
-            API).</para>
-          </listitem>
+      the corresponding command object, if desired):
 
-          <listitem>
-            <para><classname>org.springframework.web.context.request.WebRequest</classname></para>
-          </listitem>
+      <itemizedlist>
+        <listitem>
+          <para>Request and/or response objects (Servlet API or Portlet API).
+          You may choose any specific request/response type, e.g. ServletRequest /
+          HttpServletRequest or PortletRequest / ActionRequest / RenderRequest.
+          Note that in the Portlet case, an explicitly declared action/render
+          argument is also used for mapping specific request types onto a handler
+          method (in case of no other information given that differentiates
+          between action and render requests).</para>
+        </listitem>
 
-          <listitem>
-            <para><classname>java.util.Locale</classname> for the current
-            request locale.</para>
-          </listitem>
+        <listitem>
+          <para>Session object (Servlet API or Portlet API): either HttpSession or
+          PortletSession. An argument of this type will enforce the presence of a
+          corresponding session. As a consequence, such an argument will never be
+          <code>null</code>. <emphasis>Note that session access may not be
+          thread-safe, in particular in a Servlet environment: Consider switching
+          the <classname>AnnotationMethodHandlerAdapter</classname>'s
+          "synchronizeOnSession" flag to "true" if multiple requests are allowed
+          to access a session concurrently.</emphasis></para>
+        </listitem>
 
-          <listitem>
-            <para><classname>java.io.InputStream</classname> /
-            <classname>java.io.Reader</classname> for access to the request's
-            content.</para>
-          </listitem>
+        <listitem>
+          <para><classname>org.springframework.web.context.request.WebRequest</classname>
+          or <classname>org.springframework.web.context.request.NativeWebRequest</classname>.
+          Allows for generic request parameter access as well as request/session
+          attribute access, without ties to the native Servlet/Portlet API.</para>
+        </listitem>
 
-          <listitem>
-            <para><classname>java.io.OutputStream</classname> /
-            <classname>java.io.Writer</classname> for generating the
-            response's content.</para>
-          </listitem>
+        <listitem>
+          <para><classname>java.util.Locale</classname> for the current request
+          locale (determined by the most specific locale resolver available,
+          i.e. the configured <interfacename>LocaleResolver</interfacename>
+          in a Servlet environment and the portal locale in a Portlet
+          environment).</para>
+        </listitem>
 
-          <listitem>
-            <para><classname>@RequestParam</classname> annotated parameters
-            for access to specific request parameters.</para>
-          </listitem>
+        <listitem>
+          <para><classname>java.io.InputStream</classname> /
+          <classname>java.io.Reader</classname> for access to the request's
+          content. This will be the raw InputStream/Reader as exposed by the
+          Servlet/Portlet API.</para>
+        </listitem>
 
-          <listitem>
-            <para><classname>java.util.Map</classname> /
-            <classname>org.springframework.ui.ModelMap</classname> for
-            enriching the implicit model that will be exposed to the web
-            view.</para>
-          </listitem>
+        <listitem>
+          <para><classname>java.io.OutputStream</classname> /
+          <classname>java.io.Writer</classname> for generating the response's
+          content. This will be the raw OutputStream/Writer as exposed by the
+          Servlet/Portlet API.</para>
+        </listitem>
 
-          <listitem>
-            <para>Command/form objects to bind parameters to: as bean
-            properties or fields, with customizable type conversion, depending
-            on <classname>@InitBinder</classname> methods and/or the
-            HandlerAdapter configuration - see the
-            "<literal>webBindingInitializer</literal>" property on
-            <classname>AnnotationMethodHandlerAdapter</classname>. Such
-            command objects along with their validation results will be
-            exposed as model attributes, by default using the non-qualified
-            command class name in property notation (e.g. "orderAddress" for
-            type "mypackage.OrderAddress"). Specify a parameter-level
-            <classname>ModelAttribute</classname> annotation for declaring a
-            specific model attribute name.</para>
-          </listitem>
+        <listitem>
+          <para><classname>@RequestParam</classname> annotated parameters
+          for access to specific Servlet/Portlet request parameters. Parameter
+          values will be converted to the declared method argument type.</para>
+        </listitem>
 
-          <listitem>
-            <para><classname>org.springframework.validation.Errors</classname>
-            /
-            <classname>org.springframework.validation.BindingResult</classname>
-            validation results for a preceding command/form object (the
-            immediate preceding argument).</para>
-          </listitem>
+        <listitem>
+          <para><interfacename>java.util.Map</interfacename> /
+          <interfacename>org.springframework.ui.Model</interfacename> /
+          <classname>org.springframework.ui.ModelMap</classname> for
+          enriching the implicit model that will be exposed to the web
+          view.</para>
+        </listitem>
 
-          <listitem>
-            <para><classname>org.springframework.web.bind.support.SessionStatus</classname>
-            status handle for marking form processing as complete (triggering
-            the cleanup of session attributes that have been indicated by the
-            <classname>@SessionAttributes</classname> annotation at the
-            handler type level).</para>
-          </listitem>
-        </itemizedlist></para>
+        <listitem>
+          <para>Command/form objects to bind parameters to: as bean
+          properties or fields, with customizable type conversion, depending
+          on <classname>@InitBinder</classname> methods and/or the
+          HandlerAdapter configuration - see the
+          "<literal>webBindingInitializer</literal>" property on
+          <classname>AnnotationMethodHandlerAdapter</classname>. Such
+          command objects along with their validation results will be
+          exposed as model attributes, by default using the non-qualified
+          command class name in property notation (e.g. "orderAddress" for
+          type "mypackage.OrderAddress"). Specify a parameter-level
+          <classname>ModelAttribute</classname> annotation for declaring a
+          specific model attribute name.</para>
+        </listitem>
+
+        <listitem>
+          <para><classname>org.springframework.validation.Errors</classname>
+          /
+          <classname>org.springframework.validation.BindingResult</classname>
+          validation results for a preceding command/form object (the
+          immediate preceding argument).</para>
+        </listitem>
+
+        <listitem>
+          <para><classname>org.springframework.web.bind.support.SessionStatus</classname>
+          status handle for marking form processing as complete (triggering
+          the cleanup of session attributes that have been indicated by the
+          <classname>@SessionAttributes</classname> annotation at the
+          handler type level).</para>
+        </listitem>
+      </itemizedlist></para>
     </section>
 
     <section id="mvc-ann-requestparam">

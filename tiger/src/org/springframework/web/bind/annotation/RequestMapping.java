@@ -39,17 +39,42 @@ import java.lang.annotation.Target;
  * types, in arbitrary order (except for validation results, which need to
  * follow right after the corresponding command object, if desired):
  * <ul>
- * <li>request / response / session (Servlet API or Portlet API).
- * <li>{@link org.springframework.web.context.request.WebRequest}.
- * <li>{@link java.util.Locale} for the current request locale.
+ * <li>Request and/or response objects (Servlet API or Portlet API).
+ * You may choose any specific request/response type, e.g.
+ * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}
+ * or {@link javax.portlet.PortletRequest} / {@link javax.portlet.ActionRequest} /
+ * {@link javax.portlet.RenderRequest}. Note that in the Portlet case,
+ * an explicitly declared action/render argument is also used for mapping
+ * specific request types onto a handler method (in case of no other
+ * information given that differentiates between action and render requests).
+ * <li>Session object (Servlet API or Portlet API): either
+ * {@link javax.servlet.http.HttpSession} or {@link javax.portlet.PortletSession}.
+ * An argument of this type will enforce the presence of a corresponding session.
+ * As a consequence, such an argument will never be <code>null</code>.
+ * <i>Note that session access may not be thread-safe, in particular in a
+ * Servlet environment: Consider switching the
+ * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
+ * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
+ * <li>{@link org.springframework.web.context.request.WebRequest} or
+ * {@link org.springframework.web.context.request.NativeWebRequest}.
+ * Allows for generic request parameter access as well as request/session
+ * attribute access, without ties to the native Servlet/Portlet API.
+ * <li>{@link java.util.Locale} for the current request locale
+ * (determined by the most specific locale resolver available,
+ * i.e. the configured {@link org.springframework.web.servlet.LocaleResolver)
+ * in a Servlet environment and the portal locale in a Portlet environment).
  * <li>{@link java.io.InputStream} / {@link java.io.Reader} for access
- * to the request's content.
+ * to the request's content. This will be the raw InputStream/Reader as
+ * exposed by the Servlet/Portlet API.
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
- * the response's content.
+ * the response's content. This will be the raw OutputStream/Writer as
+ * exposed by the Servlet/Portlet API.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
- * specific request parameters.
- * <li>{@link java.util.Map} / {@link org.springframework.ui.ModelMap} for
- * enriching the implicit model that will be exposed to the web view.
+ * specific Servlet/Portlet request parameters. Parameter values will be
+ * converted to the declared method argument type.
+ * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
+ * {@link org.springframework.ui.ModelMap} for enriching the implicit model
+ * that will be exposed to the web view.
  * <li>Command/form objects to bind parameters to: as bean properties or fields,
  * with customizable type conversion, depending on {@link InitBinder} methods
  * and/or the HandlerAdapter configuration - see the "webBindingInitializer"
