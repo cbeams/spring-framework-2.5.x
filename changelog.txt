@@ -14,6 +14,8 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * BeanWrapperImpl resolves the target type for a generically typed bean property, performing appropriate type conversion
+* StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
+* added "nullValue" property to PropertyPlaceholderConfigurer, allowing for resolving specific Strings into a null value
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
@@ -33,6 +35,9 @@ Package org.springframework.core
 * added "isReadable()" method to Resource interface, giving a readability hint upfront (supported by FileSystemResource)
 * fixed ClassMetadataReadingVisitor (as used by "context:component-scan") to correctly ignore *usage* of inner classes
 
+Package org.springframework.dao
+* PersistenceExceptionTranslationPostProcessor extends ProxyConfig and applies its settings to newly created proxies
+
 Package org.springframework.ejb
 * Local/SimpleRemoteSlsbInvokerInterceptor use EJB(Local)Home for EJB 2.x detection, for WebSphere compatibility
 
@@ -44,6 +49,9 @@ Package org.springframework.jca
 * introduced GlassFishWorkManagerTaskExecutor as adapter for the GlassFish JCA WorkManager (analogous to CommonJ)
 
 Package org.springframework.jdbc
+* SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
+* SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
+* SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
 * merged AbstractBeanPropertyRowMapper into concrete BeanPropertyRowMapper class
 * removed BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
 * revised BeanPropertyRowMapper to use JavaBean property introspection instead of expecting field/setter name matches
@@ -55,12 +63,21 @@ Package org.springframework.jdbc
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
 
+Package org.springframework.jmx
+* factored out "doUnregister(objectName)" and "onRegister(objectName,mbean)" methods in MBeanRegistrationSupport 
+* MBeanExporter explicitly removes all of its registered NotificationListeners from the target MBeanServer on shutdown
+* introduced NotificationListenerRegistrar for registering a listener with any MBean on any MBeanServer(Connection)
+
+Package org.springframework.mail
+* added "text/csv" to ConfigurableMimeFileTypeMap's and thus MimeMessageHelper's default MIME mappings
+
 Package org.springframework.orm
 * introduced "postProcessMappings" template method in Hibernate LocalSessionFactoryBean
 * fixed Hibernate AnnotationSessionFactoryBean to allow for mixed mapping sources (despite 2.5.1's "buildMappings" call)
 * HibernateTemplate exposes the "org.hibernate.event.EventSource" and "org.hibernate.classic.Session" interfaces as well
 * introduced "EntityManagerFactoryUtils.closeEntityManager" method that protects against exceptions thrown from close
 * Hibernate/Jpa/JdoTransactionManager explicitly rollback an active transaction before closing when begin failed
+* fixed TopLinkTransactionManager to correctly expose the underlying JDBC Connection in read-write transaction scenarios
 
 Package org.springframework.scripting
 * introduced "ScriptFactory.requiresScriptedObjectRefresh(ScriptSource)" for object refresh even after a type check call
@@ -79,6 +96,7 @@ Package org.springframework.web
 * AnnotationMethodHandlerAdapter resolves the target type for a generically typed @RequestParam/@ModelAttribute argument
 * AnnotationMethodHandlerAdapter properly allows for resolving a Principal argument to null (in case of none defined)
 * added "synchronizeOnSession" property to AnnotationMethodHandlerAdapter, analogous to AbstractController
+* JSP OptionsTag and SelectTag compare raw Map key for selection check as well
 
 
 Changes in version 2.5.1 (2008-01-09)
