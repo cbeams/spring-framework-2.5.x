@@ -33,7 +33,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @see org.springframework.jdbc.support.rowset.SqlRowSet
  */
 public class InvalidResultSetAccessException extends InvalidDataAccessResourceUsageException {
-	
+
 	private String sql;
 
 
@@ -47,7 +47,7 @@ public class InvalidResultSetAccessException extends InvalidDataAccessResourceUs
 		super(task + "; invalid ResultSet access for SQL [" + sql + "]", ex);
 		this.sql = sql;
 	}
-	
+
 	/**
 	 * Constructor for InvalidResultSetAccessException.
 	 * @param ex the root cause

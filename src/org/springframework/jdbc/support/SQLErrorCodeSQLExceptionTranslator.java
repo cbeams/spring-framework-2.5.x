@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.jdbc.support;
 
 import java.lang.reflect.Constructor;
-import java.sql.SQLException;
 import java.sql.BatchUpdateException;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 import javax.sql.DataSource;
@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DataAccessException;
@@ -35,7 +36,6 @@ import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.core.JdkVersion;
 
 /**
  * Implementation of SQLExceptionTranslator that analyzes vendor-specific error codes.
@@ -233,8 +233,8 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		}
 
 		// Second, try subclass translation - if we are in Java 6 or later then we should have one of these.
-		if (subclassTranslator != null) {
-			dex = subclassTranslator.translate(task, sql, sqlExToUse);
+		if (this.subclassTranslator != null) {
+			dex = this.subclassTranslator.translate(task, sql, sqlExToUse);
 			if (dex != null) {
 				return dex;
 			}
@@ -426,8 +426,10 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 					exceptionConstructor = exceptionClass.getConstructor(messageOnlyArgsClass);
 					return (DataAccessException) exceptionConstructor.newInstance(messageOnlyArgs);
 				default:
-					logger.warn("Unable to find appropriate constructor of custom exception class [" +
-							exceptionClass.getName() + "]");
+					if (logger.isWarnEnabled()) {
+						logger.warn("Unable to find appropriate constructor of custom exception class [" +
+								exceptionClass.getName() + "]");
+					}
 					return null;
 				}
 		}
