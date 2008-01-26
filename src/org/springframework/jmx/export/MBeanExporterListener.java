@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ public interface MBeanExporterListener {
 
 	/**
 	 * Called by {@link MBeanExporter} after an MBean has been <i>successfully</i>
-     * registered with an {@link javax.management.MBeanServer}.
+	 * registered with an {@link javax.management.MBeanServer}.
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 */
 	void mbeanRegistered(ObjectName objectName);
 
 	/**
 	 * Called by {@link MBeanExporter} after an MBean has been <i>successfully</i>
-     * unregistered from an {@link javax.management.MBeanServer}.
+	 * unregistered from an {@link javax.management.MBeanServer}.
 	 * @param objectName the <code>ObjectName</code> of the unregistered MBean
 	 */
 	void mbeanUnregistered(ObjectName objectName);
