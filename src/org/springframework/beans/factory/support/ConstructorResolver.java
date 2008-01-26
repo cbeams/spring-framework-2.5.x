@@ -393,12 +393,16 @@ class ConstructorResolver {
 			}
 
 			if (factoryMethodToUse == null) {
-				throw new BeanCreationException(
-						mbd.getResourceDescription(), beanName,
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"No matching factory method found: " +
 						(mbd.getFactoryBeanName() != null ?
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "'");
+			}
+			if (void.class.equals(factoryMethodToUse.getReturnType())) {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+						"Invalid factory method '" + mbd.getFactoryMethodName() +
+						"': needs to have a non-void return type!");
 			}
 
 			if (explicitArgs == null) {
