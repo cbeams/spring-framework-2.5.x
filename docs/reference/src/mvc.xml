@@ -1541,7 +1541,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
       <para>As an example, when using JSP for a view technology you can use
       the <classname>UrlBasedViewResolver</classname>. This view resolver
-      translates a view name to a URL and hands the request over the
+      translates a view name to a URL and hands the request over to the
       RequestDispatcher to render the view.</para>
 
       <programlisting>&lt;bean id="viewResolver"
@@ -1727,7 +1727,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         relative to the current servlet context, while a name such as
         <literal>redirect:http://myhost.com/some/arbitrary/path.html</literal>
         will redirect to an absolute URL. The important thing is that as long
-        is this redirect view name is injected into the controller like any
+        as this redirect view name is injected into the controller like any
         other logical view name, the controller is not even aware that
         redirection is happening.</para>
       </section>
@@ -2987,7 +2987,7 @@ public class FileUploadBean {
     enables you to take the class name of any exception that might be thrown
     and map it to a view name. This is functionally equivalent to the
     exception mapping feature from the Servlet API, but it's also possible to
-    implement more fine grained mappings of exceptions from different
+    implement more finely grained mappings of exceptions from different
     handlers.</para>
   </section>
 
@@ -3125,7 +3125,7 @@ public class FileUploadBean {
       <title>The Model - <classname>ModelMap</classname>
       (<classname>ModelAndView</classname>)</title>
 
-      <para>The <classname>ModelMap</classname> class is an essentially
+      <para>The <classname>ModelMap</classname> class is essentially a
       glorified <interfacename>Map</interfacename> that can make adding
       objects that are to be displayed in (or on) a
       <interfacename>View</interfacename> adhere to a common naming
@@ -3366,7 +3366,7 @@ public class FileUploadBean {
       <literal>'samples/imagedb'</literal> directory.</para>
     </tip>
 
-    <para>This following sections document these annotations and how they are
+    <para>The following sections document these annotations and how they are
     most commonly used.</para>
 
     <section id="mvc-ann-setup">
