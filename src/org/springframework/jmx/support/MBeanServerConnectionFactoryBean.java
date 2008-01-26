@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * <code>FactoryBean</code> implementation that creates an <code>MBeanServerConnection</code>
+ * <code>FactoryBean</code> that creates a JMX 1.2 <code>MBeanServerConnection</code>
  * to a remote <code>MBeanServer</code> exposed via a <code>JMXServerConnector</code>.
  * Exposes the <code>MBeanServer</code> for bean references.
  *
@@ -45,6 +45,8 @@ import org.springframework.util.ClassUtils;
  * @since 1.2
  * @see MBeanServerFactoryBean
  * @see ConnectorServerFactoryBean
+ * @see org.springframework.jmx.access.MBeanClientInterceptor#setServer
+ * @see org.springframework.jmx.access.NotificationListenerRegistrar#setServer
  */
 public class MBeanServerConnectionFactoryBean
 		implements FactoryBean, BeanClassLoaderAware, InitializingBean, DisposableBean {
@@ -107,7 +109,7 @@ public class MBeanServerConnectionFactoryBean
 	 */
 	public void afterPropertiesSet() throws IOException {
 		if (this.serviceUrl == null) {
-			throw new IllegalArgumentException("serviceUrl is required");
+			throw new IllegalArgumentException("Property 'serviceUrl' is required");
 		}
 
 		if (this.connectOnStartup) {

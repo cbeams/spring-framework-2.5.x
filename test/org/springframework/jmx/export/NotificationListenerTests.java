@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.management.ObjectName;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.access.NotificationListenerRegistrar;
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 
@@ -44,12 +45,12 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		JmxTestBean bean = new JmxTestBean();
 
 		Map beans = new HashMap();
-		beans.put(objectName.toString(), bean);
+		beans.put(objectName, bean);
 
 		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
 
 		Map notificationListeners = new HashMap();
-		notificationListeners.put(objectName.toString(), listener);
+		notificationListeners.put(objectName, listener);
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
@@ -60,7 +61,6 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		// update the attribute
 		String attributeName = "Name";
 		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
-
 		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
 	}
 
@@ -69,7 +69,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		JmxTestBean bean = new JmxTestBean();
 
 		Map beans = new HashMap();
-		beans.put(objectName.toString(), bean);
+		beans.put(objectName, bean);
 
 		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
 
@@ -85,7 +85,6 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		// update the attribute
 		String attributeName = "Name";
 		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
-
 		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
 	}
 
@@ -112,12 +111,10 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		// update the attribute
 		String attributeName = "Name";
-		server.setAttribute(
-				ObjectNameManager.getInstance("spring:name=Test"), new Attribute(attributeName, "Rob Harrop"));
+		server.setAttribute(ObjectNameManager.getInstance("spring:name=Test"), new Attribute(attributeName, "Rob Harrop"));
 
 		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
 		assertEquals("Handback object not transmitted correctly", handback, listener.getLastHandback(attributeName));
-
 	}
 
 	public void testRegisterNotificationListenerForAllMBeans() throws Exception {
@@ -125,13 +122,12 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		JmxTestBean bean = new JmxTestBean();
 
 		Map beans = new HashMap();
-		beans.put(objectName.toString(), bean);
+		beans.put(objectName, bean);
 
 		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
 
 		NotificationListenerBean listenerBean = new NotificationListenerBean();
 		listenerBean.setNotificationListener(listener);
-
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
@@ -151,7 +147,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		JmxTestBean bean = new JmxTestBean();
 
 		Map beans = new HashMap();
-		beans.put(objectName.toString(), bean);
+		beans.put(objectName, bean);
 
 		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
 
@@ -168,7 +164,6 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 				}
 			}
 		});
-
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
@@ -195,15 +190,15 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		catch (IllegalArgumentException expected) {
 		}
 	}
-	
-    public void testRegisterNotificationListenerWithBeanNameAndBeanNameInBeansMap() throws Exception {
-    	String beanName = "testBean";
+
+	public void testRegisterNotificationListenerWithBeanNameAndBeanNameInBeansMap() throws Exception {
+		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
 		SelfNamingTestBean testBean = new SelfNamingTestBean();
 		testBean.setObjectName(objectName);
 
-    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerSingleton(beanName, testBean);
 
 		Map beans = new HashMap();
@@ -223,16 +218,16 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
 		assertEquals("Listener not notified", 1, listener.getCount("Age"));
-    }
-    
-    public void testRegisterNotificationListenerWithBeanNameAndBeanInstanceInBeansMap() throws Exception {
-    	String beanName = "testBean";
+	}
+
+	public void testRegisterNotificationListenerWithBeanNameAndBeanInstanceInBeansMap() throws Exception {
+		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
 		SelfNamingTestBean testBean = new SelfNamingTestBean();
 		testBean.setObjectName(objectName);
 
-    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerSingleton(beanName, testBean);
 
 		Map beans = new HashMap();
@@ -252,16 +247,16 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
 		assertEquals("Listener not notified", 1, listener.getCount("Age"));
-    }
-    
-    public void testRegisterNotificationListenerWithBeanNameBeforeObjectNameMappedToSameBeanInstance() throws Exception {
-    	String beanName = "testBean";
+	}
+
+	public void testRegisterNotificationListenerWithBeanNameBeforeObjectNameMappedToSameBeanInstance() throws Exception {
+		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
 		SelfNamingTestBean testBean = new SelfNamingTestBean();
 		testBean.setObjectName(objectName);
 
-    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerSingleton(beanName, testBean);
 
 		Map beans = new HashMap();
@@ -282,16 +277,16 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
 		assertEquals("Listener should have been notified exactly once", 1, listener.getCount("Age"));
-    }
+	}
 
-    public void testRegisterNotificationListenerWithObjectNameBeforeBeanNameMappedToSameBeanInstance() throws Exception {
-    	String beanName = "testBean";
+	public void testRegisterNotificationListenerWithObjectNameBeforeBeanNameMappedToSameBeanInstance() throws Exception {
+		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
 		SelfNamingTestBean testBean = new SelfNamingTestBean();
 		testBean.setObjectName(objectName);
 
-    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerSingleton(beanName, testBean);
 
 		Map beans = new HashMap();
@@ -312,9 +307,9 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
 		assertEquals("Listener should have been notified exactly once", 1, listener.getCount("Age"));
-    }
+	}
 
-    public void testRegisterNotificationListenerWithTwoBeanNamesMappedToDifferentBeanInstances() throws Exception {
+	public void testRegisterNotificationListenerWithTwoBeanNamesMappedToDifferentBeanInstances() throws Exception {
 		String beanName1 = "testBean1";
 		String beanName2 = "testBean2";
 
@@ -327,7 +322,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		SelfNamingTestBean testBean2 = new SelfNamingTestBean();
 		testBean2.setObjectName(objectName2);
 
-    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerSingleton(beanName1, testBean1);
 		factory.registerSingleton(beanName2, testBean2);
 
@@ -354,9 +349,41 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		server.setAttribute(ObjectNameManager.getInstance(objectName2), new Attribute("Age", new Integer(33)));
 		assertEquals("Listener not notified for testBean2", 2, listener.getCount("Age"));
-    }
+	}
 
-    
+	public void testNotificationListenerRegistrar() throws Exception {
+		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
+		JmxTestBean bean = new JmxTestBean();
+
+		Map beans = new HashMap();
+		beans.put(objectName, bean);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.afterPropertiesSet();
+
+		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
+
+		NotificationListenerRegistrar registrar = new NotificationListenerRegistrar();
+		registrar.setServer(server);
+		registrar.setNotificationListener(listener);
+		registrar.setMappedObjectName(objectName);
+		registrar.afterPropertiesSet();
+
+		// update the attribute
+		String attributeName = "Name";
+		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
+		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
+
+		registrar.destroy();
+
+		// try to update the attribute again
+		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
+		assertEquals("Listener notified after destruction", 1, listener.getCount(attributeName));
+	}
+
+
 	private static class CountingAttributeChangeNotificationListener implements NotificationListener {
 
 		private Map attributeCounts = new HashMap();
@@ -391,25 +418,26 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 			return this.attributeHandbacks.get(attributeName);
 		}
 	}
-	
-	public class SelfNamingTestBean implements SelfNaming {
+
+
+	public static class SelfNamingTestBean implements SelfNaming {
 
 		private ObjectName objectName;
 
 		private int age;
-		
+
 		public void setObjectName(ObjectName objectName) {
 			this.objectName = objectName;
 		}
-		
+
 		public ObjectName getObjectName() throws MalformedObjectNameException {
 			return this.objectName;
 		}
-		
+
 		public void setAge(int age) {
 			this.age = age;
 		}
-		
+
 		public int getAge() {
 			return this.age;
 		}

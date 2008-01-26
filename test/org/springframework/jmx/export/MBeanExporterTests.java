@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -570,7 +570,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
 		Map beansToExport = new HashMap();
-		final String objectName = "test:what=ever";
+		String objectName = "test:what=ever";
 		beansToExport.put(objectName, testBeanInstance);
 		exporter.setBeans(beansToExport);
 		exporter.setBeanFactory(factory);
@@ -581,9 +581,9 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	/*
-     * SPR-3625
-     */
-    public void testMBeanIsUnregisteredForRuntimeExceptionDuringInitialization() throws Exception {
+	 * SPR-3625
+	 */
+	public void testMBeanIsUnregisteredForRuntimeExceptionDuringInitialization() throws Exception {
 		BeanDefinitionBuilder builder1 = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		BeanDefinitionBuilder builder2 = BeanDefinitionBuilder.rootBeanDefinition(RuntimeExceptionThrowingConstructorBean.class);
 		
@@ -606,13 +606,14 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			exporter.afterPropertiesSet();
 			fail("Must have failed during creation of RuntimeExceptionThrowingConstructorBean");
 		}
-		catch (RuntimeException expected) {}
+		catch (RuntimeException expected) {
+		}
 
 		assertIsNotRegistered("Must have unregistered all previously registered MBeans due to RuntimeException",
 				ObjectNameManager.getInstance(objectName1));
 		assertIsNotRegistered("Must have never registered this MBean due to RuntimeException",
 				ObjectNameManager.getInstance(objectName2));
-    }
+	}
 	
 
 	private Map getBeanMap() {

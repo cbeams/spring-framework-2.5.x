@@ -33,7 +33,6 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
@@ -45,8 +44,6 @@ import javax.management.RuntimeMBeanException;
 import javax.management.RuntimeOperationsException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -59,7 +56,6 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
-import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
@@ -111,7 +107,7 @@ public class MBeanClientInterceptor
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	private JMXConnector connector;
+	private final ConnectorDelegate connector = new ConnectorDelegate();
 
 	private MBeanServerInvocationHandler invocationHandler;
 
@@ -217,7 +213,7 @@ public class MBeanClientInterceptor
 	public void prepare() {
 		synchronized (this.preparationMonitor) {
 			if (this.server == null) {
-				connect();
+				this.server = this.connector.connect(this.serviceUrl, this.agentId);
 			}
 			this.invocationHandler = null;
 			if (this.useStrictCasing) {
@@ -239,50 +235,6 @@ public class MBeanClientInterceptor
 			}
 		}
 	}
-
-	/**
-	 * Connects to the remote <code>MBeanServer</code> using the configured <code>JMXServiceURL</code>.
-	 * @see #setServiceUrl(String)
-	 * @see #setConnectOnStartup(boolean)
-	 */
-	private void connect() throws MBeanServerNotFoundException {
-		if (this.serviceUrl != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Connecting to remote MBeanServer at URL [" + this.serviceUrl + "]");
-			}
-			try {
-				this.connector = JMXConnectorFactory.connect(this.serviceUrl);
-				this.server = this.connector.getMBeanServerConnection();
-			}
-			catch (IOException ex) {
-				throw new MBeanServerNotFoundException(
-						"Could not connect to remote MBeanServer at URL [" + this.serviceUrl + "]", ex);
-			}
-		}
-		else {
-			logger.debug("Attempting to locate local MBeanServer");
-			this.server = locateMBeanServer(this.agentId);
-		}
-	}
-
-	/**
-	 * Attempt to locate an existing <code>MBeanServer</code>.
-	 * Called if no {@link #setServiceUrl "serviceUrl"} was specified.
-	 * <p>The default implementation attempts to find an <code>MBeanServer</code> using
-	 * a standard lookup. Subclasses may override to add additional location logic.
-	 * @param agentId the agent identifier of the MBeanServer to retrieve.
-	 * If this parameter is <code>null</code>, all registered MBeanServers are
-	 * considered.
-	 * @return the <code>MBeanServer</code> if found
-	 * @throws org.springframework.jmx.MBeanServerNotFoundException
-	 * if no <code>MBeanServer</code> could be found
-	 * @see JmxUtils#locateMBeanServer(String)
-	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
-	 */
-	protected MBeanServer locateMBeanServer(String agentId) throws MBeanServerNotFoundException {
-		return JmxUtils.locateMBeanServer(agentId);
-	}
-
 	/**
 	 * Loads the management interface info for the configured MBean into the caches.
 	 * This information is used by the proxy when determining whether an invocation matches
@@ -292,18 +244,14 @@ public class MBeanClientInterceptor
 		try {
 			MBeanInfo info = this.server.getMBeanInfo(this.objectName);
 
-			// get attributes
 			MBeanAttributeInfo[] attributeInfo = info.getAttributes();
 			this.allowedAttributes = new HashMap(attributeInfo.length);
-
 			for (int x = 0; x < attributeInfo.length; x++) {
 				this.allowedAttributes.put(attributeInfo[x].getName(), attributeInfo[x]);
 			}
 
-			// get operations
 			MBeanOperationInfo[] operationInfo = info.getOperations();
 			this.allowedOperations = new HashMap(operationInfo.length);
-
 			for (int x = 0; x < operationInfo.length; x++) {
 				MBeanOperationInfo opInfo = operationInfo[x];
 				Class[] paramTypes = JmxUtils.parameterInfoToTypes(opInfo.getSignature(), this.beanClassLoader);
@@ -523,14 +471,8 @@ public class MBeanClientInterceptor
 		}
 	}
 
-
-	/**
-	 * Closes any <code>JMXConnector</code> that may be managed by this interceptor.
-	 */
-	public void destroy() throws Exception {
-		if (this.connector != null) {
-			this.connector.close();
-		}
+	public void destroy() {
+		this.connector.close();
 	}
 
 
