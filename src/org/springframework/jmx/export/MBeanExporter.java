@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -817,7 +817,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 
 	//---------------------------------------------------------------------
-	// Management of notification listeners
+	// Notification and listener management
 	//---------------------------------------------------------------------
 
 	/**
@@ -888,12 +888,12 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/**
 	 * Called when an MBean is registered. Notifies all registered
 	 * {@link MBeanExporterListener MBeanExporterListeners} of the registration event.
-     * <p>Please note that if an {@link MBeanExporterListener} throws a (runtime)
-     * exception when notified, this will essentially interrupt the notification process
-     * and any remaining listeners that have yet to be notified will not (obviously)
-     * receive the {@link MBeanExporterListener#mbeanRegistered(javax.management.ObjectName)}
-     * callback.
-     * @param objectName the <code>ObjectName</code> of the registered MBean
+	 * <p>Please note that if an {@link MBeanExporterListener} throws a (runtime)
+	 * exception when notified, this will essentially interrupt the notification process
+	 * and any remaining listeners that have yet to be notified will not (obviously)
+	 * receive the {@link MBeanExporterListener#mbeanRegistered(javax.management.ObjectName)}
+	 * callback.
+	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 */
 	protected void onRegister(ObjectName objectName) {
 		notifyListenersOfRegistration(objectName);
@@ -902,19 +902,18 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/**
 	 * Called when an MBean is unregistered. Notifies all registered
 	 * {@link MBeanExporterListener MBeanExporterListeners} of the unregistration event.
-     * <p>Please note that if an {@link MBeanExporterListener} throws a (runtime)
-     * exception when notified, this will essentially interrupt the notification process
-     * and any remaining listeners that have yet to be notified will not (obviously)
-     * receive the {@link MBeanExporterListener#mbeanUnregistered(javax.management.ObjectName)}
-     * callback.
-     * @param objectName the <code>ObjectName</code> of the unregistered MBean
+	 * <p>Please note that if an {@link MBeanExporterListener} throws a (runtime)
+	 * exception when notified, this will essentially interrupt the notification process
+	 * and any remaining listeners that have yet to be notified will not (obviously)
+	 * receive the {@link MBeanExporterListener#mbeanUnregistered(javax.management.ObjectName)}
+	 * callback.
+	 * @param objectName the <code>ObjectName</code> of the unregistered MBean
 	 */
 	protected void onUnregister(ObjectName objectName) {
 		notifyListenersOfUnregistration(objectName);
 	}
 
-
-    /**
+	/**
 	 * Notifies all registered {@link MBeanExporterListener MBeanExporterListeners} of the
 	 * registration of the MBean identified by the supplied {@link ObjectName}.
 	 */
