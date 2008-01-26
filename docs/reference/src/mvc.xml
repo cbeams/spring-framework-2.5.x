@@ -1343,7 +1343,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
       <para>As an example, when using JSP for a view technology you can use
       the <classname>UrlBasedViewResolver</classname>. This view resolver
-      translates a view name to a URL and hands the request over the
+      translates a view name to a URL and hands the request over to the
       RequestDispatcher to render the view.</para>
       
       <programlisting><![CDATA[<bean id="viewResolver"
@@ -1520,7 +1520,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         relative to the current servlet context, while a name such as
         <literal>redirect:http://myhost.com/some/arbitrary/path.html</literal>
         will redirect to an absolute URL. The important thing is that as long
-        is this redirect view name is injected into the controller like any
+        as this redirect view name is injected into the controller like any
         other logical view name, the controller is not even aware that
         redirection is happening.</para>
       </section>
@@ -2645,7 +2645,7 @@ public class FileUploadBean {
     <classname>SimpleMappingExceptionResolver</classname>. This resolver enables you
     to take the class name of any exception that might be thrown and map it to a view
     name. This is functionally equivalent to the exception mapping feature from the
-    Servlet API, but it's also possible to implement more fine grained mappings of
+    Servlet API, but it's also possible to implement more finely grained mappings of
     exceptions from different handlers.</para>
    </section>
   
@@ -2749,7 +2749,7 @@ public class FileUploadBean {
 
         <section id="mvc-coc-modelmap">
             <title>The Model - <classname>ModelMap</classname> (<classname>ModelAndView</classname>)</title>
-            <para>The <classname>ModelMap</classname> class is an essentially glorified
+            <para>The <classname>ModelMap</classname> class is essentially a glorified
             <interfacename>Map</interfacename> that can make adding objects that are
             to be displayed in (or on) a <interfacename>View</interfacename> adhere to
             a common naming convention. Consider the following <interfacename>Controller</interfacename>
