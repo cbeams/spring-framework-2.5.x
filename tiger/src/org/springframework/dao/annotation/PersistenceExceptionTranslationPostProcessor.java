@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.dao.annotation;
 import java.lang.annotation.Annotation;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -61,7 +62,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
-public class PersistenceExceptionTranslationPostProcessor
+public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 		implements BeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware, Ordered {
 
 	private Class<? extends Annotation> repositoryAnnotationType = Repository.class;
@@ -122,9 +123,11 @@ public class PersistenceExceptionTranslationPostProcessor
 				return bean;
 			}
 			else {
-				ProxyFactory pf = new ProxyFactory(bean);
-				pf.addAdvisor(this.persistenceExceptionTranslationAdvisor);
-				return pf.getProxy(this.beanClassLoader);
+				ProxyFactory proxyFactory = new ProxyFactory(bean);
+				// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
+				proxyFactory.copyFrom(this);
+				proxyFactory.addAdvisor(this.persistenceExceptionTranslationAdvisor);
+				return proxyFactory.getProxy(this.beanClassLoader);
 			}
 		}
 		else {
