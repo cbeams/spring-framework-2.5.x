@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,14 +61,14 @@ public class IncorrectResultSetColumnCountException extends DataRetrievalFailure
 	 * Return the expected column count.
 	 */
 	public int getExpectedCount() {
-		return expectedCount;
+		return this.expectedCount;
 	}
 
 	/**
 	 * Return the actual column count.
 	 */
 	public int getActualCount() {
-		return actualCount;
+		return this.actualCount;
 	}
 
 }
