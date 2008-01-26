@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.jmx.support;
 
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -106,7 +106,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The beans that have been registered by this exporter.
 	 */
-	protected final Set registeredBeans = new HashSet();
+	protected final Set registeredBeans = new LinkedHashSet();
 
 	/**
 	 * The action take when registering an MBean and finding that it already exists.
@@ -161,6 +161,8 @@ public class MBeanRegistrationSupport {
 	 * Actually register the MBean with the server. The behavior when encountering
 	 * an existing MBean can be configured using the {@link #setRegistrationBehavior(int)}
 	 * and {@link #setRegistrationBehaviorName(String)} methods.
+	 * @param mbean the MBean instance
+	 * @param objectName the suggested ObjectName for the MBean
 	 * @throws JMException if the registration failed
 	 */
 	protected void doRegister(Object mbean, ObjectName objectName) throws JMException {
@@ -198,7 +200,7 @@ public class MBeanRegistrationSupport {
 			actualObjectName = objectName;
 		}
 		this.registeredBeans.add(actualObjectName);
-		onRegister(actualObjectName);
+		onRegister(actualObjectName, mbean);
 	}
 
 	/**
@@ -206,27 +208,34 @@ public class MBeanRegistrationSupport {
 	 */
 	protected void unregisterBeans() {
 		for (Iterator it = this.registeredBeans.iterator(); it.hasNext();) {
-			ObjectName objectName = (ObjectName) it.next();
-			try {
-				// MBean might already have been unregistered by an external process.
-				if (this.server.isRegistered(objectName)) {
-					this.server.unregisterMBean(objectName);
-					onUnregister(objectName);
-				}
-				else {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Could not unregister MBean [" + objectName + "] as said MBean " +
-								"is not registered (perhaps already unregistered by an external process)");
-					}
-				}
+			doUnregister((ObjectName) it.next());
+		}
+		this.registeredBeans.clear();
+	}
+
+	/**
+	 * Actually unregister the specified MBean from the server.
+	 * @param objectName the suggested ObjectName for the MBean
+	 */
+	protected void doUnregister(ObjectName objectName) {
+		try {
+			// MBean might already have been unregistered by an external process.
+			if (this.server.isRegistered(objectName)) {
+				this.server.unregisterMBean(objectName);
+				onUnregister(objectName);
 			}
-			catch (JMException ex) {
-				if (logger.isErrorEnabled()) {
-					logger.error("Could not unregister MBean [" + objectName + "]", ex);
+			else {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Could not unregister MBean [" + objectName + "] as said MBean " +
+							"is not registered (perhaps already unregistered by an external process)");
 				}
 			}
 		}
-		this.registeredBeans.clear();
+		catch (JMException ex) {
+			if (logger.isErrorEnabled()) {
+				logger.error("Could not unregister MBean [" + objectName + "]", ex);
+			}
+		}
 	}
 
 	/**
@@ -240,7 +249,19 @@ public class MBeanRegistrationSupport {
 	/**
 	 * Called when an MBean is registered under the given {@link ObjectName}. Allows
 	 * subclasses to perform additional processing when an MBean is registered.
-	 * @param objectName the {@link ObjectName} of the MBean that was registered.
+	 * <p>The default implementation delegates to {@link #onRegister(ObjectName)}.
+	 * @param objectName the actual {@link ObjectName} that the MBean was registered with
+	 * @param mbean the registered MBean instance
+	 */
+	protected void onRegister(ObjectName objectName, Object mbean) {
+		onRegister(objectName);
+	}
+
+	/**
+	 * Called when an MBean is registered under the given {@link ObjectName}. Allows
+	 * subclasses to perform additional processing when an MBean is registered.
+	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * @param objectName the actual {@link ObjectName} that the MBean was registered with
 	 */
 	protected void onRegister(ObjectName objectName) {
 	}
@@ -248,7 +269,8 @@ public class MBeanRegistrationSupport {
 	/**
 	 * Called when an MBean is unregistered under the given {@link ObjectName}. Allows
 	 * subclasses to perform additional processing when an MBean is unregistered.
-	 * @param objectName the {@link ObjectName} of the MBean that was unregistered.
+	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * @param objectName the {@link ObjectName} that the MBean was registered with
 	 */
 	protected void onUnregister(ObjectName objectName) {
 	}
