@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,10 @@ public class CustomDateEditor extends PropertyEditorSupport {
 				setValue(this.dateFormat.parse(text));
 			}
 			catch (ParseException ex) {
-				throw new IllegalArgumentException("Could not parse date: " + ex.getMessage());
+				IllegalArgumentException iae =
+						new IllegalArgumentException("Could not parse date: " + ex.getMessage());
+				iae.initCause(ex);
+				throw iae;
 			}
 		}
 	}
