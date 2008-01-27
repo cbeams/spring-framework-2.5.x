@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 	private boolean exposeContextBeansAsAttributes = false;
 
+	private boolean preventDispatchLoop = false;
+
 
 	/**
 	 * Constructor for use as a bean.
@@ -124,6 +126,17 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
 		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
+	}
+
+	/**
+	 * Set whether to explicitly prevent dispatching back to the
+	 * current handler path.
+	 * <p>Default is "false". Switch this to "true" for convention-based
+	 * views where a dispatch back to the current handler path is a
+	 * definitive error.
+	 */
+	public void setPreventDispatchLoop(boolean preventDispatchLoop) {
+		this.preventDispatchLoop = preventDispatchLoop;
 	}
 
 
@@ -204,10 +217,12 @@ public class InternalResourceView extends AbstractUrlBasedView {
 			throws Exception {
 
 		String path = getUrl();
-		String uri = request.getRequestURI();
-		if (path.startsWith("/") ? uri.equals(path) : uri.equals(StringUtils.applyRelativePath(uri, path))) {
-			throw new ServletException("Invalid view path [" + path + "]: would dispatch back " +
-					"to the current handler path [" + uri + "] again. Check your ViewResolver setup!");
+		if (this.preventDispatchLoop) {
+			String uri = request.getRequestURI();
+			if (path.startsWith("/") ? uri.equals(path) : uri.equals(StringUtils.applyRelativePath(uri, path))) {
+				throw new ServletException("Invalid view path [" + path + "]: would dispatch back " +
+						"to the current handler path [" + uri + "] again. Check your ViewResolver setup!");
+			}
 		}
 		return path;
 	}
