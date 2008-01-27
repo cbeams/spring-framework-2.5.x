@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,8 +141,6 @@ public class InternalResourceViewTests extends TestCase {
 			reqControl.setVoidCallable(1);
 		}
 
-		request.getRequestURI();
-		reqControl.setReturnValue("/myPath");
 		request.getRequestDispatcher(url);
 		reqControl.setReturnValue(new MockRequestDispatcher(url));
 		reqControl.replay();
@@ -177,8 +175,6 @@ public class InternalResourceViewTests extends TestCase {
 
 		request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
 		reqControl.setReturnValue("somepath");
-		request.getRequestURI();
-		reqControl.setReturnValue("/myPath");
 		request.getRequestDispatcher(url);
 		reqControl.setReturnValue(new MockRequestDispatcher(url));
 		reqControl.replay();
@@ -212,8 +208,6 @@ public class InternalResourceViewTests extends TestCase {
 
 		request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
 		reqControl.setReturnValue(null);
-		request.getRequestURI();
-		reqControl.setReturnValue("/myPath");
 		request.getRequestDispatcher(url);
 		reqControl.setReturnValue(new MockRequestDispatcher(url));
 		reqControl.replay();
