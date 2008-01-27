@@ -17,8 +17,6 @@
 package org.springframework.beans.factory.config;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -290,6 +288,50 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
 		methodInvoker.setTargetMethod("intArgument");
 		methodInvoker.setArguments(new Object[] {"5"});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
+	}
+
+	public void testInvokeWithIntArguments() throws Exception {
+		ArgumentConvertingMethodInvoker methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
+		methodInvoker.setTargetMethod("intArguments");
+		methodInvoker.setArguments(new Object[] {new Integer[] {new Integer(5), new Integer(10)}});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
+
+		methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
+		methodInvoker.setTargetMethod("intArguments");
+		methodInvoker.setArguments(new Object[] {new String[] {"5", "10"}});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
+
+		methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
+		methodInvoker.setTargetMethod("intArguments");
+		methodInvoker.setArguments(new Integer[] {new Integer(5), new Integer(10)});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
+
+		methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
+		methodInvoker.setTargetMethod("intArguments");
+		methodInvoker.setArguments(new String[] {"5", "10"});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
+
+		methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
+		methodInvoker.setTargetMethod("intArguments");
+		methodInvoker.setArguments(new Object[] {new Integer(5), new Integer(10)});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
+
+		methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(MethodInvokerTests.TestClass1.class);
+		methodInvoker.setTargetMethod("intArguments");
+		methodInvoker.setArguments(new Object[] {"5", "10"});
 		methodInvoker.prepare();
 		methodInvoker.invoke();
 	}

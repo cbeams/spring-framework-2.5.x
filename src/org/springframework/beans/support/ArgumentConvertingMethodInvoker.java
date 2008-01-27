@@ -102,20 +102,34 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 
 
 	/**
-	 * This implementation looks for a method with matching parameter types:
-	 * that is, where each argument value is assignable to the corresponding parameter type.
+	 * This implementation looks for a method with matching parameter types.
+	 * @see #doFindMatchingMethod
 	 */
 	protected Method findMatchingMethod() {
 		Method matchingMethod = super.findMatchingMethod();
-		if (matchingMethod != null) {
-			return matchingMethod;
-		}
-
 		// Second pass: look for method where arguments can be converted to parameter types.
+		if (matchingMethod == null) {
+			// Interpret argument array as individual method arguments.
+			matchingMethod = doFindMatchingMethod(getArguments());
+		}
+		if (matchingMethod == null) {
+			// Interpret argument array as single method argument of array type.
+			matchingMethod = doFindMatchingMethod(new Object[] {getArguments()});
+		}
+		return matchingMethod;
+	}
+
+	/**
+	 * Actually find a method with matching parameter type, i.e. where each
+	 * argument value is assignable to the corresponding parameter type.
+	 * @param arguments the argument values to match against method parameters
+	 * @return a matching method, or <code>null</code> if none
+	 */
+	protected Method doFindMatchingMethod(Object[] arguments) {
 		TypeConverter converter = getTypeConverter();
 		if (converter != null) {
 			String targetMethod = getTargetMethod();
-			Object[] arguments = getArguments();
+			Method matchingMethod = null;
 			int argCount = arguments.length;
 			Method[] candidates = getTargetClass().getMethods();
 			int minTypeDiffWeight = Integer.MAX_VALUE;

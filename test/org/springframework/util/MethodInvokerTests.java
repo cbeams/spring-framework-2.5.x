@@ -31,7 +31,7 @@ public class MethodInvokerTests extends TestCase {
 
 	public void testPlainMethodInvoker() throws Exception {
 		// sanity check: singleton, non-static should work
-		MethodInvokerTests.TestClass1 tc1 = new MethodInvokerTests.TestClass1();
+		TestClass1 tc1 = new TestClass1();
 		MethodInvoker mi = new MethodInvoker();
 		mi.setTargetObject(tc1);
 		mi.setTargetMethod("method1");
@@ -41,14 +41,14 @@ public class MethodInvokerTests extends TestCase {
 
 		// sanity check: check that argument count matching works
 		mi = new MethodInvoker();
-		mi.setTargetClass(MethodInvokerTests.TestClass1.class);
+		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes");
 		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
 		mi.prepare();
 		assertEquals("hello", mi.invoke());
 
 		mi = new MethodInvoker();
-		mi.setTargetClass(MethodInvokerTests.TestClass1.class);
+		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
 		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
 		mi.prepare();
@@ -56,7 +56,7 @@ public class MethodInvokerTests extends TestCase {
 
 		// Sanity check: check that argument conversion doesn't work with plain MethodInvoker
 		mi = new MethodInvoker();
-		mi.setTargetClass(MethodInvokerTests.TestClass1.class);
+		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
 		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", Boolean.TRUE});
 		try {
@@ -71,11 +71,11 @@ public class MethodInvokerTests extends TestCase {
 	public void testStringWithMethodInvoker() throws Exception {
 		try {
 			MethodInvoker methodInvoker = new MethodInvoker();
-			methodInvoker.setTargetObject(new MethodInvokerTests.Greeter());
+			methodInvoker.setTargetObject(new Greeter());
 			methodInvoker.setTargetMethod("greet");
 			methodInvoker.setArguments(new Object[] {new String("no match")});
 			methodInvoker.prepare();
-			fail("Should have thrown a NoSuchMethodException.");
+			fail("Should have thrown a NoSuchMethodException");
 		}
 		catch (NoSuchMethodException e) {
 			// expected
@@ -84,9 +84,9 @@ public class MethodInvokerTests extends TestCase {
 
 	public void testPurchaserWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new MethodInvokerTests.Greeter());
+		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new MethodInvokerTests.Purchaser()});
+		methodInvoker.setArguments(new Object[] {new Purchaser()});
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("purchaser: hello", greeting);
@@ -94,9 +94,9 @@ public class MethodInvokerTests extends TestCase {
 
 	public void testShopperWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new MethodInvokerTests.Greeter());
+		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new MethodInvokerTests.Shopper()});
+		methodInvoker.setArguments(new Object[] {new Shopper()});
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("purchaser: may I help you?", greeting);
@@ -104,9 +104,9 @@ public class MethodInvokerTests extends TestCase {
 
 	public void testSalesmanWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new MethodInvokerTests.Greeter());
+		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new MethodInvokerTests.Salesman()});
+		methodInvoker.setArguments(new Object[] {new Salesman()});
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("greetable: how are sales?", greeting);
@@ -114,9 +114,9 @@ public class MethodInvokerTests extends TestCase {
 
 	public void testCustomerWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new MethodInvokerTests.Greeter());
+		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new MethodInvokerTests.Customer()});
+		methodInvoker.setArguments(new Object[] {new Customer()});
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("customer: good day", greeting);
@@ -124,9 +124,9 @@ public class MethodInvokerTests extends TestCase {
 
 	public void testRegularWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new MethodInvokerTests.Greeter());
+		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new MethodInvokerTests.Regular("Kotter")});
+		methodInvoker.setArguments(new Object[] {new Regular("Kotter")});
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("regular: welcome back Kotter", greeting);
@@ -134,9 +134,9 @@ public class MethodInvokerTests extends TestCase {
 
 	public void testVIPWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new MethodInvokerTests.Greeter());
+		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new MethodInvokerTests.VIP("Fonzie")});
+		methodInvoker.setArguments(new Object[] {new VIP("Fonzie")});
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("regular: whassup dude?", greeting);
@@ -154,7 +154,7 @@ public class MethodInvokerTests extends TestCase {
 		}
 
 		public static int staticMethod1() {
-			return ++MethodInvokerTests.TestClass1._staticField1;
+			return ++TestClass1._staticField1;
 		}
 
 		public static void voidRetvalMethod() {
@@ -164,6 +164,9 @@ public class MethodInvokerTests extends TestCase {
 		}
 
 		public static void intArgument(int arg) {
+		}
+
+		public static void intArguments(int[] arg) {
 		}
 
 		public static String supertypes(Collection c, Integer i) {
@@ -191,22 +194,22 @@ public class MethodInvokerTests extends TestCase {
 	public static class Greeter {
 
 		// should handle Salesman (only interface)
-		public String greet(MethodInvokerTests.Greetable greetable) {
+		public String greet(Greetable greetable) {
 			return "greetable: " + greetable.getGreeting();
 		}
 
 		// should handle Shopper (beats Greetable since it is a class)
-		public String greet(MethodInvokerTests.Purchaser purchaser) {
+		public String greet(Purchaser purchaser) {
 			return "purchaser: " + purchaser.getGreeting();
 		}
 
 		// should handle Customer (exact match)
-		public String greet(MethodInvokerTests.Customer customer) {
+		public String greet(Customer customer) {
 			return "customer: " + customer.getGreeting();
 		}
 
 		// should handle Regular (exact) and VIP (closest match)
-		public String greet(MethodInvokerTests.Regular regular) {
+		public String greet(Regular regular) {
 			return "regular: " + regular.getGreeting();
 		}
 	}
@@ -218,11 +221,11 @@ public class MethodInvokerTests extends TestCase {
 	}
 
 
-	private static interface Person extends MethodInvokerTests.Greetable {
+	private static interface Person extends Greetable {
 	}
 
 
-	private static class Purchaser implements MethodInvokerTests.Greetable {
+	private static class Purchaser implements Greetable {
 
 		public String getGreeting() {
 			return "hello";
@@ -230,7 +233,7 @@ public class MethodInvokerTests extends TestCase {
 	}
 
 
-	private static class Shopper extends MethodInvokerTests.Purchaser implements MethodInvokerTests.Person {
+	private static class Shopper extends Purchaser implements Person {
 
 		public String getGreeting() {
 			return "may I help you?";
@@ -238,7 +241,7 @@ public class MethodInvokerTests extends TestCase {
 	}
 
 
-	private static class Salesman implements MethodInvokerTests.Person {
+	private static class Salesman implements Person {
 
 		public String getGreeting() {
 			return "how are sales?";
@@ -246,7 +249,7 @@ public class MethodInvokerTests extends TestCase {
 	}
 
 
-	private static class Customer extends MethodInvokerTests.Shopper {
+	private static class Customer extends Shopper {
 
 		public String getGreeting() {
 			return "good day";
@@ -254,7 +257,7 @@ public class MethodInvokerTests extends TestCase {
 	}
 
 
-	private static class Regular extends MethodInvokerTests.Customer {
+	private static class Regular extends Customer {
 
 		private String name;
 
@@ -268,7 +271,7 @@ public class MethodInvokerTests extends TestCase {
 	}
 
 
-	private static class VIP extends MethodInvokerTests.Regular {
+	private static class VIP extends Regular {
 
 		public VIP(String name) {
 			super(name);
