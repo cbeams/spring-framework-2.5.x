@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -694,6 +694,7 @@ public class DispatcherServletTests extends TestCase {
 
 	public void testThrowawayController() throws Exception {
 		SimpleWebApplicationContext.TestThrowawayController.counter = 0;
+
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/throwaway.do");
 		request.addParameter("myInt", "5");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -701,6 +702,10 @@ public class DispatcherServletTests extends TestCase {
 		simpleDispatcherServlet.service(request, response);
 		assertTrue("Correct response", "view5".equals(response.getForwardedUrl()));
 		assertEquals(1, SimpleWebApplicationContext.TestThrowawayController.counter);
+
+		request = new MockHttpServletRequest(getServletContext(), "GET", "/throwaway.do");
+		request.addParameter("myInt", "5");
+		response = new MockHttpServletResponse();
 
 		simpleDispatcherServlet.service(request, response);
 		assertTrue("Correct response", "view5".equals(response.getForwardedUrl()));

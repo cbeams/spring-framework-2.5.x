@@ -63,6 +63,10 @@ import org.springframework.web.util.WebUtils;
  */
 public class InternalResourceView extends AbstractUrlBasedView {
 
+	private static final String DISPATCHED_PATH_ATTRIBUTE =
+			InternalResourceView.class.getName() + ".DISPATCHED_PATH";
+
+
 	private boolean alwaysInclude = false;
 
 	private boolean exposeContextBeansAsAttributes = false;
@@ -218,11 +222,19 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 		String path = getUrl();
 		if (this.preventDispatchLoop) {
+			String previousPath = (String) request.getAttribute(DISPATCHED_PATH_ATTRIBUTE);
 			String uri = request.getRequestURI();
-			if (path.startsWith("/") ? uri.equals(path) : uri.equals(StringUtils.applyRelativePath(uri, path))) {
-				throw new ServletException("Invalid view path [" + path + "]: would dispatch back " +
-						"to the current handler path [" + uri + "] again. Check your ViewResolver setup!");
+			if (path.equals(previousPath)) {
+				throw new ServletException("Circular view path [" + path + "]: already dispatched to this " +
+						"view path within the same request [" + uri + "]. Check your ViewResolver setup! " +
+						"(Hint: This may be the result of an unspecified view, due to default view name generation.)");
 			}
+			if (path.startsWith("/") ? uri.equals(path) : uri.equals(StringUtils.applyRelativePath(uri, path))) {
+				throw new ServletException("Circular view path [" + path + "]: would dispatch back " +
+						"to the current handler URL [" + uri + "] again. Check your ViewResolver setup! " +
+						"(Hint: This may be the result of an unspecified view, due to default view name generation.)");
+			}
+			request.setAttribute(DISPATCHED_PATH_ATTRIBUTE, path);
 		}
 		return path;
 	}
