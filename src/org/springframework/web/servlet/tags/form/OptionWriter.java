@@ -151,7 +151,6 @@ class OptionWriter {
 	/**
 	 * Renders the inner '<code>option</code>' tags using the supplied
 	 * {@link Map} as the source.
-	 *
 	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
 	private void renderFromMap(final TagWriter tagWriter) throws JspException {
@@ -192,7 +191,6 @@ class OptionWriter {
 			Object label = (this.labelProperty != null ? wrapper.getPropertyValue(this.labelProperty) : item);
 			renderOption(tagWriter, item, value, label);
 		}
-
 	}
 
 	/**
