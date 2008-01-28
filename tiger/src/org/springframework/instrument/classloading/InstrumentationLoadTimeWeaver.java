@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,18 +49,33 @@ import org.springframework.util.ClassUtils;
  */
 public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
+	private static final boolean AGENT_CLASS_PRESENT = ClassUtils.isPresent(
+			"org.springframework.instrument.InstrumentationSavingAgent",
+			InstrumentationLoadTimeWeaver.class.getClassLoader());
+
+
 	private final ClassLoader classLoader;
+
+	private final Instrumentation instrumentation;
 
 	private final List<ClassFileTransformer> transformers = new ArrayList<ClassFileTransformer>(4);
 
 
+	/**
+	 * Create a new InstrumentationLoadTimeWeaver for the default ClassLoader.
+	 */
 	public InstrumentationLoadTimeWeaver() {
-		this.classLoader = ClassUtils.getDefaultClassLoader();
+		this(ClassUtils.getDefaultClassLoader());
 	}
 
+	/**
+	 * Create a new InstrumentationLoadTimeWeaver for the given ClassLoader.
+	 * @param classLoader the ClassLoader that registered transformers are supposed to apply to
+	 */
 	public InstrumentationLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = classLoader;
+		this.instrumentation = getInstrumentation();
 	}
 
 
@@ -68,8 +83,14 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		Assert.notNull(transformer, "Transformer must not be null");
 		FilteringClassFileTransformer actualTransformer =
 				new FilteringClassFileTransformer(transformer, this.classLoader);
-		getInstrumentation().addTransformer(actualTransformer);
-		this.transformers.add(actualTransformer);
+		synchronized (this.transformers) {
+			if (this.instrumentation == null) {
+				throw new IllegalStateException(
+						"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
+			}
+			this.instrumentation.addTransformer(actualTransformer);
+			this.transformers.add(actualTransformer);
+		}
 	}
 
 	/**
@@ -92,25 +113,48 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * Remove all registered transformers, in inverse order of registration.
 	 */
 	public void removeTransformers() {
-		Instrumentation instrumentation = getInstrumentation();
-		for (int i = this.transformers.size() - 1; i >= 0; i--) {
-			instrumentation.removeTransformer(this.transformers.get(i));
+		synchronized (this.transformers) {
+			if (!this.transformers.isEmpty()) {
+				for (int i = this.transformers.size() - 1; i >= 0; i--) {
+					this.instrumentation.removeTransformer(this.transformers.get(i));
+				}
+				this.transformers.clear();
+			}
 		}
-		this.transformers.clear();
+	}
+
+
+	/**
+	 * Check whether an Instrumentation instance is available for the current VM.
+	 * @see #getInstrumentation()
+	 */
+	public static boolean isInstrumentationAvailable() {
+		return (getInstrumentation() != null);
 	}
 
 	/**
-	 * Obtain the Instrumentation instance for the current VM, if available
-	 * @return the Instrumentation instance (never <code>null</code>)
-	 * @throws IllegalStateException if instrumentation is not available
+	 * Obtain the Instrumentation instance for the current VM, if available.
+	 * @return the Instrumentation instance, or <code>null</code> if none found
+	 * @see #isInstrumentationAvailable()
 	 */
-	private Instrumentation getInstrumentation() {
-		Instrumentation instrumentation = InstrumentationSavingAgent.getInstrumentation();
-		if (instrumentation == null) {
-			throw new IllegalStateException(
-					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
+	private static Instrumentation getInstrumentation() {
+		if (AGENT_CLASS_PRESENT) {
+			return InstrumentationAccessor.getInstrumentation();
 		}
-		return instrumentation;
+		else {
+			return null;
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid InstrumentationSavingAgent dependency.
+	 */
+	private static class InstrumentationAccessor {
+
+		public static Instrumentation getInstrumentation() {
+			return InstrumentationSavingAgent.getInstrumentation();
+		}
 	}
 
 

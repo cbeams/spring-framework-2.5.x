@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
+
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Ordered;
-import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 
@@ -39,10 +40,17 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * @author Ramnivas Laddad
  * @since 2.5
  */
-public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTimeWeaverAware, Ordered {
+public class AspectJWeavingEnabler
+		implements BeanFactoryPostProcessor, BeanClassLoaderAware, LoadTimeWeaverAware, Ordered {
+
+	private ClassLoader beanClassLoader;
 
 	private LoadTimeWeaver loadTimeWeaver;
 
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
 
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
@@ -55,24 +63,23 @@ public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTime
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		LoadTimeWeaver weaverToUse = this.loadTimeWeaver;
-		if (weaverToUse == null && InstrumentationSavingAgent.getInstrumentation() != null) {
-			weaverToUse = new InstrumentationLoadTimeWeaver();
+		if (weaverToUse == null && InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
+			weaverToUse = new InstrumentationLoadTimeWeaver(this.beanClassLoader);
 		}
-		weaverToUse.addTransformer(new AspectJClassBypassingClassFileTransformerDecorator(
+		weaverToUse.addTransformer(new AspectJClassBypassingClassFileTransformer(
 					new ClassPreProcessorAgentAdapter()));
 	}
 
 
 	/*
-	 * Potentially temporary way to avoid processing AspectJ classes and avoiding the LinkageError
-	 * while doing so. OC4J and Tomcat (in Glassfish) definitely need bypasing such classes.
-	 * TODO: Investigate further to see why AspectJ itself isn't doing so.
+	 * Decorator to suppress processing AspectJ classes, hence avoiding potential LinkageErrors.
+	 * OC4J and Tomcat (in Glassfish) definitely need such bypassing of AspectJ classes.
 	 */
-	private static class AspectJClassBypassingClassFileTransformerDecorator implements ClassFileTransformer {
+	private static class AspectJClassBypassingClassFileTransformer implements ClassFileTransformer {
 
 		private final ClassFileTransformer delegate;
 		
-		public AspectJClassBypassingClassFileTransformerDecorator(ClassFileTransformer delegate) {
+		public AspectJClassBypassingClassFileTransformer(ClassFileTransformer delegate) {
 			this.delegate = delegate;
 		}
 		
