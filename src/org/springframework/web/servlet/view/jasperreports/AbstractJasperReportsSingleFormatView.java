@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,10 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
 
+	protected boolean generatesBinaryContent() {
+		return !useWriter();
+	}
+
 	/**
 	 * Perform rendering for a single Jasper Reports exporter, that is,
 	 * for a pre-defined output format.
@@ -61,7 +65,6 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception {
 
-		// Prepare report for rendering.
 		JRExporter exporter = createExporter();
 
 		// Set exporter parameters - overriding with values from the Model.
@@ -71,41 +74,10 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		}
 
 		if (useWriter()) {
-			// We need to write text to the response Writer.
-
-			// Copy the encoding configured for the report into the response.
-			String contentType = getContentType();
-			String encoding = (String) exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
-			if (encoding != null) {
-				// Only apply encoding if content type is specified but does not contain charset clause already.
-				if (contentType != null && contentType.toLowerCase().indexOf(WebUtils.CONTENT_TYPE_CHARSET_PREFIX) == -1) {
-					contentType = contentType + WebUtils.CONTENT_TYPE_CHARSET_PREFIX + encoding;
-				}
-			}
-			response.setContentType(contentType);
-
-			// Render report into HttpServletResponse's Writer.
-			JasperReportsUtils.render(exporter, populatedReport, response.getWriter());
+			renderReportUsingWriter(exporter, populatedReport, response);
 		}
-
 		else {
-			// We need to write binary output to the response OutputStream.
-
-			// Apply the content type as specified - we don't need an encoding here.
-			response.setContentType(getContentType());
-
-			// Render report into local OutputStream.
-			// IE workaround: write into byte array first.
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
-			JasperReportsUtils.render(exporter, populatedReport, baos);
-
-			// Write content length (determined via byte array).
-			response.setContentLength(baos.size());
-
-			// Flush byte array to servlet output stream.
-			ServletOutputStream out = response.getOutputStream();
-			baos.writeTo(out);
-			out.flush();
+			renderReportUsingOutputStream(exporter, populatedReport, response);
 		}
 	}
 
@@ -129,6 +101,58 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 			}
 		}
 		return mergedParameters;
+	}
+
+	/**
+	 * We need to write text to the response Writer.
+	 * @param exporter the JasperReports exporter to use
+	 * @param populatedReport the populated <code>JasperPrint</code> to render
+	 * @param response the HTTP response the report should be rendered to
+	 * @throws Exception if rendering failed
+	 */
+	protected void renderReportUsingWriter(
+			JRExporter exporter, JasperPrint populatedReport, HttpServletResponse response) throws Exception {
+
+		// Copy the encoding configured for the report into the response.
+		String contentType = getContentType();
+		String encoding = (String) exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
+		if (encoding != null) {
+			// Only apply encoding if content type is specified but does not contain charset clause already.
+			if (contentType != null && contentType.toLowerCase().indexOf(WebUtils.CONTENT_TYPE_CHARSET_PREFIX) == -1) {
+				contentType = contentType + WebUtils.CONTENT_TYPE_CHARSET_PREFIX + encoding;
+			}
+		}
+		response.setContentType(contentType);
+
+		// Render report into HttpServletResponse's Writer.
+		JasperReportsUtils.render(exporter, populatedReport, response.getWriter());
+	}
+
+	/**
+	 * We need to write binary output to the response OutputStream.
+	 * @param exporter the JasperReports exporter to use
+	 * @param populatedReport the populated <code>JasperPrint</code> to render
+	 * @param response the HTTP response the report should be rendered to
+	 * @throws Exception if rendering failed
+	 */
+	protected void renderReportUsingOutputStream(
+			JRExporter exporter, JasperPrint populatedReport, HttpServletResponse response) throws Exception {
+
+		// Apply the content type as specified - we don't need an encoding here.
+		response.setContentType(getContentType());
+
+		// Render report into local OutputStream.
+		// IE workaround: write into byte array first.
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
+		JasperReportsUtils.render(exporter, populatedReport, baos);
+
+		// Write content length (determined via byte array).
+		response.setContentLength(baos.size());
+
+		// Flush byte array to servlet output stream.
+		ServletOutputStream out = response.getOutputStream();
+		baos.writeTo(out);
+		out.flush();
 	}
 
 

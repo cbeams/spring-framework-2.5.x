@@ -248,6 +248,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			mergedModel.put(this.requestContextAttribute, createRequestContext(request, mergedModel));
 		}
 
+		prepareResponse(request, response);
 		renderMergedOutputModel(mergedModel, request, response);
 	}
 
@@ -264,6 +265,31 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	protected RequestContext createRequestContext(HttpServletRequest request, Map model) {
 		return new RequestContext(request, getServletContext(), model);
+	}
+
+	/**
+	 * Prepare the given response for rendering.
+	 * <p>The default implementation applies a workaround for an IE bug
+	 * when sending binary content via HTTPS.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 */
+	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
+		if (generatesBinaryContent() && request.isSecure()) {
+			response.setHeader("Pragma", "private");
+			response.setHeader("Cache-Control", "private, must-revalidate");
+		}
+	}
+
+	/**
+	 * Return whether this view generates binary content.
+	 * <p>The default implementation returns <code>false</code>. Subclasses are
+	 * encouraged to return <code>true</code> here if they know that they are
+	 * generating binary content via the response OutputStream.
+	 * @see javax.servlet.http.HttpServletResponse#getOutputStream()
+	 */
+	protected boolean generatesBinaryContent() {
+		return false;
 	}
 
 	/**
