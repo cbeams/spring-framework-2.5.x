@@ -207,7 +207,7 @@ class OptionWriter {
 		// allows render values to handle some strange browser compat issues.
 		tagWriter.writeAttribute("value", valueDisplayString);
 
-		if (isOptionSelected(value) || isOptionSelected(item)) {
+		if (isOptionSelected(value) || (value != item && isOptionSelected(item))) {
 			tagWriter.writeAttribute("selected", "selected");
 		}
 		if (isOptionDisabled()) {
