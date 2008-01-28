@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * See <code>http://www.mnot.net/cache_docs</code>.
 	 */
 	protected final void preventCaching(HttpServletResponse response) {
-		response.setHeader(HEADER_PRAGMA, "No-cache");
+		response.setHeader(HEADER_PRAGMA, "no-cache");
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
 			response.setDateHeader(HEADER_EXPIRES, 1L);
