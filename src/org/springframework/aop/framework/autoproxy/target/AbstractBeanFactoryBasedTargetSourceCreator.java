@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,19 @@
 
 package org.springframework.aop.framework.autoproxy.target;
 
+import java.util.Iterator;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.TargetSourceCreator;
 import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -54,7 +58,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	private AbstractBeanFactory beanFactory;
 
-	private DefaultListableBeanFactory internalBeanFactory;
+	private final DefaultListableBeanFactory internalBeanFactory = new DefaultListableBeanFactory();
 
 
 	public final void setBeanFactory(BeanFactory beanFactory) {
@@ -64,7 +68,21 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 					beanFactory);
 		}
 		this.beanFactory = (AbstractBeanFactory) beanFactory;
-		this.internalBeanFactory = new DefaultListableBeanFactory(beanFactory);
+
+		// Required so that references (up container hierarchies) are correctly resolved.
+		this.internalBeanFactory.setParentBeanFactory(this.beanFactory);
+
+		// Required so that all BeanPostProcessors, Scopes, etc become available.
+		this.internalBeanFactory.copyConfigurationFrom(this.beanFactory);
+
+		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
+		// since those are only meant to apply to beans defined in the original factory.
+		for (Iterator it = this.internalBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor postProcessor = (BeanPostProcessor) it.next();
+			if (postProcessor instanceof AopInfrastructureBean) {
+				it.remove();
+			}
+		}
 	}
 
 	/**
@@ -95,10 +113,12 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 		// We need to override just this bean definition, as it may reference other beans
 		// and we're happy to take the parent's definition for those.
-		// Always use a prototype.
+		// Always use a prototype if demanded.
 		RootBeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
 		RootBeanDefinition bdCopy = new RootBeanDefinition(bd);
-		bdCopy.setSingleton(!isPrototypeBased());
+		if (isPrototypeBased()) {
+			bdCopy.setSingleton(false);
+		}
 		this.internalBeanFactory.registerBeanDefinition(beanName, bdCopy);
 
 		// Complete configuring the PrototypeTargetSource.
