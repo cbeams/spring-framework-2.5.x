@@ -26,6 +26,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.ReflectionUtils;
@@ -43,16 +46,34 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InjectionMetadata {
 
-	private Set<InjectedElement> injectedFields = new LinkedHashSet<InjectedElement>();
+	private final Log logger = LogFactory.getLog(InjectionMetadata.class);
 
-	private Set<InjectedElement> injectedMethods = new LinkedHashSet<InjectedElement>();
+	private String targetClassName;
+
+	private final Set<InjectedElement> injectedFields = new LinkedHashSet<InjectedElement>();
+
+	private final Set<InjectedElement> injectedMethods = new LinkedHashSet<InjectedElement>();
+
+
+	public InjectionMetadata() {
+	}
+
+	public InjectionMetadata(Class targetClass) {
+		this.targetClassName = targetClass.getName();
+	}
 
 
 	public void addInjectedField(InjectedElement element) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Found injected field on class [" + this.targetClassName + "]: " + element);
+		}
 		this.injectedFields.add(element);
 	}
 
 	public void addInjectedMethod(InjectedElement element) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Found injected method on class [" + this.targetClassName + "]: " + element);
+		}
 		this.injectedMethods.add(element);
 	}
 
@@ -75,7 +96,11 @@ public class InjectionMetadata {
 
 	public void injectFields(Object target, String beanName) throws Throwable {
 		if (!this.injectedFields.isEmpty()) {
+			boolean debug = logger.isDebugEnabled();
 			for (InjectedElement element : this.injectedFields) {
+				if (debug) {
+					logger.debug("Processing injected field of bean '" + beanName + "': " + element);
+				}
 				element.inject(target, beanName, null);
 			}
 		}
@@ -83,7 +108,11 @@ public class InjectionMetadata {
 
 	public void injectMethods(Object target, String beanName, PropertyValues pvs) throws Throwable {
 		if (!this.injectedMethods.isEmpty()) {
+			boolean debug = logger.isDebugEnabled();
 			for (InjectedElement element : this.injectedMethods) {
+				if (debug) {
+					logger.debug("Processing injected method of bean '" + beanName + "': " + element);
+				}
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -197,6 +226,10 @@ public class InjectionMetadata {
 
 		public int hashCode() {
 			return this.member.getClass().hashCode() * 29 + this.member.getName().hashCode();
+		}
+
+		public String toString() {
+			return getClass().getSimpleName() + " for " + this.member;
 		}
 	}
 

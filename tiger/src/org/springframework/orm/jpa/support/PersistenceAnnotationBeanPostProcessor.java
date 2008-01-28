@@ -346,7 +346,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(clazz);
 				if (metadata == null) {
-					final InjectionMetadata newMetadata = new InjectionMetadata();
+					final InjectionMetadata newMetadata = new InjectionMetadata(clazz);
 					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
 						public void doWith(Field field) {
 							PersistenceContext pc = field.getAnnotation(PersistenceContext.class);
