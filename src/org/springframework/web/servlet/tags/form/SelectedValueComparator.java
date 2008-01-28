@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,13 +109,27 @@ abstract class SelectedValueComparator {
 	}
 
 	private static boolean collectionCompare(Collection boundCollection, Object candidateValue, BindStatus bindStatus) {
-		return (boundCollection.contains(candidateValue) ||
-				exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus));
+		try {
+			if (boundCollection.contains(candidateValue)) {
+				return true;
+			}
+		}
+		catch (ClassCastException ex) {
+			// Probably from a  - ignore.
+		}
+		return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus);
 	}
 
 	private static boolean mapCompare(Map boundMap, Object candidateValue, BindStatus bindStatus) {
-		return (boundMap.containsKey(candidateValue) ||
-				exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus));
+		try {
+			if (boundMap.containsKey(candidateValue)) {
+				return true;
+			}
+		}
+		catch (ClassCastException ex) {
+			// Probably from a TreeMap - ignore.
+		}
+		return exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus);
 	}
 
 	private static boolean exhaustiveCollectionCompare(
