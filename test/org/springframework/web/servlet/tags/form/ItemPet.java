@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,21 @@ public class ItemPet {
 
 	public String getLabel() {
 		return this.name.toUpperCase();
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof ItemPet)) {
+			return false;
+		}
+		ItemPet otherPet = (ItemPet) other;
+		return (this.name != null && this.name.equals(otherPet.getName()));
+	}
+
+	public int hashCode() {
+		return this.name.hashCode();
 	}
 
 

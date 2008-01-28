@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,36 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * '<code>input</code>' element as 'checked' if the supplied value matches the
 	 * bound value.
 	 */
-	protected void renderFromValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
+	protected void renderFromValue(Object value, TagWriter tagWriter) throws JspException {
+		renderFromValue(value, value, tagWriter);
+	}
+
+	/**
+	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking the
+	 * '<code>input</code>' element as 'checked' if the supplied value matches the
+	 * bound value.
+	 */
+	protected void renderFromValue(Object item, Object value, TagWriter tagWriter) throws JspException {
 		BindStatus bindStatus = getBindStatus();
 		PropertyEditor editor = null;
-		if (resolvedValue != null && bindStatus.getErrors() instanceof BindingResult) {
+		if (value != null && bindStatus.getErrors() instanceof BindingResult) {
 			PropertyEditorRegistry editorRegistry = ((BindingResult) bindStatus.getErrors()).getPropertyEditorRegistry();
 			if (editorRegistry != null) {
-				editor = editorRegistry.findCustomEditor(resolvedValue.getClass(), bindStatus.getPath());
+				editor = editorRegistry.findCustomEditor(value.getClass(), bindStatus.getPath());
 			}
 		}
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, editor));
-		if (SelectedValueComparator.isSelected(bindStatus, resolvedValue)) {
+		tagWriter.writeAttribute("value", getDisplayString(value, editor));
+		if (isOptionSelected(value) || (value != item && isOptionSelected(item))) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
+	}
+	
+	/**
+	 * Determines whether the supplied value matched the selected value
+	 * through delegating to {@link SelectedValueComparator#isSelected}.
+	 */
+	private boolean isOptionSelected(Object value) throws JspException {
+		return SelectedValueComparator.isSelected(getBindStatus(), value);
 	}
 
 	/**

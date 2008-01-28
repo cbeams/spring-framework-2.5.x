@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,7 +225,7 @@ public class CheckboxesTag extends AbstractCheckedElementTag {
 		BeanWrapper wrapper = new BeanWrapperImpl(item);
 		Object renderValue = (valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
 		Object renderLabel = (labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
-		writeCheckboxTag(tagWriter, renderValue, renderLabel, itemIndex);
+		writeCheckboxTag(tagWriter, item, renderValue, renderLabel, itemIndex);
 	}
 
 	private void writeMapEntry(TagWriter tagWriter, String valueProperty,
@@ -239,10 +239,12 @@ public class CheckboxesTag extends AbstractCheckedElementTag {
 				mapKeyWrapper.getPropertyValue(valueProperty) : mapKey.toString());
 		Object renderLabel = (labelProperty != null ?
 				mapValueWrapper.getPropertyValue(labelProperty) : mapValue.toString());
-		writeCheckboxTag(tagWriter, renderValue, renderLabel, itemIndex);
+		writeCheckboxTag(tagWriter, mapKey, renderValue, renderLabel, itemIndex);
 	}
 
-	private void writeCheckboxTag(TagWriter tagWriter, Object value, Object label, int itemIndex) throws JspException {
+	private void writeCheckboxTag(TagWriter tagWriter, Object item, Object value, Object label, int itemIndex)
+			throws JspException {
+
 		tagWriter.startTag(getElement());
 		if (itemIndex > 0 && getDelimiter() != null) {
 			tagWriter.appendValue(ObjectUtils.getDisplayString(evaluate("delimiter", getDelimiter())));
@@ -250,7 +252,7 @@ public class CheckboxesTag extends AbstractCheckedElementTag {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "checkbox");
-		renderFromValue(value, tagWriter);
+		renderFromValue(item, value, tagWriter);
 		tagWriter.appendValue(label.toString());
 		tagWriter.endTag();
 		tagWriter.endTag();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,11 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.jsp.tagext.Tag;
 
@@ -241,7 +243,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		assertEquals(3, editor.count);
+		assertEquals(3, editor.allProcessedValues.size());
 
 		String output = getOutput();
 
@@ -500,15 +502,15 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 
 	private static class MyStringTrimmerEditor extends StringTrimmerEditor {
 
-		public int count = 0;
+		public final Set allProcessedValues = new HashSet();
 
 		public MyStringTrimmerEditor() {
 			super(false);
 		}
 
 		public void setAsText(String text) {
-			this.count++;
 			super.setAsText(text);
+			this.allProcessedValues.add(getValue());
 		}
 	}
 
