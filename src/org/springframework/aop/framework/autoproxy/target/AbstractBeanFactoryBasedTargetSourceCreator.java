@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,22 @@
 
 package org.springframework.aop.framework.autoproxy.target;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.TargetSourceCreator;
 import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -55,7 +61,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	private ConfigurableBeanFactory beanFactory;
 
-	private DefaultListableBeanFactory internalBeanFactory;
+	/** Internally used DefaultListableBeanFactory instances, keyed by bean name */
+	private final Map internalBeanFactories = new HashMap();
 
 
 	public final void setBeanFactory(BeanFactory beanFactory) {
@@ -64,7 +71,6 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
 		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
-		this.internalBeanFactory = new DefaultListableBeanFactory(beanFactory);
 	}
 
 	/**
@@ -74,13 +80,10 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		return this.beanFactory;
 	}
 
-	/**
-	 * Destroys the internal BeanFactory on shutdown of the TargetSourceCreator.
-	 */
-	public void destroy() {
-		this.internalBeanFactory.destroySingletons();
-	}
 
+	//---------------------------------------------------------------------
+	// Implementation of the TargetSourceCreator interface
+	//---------------------------------------------------------------------
 
 	public final TargetSource getTargetSource(Class beanClass, String beanName) {
 		AbstractBeanFactoryBasedTargetSource targetSource =
@@ -93,6 +96,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 			logger.debug("Configuring AbstractBeanFactoryBasedTargetSource: " + targetSource);
 		}
 
+		DefaultListableBeanFactory internalBeanFactory = getInternalBeanFactoryForBean(beanName);
+
 		// We need to override just this bean definition, as it may reference other beans
 		// and we're happy to take the parent's definition for those.
 		// Always use prototype scope if demanded.
@@ -101,14 +106,72 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		if (isPrototypeBased()) {
 			bdCopy.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		}
-		this.internalBeanFactory.registerBeanDefinition(beanName, bdCopy);
+		internalBeanFactory.registerBeanDefinition(beanName, bdCopy);
 
 		// Complete configuring the PrototypeTargetSource.
 		targetSource.setTargetBeanName(beanName);
-		targetSource.setBeanFactory(this.internalBeanFactory);
+		targetSource.setBeanFactory(internalBeanFactory);
 
 		return targetSource;
 	}
+
+	/**
+	 * Return the internal BeanFactory to be used for the specified bean.
+	 * @param beanName the name of the target bean
+	 * @return the internal BeanFactory to be used
+	 */
+	protected DefaultListableBeanFactory getInternalBeanFactoryForBean(String beanName) {
+		DefaultListableBeanFactory internalBeanFactory = null;
+		synchronized (this.internalBeanFactories) {
+			internalBeanFactory = (DefaultListableBeanFactory) this.internalBeanFactories.get(beanName);
+			if (internalBeanFactory == null) {
+				internalBeanFactory = buildInternalBeanFactory(this.beanFactory);
+				this.internalBeanFactories.put(beanName, internalBeanFactory);
+			}
+		}
+		return internalBeanFactory;
+	}
+
+	/**
+	 * Build an internal BeanFactory for resolving target beans.
+	 * @param containingFactory the containing BeanFactory that originally defines the beans
+	 * @return an independent internal BeanFactory to hold copies of some target beans
+	 */
+	protected DefaultListableBeanFactory buildInternalBeanFactory(ConfigurableBeanFactory containingFactory) {
+		// Set parent so that references (up container hierarchies) are correctly resolved.
+		DefaultListableBeanFactory internalBeanFactory = new DefaultListableBeanFactory(containingFactory);
+
+		// Required so that all BeanPostProcessors, Scopes, etc become available.
+		internalBeanFactory.copyConfigurationFrom(containingFactory);
+
+		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
+		// since those are only meant to apply to beans defined in the original factory.
+		for (Iterator it = internalBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor postProcessor = (BeanPostProcessor) it.next();
+			if (postProcessor instanceof AopInfrastructureBean) {
+				it.remove();
+			}
+		}
+
+		return internalBeanFactory;
+	}
+
+	/**
+	 * Destroys the internal BeanFactory on shutdown of the TargetSourceCreator.
+	 * @see #getInternalBeanFactoryForBean
+	 */
+	public void destroy() {
+		synchronized (this.internalBeanFactories) {
+			for (Iterator it = this.internalBeanFactories.values().iterator(); it.hasNext();) {
+				((DefaultListableBeanFactory) it.next()).destroySingletons();
+			}
+		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Template methods to be implemented by subclasses
+	//---------------------------------------------------------------------
 
 	/**
 	 * Return whether this TargetSourceCreator is prototype-based.
