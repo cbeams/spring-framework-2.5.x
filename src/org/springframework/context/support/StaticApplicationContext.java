@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -67,12 +67,13 @@ public class StaticApplicationContext extends GenericApplicationContext {
 		getBeanFactory().registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.staticMessageSource);
 	}
 
+
 	/**
 	 * Return the internal StaticMessageSource used by this context.
 	 * Can be used to register messages on it.
 	 * @see #addMessage
 	 */
-	public StaticMessageSource getStaticMessageSource() {
+	public final StaticMessageSource getStaticMessageSource() {
 		return this.staticMessageSource;
 	}
 
@@ -83,7 +84,9 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @see #getDefaultListableBeanFactory
 	 */
 	public void registerSingleton(String name, Class clazz) throws BeansException {
-		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz));
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setBeanClass(clazz);
+		getDefaultListableBeanFactory().registerBeanDefinition(name, bd);
 	}
 
 	/**
@@ -92,7 +95,10 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @see #getDefaultListableBeanFactory
 	 */
 	public void registerSingleton(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
-		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs));
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setBeanClass(clazz);
+		bd.setPropertyValues(pvs);
+		getDefaultListableBeanFactory().registerBeanDefinition(name, bd);
 	}
 
 	/**
@@ -101,7 +107,10 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @see #getDefaultListableBeanFactory
 	 */
 	public void registerPrototype(String name, Class clazz) throws BeansException {
-		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, false));
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setBeanClass(clazz);
+		getDefaultListableBeanFactory().registerBeanDefinition(name, bd);
 	}
 
 	/**
@@ -110,7 +119,11 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @see #getDefaultListableBeanFactory
 	 */
 	public void registerPrototype(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
-		getDefaultListableBeanFactory().registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs, false));
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setBeanClass(clazz);
+		bd.setPropertyValues(pvs);
+		getDefaultListableBeanFactory().registerBeanDefinition(name, bd);
 	}
 
 	/**
