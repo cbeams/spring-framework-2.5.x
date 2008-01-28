@@ -395,7 +395,7 @@
     <section id="new-in-2-web-jaxws">
       <title>JAX-WS support</title>
 
-      <para>Spring 2.5 fully supports JAX-WS 2.0, as included in Java 6 and Java EE 5.
+      <para>Spring 2.5 fully supports JAX-WS 2.0/2.1, as included in Java 6 and Java EE 5.
       JAX-WS is the successor of JAX-RPC, allowing access to WSDL/SOAP-based web
       services as well as JAX-WS style exposure of web services.</para>
     </section>
@@ -484,9 +484,9 @@
       linkend="scheduling-task-executor"/> contains all of the
       details.</para>
 
-      <para>The TaskExecutor abstraction is used throughout the framework
-      itself as well, e.g. for the asynchronous JMS support. In Spring 2.5,
-      it is also used in the JCA environment support.</para>
+      <para>The <interfacename>TaskExecutor</interfacename> abstraction is used
+      throughout the framework itself as well, e.g. for the asynchronous JMS support.
+      In Spring 2.5, it is also used in the JCA environment support.</para>
     </section>
 
     <section id="new-in-2-other-java5">
@@ -788,4 +788,5 @@
     <para>Special thanks to Arthur Loder for his tireless proofreading of the
     Spring Framework reference documentation and JavaDocs.</para>
   </section>
+
 </chapter>

@@ -380,8 +380,9 @@ public class AccountServiceImpl implements AccountService {
       As its name indicates, it focuses on on RPC bindings, which became
       less and less popular in the past couple of years. As a consequence,
       it has been superseded by JAX-WS 2.0 in Java EE 5, being more flexible
-      in terms of bindings but also being heavily annotation-based. JAX-WS 2.0
-      is also included in Java 6 (or more specifically, in Sun's JDK 1.6),
+      in terms of bindings but also being heavily annotation-based. JAX-WS 2.1
+      is also included in Java 6 (or more specifically, in Sun's JDK 1.6.0_04
+      and above; previous Sun JDK 1.6.0 releases included JAX-WS 2.0),
       integrated with the JDK's built-in HTTP server.</para>
       <para>Spring can work with both standard Java web services APIs.
       The choice is effectively dependent on the runtime platform:
