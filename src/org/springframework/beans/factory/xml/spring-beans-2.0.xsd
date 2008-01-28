@@ -373,8 +373,8 @@
 	bean's dependencies, expressed in its properties, are satisfied.
 	The default is to perform no dependency checking.
 
-	"simple" type dependency checking includes primitives and Strings.
-	"object" includes collaborators (other beans in the factory).
+	"simple" type dependency checking includes primitives and String;
+	"objects" includes collaborators (other beans in the factory);
 	"all" includes both types of dependency checking.
 
 	Note: This attribute will not be inherited by child bean definitions.
