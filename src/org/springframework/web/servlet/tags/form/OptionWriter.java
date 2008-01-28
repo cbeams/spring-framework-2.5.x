@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * When the either property name is ommitted the name of the {@link Object#toString()} of
  * the array/{@link Collection} element is used.
  * Property names are specified as arguments to the constructor.
+ *
  * <h3>Using a {@link Map}</h3>
  * In the second approach, '<code>option</code>' tags are rendered from a source
  * {@link Map}. The key and value of the entries in the {@link Map} correspond
@@ -90,6 +91,7 @@ final class OptionWriter {
 		this.htmlEscape = htmlEscape;
 	}
 
+
 	/**
 	 * Write the '<code>option</code>' tags for the configured {@link #optionSource} to
 	 * the supplied {@link TagWriter}.
@@ -127,7 +129,7 @@ final class OptionWriter {
 		Map optionMap = (Map) this.optionSource;
 		for (Iterator iterator = optionMap.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();
-			renderOption(tagWriter, entry, entry.getKey().toString(), entry.getValue().toString());
+			renderOption(tagWriter, entry.getKey(), entry.getKey().toString(), entry.getValue().toString());
 		}
 	}
 
