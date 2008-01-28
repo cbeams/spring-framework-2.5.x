@@ -370,12 +370,12 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	Controls whether or not to check whether all of this
-	beans dependencies, expressed in its properties, are satisfied.
+	bean's dependencies, expressed in its properties, are satisfied.
 	The default is to perform no dependency checking.
 
-	"simple" type dependency checking includes primitives and String
-	"object" includes collaborators (other beans in the factory)
-	"all" includes both types of dependency checking
+	"simple" type dependency checking includes primitives and String;
+	"objects" includes collaborators (other beans in the factory);
+	"all" includes both types of dependency checking.
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
@@ -730,9 +730,9 @@
 					<xsd:attribute name="local" type="xsd:IDREF">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the referenced bean. The value must be a bean ID,
-	and thus can be checked by the XML parser, thus should be preferred
-	for references within the same bean factory XML file.
+	The name of the referenced bean. The value must be a bean ID and thus can
+	be checked by the XML parser. This is therefore the preferred technique
+	for referencing beans within the same bean factory XML file.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -771,9 +771,9 @@
 					<xsd:attribute name="local" type="xsd:IDREF">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the referenced bean. The value must be a bean ID,
-	and thus can be checked by the XML parser, thus should be preferred
-	for references within the same bean factory XML file.
+	The name of the referenced bean. The value must be a bean ID and thus can
+	be checked by the XML parser. This is therefore the preferred technique
+	for referencing beans within the same bean factory XML file.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
