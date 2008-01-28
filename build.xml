@@ -92,7 +92,7 @@
 	<patternset id="spring.context.packages">
 		<include name="org/springframework/context/**"/>
 		<include name="org/springframework/ejb/**"/>
-		<include name="org/springframework/instrument/**"/>
+		<include name="org/springframework/instrument/classloading/**"/>
 		<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
 		<include name="org/springframework/jmx/**"/>
 		<include name="org/springframework/jndi/**"/>
