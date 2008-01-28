@@ -11,10 +11,14 @@ General
 
 Package org.springframework.aop
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
+* AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
+* AbstractBeanFactoryBasedTargetSourceCreator creates an independent internal BeanFactory per target bean
 
 Package org.springframework.beans
 * BeanWrapperImpl resolves the target type for a generically typed bean property, performing appropriate type conversion
 * StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
+* CustomDateEditor and CustomNumberEditor preserve original ParseException as root cause of IllegalArgumentException
+* MethodInvokingFactoryBean falls back to interpreting specified arguments as single method argument of array type
 * added "nullValue" property to PropertyPlaceholderConfigurer, allowing for resolving specific Strings into a null value
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
@@ -96,6 +100,9 @@ Package org.springframework.web
 * AnnotationMethodHandlerAdapter resolves the target type for a generically typed @RequestParam/@ModelAttribute argument
 * AnnotationMethodHandlerAdapter properly allows for resolving a Principal argument to null (in case of none defined)
 * added "synchronizeOnSession" property to AnnotationMethodHandlerAdapter, analogous to AbstractController
+* InternalResourceView detects circular dispatching to the same view even in case of pattern matches for same handler
+* InternalResourceView prevents dispatch to same handler path only if the "preventDispatchLoop" flag is set to "true"
+* InternalResourceViewResolver sets "preventDispatchLoop" to "true" for conventional name-based View instances only
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
 
 
