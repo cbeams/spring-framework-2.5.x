@@ -245,8 +245,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	//---------------------------------------------------------------------
 
 	public Object createBean(Class beanClass) throws BeansException {
-		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
-		RootBeanDefinition bd = new RootBeanDefinition(beanClass, false);
+		// Use prototype bean definition, to avoid registering bean as dependent bean.
+		RootBeanDefinition bd = new RootBeanDefinition(beanClass);
+		bd.setScope(SCOPE_PROTOTYPE);
 		return createBean(beanClass.getName(), bd, null);
 	}
 
@@ -1285,6 +1286,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		boolean isInitializingBean = (bean instanceof InitializingBean);
 		if (isInitializingBean && (mbd == null || !mbd.isExternallyManagedInitMethod("afterPropertiesSet"))) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking afterPropertiesSet() on bean with name '" + beanName + "'");
+			}
 			((InitializingBean) bean).afterPropertiesSet();
 		}
 
@@ -1316,9 +1320,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						"' on bean with name '" + beanName + "'");
 			}
 			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("No default init method named '" + initMethodName +
+							"' found on bean with name '" + beanName + "'");
+				}
 				// Ignore non-existent default lifecycle methods.
 				return;
 			}
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking init method  '" + initMethodName + "' on bean with name '" + beanName + "'");
 		}
 		ReflectionUtils.makeAccessible(initMethod);
 		try {

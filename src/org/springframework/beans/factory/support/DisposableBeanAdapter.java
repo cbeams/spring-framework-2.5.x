@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Adapter that implements the DisposableBean interface performing
- * various destruction steps on a given bean instance:
+ * Adapter that implements the {@link DisposableBean} interface
+ * performing various destruction steps on a given bean instance:
  * <ul>
  * <li>DestructionAwareBeanPostProcessors
  * <li>the bean implementing DisposableBean itself
@@ -136,9 +136,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	public void destroy() {
 		if (this.beanPostProcessors != null && !this.beanPostProcessors.isEmpty()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Applying DestructionAwareBeanPostProcessors to bean with name '" + this.beanName + "'");
-			}
 			for (int i = this.beanPostProcessors.size() - 1; i >= 0; i--) {
 				((DestructionAwareBeanPostProcessor) this.beanPostProcessors.get(i)).postProcessBeforeDestruction(
 						this.bean, this.beanName);
@@ -197,7 +194,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 						args[0] = Boolean.TRUE;
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Invoking custom destroy method on bean with name '" + this.beanName + "'");
+						logger.debug("Invoking destroy method '" + this.destroyMethodName +
+								"' on bean with name '" + this.beanName + "'");
 					}
 					ReflectionUtils.makeAccessible(destroyMethod);
 					try {
