@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,8 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
 		TestBean spouse = (TestBean) ctx.getBean("spouse");
@@ -72,7 +73,8 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
@@ -97,7 +99,8 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
 		TestBean spouse = (TestBean) ctx.getBean("spouse");
@@ -121,7 +124,8 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));

@@ -290,7 +290,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testStaticPrototypeFactoryMethodFoundByNonEagerTypeMatching() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBeanFactory.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBeanFactory.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.setFactoryMethodName("createTestBean");
 		lbf.registerBeanDefinition("x1", rbd);
 
@@ -346,7 +347,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		RootBeanDefinition rbd = new RootBeanDefinition();
 		rbd.setFactoryBeanName("factory");
 		rbd.setFactoryMethodName("createTestBeanNonStatic");
-		rbd.setSingleton(false);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("x1", rbd);
 
 		TestBeanFactory.initialized = false;
@@ -824,7 +825,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "Tony");
 		pvs.addPropertyValue("age", "48");
-		RootBeanDefinition bd = new RootBeanDefinition(DependenciesBean.class, pvs, true);
+		RootBeanDefinition bd = new RootBeanDefinition(DependenciesBean.class, pvs);
 		bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		lbf.registerBeanDefinition("test", bd);
@@ -855,9 +856,13 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testReregisterBeanDefinition() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, false));
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		lbf.registerBeanDefinition("testBean", bd1);
 		assertTrue(lbf.getBean("testBean") instanceof TestBean);
-		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(NestedTestBean.class, false));
+		RootBeanDefinition bd2 = new RootBeanDefinition(NestedTestBean.class);
+		bd2.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		lbf.registerBeanDefinition("testBean", bd2);
 		assertTrue(lbf.getBean("testBean") instanceof NestedTestBean);
 	}
 
@@ -1376,7 +1381,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		List list = new ManagedList();
 		list.add("myName");
 		list.add("myBeanName");
-		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class, false);
+		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bd.getConstructorArgumentValues().addGenericArgumentValue(list);
 		lbf.registerBeanDefinition("test", bd);
 		DerivedTestBean tb = (DerivedTestBean) lbf.getBean("test");
@@ -1393,7 +1399,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		List list = new ManagedList();
 		list.add("myName");
 		list.add("myBeanName");
-		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class, false);
+		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bd.setFactoryMethodName("create");
 		bd.getConstructorArgumentValues().addGenericArgumentValue(list);
 		lbf.registerBeanDefinition("test", bd);
@@ -1412,7 +1419,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			return;
 		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("test", rbd);
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
@@ -1430,7 +1438,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			return;
 		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(LifecycleBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(LifecycleBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 		lbf.registerBeanDefinition("test", rbd);
 		lbf.addBeanPostProcessor(new LifecycleBean.PostProcessor());
@@ -1472,7 +1481,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			return;
 		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("juergen");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("99");
 		lbf.registerBeanDefinition("test", rbd);
@@ -1519,7 +1529,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			return;
 		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("spouse"));
 		lbf.registerBeanDefinition("test", rbd);
 		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
@@ -1541,7 +1552,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			return;
 		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().addPropertyValue("name", "juergen");
 		rbd.getPropertyValues().addPropertyValue("age", "99");
 		lbf.registerBeanDefinition("test", rbd);
@@ -1589,7 +1601,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			return;
 		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("spouse"));
 		lbf.registerBeanDefinition("test", rbd);
 		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
@@ -1663,7 +1676,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		String expectedNameFromArgs = "gordon";
 
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanWithFactoryMethod.class, true);
+		RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanWithFactoryMethod.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", expectedNameFromProperties);
 		instanceFactoryDefinition.setPropertyValues(pvs);
@@ -1672,13 +1685,17 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		RootBeanDefinition factoryMethodDefinitionWithProperties = new RootBeanDefinition();
 		factoryMethodDefinitionWithProperties.setFactoryBeanName("factoryBeanInstance");
 		factoryMethodDefinitionWithProperties.setFactoryMethodName("create");
-		factoryMethodDefinitionWithProperties.setSingleton(singleton);
+		if (!singleton) {
+			factoryMethodDefinitionWithProperties.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		}
 		lbf.registerBeanDefinition("fmWithProperties", factoryMethodDefinitionWithProperties);
 
 		RootBeanDefinition factoryMethodDefinitionGeneric = new RootBeanDefinition();
 		factoryMethodDefinitionGeneric.setFactoryBeanName("factoryBeanInstance");
 		factoryMethodDefinitionGeneric.setFactoryMethodName("createGeneric");
-		factoryMethodDefinitionGeneric.setSingleton(singleton);
+		if (!singleton) {
+			factoryMethodDefinitionGeneric.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		}
 		lbf.registerBeanDefinition("fmGeneric", factoryMethodDefinitionGeneric);
 
 		RootBeanDefinition factoryMethodDefinitionWithArgs = new RootBeanDefinition();
@@ -1687,7 +1704,9 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		ConstructorArgumentValues cvals = new ConstructorArgumentValues();
 		cvals.addGenericArgumentValue(expectedNameFromArgs);
 		factoryMethodDefinitionWithArgs.setConstructorArgumentValues(cvals);
-		factoryMethodDefinitionWithArgs.setSingleton(singleton);
+		if (!singleton) {
+			factoryMethodDefinitionWithArgs.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		}
 		lbf.registerBeanDefinition("fmWithArgs", factoryMethodDefinitionWithArgs);
 
 		assertEquals(4, lbf.getBeanDefinitionCount());
@@ -1745,7 +1764,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		String theChildScope = "bonanza!";
 
 		RootBeanDefinition parent = new RootBeanDefinition();
-		parent.setSingleton(false);
+		parent.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 
 		AbstractBeanDefinition child = BeanDefinitionBuilder
 				.childBeanDefinition("parent").getBeanDefinition();

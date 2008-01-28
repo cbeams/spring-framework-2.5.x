@@ -105,7 +105,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
 	public void testSimpleScanWithDefaultFiltersAndOverriddenCompatibleNamedBean() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		context.registerBeanDefinition("myNamedDao", new RootBeanDefinition(NamedStubDao.class, false));
+		RootBeanDefinition bd = new RootBeanDefinition(NamedStubDao.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		context.registerBeanDefinition("myNamedDao", bd);
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
 		int beanCount = scanner.scan(BASE_PACKAGE);
