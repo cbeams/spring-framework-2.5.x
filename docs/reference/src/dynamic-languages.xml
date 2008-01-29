@@ -918,7 +918,7 @@ import javax.servlet.http.HttpServletResponse
 
 class FortuneController implements Controller {
 
-    FortuneService fortuneService
+    @Property FortuneService fortuneService
 
     ModelAndView handleRequest(
             HttpServletRequest request, HttpServletResponse httpServletResponse) {
