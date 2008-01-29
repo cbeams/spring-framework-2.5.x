@@ -451,16 +451,11 @@ public class PropertyResourceConfigurerTests extends TestCase {
 			if (userDir.startsWith("/")) {
 				userDir = userDir.substring(1);
 			}
-			
 			/* the above hack doesn't work since the exception message is created without
 			   the leading / stripped so the test fails.  Changed 17/11/04. DD */
 			//assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1);		
-			assertTrue(
-			    ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1
-			    ||
-			    ex.getMessage().indexOf(userDir + "/test//" + userDir) != -1
-			);
-			
+			assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1 ||
+			    ex.getMessage().indexOf(userDir + "/test//" + userDir) != -1);
 		}
 	}
 
@@ -547,6 +542,29 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		ac.refresh();
 		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("mytest", tb.getTouchy());
+	}
+
+	public void testPropertyPlaceholderConfigurerWithAliases() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("touchy", "${test}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		ac.registerAlias("tb", "${myAlias}");
+		ac.registerAlias("${myTarget}", "alias2");
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("test", "mytest");
+		props.put("myAlias", "alias");
+		props.put("myTarget", "tb");
+		pvs.addPropertyValue("properties", new Properties(props));
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("mytest", tb.getTouchy());
+		tb = (TestBean) ac.getBean("alias");
+		assertEquals("mytest", tb.getTouchy());
+		tb = (TestBean) ac.getBean("alias2");
 		assertEquals("mytest", tb.getTouchy());
 	}
 
