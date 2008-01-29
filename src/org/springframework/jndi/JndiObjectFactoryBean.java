@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,12 +150,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 			if (this.proxyInterfaces == null) {
 				Class expectedType = getExpectedType();
 				if (expectedType != null) {
-					if (expectedType.isInterface()) {
-						this.proxyInterfaces = new Class[] {expectedType};
-					}
-					else {
-						this.proxyInterfaces = ClassUtils.getAllInterfacesForClass(expectedType);
-					}
+					this.proxyInterfaces = ClassUtils.getAllInterfacesForClass(expectedType, this.beanClassLoader);
 				}
 			}
 			if (this.proxyInterfaces == null) {

@@ -516,7 +516,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		proxyFactory.setTargetSource(ts);
 
 		if (interfaces == null) {
-			interfaces = ClassUtils.getAllInterfacesForClass(ts.getTargetClass());
+			interfaces = ClassUtils.getAllInterfacesForClass(ts.getTargetClass(), this.beanClassLoader);
 		}
 		proxyFactory.setInterfaces(interfaces);
 

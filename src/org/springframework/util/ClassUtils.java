@@ -789,6 +789,19 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as array
 	 */
 	public static Class[] getAllInterfacesForClass(Class clazz) {
+		return getAllInterfacesForClass(clazz, null);
+	}
+
+	/**
+	 * Return all interfaces that the given class implements as array,
+	 * including ones implemented by superclasses.
+	 * <p>If the class itself is an interface, it gets returned as sole interface.
+	 * @param clazz the class to analyse for interfaces
+	 * @param classLoader the ClassLoader that the interfaces need to be visible in
+	 * (may be <code>null</code> when accepting all declared interfaces)
+	 * @return all interfaces that the given object implements as array
+	 */
+	public static Class[] getAllInterfacesForClass(Class clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
 			return new Class[] {clazz};
@@ -797,7 +810,8 @@ public abstract class ClassUtils {
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];
-				if (!interfaces.contains(ifc)) {
+				if (!interfaces.contains(ifc) &&
+						(classLoader == null || isInterfaceVisible(ifc, classLoader))) {
 					interfaces.add(ifc);
 				}
 			}
@@ -825,6 +839,19 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as Set
 	 */
 	public static Set getAllInterfacesForClassAsSet(Class clazz) {
+		return getAllInterfacesForClassAsSet(clazz, null);
+	}
+
+	/**
+	 * Return all interfaces that the given class implements as Set,
+	 * including ones implemented by superclasses.
+	 * <p>If the class itself is an interface, it gets returned as sole interface.
+	 * @param clazz the class to analyse for interfaces
+	 * @param classLoader the ClassLoader that the interfaces need to be visible in
+	 * (may be <code>null</code> when accepting all declared interfaces)
+	 * @return all interfaces that the given object implements as Set
+	 */
+	public static Set getAllInterfacesForClassAsSet(Class clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
 			return Collections.singleton(clazz);
@@ -833,11 +860,42 @@ public abstract class ClassUtils {
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];
-				interfaces.add(ifc);
+				if (classLoader == null || isInterfaceVisible(ifc, classLoader)) {
+					interfaces.add(ifc);
+				}
 			}
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
+	}
+
+	/**
+	 * Check whether the given interface is visible in the given ClassLoader.
+	 * @param ifc the interface to check
+	 * @param classLoader the ClassLoader to check against
+	 */
+	private static boolean isInterfaceVisible(Class ifc, ClassLoader classLoader) {
+		try {
+			Class interfaceClass = classLoader.loadClass(ifc.getName());
+			if (ifc == interfaceClass) {
+				return true;
+			}
+			else {
+				// Different interface class found...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring interface [" + ifc.getName() + "] - " +
+							"different class of same name visible in Classloader [" + classLoader + "]");
+				}
+			}
+		}
+		catch (ClassNotFoundException ex) {
+			// No interface class found...
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring interface [" + ifc.getName() + "] - " +
+						"not visible in Classloader [" + classLoader + "]: " + ex);
+			}
+		}
+		return false;
 	}
 
 	/**

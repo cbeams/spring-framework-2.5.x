@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,14 +245,14 @@ public abstract class ExtendedEntityManagerCreator {
 			PersistenceExceptionTranslator exceptionTranslator, Boolean jta, boolean containerManaged) {
 
 		Assert.notNull(rawEntityManager, "EntityManager must not be null");
-		Set ifcs = ClassUtils.getAllInterfacesAsSet(rawEntityManager);
+		ClassLoader cl = ExtendedEntityManagerCreator.class.getClassLoader();
+		Set ifcs = ClassUtils.getAllInterfacesForClassAsSet(rawEntityManager.getClass(), cl);
 		ifcs.add(EntityManagerProxy.class);
 		if (plusOperations != null) {
 			ifcs.add(EntityManagerPlusOperations.class);
 		}
 		return (EntityManager) Proxy.newProxyInstance(
-				ExtendedEntityManagerCreator.class.getClassLoader(),
-				(Class[]) ifcs.toArray(new Class[ifcs.size()]),
+				cl, (Class[]) ifcs.toArray(new Class[ifcs.size()]),
 				new ExtendedEntityManagerInvocationHandler(
 						rawEntityManager, plusOperations, exceptionTranslator, jta, containerManaged));
 	}

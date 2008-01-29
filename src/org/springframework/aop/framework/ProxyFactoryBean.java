@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,7 +299,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				if (targetClass == null) {
 					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy");
 				}
-				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass));
+				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.beanClassLoader));
 			}
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
@@ -328,7 +328,8 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		copy.copyConfigurationFrom(this, targetSource, freshAdvisorChain());
 		if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
 			// Rely on AOP infrastructure to tell us what interfaces to proxy.
-			copy.setInterfaces(ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass()));
+			copy.setInterfaces(
+					ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(), this.beanClassLoader));
 		}
 		copy.setFrozen(this.freezeProxy);
 

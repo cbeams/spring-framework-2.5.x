@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -83,8 +84,9 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 * @see org.springframework.orm.jdo.JdoTransactionManager
 	 */
 	public void setTargetPersistenceManagerFactory(PersistenceManagerFactory target) {
+		Assert.notNull(target, "Target PersistenceManagerFactory must not be null");
 		this.target = target;
-		Class[] ifcs = ClassUtils.getAllInterfaces(target);
+		Class[] ifcs = ClassUtils.getAllInterfacesForClass(target.getClass(), getClass().getClassLoader());
 		this.proxy = (PersistenceManagerFactory) Proxy.newProxyInstance(
 				getClass().getClassLoader(), ifcs, new TransactionAwareFactoryInvocationHandler());
 	}
@@ -117,7 +119,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 * PersistenceManager can be found for the current thread.
 	 */
 	protected boolean isAllowCreate() {
-		return allowCreate;
+		return this.allowCreate;
 	}
 
 
@@ -148,7 +150,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 			if (method.getName().equals("getPersistenceManager")) {
 				PersistenceManager pm =
 						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
-				Class[] ifcs = ClassUtils.getAllInterfaces(pm);
+				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), getClass().getClassLoader());
 				return (PersistenceManager) Proxy.newProxyInstance(
 						getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
 			}
