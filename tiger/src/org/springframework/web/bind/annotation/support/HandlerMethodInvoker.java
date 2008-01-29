@@ -16,7 +16,6 @@
 
 package org.springframework.web.bind.annotation.support;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -38,6 +37,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
@@ -62,9 +62,6 @@ import org.springframework.web.multipart.MultipartRequest;
  */
 public class HandlerMethodInvoker {
 
-	protected static final Object UNRESOLVED = new Object();
-
-
 	private final HandlerMethodResolver methodResolver;
 
 	private final WebBindingInitializer bindingInitializer;
@@ -72,6 +69,8 @@ public class HandlerMethodInvoker {
 	private final SessionAttributeStore sessionAttributeStore;
 
 	private final ParameterNameDiscoverer parameterNameDiscoverer;
+
+	private final WebArgumentResolver[] customArgumentResolvers;
 
 	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
@@ -86,12 +85,14 @@ public class HandlerMethodInvoker {
 
 	public HandlerMethodInvoker(
 			HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer,
-			SessionAttributeStore sessionAttributeStore, ParameterNameDiscoverer parameterNameDiscoverer) {
+			SessionAttributeStore sessionAttributeStore, ParameterNameDiscoverer parameterNameDiscoverer,
+			WebArgumentResolver... customArgumentResolvers) {
 
 		this.methodResolver = methodResolver;
 		this.bindingInitializer = bindingInitializer;
 		this.sessionAttributeStore = sessionAttributeStore;
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
+		this.customArgumentResolvers = customArgumentResolvers;
 	}
 
 
@@ -121,20 +122,19 @@ public class HandlerMethodInvoker {
 
 		Class[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
-		String[] paramNames = null;
-		boolean paramNamesResolved = false;
 
 		for (int i = 0; i < args.length; i++) {
 			MethodParameter param = new MethodParameter(handlerMethod, i);
+			param.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(param, handler.getClass());
 			boolean isParam = false;
 			String paramName = "";
 			boolean paramRequired = false;
 			String attrName = null;
-			Annotation[] paramAnns = (Annotation[]) param.getParameterAnnotations();
+			Object[] paramAnns = param.getParameterAnnotations();
 
 			for (int j = 0; j < paramAnns.length; j++) {
-				Annotation paramAnn = paramAnns[j];
+				Object paramAnn = paramAnns[j];
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					isParam = true;
@@ -154,8 +154,8 @@ public class HandlerMethodInvoker {
 
 			Class paramType = param.getParameterType();
 			if (!isParam && attrName == null) {
-				Object argValue = resolveStandardArgument(webRequest, paramType);
-				if (argValue != UNRESOLVED) {
+				Object argValue = resolveCommonArgument(param, webRequest);
+				if (argValue != WebArgumentResolver.UNRESOLVED) {
 					args[i] = argValue;
 				}
 				else {
@@ -176,15 +176,11 @@ public class HandlerMethodInvoker {
 			if (isParam) {
 				// Request parameter value...
 				if ("".equals(paramName)) {
-					if (!paramNamesResolved && this.parameterNameDiscoverer != null) {
-						paramNames = this.parameterNameDiscoverer.getParameterNames(handlerMethod);
-						paramNamesResolved = true;
-					}
-					if (paramNames == null) {
+					paramName = param.getParameterName();
+					if (paramName == null) {
 						throw new IllegalStateException("No parameter specified for @RequestParam argument of type [" +
 								paramType.getName() + "], and no parameter name information found in class file either.");
 					}
-					paramName = paramNames[i];
 				}
 				Object paramValue = null;
 				if (webRequest.getNativeRequest() instanceof MultipartRequest) {
@@ -257,8 +253,8 @@ public class HandlerMethodInvoker {
 				Object[] initBinderArgs = new Object[initBinderParams.length];
 				for (int j = 0; j < initBinderArgs.length; j++) {
 					Class paramType = initBinderParams[j];
-					Object argValue = resolveStandardArgument(webRequest, paramType);
-					if (argValue != UNRESOLVED) {
+					Object argValue = resolveCommonArgument(new MethodParameter(initBinderMethod, j), webRequest);
+					if (argValue != WebArgumentResolver.UNRESOLVED) {
 						initBinderArgs[j] = argValue;
 					}
 					else {
@@ -347,15 +343,27 @@ public class HandlerMethodInvoker {
 		}
 	}
 
-	protected Object resolveStandardArgument(NativeWebRequest webRequest, Class<?> parameterType)
+	protected Object resolveCommonArgument(MethodParameter methodParameter, NativeWebRequest webRequest)
+			throws Exception {
+
+		if (this.customArgumentResolvers != null) {
+			for (WebArgumentResolver argumentResolver : this.customArgumentResolvers) {
+				Object value = argumentResolver.resolveArgument(methodParameter, webRequest);
+				if (value != WebArgumentResolver.UNRESOLVED) {
+					return value;
+				}
+			}
+		}
+		return resolveStandardArgument(methodParameter.getParameterType(), webRequest);
+	}
+
+	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest)
 			throws Exception {
 
 		if (WebRequest.class.isAssignableFrom(parameterType)) {
 			return webRequest;
 		}
-		else {
-			return UNRESOLVED;
-		}
+		return WebArgumentResolver.UNRESOLVED;
 	}
 
 }

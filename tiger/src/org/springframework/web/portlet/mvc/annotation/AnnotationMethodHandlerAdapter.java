@@ -58,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
 import org.springframework.web.bind.annotation.support.HandlerMethodResolver;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -102,7 +103,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 	private boolean synchronizeOnSession = false;
 
-	private final ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+
+	private WebArgumentResolver[] customArgumentResolvers;
 
 	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
@@ -147,6 +150,34 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	 */
 	public void setSynchronizeOnSession(boolean synchronizeOnSession) {
 		this.synchronizeOnSession = synchronizeOnSession;
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed (e.g. for default attribute names).
+	 * <p>Default is a {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer}.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
+	}
+
+	/**
+	 * Set a custom ArgumentResolvers to use for special method parameter types.
+	 * Such a custom ArgumentResolver will kick in first, having a chance to
+	 * resolve an argument value before the standard argument handling kicks in.
+	 */
+	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
+		this.customArgumentResolvers = new WebArgumentResolver[] {argumentResolver};
+	}
+
+	/**
+	 * Set one or more custom ArgumentResolvers to use for special method
+	 * parameter types. Any such custom ArgumentResolver will kick in first,
+	 * having a chance to resolve an argument value before the standard
+	 * argument handling kicks in.
+	 */
+	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
+		this.customArgumentResolvers = argumentResolvers;
 	}
 
 
@@ -403,7 +434,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	private class PortletHandlerMethodInvoker extends HandlerMethodInvoker {
 
 		public PortletHandlerMethodInvoker(HandlerMethodResolver resolver) {
-			super(resolver, webBindingInitializer, sessionAttributeStore, parameterNameDiscoverer);
+			super(resolver, webBindingInitializer, sessionAttributeStore,
+					parameterNameDiscoverer, customArgumentResolvers);
 		}
 
 		@Override
@@ -436,7 +468,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		@Override
-		protected Object resolveStandardArgument(NativeWebRequest webRequest, Class<?> parameterType)
+		protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest)
 				throws Exception {
 
 			PortletRequest request = (PortletRequest) webRequest.getNativeRequest();
@@ -493,9 +525,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 				return ((RenderResponse) response).getWriter();
 			}
-			else {
-				return super.resolveStandardArgument(webRequest, parameterType);
-			}
+			return super.resolveStandardArgument(parameterType, webRequest);
 		}
 
 		@SuppressWarnings("unchecked")

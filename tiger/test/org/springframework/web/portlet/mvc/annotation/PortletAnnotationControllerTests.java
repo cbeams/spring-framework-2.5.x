@@ -43,6 +43,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
 import org.springframework.mock.web.portlet.MockPortletConfig;
@@ -60,8 +61,10 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.portlet.DispatcherPortlet;
@@ -222,6 +225,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
+				adapterDef.getPropertyValues().addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -486,16 +490,24 @@ public class PortletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("EDIT")
-		public String myOtherHandle(TB tb, BindingResult errors, ExtendedModelMap model) {
+		public String myOtherHandle(TB tb, BindingResult errors, ExtendedModelMap model, MySpecialArg arg) {
 			TestBean tbReal = (TestBean) tb;
 			tbReal.setName("myName");
 			assertTrue(model.get("ITestBean") instanceof DerivedTestBean);
+			assertNotNull(arg);
 			return super.myHandle(tbReal, errors, model);
 		}
 
 		@ModelAttribute
 		protected TB2 getModelAttr() {
 			return (TB2) new DerivedTestBean();
+		}
+	}
+
+
+	private static class MySpecialArg {
+
+		public MySpecialArg(String value) {
 		}
 	}
 
@@ -539,6 +551,17 @@ public class PortletAnnotationControllerTests extends TestCase {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+	}
+
+
+	private static class MySpecialArgumentResolver implements WebArgumentResolver {
+
+		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
+			if (methodParameter.getParameterType().equals(MySpecialArg.class)) {
+				return new MySpecialArg("myValue");
+			}
+			return UNRESOLVED;
 		}
 	}
 
