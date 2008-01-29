@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class ContextTypeMatchClassLoader extends ClassLoader implements SmartClassLoade
 			findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] {String.class});
 		}
 		catch (NoSuchMethodException ex) {
-			findLoadedClassMethod = null;
+			throw new IllegalStateException("Invalid [java.lang.ClassLoader] class: no 'findLoadedClass' method defined!");
 		}
 	}
 
@@ -80,11 +80,13 @@ class ContextTypeMatchClassLoader extends ClassLoader implements SmartClassLoade
 			if (!super.isEligibleForOverriding(className)) {
 				return false;
 			}
-			if (findLoadedClassMethod != null) {
-				ReflectionUtils.makeAccessible(findLoadedClassMethod);
-				if (ReflectionUtils.invokeMethod(findLoadedClassMethod, getParent(), new Object[] {className}) != null) {
+			ReflectionUtils.makeAccessible(findLoadedClassMethod);
+			ClassLoader parent = getParent();
+			while (parent != null) {
+				if (ReflectionUtils.invokeMethod(findLoadedClassMethod, parent, new Object[] {className}) != null) {
 					return false;
 				}
+				parent = parent.getParent();
 			}
 			return true;
 		}
