@@ -173,9 +173,8 @@ public class BeanPropertyRowMapper implements RowMapper {
 				try {
 					Object value = getColumnValue(rs, index, pd);
 					if (logger.isDebugEnabled() && rowNumber == 0) {
-						logger.debug("Mapping column '" + column + "'" +
-								" containing values of SQL type " + rsmd.getColumnType(index) +
-								" to property '" + pd.getName() + "' of type " + pd.getPropertyType());
+						logger.debug("Mapping column '" + column + "' to property '" +
+								pd.getName() + "' of type " + pd.getPropertyType());
 					}
 					bw.setPropertyValue(pd.getName(), value);
 				}
