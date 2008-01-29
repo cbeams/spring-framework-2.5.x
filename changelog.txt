@@ -8,8 +8,10 @@ Changes in version 2.5.2 (2008-02-07)
 
 General
 * updated transaction management chapter in the reference documentation
+* spring-context.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
 
 Package org.springframework.aop
+* ProxyFactoryBean and AbstractAutoProxyCreator check autodetected proxy interfaces for visibility in the ClassLoader
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
 * AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
 * AbstractBeanFactoryBasedTargetSourceCreator creates an independent internal BeanFactory per target bean
@@ -30,11 +32,14 @@ Package org.springframework.beans
 * added support for "(scope)" key to PropertiesBeanDefinitionReader: e.g. "myBean.(scope)=prototype"
 * refactored AbstractBeanConfigurerAspect into Abstract(InterfaceDriven)DependencyInjectionAspect
 * nested XML decoration elements (e.g. "aop:scoped-proxy") are explicitly rejected if no corresponding handler present
+* InitDestroy/Autowired/Common/PersistenceAnnotationBeanPostProcessor perform appropriate debug logging
 
 Package org.springframework.context
+* StaticApplicationContext builds GenericBeanDefinitions by default (instead of RootBeanDefinitions)
 * "context:component-scan" explictly ignores directories that accidentally match a specified custom resource pattern
 
 Package org.springframework.core
+* added "getParameterName()" method to MethodParameter, activated through a ParameterNameDiscoverer
 * factored out GenericTypeResolver from BridgeMethodResolver and GenericCollectionTypeResolver
 * added "isReadable()" method to Resource interface, giving a readability hint upfront (supported by FileSystemResource)
 * fixed ClassMetadataReadingVisitor (as used by "context:component-scan") to correctly ignore *usage* of inner classes
@@ -44,6 +49,9 @@ Package org.springframework.dao
 
 Package org.springframework.ejb
 * Local/SimpleRemoteSlsbInvokerInterceptor use EJB(Local)Home for EJB 2.x detection, for WebSphere compatibility
+
+Package org.springframework.instrument
+* added public "isInstrumentationAvailable()" method to InstrumentationLoadTimeWeaver, avoiding direct access to agent
 
 Package org.springframework.jca
 * ResourceAdapterApplicationContext registers BootstrapContext as resolvable dependency type (for @Autowired)
@@ -56,6 +64,7 @@ Package org.springframework.jdbc
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
 * SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
+* added further default "sql-error-codes.xml" mappings for MS SQL, MySQL and Oracle
 * merged AbstractBeanPropertyRowMapper into concrete BeanPropertyRowMapper class
 * removed BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
 * revised BeanPropertyRowMapper to use JavaBean property introspection instead of expecting field/setter name matches
@@ -82,12 +91,14 @@ Package org.springframework.orm
 * introduced "EntityManagerFactoryUtils.closeEntityManager" method that protects against exceptions thrown from close
 * Hibernate/Jpa/JdoTransactionManager explicitly rollback an active transaction before closing when begin failed
 * fixed TopLinkTransactionManager to correctly expose the underlying JDBC Connection in read-write transaction scenarios
+* JDO/JPA factories check autodetected proxy interfaces for visibility in the ClassLoader (for WebSphere compatibility)
 
 Package org.springframework.scripting
 * introduced "ScriptFactory.requiresScriptedObjectRefresh(ScriptSource)" for object refresh even after a type check call
 * GroovyScriptFactory and JRubyScriptFactory refresh scripted object instances even after an intermediate type check
 * introduced "ScriptSource.suggestedClassName()" for dynamic Groovy scripts that do not define a class themselves
 * GroovyScriptFactory uses resource filename (for files) or bean name (for inline scripts) as suggested class name
+* added "depends-on" attribute to "lang:bsh/groovy/jruby" configuration element
 
 Package org.springframework.test
 * TestContextManager ignores default TestExecutionListeners that cannot be instantiated (e.g. due to spring-tx missing)
@@ -96,14 +107,19 @@ Package org.springframework.test
 Package org.springframework.web
 * optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
 * introduced NativeWebRequest and MultipartRequest interfaces for even finer-grained generic request access options
+* introduced WebArgumentResolver interface and "webArgumentResolver(s)" property on AnnotationMethodHandlerAdapter
 * factored out common HandlerMethodResolver/Invoker classes from Servlet/Portlet AnnotationMethodHandlerAdapter
 * AnnotationMethodHandlerAdapter resolves the target type for a generically typed @RequestParam/@ModelAttribute argument
 * AnnotationMethodHandlerAdapter properly allows for resolving a Principal argument to null (in case of none defined)
 * added "synchronizeOnSession" property to AnnotationMethodHandlerAdapter, analogous to AbstractController
+* added "prepareResponse"/"generatesBinaryContent" methods to AbstractView, for HTTPS cache header workaround for IE
+* AbstractPdfView and Abstract(J)ExcelView participate in AbstractView's HTTPS cache header workaround for IE
+* AbstractJasperReportsView does not perform a hard response reset, in favor of AbstractView's HTTPS cache workaround
 * InternalResourceView detects circular dispatching to the same view even in case of pattern matches for same handler
 * InternalResourceView prevents dispatch to same handler path only if the "preventDispatchLoop" flag is set to "true"
 * InternalResourceViewResolver sets "preventDispatchLoop" to "true" for conventional name-based View instances only
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
+* JSP CheckboxesTag and RadioButtonsTag compare raw item / raw Map key for selection check as well
 
 
 Changes in version 2.5.1 (2008-01-09)
