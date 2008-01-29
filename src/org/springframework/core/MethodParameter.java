@@ -62,6 +62,10 @@ public class MethodParameter {
 
 	private Object[] parameterAnnotations;
 
+	private ParameterNameDiscoverer parameterNameDiscoverer;
+
+	private String parameterName;
+
 	private int nestingLevel = 1;
 
 	/** Map from Integer level to Integer type index */
@@ -196,12 +200,42 @@ public class MethodParameter {
 		if (methodParameterAnnotationsMethod == null) {
 			return null;
 		}
-		this.parameterAnnotations = (this.method != null ?
-				((Object[][]) ReflectionUtils.invokeMethod(methodParameterAnnotationsMethod, this.method))[this.parameterIndex] :
-				((Object[][]) ReflectionUtils.invokeMethod(constructorParameterAnnotationsMethod, this.constructor))[this.parameterIndex]);
+		Object[][] annotationArray = (this.method != null ?
+				((Object[][]) ReflectionUtils.invokeMethod(methodParameterAnnotationsMethod, this.method)) :
+				((Object[][]) ReflectionUtils.invokeMethod(constructorParameterAnnotationsMethod, this.constructor)));
+		this.parameterAnnotations = annotationArray[this.parameterIndex];
 		return this.parameterAnnotations;
 	}
 
+	/**
+	 * Initialize parameter name discovery for this method parameter.
+	 * <p>This method does not actually try to retrieve the parameter name at
+	 * this point; it just allows discovery to happen when the application calls
+	 * {@link #getParameterName()} (if ever).
+	 */
+	public void initParameterNameDiscovery(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
+	}
+
+	/**
+	 * Return the name of the method/constructor parameter.
+	 * @return the parameter name (may be <code>null</code> if no
+	 * parameter name metadata is contained in the class file or no
+	 * {@link #initParameterNameDiscovery ParameterNameDiscoverer}
+	 * has been set to begin with)
+	 */
+	public String getParameterName() {
+		if (this.parameterNameDiscoverer != null) {
+			String[] parameterNames = (this.method != null ?
+					this.parameterNameDiscoverer.getParameterNames(this.method) :
+					this.parameterNameDiscoverer.getParameterNames(this.constructor));
+			if (parameterNames != null) {
+				this.parameterName = parameterNames[this.parameterIndex];
+			}
+			this.parameterNameDiscoverer = null;
+		}
+		return this.parameterName;
+	}
 
 	/**
 	 * Increase this parameter's nesting level.

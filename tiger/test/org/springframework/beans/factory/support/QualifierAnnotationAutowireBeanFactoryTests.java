@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 
@@ -134,9 +135,10 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		lbf.registerBeanDefinition(MARK, person2);
-		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(
-				new MethodParameter(QualifiedTestBean.class.getDeclaredConstructor(Person.class), 0),
-				false);
+		MethodParameter param = new MethodParameter(QualifiedTestBean.class.getDeclaredConstructor(Person.class), 0);
+		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(param, false);
+		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		assertEquals("tpb", param.getParameterName());
 		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
 		assertTrue(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
 		assertFalse(lbf.isAutowireCandidate(MARK, qualifiedDescriptor));
@@ -153,12 +155,16 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		lbf.registerBeanDefinition(MARK, person2);
-		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(
-				new MethodParameter(QualifiedTestBean.class.getDeclaredMethod("autowireQualified", Person.class), 0),
-				false);
-		DependencyDescriptor nonqualifiedDescriptor = new DependencyDescriptor(
-				new MethodParameter(QualifiedTestBean.class.getDeclaredMethod("autowireNonqualified", Person.class), 0),
-				false);
+		MethodParameter qualifiedParam =
+				new MethodParameter(QualifiedTestBean.class.getDeclaredMethod("autowireQualified", Person.class), 0);
+		MethodParameter nonqualifiedParam =
+				new MethodParameter(QualifiedTestBean.class.getDeclaredMethod("autowireNonqualified", Person.class), 0);
+		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(qualifiedParam, false);
+		DependencyDescriptor nonqualifiedDescriptor = new DependencyDescriptor(nonqualifiedParam, false);
+		qualifiedParam.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		assertEquals("tpb", qualifiedParam.getParameterName());
+		nonqualifiedParam.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		assertEquals("tpb", nonqualifiedParam.getParameterName());
 		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
 		assertTrue(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor));
 		assertTrue(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor));
