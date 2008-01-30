@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 
 import org.hibernate.cfg.Environment;
@@ -32,6 +33,7 @@ import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.hibernate.ejb.HibernateEntityManagerFactory;
 import org.hibernate.ejb.HibernatePersistence;
 
 import org.springframework.orm.jpa.JpaDialect;
@@ -102,12 +104,16 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
-	public Class<? extends EntityManager> getEntityManagerInterface() {
-		return HibernateEntityManager.class;
-	}
-
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
+	}
+
+	public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
+		return HibernateEntityManagerFactory.class;
+	}
+
+	public Class<? extends EntityManager> getEntityManagerInterface() {
+		return HibernateEntityManager.class;
 	}
 
 }

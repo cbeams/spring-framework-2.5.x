@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,12 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.util.Map;
+
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 
 /**
@@ -107,6 +111,22 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 		return this.showSql;
 	}
 
+
+	public Map getJpaPropertyMap() {
+		return null;
+	}
+
+	public JpaDialect getJpaDialect() {
+		return null;
+	}
+
+	public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
+		return EntityManagerFactory.class;
+	}
+
+	public Class<? extends EntityManager> getEntityManagerInterface() {
+		return EntityManager.class;
+	}
 
 	/**
 	 * Post-process the EntityManagerFactory after it has been initialized.

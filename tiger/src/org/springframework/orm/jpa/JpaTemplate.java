@@ -206,7 +206,14 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	 * @see javax.persistence.EntityManager#close
 	 */
 	protected EntityManager createEntityManagerProxy(EntityManager em) {
-		Class[] ifcs = ClassUtils.getAllInterfacesForClass(em.getClass(), getClass().getClassLoader());
+		Class[] ifcs = null;
+		EntityManagerFactory emf = getEntityManagerFactory();
+		if (emf instanceof EntityManagerFactoryInfo) {
+			ifcs = new Class[] {((EntityManagerFactoryInfo) emf).getEntityManagerInterface()};
+		}
+		else {
+			ifcs = ClassUtils.getAllInterfacesForClass(em.getClass(), getClass().getClassLoader());
+		}
 		return (EntityManager) Proxy.newProxyInstance(
 				getClass().getClassLoader(), ifcs, new CloseSuppressingInvocationHandler(em));
 	}

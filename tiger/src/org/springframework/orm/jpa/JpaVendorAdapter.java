@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,19 +54,29 @@ public interface JpaVendorAdapter {
 	Map getJpaPropertyMap();
 
 	/**
-	 * Return the vendor-specific EntityManager interface that this
-	 * provider's EntityManagers will implement.
+	 * Return the vendor-specific JpaDialect implementation for this
+	 * provider, or <code>null</code> if there is none.
+	 */
+	JpaDialect getJpaDialect();
+
+	/**
+	 * Return the vendor-specific EntityManagerFactory interface
+	 * that the EntityManagerFactory proxy is supposed to implement.
+	 * <p>If the provider does not offer any EntityManagerFactory extensions,
+	 * the adapter should simply return the standard
+	 * {@link javax.persistence.EntityManagerFactory} class here.
+	 * @since 2.5.2
+	 */
+	Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface();
+
+	/**
+	 * Return the vendor-specific EntityManager interface
+	 * that this provider's EntityManagers will implement.
 	 * <p>If the provider does not offer any EntityManager extensions,
 	 * the adapter should simply return the standard
 	 * {@link javax.persistence.EntityManager} class here.
 	 */
 	Class<? extends EntityManager> getEntityManagerInterface();
-
-	/**
-	 * Return the vendor-specific JpaDialect implementation for this
-	 * provider, or <code>null</code> if there is none.
-	 */
-	JpaDialect getJpaDialect();
 
 	/**
 	 * Optional callback for post-processing the native EntityManagerFactory

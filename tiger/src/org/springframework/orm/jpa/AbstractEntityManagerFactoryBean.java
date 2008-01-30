@@ -22,8 +22,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -44,7 +46,6 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract {@link org.springframework.beans.factory.FactoryBean} that
@@ -83,6 +84,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	private String persistenceUnitName;
 
 	private final Map jpaPropertyMap = new HashMap();
+
+	private Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
 	private Class<? extends EntityManager> entityManagerInterface;
 
@@ -178,17 +181,30 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
-	 * Specify the (potentially vendor-specific) EntityManager interface that
-	 * this factory's EntityManagers are supposed to implement.
+	 * Specify the (potentially vendor-specific) EntityManagerFactory interface
+	 * that this EntityManagerFactory proxy is supposed to implement.
+	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
+	 * or set to the standard <code>javax.persistence.EntityManagerFactory</code>
+	 * interface else.
+	 * @see JpaVendorAdapter#getEntityManagerFactoryInterface()
+	 */
+	public void setEntityManagerFactoryInterface(Class<? extends EntityManagerFactory> emfInterface) {
+		Assert.isAssignable(EntityManagerFactory.class, entityManagerInterface);
+		this.entityManagerFactoryInterface = emfInterface;
+	}
+
+	/**
+	 * Specify the (potentially vendor-specific) EntityManager interface
+	 * that this factory's EntityManagers are supposed to implement.
 	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
 	 * or set to the standard <code>javax.persistence.EntityManager</code>
 	 * interface else.
 	 * @see JpaVendorAdapter#getEntityManagerInterface()
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
 	 */
-	public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
+	public void setEntityManagerInterface(Class<? extends EntityManager> emInterface) {
 		Assert.isAssignable(EntityManager.class, entityManagerInterface);
-		this.entityManagerInterface = entityManagerInterface;
+		this.entityManagerInterface = emInterface;
 	}
 
 	public Class<? extends EntityManager> getEntityManagerInterface() {
@@ -235,6 +251,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					}
 				}
 			}
+			if (this.entityManagerFactoryInterface == null) {
+				this.entityManagerFactoryInterface = this.jpaVendorAdapter.getEntityManagerFactoryInterface();
+			}
 			if (this.entityManagerInterface == null) {
 				this.entityManagerInterface = this.jpaVendorAdapter.getEntityManagerInterface();
 			}
@@ -243,6 +262,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			}
 		}
 		else {
+			if (this.entityManagerFactoryInterface == null) {
+				this.entityManagerFactoryInterface = EntityManagerFactory.class;
+			}
 			if (this.entityManagerInterface == null) {
 				this.entityManagerInterface = EntityManager.class;
 			}
@@ -272,15 +294,22 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @return proxy entity manager
 	 */
 	protected EntityManagerFactory createEntityManagerFactoryProxy(EntityManagerFactory emf) {
-		// Automatically implement all interfaces implemented by the EntityManagerFactory.
-		Class[] ifcs = ClassUtils.getAllInterfacesForClass(emf.getClass(), getClass().getClassLoader());
-		ifcs = (Class[]) ObjectUtils.addObjectToArray(ifcs, EntityManagerFactoryInfo.class);
+		ClassLoader cl = getClass().getClassLoader();
+		Set ifcs = new LinkedHashSet();
+		if (this.entityManagerFactoryInterface != null) {
+			ifcs.add(this.entityManagerFactoryInterface);
+		}
+		else {
+			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(), cl));
+		}
+		ifcs.add(EntityManagerFactoryInfo.class);
 		EntityManagerFactoryPlusOperations plusOperations = null;
 		if (getJpaDialect() != null && getJpaDialect().supportsEntityManagerFactoryPlusOperations()) {
 			plusOperations = getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
-			ifcs = (Class[]) ObjectUtils.addObjectToArray(ifcs, EntityManagerFactoryPlusOperations.class);
+			ifcs.add(EntityManagerFactoryPlusOperations.class);
 		}
-		return (EntityManagerFactory) Proxy.newProxyInstance(getClass().getClassLoader(), ifcs,
+		return (EntityManagerFactory) Proxy.newProxyInstance(
+				cl, (Class[]) ifcs.toArray(new Class[ifcs.size()]),
 				new ManagedEntityManagerFactoryInvocationHandler(emf, this, plusOperations));
 	}
 
