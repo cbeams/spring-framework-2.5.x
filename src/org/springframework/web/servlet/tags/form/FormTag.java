@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,8 +331,8 @@ public class FormTag extends AbstractHtmlElementTag {
 				return requestUri;
 			}
 			else {
-				throw new IllegalArgumentException("Attribute 'action' is required. Attempted to resolve " +
-						"against current request URI but request URI was null");
+				throw new IllegalArgumentException("Attribute 'action' is required. " +
+						"Attempted to resolve against current request URI but request URI was null.");
 			}
 		}
 	}
@@ -344,9 +344,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
-
 		this.pageContext.removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
-
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.
 			this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
@@ -355,7 +353,6 @@ public class FormTag extends AbstractHtmlElementTag {
 			// Remove exposed nestedPath value.
 			this.pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
-
 		return EVAL_PAGE;
 	}
 
