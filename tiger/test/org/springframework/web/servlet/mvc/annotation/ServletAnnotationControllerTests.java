@@ -784,7 +784,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	@RequestMapping("/myApp/*")
 	private static class MyRelativePathDispatchingController {
 
-		@RequestMapping("myHandle")
+		@RequestMapping
 		public void myHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("myView");
 		}
