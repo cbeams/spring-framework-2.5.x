@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,6 +150,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		emfMc.setReturnValue(null);
 		mockEmf.getJpaDialect();
 		emfMc.setReturnValue(new DefaultJpaDialect());
+		mockEmf.getEntityManagerInterface();
+		emfMc.setReturnValue(EntityManager.class, 1);
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
