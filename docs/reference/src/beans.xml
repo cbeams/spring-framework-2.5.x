@@ -5277,7 +5277,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     <para>(The implicitly registered post-processors include <ulink
     url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html"><classname>AutowiredAnnotationBeanPostProcessor</classname></ulink>,
     <ulink
-    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/annotation/CommonAnnotationBeanPostProcessor.html"><classname>CommonAnnotationBeanPostProcessor</classname></ulink>,
+    url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html"><classname>CommonAnnotationBeanPostProcessor</classname></ulink>,
     <ulink
     url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"><classname>PersistenceAnnotationBeanPostProcessor</classname></ulink>,
     as well as the aforementioned <ulink
