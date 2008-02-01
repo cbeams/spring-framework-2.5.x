@@ -42,6 +42,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.SystemPropertyUtils;
 
 /**
  * A component provider that scans the classpath from a base package. It then
@@ -165,7 +166,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
 		try {
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-					ClassUtils.convertClassNameToResourcePath(basePackage) + "/" + this.resourcePattern;
+					resolveBasePackage(basePackage) + "/" + this.resourcePattern;
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			for (int i = 0; i < resources.length; i++) {
 				Resource resource = resources[i];
@@ -185,6 +186,18 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
 		}
 		return candidates;
+	}
+
+	/**
+	 * Resolve the specified base package into a pattern specification for
+	 * the package search path.
+	 * <p>The default implementation resolves placeholders against system properties,
+	 * and converts a "."-based package path to a "/"-based resource path.
+	 * @param basePackage the base package as specified by the user
+	 * @return the pattern specification to be used for package searching
+	 */
+	protected String resolveBasePackage(String basePackage) {
+		return ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage));
 	}
 
 	/**
