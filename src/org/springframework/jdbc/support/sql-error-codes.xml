@@ -18,6 +18,9 @@
 		<property name="databaseProductName">
 			<value>DB2*</value>
 		</property>
+    <property name="useSqlStateForTranslation">
+      <value>true</value>
+    </property>
 		<property name="badSqlGrammarCodes">
 			<value>-204,-206,-301,-408</value>
 		</property>
@@ -96,17 +99,20 @@
 	</bean>
 
 	<bean id="MS-SQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="useSqlStateForTranslation">
+      <value>true</value>
+    </property>
 		<property name="databaseProductName">
 			<value>Microsoft SQL Server</value>
 		</property>
 		<property name="badSqlGrammarCodes">
-			<value>207,208</value>
+			<value>156,170,207,208</value>
 		</property>
 		<property name="permissionDeniedCodes">
 			<value>229</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>2627,8114,8115</value>
+			<value>544,2601,2627,8114,8115</value>
 		</property>
 		<property name="deadlockLoserCodes">
 			<value>1205</value>
@@ -142,7 +148,7 @@
 			<value>17002,17447</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>1,1400,1722,2291</value>
+			<value>1,1400,1722,2291,2292</value>
 		</property>
 		<property name="cannotAcquireLockCodes">
 			<value>54</value>
@@ -172,6 +178,7 @@
 			<list>
 				<value>Sybase SQL Server</value>
 				<value>Adaptive Server Enterprise</value>
+				<value>sql server</value> <!-- name as returned by jTDS driver -->
 			</list>
 		</property>
 		<property name="badSqlGrammarCodes">
