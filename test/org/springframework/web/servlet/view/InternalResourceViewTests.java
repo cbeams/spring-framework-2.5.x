@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -66,6 +67,11 @@ public class InternalResourceViewTests extends TestCase {
 
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
+		view.setServletContext(new MockServletContext() {
+			public int getMinorVersion() {
+				return 4;
+			}
+		});
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);
@@ -106,6 +112,11 @@ public class InternalResourceViewTests extends TestCase {
 
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
+		view.setServletContext(new MockServletContext() {
+			public int getMinorVersion() {
+				return 4;
+			}
+		});
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);
