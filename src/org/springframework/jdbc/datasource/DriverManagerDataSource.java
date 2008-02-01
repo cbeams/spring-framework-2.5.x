@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -96,8 +95,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * @param password the JDBC password to use for accessing the DriverManager
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
-	public DriverManagerDataSource(String driverClassName, String url, String username, String password)
-			throws CannotGetJdbcConnectionException {
+	public DriverManagerDataSource(String driverClassName, String url, String username, String password) {
 		setDriverClassName(driverClassName);
 		setUrl(url);
 		setUsername(username);
@@ -112,8 +110,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * @param password the JDBC password to use for accessing the DriverManager
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
-	public DriverManagerDataSource(String url, String username, String password)
-			throws CannotGetJdbcConnectionException {
+	public DriverManagerDataSource(String url, String username, String password) {
 		setUrl(url);
 		setUsername(username);
 		setPassword(password);
@@ -125,8 +122,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * @param url the JDBC URL to use for accessing the DriverManager
 	 * @see java.sql.DriverManager#getConnection(String)
 	 */
-	public DriverManagerDataSource(String url)
-			throws CannotGetJdbcConnectionException {
+	public DriverManagerDataSource(String url) {
 		setUrl(url);
 	}
 
@@ -139,15 +135,17 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * @see Class#forName(String)
 	 * @see java.sql.DriverManager#registerDriver(java.sql.Driver)
 	 */
-	public void setDriverClassName(String driverClassName) throws CannotGetJdbcConnectionException {
+	public void setDriverClassName(String driverClassName) {
 		Assert.hasText(driverClassName, "Property 'driverClassName' must not be empty");
 		this.driverClassName = driverClassName.trim();
 		try {
 			Class.forName(this.driverClassName, true, ClassUtils.getDefaultClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
-			throw new CannotGetJdbcConnectionException(
-					"Could not load JDBC driver class [" + this.driverClassName + "]", ex);
+			IllegalStateException ise =
+					new IllegalStateException("Could not load JDBC driver class [" + this.driverClassName + "]");
+			ise.initCause(ex);
+			throw ise;
 		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Loaded JDBC driver: " + this.driverClassName);
