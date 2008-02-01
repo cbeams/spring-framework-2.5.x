@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@
 
 package org.springframework.jdbc.support;
 
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -25,10 +30,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.util.Assert;
-
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * {@link SQLExceptionTranslator} implementation that analyzes the SQL state
@@ -46,45 +47,48 @@ import java.util.Set;
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 
 	/**
-	 * Set of well-known String 2-digit codes that indicate bad SQL
+	 * Set of well-known String 2-digit codes that indicate bad SQL.
 	 */
-	private static final Set BAD_SQL_CODES = new HashSet(6);
+	private static final Set BAD_SQL_CODES = new HashSet(8);
 
 	/**
-	 * Set of well-known String 2-digit codes that indicate RDBMS integrity violation
+	 * Set of well-known String 2-digit codes that indicate RDBMS integrity violation.
 	 */
-	private static final Set INTEGRITY_VIOLATION_CODES = new HashSet(4);
+	private static final Set INTEGRITY_VIOLATION_CODES = new HashSet(8);
 
 	/**
-	 * Set of String 2-digit codes that indicate communication errors
+	 * Set of String 2-digit codes that indicate communication errors.
 	 */
-	private static final Set RESOURCE_FAILURE_CODES = new HashSet(3);
+	private static final Set RESOURCE_FAILURE_CODES = new HashSet(4);
 
 	/**
-	 * Set of String 2-digit codes that indicate concurrency errors
+	 * Set of String 2-digit codes that indicate concurrency errors.
 	 */
-	private static final Set CONCURRENCY_CODES = new HashSet(1);
+	private static final Set CONCURRENCY_CODES = new HashSet(4);
 
 
 	// Populate reference data.
 	static {
-		BAD_SQL_CODES.add("07");
-		BAD_SQL_CODES.add("37");
-		BAD_SQL_CODES.add("42");
-		BAD_SQL_CODES.add("2A");
+		BAD_SQL_CODES.add("07");	// Dynamic SQL error
+		BAD_SQL_CODES.add("21");	// Cardinality violation
+		BAD_SQL_CODES.add("2A");	// Syntax error direct SQL
+		BAD_SQL_CODES.add("37");	// Syntax error dynamic SQL
+		BAD_SQL_CODES.add("42");	// Syntax error
 		BAD_SQL_CODES.add("65");	// Oracle throws this on unknown identifier
 		BAD_SQL_CODES.add("S0");	// MySQL uses this - from ODBC error codes?
 
+		INTEGRITY_VIOLATION_CODES.add("01");	// Data truncation
 		INTEGRITY_VIOLATION_CODES.add("22");	// Integrity constraint violation
 		INTEGRITY_VIOLATION_CODES.add("23");	// Integrity constraint violation
 		INTEGRITY_VIOLATION_CODES.add("27");	// Triggered data change violation
 		INTEGRITY_VIOLATION_CODES.add("44");	// With check violation
 
-		CONCURRENCY_CODES.add("40");	// Transaction rollback
-
 		RESOURCE_FAILURE_CODES.add("08");	// Connection exception
 		RESOURCE_FAILURE_CODES.add("53");	// PostgreSQL uses this - insufficient resources (e.g. disk full)
 		RESOURCE_FAILURE_CODES.add("54");	// PostgreSQL uses this - program limit exceeded (e.g. statement too complex)
+
+		CONCURRENCY_CODES.add("40");	// Transaction rollback
+		CONCURRENCY_CODES.add("61");	// Deadlock
 	}
 
 
@@ -93,7 +97,7 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 
 
 	public DataAccessException translate(String task, String sql, SQLException ex) {
-		Assert.notNull(ex, "Cannot translate a null SQLException.");
+		Assert.notNull(ex, "Cannot translate a null SQLException");
 		if (task == null) {
 			task = "";
 		}
@@ -120,26 +124,25 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 		return new UncategorizedSQLException(task, sql, ex);
 	}
 
-
 	/**
 	 * Build a message <code>String</code> for the given {@link SQLException}.
 	 * <p>Called when creating an instance of a generic
 	 * {@link DataAccessException} class.
 	 * @param task readable text describing the task being attempted
-	 * @param sql  the SQL statement that caused the problem. May be <code>null</code>.
-	 * @param ex   the offending <code>SQLException</code>
+	 * @param sql the SQL statement that caused the problem. May be <code>null</code>.
+	 * @param ex the offending <code>SQLException</code>
 	 * @return the message <code>String</code> to use
 	 */
 	protected String buildMessage(String task, String sql, SQLException ex) {
 		return task + "; SQL [" + sql + "]; " + ex.getMessage();
 	}
 
-
 	/**
 	 * Gets the SQL state code from the supplied {@link SQLException exception}.
 	 * <p>Some JDBC drivers nest the actual exception from a batched update, so we
 	 * might need to dig down into the nested exception.
-	 * @param ex the exception from which the {@link SQLException#getSQLState() SQL state} is to be extracted
+	 * @param ex the exception from which the {@link SQLException#getSQLState() SQL state}
+	 * is to be extracted
 	 * @return the SQL state code
 	 */
 	private String getSqlState(SQLException ex) {
