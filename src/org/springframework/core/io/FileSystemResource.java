@@ -42,7 +42,14 @@ public class FileSystemResource extends AbstractResource {
 
 
 	/**
-	 * Create a new FileSystemResource.
+	 * Create a new FileSystemResource from a File handle.
+	 * <p>Note: When building relative resources via {@link #createRelative},
+	 * the relative path will apply <i>at the same directory level</i>:
+	 * e.g. new File("C:/dir1"), relative path "dir2" -> "C:/dir2"!
+	 * If you prefer to have relative paths built underneath the given root
+	 * directory, use the {@link #FileSystemResource(String) constructor with a file path}
+	 * to append a trailing slash to the root path: "C:/dir1/", which
+	 * indicates this directory as root for all relative paths.
 	 * @param file a File handle
 	 */
 	public FileSystemResource(File file) {
@@ -52,7 +59,13 @@ public class FileSystemResource extends AbstractResource {
 	}
 
 	/**
-	 * Create a new FileSystemResource.
+	 * Create a new FileSystemResource from a file path.
+	 * <p>Note: When building relative resources via {@link #createRelative},
+	 * it makes a difference whether the specified resource base path here
+	 * ends with a slash or not. In the case of "C:/dir1/", relative paths
+	 * will be built underneath that root: e.g. relative path "dir2" ->
+	 * "C:/dir1/dir2". In the case of "C:/dir1", relative paths will apply
+	 * at the same directory level: relative path "dir2" -> "C:/dir2".
 	 * @param path a file path
 	 */
 	public FileSystemResource(String path) {
