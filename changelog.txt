@@ -25,6 +25,7 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
+* fixed AbstractAutowireCapableBeanFactory to always resolve the bean class before a FactoryBean type check
 * deprecated AbstractBeanDefinition's Spring 1.2 style "setSingleton" method in favor of Spring 2.0's "setScope"
 * deprecated BeanDefinitionBuilder's "addConstructorArg" in favor of the consistently named "addConstructorArgValue"
 * deprecated various rarely used BeanDefinitionBuilder methods in favor of settings on the raw BeanDefinition object
@@ -37,6 +38,7 @@ Package org.springframework.beans
 Package org.springframework.context
 * StaticApplicationContext builds GenericBeanDefinitions by default (instead of RootBeanDefinitions)
 * "context:component-scan" explictly ignores directories that accidentally match a specified custom resource pattern
+* fixed "context:load-time-weaver" to not break post-processor detection in case of Spring jars deployed as shared libs
 
 Package org.springframework.core
 * added "getParameterName()" method to MethodParameter, activated through a ParameterNameDiscoverer
@@ -64,7 +66,7 @@ Package org.springframework.jdbc
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
 * SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
-* added further default "sql-error-codes.xml" mappings for MS SQL, MySQL and Oracle
+* added further default "sql-error-codes.xml" mappings for MS SQL, MySQL, PostgreSQL and Oracle
 * merged AbstractBeanPropertyRowMapper into concrete BeanPropertyRowMapper class
 * removed BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
 * revised BeanPropertyRowMapper to use JavaBean property introspection instead of expecting field/setter name matches
@@ -92,6 +94,8 @@ Package org.springframework.orm
 * Hibernate/Jpa/JdoTransactionManager explicitly rollback an active transaction before closing when begin failed
 * fixed TopLinkTransactionManager to correctly expose the underlying JDBC Connection in read-write transaction scenarios
 * JDO/JPA factories check autodetected proxy interfaces for visibility in the ClassLoader (for WebSphere compatibility)
+* added "entityManagerFactoryInterface" property to AbstractEntityManagerFactoryBean, as alternative to autodetection
+* added "getEntityManagerFactoryInterface()" to JpaVendorAdapter (for WebSphere compatibility of OpenJpaVendorAdapter)
 
 Package org.springframework.scripting
 * introduced "ScriptFactory.requiresScriptedObjectRefresh(ScriptSource)" for object refresh even after a type check call
@@ -113,6 +117,7 @@ Package org.springframework.web
 * AnnotationMethodHandlerAdapter properly allows for resolving a Principal argument to null (in case of none defined)
 * added "synchronizeOnSession" property to AnnotationMethodHandlerAdapter, analogous to AbstractController
 * added "prepareResponse"/"generatesBinaryContent" methods to AbstractView, for HTTPS cache header workaround for IE
+* InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
 * AbstractPdfView and Abstract(J)ExcelView participate in AbstractView's HTTPS cache header workaround for IE
 * AbstractJasperReportsView does not perform a hard response reset, in favor of AbstractView's HTTPS cache workaround
 * InternalResourceView detects circular dispatching to the same view even in case of pattern matches for same handler
