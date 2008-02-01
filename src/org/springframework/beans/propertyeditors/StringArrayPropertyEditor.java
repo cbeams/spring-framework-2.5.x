@@ -22,8 +22,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Custom {@link java.beans.PropertyEditor} for {@link String String[]} arrays.
- * 
+ * Custom {@link java.beans.PropertyEditor} for String arrays.
+ *
  * <p>Strings must be in CSV format, with a customizable separator.
  *
  * @author Rod Johnson
