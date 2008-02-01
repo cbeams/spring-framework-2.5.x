@@ -31,7 +31,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Wrapper for a JSP or other resource within the same web application.
  * Exposes model objects as request attributes and forwards the request to
- * the specified resource URL using a RequestDispatcher.
+ * the specified resource URL using a {@link javax.servlet.RequestDispatcher}.
  *
  * <p>A URL for this view is supposed to specify a resource within the web
  * application, suitable for RequestDispatcher's <code>forward</code> or
@@ -42,7 +42,7 @@ import org.springframework.web.util.WebUtils;
  * a forward. This can be enforced by calling <code>response.flushBuffer()</code>
  * (which will commit the response) before rendering the view.
  *
- * <p>Typical usage with InternalResourceViewResolver would look as follows,
+ * <p>Typical usage with {@link InternalResourceViewResolver} looks as follows,
  * from the perspective of the DispatcherServlet context definition:
  *
  * <pre class="code">&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
@@ -61,6 +61,7 @@ import org.springframework.web.util.WebUtils;
  * @see javax.servlet.RequestDispatcher#include
  * @see javax.servlet.ServletResponse#flushBuffer
  * @see InternalResourceViewResolver
+ * @see JstlView
  */
 public class InternalResourceView extends AbstractUrlBasedView {
 
@@ -289,7 +290,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
 		ServletContext sc = getServletContext();
-		if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+		if (sc != null && sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
 			WebUtils.exposeForwardRequestAttributes(request);
 		}
 	}
