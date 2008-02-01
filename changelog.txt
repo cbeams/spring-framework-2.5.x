@@ -3,17 +3,35 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-03-18)
+Changes in version 2.0.9 (2008-04-17)
 -------------------------------------
 
 Package org.springframework.aop
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
+* AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
+
+Package org.springframework.beans
+* StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
+
+Package org.springframework.jdbc
+* SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
+* SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
+* SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
+* added further default "sql-error-codes.xml" mappings for MS SQL and Oracle
 
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
 
+Package org.springframework.mail
+* added "text/csv" to ConfigurableMimeFileTypeMap's and thus MimeMessageHelper's default MIME mappings
+
 Package org.springframework.orm
+* fixed TopLinkTransactionManager to correctly expose the underlying JDBC Connection in read-write transaction scenarios
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
+
+Package org.springframework.web
+* InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
+* JSP OptionsTag and SelectTag compare raw Map key for selection check as well
 
 
 Changes in version 2.0.8 (2008-01-07)
