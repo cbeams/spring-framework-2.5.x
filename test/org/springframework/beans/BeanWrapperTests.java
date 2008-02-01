@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,29 +257,33 @@ public class BeanWrapperTests extends TestCase {
 	public void testIgnoringIndexedProperty() {
 		MutablePropertyValues values = new MutablePropertyValues();
 		values.addPropertyValue("toBeIgnored[0]", new Integer(42));
-		BeanWrapper wrapper = new BeanWrapperImpl(new Object());
-		wrapper.setPropertyValues(values, true);
+		BeanWrapper bw = new BeanWrapperImpl(new Object());
+		bw.setPropertyValues(values, true);
+	}
+
+	public void testConvertClassToString() {
+		MutablePropertyValues values = new MutablePropertyValues();
+		values.addPropertyValue("name", Integer.class);
+		TestBean tb = new TestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			public void setValue(Object value) {
+				super.setValue(value.toString());
+			}
+		});
+		bw.setPropertyValues(values);
+		assertEquals(Integer.class.toString(), tb.getName());
 	}
 
 	public void testBooleanObject() {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
-		try {
-			bw.setPropertyValue("bool2", "true");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool2", "true");
 		assertTrue("Correct bool2 value", Boolean.TRUE.equals(bw.getPropertyValue("bool2")));
 		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
 
-		try {
-			bw.setPropertyValue("bool2", "false");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool2", "false");
 		assertTrue("Correct bool2 value", Boolean.FALSE.equals(bw.getPropertyValue("bool2")));
 		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
 
@@ -460,8 +464,8 @@ public class BeanWrapperTests extends TestCase {
 
 	public void testStringArrayPropertyWithStringSplitting() throws Exception {
 		PropsTest pt = new PropsTest();
-		BeanWrapper bw = new BeanWrapperImpl(pt);
-		bw.registerCustomEditor(String[].class, "stringArray", new StringArrayPropertyEditor());
+		BeanWrapperImpl bw = new BeanWrapperImpl(pt);
+		bw.useConfigValueEditors();
 		bw.setPropertyValue("stringArray", "a1,b2");
 		assertTrue("stringArray length = 2", pt.stringArray.length == 2);
 		assertTrue("correct values", pt.stringArray[0].equals("a1") && pt.stringArray[1].equals("b2"));
@@ -581,6 +585,15 @@ public class BeanWrapperTests extends TestCase {
 		bw.setPropertyValue("intArray", "0");
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
+	}
+
+	public void testIntArrayPropertyWithStringSplitting() throws Exception {
+		PropsTest pt = new PropsTest();
+		BeanWrapperImpl bw = new BeanWrapperImpl(pt);
+		bw.useConfigValueEditors();
+		bw.setPropertyValue("intArray", "4,5");
+		assertTrue("intArray length = 2", pt.intArray.length == 2);
+		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5);
 	}
 
 	public void testIndividualAllValid() {
@@ -1047,7 +1060,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(1024, tb.getArray().length);
 		assertEquals(0, tb.getArray()[0]);
 		long time1 = sw.getLastTaskTimeMillis();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(String.class, new StringTrimmerEditor(false));
 		sw.start("array2");
@@ -1055,7 +1068,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValue("array", input);
 		}
 		sw.stop();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(int.class, "array.somePath", new CustomNumberEditor(Integer.class, false));
 		sw.start("array3");
@@ -1063,7 +1076,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValue("array", input);
 		}
 		sw.stop();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(int.class, "array[0].somePath", new CustomNumberEditor(Integer.class, false));
 		sw.start("array3");
@@ -1071,7 +1084,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValue("array", input);
 		}
 		sw.stop();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class, false));
 		sw.start("array4");
@@ -1081,7 +1094,7 @@ public class BeanWrapperTests extends TestCase {
 		sw.stop();
 		assertEquals(1024, tb.getArray().length);
 		assertEquals(0, tb.getArray()[0]);
-		assertTrue(sw.getLastTaskTimeMillis() > time1);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() > time1);
 	}
 
 	public void testLargeMatchingPrimitiveArrayWithSpecificEditor() {

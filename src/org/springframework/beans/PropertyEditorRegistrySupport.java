@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,7 +209,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		// Only register config value editors if explicitly requested.
 		if (this.configValueEditorsActive) {
-			this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
+			StringArrayPropertyEditor sae = new StringArrayPropertyEditor();
+			this.defaultEditors.put(String[].class, sae);
+			this.defaultEditors.put(short[].class, sae);
+			this.defaultEditors.put(int[].class, sae);
+			this.defaultEditors.put(long[].class, sae);
 		}
 	}
 
