@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.core.Conventions;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
@@ -52,6 +53,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Same value as {@link org.springframework.web.servlet.tags.NestedPathTag#NESTED_PATH_VARIABLE_NAME}.
 	 */
 	protected static final String NESTED_PATH_VARIABLE_NAME = NestedPathTag.NESTED_PATH_VARIABLE_NAME;
+
+	/**
+	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
+	 * command object name is exposed.
+	 * @deprecated as of Spring 2.5, in favor of {@link FormTag#MODEL_ATTRIBUTE_VARIABLE_NAME}
+	 */
+	public static final String COMMAND_NAME_VARIABLE_NAME =
+			Conventions.getQualifiedAttributeName(AbstractFormTag.class, "commandName");
 
 
 	/**

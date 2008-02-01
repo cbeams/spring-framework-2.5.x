@@ -77,7 +77,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
 	 * form object name is exposed.
 	 */
-	static final String MODEL_ATTRIBUTE_VARIABLE_NAME =
+	public static final String MODEL_ATTRIBUTE_VARIABLE_NAME =
 			Conventions.getQualifiedAttributeName(AbstractFormTag.class, MODEL_ATTRIBUTE);
 
 
@@ -274,6 +274,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		// Expose the form object name for nested tags...
 		String modelAttribute = resolveModelAttribute();
 		this.pageContext.setAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, modelAttribute, PageContext.REQUEST_SCOPE);
+		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, modelAttribute, PageContext.REQUEST_SCOPE);
 
 		// Save previous nestedPath value, build and expose current nestedPath value.
 		// Use request scope to expose nestedPath to included pages too.
@@ -345,6 +346,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
 		this.pageContext.removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		this.pageContext.removeAttribute(COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.
 			this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
