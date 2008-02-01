@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.SerializationTestUtils;
+import org.springframework.stereotype.Repository;
 
 /**
  * Unit tests for persistence context and persistence unit injection.
@@ -625,12 +626,16 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@Repository
 	public static class DefaultPublicPersistenceContextSetter {
 
 		private EntityManager em;
 
 		@PersistenceContext(type = PersistenceContextType.EXTENDED)
 		public void setEntityManager(EntityManager em) {
+			if (this.em != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.em = em;
 		}
 
@@ -653,6 +658,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		@PersistenceUnit
 		public void setEmf(EntityManagerFactory emf) {
+			if (this.emf != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.emf = emf;
 		}
 
@@ -662,6 +670,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@Repository
 	public static class DefaultPublicPersistenceUnitSetterNamedPerson {
 
 		private EntityManagerFactory emf;

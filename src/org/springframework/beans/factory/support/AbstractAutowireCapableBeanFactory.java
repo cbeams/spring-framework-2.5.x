@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -428,13 +429,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			if (!this.allowRawInjectionDespiteWrapping && originalBean != bean &&
 					mbd.isSingleton() && hasDependentBean(beanName)) {
-				throw new BeanCurrentlyInCreationException(beanName,
-						"Bean with name '" + beanName + "' has been injected into other beans " +
-						getDependentBeans(beanName) + " in its raw version as part of a circular reference, " +
-						"but has eventually been wrapped (for example as part of auto-proxy creation). " +
-						"This means that said other beans do not use the final version of the bean. " +
-						"This is often the result of over-eager type matching - consider using " +
-						"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+				Set dependentBeans = getDependentBeans(beanName);
+				Set actualDependentBeans = CollectionFactory.createLinkedSetIfPossible(dependentBeans.size());
+				for (Iterator it = dependentBeans.iterator(); it.hasNext();) {
+					String dependentBean = (String) it.next();
+					if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
+						actualDependentBeans.add(dependentBean);
+					}
+				}
+				if (!actualDependentBeans.isEmpty()) {
+					throw new BeanCurrentlyInCreationException(beanName,
+							"Bean with name '" + beanName + "' has been injected into other beans [" +
+							StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
+							"] in its raw version as part of a circular reference, but has eventually " +
+							"been wrapped (for example as part of auto-proxy creation). " +
+							"This means that said other beans do not use the final version of the bean. " +
+							"This is often the result of over-eager type matching - consider using " +
+							"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+				}
 			}
 
 			// Register bean as disposable, and also as dependent on specified "dependsOn" beans.
