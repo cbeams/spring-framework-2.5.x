@@ -181,7 +181,24 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	public Object getBean(final String name, final Class requiredType, final Object[] args) throws BeansException {
+	public Object getBean(String name, Class requiredType, Object[] args) throws BeansException {
+		return doGetBean(name, requiredType, args, false);
+	}
+
+	/**
+	 * Return an instance, which may be shared or independent, of the specified bean.
+	 * @param name the name of the bean to retrieve
+	 * @param requiredType the required type of the bean to retrieve
+	 * @param args arguments to use if creating a prototype using explicit arguments to a
+	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @param typeCheckOnly whether the instance is obtained for a type check,
+	 * not for actual use
+	 * @return an instance of the bean
+	 * @throws BeansException if the bean could not be created
+	 */
+	protected Object doGetBean(
+			final String name, final Class requiredType, final Object[] args, boolean typeCheckOnly) throws BeansException {
+
 		final String beanName = transformedBeanName(name);
 		Object bean = null;
 
@@ -222,7 +239,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
-			this.alreadyCreated.add(beanName);
+			if (!typeCheckOnly) {
+				this.alreadyCreated.add(beanName);
+			}
 
 			final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 			checkMergedBeanDefinition(mbd, beanName, args);
@@ -1220,7 +1239,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return null;
 		}
 		try {
-			FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+			FactoryBean factoryBean =
+					(FactoryBean) doGetBean(FACTORY_BEAN_PREFIX + beanName, FactoryBean.class, null, true);
 			return getTypeForFactoryBean(factoryBean);
 		}
 		catch (BeanCreationException ex) {
@@ -1228,6 +1248,22 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			logger.debug("Ignoring bean creation exception on FactoryBean type check", ex);
 			onSuppressedException(ex);
 			return null;
+		}
+	}
+
+	/**
+	 * Remove the singleton instance (if any) for the given bean name,
+	 * but only if it hasn't been used for other purposes than type checking.
+	 * @param beanName the name of the bean
+	 * @return <code>true</code> if actually removed, <code>false</code> otherwise
+	 */
+	protected boolean removeSingletonIfCreatedForTypeCheckOnly(String beanName) {
+		if (!this.alreadyCreated.contains(beanName)) {
+			removeSingleton(beanName);
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 

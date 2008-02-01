@@ -449,14 +449,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (!this.allowRawInjectionDespiteWrapping && originalBean != bean &&
 				mbd.isSingleton() && hasDependentBean(beanName)) {
-			throw new BeanCurrentlyInCreationException(beanName,
-					"Bean with name '" + beanName + "' has been injected into other beans [" +
-					StringUtils.arrayToCommaDelimitedString(getDependentBeans(beanName)) +
-					"] in its raw version as part of a circular reference, but has eventually " +
-					"been wrapped (for example as part of auto-proxy creation). " +
-					"This means that said other beans do not use the final version of the bean. " +
-					"This is often the result of over-eager type matching - consider using " +
-					"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+			String[] dependentBeans = getDependentBeans(beanName);
+			Set actualDependentBeans = new LinkedHashSet(dependentBeans.length);
+			for (int i = 0; i < dependentBeans.length; i++) {
+				String dependentBean = dependentBeans[i];
+				if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
+					actualDependentBeans.add(dependentBean);
+				}
+			}
+			if (!actualDependentBeans.isEmpty()) {
+				throw new BeanCurrentlyInCreationException(beanName,
+						"Bean with name '" + beanName + "' has been injected into other beans [" +
+						StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
+						"] in its raw version as part of a circular reference, but has eventually " +
+						"been wrapped (for example as part of auto-proxy creation). " +
+						"This means that said other beans do not use the final version of the bean. " +
+						"This is often the result of over-eager type matching - consider using " +
+						"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+			}
 		}
 
 		// Register bean as disposable.

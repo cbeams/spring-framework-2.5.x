@@ -44,6 +44,7 @@ import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.SerializationTestUtils;
 
@@ -719,6 +720,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@Repository
 	public static class DefaultPublicPersistenceContextSetter implements Serializable {
 
 		private EntityManager em;
@@ -762,6 +764,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@Repository
 	public static class DefaultPublicPersistenceUnitSetterNamedPerson {
 
 		private EntityManagerFactory emf;
