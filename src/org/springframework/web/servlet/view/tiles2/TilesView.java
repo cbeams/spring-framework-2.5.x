@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,8 +72,12 @@ public class TilesView extends AbstractUrlBasedView {
 
 		if (!response.isCommitted()) {
 			// Tiles is going to use a forward, but some web containers (e.g. OC4J 10.1.3)
-			// do not properly expose the Servlet 2.4 forward request attributes...
-			WebUtils.exposeForwardRequestAttributes(request);
+			// do not properly expose the Servlet 2.4 forward request attributes... However,
+			// must not do this on Servlet 2.5 or above, mainly for GlassFish compatibility.
+			ServletContext sc = getServletContext();
+			if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+				WebUtils.exposeForwardRequestAttributes(request);
+			}
 		}
 
 		container.render(getUrl(), new Object[] {request, response});

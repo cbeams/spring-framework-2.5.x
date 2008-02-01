@@ -28,6 +28,7 @@ import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -66,6 +67,11 @@ public class InternalResourceViewTests extends TestCase {
 
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
+		view.setServletContext(new MockServletContext() {
+			public int getMinorVersion() {
+				return 4;
+			}
+		});
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);
@@ -106,6 +112,11 @@ public class InternalResourceViewTests extends TestCase {
 
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
+		view.setServletContext(new MockServletContext() {
+			public int getMinorVersion() {
+				return 4;
+			}
+		});
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);

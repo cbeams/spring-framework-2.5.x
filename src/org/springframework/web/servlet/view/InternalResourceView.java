@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -277,13 +278,20 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * Expose the current request URI and paths as {@link HttpServletRequest}
 	 * attributes under the keys defined in the Servlet 2.4 specification,
-	 * for Servlet 2.3 containers.
-	 * <p>Does not override values if already present, to not conflict
-	 * with Servlet 2.4+ containers.
+	 * for Servlet 2.3 containers as well as misbehaving Servlet 2.4 containers
+	 * (such as OC4J).
+	 * <p>Does not expose the attributes on Servlet 2.5 or above, mainly for
+	 * GlassFish compatibility (GlassFish gets confused by pre-exposed attributes).
+	 * In any case, Servlet 2.5 containers should finally properly support
+	 * Servlet 2.4 features, shouldn't they...
+	 * @param request current HTTP request
 	 * @see org.springframework.web.util.WebUtils#exposeForwardRequestAttributes
 	 */
 	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
-		WebUtils.exposeForwardRequestAttributes(request);
+		ServletContext sc = getServletContext();
+		if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+			WebUtils.exposeForwardRequestAttributes(request);
+		}
 	}
 
 }
