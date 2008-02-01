@@ -22,6 +22,7 @@ Package org.springframework.beans
 * CustomDateEditor and CustomNumberEditor preserve original ParseException as root cause of IllegalArgumentException
 * MethodInvokingFactoryBean falls back to interpreting specified arguments as single method argument of array type
 * added "nullValue" property to PropertyPlaceholderConfigurer, allowing for resolving specific Strings into a null value
+* AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
@@ -37,6 +38,7 @@ Package org.springframework.beans
 
 Package org.springframework.context
 * StaticApplicationContext builds GenericBeanDefinitions by default (instead of RootBeanDefinitions)
+* "context:component-scan" resolves "${...}" placeholders in package paths against system properties
 * "context:component-scan" explictly ignores directories that accidentally match a specified custom resource pattern
 * fixed "context:load-time-weaver" to not break post-processor detection in case of Spring jars deployed as shared libs
 
@@ -63,6 +65,7 @@ Package org.springframework.jca
 * introduced GlassFishWorkManagerTaskExecutor as adapter for the GlassFish JCA WorkManager (analogous to CommonJ)
 
 Package org.springframework.jdbc
+* DriverManagerDataSource's "driverClassName" throws IllegalStateException instead of CannotGetJdbcConnectionException
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
 * SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
@@ -123,6 +126,8 @@ Package org.springframework.web
 * InternalResourceView detects circular dispatching to the same view even in case of pattern matches for same handler
 * InternalResourceView prevents dispatch to same handler path only if the "preventDispatchLoop" flag is set to "true"
 * InternalResourceViewResolver sets "preventDispatchLoop" to "true" for conventional name-based View instances only
+* re-added AbstractDataBoundFormElementTag's COMMAND_NAME_VARIABLE_NAME in deprecated form (Spring 2.0.x compatibility)
+* made FormTag's MODEL_ATTRIBUTE_VARIABLE_NAME public (as replacement of COMMAND_NAME_VARIABLE_NAME)
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
 * JSP CheckboxesTag and RadioButtonsTag compare raw item / raw Map key for selection check as well
 
