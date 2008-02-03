@@ -270,25 +270,28 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Prepare the given response for rendering.
 	 * <p>The default implementation applies a workaround for an IE bug
-	 * when sending binary content via HTTPS.
+	 * when sending download content via HTTPS.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 */
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
-		if (generatesBinaryContent() && request.isSecure()) {
+		if (generatesDownloadContent()) {
 			response.setHeader("Pragma", "private");
 			response.setHeader("Cache-Control", "private, must-revalidate");
 		}
 	}
 
 	/**
-	 * Return whether this view generates binary content.
+	 * Return whether this view generates download content
+	 * (typically binary content like PDF or Excel files).
 	 * <p>The default implementation returns <code>false</code>. Subclasses are
 	 * encouraged to return <code>true</code> here if they know that they are
-	 * generating binary content via the response OutputStream.
+	 * generating download content that requires temporary caching on the
+	 * client side, typically via the response OutputStream.
+	 * @see #prepareResponse
 	 * @see javax.servlet.http.HttpServletResponse#getOutputStream()
 	 */
-	protected boolean generatesBinaryContent() {
+	protected boolean generatesDownloadContent() {
 		return false;
 	}
 

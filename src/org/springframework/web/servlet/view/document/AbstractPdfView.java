@@ -59,7 +59,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	}
 
 
-	protected boolean generatesBinaryContent() {
+	protected boolean generatesDownloadContent() {
 		return true;
 	}
 

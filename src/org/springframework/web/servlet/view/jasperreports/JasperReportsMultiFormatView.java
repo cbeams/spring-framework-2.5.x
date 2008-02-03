@@ -168,7 +168,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	}
 
 
-	protected boolean generatesBinaryContent() {
+	protected boolean generatesDownloadContent() {
 		return true;
 	}
 

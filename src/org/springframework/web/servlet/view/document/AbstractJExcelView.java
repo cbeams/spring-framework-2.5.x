@@ -107,7 +107,7 @@ public abstract class AbstractJExcelView extends AbstractView {
 	}
 
 
-	protected boolean generatesBinaryContent() {
+	protected boolean generatesDownloadContent() {
 		return true;
 	}
 

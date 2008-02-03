@@ -54,7 +54,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
 
-	protected boolean generatesBinaryContent() {
+	protected boolean generatesDownloadContent() {
 		return !useWriter();
 	}
 
