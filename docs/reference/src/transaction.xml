@@ -1663,7 +1663,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
       </listitem>
     </itemizedlist>
     <para>If you are going to use programmatic transaction management, the Spring
-    team generally recommend, namely that of using the <classname>TransactionTemplate</classname>).
+    team generally recommends using the <classname>TransactionTemplate</classname>.
 		The second approach is similar to using the JTA <interfacename>UserTransaction</interfacename>
 		API (although exception handling is less cumbersome).</para>
 
