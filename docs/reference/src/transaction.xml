@@ -1176,7 +1176,7 @@ public class DefaultFooService implements FooService {
               </row>
               <row>
                 <entry><literal>proxy-target-class</literal></entry>
-                <entry></entry>
+                <entry>false</entry>
                 <entry><para>Applies to proxy mode only. Controls what type
                 of transactional proxies are created for classes annotated
                 with the <interfacename>@Transactional</interfacename> annotation.
@@ -1189,13 +1189,13 @@ public class DefaultFooService implements FooService {
               </row>
               <row>
                 <entry><literal>order</literal></entry>
-                <entry></entry>
+                <entry>Ordered.LOWEST_PRECEDENCE</entry>
                 <entry><para>Defines the order of the transaction advice that will be applied to
-                beans annotated with <code>@Transactional</code>. More on the rules related
-                to ordering of AOP advice can be found in the AOP chapter (see section
+                beans annotated with <interfacename>@Transactional</interfacename>. More on the
+                rules related to ordering of AOP advice can be found in the AOP chapter (see section
                 <xref linkend="aop-ataspectj-advice-ordering"/>). Note that not specifying
                 any ordering will leave the decision as to what order advice is run in to
-								        the AOP subsystem.</para></entry>
+                the AOP subsystem.</para></entry>
               </row>
             </tbody>
           </tgroup>
