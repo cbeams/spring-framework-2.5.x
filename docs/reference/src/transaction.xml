@@ -1135,7 +1135,7 @@ public class DefaultFooService implements FooService {
                             <row>
                                 <entry><literal>proxy-target-class</literal></entry>
                                 <entry>No</entry>
-                                <entry></entry>
+                                <entry>false</entry>
                                 <entry>
                                 	<para>Controls
 									what type of transactional proxies are created for classes annotated
@@ -1150,10 +1150,10 @@ public class DefaultFooService implements FooService {
                             <row>
                                 <entry><literal>order</literal></entry>
                                 <entry>No</entry>
-                                <entry></entry>
+                                <entry>Ordered.LOWEST_PRECEDENCE</entry>
                                 <entry><para>Defines the order of the transaction advice that will be applied to
-                                beans annotated with <code>@Transactional</code>. More on the rules related
-                                to ordering of AOP advice can be found in the AOP chapter (see section
+                                beans annotated with <interfacename>@Transactional</interfacename>. More on the
+                                rules related to ordering of AOP advice can be found in the AOP chapter (see section
                                 <xref linkend="aop-ataspectj-advice-ordering"/>). Note that not specifying
                                 any ordering will leave the decision as to what order advice is run in to
 								the AOP subsystem.</para></entry>
@@ -1550,7 +1550,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
             </listitem>
         </itemizedlist>
         <para>If you are going to use programmatic transaction management, the Spring
-        team generally recommend, namely that of using the <classname>TransactionTemplate</classname>).
+        team generally recommends using the <classname>TransactionTemplate</classname>.
 	      The second approach is similar to using the JTA <interfacename>UserTransaction</interfacename>
 	      API (although exception handling is less cumbersome).</para>
         <section id="tx-prog-template">
