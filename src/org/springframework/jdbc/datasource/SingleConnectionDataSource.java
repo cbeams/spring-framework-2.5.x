@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,24 +29,25 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Implementation of SmartDataSource that wraps a single Connection which is not
- * closed after use. Obviously, this is not multi-threading capable.
+ * Implementation of {@link SmartDataSource} that wraps a single JDBC Connection
+ * which is not closed after use. Obviously, this is not multi-threading capable.
  *
- * <p>Note that at shutdown, someone should close the underlying Connection via the
- * <code>close()</code> method. Client code will never call close on the Connection
- * handle if it is SmartDataSource-aware (e.g. uses
+ * <p>Note that at shutdown, someone should close the underlying Connection
+ * via the <code>close()</code> method. Client code will never call close
+ * on the Connection handle if it is SmartDataSource-aware (e.g. uses
  * <code>DataSourceUtils.releaseConnection</code>).
  *
  * <p>If client code will call <code>close()</code> in the assumption of a pooled
  * Connection, like when using persistence tools, set "suppressClose" to "true".
  * This will return a close-suppressing proxy instead of the physical Connection.
- * Be aware that you will not be able to cast this to a native OracleConnection
- * or the like anymore (you need to use a NativeJdbcExtractor for this then).
+ * Be aware that you will not be able to cast this to a native
+ * <code>OracleConnection</code> or the like anymore; you need to use a
+ * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor} then.
  *
  * <p>This is primarily intended for testing. For example, it enables easy testing
  * outside an application server, for code that expects to work on a DataSource.
- * In contrast to DriverManagerDataSource, it reuses the same Connection all the
- * time, avoiding excessive creation of physical Connections.
+ * In contrast to {@link DriverManagerDataSource}, it reuses the same Connection
+ * all the time, avoiding excessive creation of physical Connections.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -160,7 +161,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * or the physical Connection.
 	 */
 	protected boolean isSuppressClose() {
-		return suppressClose;
+		return this.suppressClose;
 	}
 
 	/**
@@ -175,7 +176,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * @return the "autoCommit" value, or <code>null</code> if none to be applied
 	 */
 	protected Boolean getAutoCommitValue() {
-		return autoCommit;
+		return this.autoCommit;
 	}
 
 
