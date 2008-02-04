@@ -174,8 +174,9 @@ public @interface RequestMapping {
 	 * <p>Same format for any environment: a sequence of "myParam=myValue" style
 	 * expressions, with a request only mapped if each such parameter is found
 	 * to have the given value. "myParam" style expressions are also supported,
-	 * with such parameters having to be present in the request (allowed to
-	 * have any value).
+	 * with such parameters having to be present in the request (allowed to have
+	 * any value). Finally, "!myParam" style expressions indicate that the
+	 * specified parameter is <i>not</i> supposed to be present in the request.
 	 * <p><b>Only supported at the handler method level!</b>
 	 */
 	String[] params() default {};
