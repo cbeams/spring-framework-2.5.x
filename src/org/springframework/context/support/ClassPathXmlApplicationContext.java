@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Standalone XML application context, taking the context definition files
@@ -53,8 +52,26 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 
 	private Resource[] configResources;
 
-	private String[] configLocations;
 
+	/**
+	 * Create a new ClassPathXmlApplicationContext for bean-style configuration.
+	 * @see #setConfigLocation
+	 * @see #setConfigLocations
+	 * @see #afterPropertiesSet()
+	 */
+	public ClassPathXmlApplicationContext() {
+	}
+
+	/**
+	 * Create a new ClassPathXmlApplicationContext for bean-style configuration.
+	 * @param parent the parent context
+	 * @see #setConfigLocation
+	 * @see #setConfigLocations
+	 * @see #afterPropertiesSet()
+	 */
+	public ClassPathXmlApplicationContext(ApplicationContext parent) {
+		super(parent);
+	}
 
 	/**
 	 * Create a new ClassPathXmlApplicationContext, loading the definitions
@@ -117,8 +134,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 			throws BeansException {
 
 		super(parent);
-		Assert.noNullElements(configLocations, "Config location must not be null");
-		this.configLocations = StringUtils.trimArrayElements(configLocations);
+		setConfigLocations(configLocations);
 		if (refresh) {
 			refresh();
 		}
@@ -184,10 +200,6 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 
 	protected Resource[] getConfigResources() {
 		return this.configResources;
-	}
-
-	protected String[] getConfigLocations() {
-		return this.configLocations;
 	}
 
 }

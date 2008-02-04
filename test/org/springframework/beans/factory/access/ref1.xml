@@ -11,11 +11,7 @@
   <!-- this definition could be inside one beanRefFactory.xml file -->
   <bean id="a.qualified.name.of.some.sort"
       class="org.springframework.context.support.ClassPathXmlApplicationContext">
-    <constructor-arg>
-      <value>
-        org/springframework/beans/factory/access/beans1.xml
-      </value>
-   	</constructor-arg>
+    <property name="configLocation" value="org/springframework/beans/factory/access/beans1.xml"/>
   </bean>
 
   <!-- while the following two could be inside another, also on the classpath,
@@ -23,12 +19,8 @@
 
   <bean id="another.qualified.name"
       class="org.springframework.context.support.ClassPathXmlApplicationContext">
-    <constructor-arg>
-      <list><value>org/springframework/beans/factory/access/beans2.xml</value></list>
-   	</constructor-arg>
-    <constructor-arg>
-      <ref bean="a.qualified.name.of.some.sort"/>
-   	</constructor-arg>
+    <property name="configLocations" value="org/springframework/beans/factory/access/beans2.xml"/>
+    <property name="parent" ref="a.qualified.name.of.some.sort"/>
   </bean>
 
   <alias name="another.qualified.name" alias="a.qualified.name.which.is.an.alias"/>

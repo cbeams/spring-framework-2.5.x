@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.core.io.Resource;
  * @see #getConfigLocations
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
-public abstract class AbstractXmlApplicationContext extends AbstractRefreshableApplicationContext  {
+public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
 
 	/**
 	 * Create a new AbstractXmlApplicationContext with no parent.
@@ -57,6 +57,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	public AbstractXmlApplicationContext(ApplicationContext parent) {
 		super(parent);
 	}
+
 
 	/**
 	 * Loads the bean definitions via an XmlBeanDefinitionReader.
@@ -122,20 +123,6 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	 * @see #getConfigLocations()
 	 */
 	protected Resource[] getConfigResources() {
-		return null;
-	}
-
-	/**
-	 * Return an array of resource locations, referring to the XML bean definition
-	 * files that this context should be built with. Can also include location
-	 * patterns, which will get resolved via a ResourcePatternResolver.
-	 * <p>The default implementation returns <code>null</code>. Subclasses can override
-	 * this to provide a set of resource locations to load bean definitions from.
-	 * @return an array of resource locations, or <code>null</code> if none
-	 * @see #getResources
-	 * @see #getResourcePatternResolver
-	 */
-	protected String[] getConfigLocations() {
 		return null;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Standalone XML application context, taking the context definition files
@@ -56,8 +54,25 @@ import org.springframework.util.StringUtils;
  */
 public class FileSystemXmlApplicationContext extends AbstractXmlApplicationContext {
 
-	private String[] configLocations;
+	/**
+	 * Create a new FileSystemXmlApplicationContext for bean-style configuration.
+	 * @see #setConfigLocation
+	 * @see #setConfigLocations
+	 * @see #afterPropertiesSet()
+	 */
+	public FileSystemXmlApplicationContext() {
+	}
 
+	/**
+	 * Create a new FileSystemXmlApplicationContext for bean-style configuration.
+	 * @param parent the parent context
+	 * @see #setConfigLocation
+	 * @see #setConfigLocations
+	 * @see #afterPropertiesSet()
+	 */
+	public FileSystemXmlApplicationContext(ApplicationContext parent) {
+		super(parent);
+	}
 
 	/**
 	 * Create a new FileSystemXmlApplicationContext, loading the definitions
@@ -120,17 +135,12 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 			throws BeansException {
 
 		super(parent);
-		Assert.noNullElements(configLocations, "Config location must not be null");
-		this.configLocations = StringUtils.trimArrayElements(configLocations);
+		setConfigLocations(configLocations);
 		if (refresh) {
 			refresh();
 		}
 	}
 
-
-	protected String[] getConfigLocations() {
-		return this.configLocations;
-	}
 
 	/**
 	 * Resolve resource paths as file system paths.
