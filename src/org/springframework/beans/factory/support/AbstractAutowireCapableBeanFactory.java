@@ -1184,22 +1184,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				String propertyName = pv.getName();
 				Object originalValue = pv.getValue();
 				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
+				Object convertedValue = resolvedValue;
+				boolean convertible = !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName);
+				if (convertible) {
+					convertedValue = convertForProperty(resolvedValue, propertyName, bw, converter);
+				}
 				// Possibly store converted value in merged bean definition,
 				// in order to avoid re-conversion for every created bean instance.
 				if (resolvedValue == originalValue) {
-					if (!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
-						pv.setConvertedValue(convertForProperty(resolvedValue, propertyName, bw, converter));
+					if (convertible) {
+						pv.setConvertedValue(convertedValue);
 					}
 					deepCopy.add(pv);
 				}
-				else if (originalValue instanceof TypedStringValue &&
-						!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
-					pv.setConvertedValue(convertForProperty(resolvedValue, propertyName, bw, converter));
+				else if (originalValue instanceof TypedStringValue && convertible) {
+					pv.setConvertedValue(convertedValue);
 					deepCopy.add(pv);
 				}
 				else {
 					resolveNecessary = true;
-					deepCopy.add(new PropertyValue(pv, resolvedValue));
+					deepCopy.add(new PropertyValue(pv, convertedValue));
 				}
 			}
 		}
