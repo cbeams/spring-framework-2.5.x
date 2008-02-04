@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,15 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * @since 03.11.2003
  */
 public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle {
+
+	/**
+	 * Any number of these characters are considered delimiters between
+	 * multiple context config paths in a single String value.
+	 * @see org.springframework.context.support.AbstractXmlApplicationContext#setConfigLocation
+	 * @see org.springframework.web.context.ContextLoader#CONFIG_LOCATION_PARAM
+	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
+	 */
+	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
 	/**
 	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,

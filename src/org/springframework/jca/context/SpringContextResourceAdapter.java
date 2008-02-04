@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 * multiple context config paths in a single String value.
 	 * @see #setContextConfigLocation
 	 */
-	public static final String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
+	public static final String CONFIG_LOCATION_DELIMITERS = ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS;
 
 	public static final String DEFAULT_CONTEXT_CONFIG_LOCATION = "META-INF/applicationContext.xml";
 
