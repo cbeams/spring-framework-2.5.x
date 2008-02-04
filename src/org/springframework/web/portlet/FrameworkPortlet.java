@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SourceFilteringListener;
-import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
 import org.springframework.web.portlet.context.PortletRequestHandledEvent;
@@ -340,10 +339,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 		pac.setPortletContext(getPortletContext());
 		pac.setPortletConfig(getPortletConfig());
 		pac.setNamespace(getNamespace());
-		if (getContextConfigLocation() != null) {
-			pac.setConfigLocations(StringUtils.tokenizeToStringArray(getContextConfigLocation(),
-					ConfigurablePortletApplicationContext.CONFIG_LOCATION_DELIMITERS));
-		}
+		pac.setConfigLocation(getContextConfigLocation());
 		pac.addApplicationListener(new SourceFilteringListener(pac, this));
 
 		postProcessPortletApplicationContext(pac);

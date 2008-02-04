@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.AbstractRefreshableApplicationContext;
+import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
@@ -66,7 +65,7 @@ import org.springframework.web.context.support.ServletContextAwareProcessor;
  * @see org.springframework.web.portlet.context.ConfigurablePortletApplicationContext#setConfigLocations
  * @see XmlPortletApplicationContext
  */
-public abstract class AbstractRefreshablePortletApplicationContext extends AbstractRefreshableApplicationContext
+public abstract class AbstractRefreshablePortletApplicationContext extends AbstractRefreshableConfigApplicationContext
 		implements WebApplicationContext, ConfigurablePortletApplicationContext {
 
 	/** Servlet context that this context runs in */
@@ -80,9 +79,6 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 
 	/** Namespace of this context, or null if root */
 	private String namespace;
-
-	/** Paths to XML configuration files */
-	private String[] configLocations;
 
 
 	public AbstractRefreshablePortletApplicationContext() {
@@ -130,23 +126,8 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		return this.namespace;
 	}
 
-	public void setConfigLocations(String[] configLocations) {
-		this.configLocations = configLocations;
-	}
-
 	public String[] getConfigLocations() {
-		return (!ObjectUtils.isEmpty(this.configLocations) ? this.configLocations : getDefaultConfigLocations());
-	}
-
-	/**
-	 * Return the default config locations to use, for the case where no
-	 * explicit config locations have been specified.
-	 * <p>The default implementation returns <code>null</code>,
-	 * requiring explicit config locations.
-	 * @see #setConfigLocations
-	 */
-	protected String[] getDefaultConfigLocations() {
-		return null;
+		return super.getConfigLocations();
 	}
 
 

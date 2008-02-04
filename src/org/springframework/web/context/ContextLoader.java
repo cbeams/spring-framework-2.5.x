@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Performs the actual initialization work for the root application context.
@@ -250,15 +249,10 @@ public class ContextLoader {
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 		wac.setParent(parent);
 		wac.setServletContext(servletContext);
-		String configLocation = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
-		if (configLocation != null) {
-			wac.setConfigLocations(StringUtils.tokenizeToStringArray(configLocation,
-					ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
-		}
-
+		wac.setConfigLocation(servletContext.getInitParameter(CONFIG_LOCATION_PARAM));
 		customizeContext(servletContext, wac);
-
 		wac.refresh();
+
 		return wac;
 	}
 

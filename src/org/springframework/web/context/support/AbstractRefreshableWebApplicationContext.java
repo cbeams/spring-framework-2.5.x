@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,12 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.support.AbstractRefreshableApplicationContext;
+import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
-import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
@@ -75,7 +74,7 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.ui.context.ThemeSource
  * @see XmlWebApplicationContext
  */
-public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableApplicationContext
+public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableConfigApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
 	/** Servlet context that this context runs in */
@@ -86,9 +85,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	/** Namespace of this context, or <code>null</code> if root */
 	private String namespace;
-
-	/** Paths to XML configuration files */
-	private String[] configLocations;
 
 	/** the ThemeSource for this ApplicationContext */
 	private ThemeSource themeSource;
@@ -129,26 +125,8 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		return this.namespace;
 	}
 
-	public void setConfigLocations(String[] locations) {
-		this.configLocations = new String[locations.length];
-		for (int i = 0; i < locations.length; i++) {
-			this.configLocations[i] = resolvePath(locations[i]);
-		}
-	}
-
 	public String[] getConfigLocations() {
-		return (this.configLocations != null ? this.configLocations : getDefaultConfigLocations());
-	}
-
-	/**
-	 * Return the default config locations to use, for the case where no
-	 * explicit config locations have been specified.
-	 * <p>The default implementation returns <code>null</code>,
-	 * requiring explicit config locations.
-	 * @see #setConfigLocations
-	 */
-	protected String[] getDefaultConfigLocations() {
-		return null;
+		return super.getConfigLocations();
 	}
 
 
@@ -163,17 +141,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		beanFactory.registerResolvableDependency(ServletConfig.class, this.servletConfig);
 
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory);
-	}
-
-	/**
-	 * Resolve the given path, replacing placeholders with corresponding
-	 * system property values if necessary. Applied to config locations.
-	 * @param path the original file path
-	 * @return the resolved file path
-	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
-	 */
-	protected String resolvePath(String path) {
-		return SystemPropertyUtils.resolvePlaceholders(path);
 	}
 
 	/**

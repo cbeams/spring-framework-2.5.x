@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SourceFilteringListener;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
@@ -321,11 +320,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		wac.setServletContext(getServletContext());
 		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
-		if (getContextConfigLocation() != null) {
-			wac.setConfigLocations(
-			    StringUtils.tokenizeToStringArray(
-							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
-		}
+		wac.setConfigLocation(getContextConfigLocation());
 		wac.addApplicationListener(new SourceFilteringListener(wac, this));
 
 		postProcessWebApplicationContext(wac);

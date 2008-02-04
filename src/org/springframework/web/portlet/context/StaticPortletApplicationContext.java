@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
 
 /**
- * Static Portlet-based ApplicationContext implementation for testing.
- * Not intended for use in production applications.
+ * Static Portlet-based {@link org.springframework.context.ApplicationContext}
+ * implementation for testing. Not intended for use in production applications.
  *
  * <p>Implements the
  * {@link org.springframework.web.portlet.context.ConfigurablePortletApplicationContext}
@@ -42,7 +42,6 @@ import org.springframework.web.context.support.ServletContextAwareProcessor;
  * outside the portlet app root, can be accessed via "file:" URLs, as implemented
  * by {@link org.springframework.core.io.DefaultResourceLoader}.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.0
@@ -62,7 +61,8 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	public StaticPortletApplicationContext() {
 		setDisplayName("Root Portlet ApplicationContext");
 	}
-	
+
+
 	public void setParent(ApplicationContext parent) {
 		super.setParent(parent);
 		if (parent instanceof WebApplicationContext) {
@@ -104,8 +104,24 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 		return this.namespace;
 	}
 
+	/**
+	 * The {@link StaticPortletApplicationContext} class does not support this method.
+	 * @throws UnsupportedOperationException <b>always</b>
+	 */
+	public void setConfigLocation(String configLocation) {
+		if (configLocation != null) {
+			throw new UnsupportedOperationException("StaticPortletApplicationContext does not support config locations");
+		}
+	}
+
+	/**
+	 * The {@link StaticPortletApplicationContext} class does not support this method.
+	 * @throws UnsupportedOperationException <b>always</b>
+	 */
 	public void setConfigLocations(String[] configLocations) {
-		throw new UnsupportedOperationException("StaticPortletApplicationContext does not support config locations");
+		if (configLocations != null) {
+			throw new UnsupportedOperationException("StaticPortletApplicationContext does not support config locations");
+		}
 	}
 
 	public String[] getConfigLocations() {

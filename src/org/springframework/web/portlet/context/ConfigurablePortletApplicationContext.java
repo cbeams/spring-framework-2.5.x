@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,6 @@ public interface ConfigurablePortletApplicationContext
 		extends WebApplicationContext, ConfigurableApplicationContext {
 
 	/**
-	 * Any number of these characters are considered delimiters between
-	 * multiple context paths in a single String value.
-	 * @see org.springframework.web.portlet.FrameworkPortlet#setContextConfigLocation
-	 */
-	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
-
-
-	/**
 	 * Set the PortletContext for this portlet application context.
 	 * <p>Does not cause an initialization of the context: refresh needs to be
 	 * called after the setting of all configuration properties.
@@ -87,8 +79,16 @@ public interface ConfigurablePortletApplicationContext
 	String getNamespace();
 
 	/**
+	 * Set the config locations for this portlet application context in init-param style,
+	 * i.e. with distinct locations separated by commas, semicolons or whitespace.
+	 * <p>If not set, the implementation is supposed to use a default for the
+	 * given namespace.
+	 */
+	void setConfigLocation(String configLocation);
+
+	/**
 	 * Set the config locations for this portlet application context.
-	 * If not set, the implementation is supposed to use a default for the
+	 * <p>If not set, the implementation is supposed to use a default for the
 	 * given namespace.
 	 */
 	void setConfigLocations(String[] configLocations);

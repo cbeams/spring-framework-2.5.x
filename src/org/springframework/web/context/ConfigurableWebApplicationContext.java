@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,15 +40,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 public interface ConfigurableWebApplicationContext extends WebApplicationContext, ConfigurableApplicationContext {
 
 	/**
-	 * Any number of these characters are considered delimiters between
-	 * multiple context config paths in a single String value.
-	 * @see ContextLoader#CONFIG_LOCATION_PARAM
-	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
-	 */
-	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
-
-
-	/**
 	 * Set the ServletContext for this web application context.
 	 * <p>Does not cause an initialization of the context: refresh needs to be
 	 * called after the setting of all configuration properties.
@@ -79,6 +70,14 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	 * Return the namespace for this web application context, if any.
 	 */
 	String getNamespace();
+
+	/**
+	 * Set the config locations for this web application context in init-param style,
+	 * i.e. with distinct locations separated by commas, semicolons or whitespace.
+	 * <p>If not set, the implementation is supposed to use a default for the
+	 * given namespace or the root web application context, as appropriate.
+	 */
+	void setConfigLocation(String configLocation);
 
 	/**
 	 * Set the config locations for this web application context.

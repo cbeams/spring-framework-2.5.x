@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		setDisplayName("Root WebApplicationContext");
 	}
 
+
 	/**
 	 * Set the ServletContext that this WebApplicationContext runs in.
 	 */
@@ -78,7 +79,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	public void setServletConfig(ServletConfig servletConfig) {
@@ -107,8 +108,20 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * The {@link StaticWebApplicationContext} class does not support this method.
 	 * @throws UnsupportedOperationException <b>always</b>
 	 */
+	public void setConfigLocation(String configLocation) {
+		if (configLocation != null) {
+			throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
+		}
+	}
+
+	/**
+	 * The {@link StaticWebApplicationContext} class does not support this method.
+	 * @throws UnsupportedOperationException <b>always</b>
+	 */
 	public void setConfigLocations(String[] configLocations) {
-		throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
+		if (configLocations != null) {
+			throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
+		}
 	}
 
 	public String[] getConfigLocations() {
