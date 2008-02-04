@@ -25,8 +25,11 @@ import org.springframework.util.SystemPropertyUtils;
 
 /**
  * {@link AbstractRefreshableApplicationContext} subclass that adds common handling
- * of specified config locations. Serves as base class for all XML-based application
- * context implementations.
+ * of specified config locations. Serves as base class for XML-based application
+ * context implementations such as {@link ClassPathXmlApplicationContext} and
+ * {@link FileSystemXmlApplicationContext}, as well as
+ * {@link org.springframework.web.context.support.XmlWebApplicationContext} and
+ * {@link org.springframework.web.portlet.context.XmlPortletApplicationContext}.
  *
  * @author Juergen Hoeller
  * @since 2.5.2
@@ -71,7 +74,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * <p>If not set, the implementation may use a default as appropriate.
 	 */
 	public void setConfigLocations(String[] locations) {
-		Assert.noNullElements(configLocations, "Config location array must not be null");
+		Assert.noNullElements(locations, "Config locations must not be null");
 		this.configLocations = new String[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			this.configLocations[i] = resolvePath(locations[i]);
