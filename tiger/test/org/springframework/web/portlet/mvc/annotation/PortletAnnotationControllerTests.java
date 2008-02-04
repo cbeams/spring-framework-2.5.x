@@ -587,7 +587,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("myView");
 		}
 
-		@RequestMapping(params = "view=other")
+		@RequestMapping(params = {"view", "!lang"})
 		public void myOtherHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("myOtherView");
 		}

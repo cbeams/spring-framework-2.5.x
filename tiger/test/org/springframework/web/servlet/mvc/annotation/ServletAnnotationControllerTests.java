@@ -737,7 +737,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("myView");
 		}
 
-		@RequestMapping(params = "view=other")
+		@RequestMapping(params = {"view", "!lang"})
 		public void myOtherHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("myOtherView");
 		}

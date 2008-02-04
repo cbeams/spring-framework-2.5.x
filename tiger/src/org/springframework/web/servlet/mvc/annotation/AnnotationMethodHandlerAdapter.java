@@ -57,11 +57,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
 import org.springframework.web.bind.annotation.support.HandlerMethodResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -455,7 +455,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				for (String param : params) {
 					int separator = param.indexOf('=');
 					if (separator == -1) {
-						if (!WebUtils.hasSubmitParameter(request, param)) {
+						if (param.startsWith("!")) {
+							if (WebUtils.hasSubmitParameter(request, param.substring(1))) {
+								return false;
+							}
+						}
+						else if (!WebUtils.hasSubmitParameter(request, param)) {
 							return false;
 						}
 					}
