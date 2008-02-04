@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,24 @@ public interface ApplicationContext extends ListableBeanFactory, HierarchicalBea
 		MessageSource, ApplicationEventPublisher, ResourcePatternResolver {
 
 	/**
+	 * Return the unique id of this application context.
+	 * @return the unique id of the context
+	 */
+	String getId();
+
+	/**
+	 * Return a friendly name for this context.
+	 * @return a display name for this context
+	*/
+	String getDisplayName();
+
+	/**
+	 * Return the timestamp when this context was first loaded.
+	 * @return the timestamp (ms) when this context was first loaded
+	 */
+	long getStartupDate();
+
+	/**
 	 * Return the parent context, or <code>null</code> if there is no parent
 	 * and this is the root of the context hierarchy.
 	 * @return the parent context, or <code>null</code> if there is no parent
@@ -81,17 +99,5 @@ public interface ApplicationContext extends ListableBeanFactory, HierarchicalBea
 	 * @see ConfigurableApplicationContext#getBeanFactory()
 	 */
 	AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException;
-
-	/**
-	 * Return a friendly name for this context.
-	 * @return a display name for this context
-	*/
-	String getDisplayName();
-
-	/**
-	 * Return the timestamp when this context was first loaded.
-	 * @return the timestamp (ms) when this context was first loaded
-	 */
-	long getStartupDate();
 
 }

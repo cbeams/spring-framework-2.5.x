@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Logger used by this class. Available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/** Unique id for this context, if any */
+	private String id = ObjectUtils.identityToString(this);
+
 	/** Parent context */
 	private ApplicationContext parent;
 
@@ -154,7 +157,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private final List beanFactoryPostProcessors = new ArrayList();
 
 	/** Display name */
-	private String displayName = ObjectUtils.identityToString(this);
+	private String displayName;
 
 	/** System time in milliseconds when this context started */
 	private long startupDate;
@@ -206,6 +209,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	/**
+	 * Set the unique id of this application context.
+	 * <p>Default is the object id of the context instance, or the name
+	 * of the context bean if the context is itself defined as a bean.
+	 * @param id the unique id of the context
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getId() {
+		return this.id;
+	}
+
+	/**
 	 * Return the parent context, or <code>null</code> if there is no parent
 	 * (that is, this context is the root of the context hierarchy).
 	 */
@@ -234,7 +251,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Return a friendly name for this context.
 	 */
 	public String getDisplayName() {
-		return this.displayName;
+		return (this.displayName != null ? this.displayName : getId());
 	}
 
 	/**
@@ -255,7 +272,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void publishEvent(ApplicationEvent event) {
 		Assert.notNull(event, "Event must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event in context [" + ObjectUtils.identityToString(this) + "]: " + event);
+			logger.debug("Publishing event in context [" + getId() + "]: " + event);
 		}
 		getApplicationEventMulticaster().multicastEvent(event);
 		if (this.parent != null) {
@@ -412,8 +429,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Bean factory for application context [" + ObjectUtils.identityToString(this) +
-					"]: " + ObjectUtils.identityToString(beanFactory));
+			logger.info("Bean factory for application context [" + getId() + "]: " +
+					ObjectUtils.identityToString(beanFactory));
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug(beanFactory.getBeanDefinitionCount() + " beans defined in " + this);
@@ -1162,7 +1179,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Return information about this context.
 	 */
 	public String toString() {
-		StringBuffer sb = new StringBuffer(ObjectUtils.identityToString(this));
+		StringBuffer sb = new StringBuffer(getId());
 		sb.append(": display name [").append(getDisplayName());
 		sb.append("]; startup date [").append(new Date(getStartupDate()));
 		sb.append("]; ");
@@ -1171,7 +1188,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			sb.append("root of context hierarchy");
 		}
 		else {
-			sb.append("parent: ").append(ObjectUtils.identityToString(parent));
+			sb.append("parent: ").append(parent.getId());
 		}
 		return sb.toString();
 	}

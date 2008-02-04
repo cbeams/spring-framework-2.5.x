@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,13 +16,17 @@
 
 package org.springframework.context.access;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
+import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.beans.factory.access.SingletonBeanFactoryLocatorTests;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.ClassUtils;
 
 /**
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  */
 public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactoryLocatorTests {
 
@@ -42,8 +46,19 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 				SingletonBeanFactoryLocatorTests.class, "ref1.xml"));
 		
 		basicFunctionalityTest(facLoc);
+
+		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
+		BeanFactory fac = bfr.getFactory();
+		assertTrue(fac instanceof ApplicationContext);
+		assertEquals("a.qualified.name.of.some.sort", ((ApplicationContext) fac).getId());
+		assertEquals("a.qualified.name.of.some.sort", ((ApplicationContext) fac).getDisplayName());
+		BeanFactoryReference bfr2 = facLoc.useBeanFactory("another.qualified.name");
+		BeanFactory fac2 = bfr2.getFactory();
+		assertEquals("another.qualified.name", ((ApplicationContext) fac2).getId());
+		assertEquals("another.qualified.name", ((ApplicationContext) fac2).getDisplayName());
+		assertTrue(fac2 instanceof ApplicationContext);
 	}
-	
+
 	/**
 	 * This test can run multiple times, but due to static keyed lookup of the locators,
 	 * 2nd and subsequent calls will actuall get back same locator instance. This is not
