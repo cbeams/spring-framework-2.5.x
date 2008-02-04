@@ -213,9 +213,14 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see org.springframework.web.util.WebUtils#exposeForwardRequestAttributes
 	 */
 	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
-		ServletContext sc = getServletContext();
-		if (sc != null && sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-			WebUtils.exposeForwardRequestAttributes(request);
+		try {
+			ServletContext sc = getServletContext();
+			if (sc != null && sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+				WebUtils.exposeForwardRequestAttributes(request);
+			}
+		}
+		catch (IllegalStateException ex) {
+			// Ignore, assuming that no attribute exposure is necessary.
 		}
 	}
 
