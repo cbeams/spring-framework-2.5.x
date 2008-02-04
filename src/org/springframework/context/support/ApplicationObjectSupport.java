@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 			}
 			this.applicationContext = context;
 			this.messageSourceAccessor = new MessageSourceAccessor(context);
-			initApplicationContext();
+			initApplicationContext(context);
 		}
 		else {
 			// Ignore reinitialization if same context passed in.
@@ -108,6 +108,21 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	 * Gets called by <code>setApplicationContext</code> after setting the context instance.
 	 * <p>Note: Does </i>not</i> get called on reinitialization of the context
 	 * but rather just on first initialization of this object's context reference.
+	 * <p>The default implementation calls the overloaded {@link #initApplicationContext()}
+	 * method without ApplicationContext reference.
+	 * @param context the containing ApplicationContext
+	 * @throws ApplicationContextException in case of initialization errors
+	 * @throws BeansException if thrown by ApplicationContext methods
+	 * @see #setApplicationContext
+	 */
+	protected void initApplicationContext(ApplicationContext context) throws BeansException {
+		initApplicationContext();
+	}
+
+	/**
+	 * Subclasses can override this for custom initialization behavior.
+	 * <p>The default implementation is empty. Called by
+	 * {@link #initApplicationContext(org.springframework.context.ApplicationContext)}.
 	 * @throws ApplicationContextException in case of initialization errors
 	 * @throws BeansException if thrown by ApplicationContext methods
 	 * @see #setApplicationContext

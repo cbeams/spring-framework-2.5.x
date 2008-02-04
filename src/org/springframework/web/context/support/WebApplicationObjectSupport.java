@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,9 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 
 	public final void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
+		if (servletContext != null) {
+			initServletContext(servletContext);
+		}
 	}
 
 	/**
@@ -58,6 +61,32 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	}
 
 	/**
+	 * Calls {@link #initServletContext(javax.servlet.ServletContext)} if the
+	 * given ApplicationContext is a {@link WebApplicationContext}.
+	 */
+	protected void initApplicationContext(ApplicationContext context) {
+		super.initApplicationContext(context);
+		if (context instanceof WebApplicationContext) {
+			ServletContext servletContext = ((WebApplicationContext) context).getServletContext();
+			if (servletContext != null) {
+				initServletContext(servletContext);
+			}
+		}
+	}
+
+	/**
+	 * Subclasses may override this for custom initialization based
+	 * on the ServletContext that this application object runs in.
+	 * <p>The default implementation is empty. Called by
+	 * {@link #initApplicationContext(org.springframework.context.ApplicationContext)}
+	 * as well as {@link #setServletContext(javax.servlet.ServletContext)}.
+	 * @param servletContext the ServletContext that this application object runs in
+	 * (never <code>null</code>)
+	 */
+	protected void initServletContext(ServletContext servletContext) {
+	}
+
+	/**
 	 * Return the current application context as WebApplicationContext.
 	 * <p><b>NOTE:</b> Only use this if you actually need to access
 	 * WebApplicationContext-specific functionality. Preferably use
@@ -69,8 +98,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	protected final WebApplicationContext getWebApplicationContext() throws IllegalStateException {
 		ApplicationContext ctx = getApplicationContext();
 		if (!(ctx instanceof WebApplicationContext)) {
-			throw new IllegalStateException(
-					"WebApplicationObjectSupport instance [" + this +
+			throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
 					"] does not run in a WebApplicationContext but in: " + ctx);
 		}
 		return (WebApplicationContext) getApplicationContext();
@@ -84,7 +112,12 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 		if (this.servletContext != null) {
 			return this.servletContext;
 		}
-		return getWebApplicationContext().getServletContext();
+		ServletContext servletContext = getWebApplicationContext().getServletContext();
+		if (servletContext == null) {
+			throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
+					"] does not run within a ServletContext. Make sure the object is fully configured!");
+		}
+		return servletContext;
 	}
 
 	/**
