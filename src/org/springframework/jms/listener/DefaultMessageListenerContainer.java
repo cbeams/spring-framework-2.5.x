@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.jms.Session;
 import org.springframework.core.Constants;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.CachingDestinationResolver;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -175,6 +176,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private final Set scheduledInvokers = new HashSet();
 
 	private int activeInvokerCount = 0;
+
+	private Runnable stopCallback;
 
 	private final Object activeInvokerMonitor = new Object();
 
@@ -452,6 +455,104 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
+	 * Creates the specified number of concurrent consumers,
+	 * in the form of a JMS Session plus associated MessageConsumer
+	 * running in a separate thread.
+	 * @see #scheduleNewInvoker
+	 * @see #setTaskExecutor
+	 */
+	protected void doInitialize() throws JMSException {
+		synchronized (this.activeInvokerMonitor) {
+			for (int i = 0; i < this.concurrentConsumers; i++) {
+				scheduleNewInvoker();
+			}
+		}
+	}
+
+	/**
+	 * Destroy the registered JMS Sessions and associated MessageConsumers.
+	 */
+	protected void doShutdown() throws JMSException {
+		logger.debug("Waiting for shutdown of message listener invokers");
+		synchronized (this.activeInvokerMonitor) {
+			while (this.activeInvokerCount > 0) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
+							" message listener invokers");
+				}
+				try {
+					this.activeInvokerMonitor.wait();
+				}
+				catch (InterruptedException interEx) {
+					// Re-interrupt current thread, to allow other threads to react.
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Overridden to reset the stop callback, if any.
+	 */
+	public void start() throws JmsException {
+		synchronized (this.activeInvokerMonitor) {
+			this.stopCallback = null;
+		}
+		super.start();
+	}
+
+	/**
+	 * Stop this listener container, invoking the specific callback
+	 * once all listener processing has actually stopped.
+	 * <p>Note: Further <code>stop(runnable)</code> calls (before processing
+	 * has actually stopped) will override the specified callback. Only the
+	 * latest specified callback will be invoked.
+	 * <p>If a subsequent {@link #start()} call restarts the listener container
+	 * before it has fully stopped, the callback will not get invoked at all.
+	 * @param callback the callback to invoke once listener processing
+	 * has fully stopped
+	 * @throws JmsException if stopping failed
+	 * @see #stop()
+	 */
+	public void stop(Runnable callback) throws JmsException {
+		synchronized (this.activeInvokerMonitor) {
+			this.stopCallback = callback;
+		}
+		stop();
+	}
+
+	/**
+	 * Return the number of currently scheduled consumers.
+	 * <p>This number will always be inbetween "concurrentConsumers" and
+	 * "maxConcurrentConsumers", but might be higher than "activeConsumerCount"
+	 * (in case of some consumers being scheduled but not executed at the moment).
+	 * @see #getConcurrentConsumers()
+	 * @see #getMaxConcurrentConsumers()
+	 * @see #getActiveConsumerCount()
+	 */
+	public final int getScheduledConsumerCount() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.scheduledInvokers.size();
+		}
+	}
+
+	/**
+	 * Return the number of currently active consumers.
+	 * <p>This number will always be inbetween "concurrentConsumers" and
+	 * "maxConcurrentConsumers", but might be lower than "scheduledConsumerCount".
+	 * (in case of some consumers being scheduled but not executed at the moment).
+	 * @see #getConcurrentConsumers()
+	 * @see #getMaxConcurrentConsumers()
+	 * @see #getActiveConsumerCount()
+	 */
+	public final int getActiveConsumerCount() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.activeInvokerCount;
+		}
+	}
+
+
+	/**
 	 * Create a default TaskExecutor. Called if no explicit TaskExecutor has been specified.
 	 * <p>The default implementation builds a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}
 	 * with the specified bean name (or the class name, if no bean name specified) as thread name prefix.
@@ -470,21 +571,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	protected final boolean sharedConnectionEnabled() {
 		return (getCacheLevel() >= CACHE_CONNECTION);
-	}
-
-	/**
-	 * Creates the specified number of concurrent consumers,
-	 * in the form of a JMS Session plus associated MessageConsumer
-	 * running in a separate thread.
-	 * @see #scheduleNewInvoker
-	 * @see #setTaskExecutor
-	 */
-	protected void doInitialize() throws JMSException {
-		synchronized (this.activeInvokerMonitor) {
-			for (int i = 0; i < this.concurrentConsumers; i++) {
-				scheduleNewInvoker();
-			}
-		}
 	}
 
 	/**
@@ -564,36 +650,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		synchronized (this.activeInvokerMonitor) {
 			boolean idle = (idleTaskExecutionCount >= this.idleTaskExecutionLimit);
 			return (this.scheduledInvokers.size() <= (idle ? this.concurrentConsumers : this.maxConcurrentConsumers));
-		}
-	}
-
-	/**
-	 * Return the number of currently scheduled consumers.
-	 * <p>This number will always be inbetween "concurrentConsumers" and
-	 * "maxConcurrentConsumers", but might be higher than "activeConsumerCount"
-	 * (in case of some consumers being scheduled but not executed at the moment).
-	 * @see #getConcurrentConsumers()
-	 * @see #getMaxConcurrentConsumers()
-	 * @see #getActiveConsumerCount()
-	 */
-	public final int getScheduledConsumerCount() {
-		synchronized (this.activeInvokerMonitor) {
-			return this.scheduledInvokers.size();
-		}
-	}
-
-	/**
-	 * Return the number of currently active consumers.
-	 * <p>This number will always be inbetween "concurrentConsumers" and
-	 * "maxConcurrentConsumers", but might be lower than "scheduledConsumerCount".
-	 * (in case of some consumers being scheduled but not executed at the moment).
-	 * @see #getConcurrentConsumers()
-	 * @see #getMaxConcurrentConsumers()
-	 * @see #getActiveConsumerCount()
-	 */
-	public final int getActiveConsumerCount() {
-		synchronized (this.activeInvokerMonitor) {
-			return this.activeInvokerCount;
 		}
 	}
 
@@ -757,29 +813,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 
-	/**
-	 * Destroy the registered JMS Sessions and associated MessageConsumers.
-	 */
-	protected void doShutdown() throws JMSException {
-		logger.debug("Waiting for shutdown of message listener invokers");
-		synchronized (this.activeInvokerMonitor) {
-			while (this.activeInvokerCount > 0) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
-							" message listener invokers");
-				}
-				try {
-					this.activeInvokerMonitor.wait();
-				}
-				catch (InterruptedException interEx) {
-					// Re-interrupt current thread, to allow other threads to react.
-					Thread.currentThread().interrupt();
-				}
-			}
-		}
-	}
-
-
 	//-------------------------------------------------------------------------
 	// Inner classes used as internal adapters
 	//-------------------------------------------------------------------------
@@ -849,6 +882,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			synchronized (activeInvokerMonitor) {
 				activeInvokerCount--;
+				if (stopCallback != null && activeInvokerCount == 0) {
+					stopCallback.run();
+					stopCallback = null;
+				}
 				activeInvokerMonitor.notifyAll();
 			}
 			if (!messageReceived) {
