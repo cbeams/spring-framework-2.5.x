@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.web.servlet.view;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
 
@@ -32,7 +34,7 @@ import org.springframework.web.servlet.support.JstlUtils;
  * <p>Typical usage with {@link InternalResourceViewResolver} would look as follows,
  * from the perspective of the DispatcherServlet context definition:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
  *   &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
  *   &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
@@ -96,7 +98,7 @@ public class JstlView extends InternalResourceView {
 	 * Create a new JstlView with the given URL.
 	 * @param url the URL to forward to
 	 * @param messageSource the MessageSource to expose to JSTL tags
-	 * (consider exposing a JSTL-aware MessageSource that is aware of JSTL's
+	 * (will be wrapped with a JSTL-aware MessageSource that is aware of JSTL's
 	 * <code>javax.servlet.jsp.jstl.fmt.localizationContext</code> context-param)
 	 * @see JstlUtils#getJstlAwareMessageSource
 	 */
@@ -107,14 +109,25 @@ public class JstlView extends InternalResourceView {
 
 
 	/**
-	 * Initializes a default MessageSource if none has been specified explicitly.
+	 * Initializes the ApplicationContext as default MessageSource
+	 * if none has been specified explicitly.
+	 */
+	protected void initApplicationContext(ApplicationContext context) {
+		if (this.messageSource == null) {
+			this.messageSource = context;
+		}
+		super.initApplicationContext(context);
+	}
+
+	/**
+	 * Wraps the MessageSource with a JSTL-aware MessageSource that is aware
+	 * of JSTL's <code>javax.servlet.jsp.jstl.fmt.localizationContext</code>
+	 * context-param.
 	 * @see JstlUtils#getJstlAwareMessageSource
 	 */
-	protected void initApplicationContext() {
-		super.initApplicationContext();
-		if (this.messageSource == null) {
-			this.messageSource = JstlUtils.getJstlAwareMessageSource(getServletContext(), getApplicationContext());
-		}
+	protected void initServletContext(ServletContext servletContext) {
+		this.messageSource = JstlUtils.getJstlAwareMessageSource(servletContext, this.messageSource);
+		super.initServletContext(servletContext);
 	}
 
 	/**

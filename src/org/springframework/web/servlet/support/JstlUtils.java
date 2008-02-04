@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public abstract class JstlUtils {
 	 * context-param and creates a corresponding child message source,
 	 * with the provided Spring-defined MessageSource as parent.
 	 * @param servletContext the ServletContext we're running in
-	 * (to check JSTL-related context-params in web.xml)
+	 * (to check JSTL-related context-params in <code>web.xml</code>)
 	 * @param messageSource the MessageSource to expose, typically
 	 * the ApplicationContext of the current DispatcherServlet
 	 * @return the MessageSource to expose to JSTL; first checking the

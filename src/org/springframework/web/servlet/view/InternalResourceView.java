@@ -71,6 +71,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 	private boolean alwaysInclude = false;
 
+	private Boolean exposeForwardAttributes;
+
 	private boolean exposeContextBeansAsAttributes = false;
 
 	private boolean preventDispatchLoop = false;
@@ -117,6 +119,18 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Set whether to explictly expose the Servlet 2.4 forward request attributes
+	 * when forwarding to the underlying view resource.
+	 * <p>Default is "true" on Servlet containers up until 2.4, and "false" for
+	 * Servlet 2.5 and above. Note that Servlet containers at 2.4 level and above
+	 * should expose those attributes automatically! This InternalResourceView
+	 * feature exists for Servlet 2.3 containers and misbehaving 2.4 containers.
+	 */
+	public void setExposeForwardAttributes(boolean exposeForwardAttributes) {
+		this.exposeForwardAttributes = Boolean.valueOf(exposeForwardAttributes);
+	}
+
+	/**
 	 * Set whether to make all Spring beans in the application context accessible
 	 * as request attributes, through lazy checking once an attribute gets accessed.
 	 * <p>This will make all such beans accessible in plain <code>${...}</code>
@@ -143,6 +157,18 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	public void setPreventDispatchLoop(boolean preventDispatchLoop) {
 		this.preventDispatchLoop = preventDispatchLoop;
+	}
+
+	/**
+	 * Checks whether we need explictly expose the Servlet 2.4 request attributes
+	 * by default.
+	 * @see #setExposeForwardAttributes
+	 * @see #exposeForwardRequestAttributes(javax.servlet.http.HttpServletRequest)
+	 */
+	protected void initServletContext(ServletContext sc) {
+		if (this.exposeForwardAttributes == null && sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+			this.exposeForwardAttributes = Boolean.TRUE;
+		}
 	}
 
 
@@ -289,8 +315,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see org.springframework.web.util.WebUtils#exposeForwardRequestAttributes
 	 */
 	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
-		ServletContext sc = getServletContext();
-		if (sc != null && sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+		if (this.exposeForwardAttributes != null && this.exposeForwardAttributes.booleanValue()) {
 			WebUtils.exposeForwardRequestAttributes(request);
 		}
 	}
