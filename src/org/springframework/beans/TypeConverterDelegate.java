@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,7 +213,8 @@ class TypeConverterDelegate {
 					convertedValue = convertToTypedMap((Map) convertedValue, propertyName, methodParam);
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-					if (JdkVersion.isAtLeastJava15() && requiredType.isEnum() && "".equals(convertedValue)) {
+					String strValue = ((String) convertedValue).trim();
+					if (JdkVersion.isAtLeastJava15() && requiredType.isEnum() && "".equals(strValue)) {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
@@ -221,7 +222,7 @@ class TypeConverterDelegate {
 					// with values defined as static fields. Resulting value still needs
 					// to be checked, hence we don't return it right away.
 					try {
-						Field enumField = requiredType.getField((String) convertedValue);
+						Field enumField = requiredType.getField(strValue);
 						convertedValue = enumField.get(null);
 					}
 					catch (Throwable ex) {
