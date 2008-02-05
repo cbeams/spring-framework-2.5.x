@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.beans.PropertyDescriptor;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.PropertyAccessor;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.beans.PropertyDescriptor;
-
 /**
- * SqlParameterSource implementation that obtains parameter values
- * from bean properties of a given JavaBean object. The names of
- * the bean properties have to match the parameter names.
+ * {@link SqlParameterSource} implementation that obtains parameter values
+ * from bean properties of a given JavaBean object. The names of the bean
+ * properties have to match the parameter names.
  *
  * <p>Uses a Spring BeanWrapper for bean property access underneath.
  *
@@ -42,7 +42,8 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 
 	private final BeanWrapper beanWrapper;
 
-	private String[] propertyNames = null;
+	private String[] propertyNames;
+
 
 	/**
 	 * Create a new BeanPropertySqlParameterSource for the given bean.
@@ -72,22 +73,17 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	 * @return an array containing all the known property names
 	 */
 	public String[] getReadablePropertyNames() {
-
-		synchronized(this) {
-			if (propertyNames == null) {
-				List names = new ArrayList();
-				PropertyDescriptor[] props = beanWrapper.getPropertyDescriptors();
-				for  (int i = 0; i < props.length; i++) {
-					if (beanWrapper.isReadableProperty(props[i].getName())) {
-						names.add(props[i].getName());
-					}
+		if (this.propertyNames == null) {
+			List names = new ArrayList();
+			PropertyDescriptor[] props = this.beanWrapper.getPropertyDescriptors();
+			for (int i = 0; i < props.length; i++) {
+				if (this.beanWrapper.isReadableProperty(props[i].getName())) {
+					names.add(props[i].getName());
 				}
-				propertyNames = (String[]) names.toArray(new String[names.size()]);
 			}
-
+			this.propertyNames = (String[]) names.toArray(new String[names.size()]);
 		}
-
-		return propertyNames;
+		return this.propertyNames;
 	}
 
 }
