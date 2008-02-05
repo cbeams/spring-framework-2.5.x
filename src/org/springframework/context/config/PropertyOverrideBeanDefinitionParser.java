@@ -18,18 +18,18 @@ package org.springframework.context.config;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
 
 /**
- * Parser for the &lt;context:property-placeholder/&gt; element.
+ * Parser for the &lt;context:property-override/&gt; element.
  *
  * @author Juergen Hoeller
- * @since 2.5
+ * @since 2.5.2
  */
-class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
+class PropertyOverrideBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
 
 	protected Class getBeanClass(Element element) {
-		return PropertyPlaceholderConfigurer.class;
+		return PropertyOverrideConfigurer.class;
 	}
 
 }

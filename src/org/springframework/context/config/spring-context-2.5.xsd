@@ -38,12 +38,38 @@
           <xsd:documentation><![CDATA[
   The location of the properties file to resolve placeholders against, as a Spring
   resource location: a URL, a "classpath:" pseudo URL, or a relative file path.
-  Multiple locations may be specified, separated by commas.
+  Multiple locations may be specified, separated by commas. If no location is
+  specified, placeholders will be resolved against system properties.
           ]]></xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
+
+  <xsd:element name="property-override">
+    <xsd:annotation>
+      <xsd:documentation><![CDATA[
+  Activates pushing of override values into bean properties, based on configuration
+  lines of the following format: beanName.property=value
+      ]]></xsd:documentation>
+      <xsd:appinfo>
+        <tool:annotation>
+          <tool:exports type="org.springframework.beans.factory.config.PropertyOverrideConfigurer"/>
+        </tool:annotation>
+      </xsd:appinfo>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="location" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[
+  The location of the properties file to read property overrides from, as a Spring
+  resource location: a URL, a "classpath:" pseudo URL, or a relative file path.
+  Multiple locations may be specified, separated by commas.
+          ]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
 
 	<xsd:element name="annotation-config">
 		<xsd:annotation>
