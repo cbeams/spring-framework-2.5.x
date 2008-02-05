@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ package org.springframework.jdbc.core.namedparam;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
- * Abstract base class for SqlParameterSource implementations.
+ * Abstract base class for {@link SqlParameterSource} implementations.
  * Provides registration of SQL types per parameter.
  *
  * @author Juergen Hoeller
@@ -39,6 +41,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * @param sqlType the SQL type of the parameter
 	 */
 	public void registerSqlType(String paramName, int sqlType) {
+		Assert.notNull(paramName, "Parameter name must not be null");
 		this.sqlTypes.put(paramName, new Integer(sqlType));
 	}
 
@@ -48,6 +51,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * @param typeName the type name of the parameter
 	 */
 	public void registerTypeName(String paramName, String typeName) {
+		Assert.notNull(paramName, "Parameter name must not be null");
 		this.typeNames.put(paramName, typeName);
 	}
 
@@ -58,6 +62,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * or <code>TYPE_UNKNOWN</code> if not registered
 	 */
 	public int getSqlType(String paramName) {
+		Assert.notNull(paramName, "Parameter name must not be null");
 		Integer sqlType = (Integer) this.sqlTypes.get(paramName);
 		if (sqlType != null) {
 			return sqlType.intValue();
@@ -74,6 +79,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * or <code>null</code> if not registered
 	 */
 	public String getTypeName(String paramName) {
+		Assert.notNull(paramName, "Parameter name must not be null");
 		return (String) this.typeNames.get(paramName);
 	}
 
