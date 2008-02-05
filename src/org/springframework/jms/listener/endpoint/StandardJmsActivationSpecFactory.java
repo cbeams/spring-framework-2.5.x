@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,6 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	protected void populateActivationSpecProperties(BeanWrapper bw, JmsActivationSpecConfig config) {
 		String destinationName = config.getDestinationName();
 		boolean pubSubDomain = config.isPubSubDomain();
-
 		Object destination = destinationName;
 		if (this.destinationResolver != null) {
 			try {
@@ -142,16 +141,23 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 			}
 		}
 		bw.setPropertyValue("destination", destination);
-
 		bw.setPropertyValue("destinationType", pubSubDomain ? Topic.class.getName() : Queue.class.getName());
-		bw.setPropertyValue("subscriptionDurability", config.isSubscriptionDurable() ? "Durable" : "NonDurable");
 
+		if (bw.isWritableProperty("subscriptionDurability")) {
+			bw.setPropertyValue("subscriptionDurability", config.isSubscriptionDurable() ? "Durable" : "NonDurable");
+		}
+		else if (config.isSubscriptionDurable()) {
+			// Standard JCA 1.5 "acknowledgeMode" apparently not supported (e.g. WebSphere MQ 6.0.2.1)
+			throw new IllegalArgumentException(
+					"Durable subscriptions not supported by underlying provider: " + this.activationSpecClass.getName());
+		}
 		if (config.getDurableSubscriptionName() != null) {
 			bw.setPropertyValue("subscriptionName", config.getDurableSubscriptionName());
 		}
 		if (config.getClientId() != null) {
 			bw.setPropertyValue("clientId", config.getClientId());
 		}
+
 		if (config.getMessageSelector() != null) {
 			bw.setPropertyValue("messageSelector", config.getMessageSelector());
 		}
@@ -182,9 +188,14 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 			throw new IllegalArgumentException("No support for CLIENT_ACKNOWLEDGE: Only \"Auto-acknowledge\" " +
 					"and \"Dups-ok-acknowledge\" supported in standard JCA 1.5");
 		}
-		else {
+		else if (bw.isWritableProperty("acknowledgeMode")) {
 			bw.setPropertyValue("acknowledgeMode",
 					ackMode == Session.DUPS_OK_ACKNOWLEDGE ? "Dups-ok-acknowledge" : "Auto-acknowledge");
+		}
+		else if (ackMode == Session.DUPS_OK_ACKNOWLEDGE) {
+			// Standard JCA 1.5 "acknowledgeMode" apparently not supported (e.g. WebSphere MQ 6.0.2.1)
+			throw new IllegalArgumentException(
+					"Dups-ok-acknowledge not supported by underlying provider: " + this.activationSpecClass.getName());
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,8 @@ import org.springframework.beans.BeanWrapper;
  * The default ActivationSpec class detection rules may apply to other
  * JMS providers as well.
  *
- * <p>Thanks to Agim Emruli for pointing out the WebSphere JMS settings
- * and contributing corresponding tests!
+ * <p>Thanks to Agim Emruli and Laurie Chan for pointing out WebSphere MQ
+ * settings and contributing corresponding tests!
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -84,8 +84,7 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 				return adapter.getClass().getClassLoader().loadClass(specClassName);
 			}
 			catch (ClassNotFoundException ex) {
-				logger.debug("No explicit 'activationSpecClass' defined, " +
-						"and no default <Provider>ActivationSpec class found: " + specClassName);
+				logger.debug("No default <Provider>ActivationSpec class found: " + specClassName);
 			}
 		}
 
@@ -98,22 +97,27 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 				return adapter.getClass().getClassLoader().loadClass(specClassName);
 			}
 			catch (ClassNotFoundException ex) {
-				logger.debug("No explicit 'activationSpecClass' defined, " +
-						"and no default <Provider>ActivationSpec class found: " + specClassName);
+				logger.debug("No default <Provider>ActivationSpecImpl class found: " + specClassName);
 			}
 		}
 
-		else {
-			// e.g. JORAM
-			String providerPackage = adapterClassName.substring(0, adapterClassName.lastIndexOf('.') + 1);
-			String specClassName = providerPackage + ACTIVATION_SPEC_IMPL_SUFFIX;
-			try {
-				return adapter.getClass().getClassLoader().loadClass(specClassName);
-			}
-			catch (ClassNotFoundException ex) {
-				logger.debug("No explicit 'activationSpecClass' defined, " +
-						"and no default ActivationSpecImpl class found in provider package: " + specClassName);
-			}
+		// e.g. JORAM
+		String providerPackage = adapterClassName.substring(0, adapterClassName.lastIndexOf('.') + 1);
+		String specClassName = providerPackage + ACTIVATION_SPEC_IMPL_SUFFIX;
+		try {
+			return adapter.getClass().getClassLoader().loadClass(specClassName);
+		}
+		catch (ClassNotFoundException ex) {
+			logger.debug("No default ActivationSpecImpl class found in provider package: " + specClassName);
+		}
+
+		// ActivationSpecImpl class in "inbound" subpackage (WebSphere MQ 6.0.2.1)
+		specClassName = providerPackage + "inbound." + ACTIVATION_SPEC_IMPL_SUFFIX;
+		try {
+			return adapter.getClass().getClassLoader().loadClass(specClassName);
+		}
+		catch (ClassNotFoundException ex) {
+			logger.debug("No default ActivationSpecImpl class found in inbound subpackage: " + specClassName);
 		}
 
 		throw new IllegalStateException("No ActivationSpec class defined - " +
