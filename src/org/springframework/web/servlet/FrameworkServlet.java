@@ -125,6 +125,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/** Should we publish a ServletRequestHandledEvent at the end of each request? */
 	private boolean publishEvents = true;
 
+	/** Should we dispatch an HTTP OPTIONS request to {@link #doService}? */
+	private boolean dispatchOptionsRequest = false;
+
+	/** Should we dispatch an HTTP TRACE request to {@link #doService}? */
+	private boolean dispatchTraceRequest = false;
+
 	/** WebApplicationContext for this servlet */
 	private WebApplicationContext webApplicationContext;
 
@@ -195,13 +201,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Return whether to publish this servlet's context as a ServletContext attribute.
-	 */
-	public boolean isPublishContext() {
-		return this.publishContext;
-	}
-
-	/**
 	 * Set whether this servlet should publish a ServletRequestHandledEvent at the end
 	 * of each request. Default is "true"; can be turned off for a slight performance
 	 * improvement, provided that no ApplicationListeners rely on such events.
@@ -212,11 +211,39 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Return whether this servlet should publish a ServletRequestHandledEvent
-	 * at the end of each request.
+	 * Set whether this servlet should dispatch an HTTP OPTIONS request to
+	 * the {@link #doService} method.
+	 * <p>Default is "false", applying {@link javax.servlet.http.HttpServlet}'s
+	 * default behavior (i.e. enumerating all standard HTTP request methods
+	 * as a response to the OPTIONS request).
+	 * <p>Turn this flag on if you prefer OPTIONS requests to go through the
+	 * regular dispatching chain, just like other HTTP requests. This usually
+	 * means that your controllers will receive those requests; make sure
+	 * that those endpoints are actually able to handle an OPTIONS request.
+	 * <p>Note that HttpServlet's default OPTIONS processing will be applied
+	 * in any case. Your controllers are simply available to override the
+	 * default headers and optionally generate a response body.
 	 */
-	public boolean isPublishEvents() {
-		return this.publishEvents;
+	public void setDispatchOptionsRequest(boolean dispatchOptionsRequest) {
+		this.dispatchOptionsRequest = dispatchOptionsRequest;
+	}
+
+	/**
+	 * Set whether this servlet should dispatch an HTTP TRACE request to
+	 * the {@link #doService} method.
+	 * <p>Default is "false", applying {@link javax.servlet.http.HttpServlet}'s
+	 * default behavior (i.e. reflecting the message received back to the client).
+	 * <p>Turn this flag on if you prefer TRACE requests to go through the
+	 * regular dispatching chain, just like other HTTP requests. This usually
+	 * means that your controllers will receive those requests; make sure
+	 * that those endpoints are actually able to handle a TRACE request.
+	 * <p>Note that HttpServlet's default TRACE processing will be applied
+	 * in any case. Your controllers are simply available to override the
+	 * default headers and the default body, calling <code>response.reset()</code>
+	 * if necessary.
+	 */
+	public void setDispatchTraceRequest(boolean dispatchTraceRequest) {
+		this.dispatchTraceRequest = dispatchTraceRequest;
 	}
 
 
@@ -270,7 +297,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			onRefresh(wac);
 		}
 
-		if (isPublishContext()) {
+		if (this.publishContext) {
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
@@ -457,6 +484,31 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * Delegate OPTIONS requests to {@link #processRequest}, if desired.
+	 * <p>Applies HttpServlet's standard OPTIONS processing first.
+	 * @see #doService
+	 */
+	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		super.doOptions(request, response);
+		if (this.dispatchOptionsRequest) {
+			processRequest(request, response);
+		}
+	}
+
+	/**
+	 * Delegate TRACE requests to {@link #processRequest}, if desired.
+	 * <p>Applies HttpServlet's standard TRACE processing first.
+	 * @see #doService
+	 */
+	protected void doTrace(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		super.doTrace(request, response);
+		if (this.dispatchTraceRequest) {
+			processRequest(request, response);
+		}
+	}
+
+
+	/**
 	 * Process this request, publishing an event regardless of the outcome.
 	 * <p>The actual event handling is performed by the abstract
 	 * {@link #doService} template method.
@@ -490,7 +542,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			else {
 				logger.debug("Successfully completed request");
 			}
-			if (isPublishEvents()) {
+			if (this.publishEvents) {
 				// Whether or not we succeeded, publish an event.
 				long processingTime = System.currentTimeMillis() - startTime;
 				this.webApplicationContext.publishEvent(
