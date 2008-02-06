@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,10 @@ import org.springframework.context.ApplicationContextException;
  */
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
+	private Boolean allowBeanDefinitionOverriding;
+
+	private Boolean allowCircularReferences;
+
 	/** Bean factory for this context */
 	private DefaultListableBeanFactory beanFactory;
 
@@ -78,6 +82,28 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	public AbstractRefreshableApplicationContext(ApplicationContext parent) {
 		super(parent);
+	}
+
+
+	/**
+	 * Set whether it should be allowed to override bean definitions by registering
+	 * a different definition with the same name, automatically replacing the former.
+	 * If not, an exception will be thrown. Default is "true".
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 */
+	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
+		this.allowBeanDefinitionOverriding = Boolean.valueOf(allowBeanDefinitionOverriding);
+	}
+
+	/**
+	 * Set whether to allow circular references between beans - and automatically
+	 * try to resolve them.
+	 * <p>Default is "true". Turn this off to throw an exception when encountering
+	 * a circular reference, disallowing them completely.
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
+	 */
+	public void setAllowCircularReferences(boolean allowCircularReferences) {
+		this.allowCircularReferences = Boolean.valueOf(allowCircularReferences);
 	}
 
 
@@ -153,15 +179,24 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	/**
 	 * Customize the internal bean factory used by this context.
 	 * Called for each {@link #refresh()} attempt.
-	 * <p>The default implementation is empty. Can be overridden in subclasses
-	 * to customize DefaultListableBeanFactory's standard settings.
+	 * <p>The default implementation applies this context's
+	 * {@link #setAllowBeanDefinitionOverriding "allowBeanDefinitionOverriding"}
+	 * and {@link #setAllowCircularReferences "allowCircularReferences"} settings,
+	 * if specified. Can be overridden in subclasses to customize any of
+	 * {@link DefaultListableBeanFactory}'s settings.
 	 * @param beanFactory the newly created bean factory for this context
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
+	 * @see DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 * @see DefaultListableBeanFactory#setAllowCircularReferences
+	 * @see DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
+	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		if (this.allowBeanDefinitionOverriding != null) {
+			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding.booleanValue());
+		}
+		if (this.allowCircularReferences != null) {
+			beanFactory.setAllowCircularReferences(this.allowCircularReferences.booleanValue());
+		}
 	}
 
 	/**
