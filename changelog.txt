@@ -18,10 +18,13 @@ Package org.springframework.aop
 * AbstractBeanFactoryBasedTargetSourceCreator creates an independent internal BeanFactory per target bean
 
 Package org.springframework.beans
+* BeanWrapperImpl trims an enum candidate value before matching it against the available enum values
 * BeanWrapperImpl resolves the target type for a generically typed bean property, performing appropriate type conversion
 * StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
 * CustomDateEditor and CustomNumberEditor preserve original ParseException as root cause of IllegalArgumentException
 * MethodInvokingFactoryBean falls back to interpreting specified arguments as single method argument of array type
+* added "getOriginatingBeanDefinition()" method to BeanDefinition interface, exposing the decorated definition (if any)
+* PropertyOverrideConfigurer is able to properly override target bean definitions behind a scoped proxy decorator
 * added "nullValue" property to PropertyPlaceholderConfigurer, allowing for resolving specific Strings into a null value
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory applies specified TypeConverter to bean references as well (not just to literals)
@@ -41,13 +44,18 @@ Package org.springframework.beans
 Package org.springframework.context
 * added "getId()" method to ApplicationContext interface, with corresponding "setId" in AbstractApplicationContext class
 * moved CONFIG_LOCATION_DELIMITERS constant from ConfigurableWebApplicationContext to ConfigurableApplicationContext
+* exposed "allowBeanDefinitionOverriding"/"allowCircularReferences" properties in AbstractRefreshableApplicationContext
 * factored out AbstractRefreshableConfigApplicationContext base class for common handling of specified config locations
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext allow for bean-style configuration
 * StaticApplicationContext builds GenericBeanDefinitions by default (instead of RootBeanDefinitions)
 * added "initApplicationContext(ApplicationContext)" template method to ApplicationObjectSupport
+* refactored ClassPathBeanDefinitionScanner into various template methods (for easier overriding)
+* refactored ComponentScanBeanDefinitionParser into various template methods (for easier overriding)
+* ComponentScanBeanDefinitionParser includes annotation config processors in nested composite component
 * "context:component-scan" resolves "${...}" placeholders in package paths against system properties
 * "context:component-scan" explictly ignores directories that accidentally match a specified custom resource pattern
 * fixed "context:load-time-weaver" to not break post-processor detection in case of Spring jars deployed as shared libs
+* added "context:property-override" configuration element, as a sibling to "context:property-placeholder"
 
 Package org.springframework.core
 * added "getParameterName()" method to MethodParameter, activated through a ParameterNameDiscoverer
@@ -88,6 +96,7 @@ Package org.springframework.jdbc
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
 * DefaultMessageListenerContainer allows for specifying a callback on "stop", for a notification after actual stopping
+* DefaultJmsActivationSpecFactory is compatible with WebSphere MQ 6.0.2.1 as well now
 
 Package org.springframework.jmx
 * factored out "doUnregister(objectName)" and "onRegister(objectName,mbean)" methods in MBeanRegistrationSupport 
@@ -124,6 +133,7 @@ Package org.springframework.web
 * added "initServletContext(ServletContext)" template method to WebApplicationObjectSupport
 * optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
 * introduced NativeWebRequest and MultipartRequest interfaces for even finer-grained generic request access options
+* added "dispatchOptionsRequest/TraceRequest" properties to FrameworkServlet, for dispatching all HTTP request methods
 * @RequestMapping annotation supports "!myParam" expressions for non-presence of a specific parameter as well
 * introduced WebArgumentResolver interface and "customArgumentResolver(s)" property on AnnotationMethodHandlerAdapter
 * factored out common HandlerMethodResolver/Invoker classes from Servlet/Portlet AnnotationMethodHandlerAdapter
