@@ -147,7 +147,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 			bw.setPropertyValue("subscriptionDurability", config.isSubscriptionDurable() ? "Durable" : "NonDurable");
 		}
 		else if (config.isSubscriptionDurable()) {
-			// Standard JCA 1.5 "acknowledgeMode" apparently not supported (e.g. WebSphere MQ 6.0.2.1)
+			// Standard JCA 1.5 "subscriptionDurability" apparently not supported...
 			throw new IllegalArgumentException(
 					"Durable subscriptions not supported by underlying provider: " + this.activationSpecClass.getName());
 		}
