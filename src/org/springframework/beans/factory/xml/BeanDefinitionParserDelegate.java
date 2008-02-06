@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,8 @@ import org.springframework.util.xml.DomUtils;
 /**
  * Stateful delegate class used to parse XML bean definitions.
  * Intended for use by both the main parser and any extension
- * {@link BeanDefinitionParser BeanDefinitionParsers}
- * or {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
+ * {@link BeanDefinitionParser BeanDefinitionParsers} or
+ * {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -376,7 +376,7 @@ public class BeanDefinitionParserDelegate {
 			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
 		if (foundName != null) {
-			error("Bean name '" + foundName + "' is already used in this file.", beanElement);
+			error("Bean name '" + foundName + "' is already used in this file", beanElement);
 		}
 
 		this.usedNames.add(beanName);
@@ -1008,7 +1008,7 @@ public class BeanDefinitionParserDelegate {
 			if ((hasValueAttribute && hasValueRefAttribute) ||
 					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
 				error("<entry> element is only allowed to contain either " +
-								"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
+						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
 				value = buildTypedStringValueForMap(
