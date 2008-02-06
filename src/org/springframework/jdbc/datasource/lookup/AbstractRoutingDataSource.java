@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.util.Assert;
 
 /**
- * Abstract DataSource implementation that routes {@link #getConnection()} calls
- * to one of various target DataSources based on a lookup key. The latter is usually
+ * Abstract {@link javax.sql.DataSource} implementation that routes {@link #getConnection()}
+ * calls to one of various target DataSources based on a lookup key. The latter is usually
  * (but not necessarily) determined through some thread-bound transaction context.
  *
  * @author Juergen Hoeller
@@ -56,7 +56,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * Specify the map of target DataSources, with the lookup key as key.
 	 * The mapped value can either be a corresponding {@link javax.sql.DataSource}
 	 * instance or a data source name String (to be resolved via a
-	 * {@link #setDataSourceLookup DataSourceLookup}.
+	 * {@link #setDataSourceLookup DataSourceLookup}).
 	 * <p>The key can be of arbitrary type; this class implements the
 	 * generic lookup process only. The concrete key representation will
 	 * be handled by {@link #resolveSpecifiedLookupKey(Object)} and
@@ -70,10 +70,10 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * Specify the default target DataSource, if any.
 	 * The mapped value can either be a corresponding {@link javax.sql.DataSource}
 	 * instance or a data source name String (to be resolved via a
-	 * {@link #setDataSourceLookup DataSourceLookup}.
+	 * {@link #setDataSourceLookup DataSourceLookup}).
 	 * <p>This DataSource will be used as target if none of the keyed
 	 * {@link #setTargetDataSources targetDataSources} match the
-	 * {@link #determineCurrentLookupKey()} current lookup key}.
+	 * {@link #determineCurrentLookupKey()} current lookup key.
 	 */
 	public void setDefaultTargetDataSource(Object defaultTargetDataSource) {
 		this.defaultTargetDataSource = defaultTargetDataSource;
