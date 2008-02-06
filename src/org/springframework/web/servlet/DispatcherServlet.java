@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -672,13 +672,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the ThemeSource, if any
 	 * @see #getWebApplicationContext()
 	 */
-	public ThemeSource getThemeSource() {
+	public final ThemeSource getThemeSource() {
 		if (getWebApplicationContext() instanceof ThemeSource) {
 			return (ThemeSource) getWebApplicationContext();
 		}
 		else {
 			return null;
 		}
+	}
+
+	/**
+	 * Obtain this servlet's MultipartResolver, if any.
+	 * @return the MultipartResolver used by this servlet, or <code>null</code>
+	 * if none (indicating that no multipart support is available)
+	 */
+	public final MultipartResolver getMultipartResolver() {
+		return this.multipartResolver;
 	}
 
 
@@ -760,16 +769,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected Object createDefaultStrategy(ApplicationContext context, Class clazz) throws BeansException {
 		return context.getAutowireCapableBeanFactory().createBean(clazz);
-	}
-
-
-	/**
-	 * Obtain this servlet's MultipartResolver, if any.
-	 * @return the MultipartResolver used by this servlet, or <code>null</code>
-	 * if none (indicating that no multipart support is available)
-	 */
-	public MultipartResolver getMultipartResolver() {
-		return this.multipartResolver;
 	}
 
 
