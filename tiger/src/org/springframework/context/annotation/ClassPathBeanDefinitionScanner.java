@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.io.ResourceLoader;
@@ -104,6 +105,13 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		}
 	}
 
+
+	/**
+	 * Return the BeanDefinitionRegistry that this scanner operates on.
+	 */
+	public final BeanDefinitionRegistry getRegistry() {
+		return this.registry;
+	}
 
 	/**
 	 * Set the defaults to use for detected beans.
@@ -194,20 +202,41 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (checkBeanName(beanName, candidate)) {
 					if (candidate instanceof AbstractBeanDefinition) {
-						AbstractBeanDefinition abd = (AbstractBeanDefinition) candidate;
-						abd.applyDefaults(this.beanDefinitionDefaults);
-						if (this.autowireCandidatePatterns != null) {
-							abd.setAutowireCandidate(PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
-						}
+						postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 					}
 					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 					BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
-					beanDefinitions.add(new BeanDefinitionHolder(beanDefinition, beanName));
-					this.registry.registerBeanDefinition(beanName, beanDefinition);
+					BeanDefinitionHolder bdHolder = new BeanDefinitionHolder(beanDefinition, beanName);
+					beanDefinitions.add(bdHolder);
+					registerBeanDefinition(bdHolder, this.registry);
 				}
 			}
 		}
 		return beanDefinitions;
+	}
+
+	/**
+	 * Apply further settings to the given bean definition,
+	 * beyond the contents retrieved from scanning the component class.
+	 * @param beanDefinition the scanned bean definition
+	 * @param beanName the generated bean name for the given bean
+	 */
+	protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
+		beanDefinition.applyDefaults(this.beanDefinitionDefaults);
+		if (this.autowireCandidatePatterns != null) {
+			beanDefinition.setAutowireCandidate(PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
+		}
+	}
+
+	/**
+	 * Register the specified bean with the given registry.
+	 * <p>Can be overridden in subclasses, e.g. to adapt the registration
+	 * process or to register further bean definitions for each scanned bean.
+	 * @param definitionHolder the bean definition plus bean name for the bean
+	 * @param registry the BeanDefinitionRegistry to register the bean with
+	 */
+	protected void registerBeanDefinition(BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry) {
+		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, registry);
 	}
 
 

@@ -105,6 +105,13 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	}
 
 	/**
+	 * Return the ResourceLoader that this component provider uses.
+	 */
+	public final ResourceLoader getResourceLoader() {
+		return this.resourcePatternResolver;
+	}
+
+	/**
 	 * Set the resource pattern to use when scanning the classpath.
 	 * This value will be appended to each base package name.
 	 * @see #findCandidateComponents(String)
