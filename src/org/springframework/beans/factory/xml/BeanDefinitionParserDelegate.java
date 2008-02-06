@@ -69,8 +69,8 @@ import org.springframework.util.xml.DomUtils;
 /**
  * Stateful delegate class used to parse XML bean definitions.
  * Intended for use by both the main parser and any extension
- * {@link BeanDefinitionParser BeanDefinitionParsers}
- * or {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
+ * {@link BeanDefinitionParser BeanDefinitionParsers} or
+ * {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -434,7 +434,7 @@ public class BeanDefinitionParserDelegate {
 			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
 		if (foundName != null) {
-			error("Bean name '" + foundName + "' is already used in this file.", beanElement);
+			error("Bean name '" + foundName + "' is already used in this file", beanElement);
 		}
 
 		this.usedNames.add(beanName);
@@ -464,7 +464,7 @@ public class BeanDefinitionParserDelegate {
 					parent, className, this.readerContext.getBeanClassLoader());
 
 			if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
-				// Spring 2.0 "scope" attribute
+				// Spring 2.x "scope" attribute
 				bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
 				if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 					error("Specify either 'scope' or 'singleton', not both", ele);
