@@ -811,12 +811,20 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		this.resource = new DescriptiveResource(resourceDescription);
 	}
 
-	/**
-	 * Return a description of the resource that this bean definition
-	 * came from.
-	 */
 	public String getResourceDescription() {
 		return (this.resource != null ? this.resource.getDescription() : null);
+	}
+
+	/**
+	 * Set the originating (e.g. decorated) BeanDefinition, if any.
+	 */
+	public void setOriginatingBeanDefinition(BeanDefinition originatingBd) {
+		this.resource = new BeanDefinitionResource(originatingBd);
+	}
+
+	public BeanDefinition getOriginatingBeanDefinition() {
+		return (this.resource instanceof BeanDefinitionResource ?
+				((BeanDefinitionResource) this.resource).getBeanDefinition() : null);
 	}
 
 	/**

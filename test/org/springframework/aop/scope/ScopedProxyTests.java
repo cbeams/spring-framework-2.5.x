@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.SimpleMapScope;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -47,6 +49,21 @@ public class ScopedProxyTests extends TestCase {
 		Object simpleMap = bf.getBean("simpleMap");
 		assertTrue(simpleMap instanceof Map);
 		assertTrue(simpleMap instanceof HashMap);
+	}
+
+	public void testScopedOverride() throws Exception {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("scopedOverride.xml", getClass()));
+		SimpleMapScope scope = new SimpleMapScope();
+		ctx.getBeanFactory().registerScope("request", scope);
+		ctx.refresh();
+
+		ITestBean bean = (ITestBean) ctx.getBean("testBean");
+		assertEquals("male", bean.getName());
+		assertEquals(99, bean.getAge());
+
+		assertTrue(scope.getMap().containsKey("scopedTarget.testBean"));
+		assertEquals(TestBean.class, scope.getMap().get("scopedTarget.testBean").getClass());
 	}
 
 	public void testJdkScopedProxy() throws Exception {

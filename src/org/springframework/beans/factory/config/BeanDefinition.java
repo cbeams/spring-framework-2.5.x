@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,6 +191,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * came from (for the purpose of showing context in case of errors).
 	 */
 	String getResourceDescription();
+
+	/**
+	 * Return the originating BeanDefinition, or <code>null</code> if none.
+	 * Allows for retrieving the decorated bean definition, if any.
+	 * <p>Note that this method returns the immediate originator. Iterate through the
+	 * originator chain to find the original BeanDefinition as defined by the user.
+	 */
+	BeanDefinition getOriginatingBeanDefinition();
 
 	/**
 	 * Get the role hint for this <code>BeanDefinition</code>. The role hint
