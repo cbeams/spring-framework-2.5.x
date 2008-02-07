@@ -25,6 +25,7 @@
 
 	<property file="build.properties"/>
 
+
 	<path id="master-classpath">
 		<fileset dir="${spring.root}/lib/aspectj">
 			<include name="aspectjweaver.jar"/>
@@ -112,6 +113,7 @@
 		</fileset>
 	</path>
 
+
 	<target name="usage">
 		<echo message=""/>
 		<echo message="PetClinic build file"/>
@@ -129,6 +131,7 @@
 		<echo message=""/>
 	</target>
 
+
 	<target name="clean" description="Clean output dirs (build, docs, testbuild, testreports, weblib, dist)">
 		<delete dir="${build.dir}"/>
 		<delete dir="${docs.dir}"/>
@@ -144,6 +147,7 @@
 		<delete dir="${dist.dir}"/>
 		<delete dir="${ear.dir}/package"/>
 	</target>
+
 
 	<target name="build" description="Compile main source tree java files into class files, generate jar files">
 
@@ -261,9 +265,12 @@
 
 	</target>
 
+
 	<target name="docs" description="Create complete Javadoc documentation">
+
 		<delete dir="${docs.dir}"/>
 		<mkdir dir="${docs.dir}"/>
+
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="PetClinic"
 				source="1.5" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>PetClinic</h1>]]></doctitle>
@@ -271,18 +278,23 @@
 			<classpath refid="master-classpath"/>
 			<classpath refid="build-classpath"/>
 		</javadoc>
+
 	</target>
+
 
 	<target name="dist" depends="warfile">
 		<!--
-        Delegate to warfile target by depending on it. dist is just to offer
-        a generic target name across all Spring sample apps that may be used
-        for autobuilds testing.
-      -->
+			Delegate to warfile target by depending on it. dist is just to offer
+			a generic target name across all Spring sample apps that may be used
+			for autobuilds testing.
+		-->
 	</target>
 
+
 	<target name="warfile" depends="build,docs" description="Build the web application archive">
+
 		<mkdir dir="${dist.dir}"/>
+
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="docs/**"/>
@@ -299,15 +311,19 @@
 			<exclude name="**/.*"/>
 			<exclude name="WEB-INF/geronimo-web.xml"/>
 		</war>
+
 	</target>
 
+
 	<!--
-      If you are going to deploy the application into Geronimo (or an application server
-      variant of Geronimo), run this target in preference to the plain 'warfile'.
-      This is required in order to avoid Geronimo class loading issues.
-    -->
+		If you are going to deploy the application into Geronimo (or an application server
+		variant of Geronimo), run this target in preference to the plain 'warfile'.
+		This is required in order to avoid Geronimo class loading issues.
+	-->
 	<target name="warfile-geronimo" depends="build,docs" description="Build the web application archive packaged specifically for Geronimo">
+
 		<mkdir dir="${dist.dir}"/>
+
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="docs/**"/>
@@ -323,7 +339,9 @@
 			<exclude name="WEB-INF/lib/commons-logging.jar"/>
 			<exclude name="WEB-INF/lib/cglib*.jar"/>
 		</war>
+
 	</target>
+
 
 	<target name="earfile" depends="build,docs" description="Build the enterprise application archive">
 
@@ -356,23 +374,33 @@
 
 	</target>
 
+
 	<target name="setupHSQL" description="Set up HSQL database properties" if="useHSQL">
+
 		<property name="db.driver" value="${hsql.driver}"/>
 		<property name="db.url" value="${hsql.url}"/>
 		<property name="db.user" value="${hsql.user}"/>
 		<property name="db.pw" value="${hsql.pw}"/>
+
 	</target>
 
+
 	<target name="setupMYSQL" description="Set up MYSQL database properties" if="useMYSQL">
+
 		<property name="db.driver" value="${mysql.driver}"/>
 		<property name="db.url" value="${mysql.url}"/>
 		<property name="db.user" value="${mysql.user}"/>
 		<property name="db.pw" value="${mysql.pw}"/>
+
 	</target>
 
+
 	<target name="setupDB" depends="setupHSQL,setupMYSQL" description="Initialize the selected database">
+
 		<ant antfile="${db.dir}/build.xml"/>
+
 	</target>
+
 
 	<target name="tests" depends="build,setupDB" description="Run tests using initialized database">
 
@@ -431,6 +459,7 @@
 		<ant antfile="${db.dir}/build.xml"/>
 
 	</target>
+
 
 	<target name="all" depends="clean,build,docs,warfile,tests" description="Clean,build,docs,warfile,tests"/>
 

@@ -94,7 +94,7 @@
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j-*.jar"/>
+				<include name="log4j*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
@@ -117,7 +117,7 @@
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="PetPortal"
 				source="1.5" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>PetPortal</h1>]]></doctitle>
-			<bottom><![CDATA[<i>John A. Lewis, Mark Fisher, Juergen Hoeller - 2007.</i>]]></bottom>
+			<bottom><![CDATA[<i>John A. Lewis, Mark Fisher, Juergen Hoeller</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 			<classpath refid="build-classpath"/>
 		</javadoc>

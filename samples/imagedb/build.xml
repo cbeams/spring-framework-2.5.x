@@ -22,7 +22,7 @@
 			<include name="commons-logging.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/quartz">
-			<include name="quartz-*.jar"/>
+			<include name="quartz*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
@@ -101,7 +101,7 @@
 				<include name="mail.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/quartz">
-				<include name="quartz-*.jar"/>
+				<include name="quartz*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/velocity">
 				<include name="velocity-1.5*.jar"/>
