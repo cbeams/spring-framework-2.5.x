@@ -18,19 +18,21 @@
 
 	<path id="master-classpath">
 
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="jstl.jar"/>
+			<include name="servlet-api.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
 		</fileset>
-
 		<fileset dir="${spring.root}/lib/jakarta-taglibs">
 			<include name="standard.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet-api.jar"/>
-			<include name="jstl.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist/modules">
+			<include name="spring-webmvc.jar"/>
 		</fileset>
 
 	</path>
@@ -93,6 +95,9 @@
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/dist/modules">
+				<include name="spring-webmvc.jar"/>
+			</fileset>
 		</copy>
 
 	</target>
@@ -114,7 +119,7 @@
 			<include name="*"/>
 			<include name="docs/**"/>
 			<include name="html/**"/>
-            <include name="css/*.css"/>
+			<include name="css/*.css"/>
 			<include name="WEB-INF/*.*"/>
 			<include name="WEB-INF/tld/*.tld"/>
 			<exclude name="WEB-INF/web.xml"/>

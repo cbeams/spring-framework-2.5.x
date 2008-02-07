@@ -16,8 +16,8 @@
 	<path id="master-classpath">
 
 		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet-api.jar"/>
 			<include name="jstl.jar"/>
+			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
@@ -92,7 +92,7 @@
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j-1.2.13.jar"/>
+				<include name="log4j*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
