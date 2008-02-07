@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
 
 package org.springframework.remoting.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -34,18 +30,13 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 26.12.2003
  */
-public abstract class RemoteExporter implements BeanClassLoaderAware {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class RemoteExporter extends RemotingSupport {
 
 	private Object service;
 
 	private Class serviceInterface;
 
 	private boolean registerTraceInterceptor = true;
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -101,17 +92,6 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 */
 	protected boolean isRegisterTraceInterceptor() {
 		return this.registerTraceInterceptor;
-	}
-
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
-
-	/**
-	 * Return the environment's bean ClassLoader, if available.
-	 */
-	protected ClassLoader getBeanClassLoader() {
-		return this.beanClassLoader;
 	}
 
 
@@ -183,37 +163,6 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 */
 	protected String getExporterName() {
 		return ClassUtils.getShortName(getClass());
-	}
-
-	/**
-	 * Override the thread context ClassLoader with the environment's bean ClassLoader
-	 * if necessary, i.e. if the bean ClassLoader is not equivalent to the thread
-	 * context ClassLoader already.
-	 * @return the original thread context ClassLoader,
-	 * or <code>null</code> if not overridden
-	 */
-	protected ClassLoader overrideThreadContextClassLoader() {
-		Thread currentThread = Thread.currentThread();
-		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
-		ClassLoader beanClassLoader = getBeanClassLoader();
-		if (beanClassLoader != null && !beanClassLoader.equals(threadContextClassLoader)) {
-			currentThread.setContextClassLoader(beanClassLoader);
-			return threadContextClassLoader;
-		}
-		else {
-			return null;
-		}
-	}
-
-	/**
-	 * Reset the original thread context ClassLoader if necessary.
-	 * @param original the original thread context ClassLoader,
-	 * or <code>null</code> if not overridden (and hence nothing to reset)
-	 */
-	protected void resetThreadContextClassLoader(ClassLoader original) {
-		if (original != null) {
-			Thread.currentThread().setContextClassLoader(original);
-		}
 	}
 
 }

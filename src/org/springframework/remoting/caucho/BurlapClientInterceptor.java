@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 					"invoke 'prepare' before attempting any operations");
 		}
 
+		ClassLoader originalClassLoader = overrideThreadContextClassLoader();
 		try {
 			return invocation.getMethod().invoke(this.burlapProxy, invocation.getArguments());
 		}
@@ -160,6 +161,9 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 		catch (Throwable ex) {
 			throw new RemoteProxyFailureException(
 					"Failed to invoke Burlap proxy for remote service [" + getServiceUrl() + "]", ex);
+		}
+		finally {
+			resetThreadContextClassLoader(originalClassLoader);
 		}
 	}
 

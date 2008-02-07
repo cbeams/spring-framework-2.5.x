@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.remoting.caucho;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean for Hessian proxies. Exposes the proxied service for
@@ -42,21 +40,14 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  */
-public class HessianProxyFactoryBean extends HessianClientInterceptor
-		implements FactoryBean, BeanClassLoaderAware {
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean {
 
 	private Object serviceProxy;
 
 
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
-
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(this.beanClassLoader);
+		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(getBeanClassLoader());
 	}
 
 
