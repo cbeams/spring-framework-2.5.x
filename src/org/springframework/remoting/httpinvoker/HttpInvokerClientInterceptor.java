@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,12 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationResult;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing an
@@ -67,13 +65,11 @@ import org.springframework.util.ClassUtils;
  * @see java.rmi.server.RMIClassLoader
  */
 public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
-		implements MethodInterceptor, HttpInvokerClientConfiguration, BeanClassLoaderAware {
+		implements MethodInterceptor, HttpInvokerClientConfiguration {
 
 	private String codebaseUrl;
 
 	private HttpInvokerRequestExecutor httpInvokerRequestExecutor;
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -120,22 +116,10 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	public HttpInvokerRequestExecutor getHttpInvokerRequestExecutor() {
 		if (this.httpInvokerRequestExecutor == null) {
 			SimpleHttpInvokerRequestExecutor executor = new SimpleHttpInvokerRequestExecutor();
-			executor.setBeanClassLoader(this.beanClassLoader);
+			executor.setBeanClassLoader(getBeanClassLoader());
 			this.httpInvokerRequestExecutor = executor;
 		}
 		return this.httpInvokerRequestExecutor;
-	}
-
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
-
-	/**
-	 * Return the ClassLoader that this accessor operates in,
-	 * to be used for deserializing and for generating proxies.
-	 */
-	protected final ClassLoader getBeanClassLoader() {
-		return this.beanClassLoader;
 	}
 
 	public void afterPropertiesSet() {
@@ -154,7 +138,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		RemoteInvocation invocation = createRemoteInvocation(methodInvocation);
 		RemoteInvocationResult result = null;
 		try {
-			result = executeRequest(invocation);
+			result = executeRequest(invocation, methodInvocation);
 		}
 		catch (Throwable ex) {
 			throw convertHttpInvokerAccessException(ex);
@@ -171,6 +155,22 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 						"] failed in HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
 			}
 		}
+	}
+
+	/**
+	 * Execute the given remote invocation via the HttpInvokerRequestExecutor.
+	 * <p>This implementation delegates to {@link #executeRequest(RemoteInvocation)}.
+	 * Can be overridden to react to the specific original MethodInvocation.
+	 * @param invocation the RemoteInvocation to execute
+	 * @param originalInvocation the original MethodInvocation (can e.g. be cast
+	 * to the ProxyMethodInvocation interface for accessing user attributes)
+	 * @return the RemoteInvocationResult object
+	 * @throws Exception in case of errors
+	 */
+	protected RemoteInvocationResult executeRequest(
+			RemoteInvocation invocation, MethodInvocation originalInvocation) throws Exception {
+
+		return executeRequest(invocation);
 	}
 
 	/**
