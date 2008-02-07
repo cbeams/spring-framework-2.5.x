@@ -362,6 +362,9 @@ public class BeanWrapperTests extends TestCase {
 		bw.setPropertyValue("flushMode", "NEVER");
 		assertEquals(FlushMode.NEVER, et.getFlushMode());
 
+		bw.setPropertyValue("flushMode", "  AUTO ");
+		assertEquals(FlushMode.AUTO, et.getFlushMode());
+
 		try {
 			bw.setPropertyValue("flushMode", "EVER");
 			fail("Should have thrown TypeMismatchException");
