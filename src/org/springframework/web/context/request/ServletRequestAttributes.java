@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,6 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
@@ -52,9 +49,6 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
-
-	// We'll create a lot of these objects, so we don't want a new logger every time.
-	private static final Log logger = LogFactory.getLog(ServletRequestAttributes.class);
 
 
 	private final HttpServletRequest request;
@@ -90,7 +84,13 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	protected final HttpSession getSession(boolean allowCreate) {
 		try {
-			this.session = this.request.getSession(allowCreate);
+			HttpSession currentSession = this.request.getSession(allowCreate);
+			// If the current session is null, we might be in a custom child thread,
+			// hence we want to preserve the original session reference (if any).
+			// However, if we have a fresh non-null session, then let's use it.
+			if (currentSession != null) {
+				this.session = currentSession;
+			}
 			return this.session;
 		}
 		catch (IllegalStateException ex) {
@@ -130,15 +130,18 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		else {
 			HttpSession session = getSession(false);
 			if (session != null) {
-				Object value = session.getAttribute(name);
-				if (value != null) {
-					this.sessionAttributesToUpdate.put(name, value);
+				try {
+					Object value = session.getAttribute(name);
+					if (value != null) {
+						this.sessionAttributesToUpdate.put(name, value);
+					}
+					return value;
 				}
-				return value;
+				catch (IllegalStateException ex) {
+					// Session invalidated - shouldn't usually happen.
+				}
 			}
-			else {
-				return null;
-			}
+			return null;
 		}
 	}
 
@@ -148,8 +151,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		}
 		else {
 			HttpSession session = getSession(true);
-			session.setAttribute(name, value);
 			this.sessionAttributesToUpdate.remove(name);
+			session.setAttribute(name, value);
 		}
 	}
 
@@ -161,10 +164,15 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		else {
 			HttpSession session = getSession(false);
 			if (session != null) {
-				session.removeAttribute(name);
 				this.sessionAttributesToUpdate.remove(name);
-				// Remove any registered destruction callback as well.
-				session.removeAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name);
+				try {
+					session.removeAttribute(name);
+					// Remove any registered destruction callback as well.
+					session.removeAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name);
+				}
+				catch (IllegalStateException ex) {
+					// Session invalidated - shouldn't usually happen.
+				}
 			}
 		}
 	}
@@ -176,11 +184,14 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		else {
 			HttpSession session = getSession(false);
 			if (session != null) {
-				return StringUtils.toStringArray(session.getAttributeNames());
+				try {
+					return StringUtils.toStringArray(session.getAttributeNames());
+				}
+				catch (IllegalStateException ex) {
+					// Session invalidated - shouldn't usually happen.
+				}
 			}
-			else {
-				return new String[0];
-			}
+			return new String[0];
 		}
 	}
 
@@ -209,14 +220,19 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	protected void updateAccessedSessionAttributes() {
 		HttpSession session = getSession(false);
 		if (session != null) {
-			for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String name = (String) entry.getKey();
-				Object newValue = entry.getValue();
-				Object oldValue = session.getAttribute(name);
-				if (oldValue == newValue) {
-					session.setAttribute(name, newValue);
+			try {
+				for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					String name = (String) entry.getKey();
+					Object newValue = entry.getValue();
+					Object oldValue = session.getAttribute(name);
+					if (oldValue == newValue) {
+						session.setAttribute(name, newValue);
+					}
 				}
+			}
+			catch (IllegalStateException ex) {
+				// Session invalidated - shouldn't usually happen.
 			}
 		}
 		this.sessionAttributesToUpdate.clear();
