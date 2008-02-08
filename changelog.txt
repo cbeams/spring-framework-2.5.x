@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-08)
+Changes in version 2.5.2 (2008-02-10)
 -------------------------------------
 
 General
 * various documentation fixes
 * updated transaction management chapter in the reference documentation
 * spring-context.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
+* fixed showcases build scripts to correctly refer to revised frameworks jars and updated third-party libraries
 
 Package org.springframework.aop
 * ProxyFactoryBean and AbstractAutoProxyCreator check autodetected proxy interfaces for visibility in the ClassLoader
@@ -29,9 +30,10 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory applies specified TypeConverter to bean references as well (not just to literals)
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
-* AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
 * fixed AbstractAutowireCapableBeanFactory to always resolve the bean class before a FactoryBean type check
+* AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
+* fixed AutowiredAnnotationBeanPostProcessor to correctly cache a collection with a single autowired bean as element
 * deprecated AbstractBeanDefinition's Spring 1.2 style "setSingleton" method in favor of Spring 2.0's "setScope"
 * deprecated BeanDefinitionBuilder's "addConstructorArg" in favor of the consistently named "addConstructorArgValue"
 * deprecated various rarely used BeanDefinitionBuilder methods in favor of settings on the raw BeanDefinition object
@@ -117,6 +119,11 @@ Package org.springframework.orm
 * added "entityManagerFactoryInterface" property to AbstractEntityManagerFactoryBean, as alternative to autodetection
 * added "getEntityManagerFactoryInterface()" to JpaVendorAdapter (for WebSphere compatibility of OpenJpaVendorAdapter)
 
+Package org.springframework.remoting
+* factored out RemotingSupport base class from RemoteAccessor and RemoteExporter
+* HessianClientInterceptor and BurlapClientInterceptor expose the bean ClassLoader as thread context CL (if necessary)
+* added overloaded "executeRequest" method with original MethodInvocation argument to HttpInvokerClientInterceptor
+
 Package org.springframework.scripting
 * introduced "ScriptFactory.requiresScriptedObjectRefresh(ScriptSource)" for object refresh even after a type check call
 * GroovyScriptFactory and JRubyScriptFactory refresh scripted object instances even after an intermediate type check
@@ -129,6 +136,7 @@ Package org.springframework.test
 * AbstractJUnit38SpringContextTests runs "afterTestMethod" callbacks even when "beforeTestMethod" or "setUp" failed
 
 Package org.springframework.web
+* ServletRequestAttributes keeps hold onto the original session if a "request.getSession" call suddenly returns null
 * added "setConfigLocation" method to ConfigurableWeb/PortletApplicationContext, accepting an init-param style value
 * added "initServletContext(ServletContext)" template method to WebApplicationObjectSupport
 * optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
