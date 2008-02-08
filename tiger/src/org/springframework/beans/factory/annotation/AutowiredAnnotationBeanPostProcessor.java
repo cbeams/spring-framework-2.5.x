@@ -413,7 +413,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						if (autowiredBeanNames.size() == 1) {
 							String autowiredBeanName = autowiredBeanNames.iterator().next();
 							if (beanFactory.containsBean(autowiredBeanName)) {
-								this.cachedFieldValue = new RuntimeBeanReference(autowiredBeanName);
+								if (beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
+									this.cachedFieldValue = new RuntimeBeanReference(autowiredBeanName);
+								}
 							}
 							else {
 								this.cachedFieldValue = value;
@@ -486,7 +488,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 				}
 				else {
-					arguments = new Object[method.getParameterTypes().length];
+					Class[] paramTypes = method.getParameterTypes();
+					arguments = new Object[paramTypes.length];
 					Set<String> autowiredBeanNames = new LinkedHashSet<String>(arguments.length);
 					TypeConverter typeConverter = beanFactory.getTypeConverter();
 					this.cachedMethodArguments = new Object[arguments.length];
@@ -504,12 +507,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 					if (arguments != null) {
 						registerDependentBeans(beanName, autowiredBeanNames);
-						if (autowiredBeanNames.size() == arguments.length) {
+						if (autowiredBeanNames.size() == paramTypes.length) {
 							Iterator<String> it = autowiredBeanNames.iterator();
-							for (int i = 0; i < arguments.length; i++) {
+							for (int i = 0; i < paramTypes.length; i++) {
 								String autowiredBeanName = it.next();
 								if (beanFactory.containsBean(autowiredBeanName)) {
-									this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
+									if (beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
+										this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
+									}
 								}
 								else {
 									this.cachedMethodArguments[i] = arguments[i];
