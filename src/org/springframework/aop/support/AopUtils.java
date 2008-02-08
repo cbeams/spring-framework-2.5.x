@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,6 +134,15 @@ public abstract class AopUtils {
 	 */
 	public static boolean isToStringMethod(Method method) {
 		return (method != null && method.getName().equals("toString") &&
+				method.getParameterTypes().length == 0);
+	}
+
+	/**
+	 * Determine whether the given method is a "finalize" method.
+	 * @see java.lang.Object#finalize()
+	 */
+	public static boolean isFinalizeMethod(Method method) {
+		return (method != null && method.getName().equals("finalize") &&
 				method.getParameterTypes().length == 0);
 	}
 

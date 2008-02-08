@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -734,7 +734,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		 * DynamicAdvisedInterceptor, since all other interceptors can avoid the
 		 * need for a try/catch block</dd>
 		 * <dt>For Object.finalize():</dt>
-		 * <dd>No override for this method is used</dd>
+		 * <dd>No override for this method is used.</dd>
 		 * <dt>For equals():</dt>
 		 * <dd>The EqualsInterceptor is used to redirect equals() calls to a
 		 * special handler to this proxy.</dd>
@@ -757,7 +757,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		 * </dl>
 		 */
 		public int accept(Method method) {
-			if (method.getDeclaringClass() == Object.class && method.getName().equals("finalize")) {
+			if (AopUtils.isFinalizeMethod(method)) {
 				logger.debug("Found finalize() method - using NO_OVERRIDE");
 				return NO_OVERRIDE;
 			}
