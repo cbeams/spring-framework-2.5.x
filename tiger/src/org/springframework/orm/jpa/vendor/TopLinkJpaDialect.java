@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import oracle.toplink.essentials.sessions.Session;
 import oracle.toplink.essentials.sessions.UnitOfWork;
 
 import org.springframework.jdbc.datasource.ConnectionHandle;
-import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.transaction.TransactionDefinition;
@@ -37,7 +36,7 @@ import org.springframework.transaction.TransactionException;
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
  * Oracle TopLink Essentials. Developed and tested against TopLink Essentials v2.
  *
- * <p>By default, this class acquires a TopLink transaction to get the JDBC connection
+ * <p>By default, this class acquires a TopLink transaction to get the JDBC Connection
  * early. This allows mixing JDBC and JPA/TopLink operations in the same transaction.
  * In some cases, this eager acquisition of a transaction/connection may impact
  * scalability. In that case, set the "lazyDatabaseTransaction" flag to true if you
@@ -50,7 +49,7 @@ import org.springframework.transaction.TransactionException;
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setLazyDatabaseTransaction
- * @see LazyConnectionDataSourceProxy
+ * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
  */
 public class TopLinkJpaDialect extends DefaultJpaDialect {
 	
@@ -81,7 +80,7 @@ public class TopLinkJpaDialect extends DefaultJpaDialect {
 		super.beginTransaction(entityManager, definition);
 		if (!definition.isReadOnly() && !this.lazyDatabaseTransaction) {
 			// This is the magic bit. As with the existing Spring TopLink integration,
-			// begin an early transaction to force TopLink to get a JDBC connection
+			// begin an early transaction to force TopLink to get a JDBC Connection
 			// so that Spring can manage transactions with JDBC as well as TopLink.
 			UnitOfWork uow = (UnitOfWork) getSession(entityManager);
 			uow.beginEarlyTransaction();

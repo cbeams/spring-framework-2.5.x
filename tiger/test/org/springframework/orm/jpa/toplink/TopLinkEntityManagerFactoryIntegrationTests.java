@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.orm.jpa.toplink;
 
-import oracle.toplink.essentials.internal.ejb.cmp3.base.EntityManagerFactoryImpl;
-
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 
@@ -29,7 +27,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
  * @author Juergen Hoeller
  */
 public class TopLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
-	
+
 	protected String[] getConfigLocations() {
 		return TOPLINK_CONFIG_LOCATIONS;
 	}
@@ -37,9 +35,9 @@ public class TopLinkEntityManagerFactoryIntegrationTests extends AbstractContain
 
 	public void testCanCastNativeEntityManagerFactoryToTopLinkEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		assertTrue(emfi.getNativeEntityManagerFactory() instanceof EntityManagerFactoryImpl);
+		assertTrue(emfi.getNativeEntityManagerFactory().getClass().getName().endsWith("EntityManagerFactoryImpl"));
 	}
-	
+
 	public void testCanCastSharedEntityManagerProxyToTopLinkEntityManager() {
 		assertTrue(sharedEntityManager instanceof oracle.toplink.essentials.ejb.cmp3.EntityManager);
 		oracle.toplink.essentials.ejb.cmp3.EntityManager toplinkEntityManager =
