@@ -4882,13 +4882,11 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
 
         <tgroup cols="2">
           <colspec colname="c1" colwidth="2*" />
-
           <colspec colname="c2" colwidth="5*" />
 
           <thead>
             <row>
               <entry>Event</entry>
-
               <entry>Explanation</entry>
             </row>
           </thead>
@@ -4896,34 +4894,68 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
           <tbody>
             <row>
               <entry><classname>ContextRefreshedEvent</classname></entry>
-
-              <entry><para>Published when the
+              <entry>Published when the
               <interfacename>ApplicationContext</interfacename> is initialized
-              or refreshed. Initialized here means that all beans are loaded,
-              singletons are pre-instantiated and the
-              <interfacename>ApplicationContext</interfacename> is ready for
-              use.</para></entry>
+              or refreshed, e.g. using the <methodname>refresh()</methodname>
+              method on the
+              <interfacename>ConfigurableApplicationContext</interfacename>
+              interface. "Initialized" here means that all beans are loaded,
+              post-processor beans are detected and activated, singletons are
+              pre-instantiated, and the
+              <interfacename>ApplicationContext</interfacename> object is
+              ready for use. A refresh may be triggered multiple times,
+              as long as the context hasn't been closed - provided that
+              the chosen <interfacename>ApplicationContext</interfacename>
+              actually supports such "hot" refreshes (which e.g.
+              <classname>XmlWebApplicationContext</classname> does but
+              <classname>GenericApplicationContext</classname> doesn't).</entry>
+            </row>
+
+            <row>
+              <entry><classname>ContextStartedEvent</classname></entry>
+              <entry>Published when the
+              <interfacename>ApplicationContext</interfacename> is started,
+              using the <methodname>start()</methodname> method on the
+              <interfacename>ConfigurableApplicationContext</interfacename>
+              interface. "Started" here means that all
+              <interfacename>Lifecycle</interfacename> beans will receive
+              an explicit start signal. This will typically be used for
+              restarting after an explicit stop, but may also be used
+              for starting components that haven't been configured for
+              autostart (e.g. haven't started on initialization already).</entry>
+            </row>
+
+            <row>
+              <entry><classname>ContextStoppedEvent</classname></entry>
+              <entry>Published when the
+              <interfacename>ApplicationContext</interfacename> is stopped,
+              using the <methodname>stop()</methodname> method on the
+              <interfacename>ConfigurableApplicationContext</interfacename>
+              interface. "Stopped" here means that all
+              <interfacename>Lifecycle</interfacename> beans will receive
+              an explicit stop signal. A stopped context may be restarted
+              through a <methodname>start()</methodname> call.</entry>
             </row>
 
             <row>
               <entry><classname>ContextClosedEvent</classname></entry>
-
-              <entry><para>Published when the
+              <entry>Published when the
               <interfacename>ApplicationContext</interfacename> is closed,
               using the <methodname>close()</methodname> method on the
-              <interfacename>ApplicationContext</interfacename>. Closed here
-              means that singleton beans (only!) are destroyed.</para></entry>
+              <interfacename>ConfigurableApplicationContext</interfacename>
+              interface. "Closed" here means that all singleton beans
+              are destroyed. A closed context has reached its end of life;
+              it cannot be refreshed or restarted.</entry>
             </row>
 
             <row>
               <entry><classname>RequestHandledEvent</classname></entry>
-
-              <entry><para>A web-specific event telling all beans that a HTTP
-              request has been serviced (this will be published
-              <emphasis>after</emphasis> the request has been finished). Note
-              that this event is only applicable for web applications using
-              Spring's
-              <classname>DispatcherServlet</classname>.</para></entry>
+              <entry>A web-specific event telling all beans that an
+              HTTP request has been serviced (this will be published
+              <emphasis>after</emphasis> the request has been finished).
+              Note that this event is only applicable for web applications
+              using Spring's
+              <classname>DispatcherServlet</classname>.</entry>
             </row>
           </tbody>
         </tgroup>
