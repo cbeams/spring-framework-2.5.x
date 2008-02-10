@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,7 @@ package org.springframework.core;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
-import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -38,18 +33,13 @@ import org.springframework.util.FileCopyUtils;
  * @author Juergen Hoeller
  * @since 2.0.1
  */
-public class OverridingClassLoader extends ClassLoader {
+public class OverridingClassLoader extends DecoratingClassLoader {
 
 	/** Packages that are excluded by default */
 	public static final String[] DEFAULT_EXCLUDED_PACKAGES =
 			new String[] {"java.", "javax.", "sun.", "oracle."};
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
-
-
-	private final Set excludedPackages = Collections.synchronizedSet(new HashSet());
-
-	private final Set excludedClasses = Collections.synchronizedSet(new HashSet());
 
 
 	/**
@@ -59,31 +49,8 @@ public class OverridingClassLoader extends ClassLoader {
 	public OverridingClassLoader(ClassLoader parent) {
 		super(parent);
 		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
-			this.excludedPackages.add(DEFAULT_EXCLUDED_PACKAGES[i]);
+			excludePackage(DEFAULT_EXCLUDED_PACKAGES[i]);
 		}
-	}
-
-
-	/**
-	 * Add a package name to exclude from overriding.
-	 * <p>Any class whose fully-qualified name starts with the name registered
-	 * here will be handled by the parent ClassLoader in the usual fashion.
-	 * @param packageName the package name to exclude
-	 */
-	public void excludePackage(String packageName) {
-		Assert.notNull(packageName, "Package name must not be null");
-		this.excludedPackages.add(packageName);
-	}
-
-	/**
-	 * Add a class name to exclude from overriding.
-	 * <p>Any class name registered here will be handled by
-	 * the parent ClassLoader in the usual fashion.
-	 * @param className the class name to exclude
-	 */
-	public void excludeClass(String className) {
-		Assert.notNull(className, "Class name must not be null");
-		this.excludedClasses.add(className);
 	}
 
 
@@ -106,23 +73,12 @@ public class OverridingClassLoader extends ClassLoader {
 	/**
 	 * Determine whether the specified class is eligible for overriding
 	 * by this class loader.
-	 * <p>The default implementation checks against excluded packages and classes.
 	 * @param className the class name to check
 	 * @return whether the specified class is eligible
-	 * @see #excludePackage
-	 * @see #excludeClass
+	 * @see #isExcluded
 	 */
 	protected boolean isEligibleForOverriding(String className) {
-		if (this.excludedClasses.contains(className)) {
-			return false;
-		}
-		for (Iterator it = this.excludedPackages.iterator(); it.hasNext();) {
-			String packageName = (String) it.next();
-			if (className.startsWith(packageName)) {
-				return false;
-			}
-		}
-		return true;
+		return !isExcluded(className);
 	}
 
 	/**

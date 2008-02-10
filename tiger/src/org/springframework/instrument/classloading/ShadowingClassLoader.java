@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,20 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.springframework.core.DecoratingClassLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * ClassLoader decorator that shadows an enclosing ClassLoader, applying
- * registered transformers to all affected classes.
+ * ClassLoader decorator that shadows an enclosing ClassLoader,
+ * applying registered transformers to all affected classes.
  *
  * @author Rob Harrop
  * @author Rod Johnson
@@ -47,19 +44,16 @@ import org.springframework.util.StringUtils;
  * @see #addTransformer
  * @see org.springframework.core.OverridingClassLoader
  */
-public class ShadowingClassLoader extends ClassLoader {
+public class ShadowingClassLoader extends DecoratingClassLoader {
 
 	/** Packages that are excluded by default */
 	public static final String[] DEFAULT_EXCLUDED_PACKAGES =
-			new String[] {"java.", "javax.", "sun.", "oracle.", "com.sun.", "com.ibm.", "COM.ibm.", "org.w3c.",
-					"org.xml.", "org.dom4j.", "org.aspectj.", "org.apache.xerces.", "org.apache.commons.logging."};
+			new String[] {"java.", "javax.", "sun.", "oracle.", "com.sun.", "com.ibm.", "COM.ibm.",
+					"org.w3c.", "org.xml.", "org.dom4j.", "org.eclipse", "org.aspectj.",
+					"org.apache.xerces.", "org.apache.commons.logging."};
 
 
 	private final ClassLoader enclosingClassLoader;
-
-	private final Set excludedPackages = Collections.synchronizedSet(new HashSet());
-
-	private final Set excludedClasses = Collections.synchronizedSet(new HashSet());
 
 	private final List<ClassFileTransformer> classFileTransformers = new LinkedList<ClassFileTransformer>();
 
@@ -74,32 +68,10 @@ public class ShadowingClassLoader extends ClassLoader {
 		Assert.notNull(enclosingClassLoader, "Enclosing ClassLoader must not be null");
 		this.enclosingClassLoader = enclosingClassLoader;
 		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
-			this.excludedPackages.add(DEFAULT_EXCLUDED_PACKAGES[i]);
+			excludePackage(DEFAULT_EXCLUDED_PACKAGES[i]);
 		}
 	}
 
-
-	/**
-	 * Add a package name to exclude from shadowing.
-	 * <p>Any class whose fully-qualified name starts with the name registered
-	 * here will be handled by the enclosing ClassLoader in the usual fashion.
-	 * @param packageName the package name to exclude
-	 */
-	public void excludePackage(String packageName) {
-		Assert.notNull(packageName, "Package name must not be null");
-		this.excludedPackages.add(packageName);
-	}
-
-	/**
-	 * Add a class name to exclude from shadowing.
-	 * <p>Any class name registered here will be handled by
-	 * the enclosing ClassLoader in the usual fashion.
-	 * @param className the class name to exclude
-	 */
-	public void excludeClass(String className) {
-		Assert.notNull(className, "Class name must not be null");
-		this.excludedClasses.add(className);
-	}
 
 	/**
 	 * Add the given ClassFileTransformer to the list of transformers that this
@@ -148,23 +120,12 @@ public class ShadowingClassLoader extends ClassLoader {
 	/**
 	 * Determine whether the specified class is eligible for shadowing
 	 * by this class loader.
-	 * <p>The default implementation checks against excluded packages and classes.
 	 * @param className the class name to check
 	 * @return whether the specified class is eligible
-	 * @see #excludePackage
-	 * @see #excludeClass
+	 * @see #isExcluded
 	 */
 	protected boolean isEligibleForShadowing(String className) {
-		if (this.excludedClasses.contains(className)) {
-			return false;
-		}
-		for (Iterator it = this.excludedPackages.iterator(); it.hasNext();) {
-			String packageName = (String) it.next();
-			if (className.startsWith(packageName)) {
-				return false;
-			}
-		}
-		return true;
+		return !isExcluded(className);
 	}
 
 	/**
