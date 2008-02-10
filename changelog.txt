@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-04-24)
+Changes in version 2.0.9 (2008-03-20)
 -------------------------------------
 
 General
 * various documentation fixes
 
 Package org.springframework.aop
+* Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
 * AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
 
@@ -35,6 +36,7 @@ Package org.springframework.orm
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
 
 Package org.springframework.web
+* ServletRequestAttributes keeps hold onto the original session if a "request.getSession" call suddenly returns null
 * InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
 
