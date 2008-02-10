@@ -377,6 +377,11 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Apache Tomcat 5.5.23 (http://tomcat.apache.org)
 - required for building the Tomcat-specific weaver
 
+* toplink/eclipselink.jar
+- Eclipse Persistence Services 1.0 M4 (http://www.eclipse.org/eclipselink)
+- required for building the framework
+- required at runtime when using Spring's JPA support with EclipseLink as provider
+
 * toplink/toplink-api.jar
 - Oracle TopLink 10.1.3 API (http://www.oracle.com/technology/products/ias/toplink)
 - required for building the framework
