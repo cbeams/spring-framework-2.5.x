@@ -57,14 +57,14 @@ import org.springframework.util.StringUtils;
  * <p>Exposes an EntityManagerFactory and a shared EntityManager.
  * Requires an EntityManagerFactory to be injected, plus the DataSource and
  * JpaTransactionManager through the superclass.
- * 
+ *
  * <p>When using Xerces, make sure a post 2.0.2 version is available on the classpath
  * to avoid a critical 
  * <a href="http://nagoya.apache.org/bugzilla/show_bug.cgi?id=16014"/>bug</a> 
  * that leads to StackOverflow. Maven users are likely to encounter this problem since
  * 2.0.2 is used by default.
- * <p/>
- * A workaround is to explicitly specify the Xerces version inside the Maven pom: 
+ *
+ * <p>A workaround is to explicitly specify the Xerces version inside the Maven POM:
  * <pre>
  * &lt;dependency&gt;
  *   &lt;groupId&gt;xerces&lt;/groupId&gt;
@@ -325,42 +325,38 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		private final ClassLoader shadowingClassLoader;
 
-		private final Class shadowingClassLoaderClass;
-
 		public ShadowingLoadTimeWeaver(ClassLoader shadowingClassLoader) {
 			this.shadowingClassLoader = shadowingClassLoader;
-			this.shadowingClassLoaderClass = shadowingClassLoader.getClass();
-		}
-
-		public ClassLoader getInstrumentableClassLoader() {
-			return (ClassLoader) this.shadowingClassLoader;
-		}
-		
-		public ClassLoader getThrowawayClassLoader() {
-			// Be sure to copy the same resource overrides
-			// and same class file transformers:
-			// We want the throwaway class loader to behave
-			// like the instrumentable class loader
-			ResourceOverridingShadowingClassLoader roscl = new ResourceOverridingShadowingClassLoader(getClass().getClassLoader());
-			if (shadowingClassLoader instanceof ResourceOverridingShadowingClassLoader) {
-				roscl.copyOverrides((ResourceOverridingShadowingClassLoader) shadowingClassLoader);
-			}
-			if (shadowingClassLoader instanceof ShadowingClassLoader) {
-				roscl.copyTransformers((ShadowingClassLoader) shadowingClassLoader);
-			}
-			return roscl;
 		}
 
 		public void addTransformer(ClassFileTransformer transformer) {
 			try {
 				Method addClassFileTransformer =
-						this.shadowingClassLoaderClass.getMethod("addTransformer", ClassFileTransformer.class);
+						this.shadowingClassLoader.getClass().getMethod("addTransformer", ClassFileTransformer.class);
 				addClassFileTransformer.setAccessible(true);
 				addClassFileTransformer.invoke(this.shadowingClassLoader, transformer);
 			}
 			catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
+		}
+
+		public ClassLoader getInstrumentableClassLoader() {
+			return this.shadowingClassLoader;
+		}
+		
+		public ClassLoader getThrowawayClassLoader() {
+			// Be sure to copy the same resource overrides and same class file transformers:
+			// We want the throwaway class loader to behave like the instrumentable class loader.
+			ResourceOverridingShadowingClassLoader roscl =
+					new ResourceOverridingShadowingClassLoader(getClass().getClassLoader());
+			if (this.shadowingClassLoader instanceof ShadowingClassLoader) {
+				roscl.copyTransformers((ShadowingClassLoader) this.shadowingClassLoader);
+			}
+			if (this.shadowingClassLoader instanceof ResourceOverridingShadowingClassLoader) {
+				roscl.copyOverrides((ResourceOverridingShadowingClassLoader) this.shadowingClassLoader);
+			}
+			return roscl;
 		}
 	}
 
