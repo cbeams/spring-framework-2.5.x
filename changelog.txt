@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-10)
+Changes in version 2.5.2 (2008-02-18)
 -------------------------------------
 
 General
@@ -14,6 +14,7 @@ General
 
 Package org.springframework.aop
 * ProxyFactoryBean and AbstractAutoProxyCreator check autodetected proxy interfaces for visibility in the ClassLoader
+* Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
 * AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
 * AbstractBeanFactoryBasedTargetSourceCreator creates an independent internal BeanFactory per target bean
@@ -62,6 +63,7 @@ Package org.springframework.context
 Package org.springframework.core
 * added "getParameterName()" method to MethodParameter, activated through a ParameterNameDiscoverer
 * factored out GenericTypeResolver from BridgeMethodResolver and GenericCollectionTypeResolver
+* factored out DecoratingClassLoader base class from OverridingClassLoader and ShadowingClassLoader
 * added "isReadable()" method to Resource interface, giving a readability hint upfront (supported by FileSystemResource)
 * fixed ClassMetadataReadingVisitor (as used by "context:component-scan") to correctly ignore *usage* of inner classes
 
@@ -118,6 +120,8 @@ Package org.springframework.orm
 * JDO/JPA factories check autodetected proxy interfaces for visibility in the ClassLoader (for WebSphere compatibility)
 * added "entityManagerFactoryInterface" property to AbstractEntityManagerFactoryBean, as alternative to autodetection
 * added "getEntityManagerFactoryInterface()" to JpaVendorAdapter (for WebSphere compatibility of OpenJpaVendorAdapter)
+* added "getPersistenceProviderRootPackage()" to JpaVendorAdapter, for excluding provider classes from class overriding
+* introduced EclipseLinkJpaVendorAdapter and EclipseLinkJpaDialect, supporting EclipseLink 1.0 M4 or higher
 
 Package org.springframework.remoting
 * factored out RemotingSupport base class from RemoteAccessor and RemoteExporter
