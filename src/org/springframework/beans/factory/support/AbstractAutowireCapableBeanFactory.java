@@ -354,9 +354,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mbd + "]");
+					logger.debug("Creating instance of bean '" + beanName + "'");
 				}
-
 				// Make sure bean class is actually resolved at this point.
 				resolveBeanClass(mbd, beanName);
 
@@ -381,7 +380,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 							"BeanPostProcessor before instantiation of bean failed", ex);
 				}
 
-				return doCreateBean(beanName, mbd, args);
+				Object beanInstance = doCreateBean(beanName, mbd, args);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Finished creating instance of bean '" + beanName + "'");
+				}
+				return beanInstance;
 			}
 		});
 	}
