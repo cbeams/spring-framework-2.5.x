@@ -40,6 +40,14 @@ public interface JpaVendorAdapter {
 	PersistenceProvider getPersistenceProvider();
 
 	/**
+	 * Return the name of the persistence provider's root package
+	 * (e.g. "oracle.toplink.essentials"). Will be used for
+	 * excluding provider classes from temporary class overriding.
+	 * @since 2.5.2
+	 */
+	String getPersistenceProviderRootPackage();
+
+	/**
 	 * Return a Map of vendor-specific JPA properties,
 	 * typically based on settings in this JpaVendorAdapter instance.
 	 * <p>Note that there might be further JPA properties defined on

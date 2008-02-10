@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.persistenceunit;
 
 import javax.persistence.spi.ClassTransformer;
 
+import org.springframework.core.DecoratingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.util.Assert;
@@ -83,12 +84,13 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	 * This implementation delegates to the LoadTimeWeaver, if specified.
 	 */
 	public ClassLoader getNewTempClassLoader() {
-		if (this.loadTimeWeaver != null) {
-			return this.loadTimeWeaver.getThrowawayClassLoader();
+		ClassLoader tcl = (this.loadTimeWeaver != null ? this.loadTimeWeaver.getThrowawayClassLoader() :
+				new SimpleThrowawayClassLoader(this.classLoader));
+		String packageToExclude = getPersistenceProviderPackageName();
+		if (packageToExclude != null && tcl instanceof DecoratingClassLoader) {
+			((DecoratingClassLoader) tcl).excludePackage(packageToExclude);
 		}
-		else {
-			return new SimpleThrowawayClassLoader(this.classLoader);
-		}
+		return tcl;
 	}
 
 }

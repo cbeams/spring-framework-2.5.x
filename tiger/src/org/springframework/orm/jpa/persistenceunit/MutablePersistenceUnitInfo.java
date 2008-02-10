@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	private boolean excludeUnlistedClasses = false;
 
 	private Properties properties = new Properties();
+
+	private String persistenceProviderPackageName;
 
 
 	public void setPersistenceUnitName(String persistenceUnitName) {
@@ -165,6 +167,14 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 
 	public Properties getProperties() {
 		return this.properties;
+	}
+
+	public void setPersistenceProviderPackageName(String persistenceProviderPackageName) {
+		this.persistenceProviderPackageName = persistenceProviderPackageName;
+	}
+
+	public String getPersistenceProviderPackageName() {
+		return this.persistenceProviderPackageName;
 	}
 
 

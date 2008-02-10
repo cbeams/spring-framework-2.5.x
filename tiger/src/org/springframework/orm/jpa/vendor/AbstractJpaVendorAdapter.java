@@ -112,6 +112,10 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 
 
+	public String getPersistenceProviderRootPackage() {
+		return null;
+	}
+
 	public Map getJpaPropertyMap() {
 		return null;
 	}

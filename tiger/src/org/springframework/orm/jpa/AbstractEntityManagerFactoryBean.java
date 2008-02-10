@@ -236,6 +236,14 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.jpaVendorAdapter = jpaVendorAdapter;
 	}
 
+	/**
+	 * Return the JpaVendorAdapter implementation for this
+	 * EntityManagerFactory, or <code>null</code> if not known.
+	 */
+	public JpaVendorAdapter getJpaVendorAdapter() {
+		return this.jpaVendorAdapter;
+	}
+
 
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {

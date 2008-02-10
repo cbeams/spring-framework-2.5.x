@@ -43,7 +43,7 @@ import org.springframework.orm.jpa.JpaDialect;
  * Hibernate EntityManager. Developed and tested against Hibernate 3.2.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
- * and supports AbstractJpaVendorAdapter's common configuration settings.
+ * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -60,6 +60,10 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
+	}
+
+	public String getPersistenceProviderRootPackage() {
+		return "org.hibernate";
 	}
 
 	public Map getJpaPropertyMap() {

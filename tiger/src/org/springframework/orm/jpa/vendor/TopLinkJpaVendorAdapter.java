@@ -34,7 +34,7 @@ import org.springframework.orm.jpa.JpaDialect;
  * Oracle TopLink Essentials. Developed and tested against TopLink Essentials v2.
  *
  * <p>Exposes TopLink's persistence provider and EntityManager extension interface,
- * and supports AbstractJpaVendorAdapter's common configuration settings.
+ * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -51,6 +51,10 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
+	}
+
+	public String getPersistenceProviderRootPackage() {
+		return "oracle.toplink.essentials";
 	}
 
 	public Map getJpaPropertyMap() {
