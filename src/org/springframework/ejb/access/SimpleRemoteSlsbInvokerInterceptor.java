@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,13 +61,13 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  * @see AbstractRemoteSlsbInvokerInterceptor#setRefreshHomeOnConnectFailure
  */
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {
-	
+
 	/**
 	 * This implementation "creates" a new EJB instance for each invocation.
 	 * Can be overridden for custom invocation strategies.
-	 * <p>Alternatively, override getSessionBeanInstance and
-	 * releaseSessionBeanInstance to change EJB instance creation,
-	 * for example to hold a single shared EJB instance.
+	 * <p>Alternatively, override {@link #getSessionBeanInstance} and
+	 * {@link #releaseSessionBeanInstance} to change EJB instance creation,
+	 * for example to hold a single shared EJB component instance.
 	 */
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		EJBObject ejb = null;
@@ -99,8 +99,9 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	}
 
 	/**
-	 * Return an EJB instance to delegate the call to.
-	 * Default implementation delegates to newSessionBeanInstance.
+	 * Return an EJB component instance to delegate the call to.
+	 * <p>The default implementation delegates to {@link #newSessionBeanInstance}.
+	 * @return the EJB component instance
 	 * @throws NamingException if thrown by JNDI
 	 * @throws InvocationTargetException if thrown by the create method
 	 * @see #newSessionBeanInstance
@@ -111,8 +112,8 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 
 	/**
 	 * Release the given EJB instance.
-	 * Default implementation delegates to removeSessionBeanInstance.
-	 * @param ejb the EJB instance to release
+	 * <p>The default implementation delegates to {@link #removeSessionBeanInstance}.
+	 * @param ejb the EJB component instance to release
 	 * @see #removeSessionBeanInstance
 	 */
 	protected void releaseSessionBeanInstance(EJBObject ejb) {

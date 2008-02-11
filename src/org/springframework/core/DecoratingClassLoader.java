@@ -23,10 +23,12 @@ import java.util.Set;
 import org.springframework.util.Assert;
 
 /**
- * Base class for decorating ClassLoaders such as {@link OverridingClassLoader},
+ * Base class for decorating ClassLoaders such as {@link OverridingClassLoader}
+ * and {@link org.springframework.instrument.classloading.ShadowingClassLoader},
  * providing common handling of excluded packages and classes.
  *
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 2.5.2
  */
 public abstract class DecoratingClassLoader extends ClassLoader {
