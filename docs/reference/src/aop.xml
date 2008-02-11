@@ -525,9 +525,9 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
 
         <programlisting>bean(idOrNameOfBean)</programlisting>
 
-        <para>The '<literal>idOrNameOfBean</literal>' toekn can be the name of
+        <para>The '<literal>idOrNameOfBean</literal>' token can be the name of
         any Spring bean: limited wildcard support using the
-        '<literal>*</literal>' character is supported too, so if you establish
+        '<literal>*</literal>' character is provided, so if you establish
         some naming conventions for your Spring beans you can quite easily
         write a '<literal>bean</literal>' PCD expression to pick them out. As
         is the case with other pointcut designators, the
@@ -535,10 +535,15 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         (negated) too.</para>
 
         <note>
-          <para>In the interests of being totally clear and unambiguous,
-          please note that the '<literal>bean</literal>' PCD is
+          <para>Please note that the '<literal>bean</literal>' PCD is
           <emphasis>only</emphasis> supported in Spring AOP - and
-          <emphasis>not</emphasis> in AspectJ.</para>
+          <emphasis>not</emphasis> in AspectJ. It is a Spring-specific
+          extension to the standard PCDs that AspectJ defines.</para>
+
+          <para>The '<literal>bean</literal>' PCD operates at the
+          <emphasis>instance</emphasis> level (building on the Spring
+          bean name concept) rather than at the type level only
+          (which is what weaving-based AOP is limited to).</para>
         </note>
 
         <remark>Because Spring AOP limits matching to only method execution
