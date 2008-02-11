@@ -37,9 +37,8 @@ import org.springframework.util.StringUtils;
  * applying registered transformers to all affected classes.
  *
  * @author Rob Harrop
- * @author Rod Johnson
- * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  * @see #addTransformer
  * @see org.springframework.core.OverridingClassLoader
@@ -152,8 +151,11 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 			Class cls = defineClass(name, bytes, 0, bytes.length);
 			// Additional check for defining the package, if not defined yet.
 			if (cls.getPackage() == null) {
-				String packageName = name.substring(0, name.lastIndexOf('.'));
-				definePackage(packageName, null, null, null, null, null, null, null);
+				int packageSeparator = name.lastIndexOf('.');
+				if (packageSeparator != -1) {
+					String packageName = name.substring(0, packageSeparator);
+					definePackage(packageName, null, null, null, null, null, null, null);
+				}
 			}
 			this.classCache.put(name, cls);
 			return cls;
