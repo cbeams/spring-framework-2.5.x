@@ -24,6 +24,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 
 /**
  * {@link SqlParameterSource} implementation that obtains parameter values
@@ -84,6 +85,19 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 			this.propertyNames = (String[]) names.toArray(new String[names.size()]);
 		}
 		return this.propertyNames;
+	}
+
+	/**
+	 * Derives a default SQL type from the corresponding property type.
+	 * @see org.springframework.jdbc.core.StatementCreatorUtils#javaTypeToSqlParameterType
+	 */
+	public int getSqlType(String paramName) {
+		int sqlType = super.getSqlType(paramName);
+		if (sqlType != TYPE_UNKNOWN) {
+			return sqlType;
+		}
+		Class propType = this.beanWrapper.getPropertyType(paramName);
+		return StatementCreatorUtils.javaTypeToSqlParameterType(propType);
 	}
 
 }

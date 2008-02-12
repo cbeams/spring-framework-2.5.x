@@ -67,9 +67,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 		if (sqlType != null) {
 			return sqlType.intValue();
 		}
-		else {
-			return TYPE_UNKNOWN;
-		}
+		return TYPE_UNKNOWN;
 	}
 
 	/**

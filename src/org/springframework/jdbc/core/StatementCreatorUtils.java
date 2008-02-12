@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -28,7 +28,12 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
@@ -54,6 +59,54 @@ public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
+	private static Map javaTypeToSqlTypeMap = new HashMap(32);
+
+	static {
+		javaTypeToSqlTypeMap.put(boolean.class, new Integer(Types.BOOLEAN));
+		javaTypeToSqlTypeMap.put(Boolean.class, new Integer(Types.BOOLEAN));
+		javaTypeToSqlTypeMap.put(byte.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(Byte.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(short.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(Short.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(int.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(Integer.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(long.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(Long.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(BigInteger.class, new Integer(Types.INTEGER));
+		javaTypeToSqlTypeMap.put(float.class, new Integer(Types.DECIMAL));
+		javaTypeToSqlTypeMap.put(Float.class, new Integer(Types.DECIMAL));
+		javaTypeToSqlTypeMap.put(double.class, new Integer(Types.DECIMAL));
+		javaTypeToSqlTypeMap.put(Double.class, new Integer(Types.DECIMAL));
+		javaTypeToSqlTypeMap.put(BigDecimal.class, new Integer(Types.DECIMAL));
+		javaTypeToSqlTypeMap.put(java.sql.Date.class, new Integer(Types.DATE));
+		javaTypeToSqlTypeMap.put(java.sql.Time.class, new Integer(Types.TIME));
+		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, new Integer(Types.TIMESTAMP));
+		javaTypeToSqlTypeMap.put(Blob.class, new Integer(Types.BLOB));
+		javaTypeToSqlTypeMap.put(Clob.class, new Integer(Types.CLOB));
+	}
+
+
+	/**
+	 * Derive a default SQL type from the given Java type.
+	 * @param javaType the Java type to translate
+	 * @return the corresponding SQL type, or <code>null</code> if none found
+	 */
+	public static int javaTypeToSqlParameterType(Class javaType) {
+		Integer sqlType = (Integer) javaTypeToSqlTypeMap.get(javaType);
+		if (sqlType != null) {
+			return sqlType.intValue();
+		}
+		if (Number.class.isAssignableFrom(javaType)) {
+			return Types.NUMERIC;
+		}
+		if (isStringValue(javaType)) {
+			return Types.VARCHAR;
+		}
+		if (isDateValue(javaType) || Calendar.class.isAssignableFrom(javaType)) {
+			return Types.TIMESTAMP;
+		}
+		return SqlTypeValue.TYPE_UNKNOWN;
+	}
 
 	/**
 	 * Set the value for a parameter. The method used is based on the SQL type
@@ -251,10 +304,10 @@ public abstract class StatementCreatorUtils {
 				}
 			}
 			else if (sqlTypeToUse == SqlTypeValue.TYPE_UNKNOWN) {
-				if (isStringValue(inValueToUse)) {
+				if (isStringValue(inValueToUse.getClass())) {
 					ps.setString(paramIndex, inValueToUse.toString());
 				}
-				else if (isDateValue(inValueToUse)) {
+				else if (isDateValue(inValueToUse.getClass())) {
 					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValueToUse).getTime()));
 				}
 				else if (inValueToUse instanceof Calendar) {
@@ -276,18 +329,21 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Check whether the given value can be treated as a String value.
 	 */
-	private static boolean isStringValue(Object inValue) {
+	private static boolean isStringValue(Class inValueType) {
 		// Consider any CharSequence (including JDK 1.5's StringBuilder) as String.
-		return (inValue instanceof CharSequence || inValue instanceof StringWriter);
+		return (CharSequence.class.isAssignableFrom(inValueType) ||
+				StringWriter.class.isAssignableFrom(inValueType));
 	}
 
 	/**
 	 * Check whether the given value is a <code>java.util.Date</code>
 	 * (but not one of the JDBC-specific subclasses).
 	 */
-	private static boolean isDateValue(Object inValue) {
-		return (inValue instanceof java.util.Date && !(inValue instanceof java.sql.Date ||
-				inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp));
+	private static boolean isDateValue(Class inValueType) {
+		return (java.util.Date.class.isAssignableFrom(inValueType) &&
+				!(java.sql.Date.class.isAssignableFrom(inValueType) ||
+						java.sql.Time.class.isAssignableFrom(inValueType) ||
+						java.sql.Timestamp.class.isAssignableFrom(inValueType)));
 	}
 
 	/**

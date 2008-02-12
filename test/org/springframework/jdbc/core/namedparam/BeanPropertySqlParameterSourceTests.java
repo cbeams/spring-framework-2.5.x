@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,58 +16,80 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.sql.Types;
+import java.util.Arrays;
+
 import junit.framework.TestCase;
+
 import org.springframework.beans.TestBean;
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link BeanPropertySqlParameterSource} class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class BeanPropertySqlParameterSourceTests extends TestCase {
+public class BeanPropertySqlParameterSourceTests extends TestCase {
 
-    public void testWithNullBeanPassedToCtor() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                new BeanPropertySqlParameterSource(null);
-            }
-        }.runTest();
-    }
+	public void testWithNullBeanPassedToCtor() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new BeanPropertySqlParameterSource(null);
+			}
+		}.runTest();
+	}
 
-    public void testGetValueWhereTheUnderlyingBeanHasNoSuchProperty() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
-                source.getValue("thisPropertyDoesNotExist");
-            }
-        }.runTest();
-    }
+	public void testGetValueWhereTheUnderlyingBeanHasNoSuchProperty() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
+				source.getValue("thisPropertyDoesNotExist");
+			}
+		}.runTest();
+	}
 
-    public void testHasValueWhereTheUnderlyingBeanHasNoSuchProperty() throws Exception {
-        BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
-        assertFalse(source.hasValue("thisPropertyDoesNotExist"));
-    }
+	public void testSuccessfulPropertyAccess(){
+		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
+		assertTrue(Arrays.asList(source.getReadablePropertyNames()).contains("name"));
+		assertTrue(Arrays.asList(source.getReadablePropertyNames()).contains("age"));
+		assertEquals("tb", source.getValue("name"));
+		assertEquals(new Integer(99), source.getValue("age"));
+		assertEquals(Types.VARCHAR, source.getSqlType("name"));
+		assertEquals(Types.INTEGER, source.getSqlType("age"));
+	}
 
-    public void testGetValueWhereTheUnderlyingBeanPropertyIsNotReadable() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
-                source.getValue("noOp");
-            }
-        }.runTest();
-    }
+	public void testSuccessfulPropertyAccessWithOverriddenSqlType(){
+		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
+		source.registerSqlType("age", Types.NUMERIC);
+		assertEquals("tb", source.getValue("name"));
+		assertEquals(new Integer(99), source.getValue("age"));
+		assertEquals(Types.VARCHAR, source.getSqlType("name"));
+		assertEquals(Types.NUMERIC, source.getSqlType("age"));
+	}
 
-    public void testHasValueWhereTheUnderlyingBeanPropertyIsNotReadable() throws Exception {
-        BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
-        assertFalse(source.hasValue("noOp"));
-    }
+	public void testHasValueWhereTheUnderlyingBeanHasNoSuchProperty() throws Exception {
+		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
+		assertFalse(source.hasValue("thisPropertyDoesNotExist"));
+	}
+
+	public void testGetValueWhereTheUnderlyingBeanPropertyIsNotReadable() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
+				source.getValue("noOp");
+			}
+		}.runTest();
+	}
+
+	public void testHasValueWhereTheUnderlyingBeanPropertyIsNotReadable() throws Exception {
+		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
+		assertFalse(source.hasValue("noOp"));
+	}
 
 
-    private static final class NoReadableProperties {
+	private static final class NoReadableProperties {
 
-        public void setNoOp(String noOp) {
-        }
-    }
+		public void setNoOp(String noOp) {
+		}
+	}
 
 }
