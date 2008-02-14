@@ -555,7 +555,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 			else if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
 				// Assume a single model attribute...
-				String attrName = AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class).value();
+				ModelAttribute attr = AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class);
+				String attrName = (attr != null ? attr.value() : "");
 				ModelAndView mav = new ModelAndView().addAllObjects(implicitModel);
 				if ("".equals(attrName)) {
 					return mav.addObject(returnValue);
