@@ -209,12 +209,17 @@ public abstract class StatementCreatorUtils {
 		if (inValueToUse == null) {
 			if (sqlTypeToUse == SqlTypeValue.TYPE_UNKNOWN) {
 				boolean useSetObject = false;
+				sqlTypeToUse = Types.NULL;
 				try {
 					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
 					String databaseProductName = dbmd.getDatabaseProductName();
 					String jdbcDriverName = dbmd.getDriverName();
-					useSetObject = (databaseProductName.indexOf("Informix") != -1 ||
-							jdbcDriverName.indexOf("Apache Derby Embedded") != -1);
+					if (databaseProductName.startsWith("Informix") || jdbcDriverName.startsWith("Apache Derby Embedded")) {
+						useSetObject = true;
+					}
+					else if (databaseProductName.startsWith("DB2")) {
+						sqlTypeToUse = Types.VARCHAR;
+					}
 				}
 				catch (Throwable ex) {
 					logger.debug("Could not check database or driver name", ex);
@@ -223,7 +228,7 @@ public abstract class StatementCreatorUtils {
 					ps.setObject(paramIndex, null);
 				}
 				else {
-					ps.setNull(paramIndex, Types.NULL);
+					ps.setNull(paramIndex, sqlTypeToUse);
 				}
 			}
 			else if (typeNameToUse != null) {
