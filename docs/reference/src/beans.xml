@@ -3250,12 +3250,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         For a session for example, this can be the session identifier.</para>
 
         <programlisting>String getConversationId()</programlisting>
-
-        <para>
-          <ulink
-          url="http://opensource.atlassian.com/projects/spring/browse/SPR-2600">SPR-2600
-          - TODO</ulink>
-        </para>
       </section>
 
       <section id="beans-factory-scopes-custom-using">
