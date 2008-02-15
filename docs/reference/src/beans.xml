@@ -2623,7 +2623,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			    <para>The last method deals with obtaining the conversation identifier for the underlying scope. This identifier is
 			    different for each scope. For a session for example, this can be the session identifier.</para>
 			    <programlisting><![CDATA[String getConversationId()]]></programlisting>
-			    <para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-2600">SPR-2600 - TODO</ulink></para>
 			</section>
 			<section id="beans-factory-scopes-custom-using">
 			    <title>Using a custom scope</title>
