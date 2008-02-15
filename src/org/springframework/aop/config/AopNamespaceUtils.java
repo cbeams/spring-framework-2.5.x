@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Only a single auto-proxy creator can be registered and multiple tags may wish
  * to register different concrete implementations. As such this class wraps a simple
- * escalation protocol, allowing clases to request a particular auto-proxy creator
- * and know that class, <code>or a subclass thereof</code>, will eventually be resident
+ * escalation protocol. Therefore classes may request a particular auto-proxy creator
+ * and know that class, <i>or a subclass thereof</i>, will eventually be resident
  * in the application context.
  *
  * @author Rob Harrop
