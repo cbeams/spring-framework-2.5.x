@@ -735,8 +735,8 @@ BeanFactory factory = context;</programlisting>
       <interfacename>BeanFactory</interfacename> you would create one and read
       in some bean definitions in the XML format as follows:</para>
 
-      <programlisting>InputStream is = new FileInputStream("beans.xml");
-BeanFactory factory = new XmlBeanFactory(is);</programlisting>
+      <programlisting>Resource res = new FileSystemResource("beans.xml");
+BeanFactory factory = new XmlBeanFactory(res);</programlisting>
 
       <para>Basically that is all there is to it. Using
       <methodname>getBean(String)</methodname> you can retrieve instances of
