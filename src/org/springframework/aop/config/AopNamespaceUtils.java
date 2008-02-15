@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ import org.springframework.beans.factory.xml.ParserContext;
  *
  * <p>Only a single auto-proxy creator can be registered and multiple tags may wish
  * to register different concrete implementations. As such this class delegates to
- * {@link AopConfigUtils} which wraps a simple escalation protocol. Therefore 
- * classes may request a particular auto-proxy creator and know that class, 
- * <code>or a subclass thereof</code>, will eventually be resident in the 
- * application context.
+ * {@link AopConfigUtils} which wraps a simple escalation protocol. Therefore classes
+ * may request a particular auto-proxy creator and know that class, <i>or a subclass
+ * thereof</i>, will eventually be resident in the application context.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -73,6 +72,25 @@ public abstract class AopNamespaceUtils {
 				parserContext.getRegistry(), parserContext.extractSource(sourceElement));
 		useClassProxyingIfNecessary(parserContext.getRegistry(), sourceElement);
 		registerComponentIfNecessary(beanDefinition, parserContext);
+	}
+
+	/**
+	 * @deprecated since Spring 2.5, in favor of
+	 * {@link #registerAutoProxyCreatorIfNecessary(ParserContext, Element)} and
+	 * {@link AopConfigUtils#registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry, Object)}
+	 */
+	public static void registerAutoProxyCreatorIfNecessary(ParserContext parserContext, Object source) {
+		BeanDefinition beanDefinition = AopConfigUtils.registerAutoProxyCreatorIfNecessary(
+				parserContext.getRegistry(), source);
+		registerComponentIfNecessary(beanDefinition, parserContext);
+	}
+
+	/**
+	 * @deprecated since Spring 2.5, in favor of
+	 * {@link AopConfigUtils#forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry)}
+	 */
+	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
+		AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 	}
 
 
