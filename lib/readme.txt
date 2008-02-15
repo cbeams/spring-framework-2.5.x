@@ -80,7 +80,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.11 (http://www.freemarker.org)
+- FreeMarker 2.3.12 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -94,7 +94,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Groovy support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.2.5 (http://www.hibernate.org)
+- Hibernate 3.2.6 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
