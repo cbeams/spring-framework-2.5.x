@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -452,6 +452,44 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
+	 * Creates the specified number of concurrent consumers,
+	 * in the form of a JMS Session plus associated MessageConsumer
+	 * running in a separate thread.
+	 * @see #scheduleNewInvoker
+	 * @see #setTaskExecutor
+	 */
+	protected void doInitialize() throws JMSException {
+		synchronized (this.activeInvokerMonitor) {
+			for (int i = 0; i < this.concurrentConsumers; i++) {
+				scheduleNewInvoker();
+			}
+		}
+	}
+
+	/**
+	 * Destroy the registered JMS Sessions and associated MessageConsumers.
+	 */
+	protected void doShutdown() throws JMSException {
+		logger.debug("Waiting for shutdown of message listener invokers");
+		try {
+			synchronized (this.activeInvokerMonitor) {
+				while (this.activeInvokerCount > 0) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
+								" message listener invokers");
+					}
+					this.activeInvokerMonitor.wait();
+				}
+			}
+		}
+		catch (InterruptedException ex) {
+			// Re-interrupt current thread, to allow other threads to react.
+			Thread.currentThread().interrupt();
+		}
+	}
+
+
+	/**
 	 * Create a default TaskExecutor. Called if no explicit TaskExecutor has been specified.
 	 * <p>The default implementation builds a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}
 	 * with the specified bean name (or the class name, if no bean name specified) as thread name prefix.
@@ -473,21 +511,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Creates the specified number of concurrent consumers,
-	 * in the form of a JMS Session plus associated MessageConsumer
-	 * running in a separate thread.
-	 * @see #scheduleNewInvoker
-	 * @see #setTaskExecutor
-	 */
-	protected void doInitialize() throws JMSException {
-		synchronized (this.activeInvokerMonitor) {
-			for (int i = 0; i < this.concurrentConsumers; i++) {
-				scheduleNewInvoker();
-			}
-		}
-	}
-
-	/**
 	 * Re-executes the given task via this listener container's TaskExecutor.
 	 * @see #setTaskExecutor
 	 */
@@ -495,6 +518,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		this.taskExecutor.execute((Runnable) task);
 	}
 
+	/**
+	 * Try scheduling a new invoker, since we know messages are coming in...
+	 * @see #scheduleNewInvokerIfAppropriate()
+	 */
 	protected void messageReceived(Message message, Session session) {
 		scheduleNewInvokerIfAppropriate();
 	}
@@ -747,29 +774,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
 				Thread.currentThread().interrupt();
-			}
-		}
-	}
-
-
-	/**
-	 * Destroy the registered JMS Sessions and associated MessageConsumers.
-	 */
-	protected void doShutdown() throws JMSException {
-		logger.debug("Waiting for shutdown of message listener invokers");
-		synchronized (this.activeInvokerMonitor) {
-			while (this.activeInvokerCount > 0) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
-							" message listener invokers");
-				}
-				try {
-					this.activeInvokerMonitor.wait();
-				}
-				catch (InterruptedException interEx) {
-					// Re-interrupt current thread, to allow other threads to react.
-					Thread.currentThread().interrupt();
-				}
 			}
 		}
 	}
