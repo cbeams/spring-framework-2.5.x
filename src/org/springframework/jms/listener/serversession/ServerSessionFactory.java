@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import org.springframework.jms.listener.serversession.ListenerSessionManager;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of Spring 2.5, in favor of DefaultMessageListenerContainer
+ * and JmsMessageEndpointManager. To be removed in Spring 3.0.
  * @see org.springframework.jms.listener.serversession.ListenerSessionManager
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  */
