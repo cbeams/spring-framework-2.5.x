@@ -26,7 +26,7 @@ package org.springframework.web.servlet.handler.metadata;
  * <p>Application code must use the Commons Attributes indexer tool to use this option.
  *
  * @author Rod Johnson
- * @deprecated in favor of annotation-based request mapping.
+ * @deprecated as of Spring 2.5, in favor of annotation-based request mapping.
  * To be removed in Spring 3.0.
  * @@org.apache.commons.attributes.Indexed()
  */

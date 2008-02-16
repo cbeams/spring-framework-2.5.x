@@ -52,7 +52,7 @@ import org.apache.commons.attributes.Attributes;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @deprecated in favor of annotation-based request mapping.
+ * @deprecated as of Spring 2.5, in favor of annotation-based request mapping.
  * To be removed in Spring 3.0.
  */
 public class CommonsPathMapHandlerMapping extends AbstractPathMapHandlerMapping {
