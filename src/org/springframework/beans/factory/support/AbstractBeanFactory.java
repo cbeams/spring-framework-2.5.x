@@ -58,8 +58,8 @@ import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.StringValueResolver;
 
 /**
  * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
@@ -126,9 +126,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/** Map from scope identifier String to corresponding Scope */
 	private final Map scopes = new HashMap();
-
-	/** Map from alias to canonical bean name */
-	private final Map aliasMap = CollectionFactory.createConcurrentMapIfPossible(16);
 
 	/** Map from bean name to merged RootBeanDefinition */
 	private final Map mergedBeanDefinitions = CollectionFactory.createConcurrentMapIfPossible(16);
@@ -246,7 +243,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 			checkMergedBeanDefinition(mbd, beanName, args);
 
-			// Guarantee initialization of beans that the current one depends on.
+			// Guarantee initialization of beans that the current bean depends on.
 			String[] dependsOn = mbd.getDependsOn();
 			if (dependsOn != null) {
 				for (int i = 0; i < dependsOn.length; i++) {
@@ -520,16 +517,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (!fullBeanName.equals(name)) {
 			aliases.add(fullBeanName);
 		}
-		synchronized (this.aliasMap) {
-			for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String registeredName = (String) entry.getValue();
-				if (registeredName.equals(beanName)) {
-					String key = (factoryPrefix ? FACTORY_BEAN_PREFIX : "") + entry.getKey();
-					if (!key.equals(name)) {
-						aliases.add(key);
-					}
-				}
+		String[] retrievedAliases = super.getAliases(beanName);
+		for (int i = 0; i < retrievedAliases.length; i++) {
+			String alias = (factoryPrefix ? FACTORY_BEAN_PREFIX : "") + retrievedAliases[i];
+			if (!alias.equals(name)) {
+				aliases.add(alias);
 			}
 		}
 		if (!containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
@@ -721,51 +713,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
-	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
-		Assert.hasText(beanName, "'beanName' must not be empty");
-		Assert.hasText(alias, "'alias' must not be empty");
-		if (!alias.equals(beanName)) {
-			// Only actually register the alias if it is not equal to the bean name itself.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
-			}
-			synchronized (this.aliasMap) {
-				String registeredName = (String) this.aliasMap.get(alias);
-				if (registeredName != null && !registeredName.equals(beanName)) {
-					throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
-							beanName + "': It is already registered for bean name '" + registeredName + "'.");
-				}
-				this.aliasMap.put(alias, beanName);
-			}
-		}
-	}
-
-	public void resolveAliases(StringValueResolver valueResolver) {
-		Assert.notNull(valueResolver, "StringValueResolver must not be null");
-		synchronized (this.aliasMap) {
-			Map aliasCopy = new HashMap(this.aliasMap);
-			for (Iterator it = aliasCopy.keySet().iterator(); it.hasNext();) {
-				String alias = (String) it.next();
-				String registeredName = (String) aliasCopy.get(alias);
-				String resolvedAlias = valueResolver.resolveStringValue(alias);
-				String resolvedName = valueResolver.resolveStringValue(registeredName);
-				if (!resolvedAlias.equals(alias)) {
-					String existingName = (String) this.aliasMap.get(resolvedAlias);
-					if (existingName != null && !existingName.equals(resolvedName)) {
-						throw new BeanDefinitionStoreException("Cannot register resolved alias '" +
-								resolvedAlias + "' (original: '" + alias + "') for bean name '" + resolvedName +
-								"': It is already registered for bean name '" + registeredName + "'.");
-					}
-					this.aliasMap.put(resolvedAlias, resolvedName);
-					this.aliasMap.remove(alias);
-				}
-				else if (!registeredName.equals(resolvedName)) {
-					this.aliasMap.put(alias, resolvedName);
-				}
-			}
-		}
-	}
-
 	/**
 	 * Return a 'merged' BeanDefinition for the given bean name,
 	 * merging a child bean definition with its parent if necessary.
@@ -909,17 +856,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return the transformed bean name
 	 */
 	protected String transformedBeanName(String name) {
-		String canonicalName = BeanFactoryUtils.transformedBeanName(name);
-		// Handle aliasing.
-		String resolvedName = null;
-		do {
-			resolvedName = (String) this.aliasMap.get(canonicalName);
-			if (resolvedName != null) {
-				canonicalName = resolvedName;
-			}
-		}
-		while (resolvedName != null);
-		return canonicalName;
+		return canonicalName(BeanFactoryUtils.transformedBeanName(name));
 	}
 
 	/**
@@ -933,16 +870,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			beanName = FACTORY_BEAN_PREFIX + beanName;
 		}
 		return beanName;
-	}
-
-	/**
-	 * Determine whether this given bean name is defines as an alias
-	 * (as opposed to the name of an actual bean definition).
-	 * @param beanName the bean name to check
-	 * @return whether the given name is an alias
-	 */
-	protected boolean isAlias(String beanName) {
-		return this.aliasMap.containsKey(beanName);
 	}
 
 	/**
@@ -1273,6 +1200,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanInstance the shared bean instance
 	 * @param name name that may include factory dereference prefix
 	 * @param beanName the canonical bean name
+	 * @param mbd the merged bean definition
 	 * @return the object to expose for the bean
 	 */
 	protected Object getObjectForBeanInstance(
@@ -1309,12 +1237,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Determine whether the given bean name is already in use within this factory,
-	 * i.e. whether there is a local bean registered under this name or an inner
-	 * bean created with this name.
+	 * i.e. whether there is a local bean or alias registered under this name or
+	 * an inner bean created with this name.
 	 * @param beanName the name to check
 	 */
 	public boolean isBeanNameInUse(String beanName) {
-		return containsLocalBean(beanName) || hasDependentBean(beanName);
+		return isAlias(beanName) || containsLocalBean(beanName) || hasDependentBean(beanName);
 	}
 
 	/**

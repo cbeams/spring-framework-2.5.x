@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.AliasRegistry;
 
 /**
  * Interface for registries that hold bean definitions, for example RootBeanDefinition
@@ -44,7 +45,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  * @see PropertiesBeanDefinitionReader
  */
-public interface BeanDefinitionRegistry {
+public interface BeanDefinitionRegistry extends AliasRegistry {
 
 	/**
 	 * Register a new bean definition with this registry.
@@ -94,22 +95,6 @@ public interface BeanDefinitionRegistry {
 	 * @return the number of beans defined in the registry
 	 */
 	int getBeanDefinitionCount();
-
-	/**
-	 * Given a bean name, create an alias. We typically use this method to
-	 * support names that are illegal within XML ids (used for bean names).
-	 * @param beanName the canonical name of the bean
-	 * @param alias the alias to be registered for the bean
-	 * @throws BeanDefinitionStoreException if the alias is already in use
-	 */
-	void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException;
-
-	/**
-	 * Return the aliases for the given bean name, if defined.
-	 * @param beanName the bean name to check for aliases
-	 * @return the aliases, or an empty array if none
-	 */
-	String[] getAliases(String beanName);
 
 	/**
 	 * Determine whether the given bean name is already in use within this registry,

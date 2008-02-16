@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,12 +256,20 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		return this.beanFactory.getBeanDefinition(beanName);
 	}
 
-	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
+	public boolean isBeanNameInUse(String beanName) {
+		return this.beanFactory.isBeanNameInUse(beanName);
+	}
+
+	public void registerAlias(String beanName, String alias) {
 		this.beanFactory.registerAlias(beanName, alias);
 	}
 
-	public boolean isBeanNameInUse(String beanName) {
-		return this.beanFactory.isBeanNameInUse(beanName);
+	public void removeAlias(String alias) {
+		this.beanFactory.removeAlias(alias);
+	}
+
+	public boolean isAlias(String beanName) {
+		return this.beanFactory.isAlias(beanName);
 	}
 
 }

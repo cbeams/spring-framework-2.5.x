@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ import java.util.StringTokenizer;
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * Subclasses must implement setUp() to initialize bean factory
  * and any other variables they need.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -286,16 +286,19 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			// Ok
 		}
 	}
-	
+
 	// TODO: refactor in AbstractBeanFactory (tests for AbstractBeanFactory)
 	// and rename this class
 	public void testAliasing() {
-		if (!(getBeanFactory() instanceof AbstractBeanFactory))
+		BeanFactory bf = getBeanFactory();
+		if (!(bf instanceof ConfigurableBeanFactory)) {
 			return;
+		}
+		ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) bf;
 		
 		String alias = "rods alias";
 		try {
-			getBeanFactory().getBean(alias);
+			cbf.getBean(alias);
 			fail("Shouldn't permit factory get on normal bean");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -304,20 +307,10 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		}
 		
 		// Create alias
-		((AbstractBeanFactory) getBeanFactory()).registerAlias("rod", alias);
+		cbf.registerAlias("rod", alias);
 		Object rod = getBeanFactory().getBean("rod");
 		Object aliasRod = getBeanFactory().getBean(alias);
 		assertTrue(rod == aliasRod);
-
-		try {
-			((AbstractBeanFactory) getBeanFactory()).registerAlias("father", alias);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			// expected
-		}
-
-		// TODO: check prototype support
 	}
 
 
