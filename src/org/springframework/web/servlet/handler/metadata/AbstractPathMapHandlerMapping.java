@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @deprecated in favor of annotation-based request mapping.
+ * To be removed in Spring 3.0.
  */
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
 
