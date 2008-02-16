@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.util;
 import java.util.Date;
 
 /**
- * Implementation of ResponseTimeMonitor for use via delegation by
- * objects that implement this interface.
+ * Default implementation of {@link ResponseTimeMonitor}.
  *
  * @author Rod Johnson
  * @since November 21, 2000
+ * @deprecated as of Spring 2.5, to be removed in Spring 3.0
  */
 public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 
@@ -54,7 +54,7 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	 * Return the number of hits this object has handled.
 	 */
 	public int getAccessCount() {
-		return accessCount;
+		return this.accessCount;
 	}
 
 	/**
@@ -68,25 +68,23 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	 * Return the average response time achieved by this object.
 	 */
 	public int getAverageResponseTimeMillis() {
+		int count = getAccessCount();
 		// avoid division by 0
-		if (getAccessCount() == 0) {
-			return 0;
-		}
-		return this.totalResponseTimeMillis / getAccessCount();
+		return (count != 0 ? this.totalResponseTimeMillis / count : 0);
 	}
 
 	/**
 	 * Return the best (lowest) response time achieved by this object.
 	 */
 	public int getBestResponseTimeMillis() {
-		return bestResponseTimeMillis;
+		return this.bestResponseTimeMillis;
 	}
 
 	/**
 	 * Return the worst (slowest) response time achieved by this object.
 	 */
 	public int getWorstResponseTimeMillis() {
-		return worstResponseTimeMillis;
+		return this.worstResponseTimeMillis;
 	}
 
 

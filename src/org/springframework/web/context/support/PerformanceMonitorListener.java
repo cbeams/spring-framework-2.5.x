@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.springframework.util.ResponseTimeMonitorImpl;
  * @author Juergen Hoeller
  * @since January 21, 2001
  * @see RequestHandledEvent
+ * @deprecated as of Spring 2.5, to be removed in Spring 3.0.
+ * Use a custom ApplicationListener specific to your needs instead.
  */
 public class PerformanceMonitorListener implements ApplicationListener {
 
@@ -46,7 +48,6 @@ public class PerformanceMonitorListener implements ApplicationListener {
 			RequestHandledEvent rhe = (RequestHandledEvent) event;
 			this.responseTimeMonitor.recordResponseTime(rhe.getProcessingTimeMillis());
 			if (logger.isTraceEnabled()) {
-				// Stringifying objects is expensive. Don't do it unless it will show.
 				logger.trace("PerformanceMonitorListener: last=[" + rhe.getProcessingTimeMillis() + "ms]; " +
 						this.responseTimeMonitor + "; " + rhe.getShortDescription());
 			}
