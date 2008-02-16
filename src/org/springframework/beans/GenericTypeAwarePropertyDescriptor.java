@@ -16,14 +16,18 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyDescriptor;
 import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.MethodParameter;
 
 /**
+ * Extension of the standard JavaBeans PropertyDescriptor class,
+ * overriding <code>getPropertyType()</code> such that a generically
+ * declared type will be resolved against the containing bean class.
+ *
  * @author Juergen Hoeller
  * @since 2.5.2
  */
@@ -39,6 +43,7 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	public GenericTypeAwarePropertyDescriptor(
 			Class beanClass, String propertyName, Method readMethod, Method writeMethod)
 			throws IntrospectionException {
+
 		super(propertyName, readMethod, writeMethod);
 		this.beanClass = beanClass;
 	}
