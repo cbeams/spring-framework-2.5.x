@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -165,8 +166,9 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		// Register Sessions and MessageConsumers.
 		this.sessions = new HashSet(this.concurrentConsumers);
 		this.consumers = new HashSet(this.concurrentConsumers);
+		Connection con = getSharedConnection();
 		for (int i = 0; i < this.concurrentConsumers; i++) {
-			Session session = createSession(getSharedConnection());
+			Session session = createSession(con);
 			MessageConsumer consumer = createListenerConsumer(session);
 			this.sessions.add(session);
 			this.consumers.add(consumer);
