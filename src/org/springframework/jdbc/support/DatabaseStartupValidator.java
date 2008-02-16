@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,52 +101,53 @@ public class DatabaseStartupValidator implements InitializingBean {
 			throw new IllegalArgumentException("validationQuery is required");
 		}
 
-		boolean validated = false;
-		long beginTime = System.currentTimeMillis();
-		long deadLine = beginTime + this.timeout * 1000;
-		SQLException latestEx = null;
+		try {
+			boolean validated = false;
+			long beginTime = System.currentTimeMillis();
+			long deadLine = beginTime + this.timeout * 1000;
+			SQLException latestEx = null;
 
-		while (!validated && System.currentTimeMillis() < deadLine) {
-			Connection con = null;
-			Statement stmt = null;
-			try {
-				con = this.dataSource.getConnection();
-				stmt = con.createStatement();
-				stmt.execute(this.validationQuery);
-				validated = true;
-			}
-			catch (SQLException ex) {
-				latestEx = ex;
-				logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
-				float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
-				if (rest > this.interval) {
-					logger.warn("Database has not started up yet - retrying in " + this.interval +
-											" seconds (timeout in " + rest + " seconds)");
+			while (!validated && System.currentTimeMillis() < deadLine) {
+				Connection con = null;
+				Statement stmt = null;
+				try {
+					con = this.dataSource.getConnection();
+					stmt = con.createStatement();
+					stmt.execute(this.validationQuery);
+					validated = true;
+				}
+				catch (SQLException ex) {
+					latestEx = ex;
+					logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
+					float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
+					if (rest > this.interval) {
+						logger.warn("Database has not started up yet - retrying in " + this.interval +
+								" seconds (timeout in " + rest + " seconds)");
+					}
+				}
+				finally {
+					JdbcUtils.closeStatement(stmt);
+					JdbcUtils.closeConnection(con);
+				}
+
+				if (!validated) {
+					Thread.sleep(this.interval * 1000);
 				}
 			}
-			finally {
-				JdbcUtils.closeStatement(stmt);
-				JdbcUtils.closeConnection(con);
+
+			if (!validated) {
+				throw new CannotGetJdbcConnectionException(
+						"Database has not started up within " + this.timeout + " seconds", latestEx);
 			}
 
-			try {
-				Thread.sleep(this.interval * 1000);
-			}
-			catch (InterruptedException ex) {
-				// Re-interrupt current thread, to allow other threads to react.
-				Thread.currentThread().interrupt();
-			}
-		}
-
-		if (validated) {
 			float duration = (System.currentTimeMillis() - beginTime) / 1000;
 			if (logger.isInfoEnabled()) {
 				logger.info("Database startup detected after " + duration + " seconds");
 			}
 		}
-		else {
-			throw new CannotGetJdbcConnectionException(
-					"Database has not started up within " + this.timeout + " seconds", latestEx);
+		catch (InterruptedException ex) {
+			// Re-interrupt current thread, to allow other threads to react.
+			Thread.currentThread().interrupt();
 		}
 	}
 

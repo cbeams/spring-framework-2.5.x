@@ -112,7 +112,7 @@ import org.springframework.util.ClassUtils;
  * @see #setCacheLevel
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
- * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
+ * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
 public class DefaultMessageListenerContainer extends AbstractPollingMessageListenerContainer {
 
@@ -474,20 +474,20 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	protected void doShutdown() throws JMSException {
 		logger.debug("Waiting for shutdown of message listener invokers");
-		synchronized (this.activeInvokerMonitor) {
-			while (this.activeInvokerCount > 0) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
-							" message listener invokers");
-				}
-				try {
+		try {
+			synchronized (this.activeInvokerMonitor) {
+				while (this.activeInvokerCount > 0) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
+								" message listener invokers");
+					}
 					this.activeInvokerMonitor.wait();
 				}
-				catch (InterruptedException interEx) {
-					// Re-interrupt current thread, to allow other threads to react.
-					Thread.currentThread().interrupt();
-				}
 			}
+		}
+		catch (InterruptedException ex) {
+			// Re-interrupt current thread, to allow other threads to react.
+			Thread.currentThread().interrupt();
 		}
 	}
 
