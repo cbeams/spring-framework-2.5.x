@@ -36,10 +36,10 @@ import org.springframework.util.Assert;
  * this class (e.g., {@link #findAnnotation(Method, Class)},
  * {@link #getAnnotation(Method, Class)}, and {@link #getAnnotations(Method)})
  * instead of the plain annotation lookup methods in the JDK. You can still
- * explicitly choose between lookup on the given class level only ({@link #getAnnotation(Method, Class)})
- * and lookup in the entire inheritance hierarchy of the given method ({@link #findAnnotation(Method, Class)}).
+ * explicitly choose between lookup on the given class level only
+ * ({@link #getAnnotation(Method, Class)}) and lookup in the entire inheritance
+ * hierarchy of the given method ({@link #findAnnotation(Method, Class)}).
  *
- * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -86,7 +86,7 @@ public abstract class AnnotationUtils {
 	 * this explicitly.
 	 * @param method the method to look for annotations on
 	 * @param annotationType the annotation class to look for
-	 * @return the annotation of the given type found, or <code>null</code>
+	 * @return the annotation of the given type, or <code>null</code> if none found
 	 */
 	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
 		A annotation = getAnnotation(method, annotationType);
