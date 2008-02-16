@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,12 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 		if (this.concurrencyLimit > 0) {
 			boolean debug = logger.isDebugEnabled();
 			synchronized (this.monitor) {
+				boolean interrupted = false;
 				while (this.concurrencyCount >= this.concurrencyLimit) {
+					if (interrupted) {
+						throw new IllegalStateException("Thread was interrupted while waiting for invocation access, " +
+								"but concurrency limit still does not allow for entering");
+					}
 					if (debug) {
 						logger.debug("Concurrency count " + this.concurrencyCount +
 								" has reached limit " + this.concurrencyLimit + " - blocking");
@@ -120,6 +125,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 					catch (InterruptedException ex) {
 						// Re-interrupt current thread, to allow other threads to react.
 						Thread.currentThread().interrupt();
+						interrupted = true;
 					}
 				}
 				if (debug) {
