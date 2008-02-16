@@ -54,15 +54,13 @@ import org.springframework.util.Assert;
  * <p>For a different style of MessageListener handling, through looped
  * <code>MessageConsumer.receive()</code> calls that also allow for
  * transactional reception of messages (registering them with XA transactions),
- * see {@link DefaultMessageListenerContainer}. For dynamic adaptation of the
- * active number of Sessions, consider using
- * {@link org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer}.
+ * see {@link DefaultMessageListenerContainer}.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see javax.jms.MessageConsumer#setMessageListener
  * @see DefaultMessageListenerContainer
- * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
+ * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
 public class SimpleMessageListenerContainer extends AbstractMessageListenerContainer {
 

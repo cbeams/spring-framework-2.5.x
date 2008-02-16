@@ -122,7 +122,7 @@ import org.springframework.util.Assert;
  * @see #handleListenerException
  * @see DefaultMessageListenerContainer
  * @see SimpleMessageListenerContainer
- * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
+ * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer {
 
