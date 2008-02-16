@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -444,13 +444,19 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	protected final void waitWhileNotRunning() {
 		synchronized (this.lifecycleMonitor) {
+			boolean interrupted = false;
 			while (this.active && !this.running) {
+				if (interrupted) {
+					throw new IllegalStateException("Thread was interrupted while waiting for " +
+							"a restart of the listener container, but container is still stopped");
+				}
 				try {
 					this.lifecycleMonitor.wait();
 				}
 				catch (InterruptedException ex) {
 					// Re-interrupt current thread, to allow other threads to react.
 					Thread.currentThread().interrupt();
+					interrupted = true;
 				}
 			}
 		}
