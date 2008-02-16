@@ -19,6 +19,9 @@ Package org.springframework.beans
 * StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 
+Package org.springframework.instrument
+* fixed ShadowingClassLoader to not attempt defining a package in case of a class in the default package
+
 Package org.springframework.jdbc
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
@@ -27,6 +30,7 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
+* DefaultMessageListenerContainer lets shutdown continue instead of 'busy' waiting in case of thread interruption
 
 Package org.springframework.mail
 * added "text/csv" to ConfigurableMimeFileTypeMap's and thus MimeMessageHelper's default MIME mappings
@@ -34,6 +38,9 @@ Package org.springframework.mail
 Package org.springframework.orm
 * fixed TopLinkTransactionManager to correctly expose the underlying JDBC Connection in read-write transaction scenarios
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
+
+Package org.springframework.util
+* revised ConcurrencyThrottleSupport's interruption handling to throw an IllegalStateException instead of 'busy' waiting
 
 Package org.springframework.web
 * ServletRequestAttributes keeps hold onto the original session if a "request.getSession" call suddenly returns null
