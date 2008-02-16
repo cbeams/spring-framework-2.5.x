@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,8 +28,8 @@ import org.springframework.beans.BeanUtils;
  * <p>Data binding works just like with PagedListHolder. The locale can be specified in
  * Locale's toString syntax, e.g. "locale=en_US". The filter object can be of any
  * custom class, preferably a bean for easy data binding from a request. An instance
- * will simply get passed through to PagedListSourceProvider.loadList. A filter property
- * can be specified via "filter.myFilterProperty", for example.
+ * will simply get passed through to <code>PagedListSourceProvider.loadList</code>.
+ * A filter property can be specified via "filter.myFilterProperty", for example.
  *
  * <p>The scenario in the controller could be:
  * <code>
@@ -82,6 +82,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 
 	private Object filterUsed;
 
+
 	/**
 	 * Create a new list holder.
 	 * You'll need to set a source provider to be able to use the holder.
@@ -99,6 +100,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 		this.sourceProvider = sourceProvider;
 	}
 
+
 	/**
 	 * Set the callback class for reloading the List when necessary.
 	 * If the list is definitely not modifiable, i.e. not locale aware
@@ -113,7 +115,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 	 * Return the callback class for reloading the List when necessary.
 	 */
 	public PagedListSourceProvider getSourceProvider() {
-		return sourceProvider;
+		return this.sourceProvider;
 	}
 
 	/**
@@ -131,7 +133,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 	 * @return the current Locale, or <code>null</code>
 	 */
 	public Locale getLocale() {
-		return locale;
+		return this.locale;
 	}
 
 	/**
@@ -148,8 +150,9 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 	 * @return the current filter, or <code>null</code>
 	 */
 	public Object getFilter() {
-		return filter;
+		return this.filter;
 	}
+
 
 	/**
 	 * Reload the underlying list from the source provider if necessary
@@ -165,7 +168,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 				this.setPage(0);
 			}
 			this.localeUsed = this.locale;
-			if (null != this.filter) {
+			if (this.filter != null) {
 				this.filterUsed = BeanUtils.instantiateClass(this.filter.getClass());
 				BeanUtils.copyProperties(this.filter, this.filterUsed);
 			}

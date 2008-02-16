@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,21 @@ import org.springframework.core.BridgeMethodResolver;
 /**
  * General utility methods for working with annotations, handling bridge methods
  * (which the compiler generates for generic declarations) as well as super
- * methods (for optional "annotation inheritance"). Note that none of this is
- * provided by the JDK's introspection facilities themselves.
+ * methods (for optional &quot;annotation inheritance&quot;). Note that none of
+ * this is provided by the JDK's introspection facilities themselves.
  *
  * <p>As a general rule for runtime-retained annotations (e.g. for transaction
- * control, authorization or service exposure), always use the lookup methods
- * on this class instead of the plain annotation lookup methods in the JDK.
- * You can still explicitly choose between lookup on the given class level only
- * ({@link #getAnnotation}) and lookup in the entire inheritance hierarchy of
- * the given method ({@link #findAnnotation}).
+ * control, authorization or service exposure), always use the lookup methods on
+ * this class (e.g., {@link #findAnnotation(Method, Class)},
+ * {@link #getAnnotation(Method, Class)}, and {@link #getAnnotations(Method)})
+ * instead of the plain annotation lookup methods in the JDK. You can still
+ * explicitly choose between lookup on the given class level only
+ * ({@link #getAnnotation(Method, Class)}) and lookup in the entire inheritance
+ * hierarchy of the given method ({@link #findAnnotation(Method, Class)}).
  *
- * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 2.0
  * @see java.lang.reflect.Method#getAnnotations()
  * @see java.lang.reflect.Method#getAnnotation(Class)
@@ -70,12 +72,12 @@ public abstract class AnnotationUtils {
 	/**
 	 * Get a single {@link Annotation} of <code>annotationType</code> from the
 	 * supplied {@link Method}, traversing its super methods if no annotation
-	 * can be found on the given method.
-	 * <p>Annotations on methods are not inherited by default, so we need to
-	 * handle this explicitly.
+	 * can be found on the given method itself.
+	 * <p>Annotations on methods are not inherited by default, so we need to handle
+	 * this explicitly.
 	 * @param method the method to look for annotations on
 	 * @param annotationType the annotation class to look for
-	 * @return the annotation of the given type found, or <code>null</code>
+	 * @return the annotation of the given type, or <code>null</code> if none found
 	 */
 	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
 		if (!annotationType.isAnnotation()) {
