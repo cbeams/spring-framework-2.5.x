@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-18)
+Changes in version 2.5.2 (2008-02-19)
 -------------------------------------
 
 General
@@ -18,16 +18,24 @@ Package org.springframework.aop
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
 * AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
 * AbstractBeanFactoryBasedTargetSourceCreator creates an independent internal BeanFactory per target bean
+* deprecated ClassLoaderAnalyzerInterceptor and associated ClassLoaderUtils class
+* reintroduced AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(ParserContext,Object) for Spring 2.0 compatibility
 
 Package org.springframework.beans
+* introduced PropertyAccessorFactory facade for obtaining BeanWrapper and direct field accessor instances
+* deprecated BeanWrapper's "setWrappedInstance" method in favor of recreating a BeanWrapper per target instance
 * BeanWrapperImpl trims an enum candidate value before matching it against the available enum values
 * BeanWrapperImpl resolves the target type for a generically typed bean property, performing appropriate type conversion
 * StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
 * CustomDateEditor and CustomNumberEditor preserve original ParseException as root cause of IllegalArgumentException
 * MethodInvokingFactoryBean falls back to interpreting specified arguments as single method argument of array type
+* deprecated RefreshablePagedListHolder class and associated PagedListSourceProvider interface
 * added "getOriginatingBeanDefinition()" method to BeanDefinition interface, exposing the decorated definition (if any)
 * PropertyOverrideConfigurer is able to properly override target bean definitions behind a scoped proxy decorator
 * added "nullValue" property to PropertyPlaceholderConfigurer, allowing for resolving specific Strings into a null value
+* factored out AliasRegistry/SimpleAliasRegistry from BeanDefinitionRegistry/AbstractBeanFactory
+* introduced SimpleBeanDefinitionRegistry implementation for bean definition reader testing
+* "registerAlias" allows for overriding as long as bean definition overriding is allowed
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory applies specified TypeConverter to bean references as well (not just to literals)
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
@@ -75,6 +83,7 @@ Package org.springframework.ejb
 
 Package org.springframework.instrument
 * added public "isInstrumentationAvailable()" method to InstrumentationLoadTimeWeaver, avoiding direct access to agent
+* fixed ShadowingClassLoader to not attempt defining a package in case of a class in the default package
 
 Package org.springframework.jca
 * ResourceAdapterApplicationContext registers BootstrapContext as resolvable dependency type (for @Autowired)
@@ -89,6 +98,9 @@ Package org.springframework.jdbc
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
 * SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
 * added further default "sql-error-codes.xml" mappings for MS SQL, MySQL, PostgreSQL and Oracle
+* DatabaseStartupValidator lets startup continue instead of 'busy' waiting in case of thread interruption
+* JdbcTemplate falls back to type VARCHAR for a null value in case of an unknown SQL type specified against IBM DB2
+* fixed CallMetaDataContext to skip SqlParameter objects without name (avoiding NPE)
 * merged AbstractBeanPropertyRowMapper into concrete BeanPropertyRowMapper class
 * removed BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
 * revised BeanPropertyRowMapper to use JavaBean property introspection instead of expecting field/setter name matches
@@ -96,10 +108,13 @@ Package org.springframework.jdbc
 * BeanPropertyRowMapper shares ResultSet value access logic with SingleColumnRowMapper
 * BeanPropertyRowMapper and SingleColumnRowMapper perform Oracle-specific "getObject" checks for unknown specified types
 * added ParameterizedSingleColumnRowMapper with a convenient "newInstance" method to specify the required type only once
+* BeanPropertySqlParameterSource derives a default SQL type from the corresponding property type (for typed null values)
 
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
 * DefaultMessageListenerContainer allows for specifying a callback on "stop", for a notification after actual stopping
+* DefaultMessageListenerContainer lets shutdown continue instead of 'busy' waiting in case of thread interruption
+* deprecated ServerSessionMessageListenerContainer in favor of DefaultMessageListenerContainer/JmsMessageEndpointManager
 * DefaultJmsActivationSpecFactory is compatible with WebSphere MQ 6.0.2.1 as well now
 
 Package org.springframework.jmx
@@ -139,6 +154,13 @@ Package org.springframework.test
 * TestContextManager ignores default TestExecutionListeners that cannot be instantiated (e.g. due to spring-tx missing)
 * AbstractJUnit38SpringContextTests runs "afterTestMethod" callbacks even when "beforeTestMethod" or "setUp" failed
 
+Package org.springframework.util
+* revised ConcurrencyThrottleSupport's interruption handling to throw an IllegalStateException instead of 'busy' waiting
+* deprecated ResponseTimeMonitor and PerformanceMonitorListener classes in favor of custom classes for specific needs
+
+Package org.springframework.validation
+* DataBinder's "initDirectFieldAccess()" sets the "extractOldValueForEditor" flag by default, analogous to bean access
+
 Package org.springframework.web
 * ServletRequestAttributes keeps hold onto the original session if a "request.getSession" call suddenly returns null
 * added "setConfigLocation" method to ConfigurableWeb/PortletApplicationContext, accepting an init-param style value
@@ -146,11 +168,14 @@ Package org.springframework.web
 * optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
 * introduced NativeWebRequest and MultipartRequest interfaces for even finer-grained generic request access options
 * added "dispatchOptionsRequest/TraceRequest" properties to FrameworkServlet, for dispatching all HTTP request methods
+* deprecated PathMap attribute and CommonsPathMapHandlerMapping class in favor annotation-based request mapping
+* deprecated ThrowawayController and ThrowawayControllerHandlerAdapter in favor annotation-based controllers
 * @RequestMapping annotation supports "!myParam" expressions for non-presence of a specific parameter as well
 * introduced WebArgumentResolver interface and "customArgumentResolver(s)" property on AnnotationMethodHandlerAdapter
 * factored out common HandlerMethodResolver/Invoker classes from Servlet/Portlet AnnotationMethodHandlerAdapter
 * AnnotationMethodHandlerAdapter resolves the target type for a generically typed @RequestParam/@ModelAttribute argument
 * AnnotationMethodHandlerAdapter properly allows for resolving a Principal argument to null (in case of none defined)
+* fixed AnnotationMethodHandlerAdapter to avoid NPE in case of plain model attribute returned from handler method
 * added "synchronizeOnSession" property to AnnotationMethodHandlerAdapter, analogous to AbstractController
 * added "prepareResponse"/"generatesDownloadContent" methods to AbstractView, for HTTPS cache header workaround for IE
 * AbstractPdfView and Abstract(J)ExcelView participate in AbstractView's HTTPS cache header workaround for IE
