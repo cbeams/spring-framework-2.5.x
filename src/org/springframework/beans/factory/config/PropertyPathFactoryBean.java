@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -101,7 +101,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 	 * @see #setTargetBeanName
 	 */
 	public void setTargetObject(Object targetObject) {
-		this.targetBeanWrapper = new BeanWrapperImpl(targetObject);
+		this.targetBeanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(targetObject);
 	}
 
 	/**
@@ -178,7 +178,8 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 
 		if (this.targetBeanWrapper == null && this.beanFactory.isSingleton(this.targetBeanName)) {
 			// Eagerly fetch singleton target bean, and determine result type.
-			this.targetBeanWrapper = new BeanWrapperImpl(this.beanFactory.getBean(this.targetBeanName));
+			Object bean = this.beanFactory.getBean(this.targetBeanName);
+			this.targetBeanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 			this.resultType = this.targetBeanWrapper.getPropertyType(this.propertyPath);
 		}
 	}
@@ -188,7 +189,8 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target == null) {
 			// Fetch prototype target bean...
-			target = new BeanWrapperImpl(this.beanFactory.getBean(this.targetBeanName));
+			Object bean = this.beanFactory.getBean(this.targetBeanName);
+			target = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		}
 		return target.getPropertyValue(this.propertyPath);
 	}

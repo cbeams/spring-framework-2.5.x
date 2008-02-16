@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * General utility methods for working with annotations in JavaBeans style.
  *
  * @author Rob Harrop
+ * @author Juergen Hoelelr
  * @since 2.0
  */
 public abstract class AnnotationBeanUtils {
@@ -37,16 +38,14 @@ public abstract class AnnotationBeanUtils {
 	/**
 	 * Copy the properties of the supplied {@link Annotation} to the supplied target bean.
 	 * Any properties defined in <code>excludedProperties</code> will not be copied.
-	 * @see BeanWrapperImpl
+	 * @see org.springframework.beans.BeanWrapper
 	 */
 	public static void copyPropertiesToBean(Annotation ann, Object bean, String... excludedProperties) {
 		Set<String> excluded =  new HashSet<String>(Arrays.asList(excludedProperties));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
-
-		BeanWrapper bw = new BeanWrapperImpl(bean);
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		for (Method annotationProperty : annotationProperties) {
 			String propertyName = annotationProperty.getName();
-
 			if ((!excluded.contains(propertyName)) && bw.isWritableProperty(propertyName)) {
 				Object value = ReflectionUtils.invokeMethod(annotationProperty, ann);
 				bw.setPropertyValue(propertyName, value);

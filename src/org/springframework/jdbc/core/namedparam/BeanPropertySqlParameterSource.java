@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 
 /**
@@ -51,7 +51,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	 * @param object the bean instance to wrap
 	 */
 	public BeanPropertySqlParameterSource(Object object) {
-		this.beanWrapper = new BeanWrapperImpl(object);
+		this.beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(object);
 	}
 
 

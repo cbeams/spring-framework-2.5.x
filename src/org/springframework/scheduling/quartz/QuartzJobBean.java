@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyAccessorFactory;
 
 /**
  * Simple implementation of the Quartz Job interface, applying the
@@ -74,7 +74,7 @@ public abstract class QuartzJobBean implements Job {
 	 */
 	public final void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			BeanWrapper bw = new BeanWrapperImpl(this);
+			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			pvs.addPropertyValues(context.getScheduler().getContext());
 			pvs.addPropertyValues(context.getMergedJobDataMap());

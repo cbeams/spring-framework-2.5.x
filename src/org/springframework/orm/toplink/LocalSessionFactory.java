@@ -37,7 +37,7 @@ import oracle.toplink.tools.sessionmanagement.SessionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -308,7 +308,7 @@ public class LocalSessionFactory {
 
 		// Apply specified login properties to the DatabaseLogin instance.
 		if (this.loginPropertyMap != null) {
-			new BeanWrapperImpl(login).setPropertyValues(this.loginPropertyMap);
+			PropertyAccessorFactory.forBeanPropertyAccess(login).setPropertyValues(this.loginPropertyMap);
 		}
 
 		// Override default connection pool with specified DataSource, if any.

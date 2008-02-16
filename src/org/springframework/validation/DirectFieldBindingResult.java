@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.validation;
 
 import org.springframework.beans.ConfigurablePropertyAccessor;
-import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +38,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
 	private final Object target;
 
-	private transient DirectFieldAccessor directFieldAccessor;
+	private transient ConfigurablePropertyAccessor directFieldAccessor;
 
 
 	/**
@@ -54,7 +54,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
 
 	public final Object getTarget() {
-		return target;
+		return this.target;
 	}
 
 	/**
@@ -65,6 +65,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	public final ConfigurablePropertyAccessor getPropertyAccessor() {
 		if (this.directFieldAccessor == null) {
 			this.directFieldAccessor = createDirectFieldAccessor();
+			this.directFieldAccessor.setExtractOldValueForEditor(true);
 		}
 		return this.directFieldAccessor;
 	}
@@ -73,8 +74,8 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	 * Create a new DirectFieldAccessor for the underlying target object.
 	 * @see #getTarget()
 	 */
-	protected DirectFieldAccessor createDirectFieldAccessor() {
-		return new DirectFieldAccessor(getTarget());
+	protected ConfigurablePropertyAccessor createDirectFieldAccessor() {
+		return PropertyAccessorFactory.forDirectFieldAccess(getTarget());
 	}
 
 }

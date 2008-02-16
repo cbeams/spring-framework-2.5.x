@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,11 @@ import org.springframework.util.StringUtils;
  * written via PropertyEditor's <code>setValue</code>, or against a
  * comma-delimited String via <code>setAsText</code>, as String arrays are
  * converted in such a format if the array itself is not assignable.
+ *
+ * <p><b>NOTE: This is - for almost all purposes - an internal class.
+ * It is only public in order to allow for access from other framework
+ * packages. For standard application access purposes, use the
+ * {@link PropertyAccessorFactory#forBeanPropertyAccess} factory method instead.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

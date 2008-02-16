@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanNameAware;
@@ -162,7 +162,7 @@ public abstract class GenericFilterBean implements
 		// Set bean properties from init parameters.
 		try {
 			PropertyValues pvs = new FilterConfigPropertyValues(filterConfig, this.requiredProperties);
-			BeanWrapper bw = new BeanWrapperImpl(this);
+			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(filterConfig.getServletContext());
 			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
 			initBeanWrapper(bw);

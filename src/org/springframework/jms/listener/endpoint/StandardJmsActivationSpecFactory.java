@@ -25,8 +25,9 @@ import javax.jms.Topic;
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.ResourceAdapter;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 import org.springframework.jms.support.destination.DestinationResolver;
 
@@ -100,12 +101,13 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 			}
 		}
 
-		BeanWrapper bw = new BeanWrapperImpl(activationSpecClassToUse);
+		ActivationSpec spec = (ActivationSpec) BeanUtils.instantiateClass(activationSpecClassToUse);
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(spec);
 		if (this.defaultProperties != null) {
 			bw.setPropertyValues(this.defaultProperties);
 		}
 		populateActivationSpecProperties(bw, config);
-		return (ActivationSpec) bw.getWrappedInstance();
+		return spec;
 	}
 
 	/**

@@ -105,7 +105,7 @@ class ConstructorResolver {
 	protected BeanWrapper autowireConstructor(
 			String beanName, RootBeanDefinition mbd, Constructor[] chosenCtors, Object[] explicitArgs) {
 
-		BeanWrapper bw = new BeanWrapperImpl();
+		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
 		Constructor constructorToUse = null;
@@ -260,7 +260,7 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper instantiateUsingFactoryMethod(String beanName, RootBeanDefinition mbd, Object[] explicitArgs) {
-		BeanWrapper bw = new BeanWrapperImpl();
+		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
 		Class factoryClass = null;

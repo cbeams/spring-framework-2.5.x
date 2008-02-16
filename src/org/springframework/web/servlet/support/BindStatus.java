@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.beans.PropertyEditor;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.AbstractPropertyBindingResult;
@@ -144,7 +145,7 @@ public class BindStatus {
 			}
 
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
-				BeanWrapperImpl bw = new BeanWrapperImpl(target);
+				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(target);
 				this.valueType = bw.getPropertyType(this.expression);
 				this.value = bw.getPropertyValue(this.expression);
 			}

@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.servlet.jsp.JspException;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.support.BindStatus;
@@ -159,8 +159,8 @@ class OptionWriter {
 			Map.Entry entry = (Map.Entry) iterator.next();
 			Object mapKey = entry.getKey();
 			Object mapValue = entry.getValue();
-			BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
-			BeanWrapper mapValueWrapper = new BeanWrapperImpl(mapValue);
+			BeanWrapper mapKeyWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapKey);
+			BeanWrapper mapValueWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapValue);
 			Object renderValue = (this.valueProperty != null ?
 					mapKeyWrapper.getPropertyValue(this.valueProperty) : mapKey.toString());
 			Object renderLabel = (this.labelProperty != null ?
@@ -186,7 +186,7 @@ class OptionWriter {
 	private void doRenderFromCollection(Collection optionCollection, TagWriter tagWriter) throws JspException {
 		for (Iterator it = optionCollection.iterator(); it.hasNext();) {
 			Object item = it.next();
-			BeanWrapper wrapper = new BeanWrapperImpl(item);
+			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
 			Object value = (this.valueProperty != null ? wrapper.getPropertyValue(this.valueProperty) : item);
 			Object label = (this.labelProperty != null ? wrapper.getPropertyValue(this.labelProperty) : item);
 			renderOption(tagWriter, item, value, label);

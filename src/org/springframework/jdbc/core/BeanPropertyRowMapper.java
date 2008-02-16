@@ -28,8 +28,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NotWritablePropertyException;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -161,7 +161,8 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 */
 	public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
-		BeanWrapper bw = new BeanWrapperImpl(this.mappedClass);
+		Object mappedObject = BeanUtils.instantiateClass(this.mappedClass);
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
 		initBeanWrapper(bw);
 
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -185,7 +186,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 			}
 		}
 
-		return bw.getWrappedInstance();
+		return mappedObject;
 	}
 
 	/**

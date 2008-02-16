@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import java.beans.PropertyDescriptor;
  * @see #setExtractOldValueForEditor
  * @see PropertyAccessor
  * @see PropertyEditorRegistry
- * @see BeanWrapperImpl
+ * @see PropertyAccessorFactory#forBeanPropertyAccess
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.BeanPropertyBindingResult
  * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
@@ -55,6 +55,8 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	/**
 	 * Change the wrapped JavaBean object.
 	 * @param obj the bean instance to wrap
+	 * @deprecated as of Spring 2.5,
+	 * in favor of recreating a BeanWrapper per target instance
 	 */
 	void setWrappedInstance(Object obj);
 

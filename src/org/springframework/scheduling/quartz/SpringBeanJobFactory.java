@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ import org.quartz.SchedulerContext;
 import org.quartz.spi.TriggerFiredBundle;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.BeanUtils;
 
 /**
  * Subclass of {@link AdaptableJobFactory} that also supports Spring-style
@@ -67,7 +68,8 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 * from the scheduler context, job data map and trigger data map.
 	 */
 	protected Object createJobInstance(TriggerFiredBundle bundle) {
-		BeanWrapper bw = new BeanWrapperImpl(bundle.getJobDetail().getJobClass());
+		Object job = BeanUtils.instantiateClass(bundle.getJobDetail().getJobClass());
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(job);
 		if (isEligibleForPropertyPopulation(bw.getWrappedInstance())) {
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			if (this.schedulerContext != null) {
@@ -88,7 +90,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 				bw.setPropertyValues(pvs, true);
 			}
 		}
-		return bw.getWrappedInstance();
+		return job;
 	}
 
 	/**

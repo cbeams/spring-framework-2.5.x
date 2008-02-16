@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.servlet.jsp.JspException;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -213,7 +213,7 @@ public class RadioButtonsTag extends AbstractCheckedElementTag {
 	private void writeObjectEntry(TagWriter tagWriter, String valueProperty,
 			String labelProperty, Object item, int itemIndex) throws JspException {
 
-		BeanWrapper wrapper = new BeanWrapperImpl(item);
+		BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
 		Object renderValue = (valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
 		Object renderLabel = (labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
 		writeRadioButtonTag(tagWriter, item, renderValue, renderLabel, itemIndex);
@@ -224,8 +224,8 @@ public class RadioButtonsTag extends AbstractCheckedElementTag {
 
 		Object mapKey = entry.getKey();
 		Object mapValue = entry.getValue();
-		BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
-		BeanWrapper mapValueWrapper = new BeanWrapperImpl(mapValue);
+		BeanWrapper mapKeyWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapKey);
+		BeanWrapper mapValueWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapValue);
 		Object renderValue = (valueProperty != null ?
 				mapKeyWrapper.getPropertyValue(valueProperty) : mapKey.toString());
 		Object renderLabel = (labelProperty != null ?

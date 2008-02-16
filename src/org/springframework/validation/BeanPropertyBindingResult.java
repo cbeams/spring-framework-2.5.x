@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.validation;
 import java.io.Serializable;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -81,7 +81,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * @see #getTarget()
 	 */
 	protected BeanWrapper createBeanWrapper() {
-		return new BeanWrapperImpl(getTarget());
+		return PropertyAccessorFactory.forBeanPropertyAccess(getTarget());
 	}
 
 }
