@@ -61,7 +61,7 @@ import java.lang.annotation.Target;
  * attribute access, without ties to the native Servlet/Portlet API.
  * <li>{@link java.util.Locale} for the current request locale
  * (determined by the most specific locale resolver available,
- * i.e. the configured {@link org.springframework.web.servlet.LocaleResolver)
+ * i.e. the configured {@link org.springframework.web.servlet.LocaleResolver}
  * in a Servlet environment and the portal locale in a Portlet environment).
  * <li>{@link java.io.InputStream} / {@link java.io.Reader} for access
  * to the request's content. This will be the raw InputStream/Reader as
@@ -106,17 +106,17 @@ import java.lang.annotation.Target;
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.web.servlet.View View} object, with the
+ * <li>A {@link org.springframework.web.servlet.View} object, with the
  * model implicitly determined through command objects and
  * {@link ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
- * declaring a {@link org.springframework.ui.ModelMap ModelMap} argument
+ * declaring a {@link org.springframework.ui.ModelMap} argument
  * (see above).
  * <li>A {@link java.lang.String} value which is interpreted as view name,
  * with the model implicitly determined through command objects and
  * {@link ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
- * declaring a {@link org.springframework.ui.ModelMap ModelMap} argument
+ * declaring a {@link org.springframework.ui.ModelMap} argument
  * (see above).
  * <li><code>void</code> if the method handles the response itself
  * (e.g. by writing the response content directly).
