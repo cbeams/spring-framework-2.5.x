@@ -1235,7 +1235,8 @@
 			<link href="http://portals.apache.org/pluto/multiproject/portlet-api/apidocs/"/>
 			<link href="http://quartz.sourceforge.net/javadoc/"/>
 			<link href="http://struts.apache.org/struts-doc-1.2.9/api/"/>
-			<link href="http://tiles.apache.org/framework/apidocs/"/>
+      <link href="http://java.sun.com/javase/6/docs/jre/api/net/httpserver/spec/"/>
+      <link href="http://tiles.apache.org/framework/apidocs/"/>
 			<link href="http://velocity.apache.org/engine/devel/apidocs/"/>
 		</javadoc>
 
