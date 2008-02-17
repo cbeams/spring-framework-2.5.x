@@ -506,25 +506,25 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			else if (Locale.class.equals(parameterType)) {
 				return request.getLocale();
 			}
-			else if (InputStream.class.equals(parameterType)) {
+			else if (InputStream.class.isAssignableFrom(parameterType)) {
 				if (!(request instanceof ActionRequest)) {
 					throw new IllegalStateException("InputStream can only get obtained for ActionRequest");
 				}
 				return ((ActionRequest) request).getPortletInputStream();
 			}
-			else if (Reader.class.equals(parameterType)) {
+			else if (Reader.class.isAssignableFrom(parameterType)) {
 				if (!(request instanceof ActionRequest)) {
 					throw new IllegalStateException("Reader can only get obtained for ActionRequest");
 				}
 				return ((ActionRequest) request).getReader();
 			}
-			else if (OutputStream.class.equals(parameterType)) {
+			else if (OutputStream.class.isAssignableFrom(parameterType)) {
 				if (!(response instanceof RenderResponse)) {
 					throw new IllegalStateException("OutputStream can only get obtained for RenderResponse");
 				}
 				return ((RenderResponse) response).getPortletOutputStream();
 			}
-			else if (Writer.class.equals(parameterType)) {
+			else if (Writer.class.isAssignableFrom(parameterType)) {
 				if (!(response instanceof RenderResponse)) {
 					throw new IllegalStateException("Writer can only get obtained for RenderResponse");
 				}
