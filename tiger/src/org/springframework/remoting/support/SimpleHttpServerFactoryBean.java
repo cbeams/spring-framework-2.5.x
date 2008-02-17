@@ -44,6 +44,7 @@ import org.springframework.core.task.support.ConcurrentExecutorAdapter;
  * {@link com.sun.net.httpserver.HttpServer} itself.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 2.5.1
  * @see #setPort
  * @see #setContexts
@@ -129,11 +130,11 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 
 
 	public void afterPropertiesSet() throws IOException {
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Initializing HttpServer for port " + this.port);
-		}
 		InetSocketAddress address = (this.hostname != null ?
 				new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Binding HttpServer to address " + address);
+		}
 		this.server = HttpServer.create(address, this.backlog);
 		if (this.executor != null) {
 			this.server.setExecutor(this.executor);
@@ -159,6 +160,7 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 	}
 
 	public void destroy() {
+		logger.info("Stopping HttpServer");
 		this.server.stop(this.shutdownDelay);
 	}
 
