@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Connection holder, wrapping a JMS Connection and a JMS Session.
+ * JMS resource holder, wrapping a JMS Connection and a JMS Session.
  * JmsTransactionManager binds instances of this class to the thread,
  * for a given JMS ConnectionFactory.
  *
@@ -151,7 +151,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	}
 
 	public Session getSession() {
-		return (!this.sessions.isEmpty() ? (Session)  this.sessions.get(0) : null);
+		return (!this.sessions.isEmpty() ? (Session) this.sessions.get(0) : null);
 	}
 
 	public Session getSession(Class sessionType) {
