@@ -21,6 +21,8 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,9 +31,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ConcurrentExecutorAdapter;
-
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a simple
@@ -55,6 +54,8 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 
 	private int port = 8080;
 
+	private String hostname;
+
 	private int backlog = -1;
 
 	private Executor executor;
@@ -71,6 +72,14 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 	 */
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	/**
+	 * Specify the HTTP server's hostname to bind to. Default is localhost;
+	 * can be overridden with a specific network address to bind to.
+	 */
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
 	}
 
 	/**
@@ -123,7 +132,9 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Initializing HttpServer for port " + this.port);
 		}
-		this.server = HttpServer.create(new InetSocketAddress(this.port), this.backlog);
+		InetSocketAddress address = (this.hostname != null ?
+				new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
+		this.server = HttpServer.create(address, this.backlog);
 		if (this.executor != null) {
 			this.server.setExecutor(this.executor);
 		}
