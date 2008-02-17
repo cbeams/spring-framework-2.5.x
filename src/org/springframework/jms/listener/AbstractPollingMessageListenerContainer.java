@@ -310,7 +310,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 						!TransactionSynchronizationManager.hasResource(getConnectionFactory()));
 				if (exposeResource) {
 					TransactionSynchronizationManager.bindResource(
-							getConnectionFactory(), new JmsResourceHolder(sessionToUse));
+							getConnectionFactory(), new LocallyExposedResourceHolder(sessionToUse));
 				}
 				try {
 					doExecuteListener(sessionToUse, message);
@@ -350,11 +350,16 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * This implementation checks whether the Session is externally synchronized.
 	 * In this case, the Session is not locally transacted, despite the listener
 	 * container's "sessionTransacted" flag being set to "true".
-	 * @see org.springframework.jms.connection.ConnectionFactoryUtils#isSessionTransactional
+	 * @see org.springframework.jms.connection.JmsResourceHolder
 	 */
 	protected boolean isSessionLocallyTransacted(Session session) {
-		return super.isSessionLocallyTransacted(session) &&
-				!ConnectionFactoryUtils.isSessionTransactional(session, getConnectionFactory());
+		if (!super.isSessionLocallyTransacted(session)) {
+			return false;
+		}
+		JmsResourceHolder resourceHolder =
+				(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
+		return (resourceHolder == null || resourceHolder instanceof LocallyExposedResourceHolder ||
+				!resourceHolder.containsSession(session));
 	}
 
 	/**
@@ -479,6 +484,18 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 		public boolean isSynchedLocalTransactionAllowed() {
 			return AbstractPollingMessageListenerContainer.this.isSessionTransacted();
+		}
+	}
+
+
+	/**
+	 * JmsResourceHolder marker subclass that indicates local exposure,
+	 * i.e. that does not indicate an externally managed transaction.
+	 */
+	private static class LocallyExposedResourceHolder extends JmsResourceHolder {
+
+		public LocallyExposedResourceHolder(Session session) {
+			super(session);
 		}
 	}
 
