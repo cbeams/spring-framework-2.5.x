@@ -3603,7 +3603,7 @@ public class ClinicController {
           <para>Session object (Servlet API or Portlet API): either HttpSession or
           PortletSession. An argument of this type will enforce the presence of a
           corresponding session. As a consequence, such an argument will never be
-          <code>null</code>. <emphasis>Note that session access may not be
+          <literal>null</literal>. <emphasis>Note that session access may not be
           thread-safe, in particular in a Servlet environment: Consider switching
           the <classname>AnnotationMethodHandlerAdapter</classname>'s
           "synchronizeOnSession" flag to "true" if multiple requests are allowed
