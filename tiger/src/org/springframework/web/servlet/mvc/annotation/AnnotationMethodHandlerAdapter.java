@@ -370,8 +370,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				if (match) {
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
 					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
-						if (methodNameResolver != null && resolvedMethodName == null && mappingInfo.isEmpty()) {
-							resolvedMethodName = methodNameResolver.getHandlerMethodName(request);
+						if (methodNameResolver != null && mappingInfo.paths.length == 0) {
+							if (resolvedMethodName == null) {
+								resolvedMethodName = methodNameResolver.getHandlerMethodName(request);
+							}
 							if (!resolvedMethodName.equals(oldMappedMethod.getName())) {
 								oldMappedMethod = null;
 							}
@@ -613,10 +615,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		public RequestMethod[] methods = new RequestMethod[0];
 
 		public String[] params = new String[0];
-
-		public boolean isEmpty() {
-			return (paths.length == 0 && methods.length == 0 && params.length == 0);
-		}
 
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;

@@ -421,12 +421,12 @@ public class ServletAnnotationControllerTests extends TestCase {
 		servlet.service(request, response);
 		assertEquals("myOtherView", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/myLangHandle.do");
+		request = new MockHttpServletRequest("POST", "/myLangHandle.do");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("myLangView", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/mySurpriseHandle.do");
+		request = new MockHttpServletRequest("POST", "/mySurpriseHandle.do");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("mySurpriseView", response.getContentAsString());
@@ -459,12 +459,12 @@ public class ServletAnnotationControllerTests extends TestCase {
 		servlet.service(request, response);
 		assertEquals("myOtherView", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/myLang.do");
+		request = new MockHttpServletRequest("POST", "/myLang.do");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("myLangView", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/mySurprise.do");
+		request = new MockHttpServletRequest("POST", "/mySurprise.do");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("mySurpriseView", response.getContentAsString());
@@ -768,12 +768,12 @@ public class ServletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("myOtherView");
 		}
 
-		@RequestMapping
+		@RequestMapping(method = RequestMethod.POST)
 		public void myLangHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("myLangView");
 		}
 
-		@RequestMapping
+		@RequestMapping(method = RequestMethod.POST)
 		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
 		}
