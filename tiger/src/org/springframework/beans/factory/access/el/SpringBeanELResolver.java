@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.generic;
+package org.springframework.beans.factory.access.el;
 
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;

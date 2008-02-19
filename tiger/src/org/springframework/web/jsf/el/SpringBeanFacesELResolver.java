@@ -16,19 +16,11 @@
 
 package org.springframework.web.jsf.el;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
-
 import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.ELResolver;
 import javax.faces.context.FacesContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.generic.SpringBeanELResolver;
+import org.springframework.beans.factory.access.el.SpringBeanELResolver;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
