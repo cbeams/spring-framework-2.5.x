@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,19 @@ import java.lang.annotation.Target;
  * transparently stored in the session or some conversational storage,
  * serving as form-backing beans. <b>Declared at the type level,</b> applying
  * to the model attributes that the annotated handler class operates on.
+ *
+ * <p><b>NOTE:</b> Session attributes as indicated using this annotation
+ * correspond to a specific handler's model attributes, getting transparently
+ * stored in a conversational session. Those attributes will be removed once
+ * the handler indicates completion of its conversational session. Therefore,
+ * use this facility for such conversational attributes which are supposed
+ * to be stored in the session <i>temporarily</i> during the course of a
+ * specific handler's conversation.
+ *
+ * <p>For permanent session attributes, e.g. a user authentication object,
+ * use the traditional <code>session.setAttribute</code> method instead.
+ * Alternatively, consider using the attribute management capabilities of the
+ * generic {@link org.springframework.web.context.request.WebRequest} interface.
  *
  * @author Juergen Hoeller
  * @since 2.5
