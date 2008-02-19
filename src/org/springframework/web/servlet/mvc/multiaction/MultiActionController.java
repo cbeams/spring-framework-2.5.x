@@ -144,6 +144,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
+
 	/**
 	 * Additional logger to use when no mapped handler is found for a request.
 	 * @see #PAGE_NOT_FOUND_LOG_CATEGORY
@@ -153,9 +154,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	/** Object we'll invoke methods on. Defaults to this. */
 	private Object delegate;
 
-	/**
-	 * Helper object that knows how to return method names from incoming requests.
-	 */
+	/** Delegate that knows how to determine method names from incoming requests */
 	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
 	/** List of Validators to apply to commands */

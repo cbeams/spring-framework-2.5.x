@@ -1061,8 +1061,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {
 			String requestUri = new UrlPathHelper().getRequestUri(request);
-			pageNotFoundLogger.warn("No mapping for [" + requestUri +
-					"] in DispatcherServlet with name '" + getServletName() + "'");
+			pageNotFoundLogger.warn("No mapping found for HTTP request with URI [" +
+					requestUri + "] in DispatcherServlet with name '" + getServletName() + "'");
 		}
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 	}
