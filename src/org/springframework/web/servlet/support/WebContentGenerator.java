@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.support;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +24,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
@@ -50,11 +50,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/** HTTP method "GET" */
 	public static final String METHOD_GET = "GET";
 
-	/** HTTP method "POST" */
-	public static final String METHOD_POST = "POST";
-
 	/** HTTP method "HEAD" */
 	public static final String METHOD_HEAD = "HEAD";
+
+	/** HTTP method "POST" */
+	public static final String METHOD_POST = "POST";
 
 
 	private static final String HEADER_PRAGMA = "Pragma";
@@ -64,8 +64,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Set of supported methods. HEAD, GET and POST by default. */
-	private Set	supportedMethods = new HashSet();
+	/** Set of supported HTTP methods */
+	private Set	supportedMethods;
 
 	private boolean requireSession = false;
 
@@ -81,10 +81,27 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	private int cacheSeconds = -1;
 
 
+	/**
+	 * Create a new WebContentGenerator which supports
+	 * HTTP methods GET, HEAD and POST by default.
+	 */
 	public WebContentGenerator() {
-		this.supportedMethods.add(METHOD_GET);
-		this.supportedMethods.add(METHOD_POST);
-		this.supportedMethods.add(METHOD_HEAD);
+		this(true);
+	}
+
+	/**
+	 * Create a new WebContentGenerator.
+	 * @param restrictDefaultSupportedMethods <code>true</code> if this
+	 * generator should support HTTP methods GET, HEAD and POST by default,
+	 * or <code>false</code> if it should be unrestricted
+	 */
+	public WebContentGenerator(boolean restrictDefaultSupportedMethods) {
+		if (restrictDefaultSupportedMethods) {
+			this.supportedMethods = new HashSet(4);
+			this.supportedMethods.add(METHOD_GET);
+			this.supportedMethods.add(METHOD_HEAD);
+			this.supportedMethods.add(METHOD_POST);
+		}
 	}
 
 
@@ -93,12 +110,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Default is HEAD, GET and POST.
 	 */
 	public final void setSupportedMethods(String[] methods) {
-		if (ObjectUtils.isEmpty(methods)) {
-			throw new IllegalArgumentException("'supportedMethods' must not be empty");
+		if (methods != null) {
+			this.supportedMethods = new HashSet(Arrays.asList(methods));
 		}
-		this.supportedMethods.clear();
-		for (int i = 0; i < methods.length; i++) {
-			this.supportedMethods.add(methods[i]);
+		else {
+			this.supportedMethods = null;
 		}
 	}
 
@@ -222,7 +238,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 		// Check whether we should support the request method.
 		String method = request.getMethod();
-		if (!this.supportedMethods.contains(method)) {
+		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
 			throw new HttpRequestMethodNotSupportedException(method);
 		}
 

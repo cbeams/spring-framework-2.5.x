@@ -119,6 +119,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
 
 
+	public AnnotationMethodHandlerAdapter() {
+		// no restriction of HTTP methods by default
+		super(false);
+	}
+
+
 	/**
 	 * Set if URL lookup should always use the full path within the current servlet
 	 * context. Else, the path within the current servlet mapping is used if applicable
