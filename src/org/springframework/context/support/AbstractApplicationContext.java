@@ -38,11 +38,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -373,10 +371,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 
-				// Initialize dependent beans for any lifecycle beans in this context.
-				initLifecycleDependentBeans();
-
-				// Initialize other special beans in specific context subclasses.
+			// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
 				// Check for listener beans and register them.
@@ -678,28 +673,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
 						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
 						"': using default [" + this.applicationEventMulticaster + "]");
-			}
-		}
-	}
-
-	/**
-	 * Registers dependent beans for any singleton lifecycle beans in this
-	 * context, thus ensuring they are started and stopped in the correct order.
-	 */
-	protected void initLifecycleDependentBeans() {
-		String lifecycleBeans[] = this.getBeanNamesForType(Lifecycle.class, false, false);
-		for (int i = 0; i < lifecycleBeans.length; i++) {
-			String beanName = lifecycleBeans[i];
-			if (getBeanFactory().containsBeanDefinition(beanName)) {
-				BeanDefinition bd = getBeanFactory().getBeanDefinition(beanName);
-				if (bd instanceof AbstractBeanDefinition) {
-					String[] dependsOn = ((AbstractBeanDefinition) bd).getDependsOn();
-					if (dependsOn != null) {
-						for (int j = 0; j < dependsOn.length; j++) {
-							getBeanFactory().registerDependentBean(dependsOn[j], beanName);
-						}
-					}
-				}
 			}
 		}
 	}
