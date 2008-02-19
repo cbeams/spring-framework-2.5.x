@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,21 +122,26 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 
 	/**
 	 * Try to match the regular expression against the fully qualified name
-	 * of the method's declaring class, plus the name of the method.
-	 * Note that the declaring class is that class that originally declared
-	 * the method, not necessarily the class that's currently exposing it.
-	 * <p>For example, "java.lang.Object.hashCode" matches any subclass
-	 * of Object's <code>hashCode()</code> method.
+	 * of the target class as well as against the method's declaring class,
+	 * plus the name of the method.
 	 */
-	public final boolean matches(Method method, Class targetClass) {
-		// TODO use target class here?
-		String patt = method.getDeclaringClass().getName() + "." + method.getName();
+	public boolean matches(Method method, Class targetClass) {
+		return ((targetClass != null && matchesPattern(targetClass.getName() + "." + method.getName())) ||
+				matchesPattern(method.getDeclaringClass().getName() + "." + method.getName()));
+	}
+
+	/**
+	 * Match the specified candidate against the configured patterns.
+	 * @param signatureString "java.lang.Object.hashCode" style signature
+	 * @return whether the candidate matches at least one of the specified patterns
+	 */
+	protected boolean matchesPattern(String signatureString) {
 		for (int i = 0; i < this.patterns.length; i++) {
-			boolean matched = matches(patt, i);
+			boolean matched = matches(signatureString, i);
 			if (matched) {
 				for (int j = 0; j < this.excludedPatterns.length; j++) {
-					boolean excluded = matchesExclusion(patt, j);
-					if(excluded) {
+					boolean excluded = matchesExclusion(signatureString, j);
+					if (excluded) {
 						return false;
 					}
 				}
