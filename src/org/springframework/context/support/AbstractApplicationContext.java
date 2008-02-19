@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -848,7 +848,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
 			Map lifecycleBeans = getLifecycleBeans();
-			for (Iterator it = new HashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
+			for (Iterator it = new LinkedHashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
 				String beanName = (String) it.next();
 				doStop(lifecycleBeans, beanName);
 			}
@@ -1050,7 +1050,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public void start() {
 		Map lifecycleBeans = getLifecycleBeans();
-		for (Iterator it = new HashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
+		for (Iterator it = new LinkedHashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
 			doStart(lifecycleBeans, beanName);
 		}
@@ -1059,7 +1059,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public void stop() {
 		Map lifecycleBeans = getLifecycleBeans();
-		for (Iterator it = new HashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
+		for (Iterator it = new LinkedHashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
 			doStop(lifecycleBeans, beanName);
 		}
@@ -1084,11 +1084,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private Map getLifecycleBeans() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		String[] beanNames = beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
-		Map beans = new HashMap(beanNames.length);
+		String[] beanNames = beanFactory.getSingletonNames();
+		Map beans = new LinkedHashMap();
 		for (int i = 0; i < beanNames.length; i++) {
 			Object bean = beanFactory.getSingleton(beanNames[i]);
-			if (bean != null) {
+			if (bean instanceof Lifecycle) {
 				beans.put(beanNames[i], bean);
 			}
 		}
