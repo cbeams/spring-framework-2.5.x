@@ -27,9 +27,8 @@ import org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoReso
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
 
-
 /**
- * Concrete aspect that uses the {@link Configurable }
+ * Concrete aspect that uses the {@link Configurable}
  * annotation to identify which classes need autowiring.
  *
  * <p>The bean name to look up will be taken from the
@@ -45,13 +44,13 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
  */
 public aspect AnnotationBeanConfigurerAspect 
-	extends AbstractInterfaceDrivenDependencyInjectionAspect 
-	implements BeanFactoryAware, InitializingBean, DisposableBean {
+		extends AbstractInterfaceDrivenDependencyInjectionAspect
+		implements BeanFactoryAware, InitializingBean, DisposableBean {
 
 	private BeanConfigurerSupport beanConfigurerSupport = new BeanConfigurerSupport();
-	
+
 	public pointcut inConfigurableBean() : @this(Configurable);
-	
+
 	public pointcut preConstructionConfiguration() : preConstructionConfigurationSupport(*); 
 
 	declare parents: @Configurable * implements ConfigurableObject;
@@ -60,7 +59,7 @@ public aspect AnnotationBeanConfigurerAspect
 		beanConfigurerSupport.configureBean(bean);
 	}
 
-	
+
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		beanConfigurerSupport.setBeanFactory(beanFactory);
 		beanConfigurerSupport.setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
@@ -74,12 +73,12 @@ public aspect AnnotationBeanConfigurerAspect
 		beanConfigurerSupport.destroy();
 	}
 
-	
+
 	/*
 	 * An intermediary to match preConstructionConfiguration signature (that doesn't expose the annotation object)
 	 */
 	private pointcut preConstructionConfigurationSupport(Configurable c) : @this(c) && if(c.preConstruction());
-	
+
 	/*
 	 * This declaration shouldn't be needed, 
 	 * except for an AspectJ bug (https://bugs.eclipse.org/bugs/show_bug.cgi?id=214559)
@@ -88,5 +87,3 @@ public aspect AnnotationBeanConfigurerAspect
 		implements ConfigurableDeserializationSupport;
 
 }
-
-

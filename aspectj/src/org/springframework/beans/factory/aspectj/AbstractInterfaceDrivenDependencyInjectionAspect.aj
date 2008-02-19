@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.beans.factory.aspectj;
 
 import java.io.ObjectStreamException;
@@ -64,7 +65,7 @@ import java.io.Serializable;
  * </p>
  * 
  * @author Ramnivas Laddad
- * @since 2.5
+ * @since 2.5.2
  */
 public abstract aspect AbstractInterfaceDrivenDependencyInjectionAspect extends AbstractDependencyInjectionAspect {
 	/**
@@ -119,4 +120,5 @@ public abstract aspect AbstractInterfaceDrivenDependencyInjectionAspect extends 
 	public Object ConfigurableDeserializationSupport.readResolve() throws ObjectStreamException {
 		return this;
 	}
+
 }

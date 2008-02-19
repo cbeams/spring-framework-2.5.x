@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.beans.factory.aspectj;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
@@ -22,7 +23,7 @@ import org.aspectj.lang.annotation.SuppressAjWarnings;
  * Injection on objects, however they may be created.
  * 
  * @author Ramnivas Laddad
- * @since 2.5
+ * @since 2.5.2
  */
 public abstract aspect AbstractDependencyInjectionAspect {
 	/**
