@@ -35,12 +35,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
@@ -70,6 +72,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
+import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
@@ -98,6 +101,19 @@ import org.springframework.web.util.WebUtils;
  * @see #setSessionAttributeStore
  */
 public class AnnotationMethodHandlerAdapter extends WebContentGenerator implements HandlerAdapter {
+
+	/**
+	 * Log category to use when no mapped handler is found for a request.
+	 * @see #pageNotFoundLogger
+	 */
+	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
+
+
+	/**
+	 * Additional logger to use when no mapped handler is found for a request.
+	 * @see #PAGE_NOT_FOUND_LOG_CATEGORY
+	 */
+	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
@@ -282,24 +298,48 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	private ModelAndView invokeHandlerMethod(
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-		ExtendedModelMap implicitModel = new ExtendedModelMap();
-		ServletWebRequest webRequest = new ServletWebRequest(request, response);
-		ServletHandlerMethodResolver methodResolver = getMethodResolver(handler);
-		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
-		ServletHandlerMethodInvoker methodInvoker = new ServletHandlerMethodInvoker(methodResolver);
+		try {
+			ServletHandlerMethodResolver methodResolver = getMethodResolver(handler);
+			Method handlerMethod = methodResolver.resolveHandlerMethod(request);
+			ServletHandlerMethodInvoker methodInvoker = new ServletHandlerMethodInvoker(methodResolver);
+			ServletWebRequest webRequest = new ServletWebRequest(request, response);
+			ExtendedModelMap implicitModel = new ExtendedModelMap();
 
-		Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
-		ModelAndView mav = methodInvoker.getModelAndView(handlerMethod, result, implicitModel, webRequest);
-		methodInvoker.updateSessionAttributes(
-				handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);
-
-		return mav;
+			Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
+			ModelAndView mav = methodInvoker.getModelAndView(handlerMethod, result, implicitModel, webRequest);
+			methodInvoker.updateSessionAttributes(
+					handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);
+			return mav;
+		}
+		catch (NoSuchRequestHandlingMethodException ex) {
+			return handleNoSuchRequestHandlingMethod(ex, request, response);
+		}
 	}
 
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1;
 	}
 
+
+	/**
+	 * Handle the case where no request handler method was found.
+	 * <p>The default implementation logs a warning and sends an HTTP 404 error.
+	 * Alternatively, a fallback view could be chosen, or the
+	 * NoSuchRequestHandlingMethodException could be rethrown as-is.
+	 * @param ex the NoSuchRequestHandlingMethodException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleNoSuchRequestHandlingMethod(
+			NoSuchRequestHandlingMethodException ex, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		pageNotFoundLogger.warn(ex.getMessage());
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		return null;
+	}
 
 	/**
 	 * Template method for creating a new ServletRequestDataBinder instance.
@@ -355,7 +395,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				if (mappingInfo.paths.length > 0) {
 					for (String mappedPath : mappingInfo.paths) {
 						if (isPathMatch(mappedPath, lookupPath)) {
-							if (checkParameters(request, mappingInfo)) {
+							if (checkParameters(mappingInfo, request)) {
 								match = true;
 								targetPathMatches.put(mappingInfo, mappedPath);
 							}
@@ -367,7 +407,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 				else {
 					// No paths specified: parameter match sufficient.
-					match = checkParameters(request, mappingInfo);
+					match = checkParameters(mappingInfo, request);
 					if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 &&
 							resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
 						match = false;
@@ -427,9 +467,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				return targetHandlerMethods.get(bestMappingMatch);
 			}
 			else {
-				throw new IllegalStateException("No matching handler method found for servlet request: path '" +
-						lookupPath + "', method '" + request.getMethod() + "', parameters " +
-						StylerUtils.style(request.getParameterMap()));
+				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(), request.getParameterMap());
 			}
 		}
 
@@ -446,42 +484,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 							(!hasSuffix && pathMatcher.match("/**/" + mappedPath + ".*", lookupPath))));
 		}
 
-		private boolean checkParameters(HttpServletRequest request, RequestMappingInfo mapping) {
-			if (mapping.methods.length > 0) {
-				boolean match = false;
-				for (RequestMethod type : mapping.methods) {
-					if (type.toString().equals(request.getMethod().toUpperCase())) {
-						match = true;
-					}
-				}
-				if (!match) {
-					return false;
-				}
-			}
-			String[] params = mapping.params;
-			if (params.length > 0) {
-				for (String param : params) {
-					int separator = param.indexOf('=');
-					if (separator == -1) {
-						if (param.startsWith("!")) {
-							if (WebUtils.hasSubmitParameter(request, param.substring(1))) {
-								return false;
-							}
-						}
-						else if (!WebUtils.hasSubmitParameter(request, param)) {
-							return false;
-						}
-					}
-					else {
-						String key = param.substring(0, separator);
-						String value = param.substring(separator + 1);
-						if (!value.equals(request.getParameter(key))) {
-							return false;
-						}
-					}
-				}
-			}
-			return true;
+		private boolean checkParameters(RequestMappingInfo mapping, HttpServletRequest request) {
+			return ServletAnnotationMappingUtils.checkRequestMethod(mapping.methods, request) &&
+					ServletAnnotationMappingUtils.checkParameters(mapping.params, request);
 		}
 	}
 

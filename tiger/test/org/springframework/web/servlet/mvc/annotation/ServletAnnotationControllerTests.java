@@ -52,6 +52,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -470,6 +471,59 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
+	public void testPostMethodNameDispatchingController() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyPostMethodNameDispatchingController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myHandle.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			servlet.service(request, response);
+			fail("Should have thrown HttpRequestMethodNotSupportedException");
+		}
+		catch (HttpRequestMethodNotSupportedException ex) {
+			// expected
+		}
+
+		request = new MockHttpServletRequest("POST", "/myUnknownHandle.do");
+		request.addParameter("myParam", "myValue");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(404, response.getStatus());
+
+		request = new MockHttpServletRequest("POST", "/myHandle.do");
+		request.addParameter("myParam", "myValue");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/myOtherHandle.do");
+		request.addParameter("myParam", "myValue");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myOtherView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/myLangHandle.do");
+		request.addParameter("myParam", "myValue");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myLangView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/mySurpriseHandle.do");
+		request.addParameter("myParam", "myValue");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("mySurpriseView", response.getContentAsString());
+	}
+
 	public void testRelativePathDispatchingController() throws Exception {
 		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
@@ -566,6 +620,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 
 	@Controller
+	@RequestMapping(method = RequestMethod.GET)
 	private static class EmptyParameterListHandlerMethodController {
 
 		static boolean called;
@@ -777,6 +832,13 @@ public class ServletAnnotationControllerTests extends TestCase {
 		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
 		}
+	}
+
+
+	@Controller
+	@RequestMapping(value = "/*.do", method = RequestMethod.POST, params = "myParam=myValue")
+	private static class MyPostMethodNameDispatchingController extends MyMethodNameDispatchingController {
+
 	}
 
 

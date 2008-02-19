@@ -17,6 +17,8 @@
 package org.springframework.web.portlet.mvc.annotation;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
@@ -29,6 +31,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.portlet.handler.AbstractMapBasedHandlerMapping;
 
@@ -92,7 +95,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	 */
 	protected void detectHandlers() throws BeansException {
 		String[] beanNames = getApplicationContext().getBeanNamesForType(Object.class);
-		for (final String beanName : beanNames) {
+		for (String beanName : beanNames) {
 			ApplicationContext context = getApplicationContext();
 			Class<?> handlerType = context.getType(beanName);
 			RequestMapping mapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
@@ -109,37 +112,87 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 				}
 			}
 			if (mapping != null) {
-				if (mapping.method().length > 0 || mapping.params().length > 0) {
-					throw new IllegalStateException("Only portlet mode value supported for RequestMapping annotation " +
-							"at the type level - map parameters at the method level! Offending type: " + handlerType);
-				}
 				String[] modeKeys = mapping.value();
-				for (String modeKey : modeKeys) {
-					registerHandler(new PortletMode(modeKey), beanName);
+				String[] params = mapping.params();
+				boolean registerHandlerType = true;
+				if (modeKeys.length == 0 || params.length == 0) {
+					registerHandlerType = !detectHandlerMethods(handlerType, beanName, mapping);
+				}
+				if (registerHandlerType) {
+					ParameterMappingPredicate predicate = new ParameterMappingPredicate(params);
+					for (String modeKey : modeKeys) {
+						registerHandler(new PortletMode(modeKey), beanName, predicate);
+					}
 				}
 			}
 			else if (AnnotationUtils.findAnnotation(handlerType, Controller.class) != null) {
-				ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
-					public void doWith(Method method) {
-						RequestMapping mapping = method.getAnnotation(RequestMapping.class);
-						if (mapping != null) {
-							String[] modeKeys = mapping.value();
-							for (String modeKey : modeKeys) {
-								registerHandler(new PortletMode(modeKey), beanName);
-							}
-						}
-					}
-				});
+				detectHandlerMethods(handlerType, beanName, mapping);
 			}
 		}
 	}
 
+	/**
+	 * Derive portlet mode mappings from the handler's method-level mappings.
+	 * @param handlerType the handler type to introspect
+	 */
+	protected boolean detectHandlerMethods(Class handlerType, final String beanName, final RequestMapping typeMapping) {
+		final Set<Boolean> handlersRegistered = new HashSet<Boolean>(1);
+		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
+			public void doWith(Method method) {
+				RequestMapping mapping = method.getAnnotation(RequestMapping.class);
+				if (mapping != null) {
+					String[] modeKeys = mapping.value();
+					if (modeKeys.length == 0) {
+						if (typeMapping != null) {
+							modeKeys = typeMapping.value();
+						}
+						else {
+							throw new IllegalStateException(
+									"No portlet mode mappings specified - neither at type nor method level");
+						}
+					}
+					String[] params = mapping.params();
+					if (typeMapping != null) {
+						PortletAnnotationMappingUtils.validateModeMapping(modeKeys, typeMapping.value());
+						params = StringUtils.mergeStringArrays(typeMapping.params(), params);
+					}
+					ParameterMappingPredicate predicate = new ParameterMappingPredicate(params);
+					for (String modeKey : modeKeys) {
+						registerHandler(new PortletMode(modeKey), beanName, predicate);
+						handlersRegistered.add(Boolean.TRUE);
+					}
+				}
+			}
+		});
+		return !handlersRegistered.isEmpty();
+	}
 
 	/**
 	 * Uses the current PortletMode as lookup key.
 	 */
 	protected Object getLookupKey(PortletRequest request) throws Exception {
 		return request.getPortletMode();
+	}
+
+
+	/**
+	 * Predicate that matches against parameter conditions.
+	 */
+	private static class ParameterMappingPredicate implements PortletRequestMappingPredicate {
+
+		private final String[] params;
+
+		private ParameterMappingPredicate(String[] params) {
+			this.params = params;
+		}
+
+		public boolean match(PortletRequest request) {
+			return PortletAnnotationMappingUtils.checkParameters(this.params, request);
+		}
+
+		public String toString() {
+			return StringUtils.arrayToCommaDelimitedString(this.params);
+		}
 	}
 
 }

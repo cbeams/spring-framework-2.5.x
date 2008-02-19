@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,6 +172,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				rawHandler = getDefaultHandler();
 			}
 			if (rawHandler != null) {
+				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath);
 			}
 		}
@@ -191,10 +192,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see #exposePathWithinMapping
 	 * @see org.springframework.util.AntPathMatcher
 	 */
-	protected Object lookupHandler(String urlPath, HttpServletRequest request) {
+	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
 		// Direct match?
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
+			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath);
 		}
 		// Pattern match?
@@ -208,11 +210,23 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 		if (bestPathMatch != null) {
 			handler = this.handlerMap.get(bestPathMatch);
+			validateHandler(handler, request);
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPathMatch, urlPath);
 			return buildPathExposingHandler(handler, pathWithinMapping);
 		}
 		// No handler found...
 		return null;
+	}
+
+	/**
+	 * Validate the given handler against the current request.
+	 * <p>The default implementation is empty. Can be overridden in subclasses,
+	 * for example to enforce specific preconditions expressed in URL mappings.
+	 * @param handler the handler object to validate
+	 * @param request current HTTP request
+	 * @throws Exception if validation failed
+	 */
+	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
 	}
 
 	/**

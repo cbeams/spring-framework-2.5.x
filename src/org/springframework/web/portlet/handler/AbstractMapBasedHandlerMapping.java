@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.portlet.handler;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.portlet.PortletRequest;
@@ -26,9 +27,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class for HandlerMapping implementations that rely on a map
- * which caches handler objects per lookup key. Supports arbitrary lookup keys,
- * and automatically resolves handler bean names into handler bean instances.
+ * Abstract base class for {@link org.springframework.web.portlet.HandlerMapping}
+ * implementations that rely on a map which caches handler objects per lookup key.
+ * Supports arbitrary lookup keys, and automatically resolves handler bean names
+ * into handler bean instances.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -67,6 +69,16 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 		if (handler != null && logger.isDebugEnabled()) {
 			logger.debug("Key [" + lookupKey + "] -> handler [" + handler + "]");
 		}
+		if (handler instanceof Map) {
+			Map predicateMap = (Map) handler;
+			for (Iterator it = predicateMap.keySet().iterator(); it.hasNext();) {
+				PortletRequestMappingPredicate predicate = (PortletRequestMappingPredicate) it.next();
+				if (predicate.match(request)) {
+					return predicateMap.get(predicate);
+				}
+			}
+			return null;
+		}
 		return handler;
 	}
 
@@ -96,11 +108,27 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * Register the given handler instance for the given parameter value.
 	 * @param lookupKey the key to map the handler onto
 	 * @param handler the handler instance or handler bean name String
-	 * (a bean name will automatically be resolved into the corrresponding handler bean)
+	 * (a bean name will automatically be resolved into the corresponding handler bean)
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
 	protected void registerHandler(Object lookupKey, Object handler) throws BeansException, IllegalStateException {
+		registerHandler(lookupKey, handler, null);
+	}
+
+	/**
+	 * Register the given handler instance for the given parameter value.
+	 * @param lookupKey the key to map the handler onto
+	 * @param handler the handler instance or handler bean name String
+	 * (a bean name will automatically be resolved into the corresponding handler bean)
+	 * @param predicate a predicate object for this handler (may be <code>null</code>),
+	 * determining a match with the primary lookup key
+	 * @throws BeansException if the handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 */
+	protected void registerHandler(Object lookupKey, Object handler, PortletRequestMappingPredicate predicate)
+			throws BeansException, IllegalStateException {
+
 		Assert.notNull(lookupKey, "Lookup key must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
 		Object resolvedHandler = handler;
@@ -115,19 +143,43 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 
 		// Check for duplicate mapping.
 		Object mappedHandler = this.handlerMap.get(lookupKey);
-		if (mappedHandler != null) {
+		if (mappedHandler != null && !(mappedHandler instanceof Map)) {
 			if (mappedHandler != resolvedHandler) {
 				throw new IllegalStateException("Cannot map handler [" + handler + "] to key [" + lookupKey +
 						"]: There's already handler [" + mappedHandler + "] mapped.");
 			}
 		}
 		else {
-			// Add the handler to the map.
-			this.handlerMap.put(lookupKey, resolvedHandler);
+			if (predicate != null) {
+				// Add the handler to the predicate map.
+				Map predicateMap = (Map) mappedHandler;
+				if (predicateMap == null) {
+					predicateMap = new LinkedHashMap();
+					this.handlerMap.put(lookupKey, predicateMap);
+				}
+				predicateMap.put(predicate, resolvedHandler);
+			}
+			else {
+				// Add the single handler to the map.
+				this.handlerMap.put(lookupKey, resolvedHandler);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Mapped key [" + lookupKey + "] onto handler [" + resolvedHandler + "]");
 			}
 		}
+	}
+
+
+	/**
+	 * Predicate interface for determining a match with a given request.
+	 */
+	protected interface PortletRequestMappingPredicate {
+
+		/**
+		 * Determine whether the given request matches this predicate.
+		 * @param request current portlet request
+		 */
+		boolean match(PortletRequest request);
 	}
 
 }

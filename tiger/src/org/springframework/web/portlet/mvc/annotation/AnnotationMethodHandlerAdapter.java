@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortalContext;
+import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -38,6 +39,7 @@ import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
 
 import org.springframework.beans.BeanUtils;
@@ -307,7 +309,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			super(handlerType);
 		}
 
-		public Method resolveHandlerMethod(PortletRequest request, PortletResponse response) {
+		public Method resolveHandlerMethod(PortletRequest request, PortletResponse response) throws PortletException {
 			String lookupMode = request.getPortletMode().toString();
 			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
 			for (Method handlerMethod : getHandlerMethods()) {
@@ -365,7 +367,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 			}
 			else {
-				throw new IllegalStateException("No matching handler method found for portlet request: mode '" +
+				throw new UnavailableException("No matching handler method found for portlet request: mode '" +
 						request.getPortletMode() + "', type '" + (response instanceof ActionResponse ? "action" : "render") +
 						"', parameters " + StylerUtils.style(request.getParameterMap()));
 			}
@@ -382,30 +384,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 					return false;
 				}
 			}
-			String[] params = mapping.params;
-			if (params.length > 0) {
-				for (String param : params) {
-					int separator = param.indexOf('=');
-					if (separator == -1) {
-						if (param.startsWith("!")) {
-							if (PortletUtils.hasSubmitParameter(request, param.substring(1))) {
-								return false;
-							}
-						}
-						else if (!PortletUtils.hasSubmitParameter(request, param)) {
-							return false;
-						}
-					}
-					else {
-						String key = param.substring(0, separator);
-						String value = param.substring(separator + 1);
-						if (!value.equals(request.getParameter(key))) {
-							return false;
-						}
-					}
-				}
-			}
-			return true;
+			return PortletAnnotationMappingUtils.checkParameters(mapping.params, request);
 		}
 
 		private boolean isActionMethod(Method handlerMethod) {

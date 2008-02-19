@@ -31,6 +31,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.UnavailableException;
 
 import junit.framework.TestCase;
 
@@ -223,6 +224,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
+				wac.registerBeanDefinition("controller2", new RootBeanDefinition(MyOtherTypedCommandProvidingFormController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
 				adapterDef.getPropertyValues().addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
@@ -230,7 +232,6 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.refresh();
 				return wac;
 			}
-
 			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -238,6 +239,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		portlet.init(new MockPortletConfig());
 
 		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		request.addParameter("myParam", "myValue");
 		request.addParameter("defaultName", "10");
 		request.addParameter("age", "value2");
 		request.addParameter("date", "2007-10-02");
@@ -245,7 +247,17 @@ public class PortletAnnotationControllerTests extends TestCase {
 		portlet.render(request, response);
 		assertEquals("myView-Integer:10-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 
+		request = new MockRenderRequest(PortletMode.VIEW);
+		request.addParameter("myParam", "myOtherValue");
+		request.addParameter("defaultName", "10");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myOtherView-Integer:10-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+
 		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("myParam", "myValue");
 		request.addParameter("defaultName", "10");
 		request.addParameter("age", "value2");
 		request.addParameter("date", "2007-10-02");
@@ -336,6 +348,86 @@ public class PortletAnnotationControllerTests extends TestCase {
 		assertEquals("myLangView", response.getContentAsString());
 
 		request = new MockRenderRequest(PortletMode.VIEW);
+		request.addParameter("surprise", "!");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("mySurpriseView", response.getContentAsString());
+	}
+
+	public void testTypeLevelParameterDispatchingController() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
+				wac.setPortletContext(new MockPortletContext());
+				RootBeanDefinition bd = new RootBeanDefinition(MyTypeLevelParameterDispatchingController.class);
+				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller", bd);
+				RootBeanDefinition bd2 = new RootBeanDefinition(MySpecialParameterDispatchingController.class);
+				bd2.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller2", bd2);
+				RootBeanDefinition bd3 = new RootBeanDefinition(MyOtherSpecialParameterDispatchingController.class);
+				bd3.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller3", bd3);
+				RootBeanDefinition bd4 = new RootBeanDefinition(MyParameterDispatchingController.class);
+				bd4.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller4", bd4);
+				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
+				wac.refresh();
+				return wac;
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest(PortletMode.EDIT);
+		MockRenderResponse response = new MockRenderResponse();
+		try {
+			portlet.render(request, response);
+			fail("Should have thrown UnavailableException");
+		}
+		catch (UnavailableException ex) {
+			// expected
+		}
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("myParam", "myValue");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("myParam", "mySpecialValue");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("mySpecialView", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("myParam", "myOtherSpecialValue");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myOtherSpecialView", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.VIEW);
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("myParam", "myValue");
+		request.addParameter("view", "other");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myOtherView", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("myParam", "myValue");
+		request.addParameter("view", "my");
+		request.addParameter("lang", "de");
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLangView", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		request.addParameter("myParam", "myValue");
 		request.addParameter("surprise", "!");
 		response = new MockRenderResponse();
 		portlet.render(request, response);
@@ -513,9 +605,25 @@ public class PortletAnnotationControllerTests extends TestCase {
 
 
 	@Controller
+	@RequestMapping(params = "myParam=myValue")
 	private static class MyTypedCommandProvidingFormController
 			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
 
+	}
+
+
+	@Controller
+	@RequestMapping(params = "myParam=myOtherValue")
+	private static class MyOtherTypedCommandProvidingFormController
+			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
+
+		@RequestMapping("VIEW")
+		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
+			if (!model.containsKey("myKey")) {
+				model.addAttribute("myKey", "myValue");
+			}
+			return "myOtherView";
+		}
 	}
 
 
@@ -600,6 +708,35 @@ public class PortletAnnotationControllerTests extends TestCase {
 		@RequestMapping(params = "surprise")
 		public void mySurpriseHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
+		}
+	}
+
+
+	@Controller
+	@RequestMapping(value = "EDIT", params = "myParam=myValue")
+	private static class MyTypeLevelParameterDispatchingController extends MyParameterDispatchingController {
+
+	}
+
+
+	@Controller
+	@RequestMapping("EDIT")
+	private static class MySpecialParameterDispatchingController {
+
+		@RequestMapping(params = "myParam=mySpecialValue")
+		public void myHandle(RenderResponse response) throws IOException {
+			response.getWriter().write("mySpecialView");
+		}
+	}
+
+
+	@Controller
+	@RequestMapping("EDIT")
+	private static class MyOtherSpecialParameterDispatchingController {
+
+		@RequestMapping(params = "myParam=myOtherSpecialValue")
+		public void myHandle(RenderResponse response) throws IOException {
+			response.getWriter().write("myOtherSpecialView");
 		}
 	}
 

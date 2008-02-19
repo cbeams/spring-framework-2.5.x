@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,13 @@
 package org.springframework.web.servlet.mvc.annotation;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -28,6 +33,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMapping;
 
@@ -78,6 +84,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 
 	private boolean useDefaultSuffixPattern = true;
 
+	private final Map<Class, RequestMapping> cachedMappings = new HashMap<Class, RequestMapping>();
+
 
 	/**
 	 * Set whether to register paths using the default suffix pattern as well:
@@ -115,36 +123,50 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		}
 
 		if (mapping != null) {
-			if (mapping.method().length > 0 || mapping.params().length > 0) {
-				throw new IllegalStateException("Only path value supported for RequestMapping annotation " +
-						"at the type level - map HTTP method and/or parameters at the method level! " +
-						"Offending type: " + handlerType);
-			}
-			final Set<String> urls = new LinkedHashSet<String>();
+			// @RequestMapping found at type level
+			this.cachedMappings.put(handlerType, mapping);
+			Set<String> urls = new LinkedHashSet<String>();
 			String[] paths = mapping.value();
-			for (String path : paths) {
-				addUrlsForPath(urls, path);
+			if (paths.length > 0) {
+				// @RequestMapping specifies paths at type level
+				for (String path : paths) {
+					addUrlsForPath(urls, path);
+				}
+				return StringUtils.toStringArray(urls);
 			}
-			return StringUtils.toStringArray(urls);
+			else {
+				// actual paths specified by @RequestMapping at method level
+				return determineUrlsForHandlerMethods(handlerType);
+			}
 		}
 		else if (AnnotationUtils.findAnnotation(handlerType, Controller.class) != null) {
-			final Set<String> urls = new LinkedHashSet<String>();
-			ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
-				public void doWith(Method method) {
-					RequestMapping mapping = method.getAnnotation(RequestMapping.class);
-					if (mapping != null) {
-						String[] mappedPaths = mapping.value();
-						for (int i = 0; i < mappedPaths.length; i++) {
-							addUrlsForPath(urls, mappedPaths[i]);
-						}
-					}
-				}
-			});
-			return StringUtils.toStringArray(urls);
+			// @RequestMapping to be introspected at method level
+			return determineUrlsForHandlerMethods(handlerType);
 		}
 		else {
 			return null;
 		}
+	}
+
+	/**
+	 * Derive URL mappings from the handler's method-level mappings.
+	 * @param handlerType the handler type to introspect
+	 * @return the array of mapped URLs
+	 */
+	protected String[] determineUrlsForHandlerMethods(Class<?> handlerType) {
+		final Set<String> urls = new LinkedHashSet<String>();
+		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
+			public void doWith(Method method) {
+				RequestMapping mapping = method.getAnnotation(RequestMapping.class);
+				if (mapping != null) {
+					String[] mappedPaths = mapping.value();
+					for (int i = 0; i < mappedPaths.length; i++) {
+						addUrlsForPath(urls, mappedPaths[i]);
+					}
+				}
+			}
+		});
+		return StringUtils.toStringArray(urls);
 	}
 
 	/**
@@ -156,6 +178,39 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		urls.add(path);
 		if (this.useDefaultSuffixPattern && path.indexOf('.') == -1) {
 			urls.add(path + ".*");
+		}
+	}
+
+
+	/**
+	 * Validate the given annotated handler against the current request.
+	 * @see #validateMapping
+	 */
+	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
+		RequestMapping mapping = this.cachedMappings.get(handler.getClass());
+		if (mapping == null) {
+			mapping = AnnotationUtils.findAnnotation(handler.getClass(), RequestMapping.class);
+		}
+		if (mapping != null) {
+			validateMapping(mapping, request);
+		}
+	}
+
+	/**
+	 * Validate the given type-level mapping metadata against the current request,
+	 * checking HTTP request method and parameter conditions.
+	 * @param mapping the mapping metadata to validate
+	 * @param request current HTTP request
+	 * @throws Exception if validation failed
+	 */
+	protected void validateMapping(RequestMapping mapping, HttpServletRequest request) throws Exception {
+		if (!ServletAnnotationMappingUtils.checkRequestMethod(mapping.method(), request)) {
+			throw new HttpRequestMethodNotSupportedException(request.getMethod());
+		}
+		if (!ServletAnnotationMappingUtils.checkParameters(mapping.params(), request)) {
+			throw new ServletException("Parameter conditions {" +
+					StringUtils.arrayToDelimitedString(mapping.params(), ", ") +
+					"} not met for request parameters: " + request.getParameterMap());
 		}
 	}
 
