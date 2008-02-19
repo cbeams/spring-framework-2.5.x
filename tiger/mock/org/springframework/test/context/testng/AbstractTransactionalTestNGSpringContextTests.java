@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  */
-@TestExecutionListeners( { TransactionalTestExecutionListener.class })
+@TestExecutionListeners({TransactionalTestExecutionListener.class})
 @Transactional
 public abstract class AbstractTransactionalTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
 
@@ -75,8 +75,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 
 	/**
 	 * Set the DataSource, typically provided via Dependency Injection.
-	 *
-	 * @param dataSource The DataSource to inject.
+	 * @param dataSource the DataSource to inject
 	 */
 	@Autowired
 	public void setDataSource(final DataSource dataSource) {
@@ -85,50 +84,40 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 
 	/**
 	 * Count the rows in the given table.
-	 *
 	 * @param tableName table name to count rows in
 	 * @return the number of rows in the table
 	 */
-	protected int countRowsInTable(final String tableName) {
+	protected int countRowsInTable(String tableName) {
 		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
 	}
 
 	/**
-	 * <p>
 	 * Convenience method for deleting all rows from the specified tables.
-	 * </p>
-	 * <p>
-	 * Use with caution outside of a transaction!
-	 * </p>
-	 *
-	 * @param names The names of the tables from which to delete.
-	 * @return The total number of rows deleted from all specified tables.
+	 * <p>Use with caution outside of a transaction!
+	 * @param names the names of the tables from which to delete
+	 * @return the total number of rows deleted from all specified tables
 	 */
-	protected int deleteFromTables(final String... names) {
+	protected int deleteFromTables(String... names) {
 		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
 	}
 
 	/**
-	 * <p>
 	 * Execute the given SQL script.
-	 * </p>
-	 * <p>
-	 * Use with caution outside of a transaction!
-	 * </p>
-	 *
-	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 *        normally be loaded by classpath. There should be one statement per
-	 *        line. Any semicolons will be removed. <b>Do not use this method to
-	 *        execute DDL if you expect rollback.</b>
+	 * <p>Use with caution outside of a transaction!
+	 * @param sqlResourcePath Spring resource path for the SQL script.
+	 * Should normally be loaded by classpath. There should be one statement
+	 * per line. Any semicolons will be removed. <b>Do not use this method
+	 * to execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing an
-	 *        exception in the event of an error.
+	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 *         and continueOnError was <code>false</code>.
+	 * and continueOnError was <code>false</code>
 	 */
-	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
+	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError)
 			throws DataAccessException {
-		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath,
-				continueOnError);
+
+		SimpleJdbcTestUtils.executeSqlScript(
+				this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath, continueOnError);
 	}
 
 }
