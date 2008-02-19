@@ -56,9 +56,9 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -134,7 +134,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final Set alreadyCreated = Collections.synchronizedSet(new HashSet());
 
 	/** Names of beans that are currently in creation */
-	private final ThreadLocal prototypesCurrentlyInCreation = new ThreadLocal();
+	private final ThreadLocal prototypesCurrentlyInCreation =
+			new NamedThreadLocal("Prototype beans currently in creation");
 
 
 	/**

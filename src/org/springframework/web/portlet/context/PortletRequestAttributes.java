@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,6 +268,11 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 			logger.warn("Could not register destruction callback [" + callback + "] for attribute '" + name +
 					"' for session scope because Portlet API 1.0 does not support session attribute callbacks");
 		}
+	}
+
+
+	public String toString() {
+		return this.request.toString();
 	}
 
 }

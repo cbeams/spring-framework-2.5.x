@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,11 @@ package org.springframework.beans.factory;
  * or the {@link org.springframework.jndi.JndiObjectFactoryBean}.
  * It can be used for application components as well; however,
  * this is not common outside of infrastructure code.
+ *
+ * <p><b>NOTE:</b> FactoryBean objects participate in the containing
+ * BeanFactory's synchronization of bean creation. There is usually no
+ * need for internal synchronization other than for purposes of lazy
+ * initialization within the FactoryBean itself (or the like).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

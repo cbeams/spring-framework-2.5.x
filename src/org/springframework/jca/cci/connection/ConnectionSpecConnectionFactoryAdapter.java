@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.jca.cci.connection;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionSpec;
+
+import org.springframework.core.NamedThreadLocal;
 
 /**
  * An adapter for a target CCI {@link javax.resource.cci.ConnectionFactory},
@@ -64,7 +66,7 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 
 	private ConnectionSpec connectionSpec;
 
-	private final ThreadLocal threadBoundSpec = new ThreadLocal();
+	private final ThreadLocal threadBoundSpec = new NamedThreadLocal("Current CCI ConnectionSpec");
 
 
 	/**

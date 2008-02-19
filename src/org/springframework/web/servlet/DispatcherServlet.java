@@ -982,6 +982,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
 			}
+			public String toString() {
+				return getLocale().toString();
+			}
 		};
 	}
 

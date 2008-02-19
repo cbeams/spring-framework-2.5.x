@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.core.NamedThreadLocal;
 
 /**
  * Interceptor that exposes the current MethodInvocation.
@@ -57,7 +58,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 		}
 	};
 
-	private static final ThreadLocal invocation = new ThreadLocal();
+	private static final ThreadLocal invocation = new NamedThreadLocal("Current AOP method invocation");
 
 
 	/**

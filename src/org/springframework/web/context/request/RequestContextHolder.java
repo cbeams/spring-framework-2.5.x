@@ -16,6 +16,9 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.core.NamedInheritableThreadLocal;
+import org.springframework.core.NamedThreadLocal;
+
 /**
  * Holder class to expose the web request in the form of a thread-bound
  * {@link RequestAttributes} object.
@@ -37,9 +40,10 @@ package org.springframework.web.context.request;
  */
 public abstract class RequestContextHolder  {
 	
-	private static final ThreadLocal requestAttributesHolder = new ThreadLocal();
+	private static final ThreadLocal requestAttributesHolder = new NamedThreadLocal("Request attributes");
 
-	private static final ThreadLocal inheritableRequestAttributesHolder = new InheritableThreadLocal();
+	private static final ThreadLocal inheritableRequestAttributesHolder =
+			new NamedInheritableThreadLocal("Request context");
 
 
 	/**

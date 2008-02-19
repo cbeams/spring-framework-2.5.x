@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -75,7 +76,7 @@ public class UserCredentialsConnectionFactoryAdapter
 
 	private String password;
 
-	private final ThreadLocal threadBoundCredentials = new ThreadLocal();
+	private final ThreadLocal threadBoundCredentials = new NamedThreadLocal("Current JMS user credentials");
 
 
 	/**
@@ -120,7 +121,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see #removeCredentialsFromCurrentThread
 	 */
 	public void setCredentialsForCurrentThread(String username, String password) {
-		this.threadBoundCredentials.set(new String[] {username, password});
+		this.threadBoundCredentials.set(new JmsUserCredentials(username, password));
 	}
 
 	/**
@@ -140,9 +141,9 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see #doCreateConnection
 	 */
 	public final Connection createConnection() throws JMSException {
-		String[] threadCredentials = (String[]) this.threadBoundCredentials.get();
+		JmsUserCredentials threadCredentials = (JmsUserCredentials) this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
-			return doCreateConnection(threadCredentials[0], threadCredentials[1]);
+			return doCreateConnection(threadCredentials.username, threadCredentials.password);
 		}
 		else {
 			return doCreateConnection(this.username, this.password);
@@ -185,9 +186,9 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see #doCreateQueueConnection
 	 */
 	public final QueueConnection createQueueConnection() throws JMSException {
-		String[] threadCredentials = (String[]) this.threadBoundCredentials.get();
+		JmsUserCredentials threadCredentials = (JmsUserCredentials) this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
-			return doCreateQueueConnection(threadCredentials[0], threadCredentials[1]);
+			return doCreateQueueConnection(threadCredentials.username, threadCredentials.password);
 		}
 		else {
 			return doCreateQueueConnection(this.username, this.password);
@@ -234,9 +235,9 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see #doCreateTopicConnection
 	 */
 	public final TopicConnection createTopicConnection() throws JMSException {
-		String[] threadCredentials = (String[]) this.threadBoundCredentials.get();
+		JmsUserCredentials threadCredentials = (JmsUserCredentials) this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
-			return doCreateTopicConnection(threadCredentials[0], threadCredentials[1]);
+			return doCreateTopicConnection(threadCredentials.username, threadCredentials.password);
 		}
 		else {
 			return doCreateTopicConnection(this.username, this.password);
@@ -272,6 +273,26 @@ public class UserCredentialsConnectionFactoryAdapter
 		}
 		else {
 			return queueFactory.createTopicConnection();
+		}
+	}
+
+
+	/**
+	 * Inner class used as ThreadLocal value.
+	 */
+	private static class JmsUserCredentials {
+
+		public final String username;
+
+		public final String password;
+
+		private JmsUserCredentials(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		public String toString() {
+			return "JmsUserCredentials[username='" + this.username + "',password='" + this.password + "']";
 		}
 	}
 

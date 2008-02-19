@@ -250,6 +250,11 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 
+	public String toString() {
+		return this.request.toString();
+	}
+
+
 	/**
 	 * Adapter that implements the Servlet 2.3 HttpSessionBindingListener
 	 * interface, wrapping a request destruction callback.

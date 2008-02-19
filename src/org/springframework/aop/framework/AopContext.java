@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.aop.framework;
+
+import org.springframework.core.NamedThreadLocal;
 
 /**
  * Class containing static methods used to obtain information about the current AOP invocation.
@@ -44,7 +46,7 @@ public abstract class AopContext {
 	 * the controlling proxy configuration has been set to "true".
 	 * @see ProxyConfig#setExposeProxy
 	 */
-	private static final ThreadLocal currentProxy = new ThreadLocal();
+	private static final ThreadLocal currentProxy = new NamedThreadLocal("Current AOP proxy");
 
 
 	/**

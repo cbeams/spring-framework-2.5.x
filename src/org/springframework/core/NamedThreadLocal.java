@@ -14,40 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.context.i18n;
-
-import java.util.Locale;
+package org.springframework.core;
 
 import org.springframework.util.Assert;
 
 /**
- * Simple implementation of the {@link LocaleContext} interface,
- * always returning a specified <code>Locale</code>.
+ * {@link ThreadLocal} subclass that exposes a specified name
+ * as {@link #toString()} result (allowing for introspection).
  *
  * @author Juergen Hoeller
- * @since 1.2
+ * @since 2.5.2
+ * @see NamedInheritableThreadLocal
  */
-public class SimpleLocaleContext implements LocaleContext {
+public class NamedThreadLocal extends ThreadLocal {
 
-	private final Locale locale;
+	private final String name;
 
 
 	/**
-	 * Create a new SimpleLocaleContext that exposes the specified Locale.
-	 * Every <code>getLocale()</code> will return this Locale.
-	 * @param locale the Locale to expose
+	 * Create a new NamedThreadLocal with the given name.
+	 * @param name a descriptive name for this ThreadLocal
 	 */
-	public SimpleLocaleContext(Locale locale) {
-		Assert.notNull(locale, "Locale must not be null");
-		this.locale = locale;
-	}
-
-	public Locale getLocale() {
-		return this.locale;
+	public NamedThreadLocal(String name) {
+		Assert.hasText(name, "Name must not be empty");
+		this.name = name;
 	}
 
 	public String toString() {
-		return this.locale.toString();
+		return this.name;
 	}
 
 }

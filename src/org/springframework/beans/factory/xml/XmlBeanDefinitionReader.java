@@ -41,6 +41,7 @@ import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.Constants;
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -123,8 +124,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
-	/** Resources that are currently being loaded */
-	private final ThreadLocal resourcesCurrentlyBeingLoaded = new ThreadLocal();
+	private final ThreadLocal resourcesCurrentlyBeingLoaded =
+			new NamedThreadLocal("XML bean definition resources currently being loaded");
 
 
 	/**

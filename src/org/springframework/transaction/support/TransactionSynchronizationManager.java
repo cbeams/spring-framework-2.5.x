@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.OrderComparator;
 import org.springframework.util.Assert;
 
@@ -76,20 +77,25 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
-
-	private static final ThreadLocal resources = new ThreadLocal();
-
-	private static final ThreadLocal synchronizations = new ThreadLocal();
-
 	private static final Comparator synchronizationComparator = new OrderComparator();
 
-	private static final ThreadLocal currentTransactionName = new ThreadLocal();
+	private static final ThreadLocal resources =
+			new NamedThreadLocal("Transactional resources");
 
-	private static final ThreadLocal currentTransactionReadOnly = new ThreadLocal();
+	private static final ThreadLocal synchronizations =
+			new NamedThreadLocal("Transaction synchronizations");
 
-	private static final ThreadLocal currentTransactionIsolationLevel= new ThreadLocal();
+	private static final ThreadLocal currentTransactionName =
+			new NamedThreadLocal("Current transaction name");
 
-	private static final ThreadLocal actualTransactionActive = new ThreadLocal();
+	private static final ThreadLocal currentTransactionReadOnly =
+			new NamedThreadLocal("Current transaction read-only status");
+
+	private static final ThreadLocal currentTransactionIsolationLevel =
+			new NamedThreadLocal("Current transaction isolation level");
+
+	private static final ThreadLocal actualTransactionActive =
+			new NamedThreadLocal("Actual transaction active");
 
 
 	//-------------------------------------------------------------------------

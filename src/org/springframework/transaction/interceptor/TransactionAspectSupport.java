@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -71,7 +72,8 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * (e.g. before and after advice) if the aspect involves more than a
 	 * single method (as will be the case for around advice).
 	 */
-	private static final ThreadLocal transactionInfoHolder = new ThreadLocal();
+	private static final ThreadLocal transactionInfoHolder =
+			new NamedThreadLocal("Current aspect-driven transaction");
 
 
 	/**
@@ -443,6 +445,10 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			// Use stack to restore old transaction TransactionInfo.
 			// Will be null if none was set.
 			transactionInfoHolder.set(this.oldTransactionInfo);
+		}
+
+		public String toString() {
+			return this.transactionAttribute.toString();
 		}
 	}
 

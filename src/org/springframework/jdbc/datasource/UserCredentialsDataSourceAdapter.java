@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -64,7 +65,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 	private String password;
 
-	private final ThreadLocal threadBoundCredentials = new ThreadLocal();
+	private final ThreadLocal threadBoundCredentials = new NamedThreadLocal("Current JDBC user credentials");
 
 
 	/**
@@ -103,7 +104,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * @see #removeCredentialsFromCurrentThread
 	 */
 	public void setCredentialsForCurrentThread(String username, String password) {
-		this.threadBoundCredentials.set(new String[] {username, password});
+		this.threadBoundCredentials.set(new JdbcUserCredentials(username, password));
 	}
 
 	/**
@@ -124,9 +125,9 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * determined credentials as parameters.
 	 */
 	public Connection getConnection() throws SQLException {
-		String[] threadCredentials = (String[]) this.threadBoundCredentials.get();
+		JdbcUserCredentials threadCredentials = (JdbcUserCredentials) this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
-			return doGetConnection(threadCredentials[0], threadCredentials[1]);
+			return doGetConnection(threadCredentials.username, threadCredentials.password);
 		}
 		else {
 			return doGetConnection(this.username, this.password);
@@ -159,6 +160,26 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 		}
 		else {
 			return getTargetDataSource().getConnection();
+		}
+	}
+
+
+	/**
+	 * Inner class used as ThreadLocal value.
+	 */
+	private static class JdbcUserCredentials {
+
+		public final String username;
+
+		public final String password;
+
+		private JdbcUserCredentials(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		public String toString() {
+			return "JdbcUserCredentials[username='" + this.username + "',password='" + this.password + "']";
 		}
 	}
 
