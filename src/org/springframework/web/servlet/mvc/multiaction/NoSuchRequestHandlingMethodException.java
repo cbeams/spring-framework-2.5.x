@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@
 
 package org.springframework.web.servlet.mvc.multiaction;
 
+import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.core.style.StylerUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Exception thrown when there is no handler method ("action" method)
@@ -37,8 +42,18 @@ public class NoSuchRequestHandlingMethodException extends ServletException {
 	 * @param request the offending HTTP request
 	 */
 	public NoSuchRequestHandlingMethodException(HttpServletRequest request) {
-		super("No handler method found for HTTP request with URL [" + request.getRequestURI() + "]" +
-				(request.getQueryString() != null ? " and query string [" + request.getQueryString() + "]" : ""));
+		this(new UrlPathHelper().getRequestUri(request), request.getMethod(), request.getParameterMap());
+	}
+
+	/**
+	 * Create a new NoSuchRequestHandlingMethodException.
+	 * @param urlPath the request URI that has been used for handler lookup
+	 * @param method the HTTP request method of the request
+	 * @param parameterMap the request's parameters as map
+	 */
+	public NoSuchRequestHandlingMethodException(String urlPath, String method, Map parameterMap) {
+		super("No matching handler method found for servlet request: path '" + urlPath +
+				"', method '" + method + "', parameters " + StylerUtils.style(parameterMap));
 	}
 
 	/**
