@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.generic.SpringBeanELResolver;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
@@ -69,79 +70,17 @@ import org.springframework.web.jsf.FacesContextUtils;
  *
  * @author Juergen Hoeller
  * @since 2.5
- * @see org.springframework.web.jsf.WebApplicationContextVariableResolver
+ * @see WebApplicationContextFacesELResolver
  * @see org.springframework.web.jsf.FacesContextUtils#getRequiredWebApplicationContext
  */
-public class SpringBeanFacesELResolver extends ELResolver {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
-
-
-	public Object getValue(ELContext elContext, Object base, Object property) throws ELException {
-		if (base == null) {
-			// Ask Spring root application context.
-			String beanName = property.toString();
-			if (logger.isTraceEnabled()) {
-				logger.trace("Attempting to resolve variable '" + beanName + "' in Spring ApplicationContext");
-			}
-			BeanFactory bf = getBeanFactory(elContext);
-			if (bf.containsBean(beanName)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Successfully resolved variable '" + beanName + "' in Spring ApplicationContext");
-				}
-				elContext.setPropertyResolved(true);
-				return bf.getBean(beanName);
-			}
-		}
-
-		return null;
-	}
-
-	public Class<?> getType(ELContext elContext, Object base, Object property) throws ELException {
-		if (base == null) {
-			// Ask Spring root application context.
-			String name = property.toString();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Attempting to resolve variable '" + name + "' in root WebApplicationContext");
-			}
-			BeanFactory bf = getBeanFactory(elContext);
-			if (bf.containsBean(name)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Successfully resolved variable '" + name + "' in root WebApplicationContext");
-				}
-				elContext.setPropertyResolved(true);
-				return bf.getType(name);
-			}
-		}
-
-		return null;
-	}
-
-	public void setValue(ELContext elContext, Object base, Object property, Object value) throws ELException {
-	}
-
-	public boolean isReadOnly(ELContext elContext, Object base, Object property) throws ELException {
-		return false;
-	}
-
-	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext elContext, Object base) {
-		return null;
-	}
-
-	public Class<?> getCommonPropertyType(ELContext elContext, Object base) {
-		return Object.class;
-	}
-
+public class SpringBeanFacesELResolver extends SpringBeanELResolver {
 
 	/**
-	 * Retrieve the Spring BeanFactory to delegate bean name resolution to.
-	 * <p>The default implementation delegates to <code>getWebApplicationContext</code>.
+	 * This implementation delegates to {@link #getWebApplicationContext}.
 	 * Can be overridden to provide an arbitrary BeanFactory reference to resolve
 	 * against; usually, this will be a full Spring ApplicationContext.
 	 * @param elContext the current JSF ELContext
 	 * @return the Spring BeanFactory (never <code>null</code>)
-	 * @see #getWebApplicationContext
 	 */
 	protected BeanFactory getBeanFactory(ELContext elContext) {
 		return getWebApplicationContext(elContext);
