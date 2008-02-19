@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -934,11 +934,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected Collection getLifecycleBeans() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		String[] beanNames = beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
+		String[] beanNames = beanFactory.getSingletonNames();
 		Collection beans = new ArrayList(beanNames.length);
 		for (int i = 0; i < beanNames.length; i++) {
 			Object bean = beanFactory.getSingleton(beanNames[i]);
-			if (bean != null) {
+			if (bean instanceof Lifecycle) {
 				beans.add(bean);
 			}
 		}
