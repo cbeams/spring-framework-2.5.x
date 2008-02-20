@@ -16,8 +16,11 @@
 
 package org.springframework.web.context.request;
 
+import javax.faces.context.FacesContext;
+
 import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.util.ClassUtils;
 
 /**
  * Holder class to expose the web request in the form of a thread-bound
@@ -40,6 +43,8 @@ import org.springframework.core.NamedThreadLocal;
  */
 public abstract class RequestContextHolder  {
 	
+	private static final boolean jsfPresent = ClassUtils.isPresent("javax.faces.context.FacesContext");
+
 	private static final ThreadLocal requestAttributesHolder = new NamedThreadLocal("Request attributes");
 
 	private static final ThreadLocal inheritableRequestAttributesHolder =
@@ -96,21 +101,44 @@ public abstract class RequestContextHolder  {
 
 	/**
 	 * Return the RequestAttributes currently bound to the thread.
+	 * <p>Exposes the previously bound RequestAttributes instance, if any.
+	 * Falls back to the current JSF FacesContext, if any.
 	 * @return the RequestAttributes currently bound to the thread
 	 * @throws IllegalStateException if no RequestAttributes object
 	 * is bound to the current thread
+	 * @see #setRequestAttributes
+	 * @see ServletRequestAttributes
+	 * @see FacesRequestAttributes
+	 * @see javax.faces.context.FacesContext#getCurrentInstance()
 	 */
 	public static RequestAttributes currentRequestAttributes() throws IllegalStateException {
 		RequestAttributes attributes = getRequestAttributes();
 		if (attributes == null) {
-			throw new IllegalStateException("No thread-bound request found: " +
-					"Are you referring to request attributes outside of an actual web request, " +
-					"or processing a request outside of the originally receiving thread? " +
-					"If you are actually operating within a web request and still receive this message, " +
-					"your code is probably running outside of DispatcherServlet/DispatcherPortlet: " +
-					"In this case, use RequestContextListener or RequestContextFilter to expose the current request.");
+			if (jsfPresent) {
+				attributes = FacesRequestAttributesFactory.getFacesRequestAttributes();
+			}
+			if (attributes == null) {
+				throw new IllegalStateException("No thread-bound request found: " +
+						"Are you referring to request attributes outside of an actual web request, " +
+						"or processing a request outside of the originally receiving thread? " +
+						"If you are actually operating within a web request and still receive this message, " +
+						"your code is probably running outside of DispatcherServlet/DispatcherPortlet: " +
+						"In this case, use RequestContextListener or RequestContextFilter to expose the current request.");
+			}
 		}
 		return attributes;
+	}
+
+
+	/**
+	 * Inner class to avoid hard-coded JSF dependency.
+ 	 */
+	private static class FacesRequestAttributesFactory {
+
+		public static RequestAttributes getFacesRequestAttributes() {
+			FacesContext facesContext = FacesContext.getCurrentInstance();
+			return (facesContext != null ? new FacesRequestAttributes(facesContext) : null);
+		}
 	}
 
 }
