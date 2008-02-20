@@ -130,7 +130,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 			}
 			String user = getRequest().getRemoteUser();
 			if (StringUtils.hasLength(user)) {
-				buffer.append(";user=" + user);
+				buffer.append(";user=").append(user);
 			}
 		}
 		return buffer.toString();
