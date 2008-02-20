@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-03-20)
+Changes in version 2.0.9 (2008-03-27)
 -------------------------------------
 
 General
@@ -18,6 +18,9 @@ Package org.springframework.beans
 * BeanWrapperImpl trims an enum candidate value before matching it against the available enum values
 * StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
+
+Package org.springframework.context
+* fixed AbstractApplicationContext to correctly ignore FactoryBean results that implement the Lifecycle interface
 
 Package org.springframework.instrument
 * fixed ShadowingClassLoader to not attempt defining a package in case of a class in the default package
