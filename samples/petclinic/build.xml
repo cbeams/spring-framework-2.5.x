@@ -103,6 +103,7 @@
 			<include name="serp*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/toplink">
+      <include name="eclipselink.jar"/>
 			<include name="toplink-essentials.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/junit">
@@ -250,6 +251,7 @@
 				<include name="serp*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/toplink">
+        <include name="eclipselink.jar"/>
 				<include name="toplink-essentials.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
