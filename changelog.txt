@@ -13,6 +13,7 @@ General
 * fixed showcases build scripts to correctly refer to revised frameworks jars and updated third-party libraries
 
 Package org.springframework.aop
+* AbstractRegexpMethodPointcut matches against target class as well, not just against method's declaring class
 * ProxyFactoryBean and AbstractAutoProxyCreator check autodetected proxy interfaces for visibility in the ClassLoader
 * Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
@@ -41,6 +42,7 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
 * fixed AbstractAutowireCapableBeanFactory to always resolve the bean class before a FactoryBean type check
+* revised bean destruction logging to log at WARN level with exception toString only (full exception at DEBUG level)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AutowiredAnnotationBeanPostProcessor to correctly cache a collection with a single autowired bean as element
 * deprecated AbstractBeanDefinition's Spring 1.2 style "setSingleton" method in favor of Spring 2.0's "setScope"
@@ -51,6 +53,7 @@ Package org.springframework.beans
 * refactored AbstractBeanConfigurerAspect into Abstract(InterfaceDriven)DependencyInjectionAspect
 * nested XML decoration elements (e.g. "aop:scoped-proxy") are explicitly rejected if no corresponding handler present
 * InitDestroy/Autowired/Common/PersistenceAnnotationBeanPostProcessor perform appropriate debug logging
+* factored out generic SpringBeanELResolver and SimpleSpringBeanELResolver from "web.jsf.SpringBeanFacesELResolver"
 
 Package org.springframework.context
 * added "getId()" method to ApplicationContext interface, with corresponding "setId" in AbstractApplicationContext class
@@ -71,6 +74,7 @@ Package org.springframework.context
 * added "context:property-override" configuration element, as a sibling to "context:property-placeholder"
 
 Package org.springframework.core
+* introduced Named(Inheritable)ThreadLocal, used throughout the framework for self-descriptive thread-bound context 
 * added "getParameterName()" method to MethodParameter, activated through a ParameterNameDiscoverer
 * factored out GenericTypeResolver from BridgeMethodResolver and GenericCollectionTypeResolver
 * factored out DecoratingClassLoader base class from OverridingClassLoader and ShadowingClassLoader
@@ -175,6 +179,9 @@ Package org.springframework.web
 * added "dispatchOptionsRequest/TraceRequest" properties to FrameworkServlet, for dispatching all HTTP request methods
 * deprecated PathMap attribute and CommonsPathMapHandlerMapping class in favor annotation-based request mapping
 * deprecated ThrowawayController and ThrowawayControllerHandlerAdapter in favor annotation-based controllers
+* @RequestMapping's "method" attribute supported at type level as well, expressing restriction for entire handler
+* @RequestMapping's "params" attribute supported at type level for Servlets, expressing precondition for entire handler
+* @RequestMapping's "params" attribute supported at type level for Portlets, mapping mode+params onto specific handler
 * @RequestMapping annotation supports "!myParam" expressions for non-presence of a specific parameter as well
 * introduced WebArgumentResolver interface and "customArgumentResolver(s)" property on AnnotationMethodHandlerAdapter
 * factored out common HandlerMethodResolver/Invoker classes from Servlet/Portlet AnnotationMethodHandlerAdapter
@@ -183,8 +190,10 @@ Package org.springframework.web
 * AnnotationMethodHandlerAdapter resolves the target type for a generically typed @RequestParam/@ModelAttribute argument
 * AnnotationMethodHandlerAdapter properly allows for resolving a Principal argument to null (in case of none defined)
 * AnnotationMethodHandlerAdapter resolves InputStream/OutputStream and Reader/Writer subclasses as well
-* fixed AnnotationMethodHandlerAdapter to avoid NPE in case of plain model attribute returned from handler method
 * added "synchronizeOnSession" property to AnnotationMethodHandlerAdapter, analogous to AbstractController
+* fixed AnnotationMethodHandlerAdapter to avoid NPE in case of plain model attribute returned from handler method
+* Servlet AnnotationMethodHandlerAdapter sends HTTP 404 instead of throwing IllegalState if no handler method found
+* Portlet AnnotationMethodHandlerAdapter throws UnavailableException instead of IllegalState if no handler method found
 * added "prepareResponse"/"generatesDownloadContent" methods to AbstractView, for HTTPS cache header workaround for IE
 * AbstractPdfView and Abstract(J)ExcelView participate in AbstractView's HTTPS cache header workaround for IE
 * AbstractJasperReportsView does not perform a hard response reset, in favor of AbstractView's HTTPS cache workaround
