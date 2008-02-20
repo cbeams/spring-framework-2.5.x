@@ -143,8 +143,11 @@ public class InitDestroyAnnotationBeanPostProcessor
 		try {
 			metadata.invokeInitMethods(bean, beanName);
 		}
+		catch (InvocationTargetException ex) {
+			throw new BeanCreationException(beanName, "Invocation of init method failed", ex.getTargetException());
+		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Invocation of init method failed", ex);
+			throw new BeanCreationException(beanName, "Couldn't invoke init method", ex);
 		}
 		return bean;
 	}
@@ -158,8 +161,17 @@ public class InitDestroyAnnotationBeanPostProcessor
 		try {
 			metadata.invokeDestroyMethods(bean, beanName);
 		}
+		catch (InvocationTargetException ex) {
+			String msg = "Invocation of destroy method failed on bean with name '" + beanName + "'";
+			if (logger.isDebugEnabled()) {
+				logger.warn(msg, ex.getTargetException());
+			}
+			else {
+				logger.warn(msg + ": " + ex.getTargetException());
+			}
+		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Invocation of destroy method failed", ex);
+			logger.error("Couldn't invoke destroy method on bean with name '" + beanName + "'", ex);
 		}
 	}
 
@@ -282,12 +294,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 		public void invoke(Object target) throws Throwable {
 			ReflectionUtils.makeAccessible(this.method);
-			try {
-				this.method.invoke(target, (Object[]) null);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			this.method.invoke(target, (Object[]) null);
 		}
 
 		public boolean equals(Object other) {

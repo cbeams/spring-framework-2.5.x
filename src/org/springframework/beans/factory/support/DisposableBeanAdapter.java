@@ -151,7 +151,13 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				((DisposableBean) this.bean).destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("Couldn't invoke destroy method of bean with name '" + this.beanName + "'", ex);
+				String msg = "Invocation of destroy method failed on bean with name '" + this.beanName + "'";
+				if (logger.isDebugEnabled()) {
+					logger.warn(msg, ex);
+				}
+				else {
+					logger.warn(msg + ": " + ex);
+				}
 			}
 		}
 
@@ -172,7 +178,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(), this.destroyMethodName);
 			if (destroyMethod == null) {
 				if (this.enforceDestroyMethod) {
-					logger.error("Couldn't find a destroy method named '" + this.destroyMethodName +
+					logger.warn("Couldn't find a destroy method named '" + this.destroyMethodName +
 							"' on bean with name '" + this.beanName + "'");
 				}
 			}
@@ -202,12 +208,18 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 						destroyMethod.invoke(this.bean, args);
 					}
 					catch (InvocationTargetException ex) {
-						logger.error("Couldn't invoke destroy method '" + this.destroyMethodName +
-								"' of bean with name '" + this.beanName + "'", ex.getTargetException());
+						String msg = "Invocation of destroy method '" + this.destroyMethodName +
+								"' failed on bean with name '" + this.beanName + "'";
+						if (logger.isDebugEnabled()) {
+							logger.warn(msg, ex.getTargetException());
+						}
+						else {
+							logger.warn(msg + ": " + ex.getTargetException());
+						}
 					}
 					catch (Throwable ex) {
 						logger.error("Couldn't invoke destroy method '" + this.destroyMethodName +
-								"' of bean with name '" + this.beanName + "'", ex);
+								"' on bean with name '" + this.beanName + "'", ex);
 					}
 				}
 			}
