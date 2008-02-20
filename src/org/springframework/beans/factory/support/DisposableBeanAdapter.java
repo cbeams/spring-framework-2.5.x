@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.util.Assert;
 
 /**
- * Adapter that implements the DisposableBean interface performing
- * various destruction steps on a given bean instance:
+ * Adapter that implements the {@link DisposableBean} interface
+ * performing various destruction steps on a given bean instance:
  * <ul>
  * <li>DestructionAwareBeanPostProcessors
  * <li>the bean implementing DisposableBean itself
@@ -67,7 +67,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * Create a new DisposableBeanAdapter for the given bean.
 	 * @param bean the bean instance (never <code>null</code>)
 	 * @param beanName the name of the bean
-	 * @param beanDefinition the merged bean definition, if any
+	 * @param beanDefinition the merged bean definition
 	 * @param postProcessors the List of BeanPostProcessors
 	 * (potentially DestructionAwareBeanPostProcessor), if any
 	 */
@@ -146,7 +146,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				((DisposableBean) this.bean).destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("Couldn't invoke destroy method of bean with name '" + this.beanName + "'", ex);
+				logger.error("Invocation of destroy method failed on bean with name '" + this.beanName + "'", ex);
 			}
 		}
 
@@ -163,10 +163,11 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 */
 	private void invokeCustomDestroyMethod() {
 		try {
-			Method destroyMethod = BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(), destroyMethodName);
+			Method destroyMethod =
+					BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(), this.destroyMethodName);
 			if (destroyMethod == null) {
 				if (this.enforceDestroyMethod) {
-					logger.error("Couldn't find a destroy method named '" + destroyMethodName +
+					logger.error("Couldn't find a destroy method named '" + this.destroyMethodName +
 							"' on bean with name '" + this.beanName + "'");
 				}
 			}
@@ -174,11 +175,11 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			else {
 				Class[] paramTypes = destroyMethod.getParameterTypes();
 				if (paramTypes.length > 1) {
-					logger.error("Method '" + destroyMethodName + "' of bean '" + this.beanName +
+					logger.error("Method '" + this.destroyMethodName + "' of bean '" + this.beanName +
 							"' has more than one parameter - not supported as destroy method");
 				}
 				else if (paramTypes.length == 1 && !paramTypes[0].equals(boolean.class)) {
-					logger.error("Method '" + destroyMethodName + "' of bean '" + this.beanName +
+					logger.error("Method '" + this.destroyMethodName + "' of bean '" + this.beanName +
 							"' has a non-boolean parameter - not supported as destroy method");
 				}
 
@@ -193,18 +194,19 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					}
 
 					if (logger.isDebugEnabled()) {
-						logger.debug("Invoking custom destroy method on bean with name '" + this.beanName + "'");
+						logger.debug("Invoking destroy method '" + this.destroyMethodName +
+								"' on bean with name '" + this.beanName + "'");
 					}
 					try {
 						destroyMethod.invoke(this.bean, args);
 					}
 					catch (InvocationTargetException ex) {
-						logger.error("Couldn't invoke destroy method '" + destroyMethodName +
-								"' of bean with name '" + this.beanName + "'", ex.getTargetException());
+						logger.error("Invocation of destroy method '" + this.destroyMethodName +
+								"' failed on bean with name '" + this.beanName + "'", ex.getTargetException());
 					}
 					catch (Throwable ex) {
-						logger.error("Couldn't invoke destroy method '" + destroyMethodName +
-								"' of bean with name '" + this.beanName + "'", ex);
+						logger.error("Couldn't invoke destroy method '" + this.destroyMethodName +
+								"' on bean with name '" + this.beanName + "'", ex);
 					}
 				}
 			}

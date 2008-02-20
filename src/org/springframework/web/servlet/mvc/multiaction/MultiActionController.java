@@ -146,22 +146,20 @@ public class MultiActionController extends AbstractController implements LastMod
 	/** Object we'll invoke methods on. Defaults to this. */
 	private Object delegate;
 
-	/**
-	 * Helper object that knows how to return method names from incoming requests.
-	 */
+	/** Delegate that knows how to determine method names from incoming requests */
 	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
 	/** List of Validators to apply to commands */
 	private Validator[] validators;
 
-	/** Methods, keyed by name */
-	private Map handlerMethodMap = new HashMap();
+	/** Handler methods, keyed by name */
+	private final Map handlerMethodMap = new HashMap();
 
 	/** LastModified methods, keyed by handler method name (without LAST_MODIFIED_SUFFIX) */
-	private Map lastModifiedMethodMap = new HashMap();
+	private final Map lastModifiedMethodMap = new HashMap();
 
 	/** Methods, keyed by exception class */
-	private Map exceptionHandlerMap = new HashMap();
+	private final Map exceptionHandlerMap = new HashMap();
 
 
 	/**

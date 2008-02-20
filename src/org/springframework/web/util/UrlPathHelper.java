@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,9 +255,9 @@ public class UrlPathHelper {
 
 	/**
 	 * Return the request URI for root of the given request. If this is a forwarded request,
-	 * correctly resolves to the request URI of the original request. Relies on the Servlet
-	 * 2.4 'forward' attributes. These attributes may be set by other components when
-	 * running in a Servlet 2.3 environment.
+	 * correctly resolves to the request URI of the original request.
+	 * <p>Relies on the Servlet 2.4 'forward' attributes. These attributes may be set by
+	 * other components when running in a Servlet 2.3 environment.
 	 */
 	public String getOriginatingRequestUri(HttpServletRequest request) {
 		String uri = (String) request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
@@ -272,6 +272,8 @@ public class UrlPathHelper {
 	 * URL if called within a RequestDispatcher include.
 	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
+	 * <p>Relies on the Servlet 2.4 'forward' attributes. These attributes may be set by
+	 * other components when running in a Servlet 2.3 environment.
 	 * @param request current HTTP request
 	 * @return the context path
 	 */
@@ -285,9 +287,11 @@ public class UrlPathHelper {
 
 	/**
 	 * Return the request URI for root of the given request. If this is a forwarded request,
-	 * correctly resolves to the request URI of the original request. Relies on the Servlet
-	 * 2.4 'forward' attributes. These attributes may be set by other components when
-	 * running in a Servlet 2.3 environment.
+	 * correctly resolves to the request URI of the original request.
+	 * <p>Relies on the Servlet 2.4 'forward' attributes. These attributes may be set by
+	 * other components when running in a Servlet 2.3 environment.
+	 * @param request current HTTP request
+	 * @return the query string
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
 		String queryString = (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);

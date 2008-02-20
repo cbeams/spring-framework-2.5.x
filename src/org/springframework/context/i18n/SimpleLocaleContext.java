@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.Locale;
 import org.springframework.util.Assert;
 
 /**
- * Simple implementation of the LocaleContext interface,
- * always returning a specified Locale.
+ * Simple implementation of the {@link LocaleContext} interface,
+ * always returning a specified <code>Locale</code>.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
 public class SimpleLocaleContext implements LocaleContext {
 
 	private final Locale locale;
+
 
 	/**
 	 * Create a new SimpleLocaleContext that exposes the specified Locale.
@@ -42,7 +43,7 @@ public class SimpleLocaleContext implements LocaleContext {
 	}
 
 	public Locale getLocale() {
-		return locale;
+		return this.locale;
 	}
 
 }

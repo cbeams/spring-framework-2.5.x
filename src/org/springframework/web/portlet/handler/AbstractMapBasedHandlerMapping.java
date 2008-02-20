@@ -96,7 +96,7 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	 * Register the given handler instance for the given parameter value.
 	 * @param lookupKey the key to map the handler onto
 	 * @param handler the handler instance or handler bean name String
-	 * (a bean name will automatically be resolved into the corrresponding handler bean)
+	 * (a bean name will automatically be resolved into the corresponding handler bean)
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
