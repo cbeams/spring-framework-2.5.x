@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-20)
+Changes in version 2.5.2 (2008-02-25)
 -------------------------------------
 
 General
@@ -176,6 +176,7 @@ Package org.springframework.web
 * added "initServletContext(ServletContext)" template method to WebApplicationObjectSupport
 * optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
 * introduced NativeWebRequest and MultipartRequest interfaces for even finer-grained generic request access options
+* introduced FacesRequestAttributes adapter, with attributes access falling back to current JSF FacesContext by default
 * added "dispatchOptionsRequest/TraceRequest" properties to FrameworkServlet, for dispatching all HTTP request methods
 * deprecated PathMap attribute and CommonsPathMapHandlerMapping class in favor annotation-based request mapping
 * deprecated ThrowawayController and ThrowawayControllerHandlerAdapter in favor annotation-based controllers

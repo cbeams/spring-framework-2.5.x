@@ -101,22 +101,22 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2765 KB)
+* "spring" (~2820 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Spring MVC support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar and spring-webmvc*.jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-aop" (~315 KB)
+* "spring-aop" (~320 KB)
 - Contents: AOP framework
 - Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-beans" (~460 KB)
+* "spring-beans" (~470 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
-* "spring-context" (~445 KB)
+* "spring-context" (~455 KB)
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
@@ -124,7 +124,7 @@ MODULE JARS (dist/modules):
 - Contents: Quartz and CommonJ scheduling, UI templating, mail, caching
 - Dependencies: spring-context, (spring-aop, spring-jdbc)
 
-* "spring-core" (~270 KB)
+* "spring-core" (~280 KB)
 - Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
 - Dependencies: Commons Logging, (Commons Attributes)
 
@@ -132,11 +132,11 @@ MODULE JARS (dist/modules):
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
-* "spring-jms" (~175 KB)
+* "spring-jms" (~180 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-tx, JMS API
 
-* "spring-orm" (~355 KB)
+* "spring-orm" (~365 KB)
 - Contents: JDO support, JPA support, Hibernate support, TopLink support, iBATIS support
 - Dependencies: spring-jdbc, (spring-web)
 
@@ -144,15 +144,15 @@ MODULE JARS (dist/modules):
 - Contents: test context framework, JUnit support, JNDI mocks, Servlet API mocks, Portlet API mocks
 - Dependencies: spring-core, (spring-context, spring-jdbc, spring-web, JUnit, Servlet API, Portlet API)
 
-* "spring-tx" (~220 KB)
+* "spring-tx" (~225 KB)
 - Contents: transaction infrastructure, JCA support, DAO support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
 
-* "spring-web" (~180 KB)
+* "spring-web" (~185 KB)
 - Contents: web application context, multipart resolver, HTTP-based remoting support
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
-* "spring-webmvc" (~380 KB)
+* "spring-webmvc" (~390 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-context-support)
 
