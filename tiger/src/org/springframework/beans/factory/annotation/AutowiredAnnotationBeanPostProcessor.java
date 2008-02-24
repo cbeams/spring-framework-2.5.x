@@ -417,9 +417,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 									this.cachedFieldValue = new RuntimeBeanReference(autowiredBeanName);
 								}
 							}
-							else {
-								this.cachedFieldValue = value;
-							}
 						}
 					}
 					else {
