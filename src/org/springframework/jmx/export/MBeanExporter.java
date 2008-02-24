@@ -154,7 +154,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private boolean ensureUniqueRuntimeObjectNames = true;
 
 	/** Indicates whether Spring should expose the managed resource ClassLoader in the MBean */
-	private boolean exposeManagedResourceClassLoader = false;
+	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection */
 	private Set excludedBeans;
