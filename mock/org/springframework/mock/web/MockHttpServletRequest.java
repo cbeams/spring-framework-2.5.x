@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,6 +233,14 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	//---------------------------------------------------------------------
 	// Lifecycle methods
 	//---------------------------------------------------------------------
+
+	/**
+	 * Return the ServletContext that this request is associated with.
+	 * (Not available in the standard HttpServletRequest interface for some reason.)
+	 */
+	public ServletContext getServletContext() {
+		return this.servletContext;
+	}
 
 	/**
 	 * Return whether this request is still active (that is, not completed yet).
