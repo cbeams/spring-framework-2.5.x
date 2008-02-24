@@ -41,14 +41,6 @@
 import java.util.List;
 
 import springapp.domain.Product;
-
-public class SimpleProductManager implements ProductManager {
-
-    privapackage springapp.service;
-
-import java.util.List;
-
-import springapp.domain.Product;
 import springapp.repository.ProductDao;
 
 public class SimpleProductManager implements ProductManager {
