@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,6 +65,7 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
@@ -360,40 +362,59 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testParameterDispatchingController() throws Exception {
+		final MockServletContext servletContext = new MockServletContext();
+		final MockServletConfig servletConfig = new MockServletConfig(servletContext);
+
 		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.setServletContext(new MockServletContext());
+				wac.setServletContext(servletContext);
 				RootBeanDefinition bd = new RootBeanDefinition(MyParameterDispatchingController.class);
 				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
 				wac.registerBeanDefinition("controller", bd);
 				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
+				wac.getBeanFactory().registerResolvableDependency(ServletConfig.class, servletConfig);
 				wac.refresh();
 				return wac;
 			}
 		};
-		servlet.init(new MockServletConfig());
+		servlet.init(servletConfig);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		HttpSession session = request.getSession();
 		servlet.service(request, response);
 		assertEquals("myView", response.getContentAsString());
+		assertSame(servletContext, request.getAttribute("servletContext"));
+		assertSame(servletConfig, request.getAttribute("servletConfig"));
+		assertSame(session, request.getAttribute("session"));
+		assertSame(request, request.getAttribute("request"));
 
-		request = new MockHttpServletRequest("GET", "/myPath.do");
+		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
+		response = new MockHttpServletResponse();
+		session = request.getSession();
+		servlet.service(request, response);
+		assertEquals("myView", response.getContentAsString());
+		assertSame(servletContext, request.getAttribute("servletContext"));
+		assertSame(servletConfig, request.getAttribute("servletConfig"));
+		assertSame(session, request.getAttribute("session"));
+		assertSame(request, request.getAttribute("request"));
+
+		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		request.addParameter("view", "other");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("myOtherView", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/myPath.do");
+		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		request.addParameter("view", "my");
 		request.addParameter("lang", "de");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("myLangView", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/myPath.do");
+		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		request.addParameter("surprise", "!");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
@@ -779,17 +800,24 @@ public class ServletAnnotationControllerTests extends TestCase {
 		private ServletContext servletContext;
 
 		@Autowired
+		private ServletConfig servletConfig;
+
+		@Autowired
 		private HttpSession session;
 
 		@Autowired
 		private HttpServletRequest request;
 
 		@RequestMapping
-		public void myHandle(HttpServletResponse response) throws IOException {
-			if (this.servletContext == null || this.session == null || this.request == null) {
+		public void myHandle(HttpServletResponse response, HttpServletRequest request) throws IOException {
+			if (this.servletContext == null || this.servletConfig == null || this.session == null || this.request == null) {
 				throw new IllegalStateException();
 			}
 			response.getWriter().write("myView");
+			request.setAttribute("servletContext", this.servletContext);
+			request.setAttribute("servletConfig", this.servletConfig);
+			request.setAttribute("session", this.session);
+			request.setAttribute("request", this.request);
 		}
 
 		@RequestMapping(params = {"view", "!lang"})
