@@ -2690,7 +2690,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <title>Customizing the nature of a bean</title>
         <section id="beans-factory-lifecycle">
             <title>Lifecycle interfaces</title>
-            <para>The Spring Framework provides several marker interfaces to change the behavior
+            <para>The Spring Framework provides several callback interfaces to change the behavior
             of your bean in the container; they include
             <interfacename>InitializingBean</interfacename> and
             <interfacename>DisposableBean</interfacename>. Implementing these interfaces will
@@ -2700,12 +2700,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
             certain actions upon initialization and destruction.</para>
             <para>Internally, the Spring Framework uses
             <interfacename>BeanPostProcessor</interfacename> implementations to
-            process any marker interfaces it can find and call the appropriate
+            process any callback interfaces it can find and call the appropriate
             methods. If you need custom features or other lifecycle behavior Spring
             doesn't offer out-of-the-box, you can implement a
             <interfacename>BeanPostProcessor</interfacename> yourself. More information about
             this can be found in the section entitled <xref linkend="beans-factory-extension" />.</para>
-            <para>All the different lifecycle marker interfaces are described below.
+            <para>All the different lifecycle callback interfaces are described below.
             In one of the appendices, you can find diagram that show how Spring
             manages beans and how those lifecycle features change the nature of your
             beans and how they are managed.</para>
@@ -2750,7 +2750,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                 method:</para>
                 <programlisting><![CDATA[void destroy() throws Exception;]]></programlisting>
                 <para>Generally, the use of the
-                <interfacename>DisposableBean</interfacename> marker interface can be avoided (and
+                <interfacename>DisposableBean</interfacename> callback interface can be avoided (and
                 is discouraged since it unnecessarily couples the code to Spring). A
                 bean definition provides support for a generic destroy method to be
                 specified. When using XML-based configuration metadata this is done via the
@@ -3188,7 +3188,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
             initialization methods (such as <emphasis>afterPropertiesSet</emphasis> and any declared
             init method) are called, and also afterwards. The post-processor is free to do what it
             wishes with the bean instance, including ignoring the callback completely. A bean
-            post-processor will typically check for marker interfaces, or do something such as wrap
+            post-processor will typically check for callback interfaces, or do something such as wrap
             a bean with a proxy; some of the Spring AOP infrastructure classes are implemented as bean
             post-processors and they do this proxy-wrapping logic.</para>
             <para>It is important to know that a <interfacename>BeanFactory</interfacename> treats bean
@@ -3306,7 +3306,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             </section>
             <section id="beans-factory-extension-bpp-examples-rabpp">
                 <title>Example: The <classname>RequiredAnnotationBeanPostProcessor</classname></title>
-                <para>Using marker interfaces or annotations in conjunction with a custom
+                <para>Using callback interfaces or annotations in conjunction with a custom
                 <interfacename>BeanPostProcessor</interfacename> implementation is a common
                 means of extending the Spring IoC container. This next example is a bit of
                 a cop-out, in that you are directed to the section entitled
@@ -3896,8 +3896,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 				type.
 			</para>
             <para>A bean deployed into the application context may implement the
-			special marker interface, <interfacename>ResourceLoaderAware</interfacename>, to be
-			automatically called back at initialization time with the application
+			special callback interface, <interfacename>ResourceLoaderAware</interfacename>,
+			to be automatically called back at initialization time with the application
 			context itself passed in as the <interfacename>ResourceLoader</interfacename>.
 			A bean may also expose properties of type
 			<interfacename>Resource</interfacename>, to be used to access static resources, and
