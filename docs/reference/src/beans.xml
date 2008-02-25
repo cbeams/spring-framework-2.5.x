@@ -3340,7 +3340,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <section id="beans-factory-lifecycle">
       <title>Lifecycle callbacks</title>
 
-      <para>The Spring Framework provides several marker interfaces to change
+      <para>The Spring Framework provides several callback interfaces to change
       the behavior of your bean in the container; they include
       <interfacename>InitializingBean</interfacename> and
       <interfacename>DisposableBean</interfacename>. Implementing these
@@ -3351,14 +3351,14 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
       <para>Internally, the Spring Framework uses
       <interfacename>BeanPostProcessor</interfacename> implementations to
-      process any marker interfaces it can find and call the appropriate
+      process any callback interfaces it can find and call the appropriate
       methods. If you need custom features or other lifecycle behavior Spring
       doesn't offer out-of-the-box, you can implement a
       <interfacename>BeanPostProcessor</interfacename> yourself. More
       information about this can be found in the section entitled <xref
       linkend="beans-factory-extension" />.</para>
 
-      <para>All the different lifecycle marker interfaces are described below.
+      <para>All the different lifecycle callback interfaces are described below.
       In one of the appendices, you can find diagrams that show how Spring
       manages beans, how those lifecycle features change the nature of your
       beans, and how they are managed.</para>
@@ -3420,7 +3420,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <programlisting>void destroy() throws Exception;</programlisting>
 
         <para>Generally, the use of the
-        <interfacename>DisposableBean</interfacename> marker interface can be
+        <interfacename>DisposableBean</interfacename> callback interface can be
         avoided and is actually discouraged since it unnecessarily couples the
         code to Spring. As an alternative, bean definitions provide support
         for a generic destroy method to be specified. When using XML-based
@@ -4019,7 +4019,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
       declared init method) are called, and also afterwards. The
       post-processor is free to do what it wishes with the bean instance,
       including ignoring the callback completely. A bean post-processor will
-      typically check for marker interfaces, or do something such as wrap a
+      typically check for callback interfaces, or do something such as wrap a
       bean with a proxy; some of the Spring AOP infrastructure classes are
       implemented as bean post-processors and they do this proxy-wrapping
       logic.</para>
@@ -4175,7 +4175,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         <title>Example: The
         <classname>RequiredAnnotationBeanPostProcessor</classname></title>
 
-        <para>Using marker interfaces or annotations in conjunction with a
+        <para>Using callback interfaces or annotations in conjunction with a
         custom <interfacename>BeanPostProcessor</interfacename> implementation
         is a common means of extending the Spring IoC container. This next
         example is a bit of a cop-out, in that you are directed to the section
@@ -5052,7 +5052,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       type.</para>
 
       <para>A bean deployed into the application context may implement the
-      special marker interface,
+      special callback interface,
       <interfacename>ResourceLoaderAware</interfacename>, to be automatically
       called back at initialization time with the application context itself
       passed in as the <interfacename>ResourceLoader</interfacename>. A bean
