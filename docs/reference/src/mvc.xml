@@ -3556,7 +3556,6 @@ public class ClinicController {
 	 * a ModelAndView, thus leveraging convention-based model attribute names.
 	 * It relies on the RequestToViewNameTranslator to determine the logical
 	 * view name based on the request URL: "/vets.do" -&gt; "vets".
-	 *
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	<emphasis role="bold">@RequestMapping("/vets.do")</emphasis>
@@ -3570,7 +3569,6 @@ public class ClinicController {
 	 * a ModelAndView, thus leveraging convention-based model attribute names.
 	 * It relies on the RequestToViewNameTranslator to determine the logical
 	 * view name based on the request URL: "/owner.do" -&gt; "owner".
-	 *
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */
@@ -3578,9 +3576,43 @@ public class ClinicController {
 	public ModelMap ownerHandler(@RequestParam("ownerId") int ownerId) {
 		return new ModelMap(this.clinic.loadOwner(ownerId));
 	}
-
 }
 </programlisting>
+
+      <section id="mvc-ann-requestmapping-advanced">
+        <title>Advanced <interfacename>@RequestMapping</interfacename> options</title>
+
+        <para><emphasis>Ant-style path patterns are supported (e.g. "/myPath/*.do").</emphasis>
+        At the method level, relative paths (e.g. "edit.do") are supported
+        within the primary mapping expressed at the type level.</para>
+
+        <para>The handler method names are taken into account for narrowing
+        if no path was specified explicitly, according to the specified
+        <interfacename>org.springframework.web.servlet.mvc.multiaction.MethodNameResolver</interfacename>
+        (by default an
+        <classname>org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver</classname>).
+        Note that this only applies in case of ambiguous annotation mappings
+        that do not specific a path mapping explicitly. In other words,
+        the method name is only used for narrowing among a set of matching
+        methods; it does not constitute a primary path mapping itself.</para>
+
+        <para>If you have a single default method (without explicit path mapping),
+        then all requests without a more specific mapped method found will
+        be dispatched to it. If you have multiple such default methods, then
+        the method name will be taken into account for choosing between them.</para>
+
+        <para><emphasis>Path mappings can be narrowed through parameter conditions:</emphasis>
+        a sequence of "myParam=myValue" style expressions, with a request only
+        mapped if each such parameter is found to have the given value.
+        "myParam" style expressions are also supported, with such parameters
+        having to be present in the request (allowed to have any value).
+        Finally, "!myParam" style expressions indicate that the specified parameter
+        is <emphasis>not</emphasis> supposed to be present in the request.</para>
+      </section>
+    </section>
+
+    <section id="mvc-ann-requestmapping-arguments">
+      <title>Supported handler method arguments</title>
 
       <para>Handler methods which are annotated with
       <classname>@RequestMapping</classname> are allowed to have very flexible
