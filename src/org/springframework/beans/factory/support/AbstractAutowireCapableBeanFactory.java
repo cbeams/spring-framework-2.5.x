@@ -286,7 +286,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		RootBeanDefinition bd =
 				new RootBeanDefinition(ClassUtils.getUserClass(existingBean), autowireMode, dependencyCheck);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		populateBean(bd.getBeanClass().getName(), bd, new BeanWrapperImpl(existingBean));
+		BeanWrapper bw = new BeanWrapperImpl(existingBean);
+		initBeanWrapper(bw);
+		populateBean(bd.getBeanClass().getName(), bd, bw);
 	}
 
 	public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
@@ -297,15 +299,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	public Object configureBean(Object existingBean, String beanName) throws BeansException {
-		BeanDefinition bd = getMergedBeanDefinition(beanName);
-		if (!(bd instanceof RootBeanDefinition)) {
-			throw new BeanDefinitionStoreException("configureBean only supported for a merged RootBeanDefinition");
+		BeanDefinition mbd = getMergedBeanDefinition(beanName);
+		RootBeanDefinition bd = null;
+		if (mbd instanceof RootBeanDefinition) {
+			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
+			if (SCOPE_PROTOTYPE.equals(rbd.getScope())) {
+				bd = rbd;
+			}
 		}
-		RootBeanDefinition rbd = (RootBeanDefinition) bd;
+		if (bd == null) {
+			bd = new RootBeanDefinition(mbd);
+			bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		}
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
-		populateBean(beanName, rbd, bw);
-		return initializeBean(beanName, existingBean, rbd);
+		populateBean(beanName, bd, bw);
+		return initializeBean(beanName, existingBean, bd);
 	}
 
 	public Object initializeBean(Object existingBean, String beanName) {
