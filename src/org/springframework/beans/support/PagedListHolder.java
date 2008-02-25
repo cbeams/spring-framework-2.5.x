@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 /**
  * PagedListHolder is a simple state holder for handling lists of objects,
  * separating them into pages. Page numbering starts with 0.
@@ -40,15 +42,10 @@ import java.util.List;
  * the respective JSTL EL expressions, like "myModelAttr.pageSize" and
  * "myModelAttr.sort.ascending".
  *
- * <p>This class just provides support for an unmodifiable List of beans.
- * If you need on-demand refresh because of Locale or filter changes,
- * consider {@link RefreshablePagedListHolder}.
- *
  * @author Juergen Hoeller
  * @since 19.05.2003
  * @see #getPageList()
  * @see org.springframework.beans.support.MutableSortDefinition
- * @see org.springframework.beans.support.RefreshablePagedListHolder
  */
 public class PagedListHolder implements Serializable {
 
@@ -108,6 +105,7 @@ public class PagedListHolder implements Serializable {
 	 * Set the source list for this holder.
 	 */
 	public void setSource(List source) {
+		Assert.notNull(source, "Source List must not be null");
 		this.source = source;
 		this.refreshDate = new Date();
 		this.sortUsed = null;
@@ -117,14 +115,14 @@ public class PagedListHolder implements Serializable {
 	 * Return the source list for this holder.
 	 */
 	public List getSource() {
-		return source;
+		return this.source;
 	}
 
 	/**
 	 * Return the last time the list has been fetched from the source provider.
 	 */
 	public Date getRefreshDate() {
-		return refreshDate;
+		return this.refreshDate;
 	}
 
 	/**
@@ -140,7 +138,7 @@ public class PagedListHolder implements Serializable {
 	 * Return the sort definition for this holder.
 	 */
 	public SortDefinition getSort() {
-		return sort;
+		return this.sort;
 	}
 
 	/**
@@ -161,7 +159,7 @@ public class PagedListHolder implements Serializable {
 	 * Return the current page size.
 	 */
 	public int getPageSize() {
-		return pageSize;
+		return this.pageSize;
 	}
 
 	/**
@@ -196,7 +194,7 @@ public class PagedListHolder implements Serializable {
 	 * Return the maximum number of page links to a few pages around the current one.
 	 */
 	public int getMaxLinkedPages() {
-		return maxLinkedPages;
+		return this.maxLinkedPages;
 	}
 
 
