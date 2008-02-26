@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,12 @@ import java.lang.annotation.Target;
  *
  * <p>In the case of multiple argument methods, the 'required' parameter is 
  * applicable for all arguments.
- * 
+ *
+ * <p>In case of a {@link java.util.Collection} or {@link java.util.Map}
+ * dependency type, the container will autowire all beans matching the
+ * declared value type. In case of a Map, the keys must be declared as
+ * type String and will be resolved to the corresponding bean names.
+ *
  * <p>Please do consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
  *
@@ -54,7 +59,7 @@ import java.lang.annotation.Target;
 public @interface Autowired {
 
 	/**
-	 * <code>true</code> if the dependency is required.
+	 * Declares whether the annotated dependency is required.
 	 * <p>Defaults to <code>true</code>.
 	 */
 	boolean required() default true;

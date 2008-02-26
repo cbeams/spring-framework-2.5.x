@@ -5464,14 +5464,15 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>Since autowiring by type may lead to multiple candidates, it is
       often necessary to have more control over the selection process. One way
       to accomplish this is with Spring's
-      <interfacename>@Qualifier</interfacename> annotation. In the simplest
-      case, you can achieve by-name autowiring by providing a bean name within
-      the annotation:</para>
+      <interfacename>@Qualifier</interfacename> annotation. This allows for
+      associating qualifier values with specific arguments, narrowing the
+      set of type matches so that a specific bean is chosen for each argument.
+      In the simplest case, this can be a plain descriptive value:</para>
 
       <programlisting>public class MovieRecommender {
 
     @Autowired
-    <emphasis role="bold">@Qualifier("mainCatalog")</emphasis>
+    <emphasis role="bold">@Qualifier("main")</emphasis>
     private MovieCatalog movieCatalog;
 
     <lineannotation>// ...</lineannotation>
@@ -5488,13 +5489,83 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     private CustomerPreferenceDao customerPreferenceDao;
 
     @Autowired
-    public void prepare(<emphasis role="bold">@Qualifier("mainCatalog")</emphasis> MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
+    public void prepare(<emphasis role="bold">@Qualifier("main")</emphasis> MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
         this.movieCatalog = movieCatalog;
         this.customerPreferenceDao = customerPreferenceDao;
     }
 
     <lineannotation>// ...</lineannotation>
 }</programlisting>
+
+      <para>The corresponding bean definitions would look like as follows.
+      The bean with qualifier value "main" would be wired with the
+      constructor argument that has been qualified with the same value.</para>
+
+      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"&gt;
+
+    &lt;context:annotation-config/&gt;
+
+    &lt;bean class="example.SimpleMovieCatalog"&gt;
+        <emphasis role="bold">&lt;qualifier value="main"/&gt;</emphasis>
+        <lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation>
+    &lt;/bean&gt;
+
+    &lt;bean class="example.SimpleMovieCatalog"&gt;
+        <emphasis role="bold">&lt;qualifier value="action"/&gt;</emphasis>
+        <lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation>
+    &lt;/bean&gt;
+
+    &lt;bean id="movieRecommender" class="example.MovieRecommender"/&gt;
+
+&lt;/beans&gt;
+</programlisting>
+
+      <para>For a fallback match, the bean name is considered as a default qualifier
+      value. This means that the bean may be defined with an id "main" instead of
+      the nested qualifier element, leading to the same matching result. However,
+      note that while this can be used to refer to specific beans by name,
+      <interfacename>@Autowired</interfacename> is fundamentally about type-driven
+      injection with optional semantic qualifiers. This means that qualifier values,
+      even when using the bean name fallback, always have narrowing semantics within
+      the set of type matches; they do not semantically express a reference to a
+      unique bean id. Good qualifier values would be "main" or "EMEA" or "persistent",
+      expressing characteristics of a specific component - independent from the bean
+      id (which may be auto-generated in case of an anonymous bean definition like
+      the one above).</para>
+
+      <para>Qualifiers also apply to typed collections (as discussed above):
+      e.g. to <literal>Set&lt;MovieCatalog&gt;</literal>. In such a case,
+      all matching beans according to the declared qualifiers are going to
+      be injected as a collection. This implies that qualifiers do not have
+      to be unique; they rather simply constitute filtering criteria.
+      For example, there could be multiple <classname>MovieCatalog</classname>
+      beans defined with the same qualifier value "action"; all of which
+      would be injected into a <literal>Set&lt;MovieCatalog&gt;</literal>
+      annotated with <literal>@Qualifier("action")</literal>.</para>
+
+      <tip>
+        <para>If you intend to express annotation-driven injection by name,
+        do not primarily use <interfacename>@Autowired</interfacename> -
+        even if is technically capable of referring to a bean name through
+        <interfacename>@Qualifier</interfacename> values. Instead,
+        prefer the JSR-250 <interfacename>@Resource</interfacename>
+        annotation which is semantically defined to identify a specific
+        target component by its unique name, with the declared type
+        being irrelevant for the matching process.</para>
+
+        <para>As a specific consequence of this semantic difference,
+        beans which are themselves defined as a collection or map type
+        cannot be injected via <interfacename>@Autowired</interfacename>
+        since type matching is not properly applicable to them.
+        Use <interfacename>@Resource</interfacename> for such beans,
+        referring to the specific collection/map bean by unique name.</para>
+      </tip>
 
       <para>You may create your own custom qualifier annotations as well.
       Simply define an annotation and provide the
@@ -5507,7 +5578,6 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
 public @interface Genre {
 
     String value();
-
 }</programlisting>
 
       <para>Then you can provide the custom qualifier on autowired fields and
@@ -5620,7 +5690,6 @@ public @interface MovieQualifier {
     String genre();
     
     Format format();
-
 }</programlisting>
 
       <para>In this case <literal>Format</literal> is an enum:</para>
