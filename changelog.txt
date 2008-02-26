@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-25)
+Changes in version 2.5.2 (2008-02-27)
 -------------------------------------
 
 General
@@ -40,11 +40,14 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory applies specified TypeConverter to bean references as well (not just to literals)
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
+* AbstractAutowireCapableBeanFactory's "applyBeanPropertyValues" fully initializes the BeanWrapper used for binding
+* fixed AbstractAutowireCapableBeanFactory's "configureBean" (@Configurable) to avoid bean name creation for inner beans
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
 * fixed AbstractAutowireCapableBeanFactory to always resolve the bean class before a FactoryBean type check
 * revised bean destruction logging to log at WARN level with exception toString only (full exception at DEBUG level)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AutowiredAnnotationBeanPostProcessor to correctly cache a collection with a single autowired bean as element
+* fixed AutowiredAnnotationBeanPostProcessor to not cache special dependencies such as request and session references
 * deprecated AbstractBeanDefinition's Spring 1.2 style "setSingleton" method in favor of Spring 2.0's "setScope"
 * deprecated BeanDefinitionBuilder's "addConstructorArg" in favor of the consistently named "addConstructorArgValue"
 * deprecated various rarely used BeanDefinitionBuilder methods in favor of settings on the raw BeanDefinition object
@@ -125,12 +128,16 @@ Package org.springframework.jms
 * DefaultJmsActivationSpecFactory is compatible with WebSphere MQ 6.0.2.1 as well now
 
 Package org.springframework.jmx
-* factored out "doUnregister(objectName)" and "onRegister(objectName,mbean)" methods in MBeanRegistrationSupport 
+* factored out "doUnregister(objectName)" and "onRegister(objectName,mbean)" methods in MBeanRegistrationSupport
+* MBeanExporter actually sets "exposeManagedResourceClassLoader" to "true" by default (matching the 2.5 javadoc now)
 * MBeanExporter explicitly removes all of its registered NotificationListeners from the target MBeanServer on shutdown
 * introduced NotificationListenerRegistrar for registering a listener with any MBean on any MBeanServer(Connection)
 
 Package org.springframework.mail
 * added "text/csv" to ConfigurableMimeFileTypeMap's and thus MimeMessageHelper's default MIME mappings
+
+Package org.springframework.mock
+* added "getServletContext()" method to MockHttpServletRequest (not available in the HttpServletRequest interface)
 
 Package org.springframework.orm
 * introduced "postProcessMappings" template method in Hibernate LocalSessionFactoryBean
@@ -198,6 +205,7 @@ Package org.springframework.web
 * added "prepareResponse"/"generatesDownloadContent" methods to AbstractView, for HTTPS cache header workaround for IE
 * AbstractPdfView and Abstract(J)ExcelView participate in AbstractView's HTTPS cache header workaround for IE
 * AbstractJasperReportsView does not perform a hard response reset, in favor of AbstractView's HTTPS cache workaround
+* AbstractTemplateView catches "HttpServletResponse.getContentType()" exceptions (for JBoss Portal compatibility)
 * InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
 * InternalResourceView detects circular dispatching to the same view even in case of pattern matches for same handler
 * InternalResourceView prevents dispatch to same handler path only if the "preventDispatchLoop" flag is set to "true"
