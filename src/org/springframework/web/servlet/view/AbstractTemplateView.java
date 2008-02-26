@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import org.springframework.web.servlet.support.RequestContext;
  * for the current user. Furthermore, they are able to create and cache
  * helper objects as request attributes themselves.
  *
- * @author Darren Davison
  * @author Juergen Hoeller
+ * @author Darren Davison
  * @since 1.0.2
  * @see AbstractTemplateViewResolver
  * @see org.springframework.web.servlet.view.velocity.VelocityView
@@ -184,7 +184,18 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	 * @see #setContentType
 	 */
 	protected void applyContentType(HttpServletResponse response)	{
-		if (!responseGetContentTypeAvailable || response.getContentType() == null) {
+		boolean apply = true;
+		if (responseGetContentTypeAvailable) {
+			try {
+				apply = (response.getContentType() == null);
+			}
+			catch (Throwable ex) {
+				// Probably Servlet 2.4 API present but not implemented.
+				// Behave like on Servlet 2.3...
+				apply = true;
+			}
+		}
+		if (apply) {
 			response.setContentType(getContentType());
 		}
 	}
