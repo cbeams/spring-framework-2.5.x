@@ -21,6 +21,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Conventions;
@@ -37,11 +41,11 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -61,6 +65,11 @@ import org.springframework.web.multipart.MultipartRequest;
  * @see #invokeHandlerMethod
  */
 public class HandlerMethodInvoker {
+
+	/**
+	 * We'll create a lot of these objects, so we don't want a new logger every time.
+	 */
+	private static final Log logger = LogFactory.getLog(HandlerMethodInvoker.class);
 
 	private final HandlerMethodResolver methodResolver;
 
@@ -100,8 +109,12 @@ public class HandlerMethodInvoker {
 			Method handlerMethod, Object handler, NativeWebRequest webRequest, ExtendedModelMap implicitModel)
 			throws Exception {
 
+		boolean debug = logger.isDebugEnabled();
 		for (Method attributeMethod : this.methodResolver.getModelAttributeMethods()) {
 			Object[] args = resolveArguments(attributeMethod, handler, webRequest, implicitModel);
+			if (debug) {
+				logger.debug("Invoking model attribute method: " + attributeMethod);
+			}
 			Object attrValue = doInvokeMethod(attributeMethod, handler, args);
 			String attrName = AnnotationUtils.findAnnotation(attributeMethod, ModelAttribute.class).value();
 			if ("".equals(attrName)) {
@@ -112,6 +125,9 @@ public class HandlerMethodInvoker {
 		}
 
 		Object[] args = resolveArguments(handlerMethod, handler, webRequest, implicitModel);
+		if (debug) {
+			logger.debug("Invoking request handler method: " + handlerMethod);
+		}
 		return doInvokeMethod(handlerMethod, handler, args);
 	}
 
@@ -246,31 +262,38 @@ public class HandlerMethodInvoker {
 		if (this.bindingInitializer != null) {
 			this.bindingInitializer.initBinder(binder, webRequest);
 		}
-		for (Method initBinderMethod : this.methodResolver.getInitBinderMethods()) {
-			String[] targetNames = AnnotationUtils.findAnnotation(initBinderMethod, InitBinder.class).value();
-			if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
-				Class[] initBinderParams = initBinderMethod.getParameterTypes();
-				Object[] initBinderArgs = new Object[initBinderParams.length];
-				for (int j = 0; j < initBinderArgs.length; j++) {
-					Class paramType = initBinderParams[j];
-					Object argValue = resolveCommonArgument(new MethodParameter(initBinderMethod, j), webRequest);
-					if (argValue != WebArgumentResolver.UNRESOLVED) {
-						initBinderArgs[j] = argValue;
-					}
-					else {
-						if (paramType.isInstance(binder)) {
-							initBinderArgs[j] = binder;
+		Set<Method> initBinderMethods = this.methodResolver.getInitBinderMethods();
+		if (!initBinderMethods.isEmpty()) {
+			boolean debug = logger.isDebugEnabled();
+			for (Method initBinderMethod : initBinderMethods) {
+				String[] targetNames = AnnotationUtils.findAnnotation(initBinderMethod, InitBinder.class).value();
+				if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
+					Class[] initBinderParams = initBinderMethod.getParameterTypes();
+					Object[] initBinderArgs = new Object[initBinderParams.length];
+					for (int j = 0; j < initBinderArgs.length; j++) {
+						Object argValue = resolveCommonArgument(new MethodParameter(initBinderMethod, j), webRequest);
+						if (argValue != WebArgumentResolver.UNRESOLVED) {
+							initBinderArgs[j] = argValue;
 						}
 						else {
-							throw new IllegalStateException("Unsupported argument [" + paramType.getName() +
-									"] for InitBinder method: " + initBinderMethod);
+							Class paramType = initBinderParams[j];
+							if (paramType.isInstance(binder)) {
+								initBinderArgs[j] = binder;
+							}
+							else {
+								throw new IllegalStateException("Unsupported argument [" + paramType.getName() +
+										"] for InitBinder method: " + initBinderMethod);
+							}
 						}
 					}
-				}
-				Object returnValue = doInvokeMethod(initBinderMethod, handler, initBinderArgs);
-				if (returnValue != null) {
-					throw new IllegalStateException(
-							"InitBinder methods must not have a return value: " + initBinderMethod);
+					if (debug) {
+						logger.debug("Invoking init-binder method: " + initBinderMethod);
+					}
+					Object returnValue = doInvokeMethod(initBinderMethod, handler, initBinderArgs);
+					if (returnValue != null) {
+						throw new IllegalStateException(
+								"InitBinder methods must not have a return value: " + initBinderMethod);
+					}
 				}
 			}
 		}
