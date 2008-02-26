@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
 
 /**
- * Convenience class that features simple methods for custom Log4J configuration.
+ * Convenience class that features simple methods for custom log4j configuration.
  *
- * <p>Only needed for non-default Log4J initialization, for example with a custom
- * config location or a refresh interval. By default, Log4J will simply read its
+ * <p>Only needed for non-default log4j initialization, for example with a custom
+ * config location or a refresh interval. By default, log4j will simply read its
  * configuration from a "log4j.properties" or "log4j.xml" file in the root of
  * the classpath.
  *
  * <p>For web environments, the analogous Log4jWebConfigurer class can be found
  * in the web package, reading in its configuration from context-params in
- * <code>web.xml</code>. In a J2EE web application, Log4J is usually set up
+ * <code>web.xml</code>. In a J2EE web application, log4j is usually set up
  * via Log4jConfigListener or Log4jConfigServlet, delegating to
  * Log4jWebConfigurer underneath.
  *
@@ -49,12 +49,12 @@ public abstract class Log4jConfigurer {
 	/** Pseudo URL prefix for loading from the class path: "classpath:" */
 	public static final String CLASSPATH_URL_PREFIX = "classpath:";
 
-	/** Extension that indicates a Log4J XML config file: ".xml" */
+	/** Extension that indicates a log4j XML config file: ".xml" */
 	public static final String XML_FILE_EXTENSION = ".xml";
 
 
 	/**
-	 * Initialize Log4J from the given file location, with no config file refreshing.
+	 * Initialize log4j from the given file location, with no config file refreshing.
 	 * Assumes an XML file in case of a ".xml" file extension, and a properties file
 	 * otherwise.
 	 * @param location the location of the config file: either a "classpath:" location
@@ -75,14 +75,14 @@ public abstract class Log4jConfigurer {
 	}
 
 	/**
-	 * Initialize Log4J from the given location, with the given refresh interval
+	 * Initialize log4j from the given location, with the given refresh interval
 	 * for the config file. Assumes an XML file in case of a ".xml" file extension,
 	 * and a properties file otherwise.
-	 * <p>Log4J's watchdog thread will asynchronously check whether the timestamp
+	 * <p>Log4j's watchdog thread will asynchronously check whether the timestamp
 	 * of the config file has changed, using the given interval between checks.
 	 * A refresh interval of 1000 milliseconds (one second), which allows to
 	 * do on-demand log level changes with immediate effect, is not unfeasible.
-	 * <p><b>WARNING:</b> Log4J's watchdog thread does not terminate until VM shutdown;
+	 * <p><b>WARNING:</b> Log4j's watchdog thread does not terminate until VM shutdown;
 	 * in particular, it does not terminate on LogManager shutdown. Therefore, it is
 	 * recommended to <i>not</i> use config file refreshing in a production J2EE
 	 * environment; the watchdog thread would not stop on application shutdown there.
@@ -97,7 +97,7 @@ public abstract class Log4jConfigurer {
 		String resolvedLocation = SystemPropertyUtils.resolvePlaceholders(location);
 		File file = ResourceUtils.getFile(resolvedLocation);
 		if (!file.exists()) {
-			throw new FileNotFoundException("Log4J config file [" + resolvedLocation + "] not found");
+			throw new FileNotFoundException("Log4j config file [" + resolvedLocation + "] not found");
 		}
 		if (resolvedLocation.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
 			DOMConfigurator.configureAndWatch(file.getAbsolutePath(), refreshInterval);
@@ -108,9 +108,9 @@ public abstract class Log4jConfigurer {
 	}
 
 	/**
-	 * Shut down Log4J, properly releasing all file locks.
+	 * Shut down log4j, properly releasing all file locks.
 	 * <p>This isn't strictly necessary, but recommended for shutting down
-	 * Log4J in a scenario where the host VM stays alive (for example, when
+	 * log4j in a scenario where the host VM stays alive (for example, when
 	 * shutting down an application in a J2EE environment).
 	 */
 	public static void shutdownLogging() {

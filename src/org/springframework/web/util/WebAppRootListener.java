@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,14 +26,14 @@ import javax.servlet.ServletContextListener;
  * the default key is "webapp.root".
  *
  * <p>Can be used for toolkits that support substition with system properties
- * (i.e. System.getProperty values), like Log4J's "${key}" syntax within log
+ * (i.e. System.getProperty values), like log4j's "${key}" syntax within log
  * file locations.
  *
- * <p>Note: This listener should be placed before ContextLoaderListener in web.xml,
- * at least when used for Log4J. Log4jConfigListener sets the system property
+ * <p>Note: This listener should be placed before ContextLoaderListener in <code>web.xml</code>,
+ * at least when used for log4j. Log4jConfigListener sets the system property
  * implicitly, so there's no need for this listener in addition to it.
  *
- * <p><b>WARNING</b>: Some containers like Tomcat do NOT keep system properties separate
+ * <p><b>WARNING</b>: Some containers, e.g. Tomcat, do NOT keep system properties separate
  * per web app. You have to use unique "webAppRootKey" context-params per web app
  * then, to avoid clashes. Other containers like Resin do isolate each web app's
  * system properties: Here you can use the default key (i.e. no "webAppRootKey"

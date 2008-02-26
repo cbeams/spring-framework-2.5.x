@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Bootstrap servlet for custom Log4J initialization in a web environment.
- * Delegates to Log4jWebConfigurer (see its javadoc for configuration details).
+ * Bootstrap servlet for custom log4j initialization in a web environment.
+ * Delegates to {@link Log4jWebConfigurer} (see its javadoc for configuration details).
  *
  * <b>WARNING: Assumes an expanded WAR file</b>, both for loading the configuration
  * file and for writing the log files. If you want to keep your WAR unexpanded or
  * don't need application-specific log files within the WAR directory, don't use
- * Log4J setup within the application (thus, don't use Log4jConfigListener or
- * Log4jConfigServlet). Instead, use a global, VM-wide Log4J setup (for example,
+ * log4j setup within the application (thus, don't use Log4jConfigListener or
+ * Log4jConfigServlet). Instead, use a global, VM-wide log4j setup (for example,
  * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
  *
  * <p>Note: This servlet should have a lower <code>load-on-startup</code> value
- * in <code>web.xml</code> than ContextLoaderServlet, when using custom Log4J
+ * in <code>web.xml</code> than ContextLoaderServlet, when using custom log4j
  * initialization.
  *
  * <p><i>Note that this class has been deprecated for containers implementing
- * Servlet API 2.4 or higher, in favor of Log4jConfigListener.</i><br>
+ * Servlet API 2.4 or higher, in favor of {@link Log4jConfigListener}.</i><br>
  * According to Servlet 2.4, listeners must be initialized before load-on-startup
  * servlets. Many Servlet 2.3 containers already enforce this behavior
  * (see ContextLoaderServlet javadocs for details). If you use such a container,
@@ -73,7 +73,6 @@ public class Log4jConfigServlet extends HttpServlet {
 				request.getRequestURI() + "] was ignored");
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
-
 
 	public String getServletInfo() {
 		return "Log4jConfigServlet for Servlet API 2.3 " +

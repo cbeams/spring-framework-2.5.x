@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public abstract class WebUtils {
 	 * The key of the system property can be defined with the "webAppRootKey"
 	 * context-param in <code>web.xml</code>. Default is "webapp.root".
 	 * <p>Can be used for tools that support substition with <code>System.getProperty</code>
-	 * values, like Log4J's "${key}" syntax within log file locations.
+	 * values, like log4j's "${key}" syntax within log file locations.
 	 * @param servletContext the servlet context of the web application
 	 * @throws IllegalStateException if the system property is already set,
 	 * or if the WAR file is not expanded

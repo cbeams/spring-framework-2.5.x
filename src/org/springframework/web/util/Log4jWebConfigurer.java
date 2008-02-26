@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,15 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.SystemPropertyUtils;
 
 /**
- * Convenience class that performs custom Log4J initialization for web environments,
+ * Convenience class that performs custom log4j initialization for web environments,
  * allowing for log file paths within the web application, with the option to
  * perform automatic refresh checks (for runtime changes in logging configuration).
  *
  * <p><b>WARNING: Assumes an expanded WAR file</b>, both for loading the configuration
  * file and for writing the log files. If you want to keep your WAR unexpanded or
  * don't need application-specific log files within the WAR directory, don't use
- * Log4J setup within the application (thus, don't use Log4jConfigListener or
- * Log4jConfigServlet). Instead, use a global, VM-wide Log4J setup (for example,
+ * log4j setup within the application (thus, don't use Log4jConfigListener or
+ * Log4jConfigServlet). Instead, use a global, VM-wide log4j setup (for example,
  * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
  *
  * <p>Supports three init parameters at the servlet context level (that is,
@@ -41,15 +41,15 @@ import org.springframework.util.SystemPropertyUtils;
  *
  * <ul>
  * <li><i>"log4jConfigLocation":</i><br>
- * Location of the Log4J config file; either a "classpath:" location (e.g.
+ * Location of the log4j config file; either a "classpath:" location (e.g.
  * "classpath:myLog4j.properties"), an absolute file URL (e.g. "file:C:/log4j.properties),
  * or a plain path relative to the web application root directory (e.g.
- * "/WEB-INF/log4j.properties"). If not specified, default Log4J initialization
+ * "/WEB-INF/log4j.properties"). If not specified, default log4j initialization
  * will apply ("log4j.properties" or "log4j.xml" in the class path; see the
- * Log4J documentation for details).
+ * log4j documentation for details).
  * <li><i>"log4jRefreshInterval":</i><br>
  * Interval between config file refresh checks, in milliseconds. If not specified,
- * no refresh checks will happen, which avoids starting Log4J's watchdog thread.
+ * no refresh checks will happen, which avoids starting log4j's watchdog thread.
  * <li><i>"log4jExposeWebAppRoot":</i><br>
  * Whether the web app root system property should be exposed, allowing for log
  * file paths relative to the web application root directory. Default is "true";
@@ -58,22 +58,22 @@ import org.springframework.util.SystemPropertyUtils;
  * </ul>
  *
  * <p>Note: <code>initLogging</code> should be called before any other Spring activity
- * (when using Log4J), for proper initialization before any Spring logging attempts.
+ * (when using log4j), for proper initialization before any Spring logging attempts.
  *
- * <p>Log4J's watchdog thread will asynchronously check whether the timestamp
+ * <p>Log4j's watchdog thread will asynchronously check whether the timestamp
  * of the config file has changed, using the given interval between checks.
  * A refresh interval of 1000 milliseconds (one second), which allows to
  * do on-demand log level changes with immediate effect, is not unfeasible.
 
- * <p><b>WARNING:</b> Log4J's watchdog thread does not terminate until VM shutdown;
+ * <p><b>WARNING:</b> Log4j's watchdog thread does not terminate until VM shutdown;
  * in particular, it does not terminate on LogManager shutdown. Therefore, it is
  * recommended to <i>not</i> use config file refreshing in a production J2EE
  * environment; the watchdog thread would not stop on application shutdown there.
  *
  * <p>By default, this configurer automatically sets the web app root system property,
- * for "${key}" substitutions within log file locations in the Log4J config file,
+ * for "${key}" substitutions within log file locations in the log4j config file,
  * allowing for log file paths relative to the web application root directory.
- * The default system property key is "webapp.root", to be used in a Log4J config
+ * The default system property key is "webapp.root", to be used in a log4j config
  * file like as follows:
  *
  * <p><code>log4j.appender.myfile.File=${webapp.root}/WEB-INF/demo.log</code>
@@ -97,10 +97,10 @@ import org.springframework.util.SystemPropertyUtils;
  */
 public abstract class Log4jWebConfigurer {
 
-	/** Parameter specifying the location of the Log4J config file */
+	/** Parameter specifying the location of the log4j config file */
 	public static final String CONFIG_LOCATION_PARAM = "log4jConfigLocation";
 
-	/** Parameter specifying the refresh interval for checking the Log4J config file */
+	/** Parameter specifying the refresh interval for checking the log4j config file */
 	public static final String REFRESH_INTERVAL_PARAM = "log4jRefreshInterval";
 
 	/** Parameter specifying whether to expose the web app root system property */
@@ -108,7 +108,7 @@ public abstract class Log4jWebConfigurer {
 
 
 	/**
-	 * Initialize Log4J, including setting the web app root system property.
+	 * Initialize log4j, including setting the web app root system property.
 	 * @param servletContext the current ServletContext
 	 * @see WebUtils#setWebAppRootSystemProperty
 	 */
@@ -118,10 +118,10 @@ public abstract class Log4jWebConfigurer {
 			WebUtils.setWebAppRootSystemProperty(servletContext);
 		}
 
-		// Only perform custom Log4J initialization in case of a config file.
+		// Only perform custom log4j initialization in case of a config file.
 		String location = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
 		if (location != null) {
-			// Perform actual Log4J initialization; else rely on Log4J's default initialization.
+			// Perform actual log4j initialization; else rely on log4j's default initialization.
 			try {
 				// Return a URL (e.g. "classpath:" or "file:") as-is;
 				// consider a plain file path as relative to the web application root directory.
@@ -132,12 +132,12 @@ public abstract class Log4jWebConfigurer {
 				}
 
 				// Write log message to server log.
-				servletContext.log("Initializing Log4J from [" + location + "]");
+				servletContext.log("Initializing log4j from [" + location + "]");
 
 				// Check whether refresh interval was specified.
 				String intervalString = servletContext.getInitParameter(REFRESH_INTERVAL_PARAM);
 				if (intervalString != null) {
-					// Initialize with refresh interval, i.e. with Log4J's watchdog thread,
+					// Initialize with refresh interval, i.e. with log4j's watchdog thread,
 					// checking the file in the background.
 					try {
 						long refreshInterval = Long.parseLong(intervalString);
@@ -148,7 +148,7 @@ public abstract class Log4jWebConfigurer {
 					}
 				}
 				else {
-					// Initialize without refresh check, i.e. without Log4J's watchdog thread.
+					// Initialize without refresh check, i.e. without log4j's watchdog thread.
 					Log4jConfigurer.initLogging(location);
 				}
 			}
@@ -159,13 +159,13 @@ public abstract class Log4jWebConfigurer {
 	}
 
 	/**
-	 * Shut down Log4J, properly releasing all file locks
+	 * Shut down log4j, properly releasing all file locks
 	 * and resetting the web app root system property.
 	 * @param servletContext the current ServletContext
 	 * @see WebUtils#removeWebAppRootSystemProperty
 	 */
 	public static void shutdownLogging(ServletContext servletContext) {
-		servletContext.log("Shutting down Log4J");
+		servletContext.log("Shutting down log4j");
 		try {
 			Log4jConfigurer.shutdownLogging();
 		}
