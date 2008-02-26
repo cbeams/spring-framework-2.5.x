@@ -278,22 +278,41 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 					metaDataProcedureName,
 					null);
 			while (procs.next()) {
-				CallParameterMetaData meta = new CallParameterMetaData(
-						procs.getString("COLUMN_NAME"),
-						procs.getInt("COLUMN_TYPE"),
-						procs.getInt("DATA_TYPE"),
-						procs.getString("TYPE_NAME"),
-						procs.getBoolean("NULLABLE")
-				);
-				callParameterMetaData.add(meta);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Retrieved metadata: "
-						+ meta.getParameterName() +
-						" " + meta.getParameterType() +
-						" " + meta.getSqlType() +
-						" " + meta.getTypeName() +
-						" " + meta.isNullable()
+				String columnName = procs.getString("COLUMN_NAME");
+				int columnType = procs.getInt("COLUMN_TYPE");
+				if (columnName == null && (
+						columnType == DatabaseMetaData.procedureColumnIn  ||
+						columnType == DatabaseMetaData.procedureColumnInOut ||
+						columnType == DatabaseMetaData.procedureColumnOut)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Skipping metadata for: "
+							+ columnName +
+							" " + columnType +
+							" " + procs.getInt("DATA_TYPE") +
+							" " + procs.getString("TYPE_NAME") +
+							" " + procs.getBoolean("NULLABLE") +
+							" (probably a member of a collection)"
+						);
+					}
+				}
+				else {
+					CallParameterMetaData meta = new CallParameterMetaData(
+							columnName,
+							columnType,
+							procs.getInt("DATA_TYPE"),
+							procs.getString("TYPE_NAME"),
+							procs.getBoolean("NULLABLE")
 					);
+					callParameterMetaData.add(meta);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Retrieved metadata: "
+							+ meta.getParameterName() +
+							" " + meta.getParameterType() +
+							" " + meta.getSqlType() +
+							" " + meta.getTypeName() +
+							" " + meta.isNullable()
+						);
+					}
 				}
 			}
 		}
