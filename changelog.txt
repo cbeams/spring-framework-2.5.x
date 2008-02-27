@@ -16,6 +16,7 @@ Package org.springframework.aop
 * AbstractRegexpMethodPointcut matches against target class as well, not just against method's declaring class
 * ProxyFactoryBean and AbstractAutoProxyCreator check autodetected proxy interfaces for visibility in the ClassLoader
 * Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
+* CustomizableTraceInterceptor properly escapes method names and exception messages for regex parsing (wrt "$" signs)
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
 * AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
 * AbstractBeanFactoryBasedTargetSourceCreator creates an independent internal BeanFactory per target bean
@@ -41,9 +42,11 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory applies specified TypeConverter to bean references as well (not just to literals)
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
 * AbstractAutowireCapableBeanFactory's "applyBeanPropertyValues" fully initializes the BeanWrapper used for binding
+* AbstractAutowireCapableBeanFactory's "applyBeanPropertyValues" and "configureBean" use a cached merged bean definition
 * fixed AbstractAutowireCapableBeanFactory's "configureBean" (@Configurable) to avoid bean name creation for inner beans
 * fixed AbstractAutowireCapableBeanFactory to skip invocation of InstantiationAwareBeanPostProcessors for null bean
 * fixed AbstractAutowireCapableBeanFactory to always resolve the bean class before a FactoryBean type check
+* added "freezeConfiguration()" method to Configurable/DefaultListableBeanFactory, allowing for eager metadata caching
 * revised bean destruction logging to log at WARN level with exception toString only (full exception at DEBUG level)
 * AutowiredAnnotationBeanPostProcessor resolves the target type for a generically typed dependency (method parameter)
 * fixed AutowiredAnnotationBeanPostProcessor to correctly cache a collection with a single autowired bean as element
@@ -63,6 +66,7 @@ Package org.springframework.context
 * moved CONFIG_LOCATION_DELIMITERS constant from ConfigurableWebApplicationContext to ConfigurableApplicationContext
 * fixed AbstractApplicationContext to correctly ignore FactoryBean results that implement the Lifecycle interface
 * AbstractApplicationContext processes Lifecycle callbacks in the order of bean creation by default
+* AbstractApplicationContext explicitly freezes its bean factory configuration at the end of the "refresh()" phase
 * exposed "allowBeanDefinitionOverriding"/"allowCircularReferences" properties in AbstractRefreshableApplicationContext
 * factored out AbstractRefreshableConfigApplicationContext base class for common handling of specified config locations
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext allow for bean-style configuration
@@ -109,6 +113,7 @@ Package org.springframework.jdbc
 * added further default "sql-error-codes.xml" mappings for MS SQL, MySQL, PostgreSQL and Oracle
 * DatabaseStartupValidator lets startup continue instead of 'busy' waiting in case of thread interruption
 * JdbcTemplate falls back to type VARCHAR for a null value in case of an unknown SQL type specified against IBM DB2
+* JdbcTemplate uses "PreparedStatement.setString" in case of LONGVARCHAR and CLOB (if given a String value)
 * fixed CallMetaDataContext to skip SqlParameter objects without name (avoiding NPE)
 * merged AbstractBeanPropertyRowMapper into concrete BeanPropertyRowMapper class
 * removed BeanPropertyRowMapper's "newInstance" method to avoid confusion with ParameterizedBeanPropertyRowMapper
