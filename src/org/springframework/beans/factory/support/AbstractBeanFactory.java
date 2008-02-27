@@ -1038,7 +1038,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Only cache the merged bean definition if we're already about to create an
 				// instance of the bean, or at least have already created an instance before.
-				if (containingBd == null && isCacheBeanMetadata() && this.alreadyCreated.contains(beanName)) {
+				if (containingBd == null && isCacheBeanMetadata() && isBeanEligibleForMetadataCaching(beanName)) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
@@ -1180,6 +1180,27 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 * Mark the specified bean as already created (or about to be created).
+	 * <p>This allows the bean factory to optimize its caching for repeated
+	 * creation of the specified bean.
+	 * @param beanName the name of the bean
+	 */
+	protected void markBeanAsCreated(String beanName) {
+		this.alreadyCreated.add(beanName);
+	}
+
+	/**
+	 * Determine whether the specified bean is eligible for having
+	 * its bean definition metadata cached.
+	 * @param beanName the name of the bean
+	 * @return <code>true</code> if the bean's metadata may be cached
+	 * at this point already
+	 */
+	protected boolean isBeanEligibleForMetadataCaching(String beanName) {
+		return this.alreadyCreated.contains(beanName);
+	}
+
+	/**
 	 * Remove the singleton instance (if any) for the given bean name,
 	 * but only if it hasn't been used for other purposes than type checking.
 	 * @param beanName the name of the bean
@@ -1193,16 +1214,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		else {
 			return false;
 		}
-	}
-
-	/**
-	 * Mark the specified bean as already created (or about to be created).
-	 * <p>This allows the bean factory to optimize its caching for repeated
-	 * creation of the specified bean.
-	 * @param beanName the name of the bean
-	 */
-	protected void markBeanAsCreated(String beanName) {
-		this.alreadyCreated.add(beanName);
 	}
 
 	/**

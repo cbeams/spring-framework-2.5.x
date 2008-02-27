@@ -87,6 +87,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Whether to allow eager class loading even for lazy-init beans */
 	private boolean allowEagerClassLoading = true;
 
+	/** Whether bean definition metadata may be cached for all beans */
+	private boolean configurationFrozen = false;
+
 	/** Map of bean definition objects, keyed by bean name */
 	private final Map beanDefinitionMap = CollectionFactory.createConcurrentMapIfPossible(16);
 
@@ -380,6 +383,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
 		return bd;
+	}
+
+	public void freezeConfiguration() {
+		this.configurationFrozen = true;
+	}
+
+	public boolean isConfigurationFrozen() {
+		return this.configurationFrozen;
+	}
+
+	/**
+	 * Considers all beans as eligible for metdata caching
+	 * if the factory's configuration has been marked as frozen.
+	 * @see #freezeConfiguration()
+	 */
+	protected boolean isBeanEligibleForMetadataCaching(String beanName) {
+		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
 
 	public void preInstantiateSingletons() throws BeansException {

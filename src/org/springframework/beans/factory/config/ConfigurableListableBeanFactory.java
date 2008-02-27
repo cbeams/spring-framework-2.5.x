@@ -106,6 +106,20 @@ public interface ConfigurableListableBeanFactory
 	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
+	 * Freeze all bean definitions, signalling that the registered bean definitions
+	 * will not be modified or post-processed any further.
+	 * <p>This allows the factory to aggressively cache bean definition metadata.
+	 */
+	void freezeConfiguration();
+
+	/**
+	 * Return whether this factory's bean definitions are frozen,
+	 * i.e. are not supposed to be modified or post-processed any further.
+	 * @return <code>true</code> if the factory's configuration is considered frozen
+	 */
+	boolean isConfigurationFrozen();
+
+	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering
 	 * {@link org.springframework.beans.factory.FactoryBean FactoryBeans}.
 	 * Typically invoked at the end of factory setup, if desired.
