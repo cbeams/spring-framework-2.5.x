@@ -238,7 +238,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			if (!typeCheckOnly) {
-				this.alreadyCreated.add(beanName);
+				markBeanAsCreated(beanName);
 			}
 
 			final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
@@ -1193,6 +1193,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		else {
 			return false;
 		}
+	}
+
+	/**
+	 * Mark the specified bean as already created (or about to be created).
+	 * <p>This allows the bean factory to optimize its caching for repeated
+	 * creation of the specified bean.
+	 * @param beanName the name of the bean
+	 */
+	protected void markBeanAsCreated(String beanName) {
+		this.alreadyCreated.add(beanName);
 	}
 
 	/**
