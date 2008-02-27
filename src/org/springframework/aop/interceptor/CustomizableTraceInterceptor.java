@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -338,11 +338,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		while (matcher.find()) {
 			String match = matcher.group();
 			if (PLACEHOLDER_METHOD_NAME.equals(match)) {
-				matcher.appendReplacement(output, methodInvocation.getMethod().getName());
+				matcher.appendReplacement(output, escape(methodInvocation.getMethod().getName()));
 			}
 			else if (PLACEHOLDER_TARGET_CLASS_NAME.equals(match)) {
-				String targetClassName = escape(methodInvocation.getThis().getClass().getName());
-				matcher.appendReplacement(output, targetClassName);
+				matcher.appendReplacement(output, escape(methodInvocation.getThis().getClass().getName()));
 			}
 			else if (PLACEHOLDER_TARGET_CLASS_SHORT_NAME.equals(match)) {
 				matcher.appendReplacement(output, escape(ClassUtils.getShortName(methodInvocation.getThis().getClass())));
@@ -357,7 +356,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				appendReturnValue(methodInvocation, matcher, output, returnValue);
 			}
 			else if (throwable != null && PLACEHOLDER_EXCEPTION.equals(match)) {
-				matcher.appendReplacement(output, throwable.toString());
+				matcher.appendReplacement(output, escape(throwable.toString()));
 			}
 			else if (PLACEHOLDER_INVOCATION_TIME.equals(match)) {
 				matcher.appendReplacement(output, Long.toString(invocationTime));
