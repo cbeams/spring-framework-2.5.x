@@ -64,6 +64,7 @@ import org.springframework.util.StringUtils;
  * which is only available on JDK 1.4+.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  * @see #setEnterMessage
  * @see #setExitMessage
@@ -188,8 +189,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * <li><code>$[argumentTypes]</code></li>
 	 * <li><code>$[arguments]</code></li>
 	 * </ul>
-	 * @throws IllegalArgumentException if the message template is empty
-	 * or contains any invalid placeholders
 	 */
 	public void setEnterMessage(String enterMessage) throws IllegalArgumentException {
 		Assert.hasText(enterMessage, "'enterMessage' must not be empty");
@@ -214,8 +213,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * <li><code>$[returnValue]</code></li>
 	 * <li><code>$[invocationTime]</code></li>
 	 * </ul>
-	 * @throws IllegalArgumentException if the message template is empty
-	 * or contains any invalid placeholders
 	 */
 	public void setExitMessage(String exitMessage) {
 		Assert.hasText(exitMessage, "'exitMessage' must not be empty");
@@ -235,8 +232,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * <li><code>$[arguments]</code></li>
 	 * <li><code>$[exception]</code></li>
 	 * </ul>
-	 * @throws IllegalArgumentException if the message template is empty
-	 * or contains any invalid placeholders
 	 */
 	public void setExceptionMessage(String exceptionMessage) {
 		Assert.hasText(exceptionMessage, "'exceptionMessage' must not be empty");
