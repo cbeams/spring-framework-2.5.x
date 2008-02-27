@@ -40,10 +40,10 @@ import org.springframework.web.bind.annotation.SessionAttributes;
  *
  * @author Juergen Hoeller
  * @since 2.5.2
- * @see org.springframework.web.bind.annotation.RequestMapping;
- * @see org.springframework.web.bind.annotation.InitBinder;
- * @see org.springframework.web.bind.annotation.ModelAttribute;
- * @see org.springframework.web.bind.annotation.SessionAttributes;
+ * @see org.springframework.web.bind.annotation.RequestMapping
+ * @see org.springframework.web.bind.annotation.InitBinder
+ * @see org.springframework.web.bind.annotation.ModelAttribute
+ * @see org.springframework.web.bind.annotation.SessionAttributes
  */
 public class HandlerMethodResolver {
 
