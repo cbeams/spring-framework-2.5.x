@@ -329,8 +329,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Oracle OC4J 10.1.3.1 ClassLoader API extract (http://www.oracle.com/technology/tech/java/oc4j)
 - required for building the framework
 
-* openjpa/openjpa-1.0.1.jar
-- OpenJPA 1.0.1 (http://openjpa.apache.org)
+* openjpa/openjpa-1.0.2.jar
+- OpenJPA 1.0.2 (http://openjpa.apache.org)
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 

@@ -97,7 +97,7 @@
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="lib/oc4j/oc4j-clapi.jar"/>
 	<classpathentry kind="lib" path="lib/ognl/ognl.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/openjpa/openjpa-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/osgi/org.eclipse.osgi_3.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/poi/poi-3.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
