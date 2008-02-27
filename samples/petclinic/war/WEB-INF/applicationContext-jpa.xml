@@ -45,10 +45,6 @@
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter"
 					p:databasePlatform="${jpa.databasePlatform}" p:showSql="${jpa.showSql}"/>
-      <!--
-      <bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"
-          p:database="${jpa.database}" p:showSql="${jpa.showSql}"/>
-      -->
 			<!--
 			<bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter"
 					p:database="${jpa.database}" p:showSql="${jpa.showSql}"/>
