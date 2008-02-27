@@ -243,7 +243,8 @@ public abstract class StatementCreatorUtils {
 			if (inValueToUse instanceof SqlTypeValue) {
 				((SqlTypeValue) inValueToUse).setTypeValue(ps, paramIndex, sqlTypeToUse, typeNameToUse);
 			}
-			else if (sqlTypeToUse == Types.VARCHAR) {
+			else if (sqlTypeToUse == Types.VARCHAR || sqlTypeToUse == Types.LONGVARCHAR ||
+					(sqlTypeToUse == Types.CLOB && isStringValue(inValueToUse.getClass()))) {
 				ps.setString(paramIndex, inValueToUse.toString());
 			}
 			else if (sqlTypeToUse == Types.DECIMAL || sqlTypeToUse == Types.NUMERIC) {
