@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-27)
+Changes in version 2.5.2 (2008-02-28)
 -------------------------------------
 
 General
@@ -35,6 +35,7 @@ Package org.springframework.beans
 * added "getOriginatingBeanDefinition()" method to BeanDefinition interface, exposing the decorated definition (if any)
 * PropertyOverrideConfigurer is able to properly override target bean definitions behind a scoped proxy decorator
 * added "nullValue" property to PropertyPlaceholderConfigurer, allowing for resolving specific Strings into a null value
+* CustomEditorConfigurer and CustomScopeConfigurer accept editor/scope values as class names as well
 * factored out AliasRegistry/SimpleAliasRegistry from BeanDefinitionRegistry/AbstractBeanFactory
 * introduced SimpleBeanDefinitionRegistry implementation for bean definition reader testing
 * "registerAlias" allows for overriding as long as bean definition overriding is allowed
@@ -126,9 +127,11 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
-* fixed DefaultMessageListenerContainer to correctly process "sessionTransacted=true" in case of locally exposed Session
+* DefaultMessageListenerContainer logs listener setup failures at INFO instead of ERROR level
 * DefaultMessageListenerContainer allows for specifying a callback on "stop", for a notification after actual stopping
 * DefaultMessageListenerContainer lets shutdown continue instead of 'busy' waiting in case of thread interruption
+* fixed DefaultMessageListenerContainer to correctly process "sessionTransacted=true" in case of locally exposed Session
+* SimpleMessageListenerContainer exposes listener Session as thread-bound resource for JmsTemplate calls (like DMLC)
 * deprecated ServerSessionMessageListenerContainer in favor of DefaultMessageListenerContainer/JmsMessageEndpointManager
 * DefaultJmsActivationSpecFactory is compatible with WebSphere MQ 6.0.2.1 as well now
 
@@ -174,6 +177,7 @@ Package org.springframework.test
 * TestContextManager ignores default TestExecutionListeners that cannot be instantiated (e.g. due to spring-tx missing)
 * AbstractJUnit38SpringContextTests runs "afterTestMethod" callbacks even when "beforeTestMethod" or "setUp" failed
 * AbstractTestNGSpringContextTests executes Spring default callbacks in any case (marked with "alwaysRun = true")
+* added configurable "sqlScriptEncoding" property to AbstractTransactionalXxxSpringContextTests (for reading scripts)
 
 Package org.springframework.util
 * revised ConcurrencyThrottleSupport's interruption handling to throw an IllegalStateException instead of 'busy' waiting
@@ -187,6 +191,7 @@ Package org.springframework.web
 * added "setConfigLocation" method to ConfigurableWeb/PortletApplicationContext, accepting an init-param style value
 * added "initServletContext(ServletContext)" template method to WebApplicationObjectSupport
 * optimized ServletContextResource's and PortletContextResource's "exists()" check to avoid unnecessary stream opening
+* Commons(Portlet)MultipartResolver catches and logs any exception thrown from file item cleanup (not propagating it)
 * introduced NativeWebRequest and MultipartRequest interfaces for even finer-grained generic request access options
 * introduced FacesRequestAttributes adapter, with attributes access falling back to current JSF FacesContext by default
 * added "dispatchOptionsRequest/TraceRequest" properties to FrameworkServlet, for dispatching all HTTP request methods
@@ -315,7 +320,7 @@ Package org.springframework.jms
 * JmsInvokerClientInterceptor accepts any JMS 1.1 ConnectionFactory, not insisting on a QueueConnectionFactory anymore
 * MethodListenerAdapter uses type difference weight algorithm to choose between ambiguous listener methods
 * DefaultMessageListenerContainer catches TaskRejectedException and pauses affected tasks for subsequent resuming
-* DefaultMessageListenerContainer exposes locally cached Session as thread-bound resource (for JmsTemplate calls)
+* DefaultMessageListenerContainer exposes listener Session as thread-bound resource for JmsTemplate calls
 * ServerSessionMessageListenerContainer always establishes a shared Connection (even if autoStart="false")
 * CommonsPoolServerSessionFactory removes specific ServerSessionPool on close (for proper reuse on stop and restart)
 * "jms:listener-container" tag supports a concurrency range (e.g. "3-5"), for specifying a minimum number of consumers
