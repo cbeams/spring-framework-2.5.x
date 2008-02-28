@@ -53,6 +53,8 @@ public class HandlerMethodResolver {
 
 	private final Set<Method> modelAttributeMethods = new LinkedHashSet<Method>();
 
+	private final RequestMapping typeLevelMapping;
+
 	private final boolean sessionAttributesFound;
 
 	private final Set<String> sessionAttributeNames = new HashSet<String>();;
@@ -80,6 +82,7 @@ public class HandlerMethodResolver {
 				}
 			}
 		});
+		this.typeLevelMapping = handlerType.getAnnotation(RequestMapping.class);
 		SessionAttributes sessionAttributes = handlerType.getAnnotation(SessionAttributes.class);
 		this.sessionAttributesFound = (sessionAttributes != null);
 		if (this.sessionAttributesFound) {
@@ -103,6 +106,14 @@ public class HandlerMethodResolver {
 
 	public final Set<Method> getModelAttributeMethods() {
 		return this.modelAttributeMethods;
+	}
+
+	public boolean hasTypeLevelMapping() {
+		return (this.typeLevelMapping != null);
+	}
+
+	public RequestMapping getTypeLevelMapping() {
+		return this.typeLevelMapping;
 	}
 
 	public boolean hasSessionAttributes() {

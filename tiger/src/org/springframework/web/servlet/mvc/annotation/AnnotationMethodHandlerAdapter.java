@@ -389,8 +389,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				RequestMappingInfo mappingInfo = new RequestMappingInfo();
 				RequestMapping mapping = AnnotationUtils.findAnnotation(handlerMethod, RequestMapping.class);
 				mappingInfo.paths = mapping.value();
-				mappingInfo.methods = mapping.method();
-				mappingInfo.params = mapping.params();
+				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(), getTypeLevelMapping().method())) {
+					mappingInfo.methods = mapping.method();
+				}
+				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(), getTypeLevelMapping().params())) {
+					mappingInfo.params = mapping.params();
+				}
 				boolean match = false;
 				if (mappingInfo.paths.length > 0) {
 					for (String mappedPath : mappingInfo.paths) {
