@@ -96,6 +96,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** List of bean definition names, in registration order */
 	private final List beanDefinitionNames = new ArrayList();
 
+	/** Cached array of bean definition names in case of frozen configuration */
+	private String[] frozenBeanDefinitionNames;
+
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
 	private AutowireCandidateResolver autowireCandidateResolver = AutowireUtils.createAutowireCandidateResolver();
 
@@ -186,7 +189,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public String[] getBeanDefinitionNames() {
 		synchronized (this.beanDefinitionMap) {
-			return StringUtils.toStringArray(this.beanDefinitionNames);
+			if (this.frozenBeanDefinitionNames != null) {
+				return this.frozenBeanDefinitionNames;
+			}
+			else {
+				return StringUtils.toStringArray(this.beanDefinitionNames);
+			}
 		}
 	}
 
@@ -198,10 +206,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		List result = new ArrayList();
 
 		// Check all bean definitions.
-		String[] beanDefinitionNames = null;
-		synchronized (this.beanDefinitionMap) {
-			beanDefinitionNames = StringUtils.toStringArray(this.beanDefinitionNames);
-		}
+		String[] beanDefinitionNames = getBeanDefinitionNames();
 		for (int i = 0; i < beanDefinitionNames.length; i++) {
 			String beanName = beanDefinitionNames[i];
 			// Only consider bean as eligible if the bean name
@@ -387,6 +392,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public void freezeConfiguration() {
 		this.configurationFrozen = true;
+		synchronized (this.beanDefinitionMap) {
+			this.frozenBeanDefinitionNames = StringUtils.toStringArray(this.beanDefinitionNames);
+		}
 	}
 
 	public boolean isConfigurationFrozen() {
@@ -464,6 +472,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else {
 				this.beanDefinitionNames.add(beanName);
+				this.frozenBeanDefinitionNames = null;
 			}
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 
@@ -483,6 +492,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				throw new NoSuchBeanDefinitionException(beanName);
 			}
 			this.beanDefinitionNames.remove(beanName);
+			this.frozenBeanDefinitionNames = null;
 
 			resetBeanDefinition(beanName);
 		}
