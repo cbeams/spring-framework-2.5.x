@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,7 +24,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -49,6 +48,8 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
     extends AbstractTransactionalSpringContextTests {
 
 	protected JdbcTemplate jdbcTemplate;
+
+	private String sqlScriptEncoding;
 
 	/**
 	 * Did this test delete any tables? If so, we forbid transaction completion,
@@ -83,6 +84,14 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 */
 	public final JdbcTemplate getJdbcTemplate() {
 		return this.jdbcTemplate;
+	}
+
+	/**
+	 * Specify the encoding for SQL scripts, if different from the platform encoding.
+	 * @see #executeSqlScript
+	 */
+	public void setSqlScriptEncoding(String sqlScriptEncoding) {
+		this.sqlScriptEncoding = sqlScriptEncoding;
 	}
 
 
@@ -141,11 +150,12 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 			logger.info("Executing SQL script '" + sqlResourcePath + "'");
 		}
 
+		EncodedResource resource =
+				new EncodedResource(getApplicationContext().getResource(sqlResourcePath), this.sqlScriptEncoding);
 		long startTime = System.currentTimeMillis();
 		List statements = new LinkedList();
-		Resource res = getApplicationContext().getResource(sqlResourcePath);
 		try {
-			LineNumberReader lnr = new LineNumberReader(new InputStreamReader(res.getInputStream()));
+			LineNumberReader lnr = new LineNumberReader(resource.getReader());
 			String currentStatement = lnr.readLine();
 			while (currentStatement != null) {
 				currentStatement = StringUtils.replace(currentStatement, ";", "");

@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,62 +86,62 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 */
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
 
+	private String sqlScriptEncoding;
+
 
 	/**
 	 * Set the DataSource, typically provided via Dependency Injection.
 	 */
 	@Autowired
-	public void setDataSource(final DataSource dataSource) {
+	public void setDataSource(DataSource dataSource) {
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 
 	/**
+	 * Specify the encoding for SQL scripts, if different from the platform encoding.
+	 * @see #executeSqlScript
+	 */
+	public void setSqlScriptEncoding(String sqlScriptEncoding) {
+		this.sqlScriptEncoding = sqlScriptEncoding;
+	}
+
+
+	/**
 	 * Count the rows in the given table.
-	 *
 	 * @param tableName table name to count rows in
 	 * @return the number of rows in the table
 	 */
-	protected int countRowsInTable(final String tableName) {
+	protected int countRowsInTable(String tableName) {
 		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
 	}
 
 	/**
-	 * <p>
 	 * Convenience method for deleting all rows from the specified tables.
-	 * </p>
-	 * <p>
 	 * Use with caution outside of a transaction!
-	 * </p>
-	 *
 	 * @param names the names of the tables from which to delete
 	 * @return the total number of rows deleted from all specified tables
 	 */
-	protected int deleteFromTables(final String... names) {
+	protected int deleteFromTables(String... names) {
 		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
 	}
 
 	/**
-	 * <p>
-	 * Execute the given SQL script.
-	 * </p>
-	 * <p>
-	 * Use with caution outside of a transaction!
-	 * </p>
-	 *
-	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 * normally be loaded by classpath. There should be one statement per
-	 * line. Any semicolons will be removed. <b>Do not use this method to
-	 * execute DDL if you expect rollback.</b>
+	 * Execute the given SQL script. Use with caution outside of a transaction!
+	 * <p>The script will normally be loaded by classpath. There should be one statement
+	 * per line. Any semicolons will be removed. <b>Do not use this method to execute
+	 * DDL if you expect rollback.</b>
+	 * @param sqlResourcePath the Spring resource path for the SQL script
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and continueOnError was <code>false</code>
 	 */
-	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
+	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError)
 			throws DataAccessException {
 
+		Resource resource = this.applicationContext.getResource(sqlResourcePath);
 		SimpleJdbcTestUtils.executeSqlScript(
-				this.simpleJdbcTemplate, this.applicationContext, sqlResourcePath, continueOnError);
+				this.simpleJdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding), continueOnError);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.TestExecutionListeners;
@@ -49,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see AbstractJUnit38SpringContextTests
  * @see org.springframework.test.context.ContextConfiguration
@@ -64,94 +67,89 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners( { TransactionalTestExecutionListener.class })
+@TestExecutionListeners({TransactionalTestExecutionListener.class})
 @Transactional
 public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
 
 	/**
-	 * The SimpleJdbcTemplate that this base class manages, available to
-	 * subclasses.
+	 * The SimpleJdbcTemplate that this base class manages, available to subclasses.
 	 */
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
 
+	private String sqlScriptEncoding;
+
 
 	/**
-	 * Default <em>no argument</em> constructor which delegates to
-	 * {@link AbstractTransactionalJUnit38SpringContextTests#AbstractTransactionalJUnit38SpringContextTests(String) AbstractTransactionalJUnit38SpringContextTests(String)},
-	 * passing a value of <code>null</code> for the test name.
-	 *
-	 * @see AbstractTransactionalJUnit38SpringContextTests#AbstractTransactionalJUnit38SpringContextTests(String)
+	 * Constructs a new AbstractTransactionalJUnit38SpringContextTests instance.
 	 */
 	public AbstractTransactionalJUnit38SpringContextTests() {
-		this(null);
+		super();
 	}
 
 	/**
-	 * Delegates to
-	 * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}.
-	 *
-	 * @param name The name of the current test to execute.
-	 * @see AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String)
+	 * Constructs a new AbstractTransactionalJUnit38SpringContextTests instance
+	 * with the supplied <code>name</code>.
+	 * @param name the name of the current test to execute
 	 */
-	public AbstractTransactionalJUnit38SpringContextTests(final String name) {
+	public AbstractTransactionalJUnit38SpringContextTests(String name) {
 		super(name);
 	}
 
+
 	/**
 	 * Set the DataSource, typically provided via Dependency Injection.
-	 *
-	 * @param dataSource The DataSource to inject.
+	 * @param dataSource The DataSource to inject
 	 */
 	@Autowired
-	public void setDataSource(final DataSource dataSource) {
+	public void setDataSource(DataSource dataSource) {
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 
 	/**
+	 * Specify the encoding for SQL scripts, if different from the platform encoding.
+	 * @see #executeSqlScript
+	 */
+	public void setSqlScriptEncoding(String sqlScriptEncoding) {
+		this.sqlScriptEncoding = sqlScriptEncoding;
+	}
+
+
+	/**
 	 * Count the rows in the given table.
-	 *
 	 * @param tableName table name to count rows in
 	 * @return the number of rows in the table
 	 */
-	protected int countRowsInTable(final String tableName) {
+	protected int countRowsInTable(String tableName) {
 		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
 	}
 
 	/**
-	 * <p>
 	 * Convenience method for deleting all rows from the specified tables.
-	 * </p>
-	 * <p>
 	 * Use with caution outside of a transaction!
-	 * </p>
-	 *
-	 * @param names The names of the tables from which to delete.
-	 * @return The total number of rows deleted from all specified tables.
+	 * @param names the names of the tables from which to delete
+	 * @return the total number of rows deleted from all specified tables
 	 */
-	protected int deleteFromTables(final String... names) {
+	protected int deleteFromTables(String... names) {
 		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
 	}
 
 	/**
-	 * <p>
-	 * Execute the given SQL script.
-	 * </p>
-	 * <p>
-	 * Use with caution outside of a transaction!
-	 * </p>
-	 *
-	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 *        normally be loaded by classpath. There should be one statement per
-	 *        line. Any semicolons will be removed. <b>Do not use this method to
-	 *        execute DDL if you expect rollback.</b>
+	 * Execute the given SQL script. Use with caution outside of a transaction!
+	 * <p>The script will normally be loaded by classpath. There should be one statement
+	 * per line. Any semicolons will be removed. <b>Do not use this method to execute
+	 * DDL if you expect rollback.</b>
+	 * @param sqlResourcePath the Spring resource path for the SQL script
 	 * @param continueOnError whether or not to continue without throwing an
-	 *        exception in the event of an error.
+	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 *         and continueOnError was <code>false</code>.
+	 * and continueOnError was <code>false</code>
 	 */
-	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
+	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError)
 			throws DataAccessException {
-		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath,
-				continueOnError);
+
+		Resource resource = this.applicationContext.getResource(sqlResourcePath);
+		SimpleJdbcTestUtils.executeSqlScript(
+				this.simpleJdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding), continueOnError);
 	}
+
 }

@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.TestExecutionListeners;
@@ -49,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see AbstractTestNGSpringContextTests
  * @see org.springframework.test.context.ContextConfiguration
@@ -67,10 +70,11 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractTransactionalTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
 
 	/**
-	 * The SimpleJdbcTemplate that this base class manages, available to
-	 * subclasses.
+	 * The SimpleJdbcTemplate that this base class manages, available to subclasses.
 	 */
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
+
+	private String sqlScriptEncoding;
 
 
 	/**
@@ -83,6 +87,15 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	}
 
 	/**
+	 * Specify the encoding for SQL scripts, if different from the platform encoding.
+	 * @see #executeSqlScript
+	 */
+	public void setSqlScriptEncoding(String sqlScriptEncoding) {
+		this.sqlScriptEncoding = sqlScriptEncoding;
+	}
+
+
+	/**
 	 * Count the rows in the given table.
 	 * @param tableName table name to count rows in
 	 * @return the number of rows in the table
@@ -93,7 +106,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 
 	/**
 	 * Convenience method for deleting all rows from the specified tables.
-	 * <p>Use with caution outside of a transaction!
+	 * Use with caution outside of a transaction!
 	 * @param names the names of the tables from which to delete
 	 * @return the total number of rows deleted from all specified tables
 	 */
@@ -102,12 +115,11 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	}
 
 	/**
-	 * Execute the given SQL script.
-	 * <p>Use with caution outside of a transaction!
-	 * @param sqlResourcePath Spring resource path for the SQL script.
-	 * Should normally be loaded by classpath. There should be one statement
-	 * per line. Any semicolons will be removed. <b>Do not use this method
-	 * to execute DDL if you expect rollback.</b>
+	 * Execute the given SQL script. Use with caution outside of a transaction!
+	 * <p>The script will normally be loaded by classpath. There should be one statement
+	 * per line. Any semicolons will be removed. <b>Do not use this method to execute
+	 * DDL if you expect rollback.</b>
+	 * @param sqlResourcePath the Spring resource path for the SQL script
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
@@ -116,8 +128,9 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError)
 			throws DataAccessException {
 
+		Resource resource = this.applicationContext.getResource(sqlResourcePath);
 		SimpleJdbcTestUtils.executeSqlScript(
-				this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath, continueOnError);
+				this.simpleJdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding), continueOnError);
 	}
 
 }
