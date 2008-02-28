@@ -310,7 +310,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 						!TransactionSynchronizationManager.hasResource(getConnectionFactory()));
 				if (exposeResource) {
 					TransactionSynchronizationManager.bindResource(
-							getConnectionFactory(), new LocallyExposedResourceHolder(sessionToUse));
+							getConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
 				}
 				try {
 					doExecuteListener(sessionToUse, message);
@@ -358,7 +358,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 		}
 		JmsResourceHolder resourceHolder =
 				(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
-		return (resourceHolder == null || resourceHolder instanceof LocallyExposedResourceHolder ||
+		return (resourceHolder == null || resourceHolder instanceof LocallyExposedJmsResourceHolder ||
 				!resourceHolder.containsSession(session));
 	}
 
@@ -484,18 +484,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 		public boolean isSynchedLocalTransactionAllowed() {
 			return AbstractPollingMessageListenerContainer.this.isSessionTransacted();
-		}
-	}
-
-
-	/**
-	 * JmsResourceHolder marker subclass that indicates local exposure,
-	 * i.e. that does not indicate an externally managed transaction.
-	 */
-	private static class LocallyExposedResourceHolder extends JmsResourceHolder {
-
-		public LocallyExposedResourceHolder(Session session) {
-			super(session);
 		}
 	}
 

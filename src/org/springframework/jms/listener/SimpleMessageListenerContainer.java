@@ -31,6 +31,7 @@ import javax.jms.Topic;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
 /**
@@ -192,7 +193,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 				public void onMessage(final Message message) {
 					taskExecutor.execute(new Runnable() {
 						public void run() {
-							executeListener(session, message);
+							processMessage(message, session);
 						}
 					});
 				}
@@ -201,11 +202,36 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		else {
 			consumer.setMessageListener(new MessageListener() {
 				public void onMessage(Message message) {
-					executeListener(session, message);
+					processMessage(message, session);
 				}
 			});
 		}
 		return consumer;
+	}
+
+	/**
+	 * Process a message received from the provider.
+	 * <p>Executes the listener, exposing the current JMS Session as
+	 * thread-bound resource (if "exposeListenerSession" is "true").
+	 * @param message the received JMS Message
+	 * @param session the JMS Session to operate on
+	 * @see #executeListener
+	 * @see #setExposeListenerSession
+	 */
+	protected void processMessage(Message message, Session session) {
+		boolean exposeResource = isExposeListenerSession();
+		if (exposeResource) {
+			TransactionSynchronizationManager.bindResource(
+					getConnectionFactory(), new LocallyExposedJmsResourceHolder(session));
+		}
+		try {
+			executeListener(session, message);
+		}
+		finally {
+			if (exposeResource) {
+				TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+			}
+		}
 	}
 
 	/**
