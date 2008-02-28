@@ -11,6 +11,7 @@ General
 
 Package org.springframework.aop
 * Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
+* CustomizableTraceInterceptor properly escapes method names and exception messages for regex parsing (wrt "$" signs)
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
 * AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
 
@@ -33,6 +34,7 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
+* DefaultMessageListenerContainer logs listener setup failures at INFO instead of ERROR level
 * DefaultMessageListenerContainer lets shutdown continue instead of 'busy' waiting in case of thread interruption
 
 Package org.springframework.mail
@@ -47,6 +49,7 @@ Package org.springframework.util
 
 Package org.springframework.web
 * ServletRequestAttributes keeps hold onto the original session if a "request.getSession" call suddenly returns null
+* AbstractTemplateView catches "HttpServletResponse.getContentType()" exceptions (for JBoss Portal compatibility)
 * InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
 
