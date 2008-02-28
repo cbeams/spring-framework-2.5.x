@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.portlet.PortletFileUpload;
 import org.apache.commons.fileupload.portlet.PortletRequestContext;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
@@ -117,7 +118,10 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(ActionRequest request) {
-		if (commonsFileUpload12Present) {
+		if (request == null) {
+			return false;
+		}
+		else if (commonsFileUpload12Present) {
 			return PortletFileUpload.isMultipartContent(request);
 		}
 		else {
@@ -126,6 +130,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	public MultipartActionRequest resolveMultipart(final ActionRequest request) throws MultipartException {
+		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
 			return new DefaultMultipartActionRequest(request) {
 				protected void initializeMultipart() {
@@ -182,7 +187,14 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	public void cleanupMultipart(MultipartActionRequest request) {
-		cleanupFileItems(request.getFileMap().values());
+		if (request != null) {
+			try {
+				cleanupFileItems(request.getFileMap().values());
+			}
+			catch (Throwable ex) {
+				logger.warn("Failed to perform multipart cleanup for portlet request", ex);
+			}
+		}
 	}
 
 }

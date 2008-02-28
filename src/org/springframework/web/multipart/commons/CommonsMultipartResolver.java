@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -122,7 +123,10 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 
 	public boolean isMultipart(HttpServletRequest request) {
-		if (commonsFileUpload12Present) {
+		if (request == null) {
+			return false;
+		}
+		else if (commonsFileUpload12Present) {
 			return ServletFileUpload.isMultipartContent(request);
 		}
 		else {
@@ -131,6 +135,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {
+		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
 			return new DefaultMultipartHttpServletRequest(request) {
 				protected void initializeMultipart() {
@@ -187,7 +192,14 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		cleanupFileItems(request.getFileMap().values());
+		if (request != null) {
+			try {
+				cleanupFileItems(request.getFileMap().values());
+			}
+			catch (Throwable ex) {
+				logger.warn("Failed to perform multipart cleanup for servlet request", ex);
+			}
+		}
 	}
 
 }
