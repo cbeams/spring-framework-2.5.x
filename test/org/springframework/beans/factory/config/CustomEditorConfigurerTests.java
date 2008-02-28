@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
  */
 public class CustomEditorConfigurerTests extends TestCase {
 
-	public void testCustomEditorConfigurerWithClassNames() throws ParseException {
+	public void testCustomEditorConfigurerWithRequiredTypeAsClassName() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
 		Map editors = new HashMap();
@@ -60,7 +60,7 @@ public class CustomEditorConfigurerTests extends TestCase {
 		assertEquals(df.parse("2.12.1975"), tb2.getSomeMap().get("myKey"));
 	}
 
-	public void testCustomEditorConfigurerWithClasses() throws ParseException {
+	public void testCustomEditorConfigurerWithRequiredTypeAsClass() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
 		Map editors = new HashMap();
@@ -77,7 +77,41 @@ public class CustomEditorConfigurerTests extends TestCase {
 		assertEquals(df.parse("2.12.1975"), tb.getDate());
 	}
 
-	public void testCustomEditorConfigurerWithArray() throws ParseException {
+	public void testCustomEditorConfigurerWithEditorAsClassName() throws ParseException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CustomEditorConfigurer cec = new CustomEditorConfigurer();
+		Map editors = new HashMap();
+		editors.put(Date.class, MyDateEditor.class.getName());
+		cec.setCustomEditors(editors);
+		cec.postProcessBeanFactory(bf);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("date", "2.12.1975");
+		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+
+		TestBean tb = (TestBean) bf.getBean("tb");
+		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
+		assertEquals(df.parse("2.12.1975"), tb.getDate());
+	}
+
+	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CustomEditorConfigurer cec = new CustomEditorConfigurer();
+		Map editors = new HashMap();
+		editors.put(Date.class, MyDateEditor.class);
+		cec.setCustomEditors(editors);
+		cec.postProcessBeanFactory(bf);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("date", "2.12.1975");
+		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+
+		TestBean tb = (TestBean) bf.getBean("tb");
+		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
+		assertEquals(df.parse("2.12.1975"), tb.getDate());
+	}
+
+	public void testCustomEditorConfigurerWithRequiredTypeArray() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
 		Map editors = new HashMap();
@@ -96,6 +130,14 @@ public class CustomEditorConfigurerTests extends TestCase {
 		TestBean tb = (TestBean) bf.getBean("tb");
 		assertTrue(tb.getStringArray() != null && tb.getStringArray().length == 1);
 		assertEquals("test", tb.getStringArray()[0]);
+	}
+
+
+	public static class MyDateEditor extends CustomDateEditor {
+
+		public MyDateEditor() {
+			super(DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN), true);
+		}
 	}
 
 }

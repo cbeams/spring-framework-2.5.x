@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@ import java.util.Map;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.mock.easymock.AbstractScalarMockTemplate;
 import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class CustomScopeConfigurerTests extends TestCase {
+public class CustomScopeConfigurerTests extends TestCase {
 
 	private static final String FOO_SCOPE = "fooScope";
 
@@ -42,7 +44,7 @@ public final class CustomScopeConfigurerTests extends TestCase {
 		}.test();
 	}
 
-	public void testSunnyDayWithBonaFideScopeInstances() throws Exception {
+	public void testSunnyDayWithBonaFideScopeInstance() throws Exception {
 		MockControl mockScope = MockControl.createControl(Scope.class);
 		final Scope scope = (Scope) mockScope.getMock();
 		mockScope.replay();
@@ -59,6 +61,26 @@ public final class CustomScopeConfigurerTests extends TestCase {
 			}
 		}.test();
 		mockScope.verify();
+	}
+
+	public void testSunnyDayWithBonaFideScopeClass() throws Exception {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		Map scopes = new HashMap();
+		scopes.put(FOO_SCOPE, NoOpScope.class);
+		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
+		figurer.setScopes(scopes);
+		figurer.postProcessBeanFactory(factory);
+		assertTrue(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope);
+	}
+
+	public void testSunnyDayWithBonaFideScopeClassname() throws Exception {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		Map scopes = new HashMap();
+		scopes.put(FOO_SCOPE, NoOpScope.class.getName());
+		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
+		figurer.setScopes(scopes);
+		figurer.postProcessBeanFactory(factory);
+		assertTrue(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope);
 	}
 
 	public void testWhereScopeMapHasNullScopeValueInEntrySet() throws Exception {
@@ -116,7 +138,6 @@ public final class CustomScopeConfigurerTests extends TestCase {
 			super(ConfigurableListableBeanFactory.class);
 		}
 
-
 		public final void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
 			setupExpectations(mockControl, (ConfigurableListableBeanFactory) mockObject);
 		}
@@ -129,7 +150,6 @@ public final class CustomScopeConfigurerTests extends TestCase {
 		}
 
 		protected abstract void doTest(ConfigurableListableBeanFactory factory) throws Exception;
-
 	}
 
 }

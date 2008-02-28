@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,12 @@ package org.springframework.beans.factory.config;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Simple {@link BeanFactoryPostProcessor} implementation that registers
@@ -34,22 +38,25 @@ import org.springframework.core.Ordered;
  * Alternatively, consider implementing a custom {@link BeanFactoryPostProcessor}
  * that calls {@link ConfigurableBeanFactory#registerScope} programmatically.
  *
- * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 2.0
  * @see ConfigurableBeanFactory#registerScope
  */
-public class CustomScopeConfigurer implements BeanFactoryPostProcessor, Ordered {
+public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
+
+	private Map scopes;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	private Map scopes;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
 	 * Specify the custom scopes that are to be registered.
 	 * <p>The keys indicate the scope names (of type String); each value
-	 * is expected to be the corresponding custom {@link Scope} instance.
+	 * is expected to be the corresponding custom {@link Scope} instance
+	 * or class name.
 	 */
 	public void setScopes(Map scopes) {
 		this.scopes = scopes;
@@ -63,6 +70,10 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, Ordered 
 		return this.order;
 	}
 
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
+
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.scopes != null) {
@@ -73,12 +84,26 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, Ordered 
 					throw new IllegalArgumentException(
 							"Invalid scope key [" + key + "]: only Strings allowed");
 				}
+				String scopeName = (String) key;
 				Object value = entry.getValue();
-				if (!(value instanceof Scope)) {
-					throw new IllegalArgumentException("Mapped value [" + value + "] for scope key [" +
-							key + "] is not of required type [" + Scope.class.getName() + "]");
+				if (value instanceof Scope) {
+					beanFactory.registerScope(scopeName, (Scope) value);
 				}
-				beanFactory.registerScope((String) key, (Scope) value);
+				else if (value instanceof Class) {
+					Class scopeClass = (Class) value;
+					Assert.isAssignable(Scope.class, scopeClass);
+					beanFactory.registerScope(scopeName, (Scope) BeanUtils.instantiateClass(scopeClass));
+				}
+				else if (value instanceof String) {
+					Class scopeClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
+					Assert.isAssignable(Scope.class, scopeClass);
+					beanFactory.registerScope(scopeName, (Scope) BeanUtils.instantiateClass(scopeClass));
+				}
+				else {
+					throw new IllegalArgumentException("Mapped value [" + value + "] for scope key [" +
+							key + "] is not an instance of required type [" + Scope.class.getName() +
+							"] or a corresponding Class or String value indicating a Scope implementation");
+				}
 			}
 		}
 	}

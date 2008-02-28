@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
@@ -597,6 +598,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.propertyEditorRegistrars;
 	}
 
+	public void registerCustomEditor(Class requiredType, Class propertyEditorClass) {
+		Assert.notNull(requiredType, "Required type must not be null");
+		Assert.isAssignable(PropertyEditor.class, propertyEditorClass);
+		this.customEditors.put(requiredType, propertyEditorClass);
+	}
+
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		Assert.notNull(requiredType, "Required type must not be null");
 		Assert.notNull(propertyEditor, "PropertyEditor must not be null");
@@ -605,7 +612,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Return the map of custom editors, with Classes as keys
-	 * and PropertyEditors as values.
+	 * and PropertyEditor instances or PropertyEditor classes as values.
 	 */
 	public Map getCustomEditors() {
 		return this.customEditors;
@@ -927,15 +934,25 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (!this.customEditors.isEmpty()) {
 			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
-				Class clazz = (Class) entry.getKey();
-				PropertyEditor editor = (PropertyEditor) entry.getValue();
-				// Register the editor as shared instance, if possible,
-				// to make it clear that it might be used concurrently.
-				if (registrySupport != null) {
-					registrySupport.registerSharedEditor(clazz, editor);
+				Class requiredType = (Class) entry.getKey();
+				Object value = entry.getValue();
+				if (value instanceof PropertyEditor) {
+					PropertyEditor editor = (PropertyEditor) value;
+					// Register the editor as shared instance, if possible,
+					// to make it clear that it might be used concurrently.
+					if (registrySupport != null) {
+						registrySupport.registerSharedEditor(requiredType, editor);
+					}
+					else {
+						registry.registerCustomEditor(requiredType, editor);
+					}
+				}
+				else if (value instanceof Class) {
+					Class editorClass = (Class) value;
+					registry.registerCustomEditor(requiredType, (PropertyEditor) BeanUtils.instantiateClass(editorClass));
 				}
 				else {
-					registry.registerCustomEditor(clazz, editor);
+					throw new IllegalStateException("Illegal custom editor value type: " + value.getClass().getName());
 				}
 			}
 		}

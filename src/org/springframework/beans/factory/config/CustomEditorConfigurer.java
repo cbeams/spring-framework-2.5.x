@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,21 +46,14 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * <p>Alternative configuration example with custom editor instances,
- * assuming inner beans for <code>PropertyEditor</code> instances:
+ * <p>Alternative configuration example with custom editor classes:
  *
  * <pre class="code">
  * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="customEditors"&gt;
  *     &lt;map&gt;
- *       &lt;entry key="java.util.Date"&gt;
- *         &lt;bean class="mypackage.MyCustomDateEditor"/&gt;
- *       &lt;/entry&gt;
- *       &lt;entry key="mypackage.MyObject"&gt;
- *         &lt;bean id="myEditor" class="mypackage.MyObjectEditor"&gt;
- *           &lt;property name="myParam"&gt;&lt;value&gt;myValue&lt;/value&gt;&lt;/property&gt;
- *         &lt;/bean&gt;
- *       &lt;/entry&gt;
+ *       &lt;entry key="java.util.Date" value="mypackage.MyCustomDateEditor"/&gt;
+ *       &lt;entry key="mypackage.MyObject" value="mypackage.MyObjectEditor"/&gt;
  *     &lt;/map&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
@@ -120,10 +113,11 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 
 	/**
 	 * Specify the custom editors to register via a {@link Map}, using the
-	 * class name of the required type as the key and the {@link PropertyEditor}
-	 * instance as the value.
+	 * class name of the required type as the key and the class name of the
+	 * associated {@link PropertyEditor} as value.
+	 * <p>Also supports {@link PropertyEditor} instances as values; however,
+	 * this is deprecated since Spring 2.0.7 and will be removed in Spring 3.0.
 	 * @param customEditors said <code>Map</code> of editors (can be <code>null</code>) 
-	 * @deprecated as of Spring 2.0.7, in favor of {@link #setPropertyEditorRegistrars}
 	 * @see ConfigurableListableBeanFactory#registerCustomEditor
 	 */
 	public void setCustomEditors(Map customEditors) {
@@ -145,6 +139,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 		if (this.customEditors != null) {
 			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
+
 				Object key = entry.getKey();
 				Class requiredType = null;
 				if (key instanceof Class) {
@@ -158,12 +153,23 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 					throw new IllegalArgumentException(
 							"Invalid key [" + key + "] for custom editor: needs to be Class or String.");
 				}
+
 				Object value = entry.getValue();
-				if (!(value instanceof PropertyEditor)) {
-					throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
-							key + "] is not of required type [" + PropertyEditor.class.getName() + "]");
+				if (value instanceof PropertyEditor) {
+					beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
 				}
-				beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
+				else if (value instanceof Class) {
+					beanFactory.registerCustomEditor(requiredType, (Class) value);
+				}
+				else if (value instanceof String) {
+					Class editorClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
+					beanFactory.registerCustomEditor(requiredType, editorClass);
+				}
+				else {
+					throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
+							key + "] is not of required type [" + PropertyEditor.class.getName() +
+							"] or a corresponding Class or String value indicating a PropertyEditor implementation");
+				}
 			}
 		}
 	}
