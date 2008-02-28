@@ -126,12 +126,14 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 
 	/**
-	 * Default <em>no argument</em> constructor which delegates to
-	 * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String)},
-	 * passing a value of <code>null</code> for the test name.
+	 * Constructs a new AbstractJUnit38SpringContextTests instance;
+	 * initializes the internal {@link TestContextManager} for the current test;
+	 * and retrieves the configured (or default) {@link ProfileValueSource}.
 	 */
 	public AbstractJUnit38SpringContextTests() {
-		this(null);
+		super();
+		this.testContextManager = new TestContextManager(getClass());
+		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(getClass());
 	}
 
 	/**
@@ -140,7 +142,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * {@link TestContextManager} for the current test; and retrieves the
 	 * configured (or default) {@link ProfileValueSource}.
 	 * @param name the name of the current test to execute
-	 * @see TestCase#TestCase(String)
 	 */
 	public AbstractJUnit38SpringContextTests(String name) {
 		super(name);
@@ -159,13 +160,9 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 
 	/**
-	 * <p>
 	 * Runs the <em>Spring TestContext Framework</em> test sequence.
-	 * </p>
-	 * <p>
-	 * In addition to standard {@link TestCase#runBare()} semantics, this
+	 * <p>In addition to standard {@link TestCase#runBare()} semantics, this
 	 * implementation performs the following:
-	 * </p>
 	 * <ul>
 	 * <li>Calls
 	 * {@link TestContextManager#prepareTestInstance(Object) prepareTestInstance()},
@@ -180,7 +177,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
 	 * </ul>
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource, Method)
-	 * @see junit.framework.TestCase#runBare()
 	 */
 	@Override
 	public void runBare() throws Throwable {
@@ -218,9 +214,8 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	}
 
 	/**
-	 * Runs a <em>timed</em> test via the supplied
-	 * {@link TestExecutionCallback}, providing support for the
-	 * {@link Timed @Timed} annotation.
+	 * Runs a <em>timed</em> test via the supplied {@link TestExecutionCallback},
+	 * providing support for the {@link Timed @Timed} annotation.
 	 * @param tec the test execution callback to run
 	 * @param testMethod the actual test method: used to retrieve the <code>timeout</code>
 	 * @throws Throwable if any exception is thrown
@@ -252,8 +247,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * {@link Repeat @Repeat} annotations.
 	 * @param tec the test execution callback to run
 	 * @param testMethod the actual test method: used to retrieve the
-	 * {@link ExpectedException @ExpectedException} and {@link Repeat @Repeat}
-	 * annotations
+	 * {@link ExpectedException @ExpectedException} and {@link Repeat @Repeat} annotations
 	 * @throws Throwable if any exception is thrown
 	 * @see ExpectedException
 	 * @see Repeat
@@ -362,6 +356,10 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	}
 
 
+	/**
+	 * Private inner class that defines a callback analogous to
+	 * {@link Runnable}, just declaring Throwable.
+	 */
 	private static interface TestExecutionCallback {
 
 		void run() throws Throwable;
