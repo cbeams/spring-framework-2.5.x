@@ -543,7 +543,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
 					scheduleNewInvoker();
 					if (logger.isDebugEnabled()) {
-						logger.debug("Raised scheduled invoker count: " + scheduledInvokers.size());
+						logger.debug("Raised scheduled invoker count: " + this.scheduledInvokers.size());
 					}
 				}
 			}
@@ -672,7 +672,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @param ex the exception to handle
 	 * @param alreadyRecovered whether a previously executing listener
 	 * already recovered from the present listener setup failure
-	 * (this usually indicates a follow-up failure than be ignored
+	 * (this usually indicates a follow-up failure than can be ignored
 	 * other than for debug log purposes)
 	 * @see #recoverAfterListenerSetupFailure()
 	 */
@@ -689,8 +689,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			if (alreadyRecovered) {
 				logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
 			}
+			else if (logger.isDebugEnabled()) {
+				logger.info("Setup of JMS message listener invoker failed - trying to recover", ex);
+			}
 			else {
-				logger.error("Setup of JMS message listener invoker failed - trying to recover", ex);
+				logger.info("Setup of JMS message listener invoker failed - trying to recover: " + ex);
 			}
 		}
 	}
