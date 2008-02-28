@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.portlet.handler;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,11 +30,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Implementation of the HandlerMapping interface to map from
- * the current PortletMode and a request parameter to request handler beans.
- * The mapping consists of two levels: first the PortletMode and then the
- * parameter value.  In order to be mapped, both elements must
- * match the mapping definition.
+ * Implementation of the {@link org.springframework.web.portlet.HandlerMapping}
+ * interface to map from the current PortletMode and a request parameter to
+ * request handler beans. The mapping consists of two levels: first the
+ * PortletMode and then the parameter value. In order to be mapped,
+ * both elements must match the mapping definition.
  *
  * <p>This is a combination of the methods used in {@link PortletModeHandlerMapping PortletModeHandlerMapping}
  * and {@link ParameterHandlerMapping ParameterHandlerMapping}.  Unlike
@@ -95,11 +94,9 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 
 	private Map portletModeParameterMap;
 
-	protected final Map modeHandlerMap = new HashMap();
-
 	private boolean allowDuplicateParameters = false;
 
-	private Set parametersUsed = new HashSet();
+	private final Set parametersUsed = new HashSet();
 
 
 	/**
