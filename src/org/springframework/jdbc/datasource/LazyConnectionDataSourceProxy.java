@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.core.Constants;
 
 /**
  * Proxy for a target DataSource, fetching actual JDBC Connections lazily,
@@ -75,10 +77,13 @@ import org.apache.commons.logging.LogFactory;
  * @since 1.1.4
  * @see ConnectionProxy
  * @see DataSourceTransactionManager
- * @see org.springframework.orm.hibernate.HibernateTransactionManager
+ * @see org.springframework.orm.hibernate3.HibernateTransactionManager
  * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
  */
 public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
+
+	/** Constants instance for TransactionDefinition */
+	private static final Constants constants = new Constants(Connection.class);
 
 	private static final Log logger = LogFactory.getLog(LazyConnectionDataSourceProxy.class);
 
@@ -103,13 +108,14 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set the default auto-commit mode to expose when no target Connection
 	 * has been fetched yet (-> actual JDBC Connection default not known yet).
 	 * <p>If not specified, the default gets determined by checking a target
 	 * Connection on startup. If that check fails, the default will be determined
 	 * lazily on first access of a Connection.
-	 * @see java.sql.Connection#getAutoCommit
+	 * @see java.sql.Connection#setAutoCommit
 	 */
 	public void setDefaultAutoCommit(boolean defaultAutoCommit) {
 		this.defaultAutoCommit = new Boolean(defaultAutoCommit);
@@ -118,14 +124,34 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Set the default transaction isolation level to expose when no target Connection
 	 * has been fetched yet (-> actual JDBC Connection default not known yet).
+	 * <p>This property accepts the int constant value (e.g. 8) as defined in the
+	 * {@link java.sql.Connection} interface; it is mainly intended for programmatic
+	 * use. Consider using the "defaultTransactionIsolationName" property for setting
+	 * the value by name (e.g. "TRANSACTION_SERIALIZABLE").
 	 * <p>If not specified, the default gets determined by checking a target
 	 * Connection on startup. If that check fails, the default will be determined
 	 * lazily on first access of a Connection.
-	 * @see java.sql.Connection#getTransactionIsolation
+	 * @see #setDefaultTransactionIsolationName
+	 * @see java.sql.Connection#setTransactionIsolation
 	 */
 	public void setDefaultTransactionIsolation(int defaultTransactionIsolation) {
 		this.defaultTransactionIsolation = new Integer(defaultTransactionIsolation);
 	}
+
+	/**
+	 * Set the default transaction isolation level by the name of the corresponding
+	 * constant in {@link java.sql.Connection}, e.g. "TRANSACTION_SERIALIZABLE".
+	 * @param constantName name of the constant
+	 * @see #setDefaultTransactionIsolation
+	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
+	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
+	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
+	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
+	 */
+	public void setDefaultTransactionIsolationName(String constantName) {
+		setDefaultTransactionIsolation(constants.asNumber(constantName).intValue());
+	}
+
 
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
@@ -171,14 +197,14 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * Expose the default auto-commit value.
 	 */
 	protected Boolean defaultAutoCommit() {
-		return defaultAutoCommit;
+		return this.defaultAutoCommit;
 	}
 
 	/**
 	 * Expose the default transaction isolation value.
 	 */
 	protected Integer defaultTransactionIsolation() {
-		return defaultTransactionIsolation;
+		return this.defaultTransactionIsolation;
 	}
 
 
@@ -188,7 +214,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * <p>The returned Connection handle implements the ConnectionProxy interface,
 	 * allowing to retrieve the underlying target Connection.
 	 * @return a lazy Connection handle
-	 * @see ConnectionProxy#getTargetConnection
+	 * @see ConnectionProxy#getTargetConnection()
 	 */
 	public Connection getConnection() throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
@@ -205,7 +231,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @param username the per-Connection username
 	 * @param password the per-Connection password
 	 * @return a lazy Connection handle
-	 * @see ConnectionProxy#getTargetConnection
+	 * @see ConnectionProxy#getTargetConnection()
 	 */
 	public Connection getConnection(String username, String password) throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
@@ -249,11 +275,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying connection.
-				return getTargetConnection(method);
-			}
-			else if (method.getName().equals("equals")) {
+			if (method.getName().equals("equals")) {
 				// We must avoid fetching a target Connection for "equals".
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
@@ -263,6 +285,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// and we must return the same hash code even when the target
 				// Connection has been fetched: use hashCode of Connection proxy.
 				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying connection.
+				return getTargetConnection(method);
 			}
 
 			if (!hasTargetConnection()) {
