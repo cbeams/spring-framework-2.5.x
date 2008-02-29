@@ -889,21 +889,17 @@ void setMessage(String aMessage) {
 			</para>
 			<note>
 				<para>
-		            In order to effect this automatic 'pickup' of any changes
-		            to dynamic-language-backed beans, you will have had to enable the
-		            'refreshable beans' functionality. See the section entitle
-		             <xref linkend="dynamic-language-refreshable-beans"/> for a full treatment
-		             of this feature.
+          In order to effect this automatic 'pickup' of any changes
+          to dynamic-language-backed beans, you will have had to enable the
+          'refreshable beans' functionality. See the section entitle
+           <xref linkend="dynamic-language-refreshable-beans"/> for a full treatment
+           of this feature.
 				</para>
 			</note>
 			<para>
-	            Find below an example of an
-	            <interfacename>org.springframework.web.servlet.mvc.Controller</interfacename>
-	            implemented using the Groovy dynamic language. This example is taken in
-	            part from the dynamic language support showcase project that is supplied
-	            with the Spring distribution; please do see the project in the
-	            <filename class="directory">'samples/showcases/dynamvc/'</filename> directory
-	            of the Spring distribution.
+        Find below an example of an
+        <interfacename>org.springframework.web.servlet.mvc.Controller</interfacename>
+        implemented using the Groovy dynamic language.
 			</para>
 			<programlisting source="java"><![CDATA[// from the file '/WEB-INF/groovy/FortuneController.groovy'
 package org.springframework.showcase.fortune.web

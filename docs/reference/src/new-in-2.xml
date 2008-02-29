@@ -760,9 +760,7 @@
     to investigate them. The aforementioned sample applications can be found
     in the <filename class="directory">'samples'</filename> directory of the
     full Spring distribution
-    (<filename>'spring-with-dependencies.[zip|tar.gz]'</filename>), and are
-    documented (in part) in the chapter entitled <xref
-    linkend="showcases"/>.</para>
+    (<filename>'spring-with-dependencies.[zip|tar.gz]'</filename>).</para>
 
     <para>Spring 2.5 features revised versions of the PetClinic and PetPortal sample
     applications, reengineered from the ground up for leveraging Spring 2.5's

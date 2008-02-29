@@ -78,7 +78,7 @@ Contents of the "-with-dependencies" distribution (~71 MB):
 * "tiger/test" contains the JDK-1.5-specific Java source files for Spring's test suite
 * "aspectj/src" contains the AspectJ-specific source files for the framework
 * "aspectj/test" contains the AspectJ-specific source files for Spring's test suite
-* "samples" contains various demo applications and showcases
+* "samples" contains various demo applications
 
 The "lib" directory is only included in the "-with-dependencies" download. Make sure to download this full
 distribution ZIP file if you want to run the sample applications and/or build the framework yourself.
@@ -190,7 +190,6 @@ Documented sample applications can be found in "samples" (depending on distribut
 * jpetstore
 * petclinic
 * petportal
-* (showcases)
 
 The Image Database sample is a simple one-screen image management web app that illustrates various
 Spring-integrated technologies: C3P0 as connection pool, BLOB/CLOB handling with MySQL and Oracle,

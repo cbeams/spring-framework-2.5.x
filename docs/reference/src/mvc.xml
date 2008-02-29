@@ -3005,13 +3005,6 @@ public class FileUploadBean {
     lend a degree of (always good-to-have) consistency across a codebase
     should you choose to move forward with it into production.</para>
 
-    <tip>
-      <para>The Spring distribution ships with a web application that
-      showcases the convention over configuration support described in this
-      section. The application can be found in the
-      <literal>'samples/showcases/mvc-convention'</literal> directory.</para>
-    </tip>
-
     <para>This convention over configuration support address the three core
     areas of MVC - namely, the models, views, and controllers.</para>
 
