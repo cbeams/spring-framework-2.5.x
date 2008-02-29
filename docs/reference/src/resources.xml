@@ -575,8 +575,8 @@
         obtained from it, and used to resolve the wildcard by walking the
         filesystem. In the case of a jar URL, the resolver either gets a
         <classname>java.net.JarURLConnection</classname> from it, or manually
-        parse the jar URL, and then traverse the contents of the jar file, to
-        resolve the wildcards.</para>
+        parses the jar URL and then traverses the contents of the jar file
+        to resolve the wildcards.</para>
 
         <section id="resources-app-ctx-portability">
           <title>Implications on portability</title>
