@@ -243,25 +243,25 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 		assertTrue(AopUtils.isCglibProxy(bean));
 		assertTrue(bean instanceof ScopedTestBean);
 		assertTrue(bean instanceof SessionScopedTestBean);
-		
+
 		assertEquals(DEFAULT_NAME, bean.getName());
 		bean.setName(MODIFIED_NAME);	
-		
+
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// this is a proxy so it should be reset to default
 		assertEquals(DEFAULT_NAME, bean.getName());
 		bean.setName(MODIFIED_NAME);
-		
+
 		IScopedTestBean bean2 = (IScopedTestBean) context.getBean("session");
 		assertEquals(MODIFIED_NAME, bean2.getName());
 		bean2.setName(DEFAULT_NAME);
 		assertEquals(DEFAULT_NAME, bean.getName());
-		
+
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
 		assertEquals(MODIFIED_NAME, bean.getName());
 	}
-	
-	
+
+
 	private ApplicationContext createContext(ScopedProxyMode scopedProxyMode) {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, false);
@@ -276,7 +276,11 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 			}
 		});
 		scanner.setScopedProxyMode(scopedProxyMode);
+
+		// Scan twice in order to find errors in the bean definition compatibility check.
 		scanner.scan(getClass().getPackage().getName());
+		scanner.scan(getClass().getPackage().getName());
+
 		context.refresh();
 		return context;
 	}

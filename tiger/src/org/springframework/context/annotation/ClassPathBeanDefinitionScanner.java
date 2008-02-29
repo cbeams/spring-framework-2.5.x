@@ -200,12 +200,12 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackages[i]);
 			for (BeanDefinition candidate : candidates) {
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
-				if (checkBeanName(beanName, candidate)) {
-					if (candidate instanceof AbstractBeanDefinition) {
-						postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
-					}
-					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-					BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
+				if (candidate instanceof AbstractBeanDefinition) {
+					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
+				}
+				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
+				if (checkCandidate(beanName, beanDefinition)) {
 					BeanDefinitionHolder bdHolder = new BeanDefinitionHolder(beanDefinition, beanName);
 					beanDefinitions.add(bdHolder);
 					registerBeanDefinition(bdHolder, this.registry);
@@ -241,9 +241,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 
 	/**
-	 * Check the given bean name, determining whether the corresponding
-	 * bean definition needs to be registered or conflicts with an
-	 * existing definition.
+	 * Check the given candidate's bean name, determining whether the corresponding
+	 * bean definition needs to be registered or conflicts with an existing definition.
 	 * @param beanName the suggested name for the bean
 	 * @param beanDefinition the corresponding bean definition
 	 * @return <code>true</code> if the bean can be registered as-is;
@@ -252,7 +251,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @throws IllegalStateException if an existing, incompatible
 	 * bean definition has been found for the specified name
 	 */
-	private boolean checkBeanName(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
+	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;
 		}
@@ -276,7 +275,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return whether the definitions are considered as compatible, with the
 	 * new definition to be skipped in favor of the existing definition
 	 */
-	private boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
+	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
 		return newDefinition.getBeanClassName().equals(existingDefinition.getBeanClassName());
 	}
 
