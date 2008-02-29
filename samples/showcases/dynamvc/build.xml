@@ -104,7 +104,7 @@
 				<include name="commons-logging.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j-1.2.13.jar"/>
+				<include name="log4j-*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
@@ -118,13 +118,13 @@
 
 			<!-- Groovy dependencies -->
 			<fileset dir="${spring.root}/lib/groovy">
-				<include name="groovy-1.0-jsr-04.jar"/>
+				<include name="groovy*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/asm">
-				<include name="asm-2.2.2.jar"/>
+				<include name="asm*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/antlr">
-				<include name="antlr-2.7.6.jar"/>
+				<include name="antlr*.jar"/>
 			</fileset>
 		</copy>
 
