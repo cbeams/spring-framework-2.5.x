@@ -240,9 +240,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 
-	//---------------------------------------------------------------------
-	// Implementation of AutowireCapableBeanFactory interface
-	//---------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	// Typical methods for creating and populating external bean instances
+	//-------------------------------------------------------------------------
 
 	public Object createBean(Class beanClass) throws BeansException {
 		// Use prototype bean definition, to avoid registering bean as dependent bean.
@@ -251,18 +251,52 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return createBean(beanClass.getName(), bd, null);
 	}
 
-	public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck)
-			throws BeansException {
+	public void autowireBean(Object existingBean) {
+		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
+		RootBeanDefinition bd = new RootBeanDefinition(ClassUtils.getUserClass(existingBean));
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		BeanWrapper bw = new BeanWrapperImpl(existingBean);
+		initBeanWrapper(bw);
+		populateBean(bd.getBeanClass().getName(), bd, bw);
+	}
 
+	public Object configureBean(Object existingBean, String beanName) throws BeansException {
+		markBeanAsCreated(beanName);
+		BeanDefinition mbd = getMergedBeanDefinition(beanName);
+		RootBeanDefinition bd = null;
+		if (mbd instanceof RootBeanDefinition) {
+			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
+			if (SCOPE_PROTOTYPE.equals(rbd.getScope())) {
+				bd = rbd;
+			}
+		}
+		if (bd == null) {
+			bd = new RootBeanDefinition(mbd);
+			bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		}
+		BeanWrapper bw = new BeanWrapperImpl(existingBean);
+		initBeanWrapper(bw);
+		populateBean(beanName, bd, bw);
+		return initializeBean(beanName, existingBean, bd);
+	}
+
+	public Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
+		return resolveDependency(descriptor, beanName, null, null);
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Specialized methods for fine-grained control over the bean lifecycle
+	//-------------------------------------------------------------------------
+
+	public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		return createBean(beanClass.getName(), bd, null);
 	}
 
-	public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck)
-			throws BeansException {
-
+	public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -299,26 +333,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		applyPropertyValues(beanName, bd, bw, bd.getPropertyValues());
 	}
 
-	public Object configureBean(Object existingBean, String beanName) throws BeansException {
-		markBeanAsCreated(beanName);
-		BeanDefinition mbd = getMergedBeanDefinition(beanName);
-		RootBeanDefinition bd = null;
-		if (mbd instanceof RootBeanDefinition) {
-			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
-			if (SCOPE_PROTOTYPE.equals(rbd.getScope())) {
-				bd = rbd;
-			}
-		}
-		if (bd == null) {
-			bd = new RootBeanDefinition(mbd);
-			bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		}
-		BeanWrapper bw = new BeanWrapperImpl(existingBean);
-		initBeanWrapper(bw);
-		populateBean(beanName, bd, bw);
-		return initializeBean(beanName, existingBean, bd);
-	}
-
 	public Object initializeBean(Object existingBean, String beanName) {
 		return initializeBean(beanName, existingBean, null);
 	}
@@ -343,10 +357,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			result = beanProcessor.postProcessAfterInitialization(result, beanName);
 		}
 		return result;
-	}
-
-	public Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
-		return resolveDependency(descriptor, beanName, null, null);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,15 +102,68 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	int AUTOWIRE_AUTODETECT = 4;
 
 
+	//-------------------------------------------------------------------------
+	// Typical methods for creating and populating external bean instances
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Fully create a new bean instance of the given class.
 	 * <p>Performs full initialization of the bean, including all applicable
 	 * {@link BeanPostProcessor BeanPostProcessors}.
+	 * <p>Note: This is intended for creating a fresh instance, populating annotated
+	 * fields and methods as well as applying all standard bean initialiation callbacks.
+	 * It does <i>not</> imply traditional by-name or by-type autowiring of properties;
+	 * use {@link #createBean(Class, int, boolean)} for that purposes.
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
 	 */
 	Object createBean(Class beanClass) throws BeansException;
+
+	/**
+	 * Populate the given bean instance through applying after-instantiation callbacks
+	 * and bean property post-processing (e.g. for annotation-driven injection).
+	 * <p>Note: This is essentially intended for (re-)populating annotated fields and
+	 * methods, either for new instances or for deserialized instances. It does
+	 * <i>not</> imply traditional by-name or by-type autowiring of properties;
+	 * use {@link #autowireBeanProperties} for that purposes.
+	 * @param existingBean the existing bean instance
+	 * @throws BeansException if wiring failed
+	 */
+	void autowireBean(Object existingBean) throws BeansException;
+
+	/**
+	 * Configure the given raw bean: autowiring bean properties, applying
+	 * bean property values, applying factory callbacks such as <code>setBeanName</code>
+	 * and <code>setBeanFactory</code>, and also applying all bean post processors
+	 * (including ones which might wrap the given raw bean).
+	 * <p>This is effectively a superset of what {@link #initializeBean} provides,
+	 * fully applying the configuration specified by the corresponding bean definition.
+	 * <b>Note: This method requires a bean definition for the given name!</b>
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
+	 * (a bean definition of that name has to be available)
+	 * @return the bean instance to use, either the original or a wrapped one
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if there is no bean definition with the given name
+	 * @throws BeansException if the initialization failed
+	 * @see #initializeBean
+	 */
+	Object configureBean(Object existingBean, String beanName) throws BeansException;
+
+	/**
+	 * Resolve the specified dependency against the beans defined in this factory.
+	 * @param descriptor the descriptor for the dependency
+	 * @param beanName the name of the bean which declares the present dependency
+	 * @return the resolved object, or <code>null</code> if none found
+	 * @throws BeansException in dependency resolution failed
+	 */
+	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
+
+
+	//-------------------------------------------------------------------------
+	// Specialized methods for fine-grained control over the bean lifecycle
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Fully create a new bean instance of the given class with the specified
@@ -130,8 +183,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #AUTOWIRE_CONSTRUCTOR
 	 * @see #AUTOWIRE_AUTODETECT
 	 */
-	Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck)
-			throws BeansException;
+	Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 
 	/**
 	 * Instantiate a new bean instance of the given class with the specified autowire
@@ -159,13 +211,12 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #applyBeanPostProcessorsBeforeInitialization
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
-	Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck)
-			throws BeansException;
+	Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 
 	/**
 	 * Autowire the bean properties of the given bean instance by name or type.
 	 * Can also be invoked with <code>AUTOWIRE_NO</code> in order to just apply
-	 * before-instantiation callbacks (e.g. for annotation-driven injection).
+	 * after-instantiation callbacks (e.g. for annotation-driven injection).
 	 * <p>Does <i>not</i> apply standard {@link BeanPostProcessor BeanPostProcessors}
 	 * callbacks or perform any further initialization of the bean. This interface
 	 * offers distinct, fine-grained operations for those purposes, for example
@@ -208,25 +259,6 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException;
 
 	/**
-	 * Configure the given raw bean: autowiring bean properties, applying
-	 * bean property values, applying factory callbacks such as <code>setBeanName</code>
-	 * and <code>setBeanFactory</code>, and also applying all bean post processors
-	 * (including ones which might wrap the given raw bean).
-	 * <p>This is effectively a superset of what {@link #initializeBean} provides,
-	 * fully applying the configuration specified by the corresponding bean definition.
-	 * <b>Note: This method requires a bean definition for the given name!</b>
-	 * @param existingBean the existing bean instance
-	 * @param beanName the name of the bean, to be passed to it if necessary
-	 * (a bean definition of that name has to be available)
-	 * @return the bean instance to use, either the original or a wrapped one
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean definition with the given name
-	 * @throws BeansException if the initialization failed
-	 * @see #initializeBean
-	 */
-	Object configureBean(Object existingBean, String beanName) throws BeansException;
-
-	/**
 	 * Initialize the given raw bean, applying factory callbacks
 	 * such as <code>setBeanName</code> and <code>setBeanFactory</code>,
 	 * also applying all bean post processors (including ones which
@@ -267,16 +299,6 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 */
 	Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException;
-
-
-	/**
-	 * Resolve the specified dependency against the beans defined in this factory.
-	 * @param descriptor the descriptor for the dependency
-	 * @param beanName the name of the bean which declares the present dependency
-	 * @return the resolved object, or <code>null</code> if none found
-	 * @throws BeansException in dependency resolution failed
-	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
 
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.
