@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Collection;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
 
 /**
@@ -46,56 +45,24 @@ import org.springframework.web.bind.WebDataBinder;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class CheckboxTag extends AbstractCheckedElementTag {
-
-	/**
-	 * The value of the '<code>value</code>' attribute.
-	 */
-	private Object value;
-
-	/**
-	 * The value of the '<code>label</code>' attribute.
-	 */
-	private Object label;
-
-
-	/**
-	 * Set the value of the '<code>value</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setValue(Object value) {
-		Assert.notNull(value, "'value' must not be null");
-		this.value = value;
-	}
-
-	/**
-	 * Get the value of the '<code>value</code>' attribute.
-	 * May be a runtime expression.                                              
-	 */
-	protected Object getValue() {
-		return this.value;
-	}
-
-	/**
-	 * Set the value of the '<code>label</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setLabel(Object label) {
-		this.label = label;
-	}
-
-	/**
-	 * Get the value of the '<code>label</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	protected Object getLabel() {
-		return this.label;
-	}
-
+public class CheckboxTag extends AbstractSingleCheckedElementTag {
 
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
-		tagWriter.startTag("input");
-		writeDefaultAttributes(tagWriter);
+		super.writeTagContent(tagWriter);
+
+		if (!isDisabled()) {
+			// Write out the 'field was present' marker.
+			tagWriter.startTag("input");
+			tagWriter.writeAttribute("type", "hidden");
+			tagWriter.writeAttribute("name", WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName());
+			tagWriter.writeAttribute("value", "on");
+			tagWriter.endTag();
+		}
+
+		return EVAL_PAGE;
+	}
+
+	protected void writeTagDetails(TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("type", "checkbox");
 
 		Object boundValue = getBoundValue();
@@ -118,23 +85,6 @@ public class CheckboxTag extends AbstractCheckedElementTag {
 			Object resolvedValue = (value instanceof String ? evaluate("value", (String) value) : value);
 			renderFromValue(resolvedValue, tagWriter);
 		}
-
-		if (getLabel() != null) {
-			tagWriter.appendValue(getLabel().toString());
-		}
-
-		tagWriter.endTag();
-
-		if (!isDisabled()) {
-			// Write out the 'field was present' marker.
-			tagWriter.startTag("input");
-			tagWriter.writeAttribute("type", "hidden");
-			tagWriter.writeAttribute("name", WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName());
-			tagWriter.writeAttribute("value", "on");
-			tagWriter.endTag();
-		}
-
-		return EVAL_PAGE;
 	}
 
 }

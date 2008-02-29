@@ -80,24 +80,24 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("foo", checkboxElement1.getStringValue());
 		assertEquals("foo", checkboxElement1.attribute("value").getValue());
+		assertEquals("foo", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("bar", checkboxElement2.getStringValue());
 		assertEquals("bar", checkboxElement2.attribute("value").getValue());
+		assertEquals("bar", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("baz", checkboxElement3.getStringValue());
 		assertEquals("baz", checkboxElement3.attribute("value").getValue());
+		assertEquals("baz", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueArrayWithDelimiter() throws Exception {
@@ -121,8 +121,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("foo", checkboxElement1.getStringValue());
 		assertEquals("foo", checkboxElement1.attribute("value").getValue());
+		assertEquals("foo", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element delimiterElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("br", delimiterElement2.getName());
@@ -131,8 +131,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("bar", checkboxElement2.getStringValue());
 		assertEquals("bar", checkboxElement2.attribute("value").getValue());
+		assertEquals("bar", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element delimiterElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("br", delimiterElement3.getName());
@@ -141,8 +141,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("baz", checkboxElement3.getStringValue());
 		assertEquals("baz", checkboxElement3.attribute("value").getValue());
+		assertEquals("baz", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueMap() throws Exception {
@@ -168,24 +168,24 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("FOO", checkboxElement1.getStringValue());
 		assertEquals("foo", checkboxElement1.attribute("value").getValue());
+		assertEquals("FOO", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("BAR", checkboxElement2.getStringValue());
 		assertEquals("bar", checkboxElement2.attribute("value").getValue());
+		assertEquals("BAR", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("BAZ", checkboxElement3.getStringValue());
 		assertEquals("baz", checkboxElement3.attribute("value").getValue());
+		assertEquals("BAZ", spanElement3.getStringValue());
 	}
 
 	public void testWithPetItemsMap() throws Exception {
@@ -212,24 +212,24 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("someSet", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("PET1Label", checkboxElement1.getStringValue());
 		assertEquals("PET1", checkboxElement1.attribute("value").getValue());
+		assertEquals("PET1Label", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("someSet", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("PET2Label", checkboxElement2.getStringValue());
 		assertEquals("PET2", checkboxElement2.attribute("value").getValue());
+		assertEquals("PET2Label", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("someSet", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("PET3Label", checkboxElement3.getStringValue());
 		assertEquals("PET3", checkboxElement3.attribute("value").getValue());
+		assertEquals("PET3Label", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueMapWithDelimiter() throws Exception {
@@ -252,32 +252,29 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
-		assertEquals("", spanElement1.getText());
 		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
 		assertEquals("input", checkboxElement1.getName());
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("FOO", checkboxElement1.getStringValue());
 		assertEquals("foo", checkboxElement1.attribute("value").getValue());
+		assertEquals("FOO", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
-		assertEquals(delimiter, spanElement2.getText());
 		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("BAR", checkboxElement2.getStringValue());
 		assertEquals("bar", checkboxElement2.attribute("value").getValue());
+		assertEquals(delimiter + "BAR", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
-		assertEquals(delimiter, spanElement3.getText());
 		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("BAZ", checkboxElement3.getStringValue());
 		assertEquals("baz", checkboxElement3.attribute("value").getValue());
+		assertEquals(delimiter + "BAZ", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueWithEditor() throws Exception {
@@ -391,45 +388,44 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("pets", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("RUDIGER", checkboxElement1.getStringValue());
 		assertEquals("Rudiger", checkboxElement1.attribute("value").getValue());
+		assertEquals("RUDIGER", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("pets", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("SPOT", checkboxElement2.getStringValue());
 		assertEquals("Spot", checkboxElement2.attribute("value").getValue());
+		assertEquals("SPOT", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("pets", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("CHECKERS", checkboxElement3.getStringValue());
 		assertEquals("Checkers", checkboxElement3.attribute("value").getValue());
+		assertEquals("CHECKERS", spanElement3.getStringValue());
 		Element spanElement4 = (Element) document.getRootElement().elements().get(3);
 		Element checkboxElement4 = (Element) spanElement4.elements().get(0);
 		assertEquals("input", checkboxElement4.getName());
 		assertEquals("checkbox", checkboxElement4.attribute("type").getValue());
 		assertEquals("pets", checkboxElement4.attribute("name").getValue());
 		assertEquals("checked", checkboxElement4.attribute("checked").getValue());
-		assertEquals("FLUFFY", checkboxElement4.getStringValue());
 		assertEquals("Fluffy", checkboxElement4.attribute("value").getValue());
+		assertEquals("FLUFFY", spanElement4.getStringValue());
 		Element spanElement5 = (Element) document.getRootElement().elements().get(4);
 		Element checkboxElement5 = (Element) spanElement5.elements().get(0);
 		assertEquals("input", checkboxElement5.getName());
 		assertEquals("checkbox", checkboxElement5.attribute("type").getValue());
 		assertEquals("pets", checkboxElement5.attribute("name").getValue());
 		assertEquals("checked", checkboxElement5.attribute("checked").getValue());
-		assertEquals("MUFTY", checkboxElement5.getStringValue());
 		assertEquals("Mufty", checkboxElement5.attribute("value").getValue());
+		assertEquals("MUFTY", spanElement5.getStringValue());
 	}
 
 	/**
 	 * Test case where items toString() doesn't fit the item ID
-	 * @throws Exception
 	 */
 	public void testCollectionOfItemPets() throws Exception {
 		this.tag.setPath("someSet");
@@ -458,8 +454,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("someSet", checkboxElement1.attribute("name").getValue());
 		assertNotNull("should be checked", checkboxElement1.attribute("checked"));
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("PET1", checkboxElement1.getStringValue());
 		assertEquals("PET1", checkboxElement1.attribute("value").getValue());
+		assertEquals("PET1", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
@@ -467,16 +463,16 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("someSet", checkboxElement2.attribute("name").getValue());
 		assertNotNull("should be checked", checkboxElement2.attribute("checked"));
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("PET2", checkboxElement2.getStringValue());
 		assertEquals("PET2", checkboxElement2.attribute("value").getValue());
+		assertEquals("PET2", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("someSet", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("PET3", checkboxElement3.getStringValue());
 		assertEquals("PET3", checkboxElement3.attribute("value").getValue());
+		assertEquals("PET3", spanElement3.getStringValue());
 	}
 
 	public void testCollectionOfPetsWithEditor() throws Exception {
@@ -489,6 +485,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		allPets.add(new ItemPet("Mufty"));
 		this.tag.setItems(allPets);
 		this.tag.setItemLabel("label");
+		this.tag.setId("myId");
 
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
 		PropertyEditorSupport editor = new ItemPet.CustomEditor();
@@ -511,40 +508,40 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("pets", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
-		assertEquals("RUDIGER", checkboxElement1.getStringValue());
 		assertEquals("Rudiger", checkboxElement1.attribute("value").getValue());
+		assertEquals("RUDIGER", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("pets", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
-		assertEquals("SPOT", checkboxElement2.getStringValue());
 		assertEquals("Spot", checkboxElement2.attribute("value").getValue());
+		assertEquals("SPOT", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("pets", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
-		assertEquals("CHECKERS", checkboxElement3.getStringValue());
 		assertEquals("Checkers", checkboxElement3.attribute("value").getValue());
+		assertEquals("CHECKERS", spanElement3.getStringValue());
 		Element spanElement4 = (Element) document.getRootElement().elements().get(3);
 		Element checkboxElement4 = (Element) spanElement4.elements().get(0);
 		assertEquals("input", checkboxElement4.getName());
 		assertEquals("checkbox", checkboxElement4.attribute("type").getValue());
 		assertEquals("pets", checkboxElement4.attribute("name").getValue());
 		assertEquals("checked", checkboxElement4.attribute("checked").getValue());
-		assertEquals("FLUFFY", checkboxElement4.getStringValue());
 		assertEquals("Fluffy", checkboxElement4.attribute("value").getValue());
+		assertEquals("FLUFFY", spanElement4.getStringValue());
 		Element spanElement5 = (Element) document.getRootElement().elements().get(4);
 		Element checkboxElement5 = (Element) spanElement5.elements().get(0);
 		assertEquals("input", checkboxElement5.getName());
 		assertEquals("checkbox", checkboxElement5.attribute("type").getValue());
 		assertEquals("pets", checkboxElement5.attribute("name").getValue());
 		assertEquals("checked", checkboxElement5.attribute("checked").getValue());
-		assertEquals("MUFTY", checkboxElement5.getStringValue());
 		assertEquals("Mufty", checkboxElement5.attribute("value").getValue());
+		assertEquals("MUFTY", spanElement5.getStringValue());
 	}
 
 	public void testWithNullValue() throws Exception {
@@ -553,7 +550,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 			this.tag.doStartTag();
 			fail("Should not be able to render with a null value when binding to a non-boolean.");
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ex) {
 			// success
 		}
 	}

@@ -77,24 +77,24 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("radio", radioButtonElement1.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement1.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement1.attribute("checked").getValue());
-		assertEquals("foo", radioButtonElement1.getStringValue());
 		assertEquals("foo", radioButtonElement1.attribute("value").getValue());
+		assertEquals("foo", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element radioButtonElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", radioButtonElement2.getName());
 		assertEquals("radio", radioButtonElement2.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement2.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement2.attribute("checked").getValue());
-		assertEquals("bar", radioButtonElement2.getStringValue());
 		assertEquals("bar", radioButtonElement2.attribute("value").getValue());
+		assertEquals("bar", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element radioButtonElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", radioButtonElement3.getName());
 		assertEquals("radio", radioButtonElement3.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement3.attribute("name").getValue());
 		assertNull("not checked", radioButtonElement3.attribute("checked"));
-		assertEquals("baz", radioButtonElement3.getStringValue());
 		assertEquals("baz", radioButtonElement3.attribute("value").getValue());
+		assertEquals("baz", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueArrayWithDelimiter() throws Exception {
@@ -118,8 +118,8 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("radio", radioButtonElement1.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement1.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement1.attribute("checked").getValue());
-		assertEquals("foo", radioButtonElement1.getStringValue());
 		assertEquals("foo", radioButtonElement1.attribute("value").getValue());
+		assertEquals("foo", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element delimiterElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("br", delimiterElement2.getName());
@@ -128,8 +128,8 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("radio", radioButtonElement2.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement2.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement2.attribute("checked").getValue());
-		assertEquals("bar", radioButtonElement2.getStringValue());
 		assertEquals("bar", radioButtonElement2.attribute("value").getValue());
+		assertEquals("bar", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element delimiterElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("br", delimiterElement3.getName());
@@ -138,8 +138,8 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("radio", radioButtonElement3.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement3.attribute("name").getValue());
 		assertNull("not checked", radioButtonElement3.attribute("checked"));
-		assertEquals("baz", radioButtonElement3.getStringValue());
 		assertEquals("baz", radioButtonElement3.attribute("value").getValue());
+		assertEquals("baz", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueMap() throws Exception {
@@ -165,24 +165,24 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("radio", radioButtonElement1.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement1.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement1.attribute("checked").getValue());
-		assertEquals("FOO", radioButtonElement1.getStringValue());
 		assertEquals("foo", radioButtonElement1.attribute("value").getValue());
+		assertEquals("FOO", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element radioButtonElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", radioButtonElement2.getName());
 		assertEquals("radio", radioButtonElement2.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement2.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement2.attribute("checked").getValue());
-		assertEquals("BAR", radioButtonElement2.getStringValue());
 		assertEquals("bar", radioButtonElement2.attribute("value").getValue());
+		assertEquals("BAR", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element radioButtonElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", radioButtonElement3.getName());
 		assertEquals("radio", radioButtonElement3.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement3.attribute("name").getValue());
 		assertNull("not checked", radioButtonElement3.attribute("checked"));
-		assertEquals("BAZ", radioButtonElement3.getStringValue());
 		assertEquals("baz", radioButtonElement3.attribute("value").getValue());
+		assertEquals("BAZ", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueMapWithDelimiter() throws Exception {
@@ -205,32 +205,29 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
-		assertEquals("", spanElement1.getText());
 		Element radioButtonElement1 = (Element) spanElement1.elements().get(0);
 		assertEquals("input", radioButtonElement1.getName());
 		assertEquals("radio", radioButtonElement1.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement1.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement1.attribute("checked").getValue());
-		assertEquals("FOO", radioButtonElement1.getStringValue());
 		assertEquals("foo", radioButtonElement1.attribute("value").getValue());
+		assertEquals("FOO", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
-		assertEquals(delimiter, spanElement2.getText());
 		Element radioButtonElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", radioButtonElement2.getName());
 		assertEquals("radio", radioButtonElement2.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement2.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement2.attribute("checked").getValue());
-		assertEquals("BAR", radioButtonElement2.getStringValue());
 		assertEquals("bar", radioButtonElement2.attribute("value").getValue());
+		assertEquals(delimiter + "BAR", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
-		assertEquals(delimiter, spanElement3.getText());
 		Element radioButtonElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", radioButtonElement3.getName());
 		assertEquals("radio", radioButtonElement3.attribute("type").getValue());
 		assertEquals("stringArray", radioButtonElement3.attribute("name").getValue());
 		assertNull("not checked", radioButtonElement3.attribute("checked"));
-		assertEquals("BAZ", radioButtonElement3.getStringValue());
 		assertEquals("baz", radioButtonElement3.attribute("value").getValue());
+		assertEquals(delimiter + "BAZ", spanElement3.getStringValue());
 	}
 
 	public void testWithMultiValueWithEditor() throws Exception {
@@ -303,40 +300,40 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("radio", radioButtonElement1.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement1.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement1.attribute("checked").getValue());
-		assertEquals("RUDIGER", radioButtonElement1.getStringValue());
 		assertEquals("Rudiger", radioButtonElement1.attribute("value").getValue());
+		assertEquals("RUDIGER", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element radioButtonElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", radioButtonElement2.getName());
 		assertEquals("radio", radioButtonElement2.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement2.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement2.attribute("checked").getValue());
-		assertEquals("SPOT", radioButtonElement2.getStringValue());
 		assertEquals("Spot", radioButtonElement2.attribute("value").getValue());
+		assertEquals("SPOT", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element radioButtonElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", radioButtonElement3.getName());
 		assertEquals("radio", radioButtonElement3.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement3.attribute("name").getValue());
 		assertNull("not checked", radioButtonElement3.attribute("checked"));
-		assertEquals("CHECKERS", radioButtonElement3.getStringValue());
 		assertEquals("Checkers", radioButtonElement3.attribute("value").getValue());
+		assertEquals("CHECKERS", spanElement3.getStringValue());
 		Element spanElement4 = (Element) document.getRootElement().elements().get(3);
 		Element radioButtonElement4 = (Element) spanElement4.elements().get(0);
 		assertEquals("input", radioButtonElement4.getName());
 		assertEquals("radio", radioButtonElement4.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement4.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement4.attribute("checked").getValue());
-		assertEquals("FLUFFY", radioButtonElement4.getStringValue());
 		assertEquals("Fluffy", radioButtonElement4.attribute("value").getValue());
+		assertEquals("FLUFFY", spanElement4.getStringValue());
 		Element spanElement5 = (Element) document.getRootElement().elements().get(4);
 		Element radioButtonElement5 = (Element) spanElement5.elements().get(0);
 		assertEquals("input", radioButtonElement5.getName());
 		assertEquals("radio", radioButtonElement5.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement5.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement5.attribute("checked").getValue());
-		assertEquals("MUFTY", radioButtonElement5.getStringValue());
 		assertEquals("Mufty", radioButtonElement5.attribute("value").getValue());
+		assertEquals("MUFTY", spanElement5.getStringValue());
 	}
 
 	public void testCollectionOfPetsWithEditor() throws Exception {
@@ -349,6 +346,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		allPets.add(new ItemPet("Mufty"));
 		this.tag.setItems(allPets);
 		this.tag.setItemLabel("label");
+		this.tag.setId("myId");
 
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
 		PropertyEditorSupport editor = new ItemPet.CustomEditor();
@@ -371,40 +369,40 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("radio", radioButtonElement1.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement1.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement1.attribute("checked").getValue());
-		assertEquals("RUDIGER", radioButtonElement1.getStringValue());
 		assertEquals("Rudiger", radioButtonElement1.attribute("value").getValue());
+		assertEquals("RUDIGER", spanElement1.getStringValue());
 		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
 		Element radioButtonElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", radioButtonElement2.getName());
 		assertEquals("radio", radioButtonElement2.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement2.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement2.attribute("checked").getValue());
-		assertEquals("SPOT", radioButtonElement2.getStringValue());
 		assertEquals("Spot", radioButtonElement2.attribute("value").getValue());
+		assertEquals("SPOT", spanElement2.getStringValue());
 		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
 		Element radioButtonElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", radioButtonElement3.getName());
 		assertEquals("radio", radioButtonElement3.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement3.attribute("name").getValue());
 		assertNull("not checked", radioButtonElement3.attribute("checked"));
-		assertEquals("CHECKERS", radioButtonElement3.getStringValue());
 		assertEquals("Checkers", radioButtonElement3.attribute("value").getValue());
+		assertEquals("CHECKERS", spanElement3.getStringValue());
 		Element spanElement4 = (Element) document.getRootElement().elements().get(3);
 		Element radioButtonElement4 = (Element) spanElement4.elements().get(0);
 		assertEquals("input", radioButtonElement4.getName());
 		assertEquals("radio", radioButtonElement4.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement4.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement4.attribute("checked").getValue());
-		assertEquals("FLUFFY", radioButtonElement4.getStringValue());
 		assertEquals("Fluffy", radioButtonElement4.attribute("value").getValue());
+		assertEquals("FLUFFY", spanElement4.getStringValue());
 		Element spanElement5 = (Element) document.getRootElement().elements().get(4);
 		Element radioButtonElement5 = (Element) spanElement5.elements().get(0);
 		assertEquals("input", radioButtonElement5.getName());
 		assertEquals("radio", radioButtonElement5.attribute("type").getValue());
 		assertEquals("pets", radioButtonElement5.attribute("name").getValue());
 		assertEquals("checked", radioButtonElement5.attribute("checked").getValue());
-		assertEquals("MUFTY", radioButtonElement5.getStringValue());
 		assertEquals("Mufty", radioButtonElement5.attribute("value").getValue());
+		assertEquals("MUFTY", spanElement5.getStringValue());
 	}
 
 	public void testWithNullValue() throws Exception {
@@ -413,7 +411,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 			this.tag.doStartTag();
 			fail("Should not be able to render with a null value when binding to a non-boolean.");
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ex) {
 			// success
 		}
 	}

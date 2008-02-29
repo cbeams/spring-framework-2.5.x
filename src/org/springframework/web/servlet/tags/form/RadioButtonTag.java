@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,70 +32,12 @@ import javax.servlet.jsp.JspException;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class RadioButtonTag extends AbstractCheckedElementTag {
+public class RadioButtonTag extends AbstractSingleCheckedElementTag {
 
-	/**
-	 * The value of the '<code>value</code>' attribute.
-	 */
-	private Object value;
-
-	/**
-	 * The value of the '<code>label</code>' attribute.
-	 */
-	private Object label;
-
-
-	/**
-	 * Set the value of the '<code>value</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setValue(Object value) {
-		this.value = value;
-	}
-
-	/**
-	 * Get the value of the '<code>value</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	protected Object getValue() {
-		return this.value;
-	}
-
-	/**
-	 * Set the value of the '<code>label</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setLabel(Object label) {
-		this.label = label;
-	}
-
-	/**
-	 * Get the value of the '<code>label</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	protected Object getLabel() {
-		return this.label;
-	}
-
-
-	/**
-	 * Renders the '<code>input(radio)</code>' element with the configured
-	 * {@link #setValue(Object) value}. Marks the element as checked if the
-	 * value matches the {@link #getValue bound value}.
-	 */
-	protected int writeTagContent(TagWriter tagWriter) throws JspException {
-		tagWriter.startTag("input");
-		writeDefaultAttributes(tagWriter);
+	protected void writeTagDetails(TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("type", "radio");
-
 		Object resolvedValue = evaluate("value", getValue());
 		renderFromValue(resolvedValue, tagWriter);
-
-		if (getLabel() != null) {
-			tagWriter.appendValue(getLabel().toString());
-		}
-		tagWriter.endTag();
-		return EVAL_PAGE;
 	}
 
 }

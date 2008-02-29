@@ -23,7 +23,6 @@ import javax.servlet.jsp.PageContext;
 
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.EditorAwareTag;
@@ -42,11 +41,6 @@ import org.springframework.web.servlet.tags.NestedPathTag;
  * @since 2.0
  */
 public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag implements EditorAwareTag {
-
-	/**
-	 * The '<code>id</code>' attribute of the rendered HTML tag.
-	 */
-	private static final String ID_ATTRIBUTE = "id";
 
 	/**
 	 * Name of the exposed path variable within the scope of this tag: "nestedPath".
@@ -98,7 +92,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Set the value of the '<code>id</code>' attribute.
-	 * <p>Defaults to the value of {@link #getName}; may be a runtime expression.
+	 * <p>May be a runtime expression; defaults to the value of {@link #getName}.
 	 * Note that the default value may not be valid for certain tags.
 	 */
 	public void setId(String id) {
@@ -107,7 +101,6 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Get the value of the '<code>id</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	public String getId() {
 		return this.id;
@@ -124,14 +117,22 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * @param tagWriter the {@link TagWriter} to which any attributes are to be written
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
-		String id = getId();
-		if (StringUtils.hasText(id)) {
-			tagWriter.writeAttribute(ID_ATTRIBUTE, ObjectUtils.getDisplayString(evaluate(ID_ATTRIBUTE, id)));
-		}
-		else {
-			writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, autogenerateId());
-		}
+		writeOptionalAttribute(tagWriter, "id", resolveId());
 		writeOptionalAttribute(tagWriter, "name", getName());
+	}
+
+	/**
+	 * Determine the '<code>id</code>' attribute value for this tag,
+	 * autogenerating one if none specified.
+	 * @see #getId()
+	 * @see #autogenerateId()
+	 */
+	protected String resolveId() throws JspException {
+		Object id = evaluate("id", getId());
+		if (id == null || !StringUtils.hasText(id.toString())) {
+			id = autogenerateId();
+		}
+		return id.toString();
 	}
 
 	/**
