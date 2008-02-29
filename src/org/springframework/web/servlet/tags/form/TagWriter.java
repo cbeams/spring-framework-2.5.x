@@ -28,9 +28,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * Utility class for writing HTML content to a {@link Writer} instance.
- * 
+ *
  * <p>Intended to support output from JSP tag libraries.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -48,10 +48,9 @@ public class TagWriter {
 	private final Stack tagState = new Stack();
 
 
-
 	/**
 	 * Create a new instance of the {@link TagWriter} class that writes to
-	 * the supplied {@link Writer}.
+	 * the supplied {@link PageContext}.
 	 * @param pageContext the JSP PageContext to obtain the {@link Writer} from
 	 */
 	public TagWriter(PageContext pageContext) {
