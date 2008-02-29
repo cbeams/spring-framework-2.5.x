@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Default implementation of the {@link NamespaceHandler} interface.
+ * Default implementation of the {@link NamespaceHandlerResolver} interface.
  * Resolves namespace URIs to implementation classes based on the mappings
  * contained in mapping file.
  *
@@ -71,12 +71,11 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 		this(null, DEFAULT_HANDLER_MAPPINGS_LOCATION);
 	}
 
-
 	/**
 	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
 	 * default mapping file location.
-	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources (may be <code>null</code>, in
-	 * which case the thread context ClassLoader will be used) 
+	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources
+	 * (may be <code>null</code>, in which case the thread context ClassLoader will be used)
 	 * @see #DEFAULT_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader) {
@@ -86,8 +85,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/**
 	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
 	 * supplied mapping file location.
-	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources (may be <code>null</code>, in
-	 * which case the thread context ClassLoader will be used)
+	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources
+	 * may be <code>null</code>, in which case the thread context ClassLoader will be used)
 	 * @param handlerMappingsLocation the mapping file location
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader, String handlerMappingsLocation) {
