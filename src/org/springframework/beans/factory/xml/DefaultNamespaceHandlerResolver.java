@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Default implementation of the {@link NamespaceHandler} interface.
+ * Default implementation of the {@link NamespaceHandlerResolver} interface.
  * Resolves namespace URIs to implementation classes based on the mappings
  * contained in mapping file.
  *
@@ -155,9 +155,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				this.handlerMappings = new HashMap(mappings);
 			}
 			catch (IOException ex) {
-				throw new IllegalStateException(
-						"Unable to load NamespaceHandler mappings from location [" +
-						handlerMappingsLocation + "]. Root cause: " + ex);
+				IllegalStateException ise = new IllegalStateException(
+						"Unable to load NamespaceHandler mappings from location [" + this.handlerMappingsLocation + "]");
+				ise.initCause(ex);
+				throw ise;
 			}
 		}
 		return this.handlerMappings;
