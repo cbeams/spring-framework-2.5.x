@@ -6,7 +6,7 @@
     <portlet:param name="action" value="add"/>
 </portlet:actionURL>
                             
-<form:form commandName="site" method="post" action="${formAction}">
+<form:form modelAttribute="site" method="post" action="${formAction}">
     <form:errors path="*" cssStyle="color:red"/>
     <table>
 	    <tr>

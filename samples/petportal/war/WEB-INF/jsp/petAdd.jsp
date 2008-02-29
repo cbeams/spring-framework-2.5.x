@@ -34,7 +34,7 @@
     <portlet:param name="_page"><jsp:attribute name="value"><c:out value="${page}"/></jsp:attribute></portlet:param>
 </portlet:actionURL>
 
-<form:form commandName="pet" method="post" action="${formAction}">
+<form:form modelAttribute="pet" method="post" action="${formAction}">
 
     <form:errors path="*" cssStyle="color:red"/>
 	
