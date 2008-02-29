@@ -8,7 +8,7 @@ Changes in version 2.5.2 (2008-02-29)
 
 General
 * various reference documentation revisions (e.g. updated transaction management chapter)
-* fixed showcases build scripts to correctly refer to revised frameworks jars and updated third-party libraries
+* removed outdated showcases sample applications from Spring distribution
 * spring-context.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
 
 Package org.springframework.aop
