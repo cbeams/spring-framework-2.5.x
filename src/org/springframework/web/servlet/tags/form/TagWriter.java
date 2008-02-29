@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,9 +200,9 @@ public class TagWriter {
 
 
 	/**
-	 * Holds state about a tag and its rendered behaviour.
+	 * Holds state about a tag and its rendered behavior.
 	 */
-	private static final class TagStateEntry {
+	private static class TagStateEntry {
 
 		private final String tagName;
 
