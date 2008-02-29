@@ -554,12 +554,12 @@
         the last non-wildcard segment and obtains a URL from it. If this URL
         is not a "jar:" URL or container-specific variant (e.g.
         "<literal>zip:</literal>" in WebLogic, "<literal>wsjar</literal>" in
-        WebSphere, etc.), then a <methodname>java.io.File</methodname> is
-        obtained from it, and used to resolve the wildcard by walking the
+        WebSphere, etc.), then a <classname>java.io.File</classname> is
+        obtained from it and used to resolve the wildcard by traversing the
         filesystem. In the case of a jar URL, the resolver either gets a
-        <classname>java.net.JarURLConnection</classname> from it, or manually
-        parse the jar URL, and then traverse the contents of the jar file, to
-        resolve the wildcards.</para>
+        <classname>java.net.JarURLConnection</classname> from it or manually
+        parses the jar URL and then traverses the contents of the jar file
+        to resolve the wildcards.</para>
 
         <section id="resources-app-ctx-portability">
           <title>Implications on portability</title>
