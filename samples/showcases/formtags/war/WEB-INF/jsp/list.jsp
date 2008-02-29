@@ -1,7 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c"      uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt"    uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
     <title>Spring 2.0 form tag showcase application</title>
@@ -17,24 +19,19 @@
   <div id="main">
 
     <div id="topmenu">
-      <a href="http://www.interface21.com/">Interface21</a><a href="http://www.springframework.org/">Spring home</a><a href="http://forum.springframework.org/">Spring forum</a><a href="http://www.infoq.com/">Infoq.com</a>
+      <a href="http://www.springsource.com/">SpringSource</a><a href="http://www.springframework.org/">Spring home</a><a href="http://forum.springframework.org/">Spring forum</a><a href="http://www.infoq.com/">Infoq.com</a>
     </div>
 
     <div id="header">
       <span class="title">Spring<span class="darktitle">2.0</span> form tags</span><br/>
     </div>
 
-
     <div id="content">
        <div id="block">
            <p>Welcome to this Spring 2.0 showcase application that demonstrates
            the use of new JSP tags for creating form elements.</p>
-
            <p>Choose an apprentice magician on the left-hand side to continue.</p>
-
-
       </div>
-
     </div>
 
   <div class="lefty">
@@ -50,7 +47,7 @@
     </div>
   </div>
 
-</div>
+	</div>
 
 </body>
 </html>
