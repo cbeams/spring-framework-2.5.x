@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,13 @@ import java.util.TreeSet;
  *
  * <p>Mainly for internal use within the framework; consider
  * <a href="http://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
- * for a more comprehensive suite of
- * {@link org.apache.commons.lang.StringUtils String utilities}.
+ * for a more comprehensive suite of String utilities.
  *
  * <p>This class delivers some simple functionality that should really
  * be provided by the core Java <code>String</code> and {@link StringBuffer}
  * classes, such as the ability to {@link #replace} all occurrences of a given
- * substring in a target string. It also provides easy-to-use methods to
- * convert between delimited strings, such as CSV strings, and collections and
- * arrays.
+ * substring in a target string. It also provides easy-to-use methods to convert
+ * between delimited strings, such as CSV strings, and collections and arrays.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -51,6 +49,7 @@ import java.util.TreeSet;
  * @author Rob Harrop
  * @author Rick Evans
  * @since 16 April 2001
+ * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
 
