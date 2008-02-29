@@ -1643,7 +1643,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		ds.setTargetDataSource(dsTarget);
 		ds.setDefaultAutoCommit(true);
 		ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-		
+		//ds.setDefaultTransactionIsolationName("TRANSACTION_READ_COMMITTED");
+
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setDataSource(ds);
 		Properties props = new Properties();
