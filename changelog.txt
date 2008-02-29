@@ -3,14 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.2 (2008-02-28)
+Changes in version 2.5.2 (2008-02-29)
 -------------------------------------
 
 General
-* various documentation fixes
-* updated transaction management chapter in the reference documentation
-* spring-context.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
+* various reference documentation revisions (e.g. updated transaction management chapter)
 * fixed showcases build scripts to correctly refer to revised frameworks jars and updated third-party libraries
+* spring-context.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
 
 Package org.springframework.aop
 * AbstractRegexpMethodPointcut matches against target class as well, not just against method's declaring class
@@ -108,6 +107,7 @@ Package org.springframework.jca
 
 Package org.springframework.jdbc
 * DriverManagerDataSource's "driverClassName" throws IllegalStateException instead of CannotGetJdbcConnectionException
+* added "defaultTransactionIsolationName" property to LazyConnectionDataSourceProxy
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
 * SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
