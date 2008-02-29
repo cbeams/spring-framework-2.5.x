@@ -38,6 +38,7 @@ Package org.springframework.beans
 * factored out AliasRegistry/SimpleAliasRegistry from BeanDefinitionRegistry/AbstractBeanFactory
 * introduced SimpleBeanDefinitionRegistry implementation for bean definition reader testing
 * "registerAlias" allows for overriding as long as bean definition overriding is allowed
+* added convenient "autowireBean(Object existingBean)" method to AutowireCapableBeanFactory
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory applies specified TypeConverter to bean references as well (not just to literals)
 * AbstractAutowireCapableBeanFactory resolves the target type for a generically typed dependency (method parameter)
@@ -72,6 +73,7 @@ Package org.springframework.context
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext allow for bean-style configuration
 * StaticApplicationContext builds GenericBeanDefinitions by default (instead of RootBeanDefinitions)
 * added "initApplicationContext(ApplicationContext)" template method to ApplicationObjectSupport
+* ClassPathBeanDefinitionScanner detects scoped-proxy bean definitions as compatible (in case of duplicate scanning)
 * refactored ClassPathBeanDefinitionScanner into various template methods (for easier overriding)
 * refactored ComponentScanBeanDefinitionParser into various template methods (for easier overriding)
 * ComponentScanBeanDefinitionParser includes annotation config processors in nested composite component
@@ -93,6 +95,7 @@ Package org.springframework.dao
 
 Package org.springframework.ejb
 * Local/SimpleRemoteSlsbInvokerInterceptor use EJB(Local)Home for EJB 2.x detection, for WebSphere compatibility
+* SimpleRemoteSlsbInvokerInterceptor properly detects CORBA connect failures on the IBM JVM (for WebSphere EJB access)
 
 Package org.springframework.instrument
 * added public "isInstrumentationAvailable()" method to InstrumentationLoadTimeWeaver, avoiding direct access to agent
@@ -162,6 +165,7 @@ Package org.springframework.orm
 
 Package org.springframework.remoting
 * factored out RemotingSupport base class from RemoteAccessor and RemoteExporter
+* (Jndi)RmiClientInterceptor properly detects CORBA connect failures on the IBM JVM
 * HessianClientInterceptor and BurlapClientInterceptor expose the bean ClassLoader as thread context CL (if necessary)
 * added overloaded "executeRequest" method with original MethodInvocation argument to HttpInvokerClientInterceptor
 * added "hostname" bean property to SimpleHttpServerFactoryBean, for a specific network address to bind to
@@ -223,8 +227,9 @@ Package org.springframework.web
 * JstlView exposes a JSTL-aware MessageSource even for a custom MessageSource passed in through the constructor
 * re-added AbstractDataBoundFormElementTag's COMMAND_NAME_VARIABLE_NAME in deprecated form (Spring 2.0.x compatibility)
 * made FormTag's MODEL_ATTRIBUTE_VARIABLE_NAME public (as replacement of COMMAND_NAME_VARIABLE_NAME)
-* JSP OptionsTag and SelectTag compare raw Map key for selection check as well
+* JSP Checkbox(es)Tag and RadioButton(s)Tag render label as HTML label element after input element (for HTML compliance)
 * JSP CheckboxesTag and RadioButtonsTag compare raw item / raw Map key for selection check as well
+* JSP SelectTag and OptionsTag compare raw Map key for selection check as well
 
 
 Changes in version 2.5.1 (2008-01-09)
