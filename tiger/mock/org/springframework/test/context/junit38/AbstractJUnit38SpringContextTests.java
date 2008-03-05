@@ -176,14 +176,14 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * <li>Provides support for {@link Timed @Timed}.</li>
 	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
 	 * </ul>
-	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource, Method)
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment
 	 */
 	@Override
 	public void runBare() throws Throwable {
 		this.testContextManager.prepareTestInstance(this);
 		final Method testMethod = getTestMethod();
 
-		if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource, testMethod)) {
+		if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource, testMethod, getClass())) {
 			recordDisabled(testMethod);
 			return;
 		}

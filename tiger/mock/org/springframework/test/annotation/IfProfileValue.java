@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,41 +72,30 @@ import java.lang.annotation.Target;
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  */
-@Target( { ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface IfProfileValue {
 
 	/**
-	 * <p>
-	 * The <code>name</code> of the <em>profile value</em> against which to
-	 * test.
-	 * </p>
+	 * The <code>name</code> of the <em>profile value</em> against which to test.
 	 */
 	String name();
 
 	/**
-	 * <p>
 	 * A single, permissible <code>value</code> of the <em>profile value</em>
 	 * for the given {@link #name() name}.
-	 * </p>
-	 * <p>
-	 * Note: assigning values to both {@link #value()} and {@link #values()}
+	 * <p>Note: Assigning values to both {@link #value()} and {@link #values()}
 	 * will lead to a configuration conflict.
-	 * </p>
 	 */
 	String value() default "";
 
 	/**
-	 * <p>
 	 * A list of all permissible <code>values</code> of the
 	 * <em>profile value</em> for the given {@link #name() name}.
-	 * </p>
-	 * <p>
-	 * Note: assigning values to both {@link #value()} and {@link #values()}
+	 * <p>Note: Assigning values to both {@link #value()} and {@link #values()}
 	 * will lead to a configuration conflict.
-	 * </p>
 	 */
 	String[] values() default {};
 

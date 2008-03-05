@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,9 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 
 /**
- * <p>
  * Verifies proper handling of {@link IfProfileValue @IfProfileValue} and
  * {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration} in
  * conjunction with {@link AbstractAnnotationAwareTransactionalTests}.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -32,24 +30,19 @@ import junit.framework.TestResult;
 public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 
 	private static final String NAME = "ProfileValueAnnotationAwareTransactionalTests.profile_value.name";
+
 	private static final String VALUE = "enigma";
 
 
-	public ProfileValueAnnotationAwareTransactionalTests() throws Exception {
-		this(null);
-	}
-
-	public ProfileValueAnnotationAwareTransactionalTests(final String name) throws Exception {
-		super(name);
-		// Set system property for DefaultProfileValueSourceTestCase.
+	public ProfileValueAnnotationAwareTransactionalTests() {
 		System.setProperty(NAME, VALUE);
 	}
 
-	private void runTestAndAssertCounters(final Class<? extends DefaultProfileValueSourceTestCase> testCaseType,
-			final String testName, final int expectedInvocationCount, final int expectedErrorCount,
-			final int expectedFailureCount) throws Exception {
+	private void runTestAndAssertCounters(Class<? extends DefaultProfileValueSourceTestCase> testCaseType,
+			String testName, int expectedInvocationCount, int expectedErrorCount, int expectedFailureCount)
+			throws Exception {
 
-		final DefaultProfileValueSourceTestCase testCase = testCaseType.newInstance();
+		DefaultProfileValueSourceTestCase testCase = testCaseType.newInstance();
 		testCase.setName(testName);
 		TestResult testResult = testCase.run();
 		assertEquals("Verifying number of invocations for test method [" + testName + "].", expectedInvocationCount,
@@ -60,8 +53,8 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 				testResult.failureCount());
 	}
 
-	private void runTests(final Class<? extends DefaultProfileValueSourceTestCase> testCaseType) throws Exception {
-		runTestAndAssertCounters(testCaseType, "testIfProfileValueEmpty", 0, 1, 0);
+	private void runTests(Class<? extends DefaultProfileValueSourceTestCase> testCaseType) throws Exception {
+		runTestAndAssertCounters(testCaseType, "testIfProfileValueEmpty", 0, 0, 0);
 		runTestAndAssertCounters(testCaseType, "testIfProfileValueDisabledViaWrongName", 0, 0, 0);
 		runTestAndAssertCounters(testCaseType, "testIfProfileValueDisabledViaWrongValue", 0, 0, 0);
 		runTestAndAssertCounters(testCaseType, "testIfProfileValueEnabledViaSingleValue", 1, 0, 0);
@@ -86,7 +79,6 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 
 		int invocationCount = 0;
 
-
 		public DefaultProfileValueSourceTestCase() {
 		}
 
@@ -100,10 +92,10 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 		}
 
 		@NotTransactional
-		@IfProfileValue(name = NAME, value = "")
+		@IfProfileValue(name = NAME)
 		public void testIfProfileValueEmpty() {
 			this.invocationCount++;
-			fail("An empty profile value should throw an IllegalArgumentException.");
+			fail("The body of a disabled test should never be executed!");
 		}
 
 		@NotTransactional
@@ -138,14 +130,17 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 		}
 	}
 
+
 	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
 	protected static class HardCodedProfileValueSourceTestCase extends DefaultProfileValueSourceTestCase {
 	}
 
+
 	public static class HardCodedProfileValueSource implements ProfileValueSource {
 
-		public String get(final String key) {
+		public String get(String key) {
 			return (key.equals(NAME) ? VALUE : null);
 		}
 	}
+
 }

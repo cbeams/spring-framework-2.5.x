@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,9 @@ public interface ProfileValueSource {
 
 	/**
 	 * Get the <em>profile value</em> indicated by the specified key.
-	 *
-	 * @param key The name of the <em>profile value</em>.
-	 * @return The string value of the <em>profile value</em>, or
-	 *         <code>null</code> if there is no <em>profile value</em> with
-	 *         that key
-	 * @throws IllegalArgumentException if <code>key</code> is
-	 *         <code>null</code> or empty
+	 * @param key the name of the <em>profile value</em>
+	 * @return the String value of the <em>profile value</em>, or <code>null</code>
+	 * if there is no <em>profile value</em> with that key
 	 */
 	String get(String key);
 
