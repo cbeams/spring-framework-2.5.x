@@ -3,6 +3,23 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5.3 (2008-03-31)
+-------------------------------------
+
+Package org.springframework.jms
+* SimpleMessageListenerContainer registers itself as ExceptionListener for automatic Connection recovery
+
+Package org.springframework.remoting
+* revised (Simple)Hessian/BurlapServiceExporter's handling of non-POST requests (avoiding unnecessary warnings)
+
+Package org.springframework.test
+* @IfProfileValue correctly checked against concrete test class, even in case of overridden test methods
+* @IfProfileValue annotation without specified value checks against presence (non-null value) of the given profile key
+
+Package org.springframework.web
+* DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
+
+
 Changes in version 2.5.2 (2008-02-29)
 -------------------------------------
 
