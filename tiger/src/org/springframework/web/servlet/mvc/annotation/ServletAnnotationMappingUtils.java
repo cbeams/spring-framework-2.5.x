@@ -39,7 +39,7 @@ abstract class ServletAnnotationMappingUtils {
 		if (!ObjectUtils.isEmpty(methods)) {
 			boolean match = false;
 			for (RequestMethod method : methods) {
-				if (method.toString().equals(request.getMethod().toUpperCase())) {
+				if (method.name().equals(request.getMethod())) {
 					match = true;
 				}
 			}
