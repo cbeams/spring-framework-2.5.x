@@ -115,5 +115,6 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-view-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/websphere/websphere_uow_api.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/toplink/eclipselink.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
