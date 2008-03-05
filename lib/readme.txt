@@ -73,6 +73,11 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework's test suite
 
+* eclipselink/eclipselink.jar
+- Eclipse Persistence Services 1.0 M5 (http://www.eclipse.org/eclipselink)
+- required for building the framework
+- required at runtime when using Spring's JPA support with EclipseLink as provider
+
 * ehcache/ehcache-1.3.0.jar
 - EHCache 1.3.0 (http://ehcache.sourceforge.net)
 - required for building the framework
@@ -376,11 +381,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 * tomcat/catalina.jar, tomcat/naming-resources.jar
 - Apache Tomcat 5.5.23 (http://tomcat.apache.org)
 - required for building the Tomcat-specific weaver
-
-* toplink/eclipselink.jar
-- Eclipse Persistence Services 1.0 M4 (http://www.eclipse.org/eclipselink)
-- required for building the framework
-- required at runtime when using Spring's JPA support with EclipseLink as provider
 
 * toplink/toplink-api.jar
 - Oracle TopLink 10.1.3 API (http://www.oracle.com/technology/products/ias/toplink)
