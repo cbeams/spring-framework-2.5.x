@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-03-27)
+Changes in version 2.0.9 (2008-03-28)
 -------------------------------------
 
 General
@@ -27,6 +27,7 @@ Package org.springframework.instrument
 * fixed ShadowingClassLoader to not attempt defining a package in case of a class in the default package
 
 Package org.springframework.jdbc
+* added "defaultTransactionIsolationName" property to LazyConnectionDataSourceProxy
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
 * SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
@@ -43,6 +44,9 @@ Package org.springframework.mail
 Package org.springframework.orm
 * fixed TopLinkTransactionManager to correctly expose the underlying JDBC Connection in read-write transaction scenarios
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
+
+Package org.springframework.remoting
+* fixed Hessian/BurlapServiceExporter to throw HttpRequestMethodNotSupportedException with correct method value
 
 Package org.springframework.util
 * revised ConcurrencyThrottleSupport's interruption handling to throw an IllegalStateException instead of 'busy' waiting
