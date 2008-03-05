@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.jms.Connection;
 import javax.jms.Destination;
+import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -63,7 +64,7 @@ import org.springframework.util.Assert;
  * @see DefaultMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
-public class SimpleMessageListenerContainer extends AbstractMessageListenerContainer {
+public class SimpleMessageListenerContainer extends AbstractMessageListenerContainer implements ExceptionListener {
 
 	private boolean pubSubNoLocal = false;
 
@@ -74,6 +75,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	private Set sessions;
 
 	private Set consumers;
+
+	private final Object consumersMonitor = new Object();
 
 
 	/**
@@ -161,16 +164,76 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	protected void doInitialize() throws JMSException {
 		establishSharedConnection();
+		initializeConsumers();
+	}
 
+	/**
+	 * Re-initializes this container's JMS message consumers,
+	 * if not initialized already.
+	 */
+	protected void doStart() throws JMSException {
+		super.doStart();
+		initializeConsumers();
+	}
+
+	/**
+	 * Registers this listener container as JMS ExceptionListener on the shared connection.
+	 */
+	protected void prepareSharedConnection(Connection connection) throws JMSException {
+		super.prepareSharedConnection(connection);
+		connection.setExceptionListener(this);
+	}
+
+	/**
+	 * JMS ExceptionListener implementation, invoked by the JMS provider in
+	 * case of connection failures. Re-initializes this listener container's
+	 * shared connection and its sessions and consumers.
+	 * @param ex the reported connection exception
+	 */
+	public void onException(JMSException ex) {
+		// First invoke the user-specific ExceptionListener, if any.
+		invokeExceptionListener(ex);
+
+		// Now try to recover the shared Connection and all consumers...
+		if (logger.isInfoEnabled()) {
+			logger.info("Trying to recover from JMS Connection exception: " + ex);
+		}
+		try {
+			synchronized (this.consumersMonitor) {
+				this.sessions = null;
+				this.consumers = null;
+			}
+			refreshSharedConnection();
+			if (isRunning()) {
+				startSharedConnection();
+			}
+			initializeConsumers();
+			logger.info("Successfully refreshed JMS Connection");
+		}
+		catch (JMSException recoverEx) {
+			logger.debug("Failed to recover JMS Connection", recoverEx);
+			logger.error("Encountered non-recoverable JMSException", ex);
+		}
+	}
+
+	/**
+	 * Initialize the JMS Sessions and MessageConsumers for this container.
+	 * @throws JMSException in case of setup failure
+	 */
+	protected void initializeConsumers() throws JMSException {
 		// Register Sessions and MessageConsumers.
-		this.sessions = new HashSet(this.concurrentConsumers);
-		this.consumers = new HashSet(this.concurrentConsumers);
-		Connection con = getSharedConnection();
-		for (int i = 0; i < this.concurrentConsumers; i++) {
-			Session session = createSession(con);
-			MessageConsumer consumer = createListenerConsumer(session);
-			this.sessions.add(session);
-			this.consumers.add(consumer);
+		synchronized (this.consumersMonitor) {
+			if (this.consumers == null) {
+				this.sessions = new HashSet(this.concurrentConsumers);
+				this.consumers = new HashSet(this.concurrentConsumers);
+				Connection con = getSharedConnection();
+				for (int i = 0; i < this.concurrentConsumers; i++) {
+					Session session = createSession(con);
+					MessageConsumer consumer = createListenerConsumer(session);
+					this.sessions.add(session);
+					this.consumers.add(consumer);
+				}
+			}
 		}
 	}
 
@@ -188,6 +251,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 			destination = resolveDestinationName(session, getDestinationName());
 		}
 		MessageConsumer consumer = createConsumer(session, destination);
+
 		if (this.taskExecutor != null) {
 			consumer.setMessageListener(new MessageListener() {
 				public void onMessage(final Message message) {
@@ -206,6 +270,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 				}
 			});
 		}
+
 		return consumer;
 	}
 

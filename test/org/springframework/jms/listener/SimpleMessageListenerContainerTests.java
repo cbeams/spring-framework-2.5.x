@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,17 +35,14 @@ import org.springframework.jms.StubQueue;
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link SimpleMessageListenerContainer} class.
- *
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class SimpleMessageListenerContainerTests extends AbstractMessageListenerContainerTests {
+public class SimpleMessageListenerContainerTests extends AbstractMessageListenerContainerTests {
 
 	private static final String DESTINATION_NAME = "foo";
 
 	private static final String EXCEPTION_MESSAGE = "This.Is.It";
-
 
 	private static final StubQueue QUEUE_DESTINATION = new StubQueue();
 
@@ -108,6 +105,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		// session gets created in order to register MessageListener...
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
@@ -153,6 +152,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		// session gets created in order to register MessageListener...
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
@@ -199,6 +200,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		// session gets created in order to register MessageListener...
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
@@ -263,6 +266,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
 		connection.start();
@@ -321,6 +326,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		// session gets created in order to register MessageListener...
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
@@ -387,6 +394,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		// session gets created in order to register MessageListener...
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
@@ -447,6 +456,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		// session gets created in order to register MessageListener...
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
@@ -511,6 +522,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
 		Connection connection = (Connection) mockConnection.getMock();
+		connection.setExceptionListener(this.container);
+		mockConnection.setVoidCallable();
 		// session gets created in order to register MessageListener...
 		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
 		mockConnection.setReturnValue(session);
