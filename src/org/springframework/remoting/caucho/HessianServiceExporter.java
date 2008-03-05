@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,8 @@ public class HessianServiceExporter extends HessianExporter implements HttpReque
 			throws ServletException, IOException {
 
 		if (!"POST".equals(request.getMethod())) {
-			throw new HttpRequestMethodNotSupportedException("POST",
-					"HessianServiceExporter only supports POST requests");
+			throw new HttpRequestMethodNotSupportedException(request.getMethod(),
+					new String[] {"POST"}, "HessianServiceExporter only supports POST requests");
 		}
 
 		try {

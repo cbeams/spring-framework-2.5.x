@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,9 @@ public class SimpleBurlapServiceExporter extends BurlapExporter implements HttpH
 	 */
 	public void handle(HttpExchange exchange) throws IOException {
 		if (!"POST".equals(exchange.getRequestMethod())) {
-			throw new IOException("SimpleBurlapServiceExporter only supports POST requests");
+			exchange.getResponseHeaders().set("Allow", "POST");
+			exchange.sendResponseHeaders(405, -1);
+			return;
 		}
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream(1024);
@@ -63,6 +65,7 @@ public class SimpleBurlapServiceExporter extends BurlapExporter implements HttpH
 			exchange.sendResponseHeaders(500, -1);
 		  throw new IOException("Burlap skeleton invocation failed", ex);
 		}
+
 		exchange.sendResponseHeaders(200, output.size());
 		FileCopyUtils.copy(output.toByteArray(), exchange.getResponseBody());
 	}
