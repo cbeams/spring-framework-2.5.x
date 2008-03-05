@@ -506,13 +506,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myHandle.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			servlet.service(request, response);
-			fail("Should have thrown HttpRequestMethodNotSupportedException");
-		}
-		catch (HttpRequestMethodNotSupportedException ex) {
-			// expected
-		}
+		servlet.service(request, response);
+		assertEquals(405, response.getStatus());
 
 		request = new MockHttpServletRequest("POST", "/myUnknownHandle.do");
 		request.addParameter("myParam", "myValue");

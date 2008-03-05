@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,24 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 
 	private String method;
 
+	private String[] supportedMethods;
+
 
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
 	 */
 	public HttpRequestMethodNotSupportedException(String method) {
-		this(method, "Request method '" + method + "' not supported");
+		this(method, (String[]) null);
+	}
+
+	/**
+	 * Create a new HttpRequestMethodNotSupportedException.
+	 * @param method the unsupported HTTP request method
+	 * @param supportedMethods the actually supported HTTP methods
+	 */
+	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods) {
+		this(method, supportedMethods, "Request method '" + method + "' not supported");
 	}
 
 	/**
@@ -44,8 +55,19 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 * @param msg the detail message
 	 */
 	public HttpRequestMethodNotSupportedException(String method, String msg) {
+		this(method, null, msg);
+	}
+
+	/**
+	 * Create a new HttpRequestMethodNotSupportedException.
+	 * @param method the unsupported HTTP request method
+	 * @param supportedMethods the actually supported HTTP methods
+	 * @param msg the detail message
+	 */
+	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods, String msg) {
 		super(msg);
 		this.method = method;
+		this.supportedMethods = supportedMethods;
 	}
 
 
@@ -53,7 +75,14 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 * Return the HTTP request method that caused the failure.
 	 */
 	public String getMethod() {
-		return method;
+		return this.method;
+	}
+
+	/**
+	 * Return the actually supported HTTP methods, if known.
+	 */
+	public String[] getSupportedMethods() {
+		return this.supportedMethods;
 	}
 
 }

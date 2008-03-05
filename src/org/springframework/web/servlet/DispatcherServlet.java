@@ -50,6 +50,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -1105,6 +1106,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
 
+		// Check registerer HandlerExceptionResolvers...
 		ModelAndView exMv = null;
 		for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
 			HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
@@ -1116,9 +1118,18 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			return exMv;
 		}
-		else {
-			throw ex;
+
+		// Send default responses for well-known exceptions, if possible.
+		if (ex instanceof HttpRequestMethodNotSupportedException && !response.isCommitted()) {
+			String[] supportedMethods = ((HttpRequestMethodNotSupportedException) ex).getSupportedMethods();
+			if (supportedMethods != null) {
+				response.setHeader("Allow", StringUtils.arrayToDelimitedString(supportedMethods, ", "));
+			}
+			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex.getMessage());
+			return null;
 		}
+
+		throw ex;
 	}
 
 	/**

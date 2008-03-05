@@ -35,6 +35,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMapping;
 
 /**
@@ -204,12 +205,19 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 * @throws Exception if validation failed
 	 */
 	protected void validateMapping(RequestMapping mapping, HttpServletRequest request) throws Exception {
-		if (!ServletAnnotationMappingUtils.checkRequestMethod(mapping.method(), request)) {
-			throw new HttpRequestMethodNotSupportedException(request.getMethod());
+		RequestMethod[] mappedMethods = mapping.method();
+		if (!ServletAnnotationMappingUtils.checkRequestMethod(mappedMethods, request)) {
+			String[] supportedMethods = new String[mappedMethods.length];
+			for (int i = 0; i < mappedMethods.length; i++) {
+				supportedMethods[i] = mappedMethods[i].name();
+			}
+			throw new HttpRequestMethodNotSupportedException(request.getMethod(), supportedMethods);
 		}
-		if (!ServletAnnotationMappingUtils.checkParameters(mapping.params(), request)) {
+
+		String[] mappedParams = mapping.params();
+		if (!ServletAnnotationMappingUtils.checkParameters(mappedParams, request)) {
 			throw new ServletException("Parameter conditions {" +
-					StringUtils.arrayToDelimitedString(mapping.params(), ", ") +
+					StringUtils.arrayToDelimitedString(mappedParams, ", ") +
 					"} not met for request parameters: " + request.getParameterMap());
 		}
 	}
