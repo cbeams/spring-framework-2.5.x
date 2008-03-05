@@ -64,6 +64,18 @@ import org.springframework.util.Assert;
  * respectively. These defaults can be overridden through the "destinationResolver"
  * and "messageConverter" bean properties.
  *
+ * <p><b>NOTE: The <code>ConnectionFactory</code> used with this template should
+ * return pooled Connections (or a single shared Connection) as well as pooled
+ * Sessions and MessageProducers. Otherwise, performance of ad-hoc JMS operations
+ * is going to suffer.</b> The simplest option is to use the Spring-provided
+ * {@link org.springframework.jms.connection.SingleConnectionFactory} as a
+ * decorator for your target <code>ConnectionFactory</code>, reusing a single
+ * JMS Connection in a thread-safe fashion; this is often good enough for the
+ * purpose of sending messages via this template. In a J2EE environment,
+ * make sure that the <code>ConnectionFactory</code> is obtained from the
+ * application's environment naming context via JNDI; application servers
+ * typically expose pooled, transaction-aware factories there.
+ *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
