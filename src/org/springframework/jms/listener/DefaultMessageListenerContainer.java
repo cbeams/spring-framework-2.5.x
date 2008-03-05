@@ -424,15 +424,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	public void initialize() {
 		// Adapt default cache level.
-		if (getTransactionManager() != null) {
-			if (this.cacheLevel == null) {
-				this.cacheLevel = new Integer(CACHE_NONE);
-			}
-		}
-		else {
-			if (this.cacheLevel == null) {
-				this.cacheLevel = new Integer(CACHE_CONSUMER);
-			}
+		if (this.cacheLevel == null) {
+			this.cacheLevel = new Integer(getTransactionManager() != null ? CACHE_NONE : CACHE_CONSUMER);
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.

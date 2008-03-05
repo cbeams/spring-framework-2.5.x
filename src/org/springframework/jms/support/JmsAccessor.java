@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,16 +60,15 @@ public abstract class JmsAccessor implements InitializingBean {
 
 
 	/**
-	 * Set the ConnectionFactory to use for obtaining JMS
-	 * {@link Connection Connections}.
+	 * Set the ConnectionFactory to use for obtaining JMS {@link Connection Connections}.
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
 	/**
-	 * Return the ConnectionFactory that this accessor uses for
-	 * obtaining JMS {@link Connection Connections}.
+	 * Return the ConnectionFactory that this accessor uses for obtaining
+	 * JMS {@link Connection Connections}.
 	 */
 	public ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
@@ -91,7 +90,6 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * transaction being managed alongside the main transaction (which might
 	 * be a native JDBC transaction), with the JMS transaction committing
 	 * right after the main transaction.
-	 * @param sessionTransacted the transaction mode
 	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionTransacted(boolean sessionTransacted) {
@@ -101,7 +99,6 @@ public abstract class JmsAccessor implements InitializingBean {
 	/**
 	 * Return whether the JMS {@link Session sessions} used by this
 	 * accessor are supposed to be transacted.
-	 * @return <code>true</code> if the JMS Sessions used are transacted
 	 * @see #setSessionTransacted(boolean)
 	 */
 	public boolean isSessionTransacted() {
@@ -133,7 +130,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * are not taken into account. Depending on the transaction context in the EJB,
 	 * the container makes its own decisions on these values. See section 17.3.5
 	 * of the EJB spec.
-	 * @param sessionAcknowledgeMode the acknowledgement mode
+	 * @param sessionAcknowledgeMode the acknowledgement mode constant
 	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
 	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
@@ -145,7 +142,6 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	/**
 	 * Return the acknowledgement mode for JMS {@link Session sessions}.
-	 * @return the acknowledgement mode applied by this accessor
 	 */
 	public int getSessionAcknowledgeMode() {
 		return this.sessionAcknowledgeMode;
