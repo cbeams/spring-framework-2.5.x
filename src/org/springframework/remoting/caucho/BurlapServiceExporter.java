@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,8 +101,8 @@ public class BurlapServiceExporter extends RemoteExporter
 		Assert.notNull(this.skeleton, "BurlapServiceExporter has not been initialized");
 
 		if (!"POST".equals(request.getMethod())) {
-			throw new HttpRequestMethodNotSupportedException("POST",
-					"BurlapServiceExporter only supports POST requests");
+			throw new HttpRequestMethodNotSupportedException(
+					request.getMethod(), "BurlapServiceExporter only supports POST requests");
 		}
 
 		BurlapInput in = new BurlapInput(request.getInputStream());
