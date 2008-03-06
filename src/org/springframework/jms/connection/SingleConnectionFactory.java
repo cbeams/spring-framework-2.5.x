@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
+import javax.jms.Session;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
@@ -60,8 +61,8 @@ import org.springframework.util.Assert;
  * SingleConnectionFactory in combination only really makes sense for
  * sharing a single JMS Connection <i>across multiple listener containers</i>.
  *
- * @author Mark Pollack
  * @author Juergen Hoeller
+ * @author Mark Pollack
  * @since 1.1
  * @see org.springframework.jms.core.JmsTemplate
  * @see org.springframework.jms.listener.SimpleMessageListenerContainer
@@ -250,23 +251,6 @@ public class SingleConnectionFactory
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
-	/**
-	 * Exception listener callback that renews the underlying single Connection.
-	 */
-	public void onException(JMSException ex) {
-		resetConnection();
-	}
-
-	/**
-	 * Close the underlying shared connection.
-	 * The provider of this ConnectionFactory needs to care for proper shutdown.
-	 * <p>As this bean implements DisposableBean, a bean factory will
-	 * automatically invoke this on destruction of its cached singletons.
-	 */
-	public void destroy() {
-		resetConnection();
-	}
-
 
 	/**
 	 * Initialize the underlying shared Connection.
@@ -290,6 +274,23 @@ public class SingleConnectionFactory
 			}
 			this.connection = getSharedConnectionProxy(this.target);
 		}
+	}
+
+	/**
+	 * Exception listener callback that renews the underlying single Connection.
+	 */
+	public void onException(JMSException ex) {
+		resetConnection();
+	}
+
+	/**
+	 * Close the underlying shared connection.
+	 * The provider of this ConnectionFactory needs to care for proper shutdown.
+	 * <p>As this bean implements DisposableBean, a bean factory will
+	 * automatically invoke this on destruction of its cached singletons.
+	 */
+	public void destroy() {
+		resetConnection();
 	}
 
 	/**
@@ -338,6 +339,19 @@ public class SingleConnectionFactory
 	}
 
 	/**
+	 * Template method for obtaining a (potentially cached) Session.
+	 * @param con the JMS Connection to operate on
+	 * @param mode the Session acknowledgement mode
+	 * (<code>Session.TRANSACTED</code> or one of the common modes)
+	 * @return the Session to use, or <code>null</code> to indicate
+	 * creation of a default Session
+	 * @throws JMSException if thrown by the JMS API
+	 */
+	protected Session getSession(Connection con, Integer mode) throws JMSException {
+		return null;
+	}
+
+	/**
 	 * Close the given Connection.
 	 * @param con the Connection to close
 	 */
@@ -380,13 +394,13 @@ public class SingleConnectionFactory
 
 
 	/**
-	 * Invocation handler that suppresses close calls on JMS Connections.
+	 * Invocation handler for a cached JMS Connection proxy.
 	 */
-	private static class SharedConnectionInvocationHandler implements InvocationHandler {
+	private class SharedConnectionInvocationHandler implements InvocationHandler {
 
 		private final Connection target;
 
-		private SharedConnectionInvocationHandler(Connection target) {
+		public SharedConnectionInvocationHandler(Connection target) {
 			this.target = target;
 		}
 
@@ -400,16 +414,31 @@ public class SingleConnectionFactory
 				return new Integer(hashCode());
 			}
 			else if (method.getName().equals("setClientID")) {
-				// Handle setExceptionListener method: throw exception.
-				throw new javax.jms.IllegalStateException(
-						"setClientID call not supported on proxy for shared Connection. " +
-						"Set the 'clientId' property on the SingleConnectionFactory instead.");
+				// Handle setClientID method: throw exception if not compatible.
+				String currentClientId = this.target.getClientID();
+				if (currentClientId != null && currentClientId.equals(args[0])) {
+					return null;
+				}
+				else {
+					throw new javax.jms.IllegalStateException(
+							"setClientID call not supported on proxy for shared Connection. " +
+							"Set the 'clientId' property on the SingleConnectionFactory instead.");
+				}
 			}
 			else if (method.getName().equals("setExceptionListener")) {
-				// Handle setExceptionListener method: throw exception.
-				throw new javax.jms.IllegalStateException(
-						"setExceptionListener call not supported on proxy for shared Connection. " +
-						"Set the 'exceptionListener' property on the SingleConnectionFactory instead.");
+				// Handle setExceptionListener method: add to the chain.
+				ExceptionListener currentExceptionListener = this.target.getExceptionListener();
+				if (currentExceptionListener instanceof InternalChainedExceptionListener && args[0] != null) {
+					((InternalChainedExceptionListener) currentExceptionListener).addDelegate((ExceptionListener) args[0]);
+					return null;
+				}
+				else {
+					throw new javax.jms.IllegalStateException(
+							"setExceptionListener call not supported on proxy for shared Connection. " +
+							"Set the 'exceptionListener' property on the SingleConnectionFactory instead. " +
+							"Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, " +
+							"which will allow for registering further ExceptionListeners to the recovery chain.");
+				}
 			}
 			else if (method.getName().equals("stop")) {
 				// Handle stop method: don't pass the call on.
@@ -418,6 +447,20 @@ public class SingleConnectionFactory
 			else if (method.getName().equals("close")) {
 				// Handle close method: don't pass the call on.
 				return null;
+			}
+			else if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") ||
+					method.getName().equals("createTopicSession")) {
+				boolean transacted = ((Boolean) args[0]).booleanValue();
+				Integer ackMode = (Integer) args[1];
+				Integer mode = (transacted ? new Integer(Session.SESSION_TRANSACTED) : ackMode);
+				Session session = getSession(this.target, mode);
+				if (session != null) {
+					if (!method.getReturnType().isInstance(session)) {
+						throw new javax.jms.IllegalStateException(
+								"JMS Session does not implement specific domain: " + session);
+					}
+					return session;
+				}
 			}
 			try {
 				Object retVal = method.invoke(this.target, args);
@@ -443,16 +486,18 @@ public class SingleConnectionFactory
 	 */
 	private static class InternalChainedExceptionListener extends ChainedExceptionListener {
 
+		private ExceptionListener userListener;
+
 		public InternalChainedExceptionListener(ExceptionListener internalListener, ExceptionListener userListener) {
 			addDelegate(internalListener);
 			if (userListener != null) {
 				addDelegate(userListener);
+				this.userListener = userListener;
 			}
 		}
 
 		public ExceptionListener getUserListener() {
-			ExceptionListener[] delegates = getDelegates();
-			return (delegates.length > 1 ? delegates[1] : null);
+			return this.userListener;
 		}
 	}
 
