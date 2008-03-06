@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -313,20 +313,32 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return (header != null ? header.getValues() : Collections.EMPTY_LIST);
 	}
 
+	/**
+	 * The default implementation returns the given URL String as-is.
+	 * <p>Can be overridden in subclasses, appending a session id or the like.
+	 */
 	public String encodeURL(String url) {
 		return url;
 	}
 
+	/**
+	 * The default implementation delegates to {@link #encodeURL},
+	 * returning the given URL String as-is.
+	 * <p>Can be overridden in subclasses, appending a session id or the like
+	 * in a redirect-specific fashion. For general URL encoding rules,
+	 * override the common {@link #encodeURL} method instead, appyling
+	 * to redirect URLs as well as to general URLs.
+	 */
 	public String encodeRedirectURL(String url) {
-		return url;
+		return encodeURL(url);
 	}
 
 	public String encodeUrl(String url) {
-		return url;
+		return encodeURL(url);
 	}
 
 	public String encodeRedirectUrl(String url) {
-		return url;
+		return encodeRedirectURL(url);
 	}
 
 	public void sendError(int status, String errorMessage) throws IOException {
