@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,6 +172,21 @@ public class ClassPathResource extends AbstractResource {
 	 */
 	public File getFile() throws IOException {
 		return ResourceUtils.getFile(getURL(), getDescription());
+	}
+
+	/**
+	 * This implementation determines the underlying File
+	 * (or jar file, in case of a resource in a jar/zip).
+	 */
+	protected File getFileForLastModifiedCheck() throws IOException {
+		URL url = getURL();
+		if (ResourceUtils.isJarURL(url)) {
+			URL actualUrl = ResourceUtils.extractJarFileURL(url);
+			return ResourceUtils.getFile(actualUrl);
+		}
+		else {
+			return ResourceUtils.getFile(url, getDescription());
+		}
 	}
 
 	/**

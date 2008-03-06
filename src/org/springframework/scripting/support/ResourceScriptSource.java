@@ -16,8 +16,6 @@
 
 package org.springframework.scripting.support;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -78,30 +76,18 @@ public class ResourceScriptSource implements ScriptSource {
 
 
 	public String getScriptAsString() throws IOException {
-		File file = null;
+		synchronized (this.lastModifiedMonitor) {
+			this.lastModified = retrieveLastModifiedTime();
+		}
+		Reader reader = null;
 		try {
-			file = getResource().getFile();
+			// Try to get a FileReader first: generally more reliable.
+			reader = new FileReader(getResource().getFile());
 		}
 		catch (IOException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(getResource() + " could not be resolved in the file system - " +
-						"cannot store last-modified timestamp for obtained script", ex);
-			}
-		}
-		synchronized (this.lastModifiedMonitor) {
-			this.lastModified = (file != null ? file.lastModified() : 0);
-		}
-		Reader reader = null;
-		if (file != null) {
-			try {
-				// Try to get a FileReader first: generally more reliable.
-				reader = new FileReader(file);
-			}
-			catch (FileNotFoundException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not open FileReader for " + this.resource +
-							" - falling back to InputStreamReader", ex);
-				}
+				logger.debug("Could not open FileReader for " + this.resource +
+						" - falling back to InputStreamReader", ex);
 			}
 		}
 		if (reader == null) {
@@ -122,7 +108,7 @@ public class ResourceScriptSource implements ScriptSource {
 	 */
 	protected long retrieveLastModifiedTime() {
 		try {
-			return getResource().getFile().lastModified();
+			return getResource().lastModified();
 		}
 		catch (IOException ex) {
 			if (logger.isDebugEnabled()) {

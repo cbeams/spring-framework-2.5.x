@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.scripting.support;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import junit.framework.TestCase;
@@ -44,7 +44,7 @@ public class ResourceScriptSourceTests extends TestCase {
 	public void testDoesNotPropagateFatalExceptionOnResourceThatCannotBeResolvedToAFile() throws Exception {
 		MockControl mock = MockControl.createControl(Resource.class);
 		Resource resource = (Resource) mock.getMock();
-		resource.getFile();
+		resource.lastModified();
 		mock.setThrowable(new IOException());
 		mock.replay();
 
@@ -68,14 +68,16 @@ public class ResourceScriptSourceTests extends TestCase {
 		MockControl mock = MockControl.createControl(Resource.class);
 		Resource resource = (Resource) mock.getMock();
 		// underlying File is asked for so that the last modified time can be checked...
-		resource.getFile();
-		mock.setReturnValue(new TouchableFileStub(100), 2);
+		resource.lastModified();
+		mock.setReturnValue(100, 2);
 		// does not support File-based reading; delegates to InputStream-style reading...
+		resource.getFile();
+		mock.setThrowable(new FileNotFoundException());
 		resource.getInputStream();
 		mock.setReturnValue(new ByteArrayInputStream(new byte[0]));
 		// And then mock the file changing; i.e. the File says it has been modified
-		resource.getFile();
-		mock.setReturnValue(new TouchableFileStub(200));
+		resource.lastModified();
+		mock.setReturnValue(200);
 		mock.replay();
 
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
@@ -95,21 +97,6 @@ public class ResourceScriptSourceTests extends TestCase {
 		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
 		// Must now continue to report back as not having been modified 'cos the Resource does not support access as a File (and so the lastModified date cannot be determined).
 		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
-	}
-
-
-	private static final class TouchableFileStub extends File {
-
-		private long lastModified;
-
-		public TouchableFileStub(long lastModified) {
-			super("");
-			this.lastModified = lastModified;
-		}
-
-		public long lastModified() {
-			return this.lastModified;
-		}
 	}
 
 }

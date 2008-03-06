@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,6 +154,20 @@ public class UrlResource extends AbstractResource {
 		}
 		else {
 			return ResourceUtils.getFile(this.url, getDescription());
+		}
+	}
+
+	/**
+	 * This implementation determines the underlying File
+	 * (or jar file, in case of a resource in a jar/zip).
+	 */
+	protected File getFileForLastModifiedCheck() throws IOException {
+		if (ResourceUtils.isJarURL(this.url)) {
+			URL actualUrl = ResourceUtils.extractJarFileURL(this.url);
+			return ResourceUtils.getFile(actualUrl);
+		}
+		else {
+			return getFile();
 		}
 	}
 

@@ -108,6 +108,31 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * This implementation checks the timestamp of the underlying File,
+	 * if available.
+	 * @see #getFileForLastModifiedCheck()
+	 */
+	public long lastModified() throws IOException {
+		long lastModified = getFileForLastModifiedCheck().lastModified();
+		if (lastModified == 0L) {
+			throw new FileNotFoundException(getDescription() +
+					" cannot be resolved in the file system for resolving its last-modified timestamp");
+		}
+		return lastModified;
+	}
+
+	/**
+	 * Determine the File to use for timestamp checking.
+	 * <p>The default implementation delegates to {@link #getFile()}.
+	 * @return the File to use for timestamp checking (never <code>null</code>)
+	 * @throws IOException if the resource cannot be resolved as absolute
+	 * file path, i.e. if the resource is not available in a file system
+	 */
+	protected File getFileForLastModifiedCheck() throws IOException {
+		return getFile();
+	}
+
+	/**
 	 * This implementation throws a FileNotFoundException, assuming
 	 * that relative resources cannot be created for this resource.
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -460,46 +459,35 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		}
 
 		if (resource.exists()) {
-			try {
-				long fileTimestamp = -1;
-
-				if (this.cacheMillis >= 0) {
-					// Last-modified timestamp of file will just be read if caching with timeout.
-					File file = null;
-					try {
-						file = resource.getFile();
-					}
-					catch (IOException ex) {
-						// Probably a class path resource: cache it forever.
+			long fileTimestamp = -1;
+			if (this.cacheMillis >= 0) {
+				// Last-modified timestamp of file will just be read if caching with timeout.
+				try {
+					fileTimestamp = resource.lastModified();
+					if (propHolder != null && propHolder.getFileTimestamp() == fileTimestamp) {
 						if (logger.isDebugEnabled()) {
-							logger.debug(
-									resource + " could not be resolved in the file system - assuming that is hasn't changed", ex);
+							logger.debug("Re-caching properties for filename [" + filename + "] - file hasn't been modified");
 						}
-						file = null;
-					}
-					if (file != null) {
-						fileTimestamp = file.lastModified();
-						if (fileTimestamp == 0) {
-							throw new IOException("File [" + file.getAbsolutePath() + "] does not exist");
-						}
-						if (propHolder != null && propHolder.getFileTimestamp() == fileTimestamp) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Re-caching properties for filename [" + filename + "] - file hasn't been modified");
-							}
-							propHolder.setRefreshTimestamp(refreshTimestamp);
-							return propHolder;
-						}
+						propHolder.setRefreshTimestamp(refreshTimestamp);
+						return propHolder;
 					}
 				}
-
+				catch (IOException ex) {
+					// Probably a class path resource: cache it forever.
+					if (logger.isDebugEnabled()) {
+						logger.debug(
+								resource + " could not be resolved in the file system - assuming that is hasn't changed", ex);
+					}
+					fileTimestamp = -1;
+				}
+			}
+			try {
 				Properties props = loadProperties(resource, filename);
 				propHolder = new PropertiesHolder(props, fileTimestamp);
 			}
-
 			catch (IOException ex) {
 				if (logger.isWarnEnabled()) {
-					logger.warn(
-							"Could not parse properties file [" + resource.getFilename() + "]: " + ex.getMessage(), ex);
+					logger.warn("Could not parse properties file [" + resource.getFilename() + "]", ex);
 				}
 				// Empty holder representing "not valid".
 				propHolder = new PropertiesHolder();

@@ -92,6 +92,13 @@ public interface Resource extends InputStreamSource {
 	File getFile() throws IOException;
 
 	/**
+	 * Determine the last-modified timestamp for this resource.
+	 * @throws IOException if the resource cannot be resolved
+	 * (in the file system or as some other known physical resource type)
+	 */
+	long lastModified() throws IOException;
+
+	/**
 	 * Create a resource relative to this resource.
 	 * @param relativePath the relative path (relative to this resource)
 	 * @return the resource handle for the relative resource
