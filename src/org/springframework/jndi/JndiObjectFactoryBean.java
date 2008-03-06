@@ -188,6 +188,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	 * @see #setDefaultObject
 	 */
 	protected Object lookupWithFallback() throws NamingException {
+		ClassLoader originalClassLoader = ClassUtils.overrideThreadContextClassLoader(this.beanClassLoader);
 		try {
 			return lookup();
 		}
@@ -207,6 +208,11 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 				return this.defaultObject;
 			}
 			throw ex;
+		}
+		finally {
+			if (originalClassLoader != null) {
+				Thread.currentThread().setContextClassLoader(originalClassLoader);
+			}
 		}
 	}
 

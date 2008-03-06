@@ -54,20 +54,10 @@ public abstract class RemotingSupport implements BeanClassLoaderAware {
 	 * Override the thread context ClassLoader with the environment's bean ClassLoader
 	 * if necessary, i.e. if the bean ClassLoader is not equivalent to the thread
 	 * context ClassLoader already.
-	 * @return the original thread context ClassLoader,
-	 * or <code>null</code> if not overridden
+	 * @return the original thread context ClassLoader, or <code>null</code> if not overridden
 	 */
 	protected ClassLoader overrideThreadContextClassLoader() {
-		Thread currentThread = Thread.currentThread();
-		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
-		ClassLoader beanClassLoader = getBeanClassLoader();
-		if (beanClassLoader != null && !beanClassLoader.equals(threadContextClassLoader)) {
-			currentThread.setContextClassLoader(beanClassLoader);
-			return threadContextClassLoader;
-		}
-		else {
-			return null;
-		}
+		return ClassUtils.overrideThreadContextClassLoader(getBeanClassLoader());
 	}
 
 	/**

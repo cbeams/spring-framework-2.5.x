@@ -135,6 +135,25 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Override the thread context ClassLoader with the environment's bean ClassLoader
+	 * if necessary, i.e. if the bean ClassLoader is not equivalent to the thread
+	 * context ClassLoader already.
+	 * @param classLoaderToUse the actual ClassLoader to use for the thread context
+	 * @return the original thread context ClassLoader, or <code>null</code> if not overridden
+	 */
+	public static ClassLoader overrideThreadContextClassLoader(ClassLoader classLoaderToUse) {
+		Thread currentThread = Thread.currentThread();
+		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
+		if (classLoaderToUse != null && !classLoaderToUse.equals(threadContextClassLoader)) {
+			currentThread.setContextClassLoader(classLoaderToUse);
+			return threadContextClassLoader;
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
 	 * Determine whether the {@link Class} identified by the supplied name is present
 	 * and can be loaded. Will return <code>false</code> if either the class or
 	 * one of its dependencies is not present or cannot be loaded.
