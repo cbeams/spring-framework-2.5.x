@@ -260,8 +260,9 @@ public abstract class Conventions {
 	 * @return the class to use for naming a variable
 	 */
 	private static Class getClassForValue(Object value) {
-		if (Proxy.isProxyClass(value.getClass())) {
-			Class[] ifcs = value.getClass().getInterfaces();
+		Class valueClass = value.getClass();
+		if (Proxy.isProxyClass(valueClass)) {
+			Class[] ifcs = valueClass.getInterfaces();
 			for (int i = 0; i < ifcs.length; i++) {
 				Class ifc = ifcs[i];
 				if (!ignoredInterfaces.contains(ifc)) {
@@ -269,7 +270,12 @@ public abstract class Conventions {
 				}
 			}
 		}
-		return value.getClass();
+		else if (valueClass.getName().lastIndexOf('$') != -1 && valueClass.getDeclaringClass() == null) {
+			// '$' in the class name but no inner class -
+			// assuming it's a special subclass (e.g. by OpenJPA)
+			valueClass = valueClass.getSuperclass();
+		}
+		return valueClass;
 	}
 
 	/**
