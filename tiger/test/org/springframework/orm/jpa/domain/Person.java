@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,19 +37,18 @@ import org.springframework.beans.factory.annotation.Configurable;
 @Entity
 @Configurable("person")
 public class Person {
-	
+
 	@Id 
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
-	
+
 	private transient TestBean testBean;
-	
+
 	// Lazy relationship to force use of instrumentation in JPA implementation.
 	// TopLink, at least, will not instrument classes unless absolutely necessary.
 	@OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.PERSIST)
 	@JoinColumn(name="DRIVERS_LICENSE_ID")
 	private DriversLicense driversLicense;
-
 
 	private String first_name;
 
@@ -60,11 +59,11 @@ public class Person {
 	public Integer getId() {
 		return id;
 	}
-	
+
 	public void setTestBean(TestBean testBean) {
 		this.testBean = testBean;
 	}
-	
+
 	public TestBean getTestBean() {
 		return testBean;
 	}
@@ -88,15 +87,16 @@ public class Person {
 	public void setDriversLicense(DriversLicense driversLicense) {
 		this.driversLicense = driversLicense;
 	}
-	
+
 	public DriversLicense getDriversLicense() {
 		return this.driversLicense;
 	}
-	
+
+
 	@Override
 	public String toString() {
 		return getClass().getName() + ":(" + hashCode() + ") id=" + id +
-				"; firstName=" + first_name + "; lastName=" + last_name + "testBean=" + testBean;
+				"; firstName=" + first_name + "; lastName=" + last_name + "; testBean=" + testBean;
 	}
 
 }
