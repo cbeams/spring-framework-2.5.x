@@ -18,6 +18,7 @@ package org.springframework.test;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -158,11 +159,9 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 			LineNumberReader lnr = new LineNumberReader(resource.getReader());
 			String currentStatement = lnr.readLine();
 			while (currentStatement != null) {
-				currentStatement = StringUtils.replace(currentStatement, ";", "");
-				statements.add(currentStatement);				
+				statements.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(currentStatement, ";")));
 				currentStatement = lnr.readLine();
 			}
-			
 			for (Iterator itr = statements.iterator(); itr.hasNext(); ) {
 				String statement = (String) itr.next();
 				try {
