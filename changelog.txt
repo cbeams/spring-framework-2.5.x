@@ -6,14 +6,35 @@ http://www.springframework.org
 Changes in version 2.5.3 (2008-03-31)
 -------------------------------------
 
+Package org.springframework.context
+* ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
+
+Package org.springframework.core
+* Conventions detects special generated subclasses (e.g. by OpenJPA) and derives the variable name from the superclass
+* added "lastModified()" method to Resource interface, for abstract access to the last-modified timestamp
+* ClassPathResource and UrlResource use the last-modified timestamp of the archive file for jar/zip contents
+
+Package org.springframework.ejb
+* added "cacheSessionBean" flag to SimpleRemoteStatelessSessionProxyFactoryBean, for caching the session bean object
+* added "cache-session-bean" attribute to "jee:remote-slsb" configuration element
+
 Package org.springframework.jms
 * SingleConnectionFactory accepts "Connections.setClientID" calls with the same client ID as specified on the factory
 * SingleConnectionFactory accepts further "Connection.setExceptionListener" calls in "reconnectOnException" mode
 * introduced CachingConnectionFactory (as subclass of SingleConnectionFactory) for JMS 1.1 session and producer pooling
 * SimpleMessageListenerContainer registers itself as ExceptionListener for automatic Connection recovery
 
+Package org.springframework.jndi
+* JndiObjectFactoryBean exposes the bean ClassLoader as thread context ClassLoader (if necessary)
+
+Package org.springframework.mock
+* MockHttpServletResponse's "encodeURL" allows for central overriding in subclasses (affecting "encodeRedirectURL" too)
+
 Package org.springframework.remoting
 * revised (Simple)Hessian/BurlapServiceExporter's handling of non-POST requests (avoiding unnecessary warnings)
+
+Package org.springframework.scripting
+* ResourceScriptSource is able to detect updates for a script file stored in a jar/zip as well
 
 Package org.springframework.test
 * @IfProfileValue correctly checked against concrete test class, even in case of overridden test methods
