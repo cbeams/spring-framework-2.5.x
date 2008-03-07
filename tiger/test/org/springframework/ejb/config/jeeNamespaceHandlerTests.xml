@@ -62,7 +62,8 @@
 			lookup-home-on-startup="true"
 			resource-ref="true"
 			home-interface="org.springframework.beans.ITestBean"
-			refresh-home-on-connect-failure="true">
+			refresh-home-on-connect-failure="true"
+      cache-session-bean="true">
 		<jee:environment>foo=bar</jee:environment>
 	</jee:remote-slsb>
 

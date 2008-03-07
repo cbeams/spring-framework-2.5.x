@@ -178,6 +178,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether the EJB home object is cached once it has been located.
+  On by default; turn this flag off to always reobtain fresh home objects.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>

@@ -133,6 +133,17 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
+          <xsd:attribute name="cache-session-bean" type="xsd:string">
+            <xsd:annotation>
+              <xsd:documentation><![CDATA[
+	Controls whether to cache the actual session bean object.
+
+  Off by default for standard EJB compliance. Turn this flag
+  on to optimize session bean access for servers that are
+  known to allow for caching the actual session bean object.
+              ]]></xsd:documentation>
+            </xsd:annotation>
+          </xsd:attribute>
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
@@ -199,6 +210,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether the EJB home object is cached once it has been located.
+  On by default; turn this flag off to always reobtain fresh home objects.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>

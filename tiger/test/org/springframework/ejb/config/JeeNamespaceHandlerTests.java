@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,9 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "lookupHomeOnStartup", "true");
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
+		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.beans.ITestBean");
+		assertPropertyValue(beanDefinition, "refreshHomeOnConnectFailure", "true");
+		assertPropertyValue(beanDefinition, "cacheSessionBean", "true");
 	}
 
 	private void assertPropertyValue(BeanDefinition beanDefinition, String propertyName, Object expectedValue) {

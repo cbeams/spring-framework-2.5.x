@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
@@ -32,7 +33,8 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  * Basic invoker for a remote Stateless Session Bean.
  * Designed for EJB 2.x, but works for EJB 3 Session Beans as well.
  *
- * <p>"Creates" a new EJB instance for each invocation.
+ * <p>"Creates" a new EJB instance for each invocation, or caches the session
+ * bean instance for all invocations (see {@link #setCacheSessionBean}).
  * See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
  *
@@ -60,7 +62,27 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  * @see AbstractSlsbInvokerInterceptor#setCacheHome
  * @see AbstractRemoteSlsbInvokerInterceptor#setRefreshHomeOnConnectFailure
  */
-public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {
+public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor
+		implements DisposableBean {
+
+	private boolean cacheSessionBean = false;
+
+	private EJBObject beanInstance;
+
+	private final Object beanInstanceMonitor = new Object();
+
+
+	/**
+	 * Set whether to cache the actual session bean object.
+	 * <p>Off by default for standard EJB compliance. Turn this flag
+	 * on to optimize session bean access for servers that are
+	 * known to allow for caching the actual session bean object.
+	 * @see #setCacheHome
+	 */
+	public void setCacheSessionBean(boolean cacheSessionBean) {
+		this.cacheSessionBean = cacheSessionBean;
+	}
+
 
 	/**
 	 * This implementation "creates" a new EJB instance for each invocation.
@@ -107,7 +129,17 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * @see #newSessionBeanInstance
 	 */
 	protected EJBObject getSessionBeanInstance() throws NamingException, InvocationTargetException {
-		return newSessionBeanInstance();
+		if (this.cacheSessionBean) {
+			synchronized (this.beanInstanceMonitor) {
+				if (this.beanInstance == null) {
+					this.beanInstance = newSessionBeanInstance();
+				}
+				return this.beanInstance;
+			}
+		}
+		else {
+			return newSessionBeanInstance();
+		}
 	}
 
 	/**
@@ -117,7 +149,32 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * @see #removeSessionBeanInstance
 	 */
 	protected void releaseSessionBeanInstance(EJBObject ejb) {
-		removeSessionBeanInstance(ejb);
+		if (!this.cacheSessionBean) {
+			removeSessionBeanInstance(ejb);
+		}
+	}
+
+	/**
+	 * Reset the cached session bean instance, if necessary.
+	 */
+	protected void refreshHome() throws NamingException {
+		super.refreshHome();
+		if (this.cacheSessionBean) {
+			synchronized (this.beanInstanceMonitor) {
+				this.beanInstance = null;
+			}
+		}
+	}
+
+	/**
+	 * Remove the cached session bean instance, if necessary.
+	 */
+	public void destroy() {
+		if (this.cacheSessionBean) {
+			synchronized (this.beanInstanceMonitor) {
+				removeSessionBeanInstance(this.beanInstance);
+			}
+		}
 	}
 
 }
