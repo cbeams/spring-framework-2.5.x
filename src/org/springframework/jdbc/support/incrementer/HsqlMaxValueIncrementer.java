@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Class to increment maximum value of a given HSQL table with the equivalent
- * of an auto-increment column. Note: If you use this class, your HSQL key
- * column should <i>NOT</i> be auto-increment, as the sequence table does the job.
+ * {@link DataFieldMaxValueIncrementer} that increments the maximum value of a given HSQL table
+ * with the equivalent of an auto-increment column. Note: If you use this class, your HSQL
+ * key column should <i>NOT</i> be auto-increment, as the sequence table does the job.
  *
  * <p>The sequence is kept in a table. There should be one sequence table per
  * table that needs an auto-generated key.
@@ -42,12 +42,13 @@ import org.springframework.jdbc.support.JdbcUtils;
  * create table tab_sequence (value identity);
  * insert into tab_sequence values(0);</pre>
  *
- * If cacheSize is set, the intermediate values are served without querying the
+ * If "cacheSize" is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * NOTE: HSQL now supports sequences and you should consider using them instead.
+ * <p><b>NOTE:</b> HSQL now supports sequences and you should consider using them instead:
+ * {@link HsqlSequenceMaxValueIncrementer}
  *
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
@@ -118,7 +119,7 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.columnName == null) {
-			throw new IllegalArgumentException("columnName is required");
+			throw new IllegalArgumentException("Property 'columnName' is required");
 		}
 	}
 

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,8 +27,8 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Abstract base class for incrementers that use a database sequence.
- * Subclasses need to provide the database-specific SQL to use.
+ * Abstract base class for {@link DataFieldMaxValueIncrementer} implementations that use
+ * a database sequence. Subclasses need to provide the database-specific SQL to use.
  *
  * @author Juergen Hoeller
  * @since 26.02.2004
@@ -36,6 +36,9 @@ import org.springframework.jdbc.support.JdbcUtils;
  */
 public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 
+	/**
+	 * Executes the SQL as specified by {@link #getSequenceQuery()}.
+	 */
 	protected long getNextKey() throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
@@ -63,6 +66,8 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 
 	/**
 	 * Return the database-specific query to use for retrieving a sequence value.
+	 * <p>The provided SQL is supposed to result in a single row with a single
+	 * column that allows for extracting a <code>long</code> value.
 	 */
 	protected abstract String getSequenceQuery();
 

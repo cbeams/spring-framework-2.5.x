@@ -1,21 +1,37 @@
+/*
+ * Copyright 2002-2008 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jdbc.support.incrementer;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 /**
- * Class to increment maximum value of a given Derby table with the equivalent
- * of an auto-increment column. Note: If you use this class, your Derby key
+ * {@link DataFieldMaxValueIncrementer} that increments the maximum value of a given Derby table
+ * with the equivalent of an auto-increment column. Note: If you use this class, your Derby key
  * column should <i>NOT</i> be defined as an IDENTITY column, as the sequence table does the job.
- * Thanks to Endre Stolsvik for the suggestion!
  *
  * <p>The sequence is kept in a table. There should be one sequence table per
  * table that needs an auto-generated key.
@@ -30,7 +46,7 @@ import java.sql.Statement;
  * create table tab_sequence (value int generated always as identity, dummy char(1));
  * insert into tab_sequence (dummy) values(null);</pre>
  *
- * If cacheSize is set, the intermediate values are served without querying the
+ * If "cacheSize" is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
@@ -39,6 +55,8 @@ import java.sql.Statement;
  * use IDENTITY columns directly in the tables and then utilizing a {@link org.springframework.jdbc.support.KeyHolder}
  * when calling the with the update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) method of
  * the {@link org.springframework.jdbc.core.JdbcTemplate}.
+ *
+ * <p>Thanks to Endre Stolsvik for the suggestion!
  *
  * @author Thomas Risberg
  * @since 2.5
@@ -94,6 +112,7 @@ public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set the name of the column in the sequence table.
 	 */
@@ -119,7 +138,7 @@ public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 	 * Return the name of the dummy column.
 	 */
 	public String getDummyName() {
-		return dummyName;
+		return this.dummyName;
 	}
 
 	/**
@@ -139,7 +158,7 @@ public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.columnName == null) {
-			throw new IllegalArgumentException("columnName is required");
+			throw new IllegalArgumentException("Property 'columnName' is required");
 		}
 	}
 

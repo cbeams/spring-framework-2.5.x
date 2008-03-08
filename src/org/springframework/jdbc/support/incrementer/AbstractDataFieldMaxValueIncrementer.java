@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Implementation of DataFieldMaxValueIncrementer that delegates
- * to a single getNextKey template method that returns a long.
+ * Base implementation of {@link DataFieldMaxValueIncrementer} that delegates
+ * to a single {@link #getNextKey} template method that returns a <code>long</code>.
  * Uses longs for String values, padding with zeroes if required.
  *
  * @author Dmitriy Kopylenko
@@ -87,10 +87,10 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 
 	public void afterPropertiesSet() {
 		if (this.dataSource == null) {
-			throw new IllegalArgumentException("dataSource is required");
+			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
 		if (this.incrementerName == null) {
-			throw new IllegalArgumentException("incrementerName is required");
+			throw new IllegalArgumentException("Property 'incrementerName' is required");
 		}
 	}
 
@@ -116,6 +116,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 		}
 		return s;
 	}
+
 
 	/**
 	 * Determine the next key to use, as a long.

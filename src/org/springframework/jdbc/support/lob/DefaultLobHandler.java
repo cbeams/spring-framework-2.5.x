@@ -106,6 +106,10 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 
+	/**
+	 * Default LobCreator implementation as inner class.
+	 * Can be subclassed in DefaultLobHandler extensions.
+	 */
 	protected class DefaultLobCreator implements LobCreator {
 
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
