@@ -247,12 +247,30 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The bean name of the MBeanServer to which MBeans should be exported.
-	Default is to use the platform's default MBeanServer
-	(autodetecting WebLogic 9+, WebSphere 5.1+ and the JDK 1.5+ platform MBeanServer).
+	Default is to use the platform's default MBeanServer (autodetecting
+	WebLogic 9+, WebSphere 5.1+ and the JDK 1.5+ platform MBeanServer).
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-		</xsd:complexType>
+      <xsd:attribute name="registration">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[
+  The registration behavior, indicating how to deal with existing MBeans
+  of the same name: fail with an exception, ignore and keep the existing
+  MBean, or replace the existing one with the new MBean.
+
+  Default is to fail with an exception.
+          ]]></xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="failOnExisting"/>
+            <xsd:enumeration value="ignoreExisting"/>
+            <xsd:enumeration value="replaceExisting"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+    </xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="mbean-server">

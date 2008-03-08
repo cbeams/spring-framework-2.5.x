@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -32,9 +32,9 @@ import org.springframework.jmx.support.ObjectNameManager;
 public class AnnotationLazyInitMBeanTests extends TestCase {
 
 	public void testLazyNaming() throws Exception {
-		ConfigurableApplicationContext ctx = null;
+		ConfigurableApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
 		try {
-			ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertNotNull(server.getObjectInstance(oname));
@@ -42,16 +42,14 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 			assertEquals("Invalid name returned", "TEST", name);
 		}
 		finally {
-			if (ctx != null) {
-				ctx.close();
-			}
+			ctx.close();
 		}
 	}
 
 	public void testLazyAssembling() throws Exception {
-		ConfigurableApplicationContext ctx = null;
+		ConfigurableApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
 		try {
-			ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
@@ -70,9 +68,7 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 			assertEquals("Invalid name returned", "Juergen Hoeller", name);
 		}
 		finally {
-			if (ctx != null) {
-				ctx.close();
-			}
+			ctx.close();
 		}
 	}
 
