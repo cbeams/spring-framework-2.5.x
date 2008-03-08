@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * The Java Language Specification</a> for more details on the use of bridge methods.
  *
  * <p>Only usable on JDK 1.5 and higher. Use an appropriate {@link JdkVersion}
- * check before calling this class, if a fallback for JDK 1.3/1.4 is desirable.
+ * check before calling this class if a fallback for JDK 1.3/1.4 is desirable.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -96,7 +96,7 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Search for the bridged method in the given candidates.
+	 * Searches for the bridged method in the given candidates.
 	 * @param candidateMethods the List of candidate Methods
 	 * @param bridgeMethod the bridge method
 	 * @return the bridged method, or <code>null</code> if none found
@@ -113,7 +113,7 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Return <code>true</code> if the supplied '<code>candidateMethod</code>' can be
+	 * Returns <code>true</code> if the supplied '<code>candidateMethod</code>' can be
 	 * consider a validate candidate for the {@link Method} that is {@link Method#isBridge() bridged}
 	 * by the supplied {@link Method bridge Method}. This method performs inexpensive
 	 * checks and can be used quickly filter for a set of possible matches.
@@ -125,7 +125,7 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Determine whether or not the bridge {@link Method} is the bridge for the
+	 * Determines whether or not the bridge {@link Method} is the bridge for the
 	 * supplied candidate {@link Method}.
 	 */
 	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Map typeVariableMap) {
@@ -137,7 +137,7 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Search for the generic {@link Method} declaration whose erased signature
+	 * Searches for the generic {@link Method} declaration whose erased signature
 	 * matches that of the supplied bridge method.
 	 * @throws IllegalStateException if the generic declaration cannot be found
 	 */
@@ -157,7 +157,7 @@ public abstract class BridgeMethodResolver {
 		for (int i = 0; i < interfaces.length; i++) {
 			Class anInterface = interfaces[i];
 			Method method = searchForMatch(anInterface, bridgeMethod);
-			if (method != null  && !method.isBridge()) {
+			if (method != null && !method.isBridge()) {
 				return method;
 			}
 		}
@@ -166,10 +166,10 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Return <code>true</code> if the {@link Type} signature of both the supplied
+	 * Returns <code>true</code> if the {@link Type} signature of both the supplied
 	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
 	 * are equal after resolving all {@link TypeVariable TypeVariables} using the supplied
-	 * {@link #createTypeVariableMap TypeVariable Map}, otherwise returns <code>false</code>.
+	 * TypeVariable Map, otherwise returns <code>false</code>.
 	 */
 	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Map typeVariableMap) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
