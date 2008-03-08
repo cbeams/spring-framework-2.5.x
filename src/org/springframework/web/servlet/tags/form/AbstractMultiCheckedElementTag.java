@@ -166,13 +166,11 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 */
 	protected String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
-		if (id != null && StringUtils.hasText(id.toString())) {
-			id = TagIdGenerator.nextId(id.toString(), this.pageContext);
+		if (id != null) {
+			String idString = id.toString();
+			return (StringUtils.hasText(idString) ? TagIdGenerator.nextId(idString, this.pageContext) : null);
 		}
-		else {
-			id = autogenerateId();
-		}
-		return id.toString();
+		return autogenerateId();
 	}
 
 	/**

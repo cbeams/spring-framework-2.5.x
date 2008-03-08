@@ -92,7 +92,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Set the value of the '<code>id</code>' attribute.
-	 * <p>May be a runtime expression; defaults to the value of {@link #getName}.
+	 * <p>May be a runtime expression; defaults to the value of {@link #getName()}.
 	 * Note that the default value may not be valid for certain tags.
 	 */
 	public void setId(String id) {
@@ -129,10 +129,11 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 */
 	protected String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
-		if (id == null || !StringUtils.hasText(id.toString())) {
-			id = autogenerateId();
+		if (id != null) {
+			String idString = id.toString();
+			return (StringUtils.hasText(idString) ? idString : null);
 		}
-		return id.toString();
+		return autogenerateId();
 	}
 
 	/**
