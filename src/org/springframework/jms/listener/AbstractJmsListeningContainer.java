@@ -305,11 +305,11 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * that is, whether it has been started and not stopped yet.
 	 * @see #start()
 	 * @see #stop()
-	 * @see #allowRunning()
+	 * @see #runningAllowed()
 	 */
 	public final boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
-			return this.running && allowRunning();
+			return (this.running && runningAllowed());
 		}
 	}
 
@@ -322,7 +322,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * they may apply further restrictions to the 'running' state, returning
 	 * <code>false</code> if such a restriction prevents listeners from running.
 	 */
-	protected boolean allowRunning() {
+	protected boolean runningAllowed() {
 		return true;
 	}
 
