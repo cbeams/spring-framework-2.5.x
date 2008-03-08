@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,22 +23,29 @@ import java.sql.SQLException;
 
 /**
  * Interface that abstracts potentially database-specific creation of large binary
- * fields and large text fields. Does not work with java.sql.Blob and java.sql.Clob
- * instances in the API, as some JDBC drivers do not support these types as such.
+ * fields and large text fields. Does not work with <code>java.sql.Blob</code>
+ * and <code>java.sql.Clob</code> instances in the API, as some JDBC drivers
+ * do not support these types as such.
+ *
+ * <p>The LOB creation part is where {@link LobHandler} implementations usually
+ * differ. Possible strategies include usage of
+ * <code>PreparedStatement.setBinaryStream/setCharacterStream</code> but also
+ * <code>PreparedStatement.setBlob/setClob</code> with either a stream argument
+ * (requires JDBC 4.0) or <code>java.sql.Blob/Clob</code> wrapper objects.
  *
  * <p>A LobCreator represents a session for creating BLOBs: It is <i>not</i>
  * thread-safe and needs to be instantiated for each statement execution or for
  * each transaction. Each LobCreator needs to be closed after completion.
  *
- * <p>For convenient working with a PreparedStatement and a LobCreator, consider
- * JdbcTemplate with a AbstractLobCreatingPreparedStatementCallback implementation.
- * See the latter's javadoc for details.
+ * <p>For convenient working with a PreparedStatement and a LobCreator,
+ * consider using {@link org.springframework.jdbc.core.JdbcTemplate} with an
+ *{@link org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback}
+ * implementation. See the latter's javadoc for details.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
- * @see #close
- * @see LobHandler#getLobCreator
- * @see org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback
+ * @see #close()
+ * @see LobHandler#getLobCreator()
  * @see DefaultLobHandler.DefaultLobCreator
  * @see OracleLobHandler.OracleLobCreator
  * @see java.sql.PreparedStatement#setBlob
@@ -125,7 +132,7 @@ public interface LobCreator {
 	 * but might be necessary to free database resources if using proprietary means.
 	 * <p><b>NOTE</b>: Needs to be invoked after the involved PreparedStatements have
 	 * been executed or the affected O/R mapping sessions have been flushed.
-	 * Else, the database resources for the temporary BLOBs might stay allocated.
+	 * Otherwise, the database resources for the temporary BLOBs might stay allocated.
 	 */
 	void close();
 

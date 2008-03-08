@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,14 @@
 
 package org.springframework.jdbc.support.lob;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,6 +40,18 @@ import org.apache.commons.logging.LogFactory;
  * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
  * This does not apply to Oracle 9i, and only to a limited degree to Oracle 10g!
  * As a consequence, use {@link OracleLobHandler} for accessing Oracle BLOBs/CLOBs.
+ *
+ * <p>Some JDBC drivers require values with a BLOB/CLOB target column to be
+ * explicitly set through the JDBC <code>setBlob</code> / <code>setClob</code>
+ * API: for example, PostgreSQL's driver. Switch the {@link #setWrapAsLob "wrapAsLob"}
+ * property to "true" when operating against such a driver.
+ *
+ * <p>On JDBC 4.0, this LobHandler also supports streaming the BLOB/CLOB content
+ * via the <code>setBlob</code> / <code>setClob</code> variants that take a stream
+ * argument directly. Consider switching the {@link #setStreamAsLob "streamAsLob"}
+ * property to "true" when operating against a fully compliant JDBC 4.0 driver.
+ *
+ * <p>See the {@link LobHandler} javadoc for a summary of recommendations.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
@@ -53,22 +71,42 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private boolean wrapAsLob = false;
+
 	private boolean streamAsLob = false;
 
 
 	/**
-	 * Specify whether a submitted binary stream / character stream
-	 * should be passed to the JDBC driver as explicit LOB content,
-	 * using the JDBC 4.0 <code>setBlob</code> / <code>setClob</code>
-	 * method with a stream argument.
+	 * Specify whether to submit a byte array / String to the JDBC driver
+	 * wrapped in a JDBC Blob / Clob object, using the JDBC <code>setBlob</code> /
+	 * <code>setClob</code> method with a Blob / Clob argument.
 	 * <p>Default is "false", using the common JDBC 2.0 <code>setBinaryStream</code>
 	 * / <code>setCharacterStream</code> method for setting the content.
-	 * Switch this to "true" for explicit JDBC 4.0 usage, provided that
-	 * your JDBC driver actually supports those JDBC 4.0 operations.
+	 * Switch this to "true" for explicit Blob / Clob wrapping against
+	 * JDBC drivers that are known to require such wrapping (e.g. PostgreSQL's).
+	 * <p>This setting affects byte array / String arguments as well as stream
+	 * arguments, unless {@link #setStreamAsLob "streamAsLob"} overrides this
+	 * handling to use JDBC 4.0's new explicit streaming support (if available).
+	 * @see java.sql.PreparedStatement#setBlob(int, java.sql.Blob)
+	 * @see java.sql.PreparedStatement#setClob(int, java.sql.Clob)
+	 */
+	public void setWrapAsLob(boolean wrapAsLob) {
+		this.wrapAsLob = wrapAsLob;
+	}
+
+	/**
+	 * Specify whether to submit a binary stream / character stream to the JDBC
+	 * driver as explicit LOB content, using the JDBC 4.0 <code>setBlob</code> /
+	 * <code>setClob</code> method with a stream argument.
+	 * <p>Default is "false", using the common JDBC 2.0 <code>setBinaryStream</code>
+	 * / <code>setCharacterStream</code> method for setting the content.
+	 * Switch this to "true" for explicit JDBC 4.0 usage, provided that your
+	 * JDBC driver actually supports those JDBC 4.0 operations (e.g. Derby's).
+	 * <p>This setting affects stream arguments as well as byte array / String
+	 * arguments, requiring JDBC 4.0 support. For supporting LOB content against
+	 * JDBC 3.0, check out the {@link #setWrapAsLob "wrapAsLob"} setting.
 	 * @see java.sql.PreparedStatement#setBlob(int, java.io.InputStream, long)
 	 * @see java.sql.PreparedStatement#setClob(int, java.io.Reader, long)
-	 * @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream, int)
-	 * @see java.sql.PreparedStatement#setCharacterStream(int, java.io.Reader, int)
 	 */
 	public void setStreamAsLob(boolean streamAsLob) {
 		this.streamAsLob = streamAsLob;
@@ -101,7 +139,6 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 	public LobCreator getLobCreator() {
-		logger.debug("Creating new DefaultLobCreator");
 		return new DefaultLobCreator();
 	}
 
@@ -115,7 +152,25 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
 				throws SQLException {
 
-			ps.setBytes(paramIndex, content);
+			if (streamAsLob) {
+				if (content != null) {
+					ps.setBlob(paramIndex, new ByteArrayInputStream(content), content.length);
+				}
+				else {
+					ps.setBlob(paramIndex, (Blob) null);
+				}
+			}
+			else if (wrapAsLob) {
+				if (content != null) {
+					ps.setBlob(paramIndex, new PassThroughBlob(content));
+				}
+				else {
+					ps.setBlob(paramIndex, (Blob) null);
+				}
+			}
+			else {
+				ps.setBytes(paramIndex, content);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(content != null ? "Set bytes for BLOB with length " + content.length :
 						"Set BLOB to null");
@@ -127,7 +182,20 @@ public class DefaultLobHandler extends AbstractLobHandler {
 				throws SQLException {
 
 			if (streamAsLob) {
-				ps.setBlob(paramIndex, binaryStream, contentLength);
+				if (binaryStream != null) {
+					ps.setBlob(paramIndex, binaryStream, contentLength);
+				}
+				else {
+					ps.setBlob(paramIndex, (Blob) null);
+				}
+			}
+			else if (wrapAsLob) {
+				if (binaryStream != null) {
+					ps.setBlob(paramIndex, new PassThroughBlob(binaryStream, contentLength));
+				}
+				else {
+					ps.setBlob(paramIndex, (Blob) null);
+				}
 			}
 			else {
 				ps.setBinaryStream(paramIndex, binaryStream, contentLength);
@@ -141,7 +209,25 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
 		    throws SQLException {
 
-			ps.setString(paramIndex, content);
+			if (streamAsLob) {
+				if (content != null) {
+					ps.setClob(paramIndex, new StringReader(content), content.length());
+				}
+				else {
+					ps.setClob(paramIndex, (Clob) null);
+				}
+			}
+			else if (wrapAsLob) {
+				if (content != null) {
+					ps.setClob(paramIndex, new PassThroughClob(content));
+				}
+				else {
+					ps.setClob(paramIndex, (Clob) null);
+				}
+			}
+			else {
+				ps.setString(paramIndex, content);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(content != null ? "Set string for CLOB with length " + content.length() :
 						"Set CLOB to null");
@@ -152,7 +238,28 @@ public class DefaultLobHandler extends AbstractLobHandler {
 				PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 		    throws SQLException {
 
-			ps.setAsciiStream(paramIndex, asciiStream, contentLength);
+			if (streamAsLob || wrapAsLob) {
+				if (asciiStream != null) {
+					try {
+						Reader reader = new InputStreamReader(asciiStream, "US-ASCII");
+						if (streamAsLob) {
+							ps.setClob(paramIndex, reader, contentLength);
+						}
+						else {
+							ps.setClob(paramIndex, new PassThroughClob(reader, contentLength));
+						}
+					}
+					catch (UnsupportedEncodingException ex) {
+						throw new SQLException("US-ASCII encoding not supported: " + ex);
+					}
+				}
+				else {
+					ps.setClob(paramIndex, (Clob) null);
+				}
+			}
+			else {
+				ps.setAsciiStream(paramIndex, asciiStream, contentLength);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(asciiStream != null ? "Set ASCII stream for CLOB with length " + contentLength :
 						"Set CLOB to null");
@@ -164,7 +271,20 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		    throws SQLException {
 
 			if (streamAsLob) {
-				ps.setClob(paramIndex, characterStream, contentLength);
+				if (characterStream != null) {
+					ps.setClob(paramIndex, characterStream, contentLength);
+				}
+				else {
+					ps.setClob(paramIndex, (Clob) null);
+				}
+			}
+			else if (wrapAsLob) {
+				if (characterStream != null) {
+					ps.setClob(paramIndex, new PassThroughClob(characterStream, contentLength));
+				}
+				else {
+					ps.setClob(paramIndex, (Clob) null);
+				}
 			}
 			else {
 				ps.setCharacterStream(paramIndex, characterStream, contentLength);
@@ -176,7 +296,6 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 
 		public void close() {
-			logger.debug("Closing DefaultLobCreator");
 			// nothing to do here
 		}
 	}

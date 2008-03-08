@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,8 @@ import java.sql.SQLException;
  * Abstraction for handling large binary fields and large text fields in
  * specific databases, no matter if represented as simple types or Large OBjects.
  * Its main purpose is to isolate Oracle's peculiar handling of LOBs in
- * OracleLobHandler; most other databases should work with DefaultLobHandler.
+ * {@link OracleLobHandler}; most other databases should be able to work
+ * with the provided {@link DefaultLobHandler}.
  *
  * <p>Provides accessor methods for BLOBs and CLOBs, and acts as factory for
  * LobCreator instances, to be used as sessions for creating BLOBs or CLOBs.
@@ -33,22 +34,35 @@ import java.sql.SQLException;
  * each transaction. They are not thread-safe because they might track
  * allocated database resources to be able to free them after execution.
  *
- * <p>Most databases/drivers should be able to work with DefaultLobHandler,
- * which simply delegates to JDBC's direct accessor methods, avoiding
+ * <p>Most databases/drivers should be able to work with {@link DefaultLobHandler},
+ * which by default delegates to JDBC's direct accessor methods, avoiding
  * <code>java.sql.Blob</code> and <code>java.sql.Clob</code> completely.
+ * {@link DefaultLobHandler} can also be configured to populate LOBs using
+ * <code>PreparedStatement.setBlob/setClob</code> (e.g. for PostgreSQL).
  *
  * <p>Unfortunately, Oracle 9i just accepts Blob/Clob instances created via its own
  * proprietary BLOB/CLOB API, and additionally doesn't accept large streams for
  * PreparedStatement's corresponding setter methods. Therefore, you need to use
- * OracleLobHandler there, which uses Oracle's BLOB/CLOB API for both all access.
- * The Oracle 10g JDBC driver should work with DefaultLobHandler too.
+ * {@link OracleLobHandler} there, which uses Oracle's BLOB/CLOB API for both all access.
+ * The Oracle 10g JDBC driver should basically work with {@link DefaultLobHandler}
+ * as well, with some limitations in terms of LOB sizes.
  *
  * <p>Of course, you need to declare different field types for each database.
  * In Oracle, any binary content needs to go into a BLOB, and all character content
  * beyond 4000 bytes needs to go into a CLOB. In MySQL, there is no notion of a
  * CLOB type but rather a LONGTEXT type that behaves like a VARCHAR. For complete
- * portability, just use a LobHandler for fields that might typically require LOBs
- * on some database because of their size (take Oracle's numbers as a guideline).
+ * portability, use a LobHandler for fields that might typically require LOBs on
+ * some database because of the field size (take Oracle's numbers as a guideline).
+ *
+ * <p><b>Summarizing the recommended options (for actual LOB fields):</b>
+ * <ul>
+ * <li><b>JDBC 4.0 driver:</b> {@link DefaultLobHandler} with <code>streamAsLob=true</code>.
+ * <li><b>PostgreSQL:</b> {@link DefaultLobHandler} with <code>wrapAsLob=true</code>.
+ * <li><b>Oracle 9i/10g:</b> {@link OracleLobHandler} with a connection-pool-specific
+ * {@link OracleLobHandler#setNativeJdbcExtractor NativeJdbcExtractor}.
+ * <li>For all other database drivers (and for non-LOB fields that might potentially
+ * turn into LOBs on some databases): a plain {@link DefaultLobHandler}.
+ * </ul>
  *
  * @author Juergen Hoeller
  * @since 23.12.2003
@@ -185,11 +199,11 @@ public interface LobHandler {
 	Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException;
 
 	/**
-	 * Create a new LobCreator instance, i.e. a session for creating BLOBs
-	 * and CLOBs. Needs to be closed after the created LOBs are not needed
-	 * anymore, i.e. after statement execution or transaction completion.
+	 * Create a new {@link LobCreator} instance, i.e. a session for creating BLOBs
+	 * and CLOBs. Needs to be closed after the created LOBs are not needed anymore -
+	 * typically after statement execution or transaction completion.
 	 * @return the new LobCreator instance
-	 * @see LobCreator#close
+	 * @see LobCreator#close()
 	 */
 	LobCreator getLobCreator();
 
