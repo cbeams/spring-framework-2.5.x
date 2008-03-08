@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.servlet.jsp.JspException;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
 
@@ -31,6 +32,7 @@ import org.springframework.web.util.TagUtils;
  * <p><i>Must</i> be used within a {@link SelectTag 'select' tag}.
  * 
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class OptionsTag extends AbstractHtmlElementTag {
@@ -63,7 +65,6 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * array, {@link java.util.Collection} or {@link java.util.Map}.
 	 * <p>Typically a runtime expression.
 	 * @param items said items
-	 * @throws IllegalArgumentException if the supplied <code>items</code> instance is <code>null</code> 
 	 */
 	public void setItems(Object items) {
 		this.items = items;
@@ -146,21 +147,30 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		assertUnderSelectTag();
 		Object items = getItems();
 		Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
-
 		if (itemsObject != null) {
 			String itemValue = getItemValue();
 			String itemLabel = getItemLabel();
-
 			String valueProperty =
 					(itemValue != null ? ObjectUtils.getDisplayString(evaluate("itemValue", itemValue)) : null);
 			String labelProperty =
 					(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)) : null);
-
 			OptionsWriter optionWriter = new OptionsWriter(itemsObject, valueProperty, labelProperty);
 			optionWriter.writeOptions(tagWriter);
 		}
-
 		return EVAL_PAGE;
+	}
+
+	/**
+	 * Appends a counter to a specified id,
+	 * since we're dealing with multiple HTML elements.
+	 */
+	protected String resolveId() throws JspException {
+		Object id = evaluate("id", getId());
+		if (id != null) {
+			String idString = id.toString();
+			return (StringUtils.hasText(idString) ? TagIdGenerator.nextId(idString, this.pageContext) : null);
+		}
+		return null;
 	}
 
 	private void assertUnderSelectTag() {
@@ -172,6 +182,9 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	}
 
 
+	/**
+	 * Inner class that adapts OptionWriter for multiple options to be rendered.
+	 */
 	private class OptionsWriter extends OptionWriter {
 
 		public OptionsWriter(Object optionSource, String valueProperty, String labelProperty) {
@@ -183,6 +196,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		}
 
 		protected void writeCommonAttributes(TagWriter tagWriter) throws JspException {
+			writeOptionalAttribute(tagWriter, "id", resolveId());
 			writeOptionalAttributes(tagWriter);
 		}
 	}

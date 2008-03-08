@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.util.TagUtils;
  * the inner text.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
@@ -197,6 +198,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("option");
+		writeOptionalAttribute(tagWriter, "id", resolveId());
 		writeOptionalAttributes(tagWriter);
 		String renderedValue = getDisplayString(value, getBindStatus().getEditor());
 		tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
@@ -208,6 +210,10 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		}
 		tagWriter.appendValue(label);
 		tagWriter.endTag();
+	}
+
+	protected String autogenerateId() throws JspException {
+		return null;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 2.0
  */
 public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
@@ -68,6 +67,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItems("${countries}");
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
+		this.tag.setId("myOption");
 		this.tag.setCssClass("myClass");
 		this.tag.setOnclick("CLICK");
 		int result = this.tag.doStartTag();
@@ -84,6 +84,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 		Element element = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
 		assertEquals("UK node not selected", "selected", element.attribute("selected").getValue());
+		assertEquals("myOption3", element.attribute("id").getValue());
 		assertEquals("myClass", element.attribute("class").getValue());
 		assertEquals("CLICK", element.attribute("onclick").getValue());
 	}
@@ -117,10 +118,12 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		Element element = (Element) rootElement.selectSingleNode("option[text() = '12.34f']");
 		assertNotNull("Option node should not be null", element);
 		assertEquals("12.34 node not selected", "selected", element.attribute("selected").getValue());
+		assertNull("No id rendered", element.attribute("id"));
 
 		element = (Element) rootElement.selectSingleNode("option[text() = '12.35f']");
 		assertNotNull("Option node should not be null", element);
 		assertNull("12.35 node incorrectly selected", element.attribute("selected"));
+		assertNull("No id rendered", element.attribute("id"));
 	}
 
 	public void testWithItemsNullReference() throws Exception {

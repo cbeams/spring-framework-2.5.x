@@ -805,6 +805,12 @@
 			<description>The String representation of thr value bound to the 'value' attribute, taking into consideration
 			any PropertyEditor associated with the enclosing 'select' tag.</description>
 		</variable>
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>HTML Standard Attribute</description>
+    </attribute>
 		<attribute>
 			<name>value</name>
 			<required>true</required>
@@ -938,8 +944,13 @@
 		<name>options</name>
 		<tag-class>org.springframework.web.servlet.tags.form.OptionsTag</tag-class>
 		<body-content>empty</body-content>
-		<description>Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound
-			value.</description>
+		<description>Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound value.</description>
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>HTML Standard Attribute</description>
+    </attribute>
 		<attribute>
 			<name>items</name>
 			<required>true</required>

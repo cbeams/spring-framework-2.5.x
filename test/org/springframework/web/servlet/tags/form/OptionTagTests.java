@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
 
 /**
- * Unit tests for the {@link OptionTag} class.
- *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @author Rick Evans
  */
 public class OptionTagTests extends AbstractHtmlElementTagTests {
@@ -100,6 +99,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	public void testRenderSelected() throws Exception {
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		this.tag.setId("myOption");
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
 		int result = this.tag.doStartTag();
@@ -111,6 +111,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "id", "myOption");
 		assertContainsAttribute(output, "value", "foo");
 		assertContainsAttribute(output, "selected", "selected");
 		assertBlockTagContains(output, "Foo");
@@ -424,7 +425,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 
-		assertEquals(getOutput(), "<option value=\"foo\">foo</option>");
+		assertEquals("<option value=\"foo\">foo</option>", getOutput());
 	}
 
 	public void testOptionTagNotNestedWithinSelectTag() throws Exception {
