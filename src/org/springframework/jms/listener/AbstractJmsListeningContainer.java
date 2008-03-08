@@ -70,6 +70,8 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private Connection sharedConnection;
 
+	private boolean sharedConnectionStarted = false;
+
 	protected final Object sharedConnectionMonitor = new Object();
 
 	private boolean active = false;
@@ -140,6 +142,18 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	protected void validateConfiguration() {
 	}
 
+	/**
+	 * Calls {@link #shutdown()} when the BeanFactory destroys the container instance.
+	 * @see #shutdown()
+	 */
+	public void destroy() {
+		shutdown();
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Lifecycle methods for starting and stopping the container
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Initialize this container.
@@ -165,103 +179,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			}
 			throw convertJmsAccessException(ex);
 		}
-	}
-
-	/**
-	 * Establish a shared Connection for this container.
-	 * <p>The default implementation delegates to {@link #createSharedConnection()},
-	 * which does one immediate attempt and throws an exception if it fails.
-	 * Can be overridden to have a recovery process in place, retrying
-	 * until a Connection can be successfully established.
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected void establishSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
-			if (this.sharedConnection == null) {
-				this.sharedConnection = createSharedConnection();
-				logger.debug("Established shared JMS Connection");
-			}
-		}
-	}
-
-	/**
-	 * Refresh the shared Connection that this container holds.
-	 * <p>Called on startup and also after an infrastructure exception
-	 * that occurred during invoker setup and/or execution.
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected final void refreshSharedConnection() throws JMSException {
-		boolean running = isRunning();
-		synchronized (this.sharedConnectionMonitor) {
-			ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), running);
-			this.sharedConnection = createSharedConnection();
-		}
-	}
-
-	/**
-	 * Create a shared Connection for this container.
-	 * <p>The default implementation creates a standard Connection
-	 * and prepares it through {@link #prepareSharedConnection}.
-	 * @return the prepared Connection
-	 * @throws JMSException if the creation failed
-	 */
-	protected Connection createSharedConnection() throws JMSException {
-		Connection con = createConnection();
-		try {
-			prepareSharedConnection(con);
-			return con;
-		}
-		catch (JMSException ex) {
-			JmsUtils.closeConnection(con);
-			throw ex;
-		}
-	}
-
-	/**
-	 * Prepare the given Connection, which is about to be registered
-	 * as shared Connection for this container.
-	 * <p>The default implementation sets the specified client id, if any.
-	 * Subclasses can override this to apply further settings.
-	 * @param connection the Connection to prepare
-	 * @throws JMSException if the preparation efforts failed
-	 * @see #getClientId()
-	 */
-	protected void prepareSharedConnection(Connection connection) throws JMSException {
-		String clientId = getClientId();
-		if (clientId != null) {
-			connection.setClientID(clientId);
-		}
-	}
-
-	/**
-	 * Return the shared JMS Connection maintained by this container.
-	 * Available after initialization.
-	 * @return the shared Connection (never <code>null</code>)
-	 * @throws IllegalStateException if this container does not maintain a
-	 * shared Connection, or if the Connection hasn't been initialized yet
-	 * @see #sharedConnectionEnabled()
-	 */
-	protected final Connection getSharedConnection() {
-		if (!sharedConnectionEnabled()) {
-			throw new IllegalStateException(
-					"This listener container does not maintain a shared Connection");
-		}
-		synchronized (this.sharedConnectionMonitor) {
-			if (this.sharedConnection == null) {
-				throw new SharedConnectionNotInitializedException(
-						"This listener container's shared Connection has not been initialized yet");
-			}
-			return this.sharedConnection;
-		}
-	}
-
-
-	/**
-	 * Calls {@link #shutdown()} when the BeanFactory destroys the container instance.
-	 * @see #shutdown()
-	 */
-	public void destroy() {
-		shutdown();
 	}
 
 	/**
@@ -315,11 +232,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Lifecycle methods for dynamically starting and stopping the container
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Start this container.
 	 * @throws JmsException if starting failed
@@ -359,24 +271,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	/**
-	 * Start the shared Connection.
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
-	 */
-	protected void startSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
-			if (this.sharedConnection != null) {
-				try {
-					this.sharedConnection.start();
-				}
-				catch (javax.jms.IllegalStateException ex) {
-					logger.debug("Ignoring Connection start exception - assuming already started", ex);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Stop this container.
 	 * @throws JmsException if stopping failed
 	 * @see #doStop
@@ -407,31 +301,29 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	/**
-	 * Stop the shared Connection.
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
+	 * Determine whether this container is currently running,
+	 * that is, whether it has been started and not stopped yet.
+	 * @see #start()
+	 * @see #stop()
+	 * @see #allowRunning()
 	 */
-	protected void stopSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
-			if (this.sharedConnection != null) {
-				try {
-					this.sharedConnection.stop();
-				}
-				catch (javax.jms.IllegalStateException ex) {
-					logger.debug("Ignoring Connection stop exception - assuming already stopped", ex);
-				}
-			}
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running && allowRunning();
 		}
 	}
 
 	/**
-	 * Return whether this container is currently running,
-	 * that is, whether it has been started and not stopped yet.
+	 * Check whether this container's listeners are generally allowed to run.
+	 * <p>This implementation always returns <code>true</code>; the default 'running'
+	 * state is purely determined by {@link #start()} / {@link #stop()}.
+	 * <p>Subclasses may override this method to check against temporary
+	 * conditions that prevent listeners from actually running. In other words,
+	 * they may apply further restrictions to the 'running' state, returning
+	 * <code>false</code> if such a restriction prevents listeners from running.
 	 */
-	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
+	protected boolean allowRunning() {
+		return true;
 	}
 
 	/**
@@ -442,7 +334,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	protected final void waitWhileNotRunning() {
 		synchronized (this.lifecycleMonitor) {
 			boolean interrupted = false;
-			while (this.active && !this.running) {
+			while (this.active && !isRunning()) {
 				if (interrupted) {
 					throw new IllegalStateException("Thread was interrupted while waiting for " +
 							"a restart of the listener container, but container is still stopped");
@@ -458,6 +350,145 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			}
 		}
 	}
+
+
+	//-------------------------------------------------------------------------
+	// Management of a shared JMS Connection
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Establish a shared Connection for this container.
+	 * <p>The default implementation delegates to {@link #createSharedConnection()},
+	 * which does one immediate attempt and throws an exception if it fails.
+	 * Can be overridden to have a recovery process in place, retrying
+	 * until a Connection can be successfully established.
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected void establishSharedConnection() throws JMSException {
+		synchronized (this.sharedConnectionMonitor) {
+			if (this.sharedConnection == null) {
+				this.sharedConnection = createSharedConnection();
+				logger.debug("Established shared JMS Connection");
+			}
+		}
+	}
+
+	/**
+	 * Refresh the shared Connection that this container holds.
+	 * <p>Called on startup and also after an infrastructure exception
+	 * that occurred during invoker setup and/or execution.
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected final void refreshSharedConnection() throws JMSException {
+		synchronized (this.sharedConnectionMonitor) {
+			ConnectionFactoryUtils.releaseConnection(
+					this.sharedConnection, getConnectionFactory(), this.sharedConnectionStarted);
+			this.sharedConnection = createSharedConnection();
+			if (this.sharedConnectionStarted) {
+				this.sharedConnection.start();
+			}
+		}
+	}
+
+	/**
+	 * Create a shared Connection for this container.
+	 * <p>The default implementation creates a standard Connection
+	 * and prepares it through {@link #prepareSharedConnection}.
+	 * @return the prepared Connection
+	 * @throws JMSException if the creation failed
+	 */
+	protected Connection createSharedConnection() throws JMSException {
+		Connection con = createConnection();
+		try {
+			prepareSharedConnection(con);
+			return con;
+		}
+		catch (JMSException ex) {
+			JmsUtils.closeConnection(con);
+			throw ex;
+		}
+	}
+
+	/**
+	 * Prepare the given Connection, which is about to be registered
+	 * as shared Connection for this container.
+	 * <p>The default implementation sets the specified client id, if any.
+	 * Subclasses can override this to apply further settings.
+	 * @param connection the Connection to prepare
+	 * @throws JMSException if the preparation efforts failed
+	 * @see #getClientId()
+	 */
+	protected void prepareSharedConnection(Connection connection) throws JMSException {
+		String clientId = getClientId();
+		if (clientId != null) {
+			connection.setClientID(clientId);
+		}
+	}
+
+	/**
+	 * Start the shared Connection.
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see javax.jms.Connection#start()
+	 */
+	protected void startSharedConnection() throws JMSException {
+		synchronized (this.sharedConnectionMonitor) {
+			if (this.sharedConnection != null) {
+				try {
+					this.sharedConnectionStarted = true;
+					this.sharedConnection.start();
+				}
+				catch (javax.jms.IllegalStateException ex) {
+					logger.debug("Ignoring Connection start exception - assuming already started", ex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Stop the shared Connection.
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see javax.jms.Connection#start()
+	 */
+	protected void stopSharedConnection() throws JMSException {
+		synchronized (this.sharedConnectionMonitor) {
+			if (this.sharedConnection != null) {
+				try {
+					this.sharedConnectionStarted = false;
+					this.sharedConnection.stop();
+				}
+				catch (javax.jms.IllegalStateException ex) {
+					logger.debug("Ignoring Connection stop exception - assuming already stopped", ex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Return the shared JMS Connection maintained by this container.
+	 * Available after initialization.
+	 * @return the shared Connection (never <code>null</code>)
+	 * @throws IllegalStateException if this container does not maintain a
+	 * shared Connection, or if the Connection hasn't been initialized yet
+	 * @see #sharedConnectionEnabled()
+	 */
+	protected final Connection getSharedConnection() {
+		if (!sharedConnectionEnabled()) {
+			throw new IllegalStateException(
+					"This listener container does not maintain a shared Connection");
+		}
+		synchronized (this.sharedConnectionMonitor) {
+			if (this.sharedConnection == null) {
+				throw new SharedConnectionNotInitializedException(
+						"This listener container's shared Connection has not been initialized yet");
+			}
+			return this.sharedConnection;
+		}
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Management of paused tasks
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Take the given task object and reschedule it, either immediately if

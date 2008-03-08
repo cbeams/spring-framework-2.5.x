@@ -204,9 +204,6 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 				this.consumers = null;
 			}
 			refreshSharedConnection();
-			if (isRunning()) {
-				startSharedConnection();
-			}
 			initializeConsumers();
 			logger.info("Successfully refreshed JMS Connection");
 		}

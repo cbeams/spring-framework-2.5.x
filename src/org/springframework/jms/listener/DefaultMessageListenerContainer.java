@@ -755,7 +755,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			try {
 				if (sharedConnectionEnabled()) {
 					refreshSharedConnection();
-					startSharedConnection();
 				}
 				else {
 					Connection con = createConnection();
