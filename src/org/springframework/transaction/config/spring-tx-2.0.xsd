@@ -71,7 +71,7 @@
 	annotations on bean classes, and that proxies are automatically
 	to be created for the relevant annotated beans.
 
-  The default annotation supported is Spring's @Transactional.
+	The default annotation supported is Spring's @Transactional.
 	Transaction semantics such as propagation settings, the isolation level,
 	the rollback rules, etc are all defined in the annotation metadata.
 				]]></xsd:documentation>
