@@ -71,7 +71,7 @@
 	annotations on bean classes, and that proxies are automatically
 	to be created for the relevant annotated beans.
 
-  The default annotation supported is Spring's @Transactional.
+	The default annotation supported is Spring's @Transactional.
 	Transaction semantics such as propagation settings, the isolation level,
 	the rollback rules, etc are all defined in the annotation metadata.
 				]]></xsd:documentation>
@@ -127,12 +127,12 @@
 						</xsd:annotation>
 					</xsd:attribute>
 					<xsd:attribute name="propagation" default="REQUIRED">
-						<xsd:simpleType>
-							<xsd:annotation>
-								<xsd:documentation source="java:org.springframework.transaction.annotation.Propagation"><![CDATA[
+						<xsd:annotation>
+							<xsd:documentation source="java:org.springframework.transaction.annotation.Propagation"><![CDATA[
 	The transaction propagation behavior.
-								]]></xsd:documentation>
-							</xsd:annotation>
+							]]></xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
 							<xsd:restriction base="xsd:string">
 								<xsd:enumeration value="REQUIRED"/>
 								<xsd:enumeration value="SUPPORTS"/>
@@ -145,12 +145,12 @@
 						</xsd:simpleType>
 					</xsd:attribute>
 					<xsd:attribute name="isolation" default="DEFAULT">
-						<xsd:simpleType>
-							<xsd:annotation>
-								<xsd:documentation source="java:org.springframework.transaction.annotation.Isolation"><![CDATA[
+						<xsd:annotation>
+							<xsd:documentation source="java:org.springframework.transaction.annotation.Isolation"><![CDATA[
 	The transaction isolation level.
-								]]></xsd:documentation>
-							</xsd:annotation>
+							]]></xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
 							<xsd:restriction base="xsd:string">
 								<xsd:enumeration value="DEFAULT"/>
 								<xsd:enumeration value="READ_UNCOMMITTED"/>
