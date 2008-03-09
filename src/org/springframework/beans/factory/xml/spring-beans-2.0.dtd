@@ -34,7 +34,7 @@
 	XML documents that conform to this DTD should declare the following doctype:
 
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-		  "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+			"http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 -->
 
 
@@ -94,17 +94,17 @@
 <!ATTLIST alias alias CDATA #REQUIRED>
 
 <!--
-  Allows for arbitrary metadata to be attached to a bean definition.
+	Allows for arbitrary metadata to be attached to a bean definition.
 -->
 <!ELEMENT meta EMPTY>
 
 <!--
-  Specifies the key name of the metadata parameter being defined.
+	Specifies the key name of the metadata parameter being defined.
 -->
 <!ATTLIST meta key CDATA #REQUIRED>
 
 <!--
-  Specifies the value of the metadata parameter being defined as a String.
+	Specifies the value of the metadata parameter being defined as a String.
 -->
 <!ATTLIST meta value CDATA #REQUIRED>
 
@@ -373,12 +373,12 @@
 <!ATTLIST constructor-arg type CDATA #IMPLIED>
 
 <!--
-  A short-cut alternative to a child element "ref bean=".
+	A short-cut alternative to a child element "ref bean=".
 -->
 <!ATTLIST constructor-arg ref CDATA #IMPLIED>
 
 <!--
-  A short-cut alternative to a child element "value".
+	A short-cut alternative to a child element "value".
 -->
 <!ATTLIST constructor-arg value CDATA #IMPLIED>
 
@@ -402,12 +402,12 @@
 <!ATTLIST property name CDATA #REQUIRED>
 
 <!--
-  A short-cut alternative to a child element "ref bean=".
+	A short-cut alternative to a child element "ref bean=".
 -->
 <!ATTLIST property ref CDATA #IMPLIED>
 
 <!--
-  A short-cut alternative to a child element "value".
+	A short-cut alternative to a child element "value".
 -->
 <!ATTLIST property value CDATA #IMPLIED>
 
@@ -619,7 +619,7 @@
 	The key of the entry is given by the "key" attribute or child element.
 -->
 <!ELEMENT entry (
-  key?,
+	key?,
 	(bean | ref | idref | value | null | list | set | map | props)?
 )>
 
@@ -630,17 +630,17 @@
 <!ATTLIST entry key CDATA #IMPLIED>
 
 <!--
-  A short-cut alternative to a "key" element with a "ref bean=" child element.
+	A short-cut alternative to a "key" element with a "ref bean=" child element.
 -->
 <!ATTLIST entry key-ref CDATA #IMPLIED>
 
 <!--
-  A short-cut alternative to a child element "value".
+	A short-cut alternative to a child element "value".
 -->
 <!ATTLIST entry value CDATA #IMPLIED>
 
 <!--
-  A short-cut alternative to a child element "ref bean=".
+	A short-cut alternative to a child element "ref bean=".
 -->
 <!ATTLIST entry value-ref CDATA #IMPLIED>
 

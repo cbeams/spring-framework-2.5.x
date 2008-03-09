@@ -134,19 +134,19 @@
 						</xsd:restriction>
 					</xsd:simpleType>
 				</xsd:attribute>
-        <xsd:attribute name="depends-on" type="xsd:string">
-          <xsd:annotation>
-            <xsd:documentation><![CDATA[
-      The names of the beans that this bean depends on being initialized.
-      The bean factory will guarantee that these beans get initialized
-      before this bean.
+				<xsd:attribute name="depends-on" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+			The names of the beans that this bean depends on being initialized.
+			The bean factory will guarantee that these beans get initialized
+			before this bean.
 
-      Note that dependencies are normally expressed through bean properties.
-      This property should just be necessary other kinds of dependencies
-      like statics (*ugh*) or database preparation on startup.
-            ]]></xsd:documentation>
-          </xsd:annotation>
-        </xsd:attribute>
+			Note that dependencies are normally expressed through bean properties.
+			This property should just be necessary other kinds of dependencies
+			like statics (*ugh*) or database preparation on startup.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
 				<xsd:attribute name="init-method" type="xsd:string">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[

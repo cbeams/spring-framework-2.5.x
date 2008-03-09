@@ -225,21 +225,21 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
-      <xsd:attribute name="destination-resolver" type="xsd:string">
-        <xsd:annotation>
-          <xsd:documentation><![CDATA[
-  A reference to the DestinationResolver strategy for resolving destination names.
-  Default is to pass in the destination name Strings into the JCA ActivationSpec as-is.
-  Alternatively, specify a reference to a JndiDestinationResolver (typically in a J2EE
-  environment, in particular if the server insists on receiving Destination objects).
-          ]]></xsd:documentation>
+			<xsd:attribute name="destination-resolver" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the DestinationResolver strategy for resolving destination names.
+	Default is to pass in the destination name Strings into the JCA ActivationSpec as-is.
+	Alternatively, specify a reference to a JndiDestinationResolver (typically in a J2EE
+	environment, in particular if the server insists on receiving Destination objects).
+					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
 							<tool:expected-type type="org.springframework.jms.support.destination.DestinationResolver"/>
 						</tool:annotation>
 					</xsd:appinfo>
-        </xsd:annotation>
-      </xsd:attribute>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="message-converter" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
