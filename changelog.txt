@@ -8,6 +8,7 @@ Changes in version 2.5.3 (2008-03-31)
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
+* added "registration" attribute to mbean-export element, accepting "failOnExisting"/"ignoreExisting"/"replaceExisting"
 
 Package org.springframework.core
 * Conventions detects special generated subclasses (e.g. by OpenJPA) and derives the variable name from the superclass
@@ -18,11 +19,17 @@ Package org.springframework.ejb
 * added "cacheSessionBean" flag to SimpleRemoteStatelessSessionProxyFactoryBean, for caching the session bean object
 * added "cache-session-bean" attribute to "jee:remote-slsb" configuration element
 
+Package org.springframework.jdbc
+* added "wrapAsLob" property to DefaultLobHandler, for passing Blob/Clob instances to the JDBC driver (for PostgreSQL)
+* DefaultLobHandler's "streamAsLob" setting (requires JDBC 4.0) applies to byte array and String arguments as well
+
 Package org.springframework.jms
 * SingleConnectionFactory accepts "Connections.setClientID" calls with the same client ID as specified on the factory
 * SingleConnectionFactory accepts further "Connection.setExceptionListener" calls in "reconnectOnException" mode
 * introduced CachingConnectionFactory (as subclass of SingleConnectionFactory) for JMS 1.1 session and producer pooling
 * SimpleMessageListenerContainer registers itself as ExceptionListener for automatic Connection recovery
+* DefaultMessageListenerContainer propagates JMSExceptions thrown from a listener, potentially triggering recovery
+* added "runningAllowed()" template method to DefaultMessageListenerContainer, allowing subclass to temporarily suspend
 
 Package org.springframework.jndi
 * JndiObjectFactoryBean exposes the bean ClassLoader as thread context ClassLoader (if necessary)
@@ -39,9 +46,12 @@ Package org.springframework.scripting
 Package org.springframework.test
 * @IfProfileValue correctly checked against concrete test class, even in case of overridden test methods
 * @IfProfileValue annotation without specified value checks against presence (non-null value) of the given profile key
+* "executeSqlScript" (as in SimpleJdbcTestUtils) allows for multiple statements per line, separated by semicolons
 
 Package org.springframework.web
 * DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
+* JSP form tags do not autogenerate id in case of empty id specified (empty id signals no id to be rendered)
+* JSP OptionTag and OptionsTag support "id" attribute now, analogous to RadioButton(s)Tag and Checkbox(es)Tag
 
 
 Changes in version 2.5.2 (2008-02-29)
