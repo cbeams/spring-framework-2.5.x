@@ -4868,8 +4868,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <classname>ApplicationEvent</classname> gets published to the
       <interfacename>ApplicationContext</interfacename>, that bean will be
       notified. Essentially, this is the standard
-      <emphasis>Observer</emphasis> design pattern. Spring provides three
-      standard events:</para>
+      <emphasis>Observer</emphasis> design pattern. Spring provides the
+      following standard events:</para>
 
       <table id="beans-ctx-events-tbl">
         <title>Built-in Events</title>
