@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-
 	protected void extendRequest(MockHttpServletRequest request) {
 		request.setRequestURI(REQUEST_URI);
 		request.setQueryString(QUERY_STRING);
@@ -57,11 +56,12 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 
 	public void testWriteForm() throws Exception {
-		String action = "/form.html";
 		String commandName = "myCommand";
 		String name = "formName";
-		String enctype = "my/enctype";
+		String action = "/form.html";
 		String method = "POST";
+		String target = "myTarget";
+		String enctype = "my/enctype";
 		String onsubmit = "onsubmit";
 		String onreset = "onreset";
 		String cssClass = "myClass";
@@ -71,10 +71,11 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setName(name);
 		this.tag.setCssClass(cssClass);
 		this.tag.setCssStyle(cssStyle);
-		this.tag.setAction(action);
 		this.tag.setCommandName(commandName);
-		this.tag.setEnctype(enctype);
+		this.tag.setAction(action);
 		this.tag.setMethod(method);
+		this.tag.setTarget(target);
+		this.tag.setEnctype(enctype);
 		this.tag.setOnsubmit(onsubmit);
 		this.tag.setOnreset(onreset);
 		this.tag.setAcceptCharset(acceptCharset);
@@ -98,8 +99,9 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "class", cssClass);
 		assertContainsAttribute(output, "style", cssStyle);
 		assertContainsAttribute(output, "action", action);
-		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "method", method);
+		assertContainsAttribute(output, "target", target);
+		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "onsubmit", onsubmit);
 		assertContainsAttribute(output, "onreset", onreset);
 		assertContainsAttribute(output, "id", commandName);
@@ -161,7 +163,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String xssQueryString = QUERY_STRING + "&stuff=\"><script>alert('XSS!')</script>";
 		request.setQueryString(xssQueryString);
 		tag.doStartTag();
-		assertEquals("<form id=\"command\" method=\"post\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;script&gt;alert('XSS!')&lt;/script&gt;\">",
+		assertEquals("<form id=\"command\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;script&gt;alert('XSS!')&lt;/script&gt;\" method=\"post\">",
 				getOutput());
 	}
 

@@ -28,22 +28,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
 /**
- * <p>
  * Databinding-aware JSP tag for rendering an HTML '<code>form</code>' whose
  * inner elements are bound to properties on a <em>form object</em>.
- * </p>
- * <p>
- * Users should place the form object into the
+ *
+ * <p>Users should place the form object into the
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView} when
  * populating the data for their view. The name of this form object can be
  * configured using the {@link #setModelAttribute "modelAttribute"} property.
- * </p>
- * <p>
- * The default value for the {@link #setModelAttribute "modelAttribute"}
+ *
+ * <p>The default value for the {@link #setModelAttribute "modelAttribute"}
  * property is '<code>command</code>' which corresponds to the default name
  * when using the
  * {@link org.springframework.web.servlet.mvc.SimpleFormController SimpleFormController}.
- * </p>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -62,9 +58,11 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	private static final String ONRESET_ATTRIBUTE = "onreset";
 
+	private static final String ACTION_ATTRIBUTE = "action";
+
 	private static final String METHOD_ATTRIBUTE = "method";
 
-	private static final String ACTION_ATTRIBUTE = "action";
+	private static final String TARGET_ATTRIBUTE = "target";
 
 	private static final String ENCTYPE_ATTRIBUTE = "enctype";
 
@@ -91,6 +89,8 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	private String method = DEFAULT_METHOD;
 
+	private String target;
+
 	private String enctype;
 
 	private String onsubmit;
@@ -113,7 +113,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the name of the form attribute in the model.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getModelAttribute() {
 		return this.modelAttribute;
@@ -130,7 +129,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the name of the form attribute in the model.
-	 * <p>May be a runtime expression.
 	 * @see #getModelAttribute
 	 */
 	protected String getCommandName() {
@@ -149,7 +147,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>name</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getName() throws JspException {
 		return this.name;
@@ -165,7 +162,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>action</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getAction() {
 		return this.action;
@@ -181,10 +177,24 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>method</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getMethod() {
 		return this.method;
+	}
+
+	/**
+	 * Set the value of the '<code>target</code>' attribute.
+	 * <p>May be a runtime expression.
+	 */
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
+	/**
+	 * Get the value of the '<code>target</code>' attribute.
+	 */
+	public String getTarget() {
+		return this.target;
 	}
 
 	/**
@@ -197,7 +207,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>enctype</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getEnctype() {
 		return this.enctype;
@@ -213,7 +222,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>acceptCharset</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getAcceptCharset() {
 		return this.acceptCharset;
@@ -229,7 +237,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>onsubmit</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getOnsubmit() {
 		return this.onsubmit;
@@ -245,7 +252,6 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>onreset</code>' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getOnreset() {
 		return this.onreset;
@@ -260,16 +266,18 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		this.tagWriter = tagWriter;
-		this.tagWriter.startTag("form");
+
+		tagWriter.startTag("form");
 		writeDefaultAttributes(tagWriter);
-		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE, getDisplayString(evaluate(METHOD_ATTRIBUTE, getMethod())));
-		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
+		tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
+		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, getMethod());
+		writeOptionalAttribute(tagWriter, TARGET_ATTRIBUTE, getTarget());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, getOnsubmit());
 		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, getOnreset());
 		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
 
-		this.tagWriter.forceBlock();
+		tagWriter.forceBlock();
 
 		// Expose the form object name for nested tags...
 		String modelAttribute = resolveModelAttribute();
