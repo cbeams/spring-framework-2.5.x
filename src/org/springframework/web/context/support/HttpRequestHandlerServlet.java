@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Simple HttpServlet that delegates to an HttpRequestHandler bean defined
- * in Spring's root web application context. The bean name must match the
+ * Simple HttpServlet that delegates to an {@link HttpRequestHandler} bean defined
+ * in Spring's root web application context. The target bean name must match the
  * HttpRequestHandlerServlet servlet-name as defined in <code>web.xml</code>.
  *
  * <p>This can for example be used to expose a single Spring remote exporter,
- * such as HttpInvokerServiceExporter and HessianServiceExporter, per
- * HttpRequestHandlerServlet definition. This is an alternative to defining
- * remote exporters as beans in a DispatcherServlet context, leveraging
- * the advanced mapping and interception facilities there.
+ * such as {@link org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter}
+ * or {@link org.springframework.remoting.caucho.HessianServiceExporter},
+ * per HttpRequestHandlerServlet definition. This is a minimal alternative
+ * to defining remote exporters as beans in a DispatcherServlet context
+ * (with advanced mapping and interception facilities being available there).
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -56,7 +59,16 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		this.target.handleRequest(request, response);
+		try {
+			this.target.handleRequest(request, response);
+		}
+		catch (HttpRequestMethodNotSupportedException ex) {
+			String[] supportedMethods = ((HttpRequestMethodNotSupportedException) ex).getSupportedMethods();
+			if (supportedMethods != null) {
+				response.setHeader("Allow", StringUtils.arrayToDelimitedString(supportedMethods, ", "));
+			}
+			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex.getMessage());
+		}
 	}
 
 }
