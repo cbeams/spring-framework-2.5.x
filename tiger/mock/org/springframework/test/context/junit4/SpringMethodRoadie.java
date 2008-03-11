@@ -58,6 +58,7 @@ import org.springframework.test.context.TestContextManager;
  * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  */
 class SpringMethodRoadie {
@@ -256,16 +257,15 @@ class SpringMethodRoadie {
 		}
 		catch (InvocationTargetException ex) {
 			this.testException = ex.getTargetException();
-			if (this.testException instanceof AssumptionViolatedException) {
-				return;
-			}
-			else if (!this.testMethod.expectsException()) {
-				addFailure(this.testException);
-			}
-			else if (this.testMethod.isUnexpected(this.testException)) {
-				addFailure(new Exception("Unexpected exception, expected <" +
-						this.testMethod.getExpectedException().getName() + "> but was <" +
-						this.testException.getClass().getName() + ">", this.testException));
+			if (!(this.testException instanceof AssumptionViolatedException)) {
+				if (!this.testMethod.expectsException()) {
+					addFailure(this.testException);
+				}
+				else if (this.testMethod.isUnexpected(this.testException)) {
+					addFailure(new Exception("Unexpected exception, expected <" +
+							this.testMethod.getExpectedException().getName() + "> but was <" +
+							this.testException.getClass().getName() + ">", this.testException));
+				}
 			}
 		}
 		catch (Throwable ex) {
@@ -294,7 +294,10 @@ class SpringMethodRoadie {
 			}
 		}
 		catch (InvocationTargetException ex) {
-			addFailure(ex.getTargetException());
+			Throwable targetEx = ex.getTargetException();
+			if (!(targetEx instanceof AssumptionViolatedException)) {
+				addFailure(targetEx);
+			}
 			throw new FailedBefore();
 		}
 		catch (Throwable ex) {
