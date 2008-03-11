@@ -3383,9 +3383,9 @@ public class FileUploadBean {
     xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
 
-    &lt;bean class="org.springframework.web.servlet.mvc.DefaultAnnotationHandlerMapping"/&gt;
+    &lt;bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/&gt;
 
-    &lt;bean class="org.springframework.web.servlet.mvc.AnnotationMethodHandlerAdapter"/&gt;
+    &lt;bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/&gt;
 
     ... (controller bean definitions) ...
 
