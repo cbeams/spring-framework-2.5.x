@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,8 @@ public class ThreadPoolTaskExecutor
 	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
+
+	private boolean waitForTasksToCompleteOnShutdown = false;
 
 	private String beanName;
 
@@ -205,6 +207,17 @@ public class ThreadPoolTaskExecutor
 	public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
 		this.rejectedExecutionHandler =
 				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
+	}
+
+	/**
+	 * Set whether to wait for scheduled tasks to complete on shutdown.
+	 * <p>Default is "false". Switch this to "true" if you prefer
+	 * fully completed tasks at the expense of a longer shutdown phase.
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor#shutdown()
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor#shutdownNow()
+	 */
+	public void setWaitForTasksToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
+		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
 	public void setBeanName(String name) {
@@ -324,7 +337,12 @@ public class ThreadPoolTaskExecutor
 		if (logger.isInfoEnabled()) {
 			logger.info("Shutting down ThreadPoolExecutor" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
-		this.threadPoolExecutor.shutdown();
+		if (this.waitForTasksToCompleteOnShutdown) {
+			this.threadPoolExecutor.shutdown();
+		}
+		else {
+			this.threadPoolExecutor.shutdownNow();
+		}
 	}
 
 }
