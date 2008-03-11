@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 2.5.3 (2008-03-31)
 -------------------------------------
 
+General
+* replaced junit-4.4 jar with official JUnit 4.4 jar
+
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
 * restored support for null location array argument in ClassPathXmlApplicationContext (for Apache CXF compatibility)
@@ -41,6 +44,10 @@ Package org.springframework.mock
 Package org.springframework.remoting
 * revised (Simple)Hessian/BurlapServiceExporter's handling of non-POST requests (avoiding unnecessary warnings)
 
+Package org.springframework.scheduling
+* added "waitForTasksToCompleteOnShutdown" property to ThreadPoolTaskExecutor
+* changed ThreadPoolTaskExecutor's default behavior to shutdown immediately, not waiting for scheduled tasks
+
 Package org.springframework.scripting
 * ResourceScriptSource is able to detect updates for a script file stored in a jar/zip as well
 
@@ -48,9 +55,11 @@ Package org.springframework.test
 * @IfProfileValue correctly checked against concrete test class, even in case of overridden test methods
 * @IfProfileValue annotation without specified value checks against presence (non-null value) of the given profile key
 * "executeSqlScript" (as in SimpleJdbcTestUtils) allows for multiple statements per line, separated by semicolons
+* SpringJUnit4ClassRunner catches AssumptionViolatedException in @Before methods (analogous to standard JUnit 4.4)
 
 Package org.springframework.web
 * HttpRequestHandlerServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405
+* ContextLoader accepts system property placeholders in "contextConfigLocation" value (again)
 * DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
 * JSP form tags do not autogenerate id in case of empty id specified (empty id signals no id to be rendered)
 * JSP OptionTag and OptionsTag support "id" attribute now, analogous to RadioButton(s)Tag and Checkbox(es)Tag
