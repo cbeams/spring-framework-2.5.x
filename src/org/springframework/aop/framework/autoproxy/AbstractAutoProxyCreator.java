@@ -17,11 +17,13 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
@@ -43,7 +45,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
@@ -88,7 +91,7 @@ import org.springframework.util.ClassUtils;
  * @see DefaultAdvisorAutoProxyCreator
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
-		implements InstantiationAwareBeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware,
+		implements SmartInstantiationAwareBeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware,
 		Ordered, AopInfrastructureBean {
 
 	/**
@@ -138,9 +141,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	private final Set targetSourcedBeans = Collections.synchronizedSet(new HashSet());
 
+	private final Set earlyProxyReferences = Collections.synchronizedSet(new HashSet());
+
 	private final Set advisedBeans = Collections.synchronizedSet(new HashSet());
 
 	private final Set nonAdvisedBeans = Collections.synchronizedSet(new HashSet());
+
+	private final Map proxyTypes = CollectionFactory.createConcurrentMap(16);
 
 
 	/**
@@ -234,6 +241,21 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 
+	public Class predictBeanType(Class beanClass, String beanName) {
+		Object cacheKey = getCacheKey(beanClass, beanName);
+		return (Class) this.proxyTypes.get(cacheKey);
+	}
+
+	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
+		return null;
+	}
+
+	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+		Object cacheKey = getCacheKey(bean.getClass(), beanName);
+		this.earlyProxyReferences.add(cacheKey);
+		return wrapIfNecessary(bean, beanName, cacheKey);
+	}
+
 	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
@@ -254,7 +276,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (targetSource != null) {
 			this.targetSourcedBeans.add(beanName);
 			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
-			return createProxy(beanClass, beanName, specificInterceptors, targetSource);
+			Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
+			this.proxyTypes.put(cacheKey, proxy.getClass());
+			return proxy;
 		}
 
 		return null;
@@ -280,26 +304,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (this.targetSourcedBeans.contains(beanName)) {
-			return bean;
-		}
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
-		if (this.nonAdvisedBeans.contains(cacheKey)) {
-			return bean;
+		if (!this.earlyProxyReferences.contains(cacheKey)) {
+			return wrapIfNecessary(bean, beanName, cacheKey);
 		}
-		if (isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
-			this.nonAdvisedBeans.add(cacheKey);
-			return bean;
-		}
-
-		// Create proxy if we have advice.
-		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
-		if (specificInterceptors != DO_NOT_PROXY) {
-			this.advisedBeans.add(cacheKey);
-			return createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
-		}
-
-		this.nonAdvisedBeans.add(cacheKey);
 		return bean;
 	}
 
@@ -312,6 +320,38 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	protected Object getCacheKey(Class beanClass, String beanName) {
 		return beanClass.getName() + "_" + beanName;
+	}
+
+	/**
+	 * Wrap the given bean if necessary, i.e. if it is eligible for being proxied.
+	 * @param bean the raw bean instance
+	 * @param beanName the name of the bean
+	 * @param cacheKey the cache key for metadata access
+	 * @return a proxy wrapping the bean, or the raw bean instance as-is
+	 */
+	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+		if (this.targetSourcedBeans.contains(beanName)) {
+			return bean;
+		}
+		if (this.nonAdvisedBeans.contains(cacheKey)) {
+			return bean;
+		}
+		if (isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
+			this.nonAdvisedBeans.add(cacheKey);
+			return bean;
+		}
+
+		// Create proxy if we have advice.
+		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		if (specificInterceptors != DO_NOT_PROXY) {
+			this.advisedBeans.add(cacheKey);
+			Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+			this.proxyTypes.put(cacheKey, proxy.getClass());
+			return proxy;
+		}
+
+		this.nonAdvisedBeans.add(cacheKey);
+		return bean;
 	}
 
 	/**
