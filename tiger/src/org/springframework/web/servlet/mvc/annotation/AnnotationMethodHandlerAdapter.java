@@ -459,10 +459,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						bestPathMatch = mappedPath;
 					}
 					else {
-						if ((mappedPath != null && (bestPathMatch == null ||
-								mappedPath.equals(lookupPath) || bestPathMatch.length() < mappedPath.length())) ||
-								(bestMappingMatch.methods.length == 0 && mapping.methods.length > 0) ||
-								bestMappingMatch.params.length < mapping.params.length) {
+						if (isBetterPathMatch(mappedPath, bestPathMatch, lookupPath) ||
+								(!isBetterPathMatch(bestPathMatch, mappedPath, lookupPath) &&
+										(isBetterMethodMatch(mapping, bestMappingMatch) ||
+										(!isBetterMethodMatch(bestMappingMatch, mapping) &&
+												isBetterParamMatch(mapping, bestMappingMatch))))) {
 							bestMappingMatch = mapping;
 							bestPathMatch = mappedPath;
 						}
@@ -491,6 +492,19 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		private boolean checkParameters(RequestMappingInfo mapping, HttpServletRequest request) {
 			return ServletAnnotationMappingUtils.checkRequestMethod(mapping.methods, request) &&
 					ServletAnnotationMappingUtils.checkParameters(mapping.params, request);
+		}
+
+		private boolean isBetterPathMatch(String mappedPath, String mappedPathToCompare, String lookupPath) {
+			return (mappedPath != null && (mappedPathToCompare == null ||
+					mappedPath.equals(lookupPath) || mappedPathToCompare.length() < mappedPath.length()));
+		}
+
+		private boolean isBetterMethodMatch(RequestMappingInfo mapping, RequestMappingInfo mappingToCompare) {
+			return (mappingToCompare.methods.length == 0 && mapping.methods.length > 0);
+		}
+
+		private boolean isBetterParamMatch(RequestMappingInfo mapping, RequestMappingInfo mappingToCompare) {
+			return (mappingToCompare.params.length < mapping.params.length);
 		}
 	}
 
