@@ -181,6 +181,10 @@ public class HandlerMethodInvoker {
 					else if (SessionStatus.class.isAssignableFrom(paramType)) {
 						args[i] = this.sessionStatus;
 					}
+					else if (Errors.class.isAssignableFrom(paramType)) {
+						throw new IllegalStateException("Errors/BindingResult argument declared " +
+								"without preceding model attribute. Check your handler method signature!");
+					}
 					else if (BeanUtils.isSimpleProperty(paramType)) {
 						isParam = true;
 					}
