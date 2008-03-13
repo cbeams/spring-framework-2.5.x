@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
@@ -111,6 +112,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			final FactoryBean factory, final String beanName, final boolean shouldPostProcess)
 			throws BeanCreationException {
 
+		AccessControlContext acc = AccessController.getContext();
 		return AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				Object object;
@@ -143,7 +145,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 
 				return object;
 			}
-		});
+		}, acc);
 	}
 
 	/**

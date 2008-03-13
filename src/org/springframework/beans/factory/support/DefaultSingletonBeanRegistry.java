@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -86,6 +87,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Cache of singleton objects: bean name --> bean instance */
 	private final Map singletonObjects = CollectionFactory.createConcurrentMapIfPossible(16);
 
+	/** Cache of singleton factories: bean name --> ObjectFactory */
+	private final Map singletonFactories = new HashMap();
+
 	/** Set of registered singletons, containing the bean names in registration order */
 	private final Set registeredSingletons = new LinkedHashSet(16);
 
@@ -130,13 +134,56 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected void addSingleton(String beanName, Object singletonObject) {
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+			this.singletonFactories.remove(beanName);
 			this.registeredSingletons.add(beanName);
 		}
 	}
 
+	/**
+	 * Add the given singleton factory for building the specified singleton
+	 * if necessary.
+	 * <p>To be called for eager registration of singletons, e.g. to be able to
+	 * resolve circular references.
+	 * @param beanName the name of the bean
+	 * @param singletonFactory the factory for the singleton object
+	 */
+	protected void addSingletonFactory(String beanName, ObjectFactory singletonFactory) {
+		Assert.notNull(singletonFactory, "Singleton factory must not be null");
+		if (!this.singletonObjects.containsKey(beanName)) {
+			synchronized (this.singletonObjects) {
+				this.singletonFactories.put(beanName, singletonFactory);
+				this.registeredSingletons.add(beanName);
+			}
+		}
+	}
+
 	public Object getSingleton(String beanName) {
+		return getSingleton(beanName, true);
+	}
+
+	/**
+	 * Return the (raw) singleton object registered under the given name.
+	 * <p>Checks already instantiated singletons and also allows for an early
+	 * reference to a currently created singleton (resolving a circular reference).
+	 * @param beanName the name of the bean to look for
+	 * @return the registered singleton object, or <code>null</code> if none found
+	 */
+	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		Object singletonObject = this.singletonObjects.get(beanName);
-		return (singletonObject != NULL_OBJECT ? singletonObject : null);
+		if (singletonObject != null) {
+			return (singletonObject != NULL_OBJECT ? singletonObject : null);
+		}
+		if (allowEarlyReference) {
+			synchronized (this.singletonObjects) {
+				ObjectFactory singletonFactory = (ObjectFactory) this.singletonFactories.get(beanName);
+				if (singletonFactory != null) {
+					singletonObject = singletonFactory.getObject();
+					this.singletonObjects.put(beanName, singletonObject);
+					this.singletonFactories.remove(beanName);
+				}
+			}
+		}
+		return singletonObject;
 	}
 
 	/**
@@ -201,13 +248,17 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
-	 * Remove the bean with the given name from the singleton cache of this factory.
-	 * <p>To be able to clean up eager registration of a singleton if creation failed.
+	 * Remove the bean with the given name from the singleton cache of this factory,
+	 * to be able to clean up eager registration of a singleton if creation failed.
 	 * @param beanName the name of the bean
+	 * @see #getSingletonMutex()
 	 */
 	protected void removeSingleton(String beanName) {
-		this.singletonObjects.remove(beanName);
-		this.registeredSingletons.remove(beanName);
+		synchronized (this.singletonObjects) {
+			this.singletonObjects.remove(beanName);
+			this.singletonFactories.remove(beanName);
+			this.registeredSingletons.remove(beanName);
+		}
 	}
 
 	public boolean containsSingleton(String beanName) {
@@ -363,10 +414,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #destroyBean
 	 */
 	public void destroySingleton(String beanName) {
-		synchronized (this.singletonObjects) {
-			// Remove a registered singleton of the given name, if any.
-			removeSingleton(beanName);
-		}
+		// Remove a registered singleton of the given name, if any.
+		removeSingleton(beanName);
 
 		// Destroy the corresponding DisposableBean instance.
 		DisposableBean disposableBean = null;

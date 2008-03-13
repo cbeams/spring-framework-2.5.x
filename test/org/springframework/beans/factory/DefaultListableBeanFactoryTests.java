@@ -18,13 +18,20 @@ package org.springframework.beans.factory;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.security.AccessController;
+import java.security.Principal;
+import java.security.PrivilegedAction;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+
+import javax.security.auth.Subject;
 
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -43,6 +50,7 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -65,7 +73,6 @@ import org.springframework.util.StopWatch;
 
 /**
  * Tests properties population and autowire behavior.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -1490,26 +1497,26 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	/**
-	public void testPrototypeCreationIsFastEnough2() throws Exception {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
-		Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = TestBean.class.newInstance();
-			setBeanNameMethod.invoke(tb, "test");
-			setBeanFactoryMethod.invoke(tb, lbf);
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
-	}
-	*/
+	 * public void testPrototypeCreationIsFastEnough2() throws Exception {
+	 * if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+	 * // Skip this test: Trace logging blows the time limit.
+	 * return;
+	 * }
+	 * DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+	 * Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
+	 * Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
+	 * StopWatch sw = new StopWatch();
+	 * sw.start("prototype");
+	 * for (int i = 0; i < 100000; i++) {
+	 * TestBean tb = TestBean.class.newInstance();
+	 * setBeanNameMethod.invoke(tb, "test");
+	 * setBeanFactoryMethod.invoke(tb, lbf);
+	 * }
+	 * sw.stop();
+	 * // System.out.println(sw.getTotalTimeMillis());
+	 * assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
+	 * }
+	 */
 
 	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
@@ -1535,29 +1542,29 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	/**
-	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough2() throws Exception {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		Constructor<TestBean> ctor = TestBean.class.getConstructor(String.class, int.class);
-		Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
-		Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = ctor.newInstance("juergen", 99);
-			setBeanNameMethod.invoke(tb, "test");
-			setBeanFactoryMethod.invoke(tb, lbf);
-			assertEquals("juergen", tb.getName());
-			assertEquals(99, tb.getAge());
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
-	}
-	*/
+	 * public void testPrototypeCreationWithConstructorArgumentsIsFastEnough2() throws Exception {
+	 * if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+	 * // Skip this test: Trace logging blows the time limit.
+	 * return;
+	 * }
+	 * DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+	 * Constructor<TestBean> ctor = TestBean.class.getConstructor(String.class, int.class);
+	 * Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
+	 * Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
+	 * StopWatch sw = new StopWatch();
+	 * sw.start("prototype");
+	 * for (int i = 0; i < 100000; i++) {
+	 * TestBean tb = ctor.newInstance("juergen", 99);
+	 * setBeanNameMethod.invoke(tb, "test");
+	 * setBeanFactoryMethod.invoke(tb, lbf);
+	 * assertEquals("juergen", tb.getName());
+	 * assertEquals(99, tb.getAge());
+	 * }
+	 * sw.stop();
+	 * // System.out.println(sw.getTotalTimeMillis());
+	 * assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
+	 * }
+	 */
 
 	public void testPrototypeCreationWithResolvedConstructorArgumentsIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
@@ -1606,30 +1613,30 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	/**
-	public void testPrototypeCreationWithPropertiesIsFastEnough2() throws Exception {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		StopWatch sw = new StopWatch();
-		Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
-		Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
-		Method setNameMethod = TestBean.class.getMethod("setName", String.class);
-		Method setAgeMethod = TestBean.class.getMethod("setAge", int.class);
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = TestBean.class.newInstance();
-			setBeanNameMethod.invoke(tb, "test");
-			setBeanFactoryMethod.invoke(tb, lbf);
-			setNameMethod.invoke(tb, "juergen");
-			setAgeMethod.invoke(tb, 99);
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 750);
-	}
-	*/
+	 * public void testPrototypeCreationWithPropertiesIsFastEnough2() throws Exception {
+	 * if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+	 * // Skip this test: Trace logging blows the time limit.
+	 * return;
+	 * }
+	 * DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+	 * StopWatch sw = new StopWatch();
+	 * Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
+	 * Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
+	 * Method setNameMethod = TestBean.class.getMethod("setName", String.class);
+	 * Method setAgeMethod = TestBean.class.getMethod("setAge", int.class);
+	 * sw.start("prototype");
+	 * for (int i = 0; i < 100000; i++) {
+	 * TestBean tb = TestBean.class.newInstance();
+	 * setBeanNameMethod.invoke(tb, "test");
+	 * setBeanFactoryMethod.invoke(tb, lbf);
+	 * setNameMethod.invoke(tb, "juergen");
+	 * setAgeMethod.invoke(tb, 99);
+	 * }
+	 * sw.stop();
+	 * // System.out.println(sw.getTotalTimeMillis());
+	 * assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 750);
+	 * }
+	 */
 
 	public void testPrototypeCreationWithResolvedPropertiesIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
@@ -1662,6 +1669,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -1870,6 +1878,24 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		else {
 			assertEquals("Property value was NOT set and still has default value", 0, tb.getAge());
 		}
+	}
+
+	public void testInitSecurityAwarePrototypeBean() {
+		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
+		bd.setScope(ConfigurableBeanFactory.SCOPE_PROTOTYPE);
+		bd.setInitMethodName("init");
+		lbf.registerBeanDefinition("test", bd);
+		final Subject subject = new Subject();
+		subject.getPrincipals().add(new TestPrincipal("user1"));
+		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
+				new PrivilegedAction() {
+					public Object run() {
+						return lbf.getBean("test");
+					}
+				}, null);
+		assertNotNull(bean);
+		assertEquals("user1", bean.getUserName());
 	}
 
 
@@ -2130,6 +2156,64 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			else {
 				return value;
 			}
+		}
+	}
+
+
+	private static class TestPrincipal implements Principal {
+
+		private String name;
+
+		public TestPrincipal(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			if (!(obj instanceof TestPrincipal)) {
+				return false;
+			}
+			TestPrincipal p = (TestPrincipal) obj;
+			return this.name.equals(p.name);
+		}
+
+		public int hashCode() {
+			return this.name.hashCode();
+		}
+	}
+
+
+	private static class TestSecuredBean {
+
+		private String userName;
+
+		public void init() {
+			Subject subject = Subject.getSubject(AccessController.getContext());
+			if (subject == null) {
+				return;
+			}
+			setNameFromPrincipal(subject.getPrincipals());
+		}
+
+		private void setNameFromPrincipal(Set principals) {
+			if (principals == null) {
+				return;
+			}
+			for (Iterator it = principals.iterator(); it.hasNext();) {
+				Principal p = (Principal) it.next();
+				this.userName = p.getName();
+				return;
+			}
+		}
+
+		public String getUserName() {
+			return this.userName;
 		}
 	}
 

@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -62,6 +64,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -127,7 +130,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private final Set ignoredDependencyInterfaces = new HashSet();
 
 	/** Cache of unfinished FactoryBean instances: FactoryBean name --> BeanWrapper */
-	private final Map factoryBeanInstanceCache = new HashMap();
+	private final Map factoryBeanInstanceCache = CollectionFactory.createConcurrentMapIfPossible(16);
 
 	/** Cache of filtered PropertyDescriptors: bean Class -> PropertyDescriptor array */
 	private final Map filteredPropertyDescriptorsCache = new HashMap();
@@ -372,6 +375,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object createBean(final String beanName, final RootBeanDefinition mbd, final Object[] args)
 			throws BeanCreationException {
 
+		AccessControlContext acc = AccessController.getContext();
 		return AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				if (logger.isDebugEnabled()) {
@@ -407,7 +411,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				return beanInstance;
 			}
-		});
+		}, acc);
 	}
 
 	/**
@@ -425,18 +429,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #instantiateUsingFactoryMethod
 	 * @see #autowireConstructor
 	 */
-	protected Object doCreateBean(String beanName, RootBeanDefinition mbd, Object[] args) {
+	protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final Object[] args) {
 		// Instantiate the bean.
 		BeanWrapper instanceWrapper = null;
 		if (mbd.isSingleton()) {
-			synchronized (getSingletonMutex()) {
-				instanceWrapper = (BeanWrapper) this.factoryBeanInstanceCache.remove(beanName);
-			}
+			instanceWrapper = (BeanWrapper) this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
-		Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
+		final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
 		Class beanType = (instanceWrapper != null ? instanceWrapper.getWrappedClass() : null);
 
 		// Allow post-processors to modify the merged bean definition.
@@ -447,20 +449,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
-		if (mbd.isSingleton() && this.allowCircularReferences &&
-				isSingletonCurrentlyInCreation(beanName)) {
+		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
+				isSingletonCurrentlyInCreation(beanName));
+		if (earlySingletonExposure) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Eagerly caching bean '" + beanName +
 						"' to allow for resolving potential circular references");
 			}
-			addSingleton(beanName, bean);
+			addSingletonFactory(beanName, new ObjectFactory() {
+				public Object getObject() throws BeansException {
+					return getEarlyBeanReference(beanName, mbd, bean);
+				}
+			});
 		}
 
 		// Initialize the bean instance.
-		Object originalBean = bean;
+		Object exposedObject = bean;
 		try {
 			populateBean(beanName, mbd, instanceWrapper);
-			bean = initializeBean(beanName, bean, mbd);
+			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
 			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
@@ -471,32 +478,38 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
-		if (!this.allowRawInjectionDespiteWrapping && originalBean != bean &&
-				mbd.isSingleton() && hasDependentBean(beanName)) {
-			String[] dependentBeans = getDependentBeans(beanName);
-			Set actualDependentBeans = new LinkedHashSet(dependentBeans.length);
-			for (int i = 0; i < dependentBeans.length; i++) {
-				String dependentBean = dependentBeans[i];
-				if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
-					actualDependentBeans.add(dependentBean);
+		if (earlySingletonExposure) {
+			Object earlySingletonReference = getSingleton(beanName, false);
+			if (earlySingletonReference != null) {
+				if (exposedObject == bean) {
+					exposedObject = earlySingletonReference;
 				}
-			}
-			if (!actualDependentBeans.isEmpty()) {
-				throw new BeanCurrentlyInCreationException(beanName,
-						"Bean with name '" + beanName + "' has been injected into other beans [" +
-						StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
-						"] in its raw version as part of a circular reference, but has eventually " +
-						"been wrapped (for example as part of auto-proxy creation). " +
-						"This means that said other beans do not use the final version of the bean. " +
-						"This is often the result of over-eager type matching - consider using " +
-						"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
+					String[] dependentBeans = getDependentBeans(beanName);
+					Set actualDependentBeans = new LinkedHashSet(dependentBeans.length);
+					for (int i = 0; i < dependentBeans.length; i++) {
+						String dependentBean = dependentBeans[i];
+						if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
+							actualDependentBeans.add(dependentBean);
+						}
+					}
+					if (!actualDependentBeans.isEmpty()) {
+						throw new BeanCurrentlyInCreationException(beanName,
+								"Bean with name '" + beanName + "' has been injected into other beans [" +
+								StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
+								"] in its raw version as part of a circular reference, but has eventually been " +
+								"wrapped. This means that said other beans do not use the final version of the " +
+								"bean. This is often the result of over-eager type matching - consider using " +
+								"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+					}
+				}
 			}
 		}
 
 		// Register bean as disposable.
-		registerDisposableBeanIfNecessary(beanName, originalBean, mbd);
+		registerDisposableBeanIfNecessary(beanName, bean, mbd);
 
-		return bean;
+		return exposedObject;
 	}
 
 	/**
@@ -615,6 +628,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// No type found - fall back to full creation of the FactoryBean instance.
 		return super.getTypeForFactoryBean(beanName, mbd);
+	}
+
+	/**
+	 * Obtain a reference for early access to the specified bean,
+	 * typically for the purpose of resolving a circular reference.
+	 * @param beanName the name of the bean (for error handling purposes)
+	 * @param mbd the merged bean definition for the bean
+	 * @param bean the raw bean instance
+	 * @return the object to expose as bean reference
+	 */
+	protected Object getEarlyBeanReference(String beanName, RootBeanDefinition mbd, Object bean) {
+		Object exposedObject = bean;
+		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
+				BeanPostProcessor bp = (BeanPostProcessor) it.next();
+				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
+				}
+			}
+		}
+		return exposedObject;
 	}
 
 
