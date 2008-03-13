@@ -271,8 +271,8 @@ public class CachedIntrospectionResults {
 							"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
 				if (JdkVersion.isAtLeastJava15()) {
-					pd = new GenericTypeAwarePropertyDescriptor(
-							beanClass, pd.getName(), pd.getReadMethod(), pd.getWriteMethod());
+					pd = new GenericTypeAwarePropertyDescriptor(beanClass, pd.getName(),
+							pd.getReadMethod(), pd.getWriteMethod(), pd.getPropertyEditorClass());
 				}
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}

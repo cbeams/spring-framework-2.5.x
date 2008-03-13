@@ -40,11 +40,12 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	private MethodParameter writeMethodParameter;
 
 
-	public GenericTypeAwarePropertyDescriptor(
-			Class beanClass, String propertyName, Method readMethod, Method writeMethod)
+	public GenericTypeAwarePropertyDescriptor(Class beanClass, String propertyName,
+			Method readMethod, Method writeMethod, Class propertyEditorClass)
 			throws IntrospectionException {
 
 		super(propertyName, readMethod, writeMethod);
+		setPropertyEditorClass(propertyEditorClass);
 		this.beanClass = beanClass;
 	}
 
