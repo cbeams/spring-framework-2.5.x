@@ -7,7 +7,17 @@ Changes in version 2.5.3 (2008-03-31)
 -------------------------------------
 
 General
-* replaced junit-4.4 jar with official JUnit 4.4 jar
+* replaced junit-4.4.jar in with-dependencies distribution with official JUnit 4.4 jar
+
+Package org.springframework.aop
+* AbstractAutoProxyCreator predicts proxy class as bean type if known already (instead of predicting the target class)
+* AbstractAutoProxyCreator exposes early singleton proxies (for resolving circular reference between proxied beans)
+
+Package org.springframework.beans
+* GenericTypeAwarePropertyDescriptor respects "propertyEditorClass" specified on original PropertyDescriptor
+* added "getEarlyBeanReference" hook to SmartInstantiationAwareBeanPostProcessor interface
+* AbstractAutowireCapableBeanFactory allows for resolving circular reference between beans wrapped by BeanPostProcessors
+* DefaultListableBeanFactory passes full inherited AccessControlContext to the AccessController for bean creation
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
@@ -34,6 +44,7 @@ Package org.springframework.jms
 * SimpleMessageListenerContainer registers itself as ExceptionListener for automatic Connection recovery
 * DefaultMessageListenerContainer propagates JMSExceptions thrown from a listener, potentially triggering recovery
 * added "runningAllowed()" template method to DefaultMessageListenerContainer, allowing subclass to temporarily suspend
+* MessageListenerAdapter propagates JMSExceptions thrown from listener method as-is (no wrapping in runtime exception)
 
 Package org.springframework.jndi
 * JndiObjectFactoryBean exposes the bean ClassLoader as thread context ClassLoader (if necessary)
@@ -61,9 +72,12 @@ Package org.springframework.web
 * HttpRequestHandlerServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405
 * ContextLoader accepts system property placeholders in "contextConfigLocation" value (again)
 * DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
+* AnnotationMethodHandlerAdapter's @RequestMapping matching is deterministic independent from the declared methor order
+* AnnotationMethodHandlerAdapter throws clear IllegalStateException in case of invalid BindingResult argument
 * JSP form tags do not autogenerate id in case of empty id specified (empty id signals no id to be rendered)
 * JSP OptionTag and OptionsTag support "id" attribute now, analogous to RadioButton(s)Tag and Checkbox(es)Tag
 * added standard HTML "target" attribute to JSP FormTag, for submitting to another window/frame
+* fixed JSP LabelTag to render valid default "for" attribute for collection/map paths as well
 
 
 Changes in version 2.5.2 (2008-02-29)
