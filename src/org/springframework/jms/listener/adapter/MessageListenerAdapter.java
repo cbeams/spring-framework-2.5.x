@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -452,8 +452,14 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 			return methodInvoker.invoke();
 		}
 		catch (InvocationTargetException ex) {
-			throw new ListenerExecutionFailedException(
-					"Listener method '" + methodName + "' threw exception", ex.getTargetException());
+			Throwable targetEx = ex.getTargetException();
+			if (targetEx instanceof JMSException) {
+				throw (JMSException) targetEx;
+			}
+			else {
+				throw new ListenerExecutionFailedException(
+						"Listener method '" + methodName + "' threw exception", targetEx);
+			}
 		}
 		catch (Throwable ex) {
 			throw new ListenerExecutionFailedException("Failed to invoke target method '" + methodName +
