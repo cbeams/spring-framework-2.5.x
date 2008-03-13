@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,11 @@ import org.springframework.mock.web.MockPageContext;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
 /**
- * Unit tests for the {@link LabelTag} class.
- *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class LabelTagTests extends AbstractFormTagTests {
+public class LabelTagTests extends AbstractFormTagTests {
 
 	private LabelTag tag;
 
@@ -41,7 +39,6 @@ public final class LabelTagTests extends AbstractFormTagTests {
 				return new TagWriter(getWriter());
 			}
 		};
-		this.tag.setPath("name");
 		this.tag.setPageContext(getPageContext());
 	}
 
@@ -56,6 +53,7 @@ public final class LabelTagTests extends AbstractFormTagTests {
 
 
 	public void testSimpleRender() throws Exception {
+		this.tag.setPath("name");
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
 
@@ -73,7 +71,27 @@ public final class LabelTagTests extends AbstractFormTagTests {
 		assertTrue(output.endsWith("</label>"));
 	}
 
+	public void testSimpleRenderWithMapElement() throws Exception {
+		this.tag.setPath("someMap[1]");
+		int startResult = this.tag.doStartTag();
+		int endResult = this.tag.doEndTag();
+
+		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
+		assertEquals(Tag.EVAL_PAGE, endResult);
+
+		String output = getOutput();
+		// we are using a nexted path (see extendPageContext(..)), so...
+		assertContainsAttribute(output, "for", "spouse.someMap1");
+		// name attribute is not supported by <label/>
+		assertAttributeNotPresent(output, "name");
+		// id attribute is supported, but we don't want it
+		assertAttributeNotPresent(output, "id");
+		assertTrue(output.startsWith("<label "));
+		assertTrue(output.endsWith("</label>"));
+	}
+
 	public void testOverrideFor() throws Exception {
+		this.tag.setPath("name");
 		this.tag.setFor("myElement");
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();

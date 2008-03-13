@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,31 +93,42 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Overrides {@link #getName()} to always return the empty string "",
+	 * Overrides {@link #getName()} to always return <code>null</code>,
 	 * because the '<code>name</code>' attribute is not supported by the
 	 * '<code>label</code>' tag.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
 		// This also suppresses the 'id' attribute (which is okay for a <label/>)
-		return "";
+		return null;
 	}
 
 	/**
-	 * Returns the value that must be used for the '<code>for</code>' attribute.
+	 * Determine the '<code>for</code>' attribute value for this tag,
+	 * autogenerating one if none specified.
+	 * @see #getFor()
+	 * @see #autogenerateFor()
 	 */
-	protected final String resolveFor() throws JspException {
+	protected String resolveFor() throws JspException {
 		if (StringUtils.hasText(this.forId)) {
 			return getDisplayString(evaluate(FOR_ATTRIBUTE, this.forId));
 		}
 		else {
-			return getPropertyPath();
+			return autogenerateFor();
 		}
 	}
 
 	/**
+	 * Autogenerate the '<code>for</code>' attribute value for this tag.
+	 * <p>The default implementation delegates to {@link #getPropertyPath()},
+	 * deleting invalid characters (such as "[" or "]").
+	 */
+	protected String autogenerateFor() throws JspException {
+		return StringUtils.deleteAny(getPropertyPath(), "[]");
+	}
+
+	/**
 	 * Close the '<code>label</code>' tag.
-	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_PAGE}
 	 */
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
