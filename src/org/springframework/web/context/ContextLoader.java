@@ -185,8 +185,8 @@ public class ContextLoader {
 		}
 
 		servletContext.log("Initializing Spring root WebApplicationContext");
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Root WebApplicationContext: initialization started");
+		if (logger.isInfoEnabled()) {
+			logger.info("Root WebApplicationContext: initialization started");
 		}
 		long startTime = System.currentTimeMillis();
 
