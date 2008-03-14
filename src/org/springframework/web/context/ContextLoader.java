@@ -41,13 +41,14 @@ import org.springframework.util.ClassUtils;
  * Performs the actual initialization work for the root application context.
  * Called by {@link ContextLoaderListener} and {@link ContextLoaderServlet}.
  *
- * <p>Looks for a "contextClass" parameter at the web.xml context-param level
- * to specify the context class type, falling back to the default of
+ * <p>Looks for a {@link #CONTEXT_CLASS_PARAM "contextClass"} parameter
+ * at the <code>web.xml</code> context-param level to specify the context
+ * class type, falling back to the default of
  * {@link org.springframework.web.context.support.XmlWebApplicationContext}
  * if not found. With the default ContextLoader implementation, any context class
  * specified needs to implement the ConfigurableWebApplicationContext interface.
  *
- * <p>Processes a "{@link #CONFIG_LOCATION_PARAM contextConfigLocation}"
+ * <p>Processes a {@link #CONFIG_LOCATION_PARAM "contextConfigLocation"}
  * context-param and passes its value to the context instance, parsing it into
  * potentially multiple file paths which can be separated by any number of
  * commas and spaces, e.g. "WEB-INF/applicationContext1.xml,
@@ -61,9 +62,9 @@ import org.springframework.util.ClassUtils;
  * Spring's default ApplicationContext implementations. This can be leveraged
  * to deliberately override certain bean definitions via an extra XML file.
  *
- * <p>Above and beyond loading the root application context, this class can
- * optionally load or obtain and hook up a shared parent context to the root
- * application context. See the
+ * <p>Above and beyond loading the root application context, this class
+ * can optionally load or obtain and hook up a shared parent context to
+ * the root application context. See the
  * {@link #loadParentContext(ServletContext)} method for more information.
  *
  * @author Juergen Hoeller
@@ -343,7 +344,6 @@ public class ContextLoader {
 
 		return parentContext;
 	}
-
 
 	/**
 	 * Close Spring's web application context for the given servlet context. If
