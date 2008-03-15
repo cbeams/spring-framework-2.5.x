@@ -18,7 +18,6 @@ package org.springframework.scheduling.backportconcurrent;
 
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.Executor;
-import edu.emory.mathcs.backport.java.util.concurrent.Executors;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.RejectedExecutionException;
 import edu.emory.mathcs.backport.java.util.concurrent.RejectedExecutionHandler;
@@ -69,7 +68,7 @@ import org.springframework.util.Assert;
  * @see edu.emory.mathcs.backport.java.util.concurrent.Executors
  * @see ConcurrentTaskExecutor
  */
-public class ThreadPoolTaskExecutor
+public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		implements SchedulingTaskExecutor, Executor, BeanNameAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -86,11 +85,13 @@ public class ThreadPoolTaskExecutor
 
 	private int queueCapacity = Integer.MAX_VALUE;
 
-	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
+	private ThreadFactory threadFactory = this;
 
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
 
 	private boolean waitForTasksToCompleteOnShutdown = false;
+
+	private boolean threadNamePrefixSet = false;
 
 	private String beanName;
 
@@ -192,11 +193,14 @@ public class ThreadPoolTaskExecutor
 
 	/**
 	 * Set the ThreadFactory to use for the ThreadPoolExecutor's thread pool.
-	 * Default is the ThreadPoolExecutor's default thread factory.
-	 * @see edu.emory.mathcs.backport.java.util.concurrent.Executors#defaultThreadFactory()
+	 * <p>Default is this executor itself (i.e. the factory that this executor
+	 * inherits from). See {@link org.springframework.util.CustomizableThreadCreator}'s
+	 * javadoc for available bean properties.
+	 * @see #setThreadPriority
+	 * @see #setDaemon
 	 */
 	public void setThreadFactory(ThreadFactory threadFactory) {
-		this.threadFactory = (threadFactory != null ? threadFactory : Executors.defaultThreadFactory());
+		this.threadFactory = (threadFactory != null ? threadFactory : this);
 	}
 
 	/**
@@ -220,6 +224,11 @@ public class ThreadPoolTaskExecutor
 		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
+	public void setThreadNamePrefix(String threadNamePrefix) {
+		super.setThreadNamePrefix(threadNamePrefix);
+		this.threadNamePrefixSet = true;
+	}
+
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -240,6 +249,9 @@ public class ThreadPoolTaskExecutor
 	public void initialize() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Initializing ThreadPoolExecutor" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+		}
+		if (!this.threadNamePrefixSet && this.beanName != null) {
+			setThreadNamePrefix(this.beanName + "-");
 		}
 		BlockingQueue queue = createQueue(this.queueCapacity);
 		this.threadPoolExecutor = new ThreadPoolExecutor(
