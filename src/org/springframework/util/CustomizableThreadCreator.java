@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ package org.springframework.util;
  */
 public class CustomizableThreadCreator {
 
-	private final Object monitor = new Object();
-
 	private String threadNamePrefix;
 
 	private int threadPriority = Thread.NORM_PRIORITY;
@@ -41,12 +39,14 @@ public class CustomizableThreadCreator {
 
 	private int threadCount = 0;
 
+	private final Object threadCountMonitor = new Object();
+
 
 	/**
 	 * Create a new CustomizableThreadCreator with default thread name prefix.
 	 */
 	public CustomizableThreadCreator() {
-		this(null);
+		this.threadNamePrefix = getDefaultThreadNamePrefix();
 	}
 
 	/**
@@ -54,7 +54,7 @@ public class CustomizableThreadCreator {
 	 * @param threadNamePrefix the prefix to use for the names of newly created threads
 	 */
 	public CustomizableThreadCreator(String threadNamePrefix) {
-		setThreadNamePrefix(threadNamePrefix);
+		this.threadNamePrefix = (threadNamePrefix != null ? threadNamePrefix : getDefaultThreadNamePrefix());
 	}
 
 
@@ -159,7 +159,7 @@ public class CustomizableThreadCreator {
 	 */
 	protected String nextThreadName() {
 		int threadNumber = 0;
-		synchronized (this.monitor) {
+		synchronized (this.threadCountMonitor) {
 			this.threadCount++;
 			threadNumber = this.threadCount;
 		}
