@@ -8,6 +8,7 @@ Changes in version 2.5.3 (2008-03-31)
 
 General
 * replaced junit-4.4.jar in with-dependencies distribution with official JUnit 4.4 jar
+* spring.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
 
 Package org.springframework.aop
 * AbstractAutoProxyCreator predicts proxy class as bean type if known already (instead of predicting the target class)
@@ -15,9 +16,12 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * GenericTypeAwarePropertyDescriptor respects "propertyEditorClass" specified on original PropertyDescriptor
+* renamed ListableBeanFactory's "includePrototypes" flag to "includeNonSingletons" (affects javadoc only)
 * added "getEarlyBeanReference" hook to SmartInstantiationAwareBeanPostProcessor interface
 * AbstractAutowireCapableBeanFactory allows for resolving circular reference between beans wrapped by BeanPostProcessors
 * DefaultListableBeanFactory passes full inherited AccessControlContext to the AccessController for bean creation
+* DefaultListableBeanFactory does not eagerly initialize target beans when autowiring a PriorityOrdered post-processor
+* PropertyPlaceholderConfigurer works properly even in case of default-autowire="byType" with FactoryBeans involved
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
@@ -42,9 +46,14 @@ Package org.springframework.jms
 * SingleConnectionFactory accepts further "Connection.setExceptionListener" calls in "reconnectOnException" mode
 * introduced CachingConnectionFactory (as subclass of SingleConnectionFactory) for JMS 1.1 session and producer pooling
 * SimpleMessageListenerContainer registers itself as ExceptionListener for automatic Connection recovery
-* DefaultMessageListenerContainer propagates JMSExceptions thrown from a listener, potentially triggering recovery
 * added "runningAllowed()" template method to DefaultMessageListenerContainer, allowing subclass to temporarily suspend
+* DefaultMessageListenerContainer scales concurrent invokers eagerly even if one of the current invokers was idle
+* DefaultMessageListenerContainer uses a "maxMessagesPerTask" default of 10 when associated with a ScheduledTaskExecutor
+* DefaultMessageListenerContainer propagates JMSExceptions thrown from a listener, potentially triggering recovery
 * MessageListenerAdapter propagates JMSExceptions thrown from listener method as-is (no wrapping in runtime exception)
+
+Package org.springframework.jmx
+* MBeanExporter's autodetection does not cause CannotLoadBeanClassException for lazy-init beans (Spring 2.0 compatible)
 
 Package org.springframework.jndi
 * JndiObjectFactoryBean exposes the bean ClassLoader as thread context ClassLoader (if necessary)
@@ -58,6 +67,8 @@ Package org.springframework.remoting
 Package org.springframework.scheduling
 * added "waitForTasksToCompleteOnShutdown" property to ThreadPoolTaskExecutor
 * changed ThreadPoolTaskExecutor's default behavior to shutdown immediately, not waiting for scheduled tasks
+* ThreadPoolTaskExecutor extends CustomizableThreadFactory for common bean properties and uses itself as default factory
+* ThreadPoolTaskExecutor uses its bean name as default thread name prefix (analogous to DefaultMessageListenerContainer)
 
 Package org.springframework.scripting
 * ResourceScriptSource is able to detect updates for a script file stored in a jar/zip as well
@@ -69,8 +80,9 @@ Package org.springframework.test
 * SpringJUnit4ClassRunner catches AssumptionViolatedException in @Before methods (analogous to standard JUnit 4.4)
 
 Package org.springframework.web
-* HttpRequestHandlerServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405
 * ContextLoader accepts system property placeholders in "contextConfigLocation" value (again)
+* RequestContextFilter supports "threadContextInheritable" init-param (analogous to DispatcherServlet)
+* HttpRequestHandlerServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405
 * DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
 * AnnotationMethodHandlerAdapter's @RequestMapping matching is deterministic independent from the declared methor order
 * AnnotationMethodHandlerAdapter throws clear IllegalStateException in case of invalid BindingResult argument
