@@ -872,7 +872,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * whether to include a bean or not
 	 */
 	private void autodetect(AutodetectCallback callback) {
-		String[] beanNames = this.beanFactory.getBeanNamesForType(null);
+		String[] beanNames = this.beanFactory.getBeanNamesForType(Object.class, true, false);
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
 			if (!isExcluded(beanName)) {
