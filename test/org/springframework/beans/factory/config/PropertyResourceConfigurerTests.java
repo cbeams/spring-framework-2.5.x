@@ -25,6 +25,7 @@ import java.util.prefs.Preferences;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
@@ -540,6 +541,26 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		props.put("test", "mytest");
 		pvs.addPropertyValue("properties", new Properties(props));
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("mytest", tb.getTouchy());
+	}
+
+	public void testPropertyPlaceholderConfigurerWithAutowireByType() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("touchy", "${test}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("target", new RuntimeBeanReference("tb"));
+		ac.registerSingleton("tbProxy", ProxyFactoryBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("test", "mytest");
+		pvs.addPropertyValue("properties", new Properties(props));
+		RootBeanDefinition ppcDef = new RootBeanDefinition(PropertyPlaceholderConfigurer.class, pvs);
+		ppcDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		ac.registerBeanDefinition("configurer", ppcDef);
 		ac.refresh();
 		TestBean tb = (TestBean) ac.getBean("tb");
 		assertEquals("mytest", tb.getTouchy());
