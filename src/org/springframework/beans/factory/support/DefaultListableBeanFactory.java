@@ -202,7 +202,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeanNamesForType(type, true, true);
 	}
 
-	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean allowEagerInit) {
+	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List result = new ArrayList();
 
 		// Check all bean definitions.
@@ -223,11 +223,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 						boolean matchFound =
 								(allowEagerInit || !isFactoryBean || containsSingleton(beanName)) &&
-								(includePrototypes || isSingleton(beanName)) && isTypeMatch(beanName, type);
+								(includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type);
 						if (!matchFound && isFactoryBean) {
 							// In case of FactoryBean, try to match FactoryBean instance itself next.
 							beanName = FACTORY_BEAN_PREFIX + beanName;
-							matchFound = (includePrototypes || mbd.isSingleton()) && isTypeMatch(beanName, type);
+							matchFound = (includeNonSingletons || mbd.isSingleton()) && isTypeMatch(beanName, type);
 						}
 						if (matchFound) {
 							result.add(beanName);
@@ -265,7 +265,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!containsBeanDefinition(beanName)) {
 				// In case of FactoryBean, match object created by FactoryBean.
 				if (isFactoryBean(beanName)) {
-					if ((includePrototypes || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
+					if ((includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
 						result.add(beanName);
 						// Match found for this bean: do not match FactoryBean itself anymore.
 						continue;
@@ -298,10 +298,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeansOfType(type, true, true);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean allowEagerInit)
+	public Map getBeansOfType(Class type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
-		String[] beanNames = getBeanNamesForType(type, includePrototypes, allowEagerInit);
+		String[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		Map result = new LinkedHashMap(beanNames.length);
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];

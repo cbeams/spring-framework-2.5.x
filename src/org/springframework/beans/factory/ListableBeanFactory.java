@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 * @param type the class or interface to match, or <code>null</code> for all bean names
-	 * @param includePrototypes whether to include prototype beans too
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
 	 * or just singletons (also applies to FactoryBeans)
 	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
 	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
@@ -142,7 +142,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
-	String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean allowEagerInit);
+	String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit);
 
 	/**
 	 * Return the bean instances that match the given object type (including
@@ -194,7 +194,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * corresponding bean instances <i>in the order of definition</i> in the
 	 * backend configuration, as far as possible.
 	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
-	 * @param includePrototypes whether to include prototype beans too
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
 	 * or just singletons (also applies to FactoryBeans)
 	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
 	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
@@ -207,7 +207,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
-	Map getBeansOfType(Class type, boolean includePrototypes, boolean allowEagerInit)
+	Map getBeansOfType(Class type, boolean includeNonSingletons, boolean allowEagerInit)
 	    throws BeansException;
 
 }

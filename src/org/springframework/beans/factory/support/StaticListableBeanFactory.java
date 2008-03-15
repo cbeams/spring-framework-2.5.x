@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return getBeanNamesForType(type, true, true);
 	}
 
-	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean includeFactoryBeans) {
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 		List matches = new ArrayList();
 		Set keys = this.beans.keySet();
@@ -208,7 +208,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return getBeansOfType(type, true, true);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+	public Map getBeansOfType(Class type, boolean includeNonSingletons, boolean includeFactoryBeans)
 			throws BeansException {
 
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
@@ -226,7 +226,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					// Match object created by FactoryBean.
 					FactoryBean factory = (FactoryBean) beanInstance;
 					Class objectType = factory.getObjectType();
-					if ((includePrototypes || factory.isSingleton()) &&
+					if ((includeNonSingletons || factory.isSingleton()) &&
 							objectType != null && type.isAssignableFrom(objectType)) {
 						matches.put(beanName, getBean(beanName));
 					}

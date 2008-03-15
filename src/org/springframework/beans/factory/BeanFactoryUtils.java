@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,8 +170,8 @@ public abstract class BeanFactoryUtils {
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
-	 * @param includePrototypes whether to include prototype beans too or just singletons
-	 * (also applies to FactoryBeans)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
 	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
 	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
 	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
@@ -181,15 +181,15 @@ public abstract class BeanFactoryUtils {
 	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit) {
+			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		String[] result = lbf.getBeanNamesForType(type, includePrototypes, allowEagerInit);
+		String[] result = lbf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
-						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, allowEagerInit);
+						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
 				List resultList = new ArrayList();
 				resultList.addAll(Arrays.asList(result));
 				for (int i = 0; i < parentResult.length; i++) {
@@ -251,8 +251,8 @@ public abstract class BeanFactoryUtils {
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
-	 * @param includePrototypes whether to include prototype beans too or just singletons
-	 * (also applies to FactoryBeans)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
 	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
 	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
 	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
@@ -262,17 +262,17 @@ public abstract class BeanFactoryUtils {
 	 * @throws BeansException if a bean could not be created
 	 */
 	public static Map beansOfTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
+			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit)
 	    throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map result = new LinkedHashMap(4);
-		result.putAll(lbf.getBeansOfType(type, includePrototypes, allowEagerInit));
+		result.putAll(lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map parentResult = beansOfTypeIncludingAncestors(
-						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, allowEagerInit);
+						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
 				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
 					Map.Entry entry = (Map.Entry) it.next();
 					String beanName = (String) entry.getKey();
@@ -328,8 +328,8 @@ public abstract class BeanFactoryUtils {
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
-	 * @param includePrototypes whether to include prototype beans too or just singletons
-	 * (also applies to FactoryBeans)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
 	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
 	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
 	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
@@ -341,10 +341,10 @@ public abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
+			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit)
 	    throws BeansException {
 
-		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type, includePrototypes, allowEagerInit);
+		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type, includeNonSingletons, allowEagerInit);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}
@@ -392,8 +392,8 @@ public abstract class BeanFactoryUtils {
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
-	 * @param includePrototypes whether to include prototype beans too or just singletons
-	 * (also applies to FactoryBeans)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
 	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
 	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
 	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
@@ -405,11 +405,11 @@ public abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfType(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
+			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit)
 	    throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map beansOfType = lbf.getBeansOfType(type, includePrototypes, allowEagerInit);
+		Map beansOfType = lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}
