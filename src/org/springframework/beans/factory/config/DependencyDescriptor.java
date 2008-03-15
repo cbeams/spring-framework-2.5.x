@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,29 +46,57 @@ public class DependencyDescriptor {
 
 	private final boolean required;
 
+	private final boolean eager;
+
 	private Object[] fieldAnnotations;
 
 
 	/**
 	 * Create a new descriptor for a method or constructor parameter.
+	 * Considers the dependency as 'eager'.
 	 * @param methodParameter the MethodParameter to wrap
 	 * @param required whether the dependency is required
 	 */
 	public DependencyDescriptor(MethodParameter methodParameter, boolean required) {
+		this(methodParameter, required, true);
+	}
+
+	/**
+	 * Create a new descriptor for a method or constructor parameter.
+	 * @param methodParameter the MethodParameter to wrap
+	 * @param required whether the dependency is required
+	 * @param eager whether this dependency is 'eager' in the sense of
+	 * eagerly resolving potential target beans for type matching
+	 */
+	public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
 		this.required = required;
+		this.eager = eager;
+	}
+
+	/**
+	 * Create a new descriptor for a field.
+	 * Considers the dependency as 'eager'.
+	 * @param field the field to wrap
+	 * @param required whether the dependency is required
+	 */
+	public DependencyDescriptor(Field field, boolean required) {
+		this(field, required, true);
 	}
 
 	/**
 	 * Create a new descriptor for a field.
 	 * @param field the field to wrap
 	 * @param required whether the dependency is required
+	 * @param eager whether this dependency is 'eager' in the sense of
+	 * eagerly resolving potential target beans for type matching
 	 */
-	public DependencyDescriptor(Field field, boolean required) {
+	public DependencyDescriptor(Field field, boolean required, boolean eager) {
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
 		this.required = required;
+		this.eager = eager;
 	}
 
 
@@ -95,6 +123,14 @@ public class DependencyDescriptor {
 	 */
 	public boolean isRequired() {
 		return this.required;
+	}
+
+	/**
+	 * Return whether this dependency is 'eager' in the sense of
+	 * eagerly resolving potential target beans for type matching.
+	 */
+	public boolean isEager() {
+		return this.eager;
 	}
 
 

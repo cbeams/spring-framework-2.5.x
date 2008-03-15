@@ -66,6 +66,7 @@ import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostP
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -1064,6 +1065,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (converter == null) {
 			converter = bw;
 		}
+
 		Set autowiredBeanNames = new LinkedHashSet(4);
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
@@ -1071,8 +1073,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			try {
 				PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
 				MethodParameter methodParam = BeanUtils.getWriteMethodParameter(pd);
-				Object autowiredArgument = resolveDependency(
-						new DependencyDescriptor(methodParam, false), beanName, autowiredBeanNames, converter);
+				// Do not allow eager init for type matching in case of a prioritized post-processor.
+				boolean eager = !PriorityOrdered.class.isAssignableFrom(bw.getWrappedClass());
+				DependencyDescriptor desc = new DependencyDescriptor(methodParam, false, eager);
+
+				Object autowiredArgument = resolveDependency(desc, beanName, autowiredBeanNames, converter);
 				if (autowiredArgument != null) {
 					pvs.addPropertyValue(propertyName, autowiredArgument);
 				}

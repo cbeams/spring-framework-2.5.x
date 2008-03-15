@@ -650,7 +650,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @see #autowireConstructor
 	 */
 	protected Map findAutowireCandidates(String beanName, Class requiredType, DependencyDescriptor descriptor) {
-		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
+		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+				this, requiredType, true, descriptor.isEager());
 		Map result = new LinkedHashMap(candidateNames.length);
 		for (Iterator it = this.resolvableDependencies.keySet().iterator(); it.hasNext();) {
 			Class autowiringType = (Class) it.next();
