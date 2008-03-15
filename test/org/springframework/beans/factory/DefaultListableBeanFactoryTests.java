@@ -73,6 +73,7 @@ import org.springframework.util.StopWatch;
 
 /**
  * Tests properties population and autowire behavior.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans

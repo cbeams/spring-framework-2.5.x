@@ -306,16 +306,16 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return doctor;
 	}
 
+	public void setDoctor(INestedTestBean doctor) {
+		this.doctor = doctor;
+	}
+
 	public INestedTestBean getLawyer() {
 		return lawyer;
 	}
 
-	public void setDoctor(INestedTestBean bean) {
-		doctor = bean;
-	}
-
-	public void setLawyer(INestedTestBean bean) {
-		lawyer = bean;
+	public void setLawyer(INestedTestBean lawyer) {
+		this.lawyer = lawyer;
 	}
 
 	public Number getSomeNumber() {
