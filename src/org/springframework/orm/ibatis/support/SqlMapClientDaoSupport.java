@@ -63,7 +63,7 @@ public abstract class SqlMapClientDaoSupport extends DaoSupport {
 	 * Return the JDBC DataSource used by this DAO.
 	 */
 	public final DataSource getDataSource() {
-		return (this.sqlMapClientTemplate != null ? this.sqlMapClientTemplate.getDataSource() : null);
+		return this.sqlMapClientTemplate.getDataSource();
 	}
 
 	/**
@@ -81,7 +81,7 @@ public abstract class SqlMapClientDaoSupport extends DaoSupport {
 	 * Return the iBATIS Database Layer SqlMapClient that this template works with.
 	 */
 	public final SqlMapClient getSqlMapClient() {
-		return (this.sqlMapClientTemplate != null ? this.sqlMapClientTemplate.getSqlMapClient() : null);
+		return this.sqlMapClientTemplate.getSqlMapClient();
 	}
 
 	/**
