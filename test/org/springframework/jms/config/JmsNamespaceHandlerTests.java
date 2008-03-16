@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -65,6 +65,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 	protected void tearDown() throws Exception {
 		this.context.close();
 	}
+
 
 	public void testBeansCreated() {
 		Map containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
@@ -128,7 +129,6 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 		MockControl control3 = MockControl.createControl(TextMessage.class);
 		TextMessage message3 = (TextMessage) control3.getMock();
-		control3.expectAndReturn(message3.getText(), "Test3");
 		control3.replay();
 
 		MessageListener listener3 = getListener(DefaultMessageListenerContainer.class.getName() + "#0");
@@ -136,7 +136,12 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertSame(message3, testBean3.message);
 		control3.verify();
 	}
-	
+
+	private MessageListener getListener(String containerBeanName) {
+		DefaultMessageListenerContainer container = (DefaultMessageListenerContainer) this.context.getBean(containerBeanName);
+		return (MessageListener) container.getMessageListener();
+	}
+
 	public void testComponentRegistration() {
 		assertTrue("Parser should have registered a component named 'listener1'", context.containsComponentDefinition("listener1"));
 		assertTrue("Parser should have registered a component named 'listener2'", context.containsComponentDefinition("listener2"));
@@ -146,7 +151,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertTrue("Parser should have registered a component named '" + JmsMessageEndpointManager.class.getName() + "#0'", 
 			context.containsComponentDefinition(JmsMessageEndpointManager.class.getName() + "#0"));
 	}
-	
+
 	public void testSourceExtraction() {
 		Iterator iterator = context.getRegisteredComponents();
 		while (iterator.hasNext()) {
@@ -165,12 +170,6 @@ public class JmsNamespaceHandlerTests extends TestCase {
 				assertNotNull("AbstractBeanDefinition has no source attachment", ((AbstractBeanDefinition) beanDefs[i]).getSource());
 			}
 		}
-	}
-
-	private MessageListener getListener(String containerBeanName) {
-		DefaultMessageListenerContainer container =
-				(DefaultMessageListenerContainer) this.context.getBean(containerBeanName);
-		return (MessageListener) container.getMessageListener();
 	}
 
 
@@ -244,4 +243,5 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			this.registeredComponents.add(componentDefinition);
 		}
 	}
+
 }

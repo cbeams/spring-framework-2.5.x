@@ -324,32 +324,36 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	public void onMessage(Message message, Session session) throws JMSException {
-		Object convertedMessage = extractMessage(message);
-		String methodName = getListenerMethodName(message, convertedMessage);
-
-		if (methodName == null) {
-			Object delegate = getDelegate();
-			if (delegate != this) {
-				if (delegate instanceof SessionAwareMessageListener) {
-					if (session != null) {
-						((SessionAwareMessageListener) delegate).onMessage(message, session);
-						return;
-					}
-					else if (!(delegate instanceof MessageListener)) {
-						throw new javax.jms.IllegalStateException("MessageListenerAdapter cannot handle a " +
-								"SessionAwareMessageListener delegate if it hasn't been invoked with a Session itself");
-					}
-				}
-				if (delegate instanceof MessageListener) {
-					((MessageListener) delegate).onMessage(message);
+		// Check whether the delegate is a MessageListener impl itself.
+		// In that case, the adapter will simply act as a pass-through.
+		Object delegate = getDelegate();
+		if (delegate != this) {
+			if (delegate instanceof SessionAwareMessageListener) {
+				if (session != null) {
+					((SessionAwareMessageListener) delegate).onMessage(message, session);
 					return;
 				}
+				else if (!(delegate instanceof MessageListener)) {
+					throw new javax.jms.IllegalStateException("MessageListenerAdapter cannot handle a " +
+							"SessionAwareMessageListener delegate if it hasn't been invoked with a Session itself");
+				}
 			}
+			if (delegate instanceof MessageListener) {
+				((MessageListener) delegate).onMessage(message);
+				return;
+			}
+		}
+
+		// Regular case: find a handler method reflectively.
+		Object convertedMessage = extractMessage(message);
+		String methodName = getListenerMethodName(message, convertedMessage);
+		if (methodName == null) {
 			throw new javax.jms.IllegalStateException("No default listener method specified: " +
 					"Either specify a non-null value for the 'defaultListenerMethod' property or " +
 					"override the 'getListenerMethodName' method.");
 		}
 
+		// Invoke the handler method with appropriate arguments.
 		Object[] listenerArguments = buildListenerArguments(convertedMessage);
 		Object result = invokeListenerMethod(methodName, listenerArguments);
 		if (result != null) {
