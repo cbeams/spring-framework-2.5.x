@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -108,12 +108,12 @@ public class SimpleNamingContext implements Context {
 
 	/**
 	 * Look up the object with the given name.
-	 * Note: Not intended for direct use by applications.
+	 * <p>Note: Not intended for direct use by applications.
 	 * Will be used by any standard InitialContext JNDI lookups.
 	 * @throws javax.naming.NameNotFoundException if the object could not be found
 	 */
-	public Object lookup(String pname) throws NameNotFoundException {
-		String name = this.root + pname;
+	public Object lookup(String lookupName) throws NameNotFoundException {
+		String name = this.root + lookupName;
 		if (logger.isDebugEnabled()) {
 			logger.debug("Static JNDI lookup: [" + name + "]");
 		}
@@ -132,7 +132,7 @@ public class SimpleNamingContext implements Context {
 				}
 			}
 			throw new NameNotFoundException(
-					"Name [" + this.root + pname + "] not bound; " + this.boundObjects.size() + " bindings: [" +
+					"Name [" + this.root + lookupName + "] not bound; " + this.boundObjects.size() + " bindings: [" +
 					StringUtils.collectionToDelimitedString(this.boundObjects.keySet(), ",") + "]");
 		}
 		return found;
@@ -174,7 +174,11 @@ public class SimpleNamingContext implements Context {
 	}
 
 	public Context createSubcontext(String name) {
-		Context subcontext = new SimpleNamingContext(this.root + name, this.boundObjects, this.environment);
+		String subcontextName = this.root + name;
+		if (!subcontextName.endsWith("/")) {
+			subcontextName += "/";
+		}
+		Context subcontext = new SimpleNamingContext(subcontextName, this.boundObjects, this.environment);
 		bind(name, subcontext);
 		return subcontext;
 	}
@@ -188,15 +192,15 @@ public class SimpleNamingContext implements Context {
 	}
 
 	public Hashtable getEnvironment() {
-		return environment;
+		return this.environment;
 	}
 
 	public Object addToEnvironment(String propName, Object propVal) {
-		return environment.put(propName, propVal);
+		return this.environment.put(propName, propVal);
 	}
 
 	public Object removeFromEnvironment(String propName) {
-		return environment.remove(propName);
+		return this.environment.remove(propName);
 	}
 
 	public void close() {
@@ -299,19 +303,19 @@ public class SimpleNamingContext implements Context {
 		protected abstract Object createObject(String strippedName, Object obj);
 
 		public boolean hasMore() {
-			return iterator.hasNext();
+			return this.iterator.hasNext();
 		}
 
 		public Object next() {
-			return iterator.next();
+			return this.iterator.next();
 		}
 
 		public boolean hasMoreElements() {
-			return iterator.hasNext();
+			return this.iterator.hasNext();
 		}
 
 		public Object nextElement() {
-			return iterator.next();
+			return this.iterator.next();
 		}
 
 		public void close() {
