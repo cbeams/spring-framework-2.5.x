@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import com.ibatis.sqlmap.client.SqlMapClient;
 
 import org.springframework.dao.support.DaoSupport;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
+import org.springframework.util.Assert;
 
 /**
  * Convenient super class for iBATIS SqlMapClient data access objects.
@@ -46,6 +47,7 @@ public abstract class SqlMapClientDaoSupport extends DaoSupport {
 
 	private boolean externalTemplate = false;
 
+
 	/**
 	 * Set the JDBC DataSource to be used by this DAO.
 	 * Not required: The SqlMapClient might carry a shared DataSource.
@@ -59,7 +61,7 @@ public abstract class SqlMapClientDaoSupport extends DaoSupport {
 	 * Return the JDBC DataSource used by this DAO.
 	 */
 	public final DataSource getDataSource() {
-		return (this.sqlMapClientTemplate != null ? this.sqlMapClientTemplate.getDataSource() : null);
+		return this.sqlMapClientTemplate.getDataSource();
 	}
 
 	/**
@@ -84,9 +86,7 @@ public abstract class SqlMapClientDaoSupport extends DaoSupport {
 	 * @see #setSqlMapClient
 	 */
 	public final void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
-		if (sqlMapClientTemplate == null) {
-			throw new IllegalArgumentException("Cannot set sqlMapClientTemplate to null");
-		}
+		Assert.notNull(sqlMapClientTemplate, "SqlMapClientTemplate must not be null");
 		this.sqlMapClientTemplate = sqlMapClientTemplate;
 		this.externalTemplate = true;
 	}
@@ -96,7 +96,7 @@ public abstract class SqlMapClientDaoSupport extends DaoSupport {
 	 * pre-initialized with the SqlMapClient or set explicitly.
 	 */
 	public final SqlMapClientTemplate getSqlMapClientTemplate() {
-	  return sqlMapClientTemplate;
+	  return this.sqlMapClientTemplate;
 	}
 
 	protected final void checkDaoConfig() {
