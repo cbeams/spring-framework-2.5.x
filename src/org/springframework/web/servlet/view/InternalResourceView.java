@@ -16,7 +16,10 @@
 
 package org.springframework.web.servlet.view;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -74,6 +77,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	private Boolean exposeForwardAttributes;
 
 	private boolean exposeContextBeansAsAttributes = false;
+
+	private Set exposedContextBeanNames;
 
 	private boolean preventDispatchLoop = false;
 
@@ -146,6 +151,18 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
 		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
+	}
+
+	/**
+	 * Specify the names of beans in the context which are supposed to be exposed.
+	 * If this is non-null, only the specified beans are eligible for exposure as
+	 * attributes.
+	 * <p>If you'd like to expose all Spring beans in the application context, switch
+	 * the {@link #setExposeContextBeansAsAttributes "exposeContextBeansAsAttributes"}
+	 * flag on but do not list specific bean names for this property.
+	 */
+	public void setExposedContextBeanNames(String[] exposedContextBeanNames) {
+		this.exposedContextBeanNames = new HashSet(Arrays.asList(exposedContextBeanNames));
 	}
 
 	/**
@@ -277,9 +294,9 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see org.springframework.web.context.support.ContextExposingHttpServletRequest
 	 */
 	protected HttpServletRequest getRequestToExpose(HttpServletRequest originalRequest) {
-		if (this.exposeContextBeansAsAttributes &&
-				!(originalRequest instanceof ContextExposingHttpServletRequest)) {
-			return new ContextExposingHttpServletRequest(originalRequest, getWebApplicationContext());
+		if (this.exposeContextBeansAsAttributes || this.exposedContextBeanNames != null) {
+			return new ContextExposingHttpServletRequest(
+					originalRequest, getWebApplicationContext(), this.exposedContextBeanNames);
 		}
 		return originalRequest;
 	}

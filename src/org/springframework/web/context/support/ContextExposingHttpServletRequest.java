@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -36,6 +37,8 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 
 	private final WebApplicationContext webApplicationContext;
 
+	private final Set exposedContextBeanNames;
+
 	private Set explicitAttributes;
 
 
@@ -45,9 +48,26 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 	 * @param context the WebApplicationContext that this request runs in
 	 */
 	public ContextExposingHttpServletRequest(HttpServletRequest originalRequest, WebApplicationContext context) {
-		super(originalRequest);
-		this.webApplicationContext = context;
+		this(originalRequest, context, null);
 	}
+
+	/**
+	 * Create a new ContextExposingHttpServletRequest for the given request.
+	 * @param originalRequest the original HttpServletRequest
+	 * @param context the WebApplicationContext that this request runs in
+	 * @param exposedContextBeanNames the names of beans in the context which
+	 * are supposed to be exposed (if this is non-null, only the beans in this
+	 * Set are eligible for exposure as attributes)
+	 */
+	public ContextExposingHttpServletRequest(
+			HttpServletRequest originalRequest, WebApplicationContext context, Set exposedContextBeanNames) {
+
+		super(originalRequest);
+		Assert.notNull(context, "WebApplicationContext must not be null");
+		this.webApplicationContext = context;
+		this.exposedContextBeanNames = exposedContextBeanNames;
+	}
+
 
 	/**
 	 * Return the WebApplicationContext that this request runs in.
@@ -59,6 +79,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 
 	public Object getAttribute(String name) {
 		if ((this.explicitAttributes == null || !this.explicitAttributes.contains(name)) &&
+				(this.exposedContextBeanNames == null || this.exposedContextBeanNames.contains(name)) &&
 				this.webApplicationContext.containsBean(name)) {
 			return this.webApplicationContext.getBean(name);
 		}

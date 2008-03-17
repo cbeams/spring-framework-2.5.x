@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.jstl.core.Config;
@@ -39,6 +42,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -213,6 +217,80 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct rc attribute", request.getAttribute("rc") == null);
 		assertEquals("value1", request.getAttribute("key1"));
 		assertEquals(new Integer(2), request.getAttribute("key2"));
+	}
+
+	public void testInternalResourceViewResolverWithContextBeans() throws Exception {
+		MockServletContext sc = new MockServletContext();
+		final StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("myBean", TestBean.class);
+		wac.registerSingleton("myBean2", TestBean.class);
+		wac.setServletContext(sc);
+		wac.refresh();
+		InternalResourceViewResolver vr = new InternalResourceViewResolver();
+		Properties props = new Properties();
+		props.setProperty("key1", "value1");
+		vr.setAttributes(props);
+		Map map = new HashMap();
+		map.put("key2", new Integer(2));
+		vr.setAttributesMap(map);
+		vr.setExposeContextBeansAsAttributes(true);
+		vr.setApplicationContext(wac);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			public RequestDispatcher getRequestDispatcher(String path) {
+				return new MockRequestDispatcher(path) {
+					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
+						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
+						assertEquals("value1", forwardRequest.getAttribute("key1"));
+						assertEquals(new Integer(2), forwardRequest.getAttribute("key2"));
+						assertSame(wac.getBean("myBean"), forwardRequest.getAttribute("myBean"));
+						assertSame(wac.getBean("myBean2"), forwardRequest.getAttribute("myBean2"));
+					}
+				};
+			}
+		};
+		HttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		View view = vr.resolveViewName("example1", Locale.getDefault());
+		view.render(new HashMap(), request, response);
+	}
+
+	public void testInternalResourceViewResolverWithSpecificContextBeans() throws Exception {
+		MockServletContext sc = new MockServletContext();
+		final StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("myBean", TestBean.class);
+		wac.registerSingleton("myBean2", TestBean.class);
+		wac.setServletContext(sc);
+		wac.refresh();
+		InternalResourceViewResolver vr = new InternalResourceViewResolver();
+		Properties props = new Properties();
+		props.setProperty("key1", "value1");
+		vr.setAttributes(props);
+		Map map = new HashMap();
+		map.put("key2", new Integer(2));
+		vr.setAttributesMap(map);
+		vr.setExposedContextBeanNames(new String[] {"myBean2"});
+		vr.setApplicationContext(wac);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			public RequestDispatcher getRequestDispatcher(String path) {
+				return new MockRequestDispatcher(path) {
+					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
+						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
+						assertEquals("value1", forwardRequest.getAttribute("key1"));
+						assertEquals(new Integer(2), forwardRequest.getAttribute("key2"));
+						assertNull(forwardRequest.getAttribute("myBean"));
+						assertSame(wac.getBean("myBean2"), forwardRequest.getAttribute("myBean2"));
+					}
+				};
+			}
+		};
+		HttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		View view = vr.resolveViewName("example1", Locale.getDefault());
+		view.render(new HashMap(), request, response);
 	}
 
 	public void testInternalResourceViewResolverWithJstl() throws Exception {
