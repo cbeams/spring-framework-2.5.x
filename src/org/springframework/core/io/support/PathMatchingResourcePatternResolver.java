@@ -172,6 +172,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			Class fileLocatorClass = PathMatchingResourcePatternResolver.class.getClassLoader().loadClass(
 					"org.eclipse.core.runtime.FileLocator");
 			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", new Class[] {URL.class});
+			logger.debug("Found Equinox FileLocator for OSGi bundle URL resolution");
 		}
 		catch (Exception ex) {
 			equinoxResolveMethod = null;
@@ -372,21 +373,21 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Resolve the specified resource for path matching.
-	 * <p>The default implementation detects an Equinox OSGi "bundleresource:" URL
-	 * and resolves it into a standard jar file URL that can be traversed using
-	 * Spring's standard jar file traversal algorithm.
+	 * <p>The default implementation detects an Equinox OSGi "bundleresource:"
+	 * / "bundleentry:" URL and resolves it into a standard jar file URL that
+	 * can be traversed using Spring's standard jar file traversal algorithm.
 	 * @param original the resource to resolfe
 	 * @return the resolved resource (may be identical to the passed-in resource)
 	 * @throws IOException in case of resolution failure
 	 */
 	protected Resource resolveRootDirResource(Resource original) throws IOException {
-		URL url = original.getURL();
-		if (equinoxResolveMethod != null && "bundleresource".equals(url.getProtocol())) {
-			return new UrlResource((URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, new Object[] {url}));
+		if (equinoxResolveMethod != null) {
+			URL url = original.getURL();
+			if (url.getProtocol().startsWith("bundle")) {
+				return new UrlResource((URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, new Object[] {url}));
+			}
 		}
-		else {
-			return original;
-		}
+		return original;
 	}
 
 	/**
