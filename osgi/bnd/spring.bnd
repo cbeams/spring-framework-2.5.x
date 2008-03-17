@@ -3,6 +3,7 @@ Export-Package: !org.springframework.asm*, \
   org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
   javax.transaction*;version=${tx-version};resolution:=optional, \
+  org.eclipse.core.runtime;resolution:=optional, \
   *;resolution:=optional
 DynamicImport-Package: *
 Bundle-Version: ${spring-version-osgi}
