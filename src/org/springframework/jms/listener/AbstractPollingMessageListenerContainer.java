@@ -69,8 +69,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Juergen Hoeller
  * @since 2.0.3
- * @see #createListenerConsumer(javax.jms.Session)
- * @see #receiveAndExecute(javax.jms.Session, javax.jms.MessageConsumer)
+ * @see #createListenerConsumer
+ * @see #receiveAndExecute
  * @see #setTransactionManager
  */
 public abstract class AbstractPollingMessageListenerContainer extends AbstractMessageListenerContainer
@@ -220,19 +220,22 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	/**
 	 * Execute the listener for a message received from the given consumer,
 	 * wrapping the entire operation in an external transaction if demanded.
+	 * @param invoker the invoker object (passed through)
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
 	 * @return whether a message has been received
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doReceiveAndExecute
 	 */
-	protected boolean receiveAndExecute(Session session, MessageConsumer consumer) throws JMSException {
+	protected boolean receiveAndExecute(Object invoker, Session session, MessageConsumer consumer)
+			throws JMSException {
+
 		if (this.transactionManager != null) {
 			// Execute receive within transaction.
 			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
 			boolean messageReceived = true;
 			try {
-				messageReceived = doReceiveAndExecute(session, consumer, status);
+				messageReceived = doReceiveAndExecute(invoker, session, consumer, status);
 			}
 			catch (JMSException ex) {
 				rollbackOnException(status, ex);
@@ -252,13 +255,14 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 		else {
 			// Execute receive outside of transaction.
-			return doReceiveAndExecute(session, consumer, null);
+			return doReceiveAndExecute(invoker, session, consumer, null);
 		}
 	}
 
 	/**
 	 * Actually execute the listener for a message received from the given consumer,
 	 * fetching all requires resources and invoking the listener.
+	 * @param invoker the invoker object (passed through)
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
 	 * @param status the TransactionStatus (may be <code>null</code>)
@@ -266,7 +270,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
 	 */
-	protected boolean doReceiveAndExecute(Session session, MessageConsumer consumer, TransactionStatus status)
+	protected boolean doReceiveAndExecute(
+			Object invoker, Session session, MessageConsumer consumer, TransactionStatus status)
 			throws JMSException {
 
 		Connection conToClose = null;
@@ -305,7 +310,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
 							sessionToUse + "]");
 				}
-				messageReceived(message, session);
+				messageReceived(invoker, sessionToUse);
 				boolean exposeResource = (!transactional && isExposeListenerSession() &&
 						!TransactionSynchronizationManager.hasResource(getConnectionFactory()));
 				if (exposeResource) {
@@ -341,6 +346,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 					logger.debug("Consumer [" + consumerToUse + "] of " + (transactional ? "transactional " : "") +
 							"session [" + sessionToUse + "] did not receive a message");
 				}
+				noMessageReceived(invoker, sessionToUse);
 				return false;
 			}
 		}
@@ -401,10 +407,20 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * Template method that gets called right when a new message has been received,
 	 * before attempting to process it. Allows subclasses to react to the event
 	 * of an actual incoming message, for example adapting their consumer count.
-	 * @param message the received message
+	 * @param invoker the invoker object (passed through)
 	 * @param session the receiving JMS Session
 	 */
-	protected void messageReceived(Message message, Session session) {
+	protected void messageReceived(Object invoker, Session session) {
+	}
+
+	/**
+	 * Template method that gets called right <i>no</i> message has been received.
+	 * Allows subclasses to react to the temporary end of message inflow,
+	 * for example marking the affected invoker as idle.
+	 * @param invoker the invoker object (passed through)
+	 * @param session the receiving JMS Session
+	 */
+	protected void noMessageReceived(Object invoker, Session session) {
 	}
 
 

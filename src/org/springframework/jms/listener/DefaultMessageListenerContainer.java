@@ -22,7 +22,6 @@ import java.util.Set;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
@@ -155,6 +154,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public static final int CACHE_CONSUMER = 3;
 
+	/**
+	 * Constant that indicates automatic choice of an appropriate
+	 * caching level (depending on the transaction management strategy).
+	 * @see #setCacheLevel
+	 */
+	public static final int CACHE_AUTO = 4;
+
 
 	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
 
@@ -163,7 +169,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
 
-	private Integer cacheLevel;
+	private int cacheLevel = CACHE_AUTO;
 
 	private int concurrentConsumers = 1;
 
@@ -247,14 +253,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setTransactionManager
 	 */
 	public void setCacheLevel(int cacheLevel) {
-		this.cacheLevel = new Integer(cacheLevel);
+		this.cacheLevel = cacheLevel;
 	}
 
 	/**
 	 * Return the level of caching that this listener container is allowed to apply.
 	 */
 	public int getCacheLevel() {
-		return (this.cacheLevel != null ? this.cacheLevel.intValue() : CACHE_NONE);
+		return this.cacheLevel;
 	}
 
 
@@ -432,8 +438,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	public void initialize() {
 		// Adapt default cache level.
-		if (this.cacheLevel == null) {
-			this.cacheLevel = new Integer(getTransactionManager() != null ? CACHE_NONE : CACHE_CONSUMER);
+		if (this.cacheLevel == CACHE_AUTO) {
+			this.cacheLevel = (getTransactionManager() != null ? CACHE_NONE : CACHE_CONSUMER);
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.
@@ -595,11 +601,19 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Try scheduling a new invoker, since we know messages are coming in...
+	 * Tries scheduling a new invoker, since we know messages are coming in...
 	 * @see #scheduleNewInvokerIfAppropriate()
 	 */
-	protected void messageReceived(Message message, Session session) {
+	protected void messageReceived(Object invoker, Session session) {
+		((AsyncMessageListenerInvoker) invoker).setIdle(false);
 		scheduleNewInvokerIfAppropriate();
+	}
+
+	/**
+	 * Marks the affected invoker as idle.
+	 */
+	protected void noMessageReceived(Object invoker, Session session) {
+		((AsyncMessageListenerInvoker) invoker).setIdle(true);
 	}
 
 	/**
@@ -617,7 +631,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		if (isRunning()) {
 			resumePausedTasks();
 			synchronized (this.activeInvokerMonitor) {
-				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !wasIdle()) {
+				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
 					scheduleNewInvoker();
 					if (logger.isDebugEnabled()) {
 						logger.debug("Raised scheduled invoker count: " + this.scheduledInvokers.size());
@@ -631,16 +645,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Determine whether this listener container currently has more
 	 * than one idle instance among its scheduled invokers.
 	 */
-	private boolean wasIdle() {
-		boolean foundFirstIdle = false;
+	private boolean hasIdleInvokers() {
 		for (Iterator it = this.scheduledInvokers.iterator(); it.hasNext();) {
 			AsyncMessageListenerInvoker invoker = (AsyncMessageListenerInvoker) it.next();
-			if (invoker.wasIdle()) {
-				if (foundFirstIdle) {
-					// Second idle invoker found - consider container as idle.
-					return true;
-				}
-				foundFirstIdle = true;
+			if (invoker.isIdle()) {
+				return true;
 			}
 		}
 		return false;
@@ -929,9 +938,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private boolean invokeListener() throws JMSException {
 			initResourcesIfNecessary();
-			boolean messageReceived = receiveAndExecute(this.session, this.consumer);
+			boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
 			this.lastMessageSucceeded = true;
-			this.idle = !messageReceived;
 			return messageReceived;
 		}
 
@@ -975,7 +983,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			return (maxMessagesPerTask < 0);
 		}
 
-		public boolean wasIdle() {
+		public void setIdle(boolean idle) {
+			this.idle = idle;
+		}
+
+		public boolean isIdle() {
 			return this.idle;
 		}
 	}
