@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * Return whether or not the XML parser should be XML namespace aware.
+	 */
+	public boolean isNamespaceAware() {
+		return this.namespaceAware;
+	}
+
+	/**
 	 * Set if the XML parser should validate the document and thus enforce a DTD.
 	 * @deprecated as of Spring 2.0: superseded by "validationMode"
 	 * @see #setValidationMode
@@ -167,6 +174,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setValidationMode(int validationMode) {
 		this.validationMode = validationMode;
+	}
+
+	/**
+	 * Return the validation mode to use.
+	 */
+	public int getValidationMode() {
+		return this.validationMode;
 	}
 
 	/**
@@ -380,7 +394,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		try {
 			int validationMode = getValidationModeForResource(resource);
 			Document doc = this.documentLoader.loadDocument(
-					inputSource, getEntityResolver(), this.errorHandler, validationMode, this.namespaceAware);
+					inputSource, getEntityResolver(), this.errorHandler, validationMode, isNamespaceAware());
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -413,10 +427,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Gets the validation mode for the specified {@link Resource}. If no explicit
 	 * validation mode has been configured then the validation mode is
 	 * {@link #detectValidationMode detected}.
+	 * <p>Override this method if you would like full control over the validation
+	 * mode, even when something other than {@link #VALIDATION_AUTO} was set.
 	 */
-	private int getValidationModeForResource(Resource resource) {
-		if (this.validationMode != VALIDATION_AUTO) {
-			return this.validationMode;
+	protected int getValidationModeForResource(Resource resource) {
+		int validationModeToUse = getValidationMode();
+		if (validationModeToUse != VALIDATION_AUTO) {
+			return validationModeToUse;
 		}
 		int detectedMode = detectValidationMode(resource);
 		if (detectedMode != VALIDATION_AUTO) {
@@ -430,9 +447,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Detects which kind of validation to perform on the XML file identified
-	 * by the supplied {@link Resource}. If the
-	 * file has a <code>DOCTYPE</code> definition then DTD validation is used
-	 * otherwise XSD validation is assumed.
+	 * by the supplied {@link Resource}. If the file has a <code>DOCTYPE</code>
+	 * definition then DTD validation is used otherwise XSD validation is assumed.
+	 * <p>Override this method if you would like to customize resolution
+	 * of the {@link #VALIDATION_AUTO} mode.
 	 */
 	protected int detectValidationMode(Resource resource) {
 		if (resource.isOpen()) {
