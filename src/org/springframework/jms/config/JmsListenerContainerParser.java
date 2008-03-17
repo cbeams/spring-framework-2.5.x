@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String CONNECTION_FACTORY_ATTRIBUTE = "connection-factory";
 
 	private static final String TASK_EXECUTOR_ATTRIBUTE = "task-executor";
+
+	private static final String CACHE_ATTRIBUTE = "cache";
 
 
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
@@ -90,6 +92,20 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 					new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
+		String cache = containerEle.getAttribute(CACHE_ATTRIBUTE);
+		if (StringUtils.hasText(cache)) {
+			if (containerType.startsWith("simple")) {
+				if (!("auto".equals(cache) || "consumer".equals(cache))) {
+					parserContext.getReaderContext().warning(
+							"'cache' attribute not actively supported for listener container of type \"simple\". " +
+							"Effective runtime behavior will be equivalent to \"consumer\" / \"auto\".", containerEle);
+				}
+			}
+			else {
+				containerDef.getPropertyValues().addPropertyValue("cacheLevelName", "CACHE_" + cache.toUpperCase());
+			}
+		}
+
 		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
 		if (acknowledgeMode != null) {
 			if (acknowledgeMode.intValue() == Session.SESSION_TRANSACTED) {
@@ -106,8 +122,10 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 				parserContext.getReaderContext().error(
 						"'transaction-manager' attribute not supported for listener container of type \"simple\".", containerEle);
 			}
-			containerDef.getPropertyValues().addPropertyValue("transactionManager",
-					new RuntimeBeanReference(transactionManagerBeanName));
+			else {
+				containerDef.getPropertyValues().addPropertyValue("transactionManager",
+						new RuntimeBeanReference(transactionManagerBeanName));
+			}
 		}
 
 		int[] concurrency = parseConcurrency(containerEle, parserContext);

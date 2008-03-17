@@ -127,6 +127,26 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="cache" default="auto">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The cache level for JMS resources: "none", "connection", "session", "consumer"
+	or "auto". By default ("auto"), the cache level will effectively be "consumer",
+	unless an external transaction manager has been specified - in which case the
+	effective default will be "none" (assuming J2EE-style transaction management
+	where the given ConnectionFactory is an XA-aware pool).
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:NMTOKEN">
+						<xsd:enumeration value="none"/>
+						<xsd:enumeration value="connection"/>
+						<xsd:enumeration value="session"/>
+						<xsd:enumeration value="consumer"/>
+						<xsd:enumeration value="auto"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
 			<xsd:attribute name="acknowledge" default="auto">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
