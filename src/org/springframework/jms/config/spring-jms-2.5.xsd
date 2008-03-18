@@ -109,7 +109,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The JMS destination type for this listener: "queue", "topic" or "durableTopic".
-	Default is "queue".
+	The default is "queue".
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -124,6 +124,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The JMS client id for this listener container.
+	Needs to be specified when using durable subscriptions.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -151,9 +152,9 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The native JMS acknowledge mode: "auto", "client", "dups-ok" or "transacted".
-	The latter effectively activates a locally transacted Session; as alternative,
-	specify an external "transaction-manager" via the corresponding attribute.
-	Default is "auto".
+	A value of "transacted" effectively activates a locally transacted Session;
+	as alternative, specify an external "transaction-manager" via the corresponding
+	attribute. Default is "auto".
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -182,10 +183,12 @@
 			<xsd:attribute name="concurrency" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The maximum number of concurrent sessions/consumers to start for each listener.
-	Either a single maximum integer (e.g. "5") or a 'minimum-maximum' combo (e.g. "3-5").
+	The number of concurrent sessions/consumers to start for each listener.
+	Can either be a simple number indicating the maximum number (e.g. "5")
+	or a range indicating the lower as well as the upper limit (e.g. "3-5").
 	Note that a specified minimum is just a hint and might be ignored at runtime.
-	Default is 1.
+	Default is 1; keep concurrency limited to 1 in case of a topic listener
+	or if message ordering is important; consider raising it for general queues.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -292,6 +295,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The JMS client id for this listener container.
+	Needs to be specified when using durable subscriptions.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -299,9 +303,9 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The native JMS acknowledge mode: "auto", "client", "dups-ok" or "transacted".
-	The latter effectively activates a locally transacted Session; as alternative,
-	specify an external "transaction-manager" via the corresponding attribute.
-	Default is "auto".
+	A value of "transacted" effectively activates a locally transacted Session;
+	as alternative, specify an external "transaction-manager" via the corresponding
+	attribute. Default is "auto".
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -328,10 +332,11 @@
 			<xsd:attribute name="concurrency" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The maximum number of concurrent sessions to activate for each listener.
-	Either a single maximum integer (e.g. "5") or a 'minimum-maximum' combo (e.g. "3-5").
-	Note that a specified minimum is just a hint and might be ignored at runtime.
-	Default is 1.
+	The number of concurrent sessions/consumers to start for each listener.
+	Can either be a simple number indicating the maximum number (e.g. "5")
+	or a range indicating the lower as well as the upper limit (e.g. "3-5").
+	Note that a specified minimum is just a hint and will typically be ignored
+	at runtime when using a JCA listener container. Default is 1.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
