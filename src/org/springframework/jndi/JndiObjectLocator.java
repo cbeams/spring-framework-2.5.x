@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * property is true (the default is <strong>false</strong>) and no other scheme
  * (e.g. "java:") is given.
  *
- * <p>Subclasses may invoke the lookup method whenever it is appropriate.
+ * <p>Subclasses may invoke the {@link #lookup()} method whenever it is appropriate.
  * Some classes might do this on initialization, while others might do it
  * on demand. The latter strategy is more flexible in that it allows for
  * initialization of the locator before the JNDI object is available.
@@ -53,9 +53,9 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 
 
 	/**
-	 * Set the JNDI name to look up. If it doesn't begin with "java:comp/env/"
-	 * this prefix is added if resourceRef is set to true.
-	 * @param jndiName JNDI name to look up
+	 * Specify the JNDI name to look up. If it doesn't begin with "java:comp/env/"
+	 * this prefix is added automatically if "resourceRef" is set to "true".
+	 * @param jndiName the JNDI name to look up
 	 * @see #setResourceRef
 	 */
 	public void setJndiName(String jndiName) {
@@ -70,7 +70,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	}
 
 	/**
-	 * Set the type that the located JNDI object is supposed
+	 * Specify the type that the located JNDI object is supposed
 	 * to be assignable to, if any.
 	 */
 	public void setExpectedType(Class expectedType) {
