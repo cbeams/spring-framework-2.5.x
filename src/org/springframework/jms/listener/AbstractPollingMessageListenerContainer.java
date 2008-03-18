@@ -220,7 +220,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	/**
 	 * Execute the listener for a message received from the given consumer,
 	 * wrapping the entire operation in an external transaction if demanded.
-	 * @param invoker the invoker object (passed through)
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
 	 * @return whether a message has been received
@@ -262,7 +261,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	/**
 	 * Actually execute the listener for a message received from the given consumer,
 	 * fetching all requires resources and invoking the listener.
-	 * @param invoker the invoker object (passed through)
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
 	 * @param status the TransactionStatus (may be <code>null</code>)
@@ -414,9 +412,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	}
 
 	/**
-	 * Template method that gets called right <i>no</i> message has been received.
-	 * Allows subclasses to react to the temporary end of message inflow,
-	 * for example marking the affected invoker as idle.
+	 * Template method that gets called right <i>no</i> message has been received,
+	 * before attempting to process it. Allows subclasses to react to the event
+	 * of an actual incoming message, for example marking .
 	 * @param invoker the invoker object (passed through)
 	 * @param session the receiving JMS Session
 	 */
