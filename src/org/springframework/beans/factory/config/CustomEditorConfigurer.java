@@ -20,7 +20,11 @@ import java.beans.PropertyEditor;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
@@ -80,11 +84,15 @@ import org.springframework.util.ClassUtils;
  */
 public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
 	private Map customEditors;
+
+	private boolean ignoreUnresolvableEditors = false;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -124,6 +132,18 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 		this.customEditors = customEditors;
 	}
 
+	/**
+	 * Set whether unresolvable editors should simply be skipped.
+	 * Default is to raise an exception in such a case.
+	 * <p>This typically applies to either the editor class or the required type
+	 * class not being found in the classpath. If you expect this to happen in
+	 * some deployments and prefer to simply ignore the affected editors,
+	 * then switch this flag to "true".
+	 */
+	public void setIgnoreUnresolvableEditors(boolean ignoreUnresolvableEditors) {
+		this.ignoreUnresolvableEditors = ignoreUnresolvableEditors;
+	}
+
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -139,36 +159,47 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 		if (this.customEditors != null) {
 			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
-
 				Object key = entry.getKey();
-				Class requiredType = null;
-				if (key instanceof Class) {
-					requiredType = (Class) key;
-				}
-				else if (key instanceof String) {
-					String className = (String) key;
-					requiredType = ClassUtils.resolveClassName(className, this.beanClassLoader);
-				}
-				else {
-					throw new IllegalArgumentException(
-							"Invalid key [" + key + "] for custom editor: needs to be Class or String.");
-				}
-
 				Object value = entry.getValue();
-				if (value instanceof PropertyEditor) {
-					beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
+				Class requiredType = null;
+
+				try {
+					if (key instanceof Class) {
+						requiredType = (Class) key;
+					}
+					else if (key instanceof String) {
+						requiredType = ClassUtils.forName((String) key, this.beanClassLoader);
+					}
+					else {
+						throw new IllegalArgumentException(
+								"Invalid key [" + key + "] for custom editor: needs to be Class or String.");
+					}
+
+					if (value instanceof PropertyEditor) {
+						beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
+					}
+					else if (value instanceof Class) {
+						beanFactory.registerCustomEditor(requiredType, (Class) value);
+					}
+					else if (value instanceof String) {
+						Class editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
+						beanFactory.registerCustomEditor(requiredType, editorClass);
+					}
+					else {
+						throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
+								key + "] is not of required type [" + PropertyEditor.class.getName() +
+								"] or a corresponding Class or String value indicating a PropertyEditor implementation");
+					}
 				}
-				else if (value instanceof Class) {
-					beanFactory.registerCustomEditor(requiredType, (Class) value);
-				}
-				else if (value instanceof String) {
-					Class editorClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
-					beanFactory.registerCustomEditor(requiredType, editorClass);
-				}
-				else {
-					throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
-							key + "] is not of required type [" + PropertyEditor.class.getName() +
-							"] or a corresponding Class or String value indicating a PropertyEditor implementation");
+				catch (ClassNotFoundException ex) {
+					if (this.ignoreUnresolvableEditors) {
+						logger.info("Skipping editor [" + value + "] for required type [" + key + "]: " +
+								(requiredType != null ? "editor" : "required type") + " class not found.");
+					}
+					else {
+						throw new FatalBeanException(
+								(requiredType != null ? "Editor" : "Required type") + " class not found", ex);
+					}
 				}
 			}
 		}

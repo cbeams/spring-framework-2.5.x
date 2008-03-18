@@ -26,6 +26,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -130,6 +131,33 @@ public class CustomEditorConfigurerTests extends TestCase {
 		TestBean tb = (TestBean) bf.getBean("tb");
 		assertTrue(tb.getStringArray() != null && tb.getStringArray().length == 1);
 		assertEquals("test", tb.getStringArray()[0]);
+	}
+
+	public void testCustomEditorConfigurerWithUnresolvableEditor() throws ParseException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CustomEditorConfigurer cec = new CustomEditorConfigurer();
+		Map editors = new HashMap();
+		editors.put(Date.class, "MyNonExistingEditor");
+		editors.put("MyNonExistingType", "MyNonExistingEditor");
+		cec.setCustomEditors(editors);
+		try {
+			cec.postProcessBeanFactory(bf);
+			fail("Should have thrown FatalBeanException");
+		}
+		catch (FatalBeanException ex) {
+			assertTrue(ex.getCause() instanceof ClassNotFoundException);
+		}
+	}
+
+	public void testCustomEditorConfigurerWithIgnoredUnresolvableEditor() throws ParseException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CustomEditorConfigurer cec = new CustomEditorConfigurer();
+		Map editors = new HashMap();
+		editors.put(Date.class, "MyNonExistingEditor");
+		editors.put("MyNonExistingType", "MyNonExistingEditor");
+		cec.setCustomEditors(editors);
+		cec.setIgnoreUnresolvableEditors(true);
+		cec.postProcessBeanFactory(bf);
 	}
 
 
