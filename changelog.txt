@@ -22,6 +22,7 @@ Package org.springframework.beans
 * DefaultListableBeanFactory passes full inherited AccessControlContext to the AccessController for bean creation
 * DefaultListableBeanFactory does not eagerly initialize target beans when autowiring a PriorityOrdered post-processor
 * PropertyPlaceholderConfigurer works properly even in case of default-autowire="byType" with FactoryBeans involved
+* XmlBeanDefinitionReader's "getValidationModeForResource" method is protected now in order to allow for overriding
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
@@ -32,6 +33,7 @@ Package org.springframework.core
 * Conventions detects special generated subclasses (e.g. by OpenJPA) and derives the variable name from the superclass
 * added "lastModified()" method to Resource interface, for abstract access to the last-modified timestamp
 * ClassPathResource and UrlResource use the last-modified timestamp of the archive file for jar/zip contents
+* PathMatchingResourcePatternResolver detects WebSphere 6.1 "bundleresource:" URLs and resolves them for path matching
 
 Package org.springframework.ejb
 * added "cacheSessionBean" flag to SimpleRemoteStatelessSessionProxyFactoryBean, for caching the session bean object
@@ -40,6 +42,7 @@ Package org.springframework.ejb
 Package org.springframework.jdbc
 * added "wrapAsLob" property to DefaultLobHandler, for passing Blob/Clob instances to the JDBC driver (for PostgreSQL)
 * DefaultLobHandler's "streamAsLob" setting (requires JDBC 4.0) applies to byte array and String arguments as well
+* JdbcDaoSupport does not override specified JdbcTemplate on subsequent "setDataSource" call for same DataSource
 
 Package org.springframework.jms
 * SingleConnectionFactory accepts "Connections.setClientID" calls with the same client ID as specified on the factory
@@ -47,10 +50,12 @@ Package org.springframework.jms
 * introduced CachingConnectionFactory (as subclass of SingleConnectionFactory) for JMS 1.1 session and producer pooling
 * SimpleMessageListenerContainer registers itself as ExceptionListener for automatic Connection recovery
 * added "runningAllowed()" template method to DefaultMessageListenerContainer, allowing subclass to temporarily suspend
-* DefaultMessageListenerContainer scales concurrent invokers eagerly even if one of the current invokers was idle
+* DefaultMessageListenerContainer scales concurrent invokers eagerly in case of a sudden burst (revised idle handling)
 * DefaultMessageListenerContainer uses a "maxMessagesPerTask" default of 10 when associated with a ScheduledTaskExecutor
 * DefaultMessageListenerContainer propagates JMSExceptions thrown from a listener, potentially triggering recovery
 * MessageListenerAdapter propagates JMSExceptions thrown from listener method as-is (no wrapping in runtime exception)
+* MessageListenerAdapter invokes target (SessionAware)MessageListener immediately, not extracting the content upfront
+* added "cache" attribute to "jms:listener-container" configuration element, for customizing the resource cache level
 
 Package org.springframework.jmx
 * MBeanExporter's autodetection does not cause CannotLoadBeanClassException for lazy-init beans (Spring 2.0 compatible)
@@ -60,6 +65,10 @@ Package org.springframework.jndi
 
 Package org.springframework.mock
 * MockHttpServletResponse's "encodeURL" allows for central overriding in subclasses (affecting "encodeRedirectURL" too)
+* SimpleNamingContext's "createSubcontext" works correctly for given subcontext names without trailing slash as well
+
+Package org.springframework.orm
+* XxxDaoSupport does not override specified XxxTemplate on subsequent "setZzzFactory" call for same factory
 
 Package org.springframework.remoting
 * revised (Simple)Hessian/BurlapServiceExporter's handling of non-POST requests (avoiding unnecessary warnings)
@@ -86,6 +95,7 @@ Package org.springframework.web
 * DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
 * AnnotationMethodHandlerAdapter's @RequestMapping matching is deterministic independent from the declared methor order
 * AnnotationMethodHandlerAdapter throws clear IllegalStateException in case of invalid BindingResult argument
+* added "exposedContextBeanNames" property to InternalResourceView(Resolver), for exposing specific Spring beans only
 * JSP form tags do not autogenerate id in case of empty id specified (empty id signals no id to be rendered)
 * JSP OptionTag and OptionsTag support "id" attribute now, analogous to RadioButton(s)Tag and Checkbox(es)Tag
 * added standard HTML "target" attribute to JSP FormTag, for submitting to another window/frame
