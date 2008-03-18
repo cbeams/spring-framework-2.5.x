@@ -1,47 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="webintegration">
+<chapter id="web-integration">
 	<title>Integrating with other web frameworks</title>
+
 	<section id="intro">
 		<title>Introduction</title>
-        <para>
-            This chapter details Spring's integration with third party web frameworks
-            such as <ulink url="http://struts.apache.org/">Struts</ulink>,
-            <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink>,
-            <ulink url="http://jakarta.apache.org/tapestry/">Tapestry</ulink>, and
-            <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink>.
-        </para>
-      
-        <!-- insert some content about Spring WebFlow here -->
-        &swf-sidebar;
+    <para>
+      This chapter details Spring's integration with third party web frameworks
+      such as <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink>,
+      <ulink url="http://struts.apache.org/">Struts</ulink>,
+      <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink>, and
+      <ulink url="http://tapestry.apache.org/">Tapestry</ulink>.
+    </para>
 
-        <para>
-            One of the core value propositions of the Spring Framework is that of
-            enabling <emphasis>choice</emphasis>. In a general sense, Spring does not
-            force one to use or buy into any particular architecture, technology, or
-            methodology (although it certainly recommends some over others). This freedom
-            to pick and choose the architecture, technology, or methodology that is most
-            relevant to a developer and his or her development team is arguably most evident
-            in the web area, where Spring provides its own web framework
-            (<link linkend="mvc">SpringMVC</link>), while at the same time providing integration
-            with a number of popular third party web frameworks. This allows one to continue
-            to leverage any and all of the skills one may have acquired in a
-            particular web framework such as Struts, while at the same time being able to
-            enjoy the benefits afforded by Spring in other areas such as data access,
-            declarative transaction management, and flexible configuration and application
-            assembly.
-        </para>
-        <para>
-            Having dispensed with the woolly sales patter (c.f. the previous paragraph),
-            the remainder of this chapter will concentrate upon the meaty details of
-            integrating your favourite web framework with Spring. One thing that is often
-            commented upon by developers coming to Java from other languages is the seeming
-            super-abundance of web frameworks available in Java... there are indeed a great
-            number of web frameworks in the Java space; in fact there are far too many to
-            cover with any semblance of detail in a single chapter. This chapter thus picks
-            four of the more popular web frameworks in Java, starting with the Spring
-            configuration that is common to all of the supported web frameworks, and then
-            detailing the specific integration options for each supported web framework.
-        </para>
+    <!-- insert some content about Spring Web Flow here -->
+    &swf-sidebar;
+
+    <para>
+      One of the core value propositions of the Spring Framework is that of
+      enabling <emphasis>choice</emphasis>. In a general sense, Spring does not
+      force one to use or buy into any particular architecture, technology, or
+      methodology (although it certainly recommends some over others). This freedom
+      to pick and choose the architecture, technology, or methodology that is most
+      relevant to a developer and his or her development team is arguably most evident
+      in the web area, where Spring provides its own web framework
+      (<link linkend="mvc">Spring MVC</link>), while at the same time providing integration
+      with a number of popular third party web frameworks. This allows one to continue
+      to leverage any and all of the skills one may have acquired in a
+      particular web framework such as Struts, while at the same time being able to
+      enjoy the benefits afforded by Spring in other areas such as data access,
+      declarative transaction management, and flexible configuration and application
+      assembly.
+    </para>
+    <para>
+      Having dispensed with the woolly sales patter (c.f. the previous paragraph),
+      the remainder of this chapter will concentrate upon the meaty details of
+      integrating your favourite web framework with Spring. One thing that is often
+      commented upon by developers coming to Java from other languages is the seeming
+      super-abundance of web frameworks available in Java... there are indeed a great
+      number of web frameworks in the Java space; in fact there are far too many to
+      cover with any semblance of detail in a single chapter. This chapter thus picks
+      four of the more popular web frameworks in Java, starting with the Spring
+      configuration that is common to all of the supported web frameworks, and then
+      detailing the specific integration options for each supported web framework.
+    </para>
 		<para>
 			<emphasis>
 				Please note that this chapter does not attempt to explain how to use any
@@ -49,33 +50,34 @@
 				the presentation layer of your web application, the assumption is that you
 				are already familiar with Struts. If you need further details about any of
 				the supported web frameworks themselves, please do consult the section
-				entitled <xref linkend="webintegration-resources" /> at the end of this chapter.
-            </emphasis>
-        </para>
-    </section>
-    <section id="webintegration-common">
-		<title>Common configuration</title>
-        <para>
-            Before diving into the integration specifics of each supported web framework, let
-            us first take a look at the Spring configuration that <emphasis>not</emphasis>
-            specific to any one web framework. (This section is equally applicable to Spring's
-            own web framework, SpringMVC.)
-        </para>
-        <para>
-            One of the concepts (for want of a better word) espoused by (Spring's) lightweight
-            application model is that of a layered architecture. Remember that in a 'classic'
-            layered architecture, the web layer is but one of many layers... it serves as one
-            of the entry points into a server side application, and it delegates to service
-            objects (facades) defined in a service layer to satisfy business specific (and
-            presentation-technology agnostic) use cases. In Spring, these service objects,
-            any other business-specific objects, data access objects, etc. exist in a
-            distinct 'business context', which contains <emphasis>no</emphasis> web or
-            presentation layer objects (presentation objects such as Spring MVC controllers
-            are typically configured in a distinct 'presentation context'). This section
-            details how one configures a Spring container (a
-            <classname>WebApplicationContext</classname>) that contains all of the
-            'business beans' in one's application.
-        </para>
+				entitled <xref linkend="web-integration-resources" /> at the end of this chapter.
+      </emphasis>
+    </para>
+  </section>
+
+  <section id="web-integration-common">
+    <title>Common configuration</title>
+    <para>
+      Before diving into the integration specifics of each supported web framework, let
+      us first take a look at the Spring configuration that <emphasis>not</emphasis>
+      specific to any one web framework. (This section is equally applicable to Spring's
+      own web framework, Spring MVC.)
+    </para>
+    <para>
+      One of the concepts (for want of a better word) espoused by (Spring's) lightweight
+      application model is that of a layered architecture. Remember that in a 'classic'
+      layered architecture, the web layer is but one of many layers... it serves as one
+      of the entry points into a server side application, and it delegates to service
+      objects (facades) defined in a service layer to satisfy business specific (and
+      presentation-technology agnostic) use cases. In Spring, these service objects,
+      any other business-specific objects, data access objects, etc. exist in a
+      distinct 'business context', which contains <emphasis>no</emphasis> web or
+      presentation layer objects (presentation objects such as Spring MVC controllers
+      are typically configured in a distinct 'presentation context'). This section
+      details how one configures a Spring container (a
+      <classname>WebApplicationContext</classname>) that contains all of the
+      'business beans' in one's application.
+    </para>
 		<para>
 			Onto specifics... all that one need do is to declare a
 			<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></ulink>
@@ -87,7 +89,7 @@
 			Find below the &lt;listener/&gt; configuration:
 		</para>
 		<programlisting><![CDATA[<listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 </listener>]]></programlisting>
 		<note>
 			<para>
@@ -101,8 +103,8 @@
 			Find below the &lt;context-param/&gt; configuration:
 		</para>
 		<programlisting><![CDATA[<context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/applicationContext*.xml</param-value>
+  <param-name>contextConfigLocation</param-name>
+  <param-value>/WEB-INF/applicationContext*.xml</param-value>
 </context-param>]]></programlisting>
 		<para>
 			If you don't specify the <literal>contextConfigLocation</literal> 
@@ -141,19 +143,43 @@
 			also allow you to use dependency injection on their controllers. Each web framework
 			section has more detail on its specific integration strategies.
 		</para>
-	</section>	
+	</section>
+
 	<section id="jsf">
-		<title>JavaServer Faces</title>
+		<title>JavaServer Faces 1.1 and 1.2</title>
 		<para>
-			JavaServer Faces (JSF) is an increasingly popular component-based, event-driven
-			web framework. The key class in Spring's JSF integration is the
-			<classname>DelegatingVariableResolver</classname> class.
+			JavaServer Faces (JSF) is the JCP's standard component-based, event-driven
+			web user interface framework. As of Java EE 5, it is an official part of
+      the Java EE umbrella.
+    </para>
+    <para>
+      For a popular JSF runtime as well as for popular JSF component libraries, check
+      out the <ulink url="http://myfaces.apache.org/">Apache MyFaces project</ulink>.
+      The MyFaces project also provides common JSF extensions such as
+      <ulink url="http://myfaces.apache.org/orchestra/">MyFaces Orchestra</ulink>:
+      a Spring-based JSF extension that provides rich conversation scope support.
+    </para>
+    <note>
+      <para>
+        Spring Web Flow 2.0 provides rich JSF support through its newly
+        established Spring Faces module, both for JSF-centric usage
+        (as described in this section) and for Spring-centric usage
+        (using JSF views within a Spring MVC dispatcher). Check out the
+        <ulink url="http://www.springframework.org/webflow">Spring Web Flow website</ulink>
+        for details!
+      </para>
+    </note>
+    <para>
+      The key element in Spring's JSF integration is the JSF 1.1
+			<classname>VariableResolver</classname> mechanism. On JSF 1.2,
+      Spring supports the <classname>ELResolver</classname> mechanism
+      as a next-generation version of JSF EL integration.
 		</para>
 		<section id="jsf-delegatingvariableresolver">
-			<title>DelegatingVariableResolver</title>
+			<title>DelegatingVariableResolver (JSF 1.1/1.2)</title>
 			<para>
-				The easiest way to integrate one's Spring middle-tier with one's JSF 
-				web layer is to use the 
+				The easiest way to integrate one's Spring middle-tier with one's
+        JSF web layer is to use the
 				<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/jsf/DelegatingVariableResolver.html">
 				<classname>DelegatingVariableResolver</classname></ulink> class. To configure 
 				this variable resolver in one's application, one will need to edit one's 
@@ -161,17 +187,17 @@
 				<literal>&lt;faces-config/&gt;</literal> element, add an <literal>&lt;application/&gt;</literal> 
 				element and a <literal>&lt;variable-resolver/&gt;</literal> element within it.  
 				The value of the variable resolver should reference Spring's 
-				<classname>DelegatingVariableResolver</classname>; for example:	</para>
+				<classname>DelegatingVariableResolver</classname>; for example:</para>
 			<programlisting><![CDATA[<faces-config>
   <application>
     <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
-      <locale-config>
-        <default-locale>en</default-locale>
-        <supported-locale>en</supported-locale>
-        <supported-locale>es</supported-locale>
-      </locale-config>
-      <message-bundle>messages</message-bundle>
-    </application>
+    <locale-config>
+      <default-locale>en</default-locale>
+      <supported-locale>en</supported-locale>
+      <supported-locale>es</supported-locale>
+    </locale-config>
+    <message-bundle>messages</message-bundle>
+  </application>
 </faces-config>]]></programlisting>
 			<para>
 				The <classname>DelegatingVariableResolver</classname> will first delegate value
@@ -186,7 +212,7 @@
 			</para>
 			<programlisting><![CDATA[<managed-bean>
   <managed-bean-name>userList</managed-bean-name>
-	<managed-bean-class>com.whatever.jsf.UserList</managed-bean-class>
+  <managed-bean-class>com.whatever.jsf.UserList</managed-bean-class>
   <managed-bean-scope>request</managed-bean-scope>
   <managed-property>
     <property-name>userManager</property-name>
@@ -194,6 +220,50 @@
   </managed-property>
 </managed-bean>]]></programlisting>
 		</section>
+    <section id="jsf-springbeanvariableresolver">
+      <title>SpringBeanVariableResolver (JSF 1.1/1.2)</title>
+      <para>
+        <classname>SpringBeanVariableResolver</classname> is a variant of
+        <classname>DelegatingVariableResolver</classname>. It delegates to the
+        Spring's 'business context' <classname>WebApplicationContext</classname>
+        <emphasis>first</emphasis>, then to the default resolver of the
+        underlying JSF implementation. This is useful in particular when
+        using request/session-scoped beans with special Spring resolution rules,
+        e.g. Spring <interfacename>FactoryBean</interfacename> implementations.
+      </para>
+      <para>
+        Configuration-wise, simply define <classname>SpringBeanVariableResolver</classname>
+        in your <emphasis>faces-context.xml</emphasis> file:
+      </para>
+      <programlisting><![CDATA[<faces-config>
+  <application>
+    <variable-resolver>org.springframework.web.jsf.SpringBeanVariableResolver</variable-resolver>
+    ...
+  </application>
+</faces-config>]]></programlisting>
+    </section>
+    <section id="jsf-springbeanfaceselresolver">
+      <title>SpringBeanFacesELResolver (JSF 1.2+)</title>
+      <para>
+        <classname>SpringBeanFacesELResolver</classname> is a JSF 1.2 compliant
+        <classname>ELResolver</classname> implementation, integrating with
+        the standard Unified EL as used by JSF 1.2 and JSP 2.1. Like
+        <classname>SpringBeanVariableResolver</classname>, it delegates to the
+        Spring's 'business context' <classname>WebApplicationContext</classname>
+        <emphasis>first</emphasis>, then to the default resolver of the
+        underlying JSF implementation.
+      </para>
+      <para>
+        Configuration-wise, simply define <classname>SpringBeanFacesELResolver</classname>
+        in your JSF 1.2 <emphasis>faces-context.xml</emphasis> file:
+      </para>
+      <programlisting><![CDATA[<faces-config>
+  <application>
+    <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+    ...
+  </application>
+</faces-config>]]></programlisting>
+    </section>
 		<section id="jsf-facescontextutils">
 			<title>FacesContextUtils</title>
 			<para>
@@ -207,16 +277,11 @@
 				<interface>ServletContext</interface> parameter.
 			</para>
 			<programlisting><![CDATA[ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());]]></programlisting>
-			<para>
-				The <classname>DelegatingVariableResolver</classname> is the recommended 
-				strategy for integrating JSF and Spring. If one is looking for more robust 
-				integration features, one might want take a look at the 
-				<ulink url="http://jsf-spring.sourceforge.net/">JSF-Spring</ulink> project.
-			</para>
 		</section>
 	</section>
+
 	<section id="struts">
-		<title>Struts</title>
+		<title>Apache Struts 1.x and 2.x</title>
 		<para>
 			<ulink url="http://struts.apache.org">Struts</ulink> is the
 			<emphasis>de facto</emphasis> web framework for Java applications, mainly 
@@ -228,25 +293,39 @@
 			source (and thus free as in beer), and it had a large community, which allowed
 			the project to grow and become popular among Java web developers.
 		</para>
-		<para>
-			To integrate your Struts application with Spring, you have two options:
+    <note>
+      <para>
+        <emphasis>The following section discusses Struts 1 a.k.a. "Struts Classic".</emphasis>
+      </para>
+      <para>
+        Struts 2 is effectively a different product - a successor of
+        WebWork 2.2 (as discussed in <xref linkend="webwork"/>),
+        carrying the Struts brand now. Check out the Struts 2
+        <ulink url="http://struts.apache.org/2.x/docs/spring-plugin.html">Spring Plugin</ulink>
+        for the built-in Spring integration shipped with Struts 2.
+        In general, Struts 2 is closer to WebWork 2.2 than to Struts 1
+        in terms of its Spring integration implications.
+      </para>
+    </note>
+    <para>
+			To integrate your Struts 1.x application with Spring, you have two options:
 		</para>
 		<itemizedlist>
-   			<listitem>
-   				<para>
-   					Configure Spring to manage your Actions as beans, using the 
-					<classname>ContextLoaderPlugin</classname>, and set their 
-					dependencies in a Spring context file.
-				</para>
-   			</listitem>
-   			<listitem>
-   				<para>
-   					Subclass Spring's <classname>ActionSupport</classname> 
-					classes and grab your Spring-managed beans explicitly using 
-					a <emphasis>getWebApplicationContext()</emphasis> method.
-				</para>
-   			</listitem>
-   		</itemizedlist>
+      <listitem>
+        <para>
+          Configure Spring to manage your Actions as beans, using the
+          <classname>ContextLoaderPlugin</classname>, and set their
+          dependencies in a Spring context file.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Subclass Spring's <classname>ActionSupport</classname>
+          classes and grab your Spring-managed beans explicitly using
+          a <emphasis>getWebApplicationContext()</emphasis> method.
+        </para>
+      </listitem>
+    </itemizedlist>
 		<section id="struts-contextloaderplugin">
 			<title>ContextLoaderPlugin</title>
 			<para>
@@ -269,8 +348,8 @@
 			<para>
 				The location of the context configuration files can be customized using the
 				'<literal>contextConfigLocation</literal>' property.
-            </para>
-            <programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
+      </para>
+      <programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
   <set-property property="contextConfigLocation"
       value="/WEB-INF/action-servlet.xml,/WEB-INF/applicationContext.xml"/>
 </plug-in>]]></programlisting>
@@ -288,20 +367,20 @@
 				provides two ways to do this:
 			</para>
 			<itemizedlist>
-	   			<listitem>
-	   				<para>
-	   					Override Struts' default <classname>RequestProcessor</classname>
-						with Spring's <classname>DelegatingRequestProcessor</classname>.
-						</para>
-	   			</listitem>
-	   			<listitem>
-	   				<para>
-	   					Use the <classname>DelegatingActionProxy</classname> class 
-						in the <literal>type</literal> attribute of your
-						<literal>&lt;action-mapping&gt;</literal>.
-					</para>
-	   			</listitem>
-	   		</itemizedlist>
+        <listitem>
+          <para>
+            Override Struts' default <classname>RequestProcessor</classname>
+            with Spring's <classname>DelegatingRequestProcessor</classname>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Use the <classname>DelegatingActionProxy</classname> class
+            in the <literal>type</literal> attribute of your
+            <literal>&lt;action-mapping&gt;</literal>.
+          </para>
+        </listitem>
+      </itemizedlist>
 			<para>
 				Both of these methods allow you to manage your Actions and 
 				their dependencies in the <emphasis>action-servlet.xml</emphasis> file.
@@ -437,10 +516,64 @@
 			</para>
 		</section>
 	</section>
-	<section id="view-tapestry">
-		<title>Tapestry</title>
+
+  <section id="webwork">
+    <title>WebWork 2.x</title>
+    <para>
+      From the <ulink url="http://www.opensymphony.com/webwork/">WebWork homepage</ulink>...
+    </para>
+    <quote>
+      <emphasis>
+        WebWork is a Java web-application development framework. It is built
+        specifically with developer productivity and code simplicity in mind,
+        providing robust support for building reusable UI templates, such as form
+        controls, UI themes, internationalization, dynamic form parameter mapping
+        to JavaBeans, robust client and server side validation, and much more.
+      </emphasis>
+    </quote>
+    <para>
+      WebWork is (in the opinion of this author) a very clean, elegant web framework.
+      Its architecture and key concepts are not only very easy to understand, it has
+      a rich tag library, nicely decoupled validation, and it is (again, in the opinion
+      of this author) quite easy to be productive in next to no time at all (the
+      documentation and tutorials are pretty good too).
+    </para>
+    <para>
+      One of the key enablers in WebWork's technology stack is
+      <ulink url="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an IoC container</ulink>
+      to manage Webwork Actions, handle the "wiring" of business objects, etc.
+      Previous to WebWork version 2.2, WebWork used it's own proprietary IoC container
+      (and provided integration points so that one could integrate an IoC container
+      such as Springs into the mix). However, as of WebWork version 2.2, the default
+      IoC container that is used within WebWork <emphasis>is</emphasis> Spring. This
+      is obviously great news if one is a Spring developer, because it means that one
+      is immediately familiar with the basics of IoC configuration, idioms and suchlike
+      within WebWork.
+    </para>
+    <para>
+      Now in the interests of adhering to the DRY (Dont Repeat Yourself) principle, it
+      would be foolish to writeup the Spring-WebWork integration in light of the fact that
+      the WebWork team have already written such a writeup. Please do consult the
+      <ulink url="http://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork integration page</ulink>
+      on the
+      <ulink url="http://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</ulink>
+      for the full lowdown.
+    </para>
+    <para>
+      Note that the Spring-WebWork integration code was developed (and continues
+      to be maintained and improved) by the WebWork developers themselves, so in the
+      first instance please do refer to the WebWork site and forums if you are having
+      issues with the integration. Do feel free to post comments and queries regarding
+      the Spring-WebWork integration on the
+      <ulink url="http://forum.springframework.org/forumdisplay.php?f=25">Spring support forums</ulink>
+      too.
+    </para>
+  </section>
+
+	<section id="tapestry">
+		<title>Tapestry 3.x and 4.x</title>
 		<para>
-			From the <ulink url="http://jakarta.apache.org/tapestry/">Tapestry homepage</ulink>...
+			From the <ulink url="http://tapestry.apache.org/">Tapestry homepage</ulink>...
 		</para>
 		<quote>
 			<emphasis>
@@ -461,10 +594,9 @@
 			A <emphasis>typical</emphasis> layered J2EE application built with Tapestry
 			and Spring will consist of a top user interface (UI) layer built with Tapestry,
 			and a number of lower layers, all wired together by one or more Spring containers.
-			Tapestry's own
-			<ulink url="http://jakarta.apache.org/tapestry/UsersGuide/hivemind.html">reference documentation</ulink> 
-			contains the following snippet of best practice advice. (Text that I the author
-			have added is contained within <literal>[]</literal> brackets.)
+			Tapestry's own reference documentation contains the following snippet of best
+      practice advice. (Text that the author of this Spring section has added is
+      contained within <literal>[]</literal> brackets.)
 		</para>
 		<quote>
 			<emphasis>
@@ -475,22 +607,21 @@
 				and pass it over to a service.
 			</emphasis>
 		</quote>
-        <para>
-            The key question then is... how does one supply Tapestry pages with collaborating
-            services? The answer, ideally, is that one would want to dependency inject those
-            services directly into one's Tapestry pages. In Tapestry, one can effect this
-            dependency injection by a
-            <ulink url="http://jakarta.apache.org/tapestry/UsersGuide/injection.html">variety of means</ulink>...
-            this section is only going to enumerate the dependency injection means afforded
-            by Spring. The real beauty of the rest of this Spring-Tapestry integration is that
-            the elegant and flexible design of Tapestry itself makes doing this dependency
-            injection of Spring-managed beans a cinch. (Another nice thing is that this
-            Spring-Tapestry itegration code was written - and continues to be maintained - by
-            the Tapestry creator
-            <ulink url="http://howardlewisship.com/blog/">Howard M. Lewis Ship</ulink>, so hats
-            off to him for what is really some silky smooth integration).
-        </para>
-		<section id="view-tapestry-di">
+    <para>
+      The key question then is... how does one supply Tapestry pages with collaborating
+      services? The answer, ideally, is that one would want to dependency inject those
+      services directly into one's Tapestry pages. In Tapestry, one can effect this
+      dependency injection by a variety of means...
+      This section is only going to enumerate the dependency injection means afforded
+      by Spring. The real beauty of the rest of this Spring-Tapestry integration is that
+      the elegant and flexible design of Tapestry itself makes doing this dependency
+      injection of Spring-managed beans a cinch. (Another nice thing is that this
+      Spring-Tapestry integration code was written - and continues to be maintained -
+      by the Tapestry creator
+      <ulink url="http://howardlewisship.com/blog/">Howard M. Lewis Ship</ulink>,
+      so hats off to him for what is really some silky smooth integration).
+    </para>
+		<section id="tapestry-di">
 			<title>Injecting Spring-managed beans</title>
 			<para>
 				Assume we have the following simple Spring container definition (in the
@@ -555,11 +686,11 @@
  
  </beans>]]></programlisting>
 			<para>
-	            Inside the Tapestry application, the above bean definitions need to
-	            be <link linkend="webintegration-common">loaded into a Spring container</link>,
-	            and any relevant Tapestry pages need to be supplied (injected) with the
-	            <literal>authenticationService</literal> and
-	            <literal>userService</literal> beans, which implement the
+        Inside the Tapestry application, the above bean definitions need to
+        be <link linkend="web-integration-common">loaded into a Spring container</link>,
+        and any relevant Tapestry pages need to be supplied (injected) with the
+        <literal>authenticationService</literal> and
+        <literal>userService</literal> beans, which implement the
 				<interfacename>AuthenticationService</interfacename> and
 				<interfacename>UserService</interfacename> interfaces, respectively.
 			</para>
@@ -594,12 +725,12 @@ UserService userService = (UserService) appContext.getBean("userService");
 			</para>
 			<note>
 				<para>
-			        This next section is applicable to versions of Tapestry &lt; 4.0.
-			        if you are using Tapestry version 4.0+, please consult the section
-			        entitled <xref linkend="view-tapestry-40-style-di"/>.
+          This next section is applicable to Tapestry 3.x.
+          If you are using Tapestry version 4.x, please consult the section
+          entitled <xref linkend="tapestry-4-style-di"/>.
 				</para>
 			</note>
-			<section id="view-tapestry-pre40-style-di">
+			<section id="tapestry-pre4-style-di">
 				<title>Dependency Injecting Spring Beans into Tapestry pages</title>
 				<para>
 					First we need to make the <interface>ApplicationContext</interface>
@@ -655,7 +786,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
     engine-class="com.whatever.web.xportal.MyEngine">
 </application>]]></programlisting>
 			</section>
-			<section id="view-tapestry-componentdefs">
+			<section id="tapestry-componentdefs">
 				<title>Component definition files</title>
 				<para>
 					Now in our page or component definition file (*.page or *.jwc),
@@ -718,7 +849,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
  
 </page-specification>]]></programlisting>
 			</section>
-			<section id="view-tapestry-getters">
+			<section id="tapestry-getters">
 				<title>Adding abstract accessors</title>
 				<para>
 					Now in the Java class definition for the page or component
@@ -848,21 +979,21 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
     }
 }]]></programlisting>
 			</section>
-			<section id="view-tapestry-40-style-di">
-				<title>Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.0+ style</title>
+			<section id="tapestry-4-style-di">
+				<title>Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.x style</title>
 				<para>
 					Effecting the dependency injection of Spring-managed beans into Tapestry
-					pages in Tapestry version 4.0+ is <emphasis>so</emphasis> much simpler.
+					pages in Tapestry version 4.x is <emphasis>so</emphasis> much simpler.
 					All that is needed is a single
 					<ulink url="http://howardlewisship.com/tapestry-javaforge/tapestry-spring/">add-on library</ulink>,
 					and some (small) amount of (essentially boilerplate) configuration.
 					Simply package and deploy this library with the (any of the) other
-					libraries required by your web application (typially in
+					libraries required by your web application (typically in
 					<literal>WEB-INF/lib</literal>).
 				</para>
 				<para>
 					You will then need to create and expose the Spring container using the
-					<link linkend="webintegration-common">method detailed previously</link>.
+					<link linkend="web-integration-common">method detailed previously</link>.
 					You can then inject Spring-managed beans into Tapestry very easily; if
 					we are using Java 5, consider the <classname>Login</classname> page from above:
 					we simply need to annotate the appropriate getter methods
@@ -912,11 +1043,11 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 					that really is it.
 				</para>
 				<para>
-		            If you are not using Java 5, then one obviously doesn't annotate one's
-		            Tapestry page classes with annotations; instead, one simply uses
-		            good old fashioned XML to declare the dependency injection; for example,
-		            inside the <literal>.page</literal> or <literal>.jwc</literal> file
-		            for the <classname>Login</classname> page (or component):
+          If you are not using Java 5, then one obviously doesn't annotate one's
+          Tapestry page classes with annotations; instead, one simply uses
+          good old fashioned XML to declare the dependency injection; for example,
+          inside the <literal>.page</literal> or <literal>.jwc</literal> file
+          for the <classname>Login</classname> page (or component):
 				</para>
 				<programlisting><![CDATA[<inject property="userService" object="spring:userService"/>
 <inject property="authenticationService" object="spring:authenticationService"/>]]></programlisting>
@@ -932,85 +1063,27 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 			to extend it all the way up the J2EE stack in this Tapestry application.
 		</para>
 	</section>
-	<section id="webwork">
-		<title>WebWork</title>
-		<para>
-			From the <ulink url="http://www.opensymphony.com/webwork/">WebWork homepage</ulink>...
-		</para>
-		<quote>
-			<emphasis>
-				WebWork is a Java web-application development framework. It is built
-				specifically with developer productivity and code simplicity in mind,
-				providing robust support for building reusable UI templates, such as form
-				controls, UI themes, internationalization, dynamic form parameter mapping
-				to JavaBeans, robust client and server side validation, and much more.
-			</emphasis>
-		</quote>
-        <para>
-            WebWork is (in the opinion of this author) a very clean, elegant web framework.
-            Its architecture and key concepts are not only very easy to understand, it has
-            a rich tag library, nicely decoupled validation, and it is (again, in the opinion
-            of this author) quite easy to be productive in next to no time at all (the
-            documentation and tutorials are pretty good too).
-        </para>
-        <para>
-            One of the key enablers in WebWork's technology stack is
-            <ulink url="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an IoC container</ulink>
-            to manage Webwork Actions, handle the "wiring" of business objects, etc.
-            Previous to WebWork version 2.2, WebWork used it's own proprietary IoC container
-            (and provided integration points so that one could integrate an IoC container
-            such as Springs into the mix). However, as of WebWork version 2.2, the default
-            IoC container that is used within WebWork <emphasis>is</emphasis> Spring. This
-            is obviously great news if one is a Spring developer, because it means that one
-            is immediately familiar with the basics of IoC configuration, idioms and suchlike
-            within WebWork.
-        </para>
-        <para>
-            Now in the interests of adhering to the DRY (Dont Repeat Yourself) principle, it
-            would be foolish to writeup the Spring-WebWork integration in light of the fact that
-            the WebWork team have already written such a writeup. Please do consult the
-            <ulink url="http://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork integration page</ulink>
-             on the
-            <ulink url="http://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</ulink>
-             for the full lowdown.
-        </para>
-        <para>
-            Note that the Spring-WebWork integration code was developed (and continues
-            to be maintained and improved) by the WebWork developers themselves, so in the
-            first instance please do refer to the WebWork site and forums if you are having
-            issues with the integration. Do feel free to post comments and queries regarding
-			the Spring-WebWork integration on the
-			<ulink url="http://forum.springframework.org/forumdisplay.php?f=25">Spring support forums</ulink>
-            too.
-        </para>
-	</section>
-	<section id="webintegration-resources">
+
+	<section id="web-integration-resources">
 		<title>Further Resources</title>
 		<para>
-            Find below links to further resources about the various web frameworks
-            described in this chapter.
-        </para>
+      Find below links to further resources about the various web frameworks
+      described in this chapter.
+    </para>
 		<itemizedlist>
+      <listitem>
+        <para>The <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink> homepage</para>
+      </listitem>
 			<listitem>
 				<para>The <ulink url="http://struts.apache.org/">Struts</ulink> homepage</para>
 			</listitem>
+      <listitem>
+        <para>The <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink> homepage</para>
+      </listitem>
 			<listitem>
-				<para>The <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink> homepage</para>
-			</listitem>
-			<listitem>
-				<para>The <ulink url="http://jakarta.apache.org/tapestry/">Tapestry</ulink> homepage</para>
-			</listitem>
-			<listitem>
-				<para>The <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink> homepage</para>
-			</listitem>
-		</itemizedlist>
-        <para>
-            Find below some further web framework-related resources that you may find personally enriching.
-        </para>
-		<itemizedlist>
-			<listitem>
-				<para>The <ulink url="http://wiki.apache.org/struts/StrutsTi">StrutsTI</ulink> project wiki</para>
+				<para>The <ulink url="http://tapestry.apache.org/">Tapestry</ulink> homepage</para>
 			</listitem>
 		</itemizedlist>
 	</section>
+
 </chapter>

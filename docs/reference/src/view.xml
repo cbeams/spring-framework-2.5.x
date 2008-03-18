@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="view">
-  <title>Integrating view technologies</title>
+  <title>View technologies</title>
 
   <section id="view-introduction">
     <title>Introduction</title>
@@ -77,13 +77,644 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       objects as described in earlier chapters. To facilitate the development
       of JSP pages in combination with those data binding features, Spring
       provides a few tags that make things even easier. All Spring tags have
-      <emphasis>html escaping</emphasis> features to enable or disable
+      <emphasis>HTML escaping</emphasis> features to enable or disable
       escaping of characters.</para>
 
       <para>The tag library descriptor (TLD) is included in the
       <filename class="libraryfile">spring.jar</filename> as well in the distribution itself.
       Further information about the individual tags can be found in the appendix entitled
       <xref linkend="spring.tld"/>.</para>
+    </section>
+
+    <section id="view-jsp-formtaglib">
+      <title>Using Spring's form tag library</title>
+
+      <para>As of version 2.0, Spring provides a comprehensive set of data
+      binding-aware tags for handling form elements when using JSP and Spring
+      Web MVC. Each tag provides support for the set of attributes of its
+      corresponding HTML tag counterpart, making the tags familiar and intuitive
+      to use. The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.</para>
+
+      <para>Unlike other form/input tag libraries, Spring's form tag library is
+      integrated with Spring Web MVC, giving the tags access to the command
+      object and reference data your controller deals with. As you will see in
+      the following examples, the form tags make JSPs easier to develop, read
+      and maintain.</para>
+
+      <para>Let's go through the form tags and look at an example of how each
+      tag is used. We have included generated HTML snippets where certain tags
+      require further commentary.</para>
+
+      <section id="view-jsp-formtaglib-configuration">
+        <title>Configuration</title>
+
+        <para>The form tag library comes bundled in
+        <literal>spring.jar</literal>. The library descriptor is called
+        <literal>spring-form.tld</literal>.</para>
+
+        <para>To use the tags from this library, add the following directive to
+        the top of your JSP page:</para>
+
+        <programlisting>&lt;%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %&gt;</programlisting>
+
+        <para>... where <literal>form</literal> is the tag name prefix you want
+        to use for the tags from this library.</para>
+      </section>
+
+      <section id="view-jsp-formtaglib-formtag">
+        <title>The <literal>form</literal> tag</title>
+
+        <para>This tag renders an HTML 'form' tag and exposes a binding path to
+        inner tags for binding. It puts the command object in the
+        <literal>PageContext</literal> so that the command object can be
+        accessed by inner tags. <emphasis>All the other tags in this library are
+        nested tags of the <literal>form</literal> tag</emphasis>.</para>
+
+        <para>Let's assume we have a domain object called
+        <classname>User</classname>. It is a JavaBean with properties such as
+        <literal>firstName</literal> and <literal>lastName</literal>. We will
+        use it as the form backing object of our form controller which returns
+        <literal>form.jsp</literal>. Below is an example of what
+        <literal>form.jsp</literal> would look like:</para>
+
+        <programlisting>&lt;form:form&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;First Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="firstName" /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td&gt;Last Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="lastName" /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td colspan="2"&gt;
+                  &lt;input type="submit" value="Save Changes" /&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form:form&gt;</programlisting>
+
+        <para>The <literal>firstName</literal> and <literal>lastName</literal>
+        values are retrieved from the command object placed in the
+        <interfacename>PageContext</interfacename> by the page controller. Keep
+        reading to see more complex examples of how inner tags are used with the
+        <literal>form</literal> tag.</para>
+
+        <para>The generated HTML looks like a standard form:</para>
+
+        <programlisting>&lt;form method="POST"&gt;
+      &lt;table&gt;
+        &lt;tr&gt;
+            &lt;td&gt;First Name:&lt;/td&gt;
+            &lt;td&gt;&lt;input name="firstName" type="text" value="Harry"/&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Last Name:&lt;/td&gt;
+            &lt;td&gt;&lt;input name="lastName" type="text" value="Potter"/&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td colspan="2"&gt;
+              &lt;input type="submit" value="Save Changes" /&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form&gt;</programlisting>
+
+        <para>The preceding JSP assumes that the variable name of the form
+        backing object is <literal>'command'</literal>. If you have put the form
+        backing object into the model under another name (definitely a best
+        practice), then you can bind the form to the named variable like
+        so:</para>
+
+        <programlisting>&lt;form:form <lineannotation><emphasis role="bold">commandName="user"</emphasis></lineannotation>&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;First Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="firstName" /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td&gt;Last Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="lastName" /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td colspan="2"&gt;
+                  &lt;input type="submit" value="Save Changes" /&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form:form&gt;</programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-inputtag">
+        <title>The <literal>input</literal> tag</title>
+
+        <para>This tag renders an HTML 'input' tag with type 'text' using the
+        bound value. For an example of this tag, see <xref
+        linkend="view-jsp-formtaglib-formtag" />.</para>
+      </section>
+
+      <section id="view-jsp-formtaglib-checkboxtag">
+        <title>The <literal>checkbox</literal> tag</title>
+
+        <para>This tag renders an HTML 'input' tag with type 'checkbox'.</para>
+
+        <para>Let's assume our <classname>User</classname> has preferences such
+        as newsletter subscription and a list of hobbies. Below is an example of
+        the <classname>Preferences</classname> class:</para>
+      </section>
+
+      <programlisting>public class Preferences {
+
+      private boolean receiveNewsletter;
+
+      private String[] interests;
+
+      private String favouriteWord;
+
+      public boolean isReceiveNewsletter() {
+          return receiveNewsletter;
+      }
+
+      public void setReceiveNewsletter(boolean receiveNewsletter) {
+          this.receiveNewsletter = receiveNewsletter;
+      }
+
+      public String[] getInterests() {
+          return interests;
+      }
+
+      public void setInterests(String[] interests) {
+          this.interests = interests;
+      }
+
+      public String getFavouriteWord() {
+          return favouriteWord;
+      }
+
+      public void setFavouriteWord(String favouriteWord) {
+          this.favouriteWord = favouriteWord;
+      }
+  }</programlisting>
+
+      <para>The <literal>form.jsp</literal> would look like:</para>
+
+      <programlisting>&lt;form:form&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;Subscribe to newsletter?:&lt;/td&gt;
+              <lineannotation>&lt;%-- Approach 1: Property is of type <classname>java.lang.Boolean</classname> --%&gt;</lineannotation>
+              &lt;td&gt;&lt;form:checkbox path="preferences.receiveNewsletter"/&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+
+          &lt;tr&gt;
+              &lt;td&gt;Interests:&lt;/td&gt;
+              &lt;td&gt;
+                  <lineannotation>&lt;%-- Approach 2: Property is of an array or of type <interfacename>java.util.Collection</interfacename> --%&gt;</lineannotation>
+                  Quidditch: &lt;form:checkbox path="preferences.interests" value="Quidditch"/&gt;
+                  Herbology: &lt;form:checkbox path="preferences.interests" value="Herbology"/&gt;
+                  Defence Against the Dark Arts: &lt;form:checkbox path="preferences.interests"
+                      value="Defence Against the Dark Arts"/&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td&gt;Favourite Word:&lt;/td&gt;
+              &lt;td&gt;
+                  <lineannotation>&lt;%-- Approach 3: Property is of type <classname>java.lang.Object</classname> --%&gt;</lineannotation>
+                  Magic: &lt;form:checkbox path="preferences.favouriteWord" value="Magic"/&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form:form&gt;</programlisting>
+
+      <para>There are 3 approaches to the <literal>checkbox</literal> tag which
+      should meet all your checkbox needs. <itemizedlist>
+          <listitem>
+            <para>Approach One - When the bound value is of type
+            <literal>java.lang.Boolean</literal>, the
+            <literal>input(checkbox)</literal> is marked as 'checked' if the
+            bound value is <literal>true</literal>. The <literal>value</literal>
+            attribute corresponds to the resolved value of the
+            <literal>setValue(Object)</literal> value property.</para>
+          </listitem>
+
+          <listitem>
+            <para>Approach Two - When the bound value is of type
+            <literal>array</literal> or
+            <interfacename>java.util.Collection</interfacename>, the
+            <literal>input(checkbox)</literal> is marked as 'checked' if the
+            configured <literal>setValue(Object)</literal> value is present in
+            the bound <interfacename>Collection</interfacename>.</para>
+          </listitem>
+
+          <listitem>
+            <para>Approach Three - For any other bound value type, the
+            <literal>input(checkbox)</literal> is marked as 'checked' if the
+            configured <literal>setValue(Object)</literal> is equal to the bound
+            value.</para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>Note that regardless of the approach, the same HTML structure is
+      generated. Below is an HTML snippet of some checkboxes:</para>
+
+      <programlisting>&lt;tr&gt;
+      &lt;td&gt;Interests:&lt;/td&gt;
+      &lt;td&gt;
+          Quidditch: &lt;input name="preferences.interests" type="checkbox" value="Quidditch"/&gt;
+          &lt;input type="hidden" value="1" name="_preferences.interests"/&gt;
+          Herbology: &lt;input name="preferences.interests" type="checkbox" value="Herbology"/&gt;
+          &lt;input type="hidden" value="1" name="_preferences.interests"/&gt;
+          Defence Against the Dark Arts: &lt;input name="preferences.interests" type="checkbox"
+              value="Defence Against the Dark Arts"/&gt;
+          &lt;input type="hidden" value="1" name="_preferences.interests"/&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+
+      <para>What you might not expect to see is the additional hidden field
+      after each checkbox. When a checkbox in an HTML page is
+      <emphasis>not</emphasis> checked, its value will not be sent to the server
+      as part of the HTTP request parameters once the form is submitted, so we
+      need a workaround for this quirk in HTML in order for Spring form data
+      binding to work. The <literal>checkbox</literal> tag follows the existing
+      Spring convention of including a hidden parameter prefixed by an
+      underscore ("_") for each checkbox. By doing this, you are effectively
+      telling Spring that <quote>
+          <emphasis>the checkbox was visible in the form and I want my object to
+          which the form data will be bound to reflect the state of the checkbox
+          no matter what</emphasis>
+        </quote>.</para>
+
+      <section id="view-jsp-formtaglib-checkboxestag">
+        <title>The <literal>checkboxes</literal> tag</title>
+
+        <para>This tag renders multiple HTML 'input' tags with type
+        'checkbox'.</para>
+
+        <para>Building on the example from the previous
+        <classname>checkbox</classname> tag section. Sometimes you prefer not to
+        have to list all the possible hobbies in your JSP page. You would rather
+        provide a list at runtime of the available options and pass that in to
+        the tag. That is the purpose of the <classname>checkboxes</classname>
+        tag. You pass in an <classname>Array</classname>, a
+        <classname>List</classname> or a <classname>Map</classname> containing
+        the available options in the "items" property. Typically the bound
+        property is a collection so it can hold multiple values selected by the
+        user. Below is an example of the JSP using this tag:</para>
+      </section>
+
+      <programlisting>&lt;form:form&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;Interests:&lt;/td&gt;
+              &lt;td&gt;
+                  <lineannotation>&lt;%-- Property is of an array or of type <interfacename>java.util.Collection</interfacename> --%&gt;</lineannotation>
+                  &lt;form:checkboxes path="preferences.interests" items="${interestList}"/&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form:form&gt;</programlisting>
+
+      <para>This example assumes that the "interestList" is a
+      <classname>List</classname> available as a model attribute containing
+      strings of the values to be selected from. In the case where you use a
+      Map, the map entry key will be used as the value and the map entry's value
+      will be used as the label to be displayed. You can also use a custom
+      object where you can provide the property names for the value using
+      "itemValue" and the label using "itemLabel".</para>
+
+      <section id="view-jsp-formtaglib-radiobuttontag">
+        <title>The <literal>radiobutton</literal> tag</title>
+
+        <para>This tag renders an HTML 'input' tag with type 'radio'.</para>
+
+        <para>A typical usage pattern will involve multiple tag instances bound
+        to the same property but with different values.</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Sex:&lt;/td&gt;
+      &lt;td&gt;Male: &lt;form:radiobutton path="sex" value="M"/&gt; &lt;br/&gt;
+          Female: &lt;form:radiobutton path="sex" value="F"/&gt; &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-radiobuttonstag">
+        <title>The <literal>radiobuttons</literal> tag</title>
+
+        <para>This tag renders multiple HTML 'input' tags with type
+        'radio'.</para>
+
+        <para>Just like the <classname>checkboxes</classname> tag above, you
+        might want to pass in the available options as a runtime variable. For
+        this usage you would use the <classname>radiobuttons</classname> tag.
+        You pass in an <classname>Array</classname>, a
+        <classname>List</classname> or a <classname>Map</classname> containing
+        the available options in the "items" property. In the case where you use
+        a Map, the map entry key will be used as the value and the map entry's
+        value will be used as the label to be displayed. You can also use a
+        custom object where you can provide the property names for the value
+        using "itemValue" and the label using "itemLabel".</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Sex:&lt;/td&gt;
+      &lt;td&gt;&lt;form:radiobuttons path="sex" items="${sexOptions}"/&gt;&lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-passwordtag">
+        <title>The <literal>password</literal> tag</title>
+
+        <para>This tag renders an HTML 'input' tag with type 'password' using
+        the bound value.</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Password:&lt;/td&gt;
+      &lt;td&gt;
+          &lt;form:password path="password" /&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+
+        <para>Please note that by default, the password value is
+        <emphasis>not</emphasis> shown. If you do want the password value to be
+        shown, then set the value of the <literal>'showPassword'</literal>
+        attribute to true, like so.</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Password:&lt;/td&gt;
+      &lt;td&gt;
+          &lt;form:password path="password" value="^76525bvHGq" showPassword="true" /&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-selecttag">
+        <title>The <literal>select</literal> tag</title>
+
+        <para>This tag renders an HTML 'select' element. It supports data
+        binding to the selected option as well as the use of nested
+        <literal>option</literal> and <literal>options</literal> tags.</para>
+
+        <para>Let's assume a <classname>User</classname> has a list of
+        skills.</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Skills:&lt;/td&gt;
+      &lt;td&gt;&lt;form:select path="skills" items="${skills}"/&gt;&lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+
+        <para>If the <literal>User's</literal> skill were in Herbology, the HTML
+        source of the 'Skills' row would look like:</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Skills:&lt;/td&gt;
+      &lt;td&gt;&lt;select name="skills" multiple="true"&gt;
+          &lt;option value="Potions"&gt;Potions&lt;/option&gt;
+          &lt;option value="Herbology" selected="selected"&gt;Herbology&lt;/option&gt;
+          &lt;option value="Quidditch"&gt;Quidditch&lt;/option&gt;&lt;/select&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-optiontag">
+        <title>The <literal>option</literal> tag</title>
+
+        <para>This tag renders an HTML 'option'. It sets 'selected' as
+        appropriate based on the bound value.</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;House:&lt;/td&gt;
+      &lt;td&gt;
+          &lt;form:select path="house"&gt;
+              &lt;form:option value="Gryffindor"/&gt;
+              &lt;form:option value="Hufflepuff"/&gt;
+              &lt;form:option value="Ravenclaw"/&gt;
+              &lt;form:option value="Slytherin"/&gt;
+          &lt;/form:select&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+
+        <para>If the <literal>User's</literal> house was in Gryffindor, the HTML
+        source of the 'House' row would look like:</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;House:&lt;/td&gt;
+      &lt;td&gt;
+          &lt;select name="house"&gt;
+              &lt;option value="Gryffindor" selected="selected"&gt;Gryffindor&lt;/option&gt;
+              &lt;option value="Hufflepuff"&gt;Hufflepuff&lt;/option&gt;
+              &lt;option value="Ravenclaw"&gt;Ravenclaw&lt;/option&gt;
+              &lt;option value="Slytherin"&gt;Slytherin&lt;/option&gt;
+          &lt;/select&gt;
+      &lt;/td&gt;
+   &lt;/tr&gt;</programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-optionstag">
+        <title>The <literal>options</literal> tag</title>
+
+        <para>This tag renders a list of HTML 'option' tags. It sets the
+        'selected' attribute as appropriate based on the bound value.</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Country:&lt;/td&gt;
+      &lt;td&gt;
+          &lt;form:select path="country"&gt;
+              &lt;form:option value="-" label="--Please Select"/&gt;
+              &lt;form:options items="${countryList}" itemValue="code" itemLabel="name"/&gt;
+          &lt;/form:select&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+
+        <para>If the <classname>User</classname> lived in the UK, the HTML
+        source of the 'Country' row would look like:</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Country:&lt;/td&gt;
+      &lt;td&gt;
+          &lt;select name="country"&gt;
+              &lt;option value="-"&gt;--Please Select&lt;/option&gt;
+              &lt;option value="AT"&gt;Austria&lt;/option&gt;
+              &lt;option value="UK" selected="selected"&gt;United Kingdom&lt;/option&gt;
+              &lt;option value="US"&gt;United States&lt;/option&gt;
+          &lt;/select&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+
+        <para>As the example shows, the combined usage of an
+        <literal>option</literal> tag with the <literal>options</literal> tag
+        generates the same standard HTML, but allows you to explicitly specify a
+        value in the JSP that is for display only (where it belongs) such as the
+        default string in the example: "-- Please Select".</para>
+      </section>
+
+      <section id="view-jsp-formtaglib-textAreatag">
+        <title>The <literal>textarea</literal> tag</title>
+
+        <para>This tag renders an HTML 'textarea'.</para>
+
+        <programlisting>&lt;tr&gt;
+      &lt;td&gt;Notes:&lt;/td&gt;
+      &lt;td&gt;&lt;form:textarea path="notes" rows="3" cols="20" /&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;form:errors path="notes" /&gt;&lt;/td&gt;
+  &lt;/tr&gt;</programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-hiddeninputtag">
+        <title>The <literal>hidden</literal> tag</title>
+
+        <para>This tag renders an HTML 'input' tag with type 'hidden' using the
+        bound value. To submit an unbound hidden value, use the HTML
+        <literal>input</literal> tag with type 'hidden'.</para>
+
+        <programlisting>&lt;form:hidden path="house" /&gt;
+  </programlisting>
+
+        <para>If we choose to submit the 'house' value as a hidden one, the HTML
+        would look like:</para>
+
+        <programlisting>&lt;input name="house" type="hidden" value="Gryffindor"/&gt;
+  </programlisting>
+      </section>
+
+      <section id="view-jsp-formtaglib-errorstag">
+        <title>The <literal>errors</literal> tag</title>
+
+        <para>This tag renders field errors in an HTML 'span' tag. It provides
+        access to the errors created in your controller or those that were
+        created by any validators associated with your controller.</para>
+
+        <para>Let's assume we want to display all error messages for the
+        <literal>firstName</literal> and <literal>lastName</literal> fields once
+        we submit the form. We have a validator for instances of the
+        <classname>User</classname> class called
+        <classname>UserValidator</classname>.</para>
+
+        <programlisting>public class UserValidator implements Validator {
+
+      public boolean supports(Class candidate) {
+          return User.class.isAssignableFrom(candidate);
+      }
+
+      public void validate(Object obj, Errors errors) {
+          ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "required", "Field is required.");
+          ValidationUtils.rejectIfEmptyOrWhitespace(errors, "lastName", "required", "Field is required.");
+      }
+  }</programlisting>
+
+        <para>The <literal>form.jsp</literal> would look like:</para>
+
+        <programlisting>&lt;form:form&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;First Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="firstName" /&gt;&lt;/td&gt;
+              <lineannotation>&lt;%-- Show errors for firstName field --%&gt;</lineannotation>
+              &lt;td&gt;&lt;form:errors path="firstName" /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+
+          &lt;tr&gt;
+              &lt;td&gt;Last Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="lastName" /&gt;&lt;/td&gt;
+              <lineannotation>&lt;%-- Show errors for lastName field --%&gt;</lineannotation>
+              &lt;td&gt;&lt;form:errors path="lastName"  /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td colspan="3"&gt;
+                  &lt;input type="submit" value="Save Changes" /&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form:form&gt;</programlisting>
+
+        <para>If we submit a form with empty values in the
+        <literal>firstHame</literal> and <literal>lastName</literal> fields,
+        this is what the HTML would look like:</para>
+
+        <programlisting>&lt;form method="POST"&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;First Name:&lt;/td&gt;
+              &lt;td&gt;&lt;input name="firstName" type="text" value=""/&gt;&lt;/td&gt;
+              <lineannotation>&lt;%-- Associated errors to firstName field displayed --%&gt;</lineannotation>
+              &lt;td&gt;&lt;span name="firstName.errors"&gt;Field is required.&lt;/span&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+
+          &lt;tr&gt;
+              &lt;td&gt;Last Name:&lt;/td&gt;
+              &lt;td&gt;&lt;input name="lastName" type="text" value=""/&gt;&lt;/td&gt;
+              <lineannotation>&lt;%-- Associated errors to lastName field displayed --%&gt;</lineannotation>
+              &lt;td&gt;&lt;span name="lastName.errors"&gt;Field is required.&lt;/span&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td colspan="3"&gt;
+                  &lt;input type="submit" value="Save Changes" /&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form&gt;</programlisting>
+
+        <para>What if we want to display the entire list of errors for a given
+        page? The example below shows that the <literal>errors</literal> tag
+        also supports some basic wildcarding functionality.</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>path="*"</literal> - displays all errors</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>path="lastName*"</literal> - displays all errors
+            associated with the <literal>lastName</literal> field</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The example below will display a list of errors at the top of the
+        page, followed by field-specific errors next to the fields:</para>
+
+        <programlisting>&lt;form:form&gt;
+      &lt;form:errors path="*" cssClass="errorBox" /&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;First Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="firstName" /&gt;&lt;/td&gt;
+              &lt;td&gt;&lt;form:errors path="firstName" /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td&gt;Last Name:&lt;/td&gt;
+              &lt;td&gt;&lt;form:input path="lastName" /&gt;&lt;/td&gt;
+              &lt;td&gt;&lt;form:errors path="lastName"  /&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td colspan="3"&gt;
+                  &lt;input type="submit" value="Save Changes" /&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+      &lt;/table&gt;
+  &lt;/form:form&gt;</programlisting>
+
+        <para>The HTML would look like:</para>
+
+        <programlisting>&lt;form method="POST"&gt;
+      &lt;span name="*.errors" class="errorBox"&gt;Field is required.&lt;br/&gt;Field is required.&lt;/span&gt;
+      &lt;table&gt;
+          &lt;tr&gt;
+              &lt;td&gt;First Name:&lt;/td&gt;
+              &lt;td&gt;&lt;input name="firstName" type="text" value=""/&gt;&lt;/td&gt;
+              &lt;td&gt;&lt;span name="firstName.errors"&gt;Field is required.&lt;/span&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+
+          &lt;tr&gt;
+              &lt;td&gt;Last Name:&lt;/td&gt;
+              &lt;td&gt;&lt;input name="lastName" type="text" value=""/&gt;&lt;/td&gt;
+              &lt;td&gt;&lt;span name="lastName.errors"&gt;Field is required.&lt;/span&gt;&lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;tr&gt;
+              &lt;td colspan="3"&gt;
+                  &lt;input type="submit" value="Save Changes" /&gt;
+              &lt;/td&gt;
+          &lt;/tr&gt;
+  &lt;/form&gt;</programlisting>
+      </section>
     </section>
   </section>
 

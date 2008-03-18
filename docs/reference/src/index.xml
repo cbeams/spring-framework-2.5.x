@@ -15,8 +15,8 @@
 <!ENTITY jdbc				SYSTEM "jdbc.xml">
 <!ENTITY orm				SYSTEM "orm.xml">
 <!ENTITY mvc				SYSTEM "mvc.xml">
-<!ENTITY views				SYSTEM "views.xml">
-<!ENTITY webintegration		SYSTEM "webintegration.xml">
+<!ENTITY view				SYSTEM "view.xml">
+<!ENTITY web-integration		SYSTEM "web-integration.xml">
 <!ENTITY portlet            SYSTEM "portlet.xml">
 <!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY ejb				SYSTEM "ejb.xml">
@@ -125,7 +125,7 @@
 		</legalnotice>
 	</bookinfo>
 	<!-- front matter -->
-	<toc />
+	<toc/>
 	&preface;
 	&overview;
 	&whats-new-in-2;
@@ -172,19 +172,19 @@
 					<para><xref linkend="beans"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="resources" /></para>
+					<para><xref linkend="resources"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="validation" /></para>
+					<para><xref linkend="validation"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="aop" /></para>
+					<para><xref linkend="aop"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="aop-api" /></para>
+					<para><xref linkend="aop-api"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="testing" /></para>
+					<para><xref linkend="testing"/></para>
 				</listitem>
 			</itemizedlist>
 		</partintro>
@@ -211,16 +211,16 @@
 			</para>
 			<itemizedlist>
 				<listitem>
-					<para><xref linkend="transaction" /></para>
+					<para><xref linkend="transaction"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="dao" /></para>
+					<para><xref linkend="dao"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="jdbc" /></para>
+					<para><xref linkend="jdbc"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="orm" /></para>
+					<para><xref linkend="orm"/></para>
 				</listitem>
 			</itemizedlist>
 		</partintro>
@@ -252,22 +252,22 @@
 			</para>
 			<itemizedlist>
 				<listitem>
-					<para><xref linkend="mvc" /></para>
+					<para><xref linkend="mvc"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="view" /></para>
+					<para><xref linkend="view"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="webintegration" /></para>
+					<para><xref linkend="web-integration"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="portlet" /></para>
+					<para><xref linkend="portlet"/></para>
 				</listitem>
 			</itemizedlist>
 		</partintro>
 		&mvc;
-		&views;
-		&webintegration;
+		&view;
+		&web-integration;
 		&portlet;
 	</part>
 	<part id="spring-integration">
