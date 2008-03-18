@@ -50,7 +50,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simple");
 		assertEquals(JndiObjectFactoryBean.class.getName(), beanDefinition.getBeanClassName());
 		assertPropertyValue(beanDefinition, "jndiName", "jdbc/MyDataSource");
-		assertPropertyValue(beanDefinition, "resourceRef", "false");
+		assertPropertyValue(beanDefinition, "resourceRef", "true");
 	}
 
 	public void testComplexDefinition() throws Exception {

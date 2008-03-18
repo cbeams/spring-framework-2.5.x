@@ -121,7 +121,7 @@ public void setMyComponent(MyComponent myComponent) {
 			</para>
 			<programlisting><![CDATA[<bean id="myComponent"
       class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
-  <property name="jndiName" value="myJndiComponent"/>
+  <property name="jndiName" value="ejb/myBean"/>
   <property name="businessInterface" value="com.mycom.MyComponent"/>
 </bean>
 
@@ -145,10 +145,10 @@ public void setMyComponent(MyComponent myComponent) {
 			</para>
       <para>
         Alternatively (and preferably in case of many such proxy definitions),
-        consider using the <literal>local-slsb</literal> configuration element
-        in Spring's "jee" namespace:
+        consider using the <literal>&lt;jee:local-slsb&gt;</literal>
+        configuration element in Spring's "jee" namespace:
       </para>
-      <programlisting><![CDATA[<jee:local-slsb id="myComponent" jndi-name="myJndiComponent"
+      <programlisting><![CDATA[<jee:local-slsb id="myComponent" jndi-name="ejb/myBean"
       business-interface="com.mycom.MyComponent"/>
 
 <bean id="myController" class="com.mycom.myController">
@@ -197,8 +197,8 @@ public void setMyComponent(MyComponent myComponent) {
 			<para>
 				Accessing remote EJBs is essentially identical to accessing local
 				EJBs, except that the
-				<classname>SimpleRemoteStatelessSessionProxyFactoryBean</classname>
-        or <literal>jee:remote-slsb</literal> configuration element is used.
+				<classname>SimpleRemoteStatelessSessionProxyFactoryBean</classname> or
+        <literal>&lt;jee:remote-slsb&gt;</literal> configuration element is used.
 				Of course, with or without Spring, remote invocation semantics apply; a
 				call to a method on an object in another VM in another computer does
 				sometimes have to be treated differently in terms of usage scenarios and
@@ -239,17 +239,17 @@ public void setMyComponent(MyComponent myComponent) {
       <para>
         Accessing EJB 2.x Session Beans and EJB 3 Session Beans via Spring
         is largely transparent. Spring's EJB accessors, including the
-        <literal>jee:local-slsb</literal> and <literal>jee:remote-slsb</literal>
+        <literal>&lt;jee:local-slsb&gt;</literal> and <literal>&lt;jee:remote-slsb&gt;</literal>
         facilities, transparently adapt to the actual component at runtime.
         They handle a home interface if found (EJB 2.x style), or perform straight
         component invocations if no home interface is available (EJB 3 style).
       </para>
       <para>
         Note: For EJB 3 Session Beans, you could effectively use a
-        <classname>JndiObjectFactoryBean</classname> / <literal>jee:jndi-lookup</literal>
+        <classname>JndiObjectFactoryBean</classname> / <literal>&lt;jee:jndi-lookup&gt;</literal>
         as well, since fully usable component references are exposed for plain
-        JNDI lookups there. Defining explicit <literal>jee:local-slsb</literal>
-        / <literal>jee:remote-slsb</literal> lookups simply provides
+        JNDI lookups there. Defining explicit <literal>&lt;jee:local-slsb&gt;</literal>
+        / <literal>&lt;jee:remote-slsb&gt;</literal> lookups simply provides
         consistent and more explicit EJB access configuration.
       </para>
     </section>
