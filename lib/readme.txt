@@ -86,7 +86,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.11 (http://www.freemarker.org)
+- FreeMarker 2.3.12 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -105,23 +105,19 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.2.5 (http://www.hibernate.org)
+- Hibernate 3.2.6 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
-* hibernate/hibernate-annotation.jar
-- Hibernate Annotations 3.3.0 (http://www.hibernate.org)
+* hibernate/hibernate-annotations.jar, hibernate/hibernate-commons-annotations.jar
+- Hibernate Annotations 3.3.1 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
 
 * hibernate/hibernate-entitymanager.jar
-- Hibernate EntityManager 3.3.1 (http://www.hibernate.org)
+- Hibernate EntityManager 3.3.2 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate-specific JPA support
-
-* hibernate/jboss-archive-browsing.jar
-- JBoss Archive Browsing 5.0.0 alpha
-- required at runtime when using Hibernate EntityManager
 
 * hsqldb/hsqldb.jar
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
@@ -240,7 +236,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's OpenJPA support (by OpenJPA)
 
 * jakarta-commons/commons-logging.jar
-- Commons Logging 1.1 (http://jakarta.apache.org/commons/logging)
+- Commons Logging 1.1.1 (http://jakarta.apache.org/commons/logging)
 - required for building the framework
 - required at runtime, as Spring uses it for all logging
 
@@ -388,7 +384,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 
-* velocity/velocity-tools-view-1.3.jar
-- Velocity Tools 1.3 (http://jakarta.apache.org/velocity/tools)
+* velocity/velocity-tools-view-1.4.jar
+- Velocity Tools 1.4 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
