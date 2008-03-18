@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 import org.springframework.jndi.JndiLocatorSupport;
 
 /**
- * JNDI-based DataSourceLookup implementation.
+ * JNDI-based {@link DataSourceLookup} implementation.
  *
  * <p>For specific JNDI configuration, it is recommended to configure
  * the "jndiEnvironment"/"jndiTemplate" properties.
@@ -34,6 +34,10 @@ import org.springframework.jndi.JndiLocatorSupport;
  * @see #setJndiTemplate
  */
 public class JndiDataSourceLookup extends JndiLocatorSupport implements DataSourceLookup {
+
+	public JndiDataSourceLookup() {
+		setResourceRef(true);
+	}
 
 	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
 		try {
