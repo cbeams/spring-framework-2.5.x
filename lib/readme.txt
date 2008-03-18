@@ -103,19 +103,15 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
-* hibernate/hibernate-annotation.jar
-- Hibernate Annotations 3.3.0 (http://www.hibernate.org)
+* hibernate/hibernate-annotations.jar, hibernate/hibernate-commons-annotations.jar
+- Hibernate Annotations 3.3.1 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
 
 * hibernate/hibernate-entitymanager.jar
-- Hibernate EntityManager 3.3.1 (http://www.hibernate.org)
+- Hibernate EntityManager 3.3.2 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate-specific JPA support
-
-* hibernate/jboss-archive-browsing.jar
-- JBoss Archive Browsing 5.0.0 alpha
-- required at runtime when using Hibernate EntityManager
 
 * hsqldb/hsqldb.jar
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
