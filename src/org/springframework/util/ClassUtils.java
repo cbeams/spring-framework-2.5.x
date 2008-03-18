@@ -268,11 +268,15 @@ public abstract class ClassUtils {
 			return forName(className, classLoader);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException("Cannot find class [" + className + "]. Root cause: " + ex);
+			IllegalArgumentException iae = new IllegalArgumentException("Cannot find class [" + className + "]");
+			iae.initCause(ex);
+			throw iae;
 		}
 		catch (LinkageError ex) {
-			throw new IllegalArgumentException("Error loading class [" + className +
-					"]: problem with class file or dependent class. Root cause: " + ex);
+			IllegalArgumentException iae = new IllegalArgumentException(
+					"Error loading class [" + className + "]: problem with class file or dependent class.");
+			iae.initCause(ex);
+			throw iae;
 		}
 	}
 
