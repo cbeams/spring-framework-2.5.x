@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.util.Assert;
 
 /**
  * Base implementation of {@link DataFieldMaxValueIncrementer} that delegates
@@ -40,6 +41,27 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 
 	/** The length to which a string result should be pre-pended with zeroes */
 	protected int paddingLength = 0;
+
+
+	/**
+	 * Default constructor for bean property style usage.
+	 * @see #setDataSource
+	 * @see #setIncrementerName
+	 */
+	public AbstractDataFieldMaxValueIncrementer() {
+	}
+
+	/**
+	 * Convenience constructor.
+	 * @param dataSource the DataSource to use
+	 * @param incrementerName the name of the sequence/table to use
+	 */
+	public AbstractDataFieldMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+		Assert.notNull(dataSource, "DataSource must not be null");
+		Assert.notNull(incrementerName, "Incrementer name must not be null");
+		this.dataSource = dataSource;
+		this.incrementerName = incrementerName;
+	}
 
 
 	/**
@@ -82,7 +104,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	 * Return the padding length for String values.
 	 */
 	public int getPaddingLength() {
-		return paddingLength;
+		return this.paddingLength;
 	}
 
 	public void afterPropertiesSet() {

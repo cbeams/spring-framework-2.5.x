@@ -27,21 +27,22 @@ import javax.sql.DataSource;
 public class PostgreSQLSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
 	/**
-	 * Default constructor.
-	 **/
+	 * Default constructor for bean property style usage.
+	 * @see #setDataSource
+	 * @see #setIncrementerName
+	 */
 	public PostgreSQLSequenceMaxValueIncrementer() {
 	}
 
 	/**
 	 * Convenience constructor.
-	 * @param ds the DataSource to use
+	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 */
-	public PostgreSQLSequenceMaxValueIncrementer(DataSource ds, String incrementerName) {
-		setDataSource(ds);
-		setIncrementerName(incrementerName);
-		afterPropertiesSet();
+	public PostgreSQLSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+		super(dataSource, incrementerName);
 	}
+
 
 	protected String getSequenceQuery() {
 		return "select nextval('" + getIncrementerName() + "')";

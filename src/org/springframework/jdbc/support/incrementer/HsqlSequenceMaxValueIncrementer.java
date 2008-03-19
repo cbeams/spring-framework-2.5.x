@@ -27,26 +27,27 @@ import javax.sql.DataSource;
  *
  * @author Thomas Risberg
  * @since 2.5
- * @see org.springframework.jdbc.support.incrementer.HsqlMaxValueIncrementer
+ * @see HsqlMaxValueIncrementer
  */
 public class HsqlSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
 	/**
-	 * Default constructor.
-	 **/
+	 * Default constructor for bean property style usage.
+	 * @see #setDataSource
+	 * @see #setIncrementerName
+	 */
 	public HsqlSequenceMaxValueIncrementer() {
 	}
 
 	/**
 	 * Convenience constructor.
-	 * @param ds the DataSource to use
-	 * @param incrementerName the name of the sequence to use
+	 * @param dataSource the DataSource to use
+	 * @param incrementerName the name of the sequence/table to use
 	 */
-	public HsqlSequenceMaxValueIncrementer(DataSource ds, String incrementerName) {
-		setDataSource(ds);
-		setIncrementerName(incrementerName);
-		afterPropertiesSet();
+	public HsqlSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+		super(dataSource, incrementerName);
 	}
+
 
 	protected String getSequenceQuery() {
 		return "call next value for " + getIncrementerName();
