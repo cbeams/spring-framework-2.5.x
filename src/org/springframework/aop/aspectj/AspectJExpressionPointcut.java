@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -69,7 +71,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
-		implements ClassFilter, IntroductionAwareMethodMatcher {
+		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
 	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
 
@@ -98,6 +100,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	private String[] pointcutParameterNames = new String[0];
 
 	private Class[] pointcutParameterTypes = new Class[0];
+
+	private BeanFactory beanFactory;
 
 	private PointcutExpression pointcutExpression;
 
@@ -158,6 +162,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 */
 	public void setParameterTypes(Class[] types) {
 		this.pointcutParameterTypes = types;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 
@@ -482,9 +490,21 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		private boolean contextMatch() {
 			String advisedBeanName = getCurrentProxiedBeanName();
-			return (advisedBeanName != null &&
-					!BeanFactoryUtils.isGeneratedBeanName(advisedBeanName) &&
-					this.expressionPattern.matches(advisedBeanName));
+			if (advisedBeanName == null || BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
+				return false;
+			}
+			if (this.expressionPattern.matches(advisedBeanName)) {
+				return true;
+			}
+			if (beanFactory != null) {
+				String[] aliases = beanFactory.getAliases(advisedBeanName);
+				for (int i = 0; i < aliases.length; i++) {
+					if (this.expressionPattern.matches(aliases[i])) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 	}
 

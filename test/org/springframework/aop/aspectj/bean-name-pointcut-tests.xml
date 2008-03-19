@@ -7,7 +7,7 @@
 
 	<aop:config>
 		<aop:aspect id="beanNameMatchingTest" ref="counterAspect">
-			<aop:pointcut id="bean1Operation" expression="execution(* set*(..)) and bean(testBean1)"/>
+			<aop:pointcut id="bean1Operation" expression="execution(* set*(..)) and bean(myBean)"/>
 			<aop:before pointcut-ref="bean1Operation" method="increment()"/>
 
 			<aop:pointcut id="nestedBeanOperation" expression="execution(* getCompany(..)) and bean(*)"/>
@@ -15,7 +15,7 @@
 		</aop:aspect>
 	</aop:config>
 
-	<bean id="testBean1" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean1" name="myBean" class="org.springframework.beans.TestBean"/>
 
 	<bean id="testBean2" class="org.springframework.beans.TestBean"/>
 
