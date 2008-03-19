@@ -127,15 +127,28 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 		NamedNodeMap attributes = element.getAttributes();
 		for (int x = 0; x < attributes.getLength(); x++) {
 			Attr attribute = (Attr) attributes.item(x);
-			String name = attribute.getLocalName();
-			if (isEligibleAttribute(name)) {
-				String propertyName = extractPropertyName(name);
+			if (isEligibleAttribute(attribute)) {
+				String propertyName = extractPropertyName(attribute.getLocalName());
 				Assert.state(StringUtils.hasText(propertyName),
 						"Illegal property name returned from 'extractPropertyName(String)': cannot be null or empty.");
 				builder.addPropertyValue(propertyName, attribute.getValue());
 			}
 		}
 		postProcess(builder, element);
+	}
+
+	/**
+	 * Determine whether the given attribute is eligible for being
+	 * turned into a corresponding bean property value.
+	 * <p>The default implementation considers any attribute as eligible,
+	 * except for the "id" attribute and namespace declaration attributes.
+	 * @param attribute the XML attribute to check
+	 * @see #isEligibleAttribute(String)
+	 */
+	protected boolean isEligibleAttribute(Attr attribute) {
+		String fullName = attribute.getName();
+		return (!fullName.equals("xmlns") && !fullName.startsWith("xmlns:") &&
+				isEligibleAttribute(attribute.getLocalName()));
 	}
 
 	/**
