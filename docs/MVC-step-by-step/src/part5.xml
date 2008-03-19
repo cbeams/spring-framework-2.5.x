@@ -428,12 +428,13 @@ public class Product implements Serializable {
     <programlisting>package springapp.repository;
 
 import java.util.List;
+import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
+import springapp.domain.Product;
 
 public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringContextTests {
 
     private ProductDao productDao;
 
-    
     public void setProductDao(ProductDao productDao) {
         this.productDao = productDao;
     }
@@ -450,29 +451,21 @@ public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringCo
     }
 
     public void testGetProductList() {
-        
         List&lt;Product&gt; products = productDao.getProductList();
-        
         assertEquals("wrong number of products?", 3, products.size());
-        
     }
     
     public void testSaveProduct() {
-        
         List&lt;Product&gt; products = productDao.getProductList();
-        
         for (Product p : products) {
             p.setPrice(200.12);
             productDao.saveProduct(p);
         }
-        
         List&lt;Product&gt; updatedProducts = productDao.getProductList();
         for (Product p : updatedProducts) {
             assertEquals("wrong price of product?", 200.12, p.getPrice());
         }
-
     }
-
 }</programlisting>
 
     <para>We don't have the application context file that is loaded for this
