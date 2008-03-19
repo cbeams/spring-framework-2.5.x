@@ -1240,7 +1240,7 @@ public class ExtendedTest extends BaseTest {
         let's look at a JUnit 4.4 based implementation of the test class
         itself which uses <interfacename>@Autowired</interfacename> for field
         injection (we will look at the application context configuration after
-        all sample code listings). <emphasis>Note: the dependency injection
+        all sample code listings). <emphasis>Note: The dependency injection
         behavior in the following code listings is not in any way specific to
         JUnit 4.4. The same DI techniques can be used in conjunction with any
         testing framework.</emphasis></para>
@@ -1355,6 +1355,47 @@ public final class HibernateTitleDaoTests {
     &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting>
+
+        <note>
+          <para>If you are extending from a Spring-provided test base class that happens
+          to use <interfacename>@Autowired</interfacename> on one of its setters methods,
+          you might have multiple beans of the affected type defined in your application context:
+          e.g. multiple <interfacename>DataSource</interfacename> beans. In such a case,
+          you may override the setter and use the <interfacename>@Qualifier</interfacename>
+          annotation to indicate a specific target bean as follows:</para>
+
+          <programlisting>...
+    @Override @Autowired
+    public void setDataSource(<emphasis role="bold">@Qualifier("myDataSource")</emphasis> DataSource dataSource) {
+        super.setDataSource(dataSource);
+    }
+...</programlisting>
+
+          <para>The specified qualifier value indicates the specific
+          <interfacename>DataSource</interfacename> bean to inject,
+          narrowing the set of type matches to a specific bean.
+          Its value is matched against <literal>&lt;qualifier&gt;</literal>
+          declarations within the corresponding <literal>&lt;bean&gt;</literal>
+          definitions. The bean name is used as a fallback qualifier value,
+          so you may effectively also point to a specific bean by name there
+          (as shown above, assuming that "myDataSource" is the bean id).
+          If there is only one <interfacename>DataSource</interfacename> bean
+          to begin with, then the qualifier will simply not have any effect
+          - independent from the bean name of that single matching bean.</para>
+
+          <para>Alternatively, consider using the <interfacename>@Resource</interfacename>
+          annotation on such an overridden setter methods, defining the
+          target bean name explicitly - with no type matching semantics.
+          Note that this always points to a bean with that specific name,
+          no matter whether there is one or more beans of the given type.</para>
+
+          <programlisting>...
+    @Override <emphasis role="bold">@Resource("myDataSource")</emphasis>
+    public void setDataSource(DataSource dataSource) {
+        super.setDataSource(dataSource);
+    }
+...</programlisting>
+        </note>
       </section>
 
       <!-- ================================================================= -->
@@ -1444,38 +1485,38 @@ public final class HibernateTitleDaoTests {
 <emphasis role="bold">@Transactional</emphasis>
 public class FictitiousTransactionalTest {
 
-	<emphasis role="bold">@BeforeTransaction</emphasis>
-	public void verifyInitialDatabaseState() {
-		<lineannotation>// logic to verify the initial state before a transaction is started</lineannotation>
-	}
+    <emphasis role="bold">@BeforeTransaction</emphasis>
+    public void verifyInitialDatabaseState() {
+        <lineannotation>// logic to verify the initial state before a transaction is started</lineannotation>
+    }
 
-	@Before
-	public void setUpTestDataWithinTransaction() {
-		<lineannotation>// set up test data within the transaction</lineannotation>
-	}
+    @Before
+    public void setUpTestDataWithinTransaction() {
+        <lineannotation>// set up test data within the transaction</lineannotation>
+    }
 
-	@Test
-	<lineannotation>// overrides the class-level defaultRollback setting</lineannotation>
-	<emphasis role="bold">@Rollback(true)</emphasis>
-	public void modifyDatabaseWithinTransaction() {
-		<lineannotation>// logic which uses the test data and modifies database state</lineannotation>
-	}
+    @Test
+    <lineannotation>// overrides the class-level defaultRollback setting</lineannotation>
+    <emphasis role="bold">@Rollback(true)</emphasis>
+    public void modifyDatabaseWithinTransaction() {
+        <lineannotation>// logic which uses the test data and modifies database state</lineannotation>
+    }
 
-	@After
-	public void tearDownWithinTransaction() {
-		<lineannotation>// execute "tear down" logic within the transaction</lineannotation>
-	}
+    @After
+    public void tearDownWithinTransaction() {
+        <lineannotation>// execute "tear down" logic within the transaction</lineannotation>
+    }
 
-	<emphasis role="bold">@AfterTransaction</emphasis>
-	public void verifyFinalDatabaseState() {
-		<lineannotation>// logic to verify the final state after transaction has rolled back</lineannotation>
-	}
+    <emphasis role="bold">@AfterTransaction</emphasis>
+    public void verifyFinalDatabaseState() {
+        <lineannotation>// logic to verify the final state after transaction has rolled back</lineannotation>
+    }
 
-	@Test
-	<emphasis role="bold">@NotTransactional</emphasis>
-	public void performNonDatabaseRelatedAction() {
-		<lineannotation>// logic which does not modify database state</lineannotation>
-	}
+    @Test
+    <emphasis role="bold">@NotTransactional</emphasis>
+    public void performNonDatabaseRelatedAction() {
+        <lineannotation>// logic which does not modify database state</lineannotation>
+    }
 }</programlisting>
       </section>
 
@@ -1658,10 +1699,10 @@ public class FictitiousTransactionalTest {
 @TestExecutionListeners({})
 public class SimpleTest {
 
-	@Test
-	public void testMethod() {
-		<lineannotation>// execute test logic...</lineannotation>
-	}
+    @Test
+    public void testMethod() {
+        <lineannotation>// execute test logic...</lineannotation>
+    }
 }</programlisting>
         </section>
 
@@ -1990,22 +2031,22 @@ public void afterTransaction() {
       <programlisting><emphasis role="bold">@ContextConfiguration</emphasis>
 public abstract class AbstractClinicTests <emphasis role="bold">extends AbstractTransactionalJUnit4SpringContextTests</emphasis> {
 
-	<emphasis role="bold">@Autowired</emphasis>
-	protected Clinic clinic;
+    <emphasis role="bold">@Autowired</emphasis>
+    protected Clinic clinic;
 
-	@Test
-	public void getVets() {
-		Collection&lt;Vet&gt; vets = this.clinic.getVets();
-		assertEquals("JDBC query must show the same number of vets",
-			<emphasis role="bold">super.countRowsInTable("VETS")</emphasis>, vets.size());
-		Vet v1 = EntityUtils.getById(vets, Vet.class, 2);
-		assertEquals("Leary", v1.getLastName());
-		assertEquals(1, v1.getNrOfSpecialties());
-		assertEquals("radiology", (v1.getSpecialties().get(0)).getName());
-		<lineannotation>// ...</lineannotation>
-	}
-	
-	<lineannotation>// ...</lineannotation>
+    @Test
+    public void getVets() {
+        Collection&lt;Vet&gt; vets = this.clinic.getVets();
+        assertEquals("JDBC query must show the same number of vets",
+            <emphasis role="bold">super.countRowsInTable("VETS")</emphasis>, vets.size());
+        Vet v1 = EntityUtils.getById(vets, Vet.class, 2);
+        assertEquals("Leary", v1.getLastName());
+        assertEquals(1, v1.getNrOfSpecialties());
+        assertEquals("radiology", (v1.getSpecialties().get(0)).getName());
+        <lineannotation>// ...</lineannotation>
+    }
+
+    <lineannotation>// ...</lineannotation>
 }</programlisting>
 
       <para>Notes:</para>
