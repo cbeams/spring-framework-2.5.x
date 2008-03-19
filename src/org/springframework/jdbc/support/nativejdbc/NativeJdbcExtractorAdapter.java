@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.sql.Statement;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
- * Abstract adapter class for the NativeJdbcExtractor interface,
+ * Abstract adapter class for the {@link NativeJdbcExtractor} interface,
  * for simplified implementation of basic extractors.
  * Basically returns the passed-in JDBC objects on all methods.
  *
@@ -106,7 +106,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 			// which might not carry a DatabaseMetaData instance.
 			if (metaData != null) {
 				Connection metaCon = metaData.getConnection();
-				if (metaCon != targetCon) {
+				if (metaCon != null && metaCon != targetCon) {
 					// We've received a different Connection there:
 					// Let's retry the native extraction process with it.
 					nativeCon = doGetNativeConnection(metaCon);
