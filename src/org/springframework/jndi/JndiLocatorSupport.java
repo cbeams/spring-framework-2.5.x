@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jndi;
 
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.springframework.util.Assert;
@@ -89,10 +90,26 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 */
 	protected Object lookup(String jndiName, Class requiredType) throws NamingException {
 		Assert.notNull(jndiName, "'jndiName' must not be null");
-		String jndiNameToUse = convertJndiName(jndiName);
-		Object jndiObject = getJndiTemplate().lookup(jndiNameToUse, requiredType);
+		String convertedName = convertJndiName(jndiName);
+		Object jndiObject = null;
+		try {
+			jndiObject = getJndiTemplate().lookup(convertedName, requiredType);
+		}
+		catch (NameNotFoundException ex) {
+			if (!convertedName.equals(jndiName)) {
+				// Try fallback to originally specified name...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Converted JNDI name [" + convertedName +
+							"] not found - trying original name [" + jndiName + "]. " + ex);
+				}
+				jndiObject = getJndiTemplate().lookup(jndiName, requiredType);
+			}
+			else {
+				throw ex;
+			}
+		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Located object with JNDI name [" + jndiNameToUse + "]");
+			logger.debug("Located object with JNDI name [" + convertedName + "]");
 		}
 		return jndiObject;
 	}
