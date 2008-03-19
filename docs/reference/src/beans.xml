@@ -281,6 +281,25 @@ BeanFactory factory = context;</programlisting>
         the Spring Schema or DTD, including the top level
         <literal>&lt;beans/&gt;</literal> element.</para>
       </section>
+
+      <note>
+        <para>It is possible to reference files in parent directories using a relative "../"
+        path. However, this is not recommended because it creates a dependency on a file
+        that is outside the current application. This is in particular not recommended
+        for "classpath:" URLs (e.g. "classpath:../services.xml") where the runtime
+        resolution process will pick the "nearest" classpath root and then look into
+        its parent directory. This is fragile since classpath configuration changes
+        may lead to a different directory being picked.</para>
+
+        <para>Note that you can always use fully qualified resource locations
+        instead of relative paths: e.g. "file:C:/config/services.xml" or
+        "classpath:/config/services.xml". However, be aware that you are coupling
+        your application's configuration to specific absolute locations then.
+        It is generally preferable to keep an indirection for such absolute
+        locations, e.g. through "${...}" placeholders that are resolved
+        against JVM system properties at runtime.</para>
+      </note>
+
     </section>
 
     <section id="beans-definition">
@@ -4990,7 +5009,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <programlisting>public class EmailBean implements ApplicationContextAware {
 
     private List blackList;
-	private ApplicationContext ctx;
+    private ApplicationContext ctx;
 
     public void setBlackList(List blackList) {
         this.blackList = blackList;
