@@ -53,7 +53,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @see org.springframework.jdbc.support.incrementer.HsqlSequenceMaxValueIncrementer
+ * @see HsqlSequenceMaxValueIncrementer
  */
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 

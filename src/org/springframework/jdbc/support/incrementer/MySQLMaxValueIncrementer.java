@@ -122,7 +122,7 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.columnName == null) {
-			throw new IllegalArgumentException("columnName is required");
+			throw new IllegalArgumentException("Property 'columnName' is required");
 		}
 	}
 
