@@ -342,16 +342,18 @@
     servlet configuration (in the <literal>'web.xml'</literal> file.)</para>
 
     <programlisting>&lt;web-app&gt;
-    ...
+
     &lt;servlet&gt;
         &lt;servlet-name&gt;<emphasis role="bold">golfing</emphasis>&lt;/servlet-name&gt;
         &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
         &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
     &lt;/servlet&gt;
+
     &lt;servlet-mapping&gt;
         &lt;servlet-name&gt;<emphasis role="bold">golfing</emphasis>&lt;/servlet-name&gt;
         &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;
     &lt;/servlet-mapping&gt;
+
 &lt;/web-app&gt;</programlisting>
 
     <para>With the above servlet configuration in place, you will need to have
@@ -549,13 +551,11 @@
 
       <tgroup cols="2">
         <colspec colname="c1" colwidth="1*" />
-
         <colspec colname="c2" colwidth="4*" />
 
         <thead>
           <row>
             <entry>Parameter</entry>
-
             <entry>Explanation</entry>
           </row>
         </thead>
@@ -654,13 +654,11 @@
 
         <tgroup cols="2">
           <colspec colname="c1" colwidth="1*" />
-
           <colspec colname="c2" colwidth="3*" />
 
           <thead>
             <row>
               <entry>Feature</entry>
-
               <entry>Explanation</entry>
             </row>
           </thead>
@@ -2054,13 +2052,12 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       applications. The design for the multipart support is done with
       pluggable <interfacename>MultipartResolver</interfacename> objects,
       defined in the <literal>org.springframework.web.multipart</literal>
-      package. Out of the box, Spring provides
-      <interfacename>MultipartResolver</interfacename>s for use with
+      package. Out of the box, Spring provides a
+      <interfacename>MultipartResolver</interfacename> for use with
       <emphasis>Commons FileUpload</emphasis> (<ulink
-      url="http://jakarta.apache.org/commons/fileupload"></ulink>) and
-      <emphasis>COS FileUpload</emphasis> (<ulink
-      url="http://www.servlets.com/cos"></ulink>). How uploading files is
-      supported will be described in the rest of this chapter.</para>
+      url="http://jakarta.apache.org/commons/fileupload"/>).
+      How uploading files is supported will be described in the rest of
+      this chapter.</para>
 
       <para>By default, no multipart handling will be done by Spring, as some
       developers will want to handle multiparts themselves. You will have to
@@ -2162,7 +2159,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       the controller itself.</para>
 
       <programlisting>&lt;beans&gt;
-	<lineannotation>&lt;!-- lets use the Commons-based implementation of the MultipartResolver interface --&gt;</lineannotation>
+  <lineannotation>&lt;!-- lets use the Commons-based implementation of the MultipartResolver interface --&gt;</lineannotation>
     &lt;bean id="multipartResolver"
         class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/&gt;
 
@@ -2187,11 +2184,8 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
 
       <programlisting>public class FileUploadController extends SimpleFormController {
 
-    protected ModelAndView onSubmit(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        Object command,
-        BindException errors) throws ServletException, IOException {
+    protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
+            Object command, BindException errors) throws ServletException, IOException {
 
         <lineannotation> // cast the bean</lineannotation>
         FileUploadBean bean = (FileUploadBean) command;
@@ -2213,7 +2207,6 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
         binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
         // now Spring knows how to handle multipart object and convert them
     }
-
 }
 
 public class FileUploadBean {
@@ -2243,11 +2236,8 @@ public class FileUploadBean {
 
       <programlisting>public class FileUploadController extends SimpleFormController {
 
-    protected ModelAndView onSubmit(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        Object command,
-        BindException errors) throws ServletException, IOException {
+    protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
+            Object command, BindException errors) throws ServletException, IOException {
 
         <lineannotation> // cast the bean</lineannotation>
         FileUploadBean bean = (FileUploadBean) command;
@@ -2297,11 +2287,8 @@ public class FileUploadBean {
 
       <programlisting>public class FileUploadController extends SimpleFormController {
 
-    protected ModelAndView onSubmit(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        Object command,
-        BindException errors) throws ServletException, IOException {
+    protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
+            Object command, BindException errors) throws ServletException, IOException {
 
         <lineannotation> // cast the bean</lineannotation>
         FileUploadBean bean = (FileUploadBean) command;
@@ -2729,7 +2716,7 @@ public class FileUploadBean {
     </tip>
 
     <para>The following sections document these annotations and how they are
-    most commonly used.</para>
+    most commonly used in a Servlet environment.</para>
 
     <section id="mvc-ann-setup">
       <title>Setting up the dispatcher for annotation support</title>
@@ -2756,7 +2743,7 @@ public class FileUploadBean {
 
     &lt;bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/&gt;
 
-    ... (controller bean definitions) ...
+    <lineannotation>// ... (controller bean definitions) ...</lineannotation>
 
 &lt;/beans&gt;
 </programlisting>
@@ -2809,10 +2796,9 @@ public class FileUploadBean {
 
     &lt;context:component-scan base-package="org.springframework.samples.petclinic.web"/&gt;
 
-    ...
+    <lineannotation>// ...</lineannotation>
 
-&lt;/beans&gt;
-</programlisting>
+&lt;/beans&gt;</programlisting>
     </section>
 
     <section id="mvc-ann-requestmapping">
@@ -2850,41 +2836,40 @@ public class FileUploadBean {
 @SessionAttributes("pet")
 public class EditPetForm {
 
-	private final Clinic clinic;
+    private final Clinic clinic;
 
-	@Autowired
-	public EditPetForm(Clinic clinic) {
-		this.clinic = clinic;
-	}
+    @Autowired
+    public EditPetForm(Clinic clinic) {
+        this.clinic = clinic;
+    }
 
-	@ModelAttribute("types")
-	public Collection&lt;PetType&gt; populatePetTypes() {
-		return this.clinic.getPetTypes();
-	}
+    @ModelAttribute("types")
+    public Collection&lt;PetType&gt; populatePetTypes() {
+        return this.clinic.getPetTypes();
+    }
 
-	<emphasis role="bold">@RequestMapping(method = RequestMethod.GET)</emphasis>
-	public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
-		Pet pet = this.clinic.loadPet(petId);
-		model.addAttribute("pet", pet);
-		return "petForm";
-	}
+    <emphasis role="bold">@RequestMapping(method = RequestMethod.GET)</emphasis>
+    public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
+        Pet pet = this.clinic.loadPet(petId);
+        model.addAttribute("pet", pet);
+        return "petForm";
+    }
 
-	<emphasis role="bold">@RequestMapping(method = RequestMethod.POST)</emphasis>
-	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, 
-			SessionStatus status) {
-		new PetValidator().validate(pet, result);
-		if (result.hasErrors()) {
-			return "petForm";
-		}
-		else {
-			this.clinic.storePet(pet);
-			status.setComplete();
-			return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
-		}
-	}
+    <emphasis role="bold">@RequestMapping(method = RequestMethod.POST)</emphasis>
+    public String processSubmit(
+            @ModelAttribute("pet") Pet pet, BindingResult result, SessionStatus status) {
 
-}
-</programlisting>
+        new PetValidator().validate(pet, result);
+        if (result.hasErrors()) {
+            return "petForm";
+        }
+        else {
+            this.clinic.storePet(pet);
+            status.setComplete();
+            return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
+        }
+    }
+}</programlisting>
 
       <para>For a traditional multi-action controller the URLs are typically
       mapped directly on the methods since the controller responds to multiple
@@ -2895,51 +2880,50 @@ public class EditPetForm {
       <programlisting>@Controller
 public class ClinicController {
 
-	private final Clinic clinic;
+    private final Clinic clinic;
 
-	@Autowired
-	public ClinicController(Clinic clinic) {
-		this.clinic = clinic;
-	}
+    @Autowired
+    public ClinicController(Clinic clinic) {
+        this.clinic = clinic;
+    }
 
-	/**
-	 * Custom handler for the welcome view.
-	 * Note that this handler relies on the RequestToViewNameTranslator to
-	 * determine the logical view name based on the request URL: "/welcome.do"
-	 * -&gt; "welcome".
-	 */
-	<emphasis role="bold">@RequestMapping("/welcome.do")</emphasis>
-	public void welcomeHandler() {
-	}
+    /**
+     * Custom handler for the welcome view.
+     * Note that this handler relies on the RequestToViewNameTranslator to
+     * determine the logical view name based on the request URL: "/welcome.do"
+     * -&gt; "welcome".
+     */
+    <emphasis role="bold">@RequestMapping("/welcome.do")</emphasis>
+    public void welcomeHandler() {
+    }
 
-	/**
-	 * Custom handler for displaying vets.
-	 * Note that this handler returns a plain {@link ModelMap} object instead of
-	 * a ModelAndView, thus leveraging convention-based model attribute names.
-	 * It relies on the RequestToViewNameTranslator to determine the logical
-	 * view name based on the request URL: "/vets.do" -&gt; "vets".
-	 * @return a ModelMap with the model attributes for the view
-	 */
-	<emphasis role="bold">@RequestMapping("/vets.do")</emphasis>
-	public ModelMap vetsHandler() {
-		return new ModelMap(this.clinic.getVets());
-	}
+    /**
+     * Custom handler for displaying vets.
+     * Note that this handler returns a plain {@link ModelMap} object instead of
+     * a ModelAndView, thus leveraging convention-based model attribute names.
+     * It relies on the RequestToViewNameTranslator to determine the logical
+     * view name based on the request URL: "/vets.do" -&gt; "vets".
+     * @return a ModelMap with the model attributes for the view
+     */
+    <emphasis role="bold">@RequestMapping("/vets.do")</emphasis>
+    public ModelMap vetsHandler() {
+        return new ModelMap(this.clinic.getVets());
+    }
 
-	/**
-	 * Custom handler for displaying an owner.
-	 * Note that this handler returns a plain {@link ModelMap} object instead of
-	 * a ModelAndView, thus leveraging convention-based model attribute names.
-	 * It relies on the RequestToViewNameTranslator to determine the logical
-	 * view name based on the request URL: "/owner.do" -&gt; "owner".
-	 * @param ownerId the ID of the owner to display
-	 * @return a ModelMap with the model attributes for the view
-	 */
-	<emphasis role="bold">@RequestMapping("/owner.do")</emphasis>
-	public ModelMap ownerHandler(@RequestParam("ownerId") int ownerId) {
-		return new ModelMap(this.clinic.loadOwner(ownerId));
-	}
-}
-</programlisting>
+    /**
+     * Custom handler for displaying an owner.
+     * Note that this handler returns a plain {@link ModelMap} object instead of
+     * a ModelAndView, thus leveraging convention-based model attribute names.
+     * It relies on the RequestToViewNameTranslator to determine the logical
+     * view name based on the request URL: "/owner.do" -&gt; "owner".
+     * @param ownerId the ID of the owner to display
+     * @return a ModelMap with the model attributes for the view
+     */
+    <emphasis role="bold">@RequestMapping("/owner.do")</emphasis>
+    public ModelMap ownerHandler(@RequestParam("ownerId") int ownerId) {
+        return new ModelMap(this.clinic.loadOwner(ownerId));
+    }
+}</programlisting>
 
       <section id="mvc-ann-requestmapping-advanced">
         <title>Advanced <interfacename>@RequestMapping</interfacename> options</title>
@@ -2984,22 +2968,18 @@ public class ClinicController {
 
       <itemizedlist>
         <listitem>
-          <para>Request and/or response objects (Servlet API or Portlet API).
-          You may choose any specific request/response type, e.g. ServletRequest /
-          HttpServletRequest or PortletRequest / ActionRequest / RenderRequest.
-          Note that in the Portlet case, an explicitly declared action/render
-          argument is also used for mapping specific request types onto a handler
-          method (in case of no other information given that differentiates
-          between action and render requests).</para>
+          <para>Request and/or response objects (Servlet API).
+          You may choose any specific request/response type,
+          e.g. ServletRequest / HttpServletRequest.</para>
         </listitem>
 
         <listitem>
-          <para>Session object (Servlet API or Portlet API): either HttpSession or
-          PortletSession. An argument of this type will enforce the presence of a
-          corresponding session. As a consequence, such an argument will never be
-          <literal>null</literal>. <emphasis>Note that session access may not be
-          thread-safe, in particular in a Servlet environment: Consider switching
-          the <classname>AnnotationMethodHandlerAdapter</classname>'s
+          <para>Session object (Servlet API): of type HttpSession. An argument
+          of this type will enforce the presence of a corresponding session.
+          As a consequence, such an argument will never be <literal>null</literal>.
+          <emphasis>Note that session access may not be thread-safe, in particular
+          in a Servlet environment: Consider switching the
+          <classname>AnnotationMethodHandlerAdapter</classname>'s
           "synchronizeOnSession" flag to "true" if multiple requests are allowed
           to access a session concurrently.</emphasis></para>
         </listitem>
@@ -3015,36 +2995,32 @@ public class ClinicController {
           <para><classname>java.util.Locale</classname> for the current request
           locale (determined by the most specific locale resolver available,
           i.e. the configured <interfacename>LocaleResolver</interfacename>
-          in a Servlet environment and the portal locale in a Portlet
-          environment).</para>
+          in a Servlet environment).</para>
         </listitem>
 
         <listitem>
           <para><classname>java.io.InputStream</classname> /
-          <classname>java.io.Reader</classname> for access to the request's
-          content. This will be the raw InputStream/Reader as exposed by the
-          Servlet/Portlet API.</para>
+          <classname>java.io.Reader</classname> for access to the request's content.
+          This will be the raw InputStream/Reader as exposed by the Servlet API.</para>
         </listitem>
 
         <listitem>
           <para><classname>java.io.OutputStream</classname> /
-          <classname>java.io.Writer</classname> for generating the response's
-          content. This will be the raw OutputStream/Writer as exposed by the
-          Servlet/Portlet API.</para>
+          <classname>java.io.Writer</classname> for generating the response's content.
+          This will be the raw OutputStream/Writer as exposed by the Servlet API.</para>
         </listitem>
 
         <listitem>
           <para><classname>@RequestParam</classname> annotated parameters
-          for access to specific Servlet/Portlet request parameters. Parameter
-          values will be converted to the declared method argument type.</para>
+          for access to specific Servlet request parameters. Parameter values
+          will be converted to the declared method argument type.</para>
         </listitem>
 
         <listitem>
           <para><interfacename>java.util.Map</interfacename> /
           <interfacename>org.springframework.ui.Model</interfacename> /
           <classname>org.springframework.ui.ModelMap</classname> for
-          enriching the implicit model that will be exposed to the web
-          view.</para>
+          enriching the implicit model that will be exposed to the web view.</para>
         </listitem>
 
         <listitem>
@@ -3063,8 +3039,7 @@ public class ClinicController {
         </listitem>
 
         <listitem>
-          <para><classname>org.springframework.validation.Errors</classname>
-          /
+          <para><classname>org.springframework.validation.Errors</classname> /
           <classname>org.springframework.validation.BindingResult</classname>
           validation results for a preceding command/form object (the
           immediate preceding argument).</para>
@@ -3097,12 +3072,12 @@ public class EditPetForm {
 
     <lineannotation>// ...</lineannotation>
 
-	@RequestMapping(method = RequestMethod.GET)
-	public String setupForm(<emphasis role="bold">@RequestParam("petId") int petId</emphasis>, ModelMap model) {
-		Pet pet = this.clinic.loadPet(petId);
-		model.addAttribute("pet", pet);
-		return "petForm";
-	}
+    @RequestMapping(method = RequestMethod.GET)
+    public String setupForm(<emphasis role="bold">@RequestParam("petId") int petId</emphasis>, ModelMap model) {
+        Pet pet = this.clinic.loadPet(petId);
+        model.addAttribute("pet", pet);
+        return "petForm";
+    }
 
     <lineannotation>// ...</lineannotation>
 </programlisting>
@@ -3152,29 +3127,28 @@ public class EditPetForm {
 @SessionAttributes("pet")
 public class EditPetForm {
 
-	<lineannotation>// ...</lineannotation>
+    <lineannotation>// ...</lineannotation>
 
-	<emphasis role="bold">@ModelAttribute("types")</emphasis>
-	public Collection&lt;PetType&gt; populatePetTypes() {
-		return this.clinic.getPetTypes();
-	}
+    <emphasis role="bold">@ModelAttribute("types")</emphasis>
+    public Collection&lt;PetType&gt; populatePetTypes() {
+        return this.clinic.getPetTypes();
+    }
 
-	@RequestMapping(method = RequestMethod.POST)
-	public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>, BindingResult result,
-			SessionStatus status) {
-		new PetValidator().validate(pet, result);
-		if (result.hasErrors()) {
-			return "petForm";
-		}
-		else {
-			this.clinic.storePet(pet);
-			status.setComplete();
-			return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
-		}
-	}
+    @RequestMapping(method = RequestMethod.POST)
+    public String processSubmit(
+            <emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>, BindingResult result, SessionStatus status) {
 
-}
-</programlisting>
+        new PetValidator().validate(pet, result);
+        if (result.hasErrors()) {
+            return "petForm";
+        }
+        else {
+            this.clinic.storePet(pet);
+            status.setComplete();
+            return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
+        }
+    }
+}</programlisting>
     </section>
 
     <section id="mvc-ann-sessionattrib">
@@ -3247,9 +3221,7 @@ public class MyFormController {
     }
 
     <lineannotation>// ...</lineannotation>
-}
-
-</programlisting>
+}</programlisting>
       </section>
 
       <section id="mvc-ann-webbindinginitializer">
@@ -3304,4 +3276,5 @@ public class MyFormController {
       </listitem>
     </itemizedlist>
   </section>
+
 </chapter>
