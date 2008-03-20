@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="web-integration">
-	<title>Integrating with other web frameworks</title>
+  <title>Integrating with other web frameworks</title>
 
-	<section id="intro">
-		<title>Introduction</title>
+  <section id="intro">
+    <title>Introduction</title>
     <para>
       This chapter details Spring's integration with third party web frameworks
       such as <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink>,
@@ -43,14 +43,14 @@
       configuration that is common to all of the supported web frameworks, and then
       detailing the specific integration options for each supported web framework.
     </para>
-		<para>
-			<emphasis>
-				Please note that this chapter does not attempt to explain how to use any
-				of the supported web frameworks. For example, if you want to use Struts for
-				the presentation layer of your web application, the assumption is that you
-				are already familiar with Struts. If you need further details about any of
-				the supported web frameworks themselves, please do consult the section
-				entitled <xref linkend="web-integration-resources" /> at the end of this chapter.
+    <para>
+      <emphasis>
+        Please note that this chapter does not attempt to explain how to use any
+        of the supported web frameworks. For example, if you want to use Struts for
+        the presentation layer of your web application, the assumption is that you
+        are already familiar with Struts. If you need further details about any of
+        the supported web frameworks themselves, please do consult the section
+        entitled <xref linkend="web-integration-resources" /> at the end of this chapter.
       </emphasis>
     </para>
   </section>
@@ -78,78 +78,78 @@
       <classname>WebApplicationContext</classname>) that contains all of the
       'business beans' in one's application.
     </para>
-		<para>
-			Onto specifics... all that one need do is to declare a
-			<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></ulink>
-			in the standard J2EE servlet <literal>web.xml</literal> file of one's web application,
-			and add a <literal>contextConfigLocation</literal> &lt;context-param/&gt; section
-			(in the same file) that defines which set of Spring XML cpnfiguration files to load.
-		</para>
-		<para>
-			Find below the &lt;listener/&gt; configuration:
-		</para>
-		<programlisting><![CDATA[<listener>
+    <para>
+      Onto specifics... all that one need do is to declare a
+      <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></ulink>
+      in the standard J2EE servlet <literal>web.xml</literal> file of one's web application,
+      and add a <literal>contextConfigLocation</literal> &lt;context-param/&gt; section
+      (in the same file) that defines which set of Spring XML cpnfiguration files to load.
+    </para>
+    <para>
+      Find below the &lt;listener/&gt; configuration:
+    </para>
+    <programlisting><![CDATA[<listener>
   <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 </listener>]]></programlisting>
-		<note>
-			<para>
-				Listeners were added to the Servlet API in version 2.3; listener startup order was
-				finally clarified in Servlet 2.4. If you have a Servlet 2.3 container, you can use the
-				<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/ContextLoaderServlet.html"><classname>ContextLoaderServlet</classname></ulink>
-				to achieve the same functionality in a 100% portable fashion (with respect to startup order).
-			</para>
-		</note>
-		<para>
-			Find below the &lt;context-param/&gt; configuration:
-		</para>
-		<programlisting><![CDATA[<context-param>
+    <note>
+      <para>
+        Listeners were added to the Servlet API in version 2.3; listener startup order was
+        finally clarified in Servlet 2.4. If you have a Servlet 2.3 container, you can use the
+        <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/ContextLoaderServlet.html"><classname>ContextLoaderServlet</classname></ulink>
+        to achieve the same functionality in a 100% portable fashion (with respect to startup order).
+      </para>
+    </note>
+    <para>
+      Find below the &lt;context-param/&gt; configuration:
+    </para>
+    <programlisting><![CDATA[<context-param>
   <param-name>contextConfigLocation</param-name>
   <param-value>/WEB-INF/applicationContext*.xml</param-value>
 </context-param>]]></programlisting>
-		<para>
-			If you don't specify the <literal>contextConfigLocation</literal> 
-			context parameter, the <classname>ContextLoaderListener</classname> will look 
-			for a file called <literal>/WEB-INF/applicationContext.xml</literal> to load. 
-			Once the context files are loaded, Spring creates a
-			<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></ulink>
-			object based on the bean definitions and stores it in the
-			<interface>ServletContext</interface> of one's web application.
-		</para>
-		<para>
-			All Java web frameworks are built on top of the Servlet API, and so one can
-			use the following code snippet to get access to this 'business context'
-			<interface>ApplicationContext</interface> created by the
-			<classname>ContextLoaderListener</classname>.
-		</para>
-		<programlisting><![CDATA[WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);]]></programlisting>
-		<para>
-			The <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></ulink>
-			class is for convenience, so you don't have to remember the name of the
-			<interface>ServletContext</interface> attribute. Its <emphasis>getWebApplicationContext()</emphasis>
-			method will return <literal>null</literal> if an object doesn't exist under the
-			<literal>WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE</literal> key. Rather
-			than risk getting <classname>NullPointerExceptions</classname> in your application, it's
-			better to use the <literal>getRequiredWebApplicationContext()</literal> method. This
-			method throws an exception when the <interface>ApplicationContext</interface> is missing.
-		</para>
-		<para>
-			Once you have a reference to the <classname>WebApplicationContext</classname>, 
-			you can retrieve beans by their name or type. Most developers retrieve beans 
-			by name, then cast them to one of their implemented interfaces.
-		</para>
-		<para>
-			Fortunately, most of the frameworks in this section have simpler ways of looking up
-			beans. Not only do they make it easy to get beans from a Spring container, but they
-			also allow you to use dependency injection on their controllers. Each web framework
-			section has more detail on its specific integration strategies.
-		</para>
-	</section>
+    <para>
+      If you don't specify the <literal>contextConfigLocation</literal>
+      context parameter, the <classname>ContextLoaderListener</classname> will look
+      for a file called <literal>/WEB-INF/applicationContext.xml</literal> to load.
+      Once the context files are loaded, Spring creates a
+      <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></ulink>
+      object based on the bean definitions and stores it in the
+      <interface>ServletContext</interface> of one's web application.
+    </para>
+    <para>
+      All Java web frameworks are built on top of the Servlet API, and so one can
+      use the following code snippet to get access to this 'business context'
+      <interface>ApplicationContext</interface> created by the
+      <classname>ContextLoaderListener</classname>.
+    </para>
+    <programlisting><![CDATA[WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);]]></programlisting>
+    <para>
+      The <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></ulink>
+      class is for convenience, so you don't have to remember the name of the
+      <interface>ServletContext</interface> attribute. Its <emphasis>getWebApplicationContext()</emphasis>
+      method will return <literal>null</literal> if an object doesn't exist under the
+      <literal>WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE</literal> key. Rather
+      than risk getting <classname>NullPointerExceptions</classname> in your application, it's
+      better to use the <literal>getRequiredWebApplicationContext()</literal> method. This
+      method throws an exception when the <interface>ApplicationContext</interface> is missing.
+    </para>
+    <para>
+      Once you have a reference to the <classname>WebApplicationContext</classname>,
+      you can retrieve beans by their name or type. Most developers retrieve beans
+      by name, then cast them to one of their implemented interfaces.
+    </para>
+    <para>
+      Fortunately, most of the frameworks in this section have simpler ways of looking up
+      beans. Not only do they make it easy to get beans from a Spring container, but they
+      also allow you to use dependency injection on their controllers. Each web framework
+      section has more detail on its specific integration strategies.
+    </para>
+  </section>
 
-	<section id="jsf">
-		<title>JavaServer Faces 1.1 and 1.2</title>
-		<para>
-			JavaServer Faces (JSF) is the JCP's standard component-based, event-driven
-			web user interface framework. As of Java EE 5, it is an official part of
+  <section id="jsf">
+    <title>JavaServer Faces 1.1 and 1.2</title>
+    <para>
+      JavaServer Faces (JSF) is the JCP's standard component-based, event-driven
+      web user interface framework. As of Java EE 5, it is an official part of
       the Java EE umbrella.
     </para>
     <para>
@@ -171,24 +171,24 @@
     </note>
     <para>
       The key element in Spring's JSF integration is the JSF 1.1
-			<classname>VariableResolver</classname> mechanism. On JSF 1.2,
+      <classname>VariableResolver</classname> mechanism. On JSF 1.2,
       Spring supports the <classname>ELResolver</classname> mechanism
       as a next-generation version of JSF EL integration.
-		</para>
-		<section id="jsf-delegatingvariableresolver">
-			<title>DelegatingVariableResolver (JSF 1.1/1.2)</title>
-			<para>
-				The easiest way to integrate one's Spring middle-tier with one's
+    </para>
+    <section id="jsf-delegatingvariableresolver">
+      <title>DelegatingVariableResolver (JSF 1.1/1.2)</title>
+      <para>
+        The easiest way to integrate one's Spring middle-tier with one's
         JSF web layer is to use the
-				<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/jsf/DelegatingVariableResolver.html">
-				<classname>DelegatingVariableResolver</classname></ulink> class. To configure 
-				this variable resolver in one's application, one will need to edit one's 
-				<emphasis>faces-context.xml</emphasis> file. After the opening
-				<literal>&lt;faces-config/&gt;</literal> element, add an <literal>&lt;application/&gt;</literal> 
-				element and a <literal>&lt;variable-resolver/&gt;</literal> element within it.  
-				The value of the variable resolver should reference Spring's 
-				<classname>DelegatingVariableResolver</classname>; for example:</para>
-			<programlisting><![CDATA[<faces-config>
+        <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/jsf/DelegatingVariableResolver.html">
+        <classname>DelegatingVariableResolver</classname></ulink> class. To configure
+        this variable resolver in one's application, one will need to edit one's
+        <emphasis>faces-context.xml</emphasis> file. After the opening
+        <literal>&lt;faces-config/&gt;</literal> element, add an <literal>&lt;application/&gt;</literal>
+        element and a <literal>&lt;variable-resolver/&gt;</literal> element within it.
+        The value of the variable resolver should reference Spring's
+        <classname>DelegatingVariableResolver</classname>; for example:</para>
+      <programlisting><![CDATA[<faces-config>
   <application>
     <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
     <locale-config>
@@ -199,18 +199,18 @@
     <message-bundle>messages</message-bundle>
   </application>
 </faces-config>]]></programlisting>
-			<para>
-				The <classname>DelegatingVariableResolver</classname> will first delegate value
-				lookups to the default resolver of the underlying JSF implementation, and
-				then to Spring's 'business context' <classname>WebApplicationContext</classname>.
-				This allows one to easily inject dependencies into one's JSF-managed beans.
-			</para>
-			<para>
-				Managed beans are defined in one's <literal>faces-config.xml</literal> 
-				file. Find below an example where <literal>#{userManager}</literal> is a bean
-				that is retrieved from the Spring 'business context'.
-			</para>
-			<programlisting><![CDATA[<managed-bean>
+      <para>
+        The <classname>DelegatingVariableResolver</classname> will first delegate value
+        lookups to the default resolver of the underlying JSF implementation, and
+        then to Spring's 'business context' <classname>WebApplicationContext</classname>.
+        This allows one to easily inject dependencies into one's JSF-managed beans.
+      </para>
+      <para>
+        Managed beans are defined in one's <literal>faces-config.xml</literal>
+        file. Find below an example where <literal>#{userManager}</literal> is a bean
+        that is retrieved from the Spring 'business context'.
+      </para>
+      <programlisting><![CDATA[<managed-bean>
   <managed-bean-name>userList</managed-bean-name>
   <managed-bean-class>com.whatever.jsf.UserList</managed-bean-class>
   <managed-bean-scope>request</managed-bean-scope>
@@ -219,7 +219,7 @@
     <value>#{userManager}</value>
   </managed-property>
 </managed-bean>]]></programlisting>
-		</section>
+    </section>
     <section id="jsf-springbeanvariableresolver">
       <title>SpringBeanVariableResolver (JSF 1.1/1.2)</title>
       <para>
@@ -264,35 +264,35 @@
   </application>
 </faces-config>]]></programlisting>
     </section>
-		<section id="jsf-facescontextutils">
-			<title>FacesContextUtils</title>
-			<para>
-				A custom <interfacename>VariableResolver</interfacename> works well when mapping
-				one's properties to beans in <emphasis>faces-config.xml</emphasis>, but at times
-				one may need to grab a bean explicitly.  The
-				<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/jsf/FacesContextUtils.html">
-				<classname>FacesContextUtils</classname></ulink> class makes this easy. It is
-				similar to <classname>WebApplicationContextUtils</classname>, except that it
-				takes a <classname>FacesContext</classname> parameter rather than a
-				<interface>ServletContext</interface> parameter.
-			</para>
-			<programlisting><![CDATA[ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());]]></programlisting>
-		</section>
-	</section>
+    <section id="jsf-facescontextutils">
+      <title>FacesContextUtils</title>
+      <para>
+        A custom <interfacename>VariableResolver</interfacename> works well when mapping
+        one's properties to beans in <emphasis>faces-config.xml</emphasis>, but at times
+        one may need to grab a bean explicitly.  The
+        <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/jsf/FacesContextUtils.html">
+        <classname>FacesContextUtils</classname></ulink> class makes this easy. It is
+        similar to <classname>WebApplicationContextUtils</classname>, except that it
+        takes a <classname>FacesContext</classname> parameter rather than a
+        <interface>ServletContext</interface> parameter.
+      </para>
+      <programlisting><![CDATA[ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());]]></programlisting>
+    </section>
+  </section>
 
-	<section id="struts">
-		<title>Apache Struts 1.x and 2.x</title>
-		<para>
-			<ulink url="http://struts.apache.org">Struts</ulink> is the
-			<emphasis>de facto</emphasis> web framework for Java applications, mainly 
-			because it was one of the first to be released (June 2001). Invented by 
-			Craig McClanahan, Struts is an open source project hosted by the Apache 
-			Software Foundation. At the time, it greatly simplified the JSP/Servlet 
-			programming paradigm and won over many developers who were using 
-			proprietary frameworks. It simplified the programming model, it was open 
-			source (and thus free as in beer), and it had a large community, which allowed
-			the project to grow and become popular among Java web developers.
-		</para>
+  <section id="struts">
+    <title>Apache Struts 1.x and 2.x</title>
+    <para>
+      <ulink url="http://struts.apache.org">Struts</ulink> is the
+      <emphasis>de facto</emphasis> web framework for Java applications, mainly
+      because it was one of the first to be released (June 2001). Invented by
+      Craig McClanahan, Struts is an open source project hosted by the Apache
+      Software Foundation. At the time, it greatly simplified the JSP/Servlet
+      programming paradigm and won over many developers who were using
+      proprietary frameworks. It simplified the programming model, it was open
+      source (and thus free as in beer), and it had a large community, which allowed
+      the project to grow and become popular among Java web developers.
+    </para>
     <note>
       <para>
         <emphasis>The following section discusses Struts 1 a.k.a. "Struts Classic".</emphasis>
@@ -308,9 +308,9 @@
       </para>
     </note>
     <para>
-			To integrate your Struts 1.x application with Spring, you have two options:
-		</para>
-		<itemizedlist>
+      To integrate your Struts 1.x application with Spring, you have two options:
+    </para>
+    <itemizedlist>
       <listitem>
         <para>
           Configure Spring to manage your Actions as beans, using the
@@ -326,47 +326,47 @@
         </para>
       </listitem>
     </itemizedlist>
-		<section id="struts-contextloaderplugin">
-			<title>ContextLoaderPlugin</title>
-			<para>
-				The <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></ulink>
-				is a Struts 1.1+ plug-in that loads a Spring context file for the Struts 
-				<classname>ActionServlet</classname>. This context refers to the root 
-				<classname>WebApplicationContext</classname> (loaded by the 
-				<classname>ContextLoaderListener</classname>) as its parent. The default 
-				name of the context file is the name of the mapped servlet, plus 
-				<emphasis>-servlet.xml</emphasis>. If <classname>ActionServlet</classname> 
-				is defined in web.xml as 
-				<literal>&lt;servlet-name&gt;action&lt;/servlet-name&gt;</literal>, the 
-				default is <emphasis>/WEB-INF/action-servlet.xml</emphasis>.
-			</para>
-			<para>
-				To configure this plug-in, add the following XML to the plug-ins section near
-				the bottom of your <emphasis>struts-config.xml</emphasis> file:
-			</para>
-			<programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/>]]></programlisting>
-			<para>
-				The location of the context configuration files can be customized using the
-				'<literal>contextConfigLocation</literal>' property.
+    <section id="struts-contextloaderplugin">
+      <title>ContextLoaderPlugin</title>
+      <para>
+        The <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></ulink>
+        is a Struts 1.1+ plug-in that loads a Spring context file for the Struts
+        <classname>ActionServlet</classname>. This context refers to the root
+        <classname>WebApplicationContext</classname> (loaded by the
+        <classname>ContextLoaderListener</classname>) as its parent. The default
+        name of the context file is the name of the mapped servlet, plus
+        <emphasis>-servlet.xml</emphasis>. If <classname>ActionServlet</classname>
+        is defined in web.xml as
+        <literal>&lt;servlet-name&gt;action&lt;/servlet-name&gt;</literal>, the
+        default is <emphasis>/WEB-INF/action-servlet.xml</emphasis>.
+      </para>
+      <para>
+        To configure this plug-in, add the following XML to the plug-ins section near
+        the bottom of your <emphasis>struts-config.xml</emphasis> file:
+      </para>
+      <programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/>]]></programlisting>
+      <para>
+        The location of the context configuration files can be customized using the
+        '<literal>contextConfigLocation</literal>' property.
       </para>
       <programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
   <set-property property="contextConfigLocation"
       value="/WEB-INF/action-servlet.xml,/WEB-INF/applicationContext.xml"/>
 </plug-in>]]></programlisting>
-			<para>
-				It is possible to use this plugin to load all your context files, which can be
-				useful when using testing tools like StrutsTestCase. StrutsTestCase's
-				<classname>MockStrutsTestCase</classname> won't initialize Listeners on startup
-				so putting all your context files in the plugin is a workaround. (A 
-				<ulink url="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1088866&amp;group_id=39190&amp;atid=424562">
-				bug has been filed</ulink> for this issue, but has been closed as 'Wont Fix').
-			</para>
-			<para>
-				After configuring this plug-in in <emphasis>struts-config.xml</emphasis>, you can
-				configure your <classname>Action</classname> to be managed by Spring. Spring (1.1.3+)
-				provides two ways to do this:
-			</para>
-			<itemizedlist>
+      <para>
+        It is possible to use this plugin to load all your context files, which can be
+        useful when using testing tools like StrutsTestCase. StrutsTestCase's
+        <classname>MockStrutsTestCase</classname> won't initialize Listeners on startup
+        so putting all your context files in the plugin is a workaround. (A
+        <ulink url="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1088866&amp;group_id=39190&amp;atid=424562">
+        bug has been filed</ulink> for this issue, but has been closed as 'Wont Fix').
+      </para>
+      <para>
+        After configuring this plug-in in <emphasis>struts-config.xml</emphasis>, you can
+        configure your <classname>Action</classname> to be managed by Spring. Spring (1.1.3+)
+        provides two ways to do this:
+      </para>
+      <itemizedlist>
         <listitem>
           <para>
             Override Struts' default <classname>RequestProcessor</classname>
@@ -381,106 +381,106 @@
           </para>
         </listitem>
       </itemizedlist>
-			<para>
-				Both of these methods allow you to manage your Actions and 
-				their dependencies in the <emphasis>action-servlet.xml</emphasis> file.
-				The bridge between the Action in <emphasis>struts-config.xml</emphasis> 
-				and <emphasis>action-servlet.xml</emphasis> is built with the 
-				action-mapping's "path" and the bean's "name". If you have the 
-				following in your <emphasis>struts-config.xml</emphasis> file:
-			</para>
-			<programlisting><![CDATA[<action path="/users" .../>]]></programlisting>
-			<para>
-				You must define that Action's bean with the "/users" name in
-				<emphasis>action-servlet.xml</emphasis>:
-			</para>
-			<programlisting><![CDATA[<bean name="/users" .../>]]></programlisting>
-			<section id="struts-delegatingrequestprocessor">
-				<title>DelegatingRequestProcessor</title>
-				<para>
-					To configure the <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DelegatingRequestProcessor.html">
-					<literal>DelegatingRequestProcessor</literal></ulink> in your 
-					<emphasis>struts-config.xml</emphasis> file, override the "processorClass" 
-					property in the &lt;controller&gt; element. These lines follow the 
-					&lt;action-mapping&gt; element.
-				</para>
-				<programlisting><![CDATA[<controller>
+      <para>
+        Both of these methods allow you to manage your Actions and
+        their dependencies in the <emphasis>action-servlet.xml</emphasis> file.
+        The bridge between the Action in <emphasis>struts-config.xml</emphasis>
+        and <emphasis>action-servlet.xml</emphasis> is built with the
+        action-mapping's "path" and the bean's "name". If you have the
+        following in your <emphasis>struts-config.xml</emphasis> file:
+      </para>
+      <programlisting><![CDATA[<action path="/users" .../>]]></programlisting>
+      <para>
+        You must define that Action's bean with the "/users" name in
+        <emphasis>action-servlet.xml</emphasis>:
+      </para>
+      <programlisting><![CDATA[<bean name="/users" .../>]]></programlisting>
+      <section id="struts-delegatingrequestprocessor">
+        <title>DelegatingRequestProcessor</title>
+        <para>
+          To configure the <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DelegatingRequestProcessor.html">
+          <literal>DelegatingRequestProcessor</literal></ulink> in your
+          <emphasis>struts-config.xml</emphasis> file, override the "processorClass"
+          property in the &lt;controller&gt; element. These lines follow the
+          &lt;action-mapping&gt; element.
+        </para>
+        <programlisting><![CDATA[<controller>
   <set-property property="processorClass"
       value="org.springframework.web.struts.DelegatingRequestProcessor"/>
 </controller>]]></programlisting>
-				<para>
-					After adding this setting, your Action will automatically be 
-					looked up in Spring's context file, no matter what the type. In fact, 
-					you don't even need to specify a type. Both of the following snippets 
-					will work:
-				</para>
-				<programlisting><![CDATA[<action path="/user" type="com.whatever.struts.UserAction"/>		
+        <para>
+          After adding this setting, your Action will automatically be
+          looked up in Spring's context file, no matter what the type. In fact,
+          you don't even need to specify a type. Both of the following snippets
+          will work:
+        </para>
+        <programlisting><![CDATA[<action path="/user" type="com.whatever.struts.UserAction"/>
 <action path="/user"/>]]></programlisting>
-				<para>
-					If you're using Struts' <emphasis>modules</emphasis> feature, 
-					your bean names must contain the module prefix. For example, an action 
-					defined as <literal>&lt;action path="/user"/&gt;</literal> with module 
-					prefix "admin" requires a bean name with
-					<literal>&lt;bean name="/admin/user"/&gt;</literal>.
-				</para>
-				<note>
-					<para>
-						If you are using Tiles in your Struts application, you must configure your
-						&lt;controller&gt; with the
-						<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></ulink>
-						instead.
-					</para>
-				</note>
-			</section>
-			<section id="struts-delegatingactionproxy">
-				<title>DelegatingActionProxy</title>
-				<para>
-					If you have a custom <classname>RequestProcessor</classname> and 
-					can't use the <classname>DelegatingRequestProcessor</classname> or
-					<classname>DelegatingTilesRequestProcessor</classname> approaches, you can 
-					use the <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DelegatingActionProxy.html">
-					<classname>DelegatingActionProxy</classname></ulink> as the type in your 
-					action-mapping.
-				</para>
-				<programlisting><![CDATA[<action path="/user" type="org.springframework.web.struts.DelegatingActionProxy"
+        <para>
+          If you're using Struts' <emphasis>modules</emphasis> feature,
+          your bean names must contain the module prefix. For example, an action
+          defined as <literal>&lt;action path="/user"/&gt;</literal> with module
+          prefix "admin" requires a bean name with
+          <literal>&lt;bean name="/admin/user"/&gt;</literal>.
+        </para>
+        <note>
+          <para>
+            If you are using Tiles in your Struts application, you must configure your
+            &lt;controller&gt; with the
+            <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></ulink>
+            instead.
+          </para>
+        </note>
+      </section>
+      <section id="struts-delegatingactionproxy">
+        <title>DelegatingActionProxy</title>
+        <para>
+          If you have a custom <classname>RequestProcessor</classname> and
+          can't use the <classname>DelegatingRequestProcessor</classname> or
+          <classname>DelegatingTilesRequestProcessor</classname> approaches, you can
+          use the <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DelegatingActionProxy.html">
+          <classname>DelegatingActionProxy</classname></ulink> as the type in your
+          action-mapping.
+        </para>
+        <programlisting><![CDATA[<action path="/user" type="org.springframework.web.struts.DelegatingActionProxy"
     name="userForm" scope="request" validate="false" parameter="method">
   <forward name="list" path="/userList.jsp"/>
   <forward name="edit" path="/userForm.jsp"/>
 </action>]]></programlisting>
-				<para>
-					The bean definition in <emphasis>action-servlet.xml</emphasis> 
-					remains the same, whether you use a custom <literal>RequestProcessor</literal>
-					or the <classname>DelegatingActionProxy</classname>.
-				</para>
-				<para>
-					If you define your <classname>Action</classname> in a context file, the
-					full feature set of Spring's bean container will be available for it:
-					dependency injection as well as the option to instantiate a new
-					<classname>Action</classname> instance for each request. To activate the latter,
-					add <emphasis>scope="prototype"</emphasis> to your Action's bean definition.
-				</para>
-				<programlisting><![CDATA[<bean name="/user" scope="prototype" autowire="byName"
+        <para>
+          The bean definition in <emphasis>action-servlet.xml</emphasis>
+          remains the same, whether you use a custom <literal>RequestProcessor</literal>
+          or the <classname>DelegatingActionProxy</classname>.
+        </para>
+        <para>
+          If you define your <classname>Action</classname> in a context file, the
+          full feature set of Spring's bean container will be available for it:
+          dependency injection as well as the option to instantiate a new
+          <classname>Action</classname> instance for each request. To activate the latter,
+          add <emphasis>scope="prototype"</emphasis> to your Action's bean definition.
+        </para>
+        <programlisting><![CDATA[<bean name="/user" scope="prototype" autowire="byName"
     class="org.example.web.UserAction"/>]]></programlisting>
-			</section>
-		</section>
-		<section id="struts-actionsupport">
-			<title>ActionSupport Classes</title>
-			<para>
-				As previously mentioned, you can retrieve the
-				<classname>WebApplicationContext</classname> from the <interface>ServletContext</interface>
-				using the <classname>WebApplicationContextUtils</classname> class. An
-				easier way is to extend	Spring's <classname>Action</classname> classes for
-				Struts. For example, instead of subclassing Struts'
-				<classname>Action</classname> class, you can subclass Spring's
-				<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/ActionSupport.html">
-				<classname>ActionSupport</classname></ulink> class.
-			</para>
-			<para>
-				The <classname>ActionSupport</classname> class provides additional
-				convenience methods, like <emphasis>getWebApplicationContext()</emphasis>.
-				Below is an example of how you might use this in an Action:
-			</para>
-		<programlisting><![CDATA[public class UserAction extends DispatchActionSupport {
+      </section>
+    </section>
+    <section id="struts-actionsupport">
+      <title>ActionSupport Classes</title>
+      <para>
+        As previously mentioned, you can retrieve the
+        <classname>WebApplicationContext</classname> from the <interface>ServletContext</interface>
+        using the <classname>WebApplicationContextUtils</classname> class. An
+        easier way is to extend  Spring's <classname>Action</classname> classes for
+        Struts. For example, instead of subclassing Struts'
+        <classname>Action</classname> class, you can subclass Spring's
+        <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/ActionSupport.html">
+        <classname>ActionSupport</classname></ulink> class.
+      </para>
+      <para>
+        The <classname>ActionSupport</classname> class provides additional
+        convenience methods, like <emphasis>getWebApplicationContext()</emphasis>.
+        Below is an example of how you might use this in an Action:
+      </para>
+    <programlisting><![CDATA[public class UserAction extends DispatchActionSupport {
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -495,27 +495,27 @@
         return mapping.findForward("success");
     }
 }]]></programlisting>
-		<para>
-			Spring includes subclasses for all of the standard Struts Actions
-			- the Spring versions merely have <emphasis>Support</emphasis> appended to the name:
-			<itemizedlist spacing="compact">
-			<listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></ulink>,</para></listitem>
-			<listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></ulink>,</para></listitem>
-			<listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></ulink> and</para></listitem>
-			<listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></ulink>.</para></listitem>
-			</itemizedlist>
-		</para>
+    <para>
+      Spring includes subclasses for all of the standard Struts Actions
+      - the Spring versions merely have <emphasis>Support</emphasis> appended to the name:
+      <itemizedlist spacing="compact">
+      <listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></ulink>,</para></listitem>
+      <listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></ulink>,</para></listitem>
+      <listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></ulink> and</para></listitem>
+      <listitem><para><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></ulink>.</para></listitem>
+      </itemizedlist>
+    </para>
 
-		<para>
-			The recommended strategy is to use the approach that best suits
-			your project. Subclassing makes your code more readable, and you know
-			exactly how your dependencies are resolved. However, using the
-			<classname>ContextLoaderPlugin</classname> allow you to easily add new
-			dependencies in your context XML file. Either way, Spring provides some
-			nice options for integrating the two frameworks.
-			</para>
-		</section>
-	</section>
+    <para>
+      The recommended strategy is to use the approach that best suits
+      your project. Subclassing makes your code more readable, and you know
+      exactly how your dependencies are resolved. However, using the
+      <classname>ContextLoaderPlugin</classname> allow you to easily add new
+      dependencies in your context XML file. Either way, Spring provides some
+      nice options for integrating the two frameworks.
+      </para>
+    </section>
+  </section>
 
   <section id="webwork">
     <title>WebWork 2.x</title>
@@ -570,43 +570,43 @@
     </para>
   </section>
 
-	<section id="tapestry">
-		<title>Tapestry 3.x and 4.x</title>
-		<para>
-			From the <ulink url="http://tapestry.apache.org/">Tapestry homepage</ulink>...
-		</para>
-		<quote>
-			<emphasis>
-				Tapestry is an open-source framework for creating dynamic, robust, highly
-				scalable web applications in Java. Tapestry complements and builds upon
-				the standard Java Servlet API, and so it works in any servlet container or
-				application server.
-			</emphasis>
-		</quote>
-		<para>
-			While Spring has its own <link linkend="mvc">powerful web layer</link>, there
-			are a number of unique advantages to building a J2EE application using a
-			combination of Tapestry for the web	user interface and the Spring container
-			for the lower layers. This section of the web integration chapter attempts
-			to detail a few best practices for combining these two frameworks.
-		</para>
-		<para>
-			A <emphasis>typical</emphasis> layered J2EE application built with Tapestry
-			and Spring will consist of a top user interface (UI) layer built with Tapestry,
-			and a number of lower layers, all wired together by one or more Spring containers.
-			Tapestry's own reference documentation contains the following snippet of best
+  <section id="tapestry">
+    <title>Tapestry 3.x and 4.x</title>
+    <para>
+      From the <ulink url="http://tapestry.apache.org/">Tapestry homepage</ulink>...
+    </para>
+    <quote>
+      <emphasis>
+        Tapestry is an open-source framework for creating dynamic, robust, highly
+        scalable web applications in Java. Tapestry complements and builds upon
+        the standard Java Servlet API, and so it works in any servlet container or
+        application server.
+      </emphasis>
+    </quote>
+    <para>
+      While Spring has its own <link linkend="mvc">powerful web layer</link>, there
+      are a number of unique advantages to building a J2EE application using a
+      combination of Tapestry for the web  user interface and the Spring container
+      for the lower layers. This section of the web integration chapter attempts
+      to detail a few best practices for combining these two frameworks.
+    </para>
+    <para>
+      A <emphasis>typical</emphasis> layered J2EE application built with Tapestry
+      and Spring will consist of a top user interface (UI) layer built with Tapestry,
+      and a number of lower layers, all wired together by one or more Spring containers.
+      Tapestry's own reference documentation contains the following snippet of best
       practice advice. (Text that the author of this Spring section has added is
       contained within <literal>[]</literal> brackets.)
-		</para>
-		<quote>
-			<emphasis>
-				A very succesful design pattern in Tapestry is to keep pages and components
-				very simple, and <emphasis role="bold">delegate</emphasis> as much logic as
-				possible out to HiveMind [or Spring, or whatever] services. Listener methods
-				should ideally do little more than marshall together the correct information
-				and pass it over to a service.
-			</emphasis>
-		</quote>
+    </para>
+    <quote>
+      <emphasis>
+        A very succesful design pattern in Tapestry is to keep pages and components
+        very simple, and <emphasis role="bold">delegate</emphasis> as much logic as
+        possible out to HiveMind [or Spring, or whatever] services. Listener methods
+        should ideally do little more than marshall together the correct information
+        and pass it over to a service.
+      </emphasis>
+    </quote>
     <para>
       The key question then is... how does one supply Tapestry pages with collaborating
       services? The answer, ideally, is that one would want to dependency inject those
@@ -621,13 +621,13 @@
       <ulink url="http://howardlewisship.com/blog/">Howard M. Lewis Ship</ulink>,
       so hats off to him for what is really some silky smooth integration).
     </para>
-		<section id="tapestry-di">
-			<title>Injecting Spring-managed beans</title>
-			<para>
-				Assume we have the following simple Spring container definition (in the
-				ubiquitous XML format):
-			</para>
-			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+    <section id="tapestry-di">
+      <title>Injecting Spring-managed beans</title>
+      <para>
+        Assume we have the following simple Spring container definition (in the
+        ubiquitous XML format):
+      </para>
+      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" 
         "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
  
@@ -685,66 +685,66 @@
     </bean>  
  
  </beans>]]></programlisting>
-			<para>
+      <para>
         Inside the Tapestry application, the above bean definitions need to
         be <link linkend="web-integration-common">loaded into a Spring container</link>,
         and any relevant Tapestry pages need to be supplied (injected) with the
         <literal>authenticationService</literal> and
         <literal>userService</literal> beans, which implement the
-				<interfacename>AuthenticationService</interfacename> and
-				<interfacename>UserService</interfacename> interfaces, respectively.
-			</para>
-			<para>
-				At this point, the application context is available to a web
-				application by calling Spring's static utility function
-				<literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
-				where servletContext is the standard <interface>ServletContext</interface>
-				from the J2EE Servlet specification. As such, one simple mechanism for
-				a page to get an instance of the <interfacename>UserService</interfacename>,
-				for example, would be with code such as:
-			</para>
-			<programlisting><![CDATA[WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
+        <interfacename>AuthenticationService</interfacename> and
+        <interfacename>UserService</interfacename> interfaces, respectively.
+      </para>
+      <para>
+        At this point, the application context is available to a web
+        application by calling Spring's static utility function
+        <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
+        where servletContext is the standard <interface>ServletContext</interface>
+        from the J2EE Servlet specification. As such, one simple mechanism for
+        a page to get an instance of the <interfacename>UserService</interfacename>,
+        for example, would be with code such as:
+      </para>
+      <programlisting><![CDATA[WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
     getRequestCycle().getRequestContext().getServlet().getServletContext());
 UserService userService = (UserService) appContext.getBean("userService");
 ]]><lineannotation>... some code which uses UserService</lineannotation></programlisting>
-			<para>
-				This mechanism does work... having said that, it can be made a
-				lot less verbose by encapsulating most of the functionality in a
-				method in the base class for the page or component. However, in
-				some respects it goes against the IoC principle; ideally you would like the page to
-				not have to ask the context for a specific bean by name, and in
-				fact, the page would ideally not know about the context at all.
-			</para>
-			<para>
-				Luckily, there is a mechanism to allow this. We rely upon the
-				fact that Tapestry already has a mechanism to declaratively add
-				properties to a page, and it is in fact the preferred approach to
-				manage all properties on a page in this declarative fashion, so that
-				Tapestry can properly manage their lifecycle as part of the page and
-				component lifecycle.
-			</para>
-			<note>
-				<para>
+      <para>
+        This mechanism does work... having said that, it can be made a
+        lot less verbose by encapsulating most of the functionality in a
+        method in the base class for the page or component. However, in
+        some respects it goes against the IoC principle; ideally you would like the page to
+        not have to ask the context for a specific bean by name, and in
+        fact, the page would ideally not know about the context at all.
+      </para>
+      <para>
+        Luckily, there is a mechanism to allow this. We rely upon the
+        fact that Tapestry already has a mechanism to declaratively add
+        properties to a page, and it is in fact the preferred approach to
+        manage all properties on a page in this declarative fashion, so that
+        Tapestry can properly manage their lifecycle as part of the page and
+        component lifecycle.
+      </para>
+      <note>
+        <para>
           This next section is applicable to Tapestry 3.x.
           If you are using Tapestry version 4.x, please consult the section
           entitled <xref linkend="tapestry-4-style-di"/>.
-				</para>
-			</note>
-			<section id="tapestry-pre4-style-di">
-				<title>Dependency Injecting Spring Beans into Tapestry pages</title>
-				<para>
-					First we need to make the <interface>ApplicationContext</interface>
-					available to the Tapestry page or Component without having to have the
-					<interface>ServletContext</interface>; this is because at the stage in the
-					page's/component's lifecycle when we need to access the
-					<interface>ApplicationContext</interface>, the
-					<interface>ServletContext</interface> won't be easily available to the
-					page, so we can't use
-					<literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>
-					directly. One way is by defining a custom version of the Tapestry
-					<interfacename>IEngine</interfacename> which exposes this for us:
-				</para>
-				<programlisting><![CDATA[package com.whatever.web.xportal;
+        </para>
+      </note>
+      <section id="tapestry-pre4-style-di">
+        <title>Dependency Injecting Spring Beans into Tapestry pages</title>
+        <para>
+          First we need to make the <interface>ApplicationContext</interface>
+          available to the Tapestry page or Component without having to have the
+          <interface>ServletContext</interface>; this is because at the stage in the
+          page's/component's lifecycle when we need to access the
+          <interface>ApplicationContext</interface>, the
+          <interface>ServletContext</interface> won't be easily available to the
+          page, so we can't use
+          <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>
+          directly. One way is by defining a custom version of the Tapestry
+          <interfacename>IEngine</interfacename> which exposes this for us:
+        </para>
+        <programlisting><![CDATA[package com.whatever.web.xportal;
 
 import ...
 
@@ -769,14 +769,14 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
         }
     }
 }]]></programlisting>
-				<para>
-					This engine class places the Spring Application Context as
-					an attribute called "appContext" in this Tapestry app's 'Global'
-					object. Make sure to register the fact that this special IEngine
-					instance should be used for this Tapestry application, with an entry
-					in the Tapestry application definition file. For example:
-				</para>
-				<programlisting><lineannotation>file: xportal.application:</lineannotation><![CDATA[ 
+        <para>
+          This engine class places the Spring Application Context as
+          an attribute called "appContext" in this Tapestry app's 'Global'
+          object. Make sure to register the fact that this special IEngine
+          instance should be used for this Tapestry application, with an entry
+          in the Tapestry application definition file. For example:
+        </para>
+        <programlisting><lineannotation>file: xportal.application:</lineannotation><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE application PUBLIC 
     "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
@@ -785,16 +785,16 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
     name="Whatever xPortal"
     engine-class="com.whatever.web.xportal.MyEngine">
 </application>]]></programlisting>
-			</section>
-			<section id="tapestry-componentdefs">
-				<title>Component definition files</title>
-				<para>
-					Now in our page or component definition file (*.page or *.jwc),
-					we simply add property-specification elements to grab the beans we
-					need out of the <interfacename>ApplicationContext</interfacename>,
-					and create page or component properties for them. For example:
-				</para>
-				<programlisting><![CDATA[    <property-specification name="userService"
+      </section>
+      <section id="tapestry-componentdefs">
+        <title>Component definition files</title>
+        <para>
+          Now in our page or component definition file (*.page or *.jwc),
+          we simply add property-specification elements to grab the beans we
+          need out of the <interfacename>ApplicationContext</interfacename>,
+          and create page or component properties for them. For example:
+        </para>
+        <programlisting><![CDATA[    <property-specification name="userService"
                             type="com.whatever.services.service.user.UserService">
         global.appContext.getBean("userService")
     </property-specification>
@@ -802,12 +802,12 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
                             type="com.whatever.services.service.user.AuthenticationService">
         global.appContext.getBean("authenticationService")
     </property-specification>]]></programlisting>
-				<para>
-					The OGNL expression	inside the property-specification specifies the
-					initial value for the property, as a bean obtained from the context.
-					The entire page definition might look like this:
-				</para>
-				<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+        <para>
+          The OGNL expression  inside the property-specification specifies the
+          initial value for the property, as a bean obtained from the context.
+          The entire page definition might look like this:
+        </para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE page-specification PUBLIC 
     "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
     "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
@@ -848,24 +848,24 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
     </component>
  
 </page-specification>]]></programlisting>
-			</section>
-			<section id="tapestry-getters">
-				<title>Adding abstract accessors</title>
-				<para>
-					Now in the Java class definition for the page or component
-					itself, all we need to do is add an abstract getter method
-					for the properties we have defined (in order to be able to
-					access the properties).
-				</para>
-				<programlisting><![CDATA[// our UserService implementation; will come from page definition
+      </section>
+      <section id="tapestry-getters">
+        <title>Adding abstract accessors</title>
+        <para>
+          Now in the Java class definition for the page or component
+          itself, all we need to do is add an abstract getter method
+          for the properties we have defined (in order to be able to
+          access the properties).
+        </para>
+        <programlisting><![CDATA[// our UserService implementation; will come from page definition
 public abstract UserService getUserService();
 // our AuthenticationService implementation; will come from page definition
 public abstract AuthenticationService getAuthenticationService();]]></programlisting>
-				<para>
-					For the sake of completeness, the entire Java class, for a
-					login page in this example, might look like this:
-				</para>
-				<programlisting><![CDATA[package com.whatever.web.xportal.pages;
+        <para>
+          For the sake of completeness, the entire Java class, for a
+          login page in this example, might look like this:
+        </para>
+        <programlisting><![CDATA[package com.whatever.web.xportal.pages;
  
 /**
  *  Allows the user to login, by providing username and password.
@@ -978,30 +978,30 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         }
     }
 }]]></programlisting>
-			</section>
-			<section id="tapestry-4-style-di">
-				<title>Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.x style</title>
-				<para>
-					Effecting the dependency injection of Spring-managed beans into Tapestry
-					pages in Tapestry version 4.x is <emphasis>so</emphasis> much simpler.
-					All that is needed is a single
-					<ulink url="http://howardlewisship.com/tapestry-javaforge/tapestry-spring/">add-on library</ulink>,
-					and some (small) amount of (essentially boilerplate) configuration.
-					Simply package and deploy this library with the (any of the) other
-					libraries required by your web application (typically in
-					<literal>WEB-INF/lib</literal>).
-				</para>
-				<para>
-					You will then need to create and expose the Spring container using the
-					<link linkend="web-integration-common">method detailed previously</link>.
-					You can then inject Spring-managed beans into Tapestry very easily; if
-					we are using Java 5, consider the <classname>Login</classname> page from above:
-					we simply need to annotate the appropriate getter methods
-					in order to dependency inject the Spring-managed <literal>userService</literal>
-					and <literal>authenticationService</literal> objects (lots of the class
-					definition has been elided for clarity)...
-				</para>
-				<programlisting><![CDATA[package com.whatever.web.xportal.pages;
+      </section>
+      <section id="tapestry-4-style-di">
+        <title>Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.x style</title>
+        <para>
+          Effecting the dependency injection of Spring-managed beans into Tapestry
+          pages in Tapestry version 4.x is <emphasis>so</emphasis> much simpler.
+          All that is needed is a single
+          <ulink url="http://howardlewisship.com/tapestry-javaforge/tapestry-spring/">add-on library</ulink>,
+          and some (small) amount of (essentially boilerplate) configuration.
+          Simply package and deploy this library with the (any of the) other
+          libraries required by your web application (typically in
+          <literal>WEB-INF/lib</literal>).
+        </para>
+        <para>
+          You will then need to create and expose the Spring container using the
+          <link linkend="web-integration-common">method detailed previously</link>.
+          You can then inject Spring-managed beans into Tapestry very easily; if
+          we are using Java 5, consider the <classname>Login</classname> page from above:
+          we simply need to annotate the appropriate getter methods
+          in order to dependency inject the Spring-managed <literal>userService</literal>
+          and <literal>authenticationService</literal> objects (lots of the class
+          definition has been elided for clarity)...
+        </para>
+        <programlisting><![CDATA[package com.whatever.web.xportal.pages;
 
 public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
     
@@ -1012,11 +1012,11 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
     public abstract AuthenticationService getAuthenticationService();
 
 }]]></programlisting>
-			<para>
-				We are almost done... all that remains is the HiveMind configuration that exposes the
-				Spring container stored in the <interfacename>ServletContext</interfacename> as a
-				HiveMind service; for example:</para>
-			<programlisting><![CDATA[<?xml version="1.0"?>
+      <para>
+        We are almost done... all that remains is the HiveMind configuration that exposes the
+        Spring container stored in the <interfacename>ServletContext</interfacename> as a
+        HiveMind service; for example:</para>
+      <programlisting><![CDATA[<?xml version="1.0"?>
 <module id="com.javaforge.tapestry.spring" version="0.1.1">
 
     <service-point id="SpringApplicationInitializer"
@@ -1038,52 +1038,52 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
     </contribution>
 
 </module>]]></programlisting>
-				<para>
-					If you are using Java 5 (and thus have access to annotations), then
-					that really is it.
-				</para>
-				<para>
+        <para>
+          If you are using Java 5 (and thus have access to annotations), then
+          that really is it.
+        </para>
+        <para>
           If you are not using Java 5, then one obviously doesn't annotate one's
           Tapestry page classes with annotations; instead, one simply uses
           good old fashioned XML to declare the dependency injection; for example,
           inside the <literal>.page</literal> or <literal>.jwc</literal> file
           for the <classname>Login</classname> page (or component):
-				</para>
-				<programlisting><![CDATA[<inject property="userService" object="spring:userService"/>
+        </para>
+        <programlisting><![CDATA[<inject property="userService" object="spring:userService"/>
 <inject property="authenticationService" object="spring:authenticationService"/>]]></programlisting>
-			</section>
-		</section>
-		<para>
-			In this example, we've managed to allow service beans defined in
-			a Spring container to be provided to the Tapestry page in a declarative
-			fashion. The page class does not know where the service implementations
-			are coming from, and in fact it is easy to slip in another implementation,
-			for example, during testing. This inversion	of control is one of the
-			prime goals and benefits of the Spring Framework, and we have managed
-			to extend it all the way up the J2EE stack in this Tapestry application.
-		</para>
-	</section>
+      </section>
+    </section>
+    <para>
+      In this example, we've managed to allow service beans defined in
+      a Spring container to be provided to the Tapestry page in a declarative
+      fashion. The page class does not know where the service implementations
+      are coming from, and in fact it is easy to slip in another implementation,
+      for example, during testing. This inversion  of control is one of the
+      prime goals and benefits of the Spring Framework, and we have managed
+      to extend it all the way up the J2EE stack in this Tapestry application.
+    </para>
+  </section>
 
-	<section id="web-integration-resources">
-		<title>Further Resources</title>
-		<para>
+  <section id="web-integration-resources">
+    <title>Further Resources</title>
+    <para>
       Find below links to further resources about the various web frameworks
       described in this chapter.
     </para>
-		<itemizedlist>
+    <itemizedlist>
       <listitem>
         <para>The <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink> homepage</para>
       </listitem>
-			<listitem>
-				<para>The <ulink url="http://struts.apache.org/">Struts</ulink> homepage</para>
-			</listitem>
+      <listitem>
+        <para>The <ulink url="http://struts.apache.org/">Struts</ulink> homepage</para>
+      </listitem>
       <listitem>
         <para>The <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink> homepage</para>
       </listitem>
-			<listitem>
-				<para>The <ulink url="http://tapestry.apache.org/">Tapestry</ulink> homepage</para>
-			</listitem>
-		</itemizedlist>
-	</section>
+      <listitem>
+        <para>The <ulink url="http://tapestry.apache.org/">Tapestry</ulink> homepage</para>
+      </listitem>
+    </itemizedlist>
+  </section>
 
 </chapter>

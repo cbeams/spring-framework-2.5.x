@@ -939,7 +939,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <para>There is a dedicated Spring Framework plugin for Eclipse called
 				<ulink url="http://springide.org/blog/">Spring IDE</ulink> and it is pretty darn cool. (There's a
 				considered and non-biased opinion for you!) This plugin makes using Spring even easier, and it has more
-				than just support for the core Spring Framework... Spring WebFlow is supported too. Details of how to
+				than just support for the core Spring Framework... Spring Web Flow is supported too. Details of how to
 				install Spring IDE can be found on the
 				<ulink url="http://springide.org/project/wiki/SpringideInstall">Spring IDE installation page</ulink>.</para>
 		        <para>
