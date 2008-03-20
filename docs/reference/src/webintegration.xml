@@ -485,8 +485,8 @@
             by Spring. The real beauty of the rest of this Spring-Tapestry integration is that
             the elegant and flexible design of Tapestry itself makes doing this dependency
             injection of Spring-managed beans a cinch. (Another nice thing is that this
-            Spring-Tapestry itegration code was written - and continues to be maintained - by
-            the Tapestry creator
+            Spring-Tapestry integration code was written - and continues to be maintained -
+            by the Tapestry creator
             <ulink url="http://howardlewisship.com/blog/">Howard M. Lewis Ship</ulink>, so hats
             off to him for what is really some silky smooth integration).
         </para>
