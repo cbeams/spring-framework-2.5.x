@@ -44,7 +44,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * create table tab_sequence (value int not null) type=MYISAM;
  * insert into tab_sequence values(0);</pre>
  *
- * If "cacheSize is" set, the intermediate values are served without querying the
+ * If "cacheSize" is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
@@ -53,16 +53,10 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
+public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
 
-	/** The Sql string for retrieving the new sequence value */
+	/** The SQL string for retrieving the new sequence value */
 	private static final String VALUE_SQL = "select last_insert_id()";
-
-	/** The name of the column for this sequence */
-	private String columnName;
-
-	/** The number of keys buffered in a cache */
-	private int cacheSize = 1;
 
 	/** The next id to serve */
 	private long nextId = 0;
@@ -72,58 +66,22 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 
 
 	/**
-	 * Default constructor.
-	 **/
+	 * Default constructor for bean property style usage.
+	 * @see #setDataSource
+	 * @see #setIncrementerName
+	 * @see #setColumnName
+	 */
 	public MySQLMaxValueIncrementer() {
 	}
 
 	/**
 	 * Convenience constructor.
-	 * @param ds the DataSource to use
+	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 * @param columnName the name of the column in the sequence table to use
-	 **/
-	public MySQLMaxValueIncrementer(DataSource ds, String incrementerName, String columnName) {
-		setDataSource(ds);
-		setIncrementerName(incrementerName);
-		this.columnName = columnName;
-		afterPropertiesSet();
-	}
-
-
-	/**
-	 * Set the name of the column in the sequence table.
 	 */
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
-
-	/**
-	 * Return the name of the column in the sequence table.
-	 */
-	public String getColumnName() {
-		return this.columnName;
-	}
-
-	/**
-	 * Set the number of buffered keys.
-	 */
-	public void setCacheSize(int cacheSize) {
-		this.cacheSize = cacheSize;
-	}
-
-	/**
-	 * Return the number of buffered keys.
-	 */
-	public int getCacheSize() {
-		return this.cacheSize;
-	}
-
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		if (this.columnName == null) {
-			throw new IllegalArgumentException("Property 'columnName' is required");
-		}
+	public MySQLMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
+		super(dataSource, incrementerName, columnName);
 	}
 
 
@@ -139,10 +97,11 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 			try {
 				stmt = con.createStatement();
 				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-				// increment the sequence column
-				stmt.executeUpdate("update "+ getIncrementerName() + " set " + this.columnName +
-						" = last_insert_id(" + this.columnName + " + " + getCacheSize() + ")");
-				// retrieve the new max of the sequence column
+				// Increment the sequence column...
+				String columnName = getColumnName();
+				stmt.executeUpdate("update "+ getIncrementerName() + " set " + columnName +
+						" = last_insert_id(" + columnName + " + " + getCacheSize() + ")");
+				// Retrieve the new max of the sequence column...
 				ResultSet rs = stmt.executeQuery(VALUE_SQL);
 				try {
 					if (!rs.next()) {

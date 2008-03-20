@@ -55,72 +55,32 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Juergen Hoeller
  * @see HsqlSequenceMaxValueIncrementer
  */
-public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
+public class HsqlMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
 
-	/** The name of the column for this sequence */
-	private String columnName;
-
-	/** The number of keys buffered in a cache */
-	private int cacheSize = 1;
-
-	private long[] valueCache = null;
+	/** The current cache of values */
+	private long[] valueCache;
 
 	/** The next id to serve from the value cache */
 	private int nextValueIndex = -1;
 
 
 	/**
-	 * Default constructor.
-	 **/
+	 * Default constructor for bean property style usage.
+	 * @see #setDataSource
+	 * @see #setIncrementerName
+	 * @see #setColumnName
+	 */
 	public HsqlMaxValueIncrementer() {
 	}
 
 	/**
 	 * Convenience constructor.
-	 * @param ds the DataSource to use
+	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 * @param columnName the name of the column in the sequence table to use
-	 **/
-	public HsqlMaxValueIncrementer(DataSource ds, String incrementerName, String columnName) {
-		setDataSource(ds);
-		setIncrementerName(incrementerName);
-		this.columnName = columnName;
-		afterPropertiesSet();
-	}
-
-	/**
-	 * Set the name of the column in the sequence table.
 	 */
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
-
-	/**
-	 * Return the name of the column in the sequence table.
-	 */
-	public String getColumnName() {
-		return this.columnName;
-	}
-
-	/**
-	 * Set the number of buffered keys.
-	 */
-	public void setCacheSize(int cacheSize) {
-		this.cacheSize = cacheSize;
-	}
-
-	/**
-	 * Return the number of buffered keys.
-	 */
-	public int getCacheSize() {
-		return this.cacheSize;
-	}
-
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		if (this.columnName == null) {
-			throw new IllegalArgumentException("Property 'columnName' is required");
-		}
+	public HsqlMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
+		super(dataSource, incrementerName, columnName);
 	}
 
 
@@ -128,8 +88,8 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
 			/*
 			* Need to use straight JDBC code because we need to make sure that the insert and select
-			* are performed on the same connection (otherwise we can't be sure that last_insert_id()
-			* returned the correct value)
+			* are performed on the same Connection. Otherwise we can't be sure that last_insert_id()
+			* returned the correct value.
 			*/
 			Connection con = DataSourceUtils.getConnection(getDataSource());
 			Statement stmt = null;
@@ -152,7 +112,7 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 					}
 				}
 				long maxValue = this.valueCache[(this.valueCache.length - 1)];
-				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + this.columnName + " < " + maxValue);
+				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + getColumnName() + " < " + maxValue);
 			}
 			catch (SQLException ex) {
 				throw new DataAccessResourceFailureException("Could not obtain identity()", ex);

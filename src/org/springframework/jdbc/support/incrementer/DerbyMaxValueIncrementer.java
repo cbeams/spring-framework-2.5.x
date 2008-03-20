@@ -51,81 +51,65 @@ import org.springframework.jdbc.support.JdbcUtils;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b>  Since Derby supports the JDBC 3.0 method getGeneratedKeys it's recommended to
- * use IDENTITY columns directly in the tables and then utilizing a {@link org.springframework.jdbc.support.KeyHolder}
- * when calling the with the update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) method of
- * the {@link org.springframework.jdbc.core.JdbcTemplate}.
+ * <b>HINT:</b>  Since Derby supports the JDBC 3.0 <code>getGeneratedKeys</code> method,
+ * it is recommended to use IDENTITY columns directly in the tables and then utilizing
+ * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
+ * <code>update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)</code>
+ * method of the {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * <p>Thanks to Endre Stolsvik for the suggestion!
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
-public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
+public class DerbyMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
 
 	/** The default for dummy name */
 	private static final String DEFAULT_DUMMY_NAME = "dummy";
 
-	/** The name of the column for this sequence */
-	private String columnName;
-
 	/** The name of the dummy column used for inserts */
 	private String dummyName = DEFAULT_DUMMY_NAME;
 
-	/** The number of keys buffered in a cache */
-	private int cacheSize = 1;
-
-	private long[] valueCache = null;
+	/** The current cache of values */
+	private long[] valueCache;
 
 	/** The next id to serve from the value cache */
 	private int nextValueIndex = -1;
 
 
 	/**
-	 * Default constructor.
-	 **/
+	 * Default constructor for bean property style usage.
+	 * @see #setDataSource
+	 * @see #setIncrementerName
+	 * @see #setColumnName
+	 */
 	public DerbyMaxValueIncrementer() {
 	}
 
 	/**
 	 * Convenience constructor.
-	 * @param ds the DataSource to use
+	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 * @param columnName the name of the column in the sequence table to use
-	 **/
-	public DerbyMaxValueIncrementer(DataSource ds, String incrementerName, String columnName) {
-		this(ds, incrementerName, columnName, DEFAULT_DUMMY_NAME);
+	 */
+	public DerbyMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
+		super(dataSource, incrementerName, columnName);
+		this.dummyName = DEFAULT_DUMMY_NAME;
 	}
 
 	/**
 	 * Convenience constructor.
-	 * @param ds the DataSource to use
+	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 * @param columnName the name of the column in the sequence table to use
 	 * @param dummyName the name of the dummy column used for inserts
-	 **/
-	public DerbyMaxValueIncrementer(DataSource ds, String incrementerName, String columnName, String dummyName) {
-		setDataSource(ds);
-		setIncrementerName(incrementerName);
-		this.columnName = columnName;
+	 */
+	public DerbyMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName, String dummyName) {
+		super(dataSource, incrementerName, columnName);
 		this.dummyName = dummyName;
-		afterPropertiesSet();
 	}
 
-
-	/**
-	 * Set the name of the column in the sequence table.
-	 */
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
-
-	/**
-	 * Return the name of the column in the sequence table.
-	 */
-	public String getColumnName() {
-		return this.columnName;
-	}
 
 	/**
 	 * Set the name of the dummy column.
@@ -139,27 +123,6 @@ public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 	 */
 	public String getDummyName() {
 		return this.dummyName;
-	}
-
-	/**
-	 * Set the number of buffered keys.
-	 */
-	public void setCacheSize(int cacheSize) {
-		this.cacheSize = cacheSize;
-	}
-
-	/**
-	 * Return the number of buffered keys.
-	 */
-	public int getCacheSize() {
-		return this.cacheSize;
-	}
-
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		if (this.columnName == null) {
-			throw new IllegalArgumentException("Property 'columnName' is required");
-		}
 	}
 
 
@@ -191,7 +154,7 @@ public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 					}
 				}
 				long maxValue = this.valueCache[(this.valueCache.length - 1)];
-				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + this.columnName + " < " + maxValue);
+				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + getColumnName() + " < " + maxValue);
 			}
 			catch (SQLException ex) {
 				throw new DataAccessResourceFailureException("Could not obtain IDENTITY value", ex);
