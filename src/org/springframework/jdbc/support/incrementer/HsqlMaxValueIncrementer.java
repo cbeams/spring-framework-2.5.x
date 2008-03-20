@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 
 	/**
 	 * Default constructor.
-	 **/
+	 */
 	public HsqlMaxValueIncrementer() {
 	}
 
@@ -76,7 +76,7 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 	 * @param ds the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 * @param columnName the name of the column in the sequence table to use
-	 **/
+	 */
 	public HsqlMaxValueIncrementer(DataSource ds, String incrementerName, String columnName) {
 		setDataSource(ds);
 		setIncrementerName(incrementerName);
