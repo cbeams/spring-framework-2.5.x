@@ -147,7 +147,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private final Set nonAdvisedBeans = Collections.synchronizedSet(new HashSet());
 
-	private final Map proxyTypes = CollectionFactory.createConcurrentMap(16);
+	private final Map proxyTypes = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	/**
