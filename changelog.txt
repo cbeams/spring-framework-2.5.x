@@ -9,10 +9,13 @@ Changes in version 2.5.3 (2008-03-31)
 General
 * replaced junit-4.4.jar in with-dependencies distribution with official JUnit 4.4 jar
 * spring.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
+* Spring reference documentation covers JSF 1.2 and contains updated Struts 2.0 and Tapestry references
+* Spring reference documentation covers annotation-based controllers in Portlet chapter
 
 Package org.springframework.aop
 * AbstractAutoProxyCreator predicts proxy class as bean type if known already (instead of predicting the target class)
 * AbstractAutoProxyCreator exposes early singleton proxies (for resolving circular reference between proxied beans)
+* "bean(...)" pointcut designator matches against bean name aliases as well, not just against the canonical bean name
 
 Package org.springframework.beans
 * GenericTypeAwarePropertyDescriptor respects "propertyEditorClass" specified on original PropertyDescriptor
@@ -22,7 +25,9 @@ Package org.springframework.beans
 * DefaultListableBeanFactory passes full inherited AccessControlContext to the AccessController for bean creation
 * DefaultListableBeanFactory does not eagerly initialize target beans when autowiring a PriorityOrdered post-processor
 * PropertyPlaceholderConfigurer works properly even in case of default-autowire="byType" with FactoryBeans involved
+* added "ignoreUnresolvableEditors" property to CustomEditorConfigurer, allowing to ignore type/editor classes not found
 * XmlBeanDefinitionReader's "getValidationModeForResource" method is protected now in order to allow for overriding
+* AbstractSimpleBeanDefinitionParser properly ignores namespace declaration attributes ("xmlns"/"xmlns:")
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
@@ -38,8 +43,13 @@ Package org.springframework.core
 Package org.springframework.ejb
 * added "cacheSessionBean" flag to SimpleRemoteStatelessSessionProxyFactoryBean, for caching the session bean object
 * added "cache-session-bean" attribute to "jee:remote-slsb" configuration element
+* Spring 2.5 "jee:*" config elements use resource-ref="true" by default (non-resource-ref names will still work as well)
 
 Package org.springframework.jdbc
+* JndiDataSourceLookup uses "resourceRef"=true by default (being able to resolve J2EE "jdbc/myDb" ENC names by default)
+* NativeJdbcExtractorAdapter only processes DatabaseMetaData Connection if non-null (for WebLogic cluster compatibility)
+* factored out common AbstractColumnMaxValueIncrementer base class from Derby/Hsql/MySQLMaxValueIncrementer
+* added DB2MainframeSequenceMaxValueIncrementer for DB2/390 and DB2/400 (differing from DB2 UDB for Unix and Windows)
 * added "wrapAsLob" property to DefaultLobHandler, for passing Blob/Clob instances to the JDBC driver (for PostgreSQL)
 * DefaultLobHandler's "streamAsLob" setting (requires JDBC 4.0) applies to byte array and String arguments as well
 * JdbcDaoSupport does not override specified JdbcTemplate on subsequent "setDataSource" call for same DataSource
@@ -61,6 +71,7 @@ Package org.springframework.jmx
 * MBeanExporter's autodetection does not cause CannotLoadBeanClassException for lazy-init beans (Spring 2.0 compatible)
 
 Package org.springframework.jndi
+* JndiLocatorSupport tries fallback lookup for originally specified JNDI name if resource-ref adapted name wasn't found
 * JndiObjectFactoryBean exposes the bean ClassLoader as thread context ClassLoader (if necessary)
 
 Package org.springframework.mock
@@ -87,6 +98,9 @@ Package org.springframework.test
 * @IfProfileValue annotation without specified value checks against presence (non-null value) of the given profile key
 * "executeSqlScript" (as in SimpleJdbcTestUtils) allows for multiple statements per line, separated by semicolons
 * SpringJUnit4ClassRunner catches AssumptionViolatedException in @Before methods (analogous to standard JUnit 4.4)
+
+Package org.springframework.util
+* "ClassUtils.resolveClassName" preserves the original root cause in the rethrown IllegalArgumentException
 
 Package org.springframework.web
 * ContextLoader accepts system property placeholders in "contextConfigLocation" value (again)
