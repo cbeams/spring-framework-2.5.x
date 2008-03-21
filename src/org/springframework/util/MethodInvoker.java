@@ -133,7 +133,7 @@ public class MethodInvoker {
 	}
 
 	/**
-	 * Retrun the arguments for the method invocation.
+	 * Return the arguments for the method invocation.
 	 */
 	public Object[] getArguments() {
 		return this.arguments;
