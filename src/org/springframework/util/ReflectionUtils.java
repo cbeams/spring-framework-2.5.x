@@ -22,8 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -416,10 +416,10 @@ public abstract class ReflectionUtils {
 	 * Leaf class methods are included first.
 	 */
 	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
-		final List list = new LinkedList();
+		final List list = new ArrayList(32);
 		doWithMethods(leafClass, new MethodCallback() {
-			public void doWith(Method m) {
-				list.add(m);
+			public void doWith(Method method) {
+				list.add(method);
 			}
 		});
 		return (Method[]) list.toArray(new Method[list.size()]);
