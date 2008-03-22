@@ -16,7 +16,6 @@
 
 package org.springframework.jndi;
 
-import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.springframework.util.Assert;
@@ -95,7 +94,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 		try {
 			jndiObject = getJndiTemplate().lookup(convertedName, requiredType);
 		}
-		catch (NameNotFoundException ex) {
+		catch (NamingException ex) {
 			if (!convertedName.equals(jndiName)) {
 				// Try fallback to originally specified name...
 				if (logger.isDebugEnabled()) {
