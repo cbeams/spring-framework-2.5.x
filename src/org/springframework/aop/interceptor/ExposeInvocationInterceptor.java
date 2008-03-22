@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,25 +25,24 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
- * Interceptor that exposes the current MethodInvocation.
- * We occasionally need to do this; for example, when a pointcut
- * or target object needs to know the Invocation context.
+ * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation}
+ * as a thread-local object. We occasionally need to do this; for example, when a pointcut
+ * (e.g. an AspectJ expression pointcut) needs to know the full invocation context.
  *
- * <p>Don't use this interceptor unless this is really necessary.
- * Target objects should not normally know about Spring AOP,
- * as this creates a dependency on Spring. Target objects
- * should be plain POJOs as far as possible.
+ * <p>Don't use this interceptor unless this is really necessary. Target objects should
+ * not normally know about Spring AOP, as this creates a dependency on Spring API.
+ * Target objects should be plain POJOs as far as possible.
  *
- * <p>If used, this interceptor will normally be the first
- * in the interceptor chain.
+ * <p>If used, this interceptor will normally be the first in the interceptor chain.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor, Serializable {
-	
+
 	/** Singleton instance of this class */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
-	
+
 	/**
 	 * Singleton advisor for this class. Use in preference to INSTANCE when using
 	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
@@ -77,7 +76,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 
 
 	/**
-	 * Ensure that only the canonical instance can be created.
+	 * Ensures that only the canonical instance can be created.
 	 */
 	private ExposeInvocationInterceptor() {
 	}
@@ -96,7 +95,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	/**
 	 * Required to support serialization. Replaces with canonical instance
 	 * on deserialization, protecting Singleton pattern.
-	 * Alternative to overriding the <code>equals</code> method.
+	 * <p>Alternative to overriding the <code>equals</code> method.
 	 */
 	private Object readResolve() {
 		return INSTANCE;
