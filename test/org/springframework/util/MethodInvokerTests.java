@@ -199,17 +199,17 @@ public class MethodInvokerTests extends TestCase {
 		}
 
 		// should handle Shopper (beats Greetable since it is a class)
-		public String greet(Purchaser purchaser) {
+		protected String greet(Purchaser purchaser) {
 			return "purchaser: " + purchaser.getGreeting();
 		}
 
 		// should handle Customer (exact match)
-		public String greet(Customer customer) {
+		String greet(Customer customer) {
 			return "customer: " + customer.getGreeting();
 		}
 
 		// should handle Regular (exact) and VIP (closest match)
-		public String greet(Regular regular) {
+		private String greet(Regular regular) {
 			return "regular: " + regular.getGreeting();
 		}
 	}

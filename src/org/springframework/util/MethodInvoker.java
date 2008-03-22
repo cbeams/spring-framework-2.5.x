@@ -212,7 +212,7 @@ public class MethodInvoker {
 		Object[] arguments = getArguments();
 		int argCount = arguments.length;
 
-		Method[] candidates = getTargetClass().getMethods();
+		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(getTargetClass());
 		int minTypeDiffWeight = Integer.MAX_VALUE;
 		Method matchingMethod = null;
 
@@ -272,6 +272,7 @@ public class MethodInvoker {
 		if (targetObject == null && !Modifier.isStatic(preparedMethod.getModifiers())) {
 			throw new IllegalArgumentException("Target method must not be non-static without a target");
 		}
+		ReflectionUtils.makeAccessible(preparedMethod);
 		return preparedMethod.invoke(targetObject, getArguments());
 	}
 

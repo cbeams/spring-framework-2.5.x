@@ -24,6 +24,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.util.MethodInvoker;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Subclass of {@link MethodInvoker} that tries to convert the given
@@ -131,7 +132,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 			String targetMethod = getTargetMethod();
 			Method matchingMethod = null;
 			int argCount = arguments.length;
-			Method[] candidates = getTargetClass().getMethods();
+			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(getTargetClass());
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Object[] argumentsToUse = null;
 
