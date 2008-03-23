@@ -58,7 +58,7 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 		// Call two methods to test for SPR-3953-like condition
 		testBean1.setAge(20);
 		testBean1.setName("");
-		assertEquals(2 /*make this 3 when SPR-3688 is fixed and advice in CounterAspect are uncommented*/, counterAspect.count);
+		assertEquals(3, counterAspect.count);
 	}
 
 	public void testNonMatchingBeanName() {
@@ -94,21 +94,21 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 			count++;
 		}
 
-//		@Pointcut("execution(* setAge(..)) && bean(testBean1)")
-//		public void testBean1SetAge() {}
-//
-//		@Pointcut("execution(* setAge(..)) && bean(testBean2)")
-//		public void testBean2SetAge() {}
-//		
-//		@Before("testBean1SetAge()")
-//		public void increment1() {
-//			count++;
-//		}
-//
-//		@Before("testBean2SetAge()")
-//		public void increment2() {
-//			count++;
-//		}
+		@Pointcut("execution(* setAge(..)) && bean(testBean1)")
+		public void testBean1SetAge() {}
+
+		@Pointcut("execution(* setAge(..)) && bean(testBean2)")
+		public void testBean2SetAge() {}
+		
+		@Before("testBean1SetAge()")
+		public void increment1() {
+			count++;
+		}
+
+		@Before("testBean2SetAge()")
+		public void increment2() {
+			count++;
+		}
 	}
 
 }
