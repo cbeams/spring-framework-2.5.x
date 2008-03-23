@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
  * @see org.springframework.web.servlet.mvc.throwaway.ThrowawayController
  * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
  */
-public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping implements HandlerMapping {
+public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping {
 
 	/**
 	 * Common suffix at the end of controller implementation classes.
@@ -269,7 +269,7 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 				className.substring(0, className.indexOf(CONTROLLER_SUFFIX)) : className);
 		if (path.length() > 0) {
 			if (this.caseSensitive) {
-				pathMapping.append(path.substring(0, 1).toLowerCase() + path.substring(1));
+				pathMapping.append(path.substring(0, 1).toLowerCase()).append(path.substring(1));
 			}
 			else {
 				pathMapping.append(path.toLowerCase());
