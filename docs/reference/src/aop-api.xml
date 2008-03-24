@@ -437,19 +437,19 @@
         the return of the join point if the join point threw an exception.
         Spring offers typed throws advice. Note that this means that the
         <literal>org.springframework.aop.ThrowsAdvice</literal> interface does
-        not contain any methods: it is a tag interface identifying that the
+        not contain any methods: It is a tag interface identifying that the
         given object implements one or more typed throws advice methods. These
         should be in the form of:</para>
 
         <programlisting>afterThrowing([Method, args, target], subclassOfThrowable) </programlisting>
 
         <para>Only the last argument is required. The method signatures may
-		have either one or four arguments, depending on whether the advice
-		method is interested in the method and arguments. The following
-		classes are examples of throws advice.</para>
+        have either one or four arguments, depending on whether the advice
+        method is interested in the method and arguments. The following
+        classes are examples of throws advice.</para>
 
         <para>The advice below is invoked if a <exceptionname>RemoteException</exceptionname>
-		is thrown (including subclasses):</para>
+    		is thrown (including subclasses):</para>
 
         <programlisting><![CDATA[public class RemoteThrowsAdvice implements ThrowsAdvice {
 
@@ -486,6 +486,14 @@
         // Do something with all arguments
     }
 }</programlisting>
+
+        <para><emphasis>Note:</emphasis> If a throws-advice method throws an exception itself,
+        it will override the original exception (i.e. change the exception thrown to the user).
+        The overriding exception will typically be a RuntimeException; this is compatible with
+        any method signature. However, if a throws-advice method throws a checked exception,
+        it will have to match the declared exceptions of the target method and is hence to some
+        degree coupled to specific target method signatures. <emphasis>Do not throw an undeclared
+        checked exception that is incompatible with the target method's signature!</emphasis></para>
 
 				<tip><para>Throws advice can be used with any pointcut.</para></tip>        
       </section>
