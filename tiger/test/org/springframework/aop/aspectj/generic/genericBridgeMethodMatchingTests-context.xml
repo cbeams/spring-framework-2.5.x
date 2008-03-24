@@ -7,7 +7,7 @@
 
 	<aop:aspectj-autoproxy proxy-target-class="false"/>
 
-	<bean id="counterAspect" class="org.springframework.aop.aspectj.generic.CounterAspect"/>
+	<bean id="counterAspect" class="org.springframework.aop.aspectj.generic.GenericBridgeMethodMatchingTests$CounterAspect"/>
 
 	<bean id="testBean" class="org.springframework.aop.aspectj.generic.GenericBridgeMethodMatchingTests$DerivedStringParameterizedClass"/>
 

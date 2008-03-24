@@ -16,13 +16,15 @@
 
 package org.springframework.aop.aspectj.generic;
 
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * Tests for AspectJ pointcut expression matching when working with bridge methods.
  *
  * <p>Depending on the caller's static type either the bridge method or the user-implemented method
- * gets called as the way into the proxy. Therfore, we need tests for calling a bean with
+ * gets called as the way into the proxy. Therefore, we need tests for calling a bean with
  * static type set to type with generic method and to type with specific non-generic implementation.
  *
  * <p>This class focuses on JDK proxy, while a subclass, GenericBridgeMethodMatchingClassProxyTests,
@@ -84,6 +86,18 @@ public class GenericBridgeMethodMatchingTests extends AbstractDependencyInjectio
 
 		public void genericBaseInterfaceMethod(String t) {
 		}
+	}
+	
+	@Aspect
+	public static class CounterAspect {
+
+		public int count;
+
+		@Before("execution(* *..BaseInterface+.*(..))")
+		public void increment() {
+			count++;
+		}
+
 	}
 
 }
