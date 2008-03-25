@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -217,6 +216,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	// Convenience methods for load, save, delete
 	//-------------------------------------------------------------------------
 
+	@SuppressWarnings("unchecked")
 	public <T> T find(final Class<T> entityClass, final Object id) throws DataAccessException {
 		return (T) execute(new JpaCallback() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
@@ -225,6 +225,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T getReference(final Class<T> entityClass, final Object id) throws DataAccessException {
 		return (T) execute(new JpaCallback() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
@@ -260,6 +261,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T merge(final T entity) throws DataAccessException {
 		return (T) execute(new JpaCallback() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
@@ -309,13 +311,12 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
-	public List findByNamedParams(final String queryString, final Map<String,? extends Object> params) throws DataAccessException {
+	public List findByNamedParams(final String queryString, final Map<String, ?> params) throws DataAccessException {
 		return executeFind(new JpaCallback() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
 				if (params != null) {
-					for (Iterator it = params.entrySet().iterator(); it.hasNext();) {
-						Map.Entry<String, Object> entry = (Map.Entry<String, Object>) it.next();
+					for (Map.Entry<String, ?> entry : params.entrySet()) {
 						queryObject.setParameter(entry.getKey(), entry.getValue());
 					}
 				}
@@ -342,15 +343,14 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
-	public List findByNamedQueryAndNamedParams(final String queryName, final Map<String, ? extends Object> params)
+	public List findByNamedQueryAndNamedParams(final String queryName, final Map<String, ?> params)
 			throws DataAccessException {
 
 		return executeFind(new JpaCallback() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createNamedQuery(queryName);
 				if (params != null) {
-					for (Iterator it = params.entrySet().iterator(); it.hasNext();) {
-						Map.Entry<String, Object> entry = (Map.Entry<String, Object>) it.next();
+					for (Map.Entry<String, ?> entry : params.entrySet()) {
 						queryObject.setParameter(entry.getKey(), entry.getValue());
 					}
 				}

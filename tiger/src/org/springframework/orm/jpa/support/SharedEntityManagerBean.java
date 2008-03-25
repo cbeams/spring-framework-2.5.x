@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,21 +29,19 @@ import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 
 /**
- * FactoryBeans that exposes a shared JPA EntityManager reference for a
- * given EntityManagerFactory. Typically used for an EntityManagerFactory
- * created by LocalEntityManagerFactoryBean, as direct alternative to a
- * JndiObjectFactoryBean definition for a Java EE 5 server's EntityManager.
+ * {@link FactoryBean} that exposes a shared JPA {@link javax.persistence.EntityManager}
+ * reference for a given EntityManagerFactory. Typically used for an EntityManagerFactory
+ * created by {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean},
+ * as direct alternative to a JNDI lookup for a Java EE 5 server's EntityManager reference.
  *
- * <p>The shared EntityManager will behave just like an EntityManager fetched
- * from an application server's JNDI environment, as defined by the JPA
- * specification. It will delegate all calls to the current transactional
- * EntityManager, if any; else, it will fall back to a newly created
- * EntityManager per operation.
+ * <p>The shared EntityManager will behave just like an EntityManager fetched from an
+ * application server's JNDI environment, as defined by the JPA specification.
+ * It will delegate all calls to the current transactional EntityManager, if any;
+ * otherwise, it will fall back to a newly created EntityManager per operation.
  *
- * <p>Can be passed to DAOs that expect a shared EntityManager reference
- * rather than an EntityManagerFactory reference. Note that Spring's
- * JpaTransactionManager always needs an EntityManagerFactory reference,
- * to be able to create new transactional EntityManager instances.
+ * <p>Can be passed to DAOs that expect a shared EntityManager reference rather than an
+ * EntityManagerFactory. Note that Spring's {@link org.springframework.orm.jpa.JpaTransactionManager}
+ * always needs an EntityManagerFactory in order to create new transactional EntityManager instances.
  *
  * @author Juergen Hoeller
  * @since 2.0

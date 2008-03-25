@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Factory for a shared JPA EntityManager for a given EntityManagerFactory.
+ * Factory for a shared JPA {@link javax.persistence.EntityManager}
+ * for a given {@link javax.persistence.EntityManagerFactory}.
  *
  * <p>The shared EntityManager will behave just like an EntityManager fetched
  * from an application server's JNDI environment, as defined by the JPA
  * specification. It will delegate all calls to the current transactional
- * EntityManager, if any; else, it will fall back to a newly created
+ * EntityManager, if any; otherwise it will fall back to a newly created
  * EntityManager per operation.
  *
  * @author Juergen Hoeller
@@ -48,8 +49,7 @@ import org.springframework.util.CollectionUtils;
 public abstract class SharedEntityManagerCreator {
 
 	/**
-	 * Create a shared transactional EntityManager proxy,
-	 * given this EntityManagerFactory
+	 * Create a shared transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
 	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
 	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
@@ -61,8 +61,7 @@ public abstract class SharedEntityManagerCreator {
 	}
 
 	/**
-	 * Create a shared transactional EntityManager proxy,
-	 * given this EntityManagerFactory
+	 * Create a shared transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
 	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
 	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
@@ -78,7 +77,8 @@ public abstract class SharedEntityManagerCreator {
 			Class entityManagerInterface = emfInfo.getEntityManagerInterface();
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
-				entityManagerInterfaces = new Class[] {entityManagerInterface, EntityManagerPlus.class};
+				entityManagerInterfaces =
+						new Class[] {entityManagerInterface, EntityManagerPlus.class};
 			}
 			else {
 				entityManagerInterfaces = new Class[] {entityManagerInterface};
@@ -91,8 +91,7 @@ public abstract class SharedEntityManagerCreator {
 	}
 
 	/**
-	 * Create a shared transactional EntityManager proxy,
-	 * given this EntityManagerFactory
+	 * Create a shared transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
 	 * @param properties the properties to be passed into the <code>createEntityManager</code>
 	 * call (may be <code>null</code>)
@@ -104,8 +103,7 @@ public abstract class SharedEntityManagerCreator {
 			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
 
 		return (EntityManager) Proxy.newProxyInstance(
-				SharedEntityManagerCreator.class.getClassLoader(),
-				entityManagerInterfaces,
+				SharedEntityManagerCreator.class.getClassLoader(), entityManagerInterfaces,
 				new SharedEntityManagerInvocationHandler(emf, properties));
 	}
 
