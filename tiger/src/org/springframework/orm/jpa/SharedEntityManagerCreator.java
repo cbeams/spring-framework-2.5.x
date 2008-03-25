@@ -31,10 +31,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Factory for a shared JPA {@link javax.persistence.EntityManager}
+ * Factory for a shareable JPA {@link javax.persistence.EntityManager}
  * for a given {@link javax.persistence.EntityManagerFactory}.
  *
- * <p>The shared EntityManager will behave just like an EntityManager fetched
+ * <p>The shareable EntityManager will behave just like an EntityManager fetched
  * from an application server's JNDI environment, as defined by the JPA
  * specification. It will delegate all calls to the current transactional
  * EntityManager, if any; otherwise it will fall back to a newly created
@@ -49,12 +49,11 @@ import org.springframework.util.CollectionUtils;
 public abstract class SharedEntityManagerCreator {
 
 	/**
-	 * Create a shared transactional EntityManager proxy,
-	 * given this EntityManagerFactory
+	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
-	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
-	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
-	 * will automatically apply.
+	 * If this implements the {@link EntityManagerFactoryInfo} interface,
+	 * appropriate handling of the native EntityManagerFactory and available
+	 * {@link EntityManagerPlusOperations} will automatically apply.
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf) {
@@ -62,14 +61,13 @@ public abstract class SharedEntityManagerCreator {
 	}
 
 	/**
-	 * Create a shared transactional EntityManager proxy,
-	 * given this EntityManagerFactory
+	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
-	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
-	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
-	 * will automatically apply.
-	 * @param properties the properties to be passed into the <code>createEntityManager</code>
-	 * call (may be <code>null</code>)
+	 * If this implements the {@link EntityManagerFactoryInfo} interface,
+	 * appropriate handling of the native EntityManagerFactory and available
+	 * {@link EntityManagerPlusOperations} will automatically apply.
+	 * @param properties the properties to be passed into the
+	 * <code>createEntityManager</code> call (may be <code>null</code>)
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
@@ -96,14 +94,13 @@ public abstract class SharedEntityManagerCreator {
 	}
 
 	/**
-	 * Create a shared transactional EntityManager proxy,
-	 * given this EntityManagerFactory
+	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
-	 * @param properties the properties to be passed into the <code>createEntityManager</code>
-	 * call (may be <code>null</code>)
-	 * @param entityManagerInterfaces interfaces to be implemented by the
+	 * @param properties the properties to be passed into the
+	 * <code>createEntityManager</code> call (may be <code>null</code>)
+	 * @param entityManagerInterfaces the interfaces to be implemented by the
 	 * EntityManager. Allows the addition or specification of proprietary interfaces.
-	 * @return a shareable transaction EntityManager proxy
+	 * @return a shareable transactional EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
