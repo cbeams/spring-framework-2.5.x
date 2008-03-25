@@ -597,7 +597,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				}
 				// Inject a shared transactional EntityManager proxy.
 				if (emf instanceof EntityManagerFactoryInfo &&
-						!EntityManager.class.equals(((EntityManagerFactoryInfo) emf).getEntityManagerInterface())) {
+						((EntityManagerFactoryInfo) emf).getEntityManagerInterface() != null) {
 					// Create EntityManager based on the info's vendor-specific type
 					// (which might be more specific than the field's type).
 					em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties);

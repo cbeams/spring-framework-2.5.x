@@ -189,7 +189,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see JpaVendorAdapter#getEntityManagerFactoryInterface()
 	 */
 	public void setEntityManagerFactoryInterface(Class<? extends EntityManagerFactory> emfInterface) {
-		Assert.isAssignable(EntityManagerFactory.class, entityManagerInterface);
+		Assert.isAssignable(EntityManagerFactory.class, emfInterface);
 		this.entityManagerFactoryInterface = emfInterface;
 	}
 
@@ -203,7 +203,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
 	 */
 	public void setEntityManagerInterface(Class<? extends EntityManager> emInterface) {
-		Assert.isAssignable(EntityManager.class, entityManagerInterface);
+		Assert.isAssignable(EntityManager.class, emInterface);
 		this.entityManagerInterface = emInterface;
 	}
 
@@ -267,14 +267,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			}
 			if (this.jpaDialect == null) {
 				this.jpaDialect = this.jpaVendorAdapter.getJpaDialect();
-			}
-		}
-		else {
-			if (this.entityManagerFactoryInterface == null) {
-				this.entityManagerFactoryInterface = EntityManagerFactory.class;
-			}
-			if (this.entityManagerInterface == null) {
-				this.entityManagerInterface = EntityManager.class;
 			}
 		}
 

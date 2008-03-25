@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
 /**
- * Metadata interface for a Spring-managed EntityManagerFactory.
+ * Metadata interface for a Spring-managed JPA {@link EntityManagerFactory}.
  *
  * <p>This facility can be obtained from Spring-managed EntityManagerFactory
- * proxies through casting the EntityManagerFactory to this interface.
+ * proxies through casting the EntityManagerFactory handle to this interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -80,6 +80,9 @@ public interface EntityManagerFactoryInfo {
 	/**
 	 * Return the (potentially vendor-specific) EntityManager interface
 	 * that this factory's EntityManagers will implement.
+	 * <p>A <code>null</code> return value suggests that autodetection is supposed
+	 * to happen: either based on a target <code>EntityManager</code> instance
+	 * or simply defaulting to <code>javax.persistence.EntityManager</code>.
 	 */
 	Class<? extends EntityManager> getEntityManagerInterface();
 

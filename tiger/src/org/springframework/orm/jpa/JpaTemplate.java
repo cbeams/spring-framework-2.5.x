@@ -209,9 +209,12 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		Class[] ifcs = null;
 		EntityManagerFactory emf = getEntityManagerFactory();
 		if (emf instanceof EntityManagerFactoryInfo) {
-			ifcs = new Class[] {((EntityManagerFactoryInfo) emf).getEntityManagerInterface()};
+			Class entityManagerInterface = ((EntityManagerFactoryInfo) emf).getEntityManagerInterface();
+			if (entityManagerInterface != null) {
+				ifcs = new Class[] {entityManagerInterface};
+			}
 		}
-		else {
+		if (ifcs == null) {
 			ifcs = ClassUtils.getAllInterfacesForClass(em.getClass(), getClass().getClassLoader());
 		}
 		return (EntityManager) Proxy.newProxyInstance(

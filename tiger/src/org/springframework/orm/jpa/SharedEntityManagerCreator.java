@@ -31,12 +31,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Factory for a shared JPA EntityManager for a given EntityManagerFactory.
+ * Factory for a shared JPA {@link javax.persistence.EntityManager}
+ * for a given {@link javax.persistence.EntityManagerFactory}.
  *
  * <p>The shared EntityManager will behave just like an EntityManager fetched
  * from an application server's JNDI environment, as defined by the JPA
  * specification. It will delegate all calls to the current transactional
- * EntityManager, if any; else, it will fall back to a newly created
+ * EntityManager, if any; otherwise it will fall back to a newly created
  * EntityManager per operation.
  *
  * @author Juergen Hoeller
@@ -76,6 +77,9 @@ public abstract class SharedEntityManagerCreator {
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
 			Class entityManagerInterface = emfInfo.getEntityManagerInterface();
+			if (entityManagerInterface == null) {
+				entityManagerInterface = EntityManager.class;
+			}
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
 				entityManagerInterfaces =
