@@ -21,6 +21,7 @@ Package org.springframework.beans
 * GenericTypeAwarePropertyDescriptor respects "propertyEditorClass" specified on original PropertyDescriptor
 * renamed ListableBeanFactory's "includePrototypes" flag to "includeNonSingletons" (affects javadoc only)
 * added "getEarlyBeanReference" hook to SmartInstantiationAwareBeanPostProcessor interface
+* AbstractBeanFactory does not log full exception stack trace (at debug level) on FactoryBean type check anymore
 * AbstractAutowireCapableBeanFactory allows for resolving circular reference between beans wrapped by BeanPostProcessors
 * DefaultListableBeanFactory passes full inherited AccessControlContext to the AccessController for bean creation
 * DefaultListableBeanFactory does not eagerly initialize target beans when autowiring a PriorityOrdered post-processor
@@ -53,6 +54,7 @@ Package org.springframework.jdbc
 * added "wrapAsLob" property to DefaultLobHandler, for passing Blob/Clob instances to the JDBC driver (for PostgreSQL)
 * DefaultLobHandler's "streamAsLob" setting (requires JDBC 4.0) applies to byte array and String arguments as well
 * JdbcDaoSupport does not override specified JdbcTemplate on subsequent "setDataSource" call for same DataSource
+* NamedParameterJdbcTemplate ignores Postgres-style "::" casting operator (i.e. not treated as named parameter)
 
 Package org.springframework.jms
 * SingleConnectionFactory accepts "Connections.setClientID" calls with the same client ID as specified on the factory
@@ -80,6 +82,7 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * XxxDaoSupport does not override specified XxxTemplate on subsequent "setZzzFactory" call for same factory
+* revised EntityManagerFactoryInfo handling to autodetect all EntityManager interfaces if no JpaVendorAdapter specified
 
 Package org.springframework.remoting
 * revised (Simple)Hessian/BurlapServiceExporter's handling of non-POST requests (avoiding unnecessary warnings)
@@ -101,6 +104,8 @@ Package org.springframework.test
 
 Package org.springframework.util
 * "ClassUtils.resolveClassName" preserves the original root cause in the rethrown IllegalArgumentException
+* MethodInvoker scans all declared methods (of any visibility), being able to invoke protected/private methods as well
+* added "getChildElementsByTagNames" method with tag names Collection argument to DomUtils
 
 Package org.springframework.web
 * ContextLoader accepts system property placeholders in "contextConfigLocation" value (again)
