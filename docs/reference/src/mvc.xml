@@ -2938,7 +2938,7 @@ public class ClinicController {
         (by default an
         <classname>org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver</classname>).
         Note that this only applies in case of ambiguous annotation mappings
-        that do not specific a path mapping explicitly. In other words,
+        that do not specify a path mapping explicitly. In other words,
         the method name is only used for narrowing among a set of matching
         methods; it does not constitute a primary path mapping itself.</para>
 

@@ -170,7 +170,7 @@ public @interface RequestMapping {
 	 * (by default an
 	 * {@link org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver}).
 	 * Note that this only applies in case of ambiguous annotation mappings
-	 * that do not specific a path mapping explicitly. In other words,
+	 * that do not specify a path mapping explicitly. In other words,
 	 * the method name is only used for narrowing among a set of matching
 	 * methods; it does not constitute a primary path mapping itself.
 	 * <p>If you have a single default method (without explicit path mapping),
