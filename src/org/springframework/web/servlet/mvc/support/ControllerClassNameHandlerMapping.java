@@ -24,16 +24,15 @@ import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
 
 /**
- * Implementation of {@link HandlerMapping} that follows a simple convention for
- * generating URL path mappings from the class names of registered
- * {@link org.springframework.web.servlet.mvc.Controller} and
+ * Implementation of {@link org.springframework.web.servlet.HandlerMapping} that
+ * follows a simple convention for generating URL path mappings from the class names
+ * of registered {@link org.springframework.web.servlet.mvc.Controller} and
  * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController} beans.
  *
  * <p>For simple {@link org.springframework.web.servlet.mvc.Controller} implementations
@@ -46,8 +45,8 @@ import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
  * <li><code>HomeController</code> -> <code>/home*</code></li>
  * </ul>
  *
- * <p>For {@link MultiActionController MultiActionControllers} then a similar mapping is registered,
- * except that all sub-paths are registed using the trailing wildcard pattern <code>/*</code>.
+ * <p>For {@link MultiActionController MultiActionControllers}, a similar mapping is registered,
+ * except that all sub-paths are registered using the trailing wildcard pattern <code>/*</code>.
  * For example:
  * <ul>
  * <li><code>WelcomeController</code> -> <code>/welcome/*</code></li>
