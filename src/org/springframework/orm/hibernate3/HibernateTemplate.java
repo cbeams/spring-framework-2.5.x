@@ -336,11 +336,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	public Object execute(HibernateCallback action) throws DataAccessException {
-		return execute(action, isExposeNativeSession());
+		return doExecute(action, false, false);
 	}
 
 	public List executeFind(HibernateCallback action) throws DataAccessException {
-		Object result = execute(action, isExposeNativeSession());
+		Object result = doExecute(action, false, false);
 		if (result != null && !(result instanceof List)) {
 			throw new InvalidDataAccessApiUsageException(
 					"Result object returned from HibernateCallback isn't a List: [" + result + "]");
@@ -349,18 +349,62 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	/**
-	 * Execute the action specified by the given action object within a Session.
+	 * Execute the action specified by the given action object within a
+	 * new {@link org.hibernate.Session}.
+	 * <p>This execute variant overrides the template-wide
+	 * {@link #isAlwaysUseNewSession() "alwaysUseNewSession"} setting.
 	 * @param action callback object that specifies the Hibernate action
-	 * @param exposeNativeSession whether to expose the native Hibernate Session
-	 * to callback code
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
-	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
+	public Object executeWithNewSession(HibernateCallback action) {
+		return doExecute(action, true, false);
+	}
+
+	/**
+	 * Execute the action specified by the given action object within a
+	 * native {@link org.hibernate.Session}.
+	 * <p>This execute variant overrides the template-wide
+	 * {@link #isExposeNativeSession() "exposeNativeSession"} setting.
+	 * @param action callback object that specifies the Hibernate action
+	 * @return a result object returned by the action, or <code>null</code>
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 */
+	public Object executeWithNativeSession(HibernateCallback action) {
+		return doExecute(action, false, true);
+	}
+
+	/**
+	 * Execute the action specified by the given action object within a Session.
+	 * @param action callback object that specifies the Hibernate action
+	 * @param enforceNativeSession whether to enforce exposure of the native
+	 * Hibernate Session to callback code
+	 * @return a result object returned by the action, or <code>null</code>
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @deprecated as of Spring 2.5, in favor of {@link #executeWithNativeSession}
+	 */
+	public Object execute(HibernateCallback action, boolean enforceNativeSession) throws DataAccessException {
+		return doExecute(action, false, enforceNativeSession);
+	}
+
+	/**
+	 * Execute the action specified by the given action object within a Session.
+	 * @param action callback object that specifies the Hibernate action
+	 * @param enforceNewSession whether to enforce a new Session for this template
+	 * even if there is a pre-bound transactional Session
+	 * @param enforceNativeSession whether to enforce exposure of the native
+	 * Hibernate Session to callback code
+	 * @return a result object returned by the action, or <code>null</code>
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 */
+	protected Object doExecute(HibernateCallback action, boolean enforceNewSession, boolean enforceNativeSession)
+			throws DataAccessException {
+
 		Assert.notNull(action, "Callback object must not be null");
 
-		Session session = getSession();
-		boolean existingTransaction = (!isAlwaysUseNewSession() &&
+		Session session = (enforceNewSession ?
+				SessionFactoryUtils.getNewSession(getSessionFactory(), getEntityInterceptor()) : getSession());
+		boolean existingTransaction = (!enforceNewSession &&
 				(!isAllowCreate() || SessionFactoryUtils.isSessionTransactional(session, getSessionFactory())));
 		if (existingTransaction) {
 			logger.debug("Found thread-bound Session for HibernateTemplate");
@@ -370,7 +414,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		try {
 			previousFlushMode = applyFlushMode(session, existingTransaction);
 			enableFilters(session);
-			Session sessionToExpose = (exposeNativeSession ? session : createSessionProxy(session));
+			Session sessionToExpose =
+					(enforceNativeSession || isExposeNativeSession() ? session : createSessionProxy(session));
 			Object result = action.doInHibernate(sessionToExpose);
 			flushIfNecessary(session, existingTransaction);
 			return result;
@@ -410,7 +455,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * <p>Returns a new Session in case of "alwaysUseNewSession" (using the same
 	 * JDBC Connection as a transactional Session, if applicable), a pre-bound
 	 * Session in case of "allowCreate" turned off, and a pre-bound or new Session
-	 * else (new only if no transactional or otherwise pre-bound Session exists).
+	 * otherwise (new only if no transactional or otherwise pre-bound Session exists).
 	 * @return the Session to use (never <code>null</code>)
 	 * @see SessionFactoryUtils#getSession
 	 * @see SessionFactoryUtils#getNewSession
@@ -474,7 +519,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object get(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
 
-		return execute(new HibernateCallback() {
+		return executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					return session.get(entityClass, id, lockMode);
@@ -483,7 +528,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 					return session.get(entityClass, id);
 				}
 			}
-		}, true);
+		});
 	}
 
 	public Object get(String entityName, Serializable id) throws DataAccessException {
@@ -493,7 +538,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object get(final String entityName, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
 
-		return execute(new HibernateCallback() {
+		return executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					return session.get(entityName, id, lockMode);
@@ -502,7 +547,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 					return session.get(entityName, id);
 				}
 			}
-		}, true);
+		});
 	}
 
 	public Object load(Class entityClass, Serializable id) throws DataAccessException {
@@ -512,7 +557,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
 
-		return execute(new HibernateCallback() {
+		return executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					return session.load(entityClass, id, lockMode);
@@ -521,7 +566,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 					return session.load(entityClass, id);
 				}
 			}
-		}, true);
+		});
 	}
 
 	public Object load(String entityName, Serializable id) throws DataAccessException {
@@ -531,7 +576,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object load(final String entityName, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
 
-		return execute(new HibernateCallback() {
+		return executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					return session.load(entityName, id, lockMode);
@@ -540,26 +585,26 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 					return session.load(entityName, id);
 				}
 			}
-		}, true);
+		});
 	}
 
 	public List loadAll(final Class entityClass) throws DataAccessException {
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria criteria = session.createCriteria(entityClass);
 				prepareCriteria(criteria);
 				return criteria.list();
 			}
-		}, true);
+		});
 	}
 
 	public void load(final Object entity, final Serializable id) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.load(entity, id);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void refresh(final Object entity) throws DataAccessException {
@@ -567,7 +612,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public void refresh(final Object entity, final LockMode lockMode) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
 					session.refresh(entity, lockMode);
@@ -577,25 +622,25 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public boolean contains(final Object entity) throws DataAccessException {
-		Boolean result = (Boolean) execute(new HibernateCallback() {
+		Boolean result = (Boolean) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) {
 				return (session.contains(entity) ? Boolean.TRUE : Boolean.FALSE);
 			}
-		}, true);
+		});
 		return result.booleanValue();
 	}
 
 	public void evict(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.evict(entity);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void initialize(Object proxy) throws DataAccessException {
@@ -622,41 +667,41 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	//-------------------------------------------------------------------------
 
 	public void lock(final Object entity, final LockMode lockMode) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.lock(entity, lockMode);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void lock(final String entityName, final Object entity, final LockMode lockMode)
 			throws DataAccessException {
 
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.lock(entityName, entity, lockMode);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public Serializable save(final Object entity) throws DataAccessException {
-		return (Serializable) execute(new HibernateCallback() {
+		return (Serializable) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				return session.save(entity);
 			}
-		}, true);
+		});
 	}
 
 	public Serializable save(final String entityName, final Object entity) throws DataAccessException {
-		return (Serializable) execute(new HibernateCallback() {
+		return (Serializable) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				return session.save(entityName, entity);
 			}
-		}, true);
+		});
 	}
 
 	public void update(Object entity) throws DataAccessException {
@@ -664,7 +709,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public void update(final Object entity, final LockMode lockMode) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.update(entity);
@@ -673,7 +718,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void update(String entityName, Object entity) throws DataAccessException {
@@ -683,7 +728,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void update(final String entityName, final Object entity, final LockMode lockMode)
 			throws DataAccessException {
 
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.update(entityName, entity);
@@ -692,31 +737,31 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void saveOrUpdate(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.saveOrUpdate(entity);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void saveOrUpdate(final String entityName, final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.saveOrUpdate(entityName, entity);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void saveOrUpdateAll(final Collection entities) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				for (Iterator it = entities.iterator(); it.hasNext();) {
@@ -724,69 +769,69 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void replicate(final Object entity, final ReplicationMode replicationMode)
 			throws DataAccessException {
 
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.replicate(entity, replicationMode);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void replicate(final String entityName, final Object entity, final ReplicationMode replicationMode)
 			throws DataAccessException {
 
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.replicate(entityName, entity, replicationMode);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void persist(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.persist(entity);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void persist(final String entityName, final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.persist(entityName, entity);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public Object merge(final Object entity) throws DataAccessException {
-		return execute(new HibernateCallback() {
+		return executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				return session.merge(entity);
 			}
-		}, true);
+		});
 	}
 
 	public Object merge(final String entityName, final Object entity) throws DataAccessException {
-		return execute(new HibernateCallback() {
+		return executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				return session.merge(entityName, entity);
 			}
-		}, true);
+		});
 	}
 
 	public void delete(Object entity) throws DataAccessException {
@@ -794,7 +839,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				if (lockMode != null) {
@@ -803,7 +848,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.delete(entity);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void delete(String entityName, Object entity) throws DataAccessException {
@@ -813,7 +858,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void delete(final String entityName, final Object entity, final LockMode lockMode)
 			throws DataAccessException {
 
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				if (lockMode != null) {
@@ -822,11 +867,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.delete(entityName, entity);
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void deleteAll(final Collection entities) throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				for (Iterator it = entities.iterator(); it.hasNext();) {
@@ -834,25 +879,25 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void flush() throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.flush();
 				return null;
 			}
-		}, true);
+		});
 	}
 
 	public void clear() throws DataAccessException {
-		execute(new HibernateCallback() {
+		executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) {
 				session.clear();
 				return null;
 			}
-		}, true);
+		});
 	}
 
 
@@ -869,7 +914,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public List find(final String queryString, final Object[] values) throws DataAccessException {
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -880,7 +925,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		}, true);
+		});
 	}
 
 	public List findByNamedParam(String queryString, String paramName, Object value)
@@ -895,7 +940,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		if (paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -906,20 +951,20 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		}, true);
+		});
 	}
 
 	public List findByValueBean(final String queryString, final Object valueBean)
 			throws DataAccessException {
 
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
 			}
-		}, true);
+		});
 	}
 
 
@@ -936,7 +981,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public List findByNamedQuery(final String queryName, final Object[] values) throws DataAccessException {
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -947,7 +992,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		}, true);
+		});
 	}
 
 	public List findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
@@ -963,7 +1008,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		if (paramNames != null && values != null && paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -974,20 +1019,20 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.list();
 			}
-		}, true);
+		});
 	}
 
 	public List findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
 			throws DataAccessException {
 
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
 			}
-		}, true);
+		});
 	}
 
 
@@ -1003,7 +1048,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throws DataAccessException {
 
 		Assert.notNull(criteria, "DetachedCriteria must not be null");
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = criteria.getExecutableCriteria(session);
 				prepareCriteria(executableCriteria);
@@ -1015,7 +1060,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return executableCriteria.list();
 			}
-		}, true);
+		});
 	}
 
 	public List findByExample(Object exampleEntity) throws DataAccessException {
@@ -1035,7 +1080,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throws DataAccessException {
 
 		Assert.notNull(exampleEntity, "Example entity must not be null");
-		return (List) execute(new HibernateCallback() {
+		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = (entityName != null ?
 						session.createCriteria(entityName) : session.createCriteria(exampleEntity.getClass()));
@@ -1049,7 +1094,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return executableCriteria.list();
 			}
-		}, true);
+		});
 	}
 
 
@@ -1066,7 +1111,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public Iterator iterate(final String queryString, final Object[] values) throws DataAccessException {
-		return (Iterator) execute(new HibernateCallback() {
+		return (Iterator) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -1077,7 +1122,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return queryObject.iterate();
 			}
-		}, true);
+		});
 	}
 
 	public void closeIterator(Iterator it) throws DataAccessException {
@@ -1098,7 +1143,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public int bulkUpdate(final String queryString, final Object[] values) throws DataAccessException {
-		Integer updateCount = (Integer) execute(new HibernateCallback() {
+		Integer updateCount = (Integer) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -1109,7 +1154,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 				return new Integer(queryObject.executeUpdate());
 			}
-		}, true);
+		});
 		return updateCount.intValue();
 	}
 
