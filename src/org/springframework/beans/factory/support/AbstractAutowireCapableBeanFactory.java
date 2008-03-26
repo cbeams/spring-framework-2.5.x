@@ -513,19 +513,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return exposedObject;
 	}
 
-	/**
-	 * Predict the eventual bean type for the given bean.
-	 * @param beanName the name of the bean
-	 * @param mbd the merged bean definition to determine the type for
-	 * @return the type of the bean, or <code>null</code> if not predictable
-	 */
-	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, boolean typeMatchOnly) {
+	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
 		Class beanClass = null;
 		if (mbd.getFactoryMethodName() != null) {
-			beanClass = getTypeForFactoryMethod(beanName, mbd, typeMatchOnly);
+			beanClass = getTypeForFactoryMethod(beanName, mbd, typesToMatch);
 		}
 		else {
-			beanClass = resolveBeanClass(mbd, beanName, typeMatchOnly);
+			beanClass = resolveBeanClass(mbd, beanName, typesToMatch);
 		}
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
@@ -553,12 +547,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * type checking to avoid creation of the target bean.
 	 * @param beanName the name of the bean (for error handling purposes)
 	 * @param mbd the merged bean definition for the bean
-	 * @param typeMatchOnly whether the returned {@link Class} is only used
-	 * for internal type matching purposes (that is, never exposed to application code)
+	 * @param typesToMatch the types to match in case of internal type matching purposes
+	 * (also signals that the returned <code>Class</code> will never be exposed to application code)
 	 * @return the type for the bean if determinable, or <code>null</code> else
 	 * @see #createBean
 	 */
-	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, boolean typeMatchOnly) {
+	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
 		Class factoryClass = null;
 		boolean isStatic = true;
 
@@ -574,7 +568,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else {
 			// Check declared factory method return type on bean class.
-			factoryClass = resolveBeanClass(mbd, beanName, typeMatchOnly);
+			factoryClass = resolveBeanClass(mbd, beanName, typesToMatch);
 		}
 
 		if (factoryClass == null) {

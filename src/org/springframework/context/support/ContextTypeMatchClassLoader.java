@@ -20,22 +20,23 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Special variant of an overriding ClassLoader, used for temporary
- * type matching in AbstractApplicationContext. Redefines classes
- * from a cached byte array for every <code>loadClass</code> call
- * in order to pick up recently loaded types in the parent ClassLoader.
+ * Special variant of an overriding ClassLoader, used for temporary type
+ * matching in {@link AbstractApplicationContext}. Redefines classes from
+ * a cached byte array for every <code>loadClass</code> call in order to
+ * pick up recently loaded types in the parent ClassLoader.
  *
  * @author Juergen Hoeller
  * @since 2.5
  * @see AbstractApplicationContext
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setTempClassLoader
  */
-class ContextTypeMatchClassLoader extends ClassLoader implements SmartClassLoader {
+class ContextTypeMatchClassLoader extends DecoratingClassLoader implements SmartClassLoader {
 
 	private static Method findLoadedClassMethod;
 
@@ -77,7 +78,7 @@ class ContextTypeMatchClassLoader extends ClassLoader implements SmartClassLoade
 		}
 
 		protected boolean isEligibleForOverriding(String className) {
-			if (!super.isEligibleForOverriding(className)) {
+			if (isExcluded(className) || ContextTypeMatchClassLoader.this.isExcluded(className)) {
 				return false;
 			}
 			ReflectionUtils.makeAccessible(findLoadedClassMethod);

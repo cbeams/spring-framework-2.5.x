@@ -57,6 +57,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -358,8 +359,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
 			if (mbd.isSingleton()) {
-				Class beanClass = predictBeanType(beanName, mbd, true);
-				if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
+				if (isFactoryBean(beanName, mbd)) {
 					if (BeanFactoryUtils.isFactoryDereference(name)) {
 						return true;
 					}
@@ -388,11 +388,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 		if (mbd.isPrototype()) {
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
-			if (!BeanFactoryUtils.isFactoryDereference(name)) {
-				return true;
-			}
-			Class beanClass = predictBeanType(beanName, mbd, true);
-			return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
+			return (!BeanFactoryUtils.isFactoryDereference(name) || isFactoryBean(beanName, mbd));
 		}
 		else {
 			// Singleton or scoped - not a prototype.
@@ -400,8 +396,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (BeanFactoryUtils.isFactoryDereference(name)) {
 				return false;
 			}
-			Class beanClass = predictBeanType(beanName, mbd, true);
-			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
+			if (isFactoryBean(beanName, mbd)) {
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
 						!factoryBean.isSingleton());
@@ -443,8 +438,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-			Class beanClass = predictBeanType(beanName, mbd, true);
-
+			Class beanClass = predictBeanType(beanName, mbd, new Class[] {FactoryBean.class, typeToMatch});
 			if (beanClass == null) {
 				return false;
 			}
@@ -490,7 +484,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-			Class beanClass = predictBeanType(beanName, mbd, false);
+			Class beanClass = predictBeanType(beanName, mbd, null);
 
 			// Check bean class whether we're dealing with a FactoryBean.
 			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
@@ -757,9 +751,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
 		}
 
-		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-		Class beanClass = predictBeanType(beanName, mbd, true);
-		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
+		return isFactoryBean(beanName, getMergedLocalBeanDefinition(beanName));
 	}
 
 	/**
@@ -1107,7 +1099,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
 	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName) {
-		return resolveBeanClass(mbd, beanName, false);
+		return resolveBeanClass(mbd, beanName, null);
 	}
 
 	/**
@@ -1116,20 +1108,29 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * and storing the resolved Class in the bean definition for further use.
 	 * @param mbd the merged bean definition to determine the class for
 	 * @param beanName the name of the bean (for error handling purposes)
-	 * @param typeMatchOnly whether the returned {@link Class} is only used
-	 * for internal type matching purposes (that is, never exposed to application code)
+	 * @param typesToMatch the types to match in case of internal type matching purposes
+	 * (also signals that the returned <code>Class</code> will never be exposed to application code)
 	 * @return the resolved bean class (or <code>null</code> if none)
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
-	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName, boolean typeMatchOnly)
+	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName, Class[] typesToMatch)
 			throws CannotLoadBeanClassException {
 		try {
 			if (mbd.hasBeanClass()) {
 				return mbd.getBeanClass();
 			}
-			if (typeMatchOnly && getTempClassLoader() != null) {
-				String className = mbd.getBeanClassName();
-				return (className != null ? ClassUtils.forName(className, getTempClassLoader()) : null);
+			if (typesToMatch != null) {
+				ClassLoader tempClassLoader = getTempClassLoader();
+				if (tempClassLoader != null) {
+					if (tempClassLoader instanceof DecoratingClassLoader) {
+						DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
+						for (int i = 0; i < typesToMatch.length; i++) {
+							dcl.excludeClass(typesToMatch[i].getName());
+						}
+					}
+					String className = mbd.getBeanClassName();
+					return (className != null ? ClassUtils.forName(className, tempClassLoader) : null);
+				}
 			}
 			return mbd.resolveBeanClass(getBeanClassLoader());
 		}
@@ -1153,15 +1154,25 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * To be overridden in subclasses, applying more sophisticated type detection.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition to determine the type for
-	 * @param typeMatchOnly whether the predicated is only used for internal
-	 * type matching purposes (i.e. never exposed to application code)
+	 * @param typesToMatch the types to match in case of internal type matching purposes
+	 * (also signals that the returned <code>Class</code> will never be exposed to application code)
 	 * @return the type of the bean, or <code>null</code> if not predictable
 	 */
-	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, boolean typeMatchOnly) {
+	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
 		if (mbd.getFactoryMethodName() != null) {
 			return null;
 		}
-		return resolveBeanClass(mbd, beanName, typeMatchOnly);
+		return resolveBeanClass(mbd, beanName, typesToMatch);
+	}
+
+	/**
+	 * Check whether the given bean is defined as a {@link FactoryBean}.
+	 * @param beanName the name of the bean
+	 * @param mbd the corresponding bean definition
+	 */
+	protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
+		Class beanClass = predictBeanType(beanName, mbd, new Class[] {FactoryBean.class});
+		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 	}
 
 	/**
