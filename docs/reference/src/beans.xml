@@ -5797,7 +5797,7 @@ public @interface MovieQualifier {
       <title><classname>CustomAutowireConfigurer</classname></title>
 
       <para>The <ulink
-      url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/config/CustomAutowireConfigurer.html"><classname>CustomAutowireConfigurer</classname></ulink>
+      url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html"><classname>CustomAutowireConfigurer</classname></ulink>
       is a <interfacename>BeanFactoryPostProcessor</interfacename> that
       enables further customization of the autowiring process. Specifically,
       it allows you to register your own custom qualifier annotation types
