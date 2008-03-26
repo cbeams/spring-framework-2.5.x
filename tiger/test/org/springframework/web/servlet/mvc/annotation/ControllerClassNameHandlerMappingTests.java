@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.mapping;
+package org.springframework.web.servlet.mvc.annotation;
 
 import junit.framework.TestCase;
 
@@ -25,12 +25,11 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * @author Rob Harrop
  * @author Juergen Hoeller
  */
 public class ControllerClassNameHandlerMappingTests extends TestCase {
 
-	public static final String LOCATION = "/org/springframework/web/servlet/mvc/mapping/class-mapping.xml";
+	public static final String LOCATION = "/org/springframework/web/servlet/mvc/annotation/class-mapping.xml";
 
 	private XmlWebApplicationContext wac;
 
@@ -55,14 +54,22 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 	}
 
 	public void testIndexUri() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
+		assertEquals(this.wac.getBean("index"), chain.getHandler());
+
+		request = new MockHttpServletRequest("GET", "/index/product");
+		chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("index"), chain.getHandler());
 	}
 
 	public void testMapSimpleUri() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
+		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
+
+		request = new MockHttpServletRequest("GET", "/welcome/product");
+		chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
@@ -73,30 +80,24 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
-	public void testWithMultiActionControllerMapping() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/user");
-		HandlerExecutionChain chain = this.hm.getHandler(request);
-		assertEquals(this.wac.getBean("admin"), chain.getHandler());
-
-		request = new MockHttpServletRequest("GET", "/admin/product");
-		chain = this.hm.getHandler(request);
-		assertEquals(this.wac.getBean("admin"), chain.getHandler());
-	}
-
 	public void testWithoutControllerSuffix() throws Exception {
 	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buyform");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("buy"), chain.getHandler());
+
+		request = new MockHttpServletRequest("GET", "/buyform/product");
+		chain = this.hm.getHandler(request);
+		assertEquals(this.wac.getBean("buy"), chain.getHandler());
 	}
 
 	public void testWithBasePackage() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/mvc/mapping/welcome");
+	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/mvc/annotation/welcome");
 		HandlerExecutionChain chain = this.hm2.getHandler(request);
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
 	public void testWithBasePackageAndCaseSensitive() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/mvc/mapping/buyForm");
+	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/mvc/annotation/buyForm");
 		HandlerExecutionChain chain = this.hm2.getHandler(request);
 		assertEquals(this.wac.getBean("buy"), chain.getHandler());
 	}
@@ -108,7 +109,7 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 	}
 
 	public void testWithRootAsBasePackage() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/org/springframework/web/servlet/mvc/mapping/welcome");
+	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/org/springframework/web/servlet/mvc/annotation/welcome");
 		HandlerExecutionChain chain = this.hm4.getHandler(request);
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}

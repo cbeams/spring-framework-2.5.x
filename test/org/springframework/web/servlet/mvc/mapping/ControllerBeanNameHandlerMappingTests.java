@@ -25,22 +25,15 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class ControllerClassNameHandlerMappingTests extends TestCase {
+public class ControllerBeanNameHandlerMappingTests extends TestCase {
 
-	public static final String LOCATION = "/org/springframework/web/servlet/mvc/mapping/class-mapping.xml";
+	public static final String LOCATION = "/org/springframework/web/servlet/mvc/mapping/name-mapping.xml";
 
 	private XmlWebApplicationContext wac;
 
 	private HandlerMapping hm;
-
-	private HandlerMapping hm2;
-
-	private HandlerMapping hm3;
-
-	private HandlerMapping hm4;
 
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
@@ -49,13 +42,10 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 		this.wac.setConfigLocations(new String[] {LOCATION});
 		this.wac.refresh();
 		this.hm = (HandlerMapping) this.wac.getBean("mapping");
-		this.hm2 = (HandlerMapping) this.wac.getBean("mapping2");
-		this.hm3 = (HandlerMapping) this.wac.getBean("mapping3");
-		this.hm4 = (HandlerMapping) this.wac.getBean("mapping4");
 	}
 
 	public void testIndexUri() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("index"), chain.getHandler());
 	}
@@ -74,43 +64,15 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 	}
 
 	public void testWithMultiActionControllerMapping() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/user");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
-		assertEquals(this.wac.getBean("admin"), chain.getHandler());
-
-		request = new MockHttpServletRequest("GET", "/admin/product");
-		chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("admin"), chain.getHandler());
 	}
 
 	public void testWithoutControllerSuffix() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buyform");
+	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buy");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("buy"), chain.getHandler());
-	}
-
-	public void testWithBasePackage() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/mvc/mapping/welcome");
-		HandlerExecutionChain chain = this.hm2.getHandler(request);
-		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
-	}
-
-	public void testWithBasePackageAndCaseSensitive() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/mvc/mapping/buyForm");
-		HandlerExecutionChain chain = this.hm2.getHandler(request);
-		assertEquals(this.wac.getBean("buy"), chain.getHandler());
-	}
-
-	public void testWithFullBasePackage() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/welcome");
-		HandlerExecutionChain chain = this.hm3.getHandler(request);
-		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
-	}
-
-	public void testWithRootAsBasePackage() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/org/springframework/web/servlet/mvc/mapping/welcome");
-		HandlerExecutionChain chain = this.hm4.getHandler(request);
-		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
 }
