@@ -1840,23 +1840,14 @@ public class SimpleTest {
             <interfacename>@Test(timeout=...)</interfacename> support.
             Specifically, due to the manner in which JUnit 4 handles test
             execution timeouts (i.e., by executing the test method in a
-            separate <interfacename>Thread</interfacename>), one can not use
-            JUnit's <interfacename>@Test(timeout=...)</interfacename>
-            configuration on a test method which is executed in a
-            transactional context. Therefore, if you wish to configure a test
-            method to be both <emphasis>timed</emphasis> <emphasis
-            role="bold">and</emphasis> <emphasis>transactional</emphasis>, you
-            must use a combination of Spring's
-            <interfacename>@Timed</interfacename> and
-            <interfacename>@Transactional</interfacename> annotations. It also
-            worth noting that
-            <interfacename>@Test(timeout=...)</interfacename> times only the
-            execution of the test method itself and preemptively fails the
-            test if the test takes too long; whereas,
-            <interfacename>@Timed</interfacename> times the <emphasis>total
-            </emphasis> test execution time (including set up and tear down
-            operations as well as repetitions) and does not preemptively fail
-            the test.</para>
+            separate <classname>Thread</classname>),
+            <interfacename>@Test(timeout=...)</interfacename> applies to
+            <emphasis>each iteration</emphasis> in the case of repetitions
+            and preemptively fails the test if the test takes too long.
+            Spring's <interfacename>@Timed</interfacename>, on the other hand,
+            times the <emphasis>total</emphasis> test execution time
+            (including all repetitions) and does not preemptively fail the test
+            but rather waits for the test to actually complete before failing.</para>
           </listitem>
 
           <listitem>
