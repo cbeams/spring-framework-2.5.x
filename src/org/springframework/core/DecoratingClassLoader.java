@@ -43,14 +43,14 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	/**
 	 * Create a new DecoratingClassLoader with no parent ClassLoader.
 	 */
-	protected DecoratingClassLoader() {
+	public DecoratingClassLoader() {
 	}
 
 	/**
 	 * Create a new DecoratingClassLoader using the given parent ClassLoader
 	 * for delegation.
 	 */
-	protected DecoratingClassLoader(ClassLoader parent) {
+	public DecoratingClassLoader(ClassLoader parent) {
 		super(parent);
 	}
 
@@ -70,8 +70,8 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 
 	/**
 	 * Add a class name to exclude from decoration (e.g. overriding).
-	 * <p>Any class name registered here will be handled by
-	 * the parent ClassLoader in the usual fashion.
+	 * <p>Any class name registered here will be handled by the parent
+	 * ClassLoader in the usual fashion.
 	 * @param className the class name to exclude
 	 */
 	public void excludeClass(String className) {
