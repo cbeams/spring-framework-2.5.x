@@ -116,7 +116,7 @@ class SpringMethodRoadie {
 					timedAnnotation.millis() : 0);
 			long junitTimeout = this.testMethod.getTimeout();
 
-			if ((springTimeout > 0) && (junitTimeout > 0)) {
+			if (springTimeout > 0 && junitTimeout > 0) {
 				throw new IllegalStateException("Test method [" + this.testMethod.getMethod() +
 						"] has been configured with Spring's @Timed(millis=" + springTimeout +
 						") and JUnit's @Test(timeout=" + junitTimeout +
@@ -157,12 +157,7 @@ class SpringMethodRoadie {
 		runWithRepetitions(new Runnable() {
 			public void run() {
 				ExecutorService service = Executors.newSingleThreadExecutor();
-				Runnable runnable = new Runnable() {
-					public void run() {
-						runTestMethod();
-					}
-				};
-				Future result = service.submit(runnable);
+				Future result = service.submit(new RunBeforesThenTestThenAfters());
 				service.shutdown();
 				try {
 					boolean terminated = service.awaitTermination(timeout, TimeUnit.MILLISECONDS);
@@ -185,60 +180,30 @@ class SpringMethodRoadie {
 	/**
 	 * Runs the test, including {@link #runBefores() @Before} and
 	 * {@link #runAfters() @After} methods.
-	 *
 	 * @see #runWithRepetitions(Runnable)
 	 * @see #runTestMethod()
 	 */
 	protected void runTest() {
-		runWithRepetitions(new Runnable() {
-			public void run() {
-				runTestMethod();
-			}
-		});
+		runWithRepetitions(new RunBeforesThenTestThenAfters());
 	}
 
 	/**
 	 * Runs the supplied <code>test</code> with repetitions. Checks for the
 	 * presence of {@link Repeat @Repeat} to determine if the test should be run
-	 * more than once and delegates to
-	 * {@link #runBeforesThenTestThenAfters(Runnable)} for each repetition. The
-	 * test will be run at least once.
+	 * more than once. The test will be run at least once.
 	 * @param test the runnable test
 	 * @see Repeat
-	 * @see #runBeforesThenTestThenAfters(Runnable)
 	 */
 	protected void runWithRepetitions(Runnable test) {
 		Method method = this.testMethod.getMethod();
 		Repeat repeat = method.getAnnotation(Repeat.class);
-		int runs = ((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
+		int runs = (repeat != null && repeat.value() > 1 ? repeat.value() : 1);
 
 		for (int i = 0; i < runs; i++) {
 			if (runs > 1 && logger.isInfoEnabled()) {
 				logger.info("Repetition " + (i + 1) + " of test " + method.getName());
 			}
-			runBeforesThenTestThenAfters(test);
-		}
-	}
-
-	/**
-	 * Runs the following methods on the test instance, guaranteeing that
-	 * {@link #runAfters() @After methods} will have a chance to execute:
-	 * <ul>
-	 * <li>{@link #runBefores() @Before methods}</li>
-	 * <li>The supplied, {@link Runnable} <code>test</code></li>
-	 * <li>{@link #runAfters() @After methods}</li>
-	 * </ul>
-	 * @param test the runnable test
-	 */
-	protected void runBeforesThenTestThenAfters(Runnable test) {
-		try {
-			runBefores();
 			test.run();
-		}
-		catch (FailedBefore ex) {
-		}
-		finally {
-			runAfters();
 		}
 	}
 
@@ -340,6 +305,26 @@ class SpringMethodRoadie {
 	 */
 	protected void addFailure(Throwable exception) {
 		this.notifier.fireTestFailure(new Failure(this.description, exception));
+	}
+
+
+	/**
+	 * Runs the test method, executing <code>@Before</code> and <code>@After</code>
+	 * methods accordingly.
+	 */
+	private class RunBeforesThenTestThenAfters implements Runnable {
+
+		public void run() {
+			try {
+				runBefores();
+				runTestMethod();
+			}
+			catch (FailedBefore ex) {
+			}
+			finally {
+				runAfters();
+			}
+		}
 	}
 
 

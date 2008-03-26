@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -49,8 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-	TransactionalTestExecutionListener.class })
 @TransactionConfiguration(defaultRollback = true)
 public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
 
@@ -73,7 +67,7 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
-	@Test
+	@Test(timeout = 1000)
 	@Transactional
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);

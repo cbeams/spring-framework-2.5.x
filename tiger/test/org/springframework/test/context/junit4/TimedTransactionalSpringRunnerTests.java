@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,31 +39,21 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2.5
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "transactionalTests-context.xml" })
+@ContextConfiguration(locations = {"transactionalTests-context.xml"})
 @Transactional
 public class TimedTransactionalSpringRunnerTests {
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@Test
 	@Timed(millis = 10000)
 	@Repeat(5)
 	public void transactionalWithSpringTimeout() {
-
 		assertInTransaction(true);
 	}
 
 	@Test(timeout = 10000)
 	@Repeat(5)
 	public void transactionalWithJUnitTimeout() {
-
-		// Note: the combination of JUnit's @Test(timeout=...) and Spring's
-		// @Transactional do NOT mix, since JUnit 4 runs timeout code in a new
-		// thread in which the ThreadLocal for the transaction management is not
-		// visible. Thus the following assertion is 'false'.
-		assertInTransaction(false);
+		assertInTransaction(true);
 	}
 
 	@Test
@@ -71,7 +61,6 @@ public class TimedTransactionalSpringRunnerTests {
 	@Timed(millis = 10000)
 	@Repeat(5)
 	public void notTransactionalWithSpringTimeout() {
-
 		assertInTransaction(false);
 	}
 
@@ -79,7 +68,7 @@ public class TimedTransactionalSpringRunnerTests {
 	@NotTransactional
 	@Repeat(5)
 	public void notTransactionalWithJUnitTimeout() {
-
 		assertInTransaction(false);
 	}
+
 }
