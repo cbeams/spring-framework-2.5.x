@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.logging.Log;
@@ -27,7 +26,6 @@ import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.StatefulJob;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -73,16 +71,6 @@ import org.springframework.util.MethodInvoker;
  */
 public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
     implements FactoryBean, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
-
-	/**
-	 * Determine whether the old Quartz 1.5 JobExecutionException constructor
-	 * with an Exception argument is present. If yes, we'll use it;
-	 * else we'll use Quartz 1.6's constructor with a Throwable argument.
-	 */
-	private static final Constructor oldJobExecutionExceptionConstructor =
-			ClassUtils.getConstructorIfAvailable(JobExecutionException.class,
-					new Class[] {String.class, Exception.class, boolean.class});
-
 
 	private String name;
 
@@ -272,41 +260,19 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				this.methodInvoker.invoke();
 			}
 			catch (InvocationTargetException ex) {
-				String errorMessage = getInvocationFailureMessage();
-				logger.warn(errorMessage, ex.getTargetException());
 				if (ex.getTargetException() instanceof JobExecutionException) {
+					// -> JobExecutionException, to be logged at info level by Quartz
 					throw (JobExecutionException) ex.getTargetException();
 				}
-				if (oldJobExecutionExceptionConstructor != null) {
-					Exception jobEx = (ex.getTargetException() instanceof Exception) ?
-							(Exception) ex.getTargetException() : ex;
-					throw (JobExecutionException) BeanUtils.instantiateClass(
-							oldJobExecutionExceptionConstructor, new Object[] {errorMessage, jobEx, Boolean.FALSE});
-				}
 				else {
-					throw new JobExecutionException(errorMessage, ex.getTargetException());
+					// -> "unhandled exception", to be logged at error level by Quartz
+					throw new JobMethodInvocationFailedException(this.methodInvoker, ex.getTargetException());
 				}
 			}
 			catch (Exception ex) {
-				String errorMessage = getInvocationFailureMessage();
-				logger.warn(errorMessage, ex);
-				if (oldJobExecutionExceptionConstructor != null) {
-					throw (JobExecutionException) BeanUtils.instantiateClass(
-							oldJobExecutionExceptionConstructor, new Object[] {errorMessage, ex, Boolean.FALSE});
-				}
-				else {
-					throw new JobExecutionException(errorMessage, ex);
-				}
+				// -> "unhandled exception", to be logged at error level by Quartz
+				throw new JobMethodInvocationFailedException(this.methodInvoker, ex);
 			}
-		}
-
-		/**
-		 * Build a message for an invocation failure exception.
-		 * @return the error message, including the target method name etc
-		 */
-		private String getInvocationFailureMessage() {
-			return "Invocation of method '" + this.methodInvoker.getTargetMethod() +
-					"' on target class [" + this.methodInvoker.getTargetClass() + "] failed";
 		}
 	}
 
