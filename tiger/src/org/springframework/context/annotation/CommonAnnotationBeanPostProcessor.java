@@ -341,7 +341,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					});
 					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 						public void doWith(Method method) {
-							if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass)) {
+							if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass) &&
+									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
 								}
@@ -351,7 +352,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 								newMetadata.addInjectedMethod(new WebServiceRefElement(method, pd));
 							}
-							else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass)) {
+							else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass) &&
+									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("@EJB annotation is not supported on static methods");
 								}
@@ -361,7 +363,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 								newMetadata.addInjectedMethod(new EjbRefElement(method, pd));
 							}
-							else if (method.isAnnotationPresent(Resource.class)) {
+							else if (method.isAnnotationPresent(Resource.class) &&
+									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("@Resource annotation is not supported on static methods");
 								}

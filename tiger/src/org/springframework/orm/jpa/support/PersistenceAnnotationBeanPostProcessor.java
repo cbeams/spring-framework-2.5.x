@@ -58,6 +58,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -339,7 +340,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	}
 
 
-	private InjectionMetadata findPersistenceMetadata(Class clazz) {
+	private InjectionMetadata findPersistenceMetadata(final Class clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
 		if (metadata == null) {
@@ -363,7 +364,8 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 						public void doWith(Method method) {
 							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
 							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
-							if (pc != null || pu != null) {
+							if (pc != null || pu != null &&
+									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Persistence annotations are not supported on static methods");
 								}

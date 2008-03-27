@@ -53,6 +53,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -297,7 +298,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 						public void doWith(Method method) {
 							Annotation annotation = method.getAnnotation(getAutowiredAnnotationType());
-							if (annotation != null) {
+							if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Autowired annotation is not supported on static methods");
 								}
