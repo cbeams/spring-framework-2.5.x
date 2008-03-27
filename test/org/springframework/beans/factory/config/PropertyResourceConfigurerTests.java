@@ -408,6 +408,22 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertNull(tb.getName());
 	}
 
+	public void testPropertyPlaceholderConfigurerWithEmptyStringInPlaceholderAsNull() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "${ref}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("nullValue", "");
+		Properties props = new Properties();
+		props.put("ref", "");
+		pvs.addPropertyValue("properties", props);
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertNull(tb.getName());
+	}
+
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();

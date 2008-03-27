@@ -325,8 +325,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			}
 		}
 
-		String value = buf.toString();
-		return (value.equals(this.nullValue) ? null : value);
+		return buf.toString();
 	}
 
 	/**
@@ -416,7 +415,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		}
 
 		public String resolveStringValue(String strVal) throws BeansException {
-			return parseStringValue(strVal, this.props, new HashSet());
+			String value = parseStringValue(strVal, this.props, new HashSet());
+			return (value.equals(nullValue) ? null : value);
 		}
 	}
 
