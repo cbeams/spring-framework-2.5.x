@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -131,15 +132,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * If this variable is set to true then all results from a stored procedure call
-	 * that don't have a correpsonding SqlOutParameter declaration will be bypassed.
+	 * that don't have a corresponding SqlOutParameter declaration will be bypassed.
 	 * All other results processng will be take place unless the variable 
 	 * <code>skipResultsProcessing</code> is set to <code>true</code> 
 	 */
 	private boolean skipUndeclaredResults = false;
 
 	/**
-	 * If this variable is set to true then execution of a CallableStatement will return the results in a Map
-	 * that uses case insensitive names for the parameters if Commons Collections are available on the classpath.
+	 * If this variable is set to true then execution of a CallableStatement will return
+	 * the results in a Map that uses case insensitive names for the parameters if
+	 * Commons Collections is available on the classpath.
 	 */
 	private boolean resultsMapCaseInsensitive = false;
 
@@ -302,19 +304,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Return whether execution of a CallableStatement will return the results in a Map
-	 * that uses case insensitive names for the parameters.
-	 */
-	public boolean isResultsMapCaseInsensitive() {
-		return resultsMapCaseInsensitive;
-	}
-
-	/*
 	 * Set whether execution of a CallableStatement will return the results in a Map
 	 * that uses case insensitive names for the parameters.
 	 */
 	public void setResultsMapCaseInsensitive(boolean resultsMapCaseInsensitive) {
 		this.resultsMapCaseInsensitive = resultsMapCaseInsensitive;
+	}
+
+	/**
+	 * Return whether execution of a CallableStatement will return the results in a Map
+	 * that uses case insensitive names for the parameters.
+	 */
+	public boolean isResultsMapCaseInsensitive() {
+		return this.resultsMapCaseInsensitive;
 	}
 
 
@@ -1159,6 +1161,23 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
+	 * Create a Map instance to be used as results map.
+	 * <p>If "isResultsMapCaseInsensitive" has been set to true, a linked case-insensitive Map
+	 * will be created if possible, else a plain HashMap (see Spring's CollectionFactory).
+	 * @return the results Map instance
+	 * @see #setResultsMapCaseInsensitive
+	 * @see org.springframework.core.CollectionFactory#createLinkedCaseInsensitiveMapIfPossible
+	 */
+	protected Map createResultsMap() {
+		if (isResultsMapCaseInsensitive()) {
+			return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(10);
+		}
+		else {
+			return new LinkedHashMap();
+		}
+	}
+
+	/**
 	 * Prepare the given JDBC Statement (or PreparedStatement or CallableStatement),
 	 * applying statement settings such as fetch size, max rows, and query timeout.
 	 * @param stmt the JDBC Statement to prepare
@@ -1339,17 +1358,4 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
-	/**
-	 * Create a Map instance to be used as results map.
-	 * <p>If "isResultsMapCaseInsensitive" has been set to true, a linked case-insensitive Map 
-     * will be created if possible, else a plain HashMap (see Spring's CollectionFactory).
-	 * @return the new Map instance
-	 * @see org.springframework.core.CollectionFactory#createLinkedCaseInsensitiveMapIfPossible
-	 */
-	protected Map createResultsMap() {
-		if (isResultsMapCaseInsensitive())
-			return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(10);
-		else
-			return new HashMap();
-	}
 }
