@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.ClassUtils;
 
 /**
- * Adapter that implements the Runnable interface as a configurable
+ * Adapter that implements the {@link Runnable} interface as a configurable
  * method invocation based on Spring's MethodInvoker.
  *
  * <p>Inherits common configuration properties from
@@ -76,11 +76,11 @@ public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker
 			invoke();
 		}
 		catch (InvocationTargetException ex) {
-			logger.warn(getInvocationFailureMessage(), ex);
+			logger.error(getInvocationFailureMessage(), ex.getTargetException());
 			// Do not throw exception, else the main loop of the scheduler might stop!
 		}
 		catch (Throwable ex) {
-			logger.warn(getInvocationFailureMessage(), ex);
+			logger.error(getInvocationFailureMessage(), ex);
 			// Do not throw exception, else the main loop of the scheduler might stop!
 		}
 	}

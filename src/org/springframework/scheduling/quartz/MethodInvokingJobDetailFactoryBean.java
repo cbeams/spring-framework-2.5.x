@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,7 +273,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 			}
 			catch (InvocationTargetException ex) {
 				String errorMessage = getInvocationFailureMessage();
-				logger.warn(errorMessage, ex.getTargetException());
+				logger.error(errorMessage, ex.getTargetException());
 				if (ex.getTargetException() instanceof JobExecutionException) {
 					throw (JobExecutionException) ex.getTargetException();
 				}
@@ -289,7 +289,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 			}
 			catch (Exception ex) {
 				String errorMessage = getInvocationFailureMessage();
-				logger.warn(errorMessage, ex);
+				logger.error(errorMessage, ex);
 				if (oldJobExecutionExceptionConstructor != null) {
 					throw (JobExecutionException) BeanUtils.instantiateClass(
 							oldJobExecutionExceptionConstructor, new Object[] {errorMessage, ex, Boolean.FALSE});
