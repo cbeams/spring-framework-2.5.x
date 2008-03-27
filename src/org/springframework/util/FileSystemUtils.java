@@ -23,24 +23,24 @@ import java.io.IOException;
  * Utility methods for working with the file system.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.5.3
  */
 public abstract class FileSystemUtils {
 
 	/**
-	 * Delete the supplied {@link File} and, for directories, recursively delete
-	 * any nested directories or files.
-	 *
-	 * @param root the root <code>File</code> to delete.
+	 * Delete the supplied {@link File} - for directories,
+	 * recursively delete any nested directories or files as well.
+	 * @param root the root <code>File</code> to delete
 	 * @return <code>true</code> if the <code>File</code> was deleted,
-	 * otherwise <code>false</code>.
+	 * otherwise <code>false</code>
 	 */
 	public static boolean deleteRecursively(File root) {
 		if (root.exists()) {
 			if (root.isDirectory()) {
 				File[] children = root.listFiles();
-				for (File file : children) {
-					deleteRecursively(file);
+				for (int i = 0; i < children.length; i++) {
+					deleteRecursively(children[i]);
 				}
 			}
 			return root.delete();
@@ -50,15 +50,15 @@ public abstract class FileSystemUtils {
 
 	/**
 	 * Recursively copy the contents of <code>src</code> to <code>dest</code>.
-	 *
-	 * @param src the source file.
-	 * @param dest the destination file.
-	 * @throws IOException in the case of I/O errors.
+	 * @param src the source file
+	 * @param dest the destination file
+	 * @throws IOException in the case of I/O errors
 	 */
 	public static void copyRecursively(File src, File dest) throws IOException {
 		dest.mkdir();
 		File[] entries = src.listFiles();
-		for (File file : entries) {
+		for (int i = 0; i < entries.length; i++) {
+			File file = entries[i];
 			File newFile = new File(dest, file.getName());
 			if (file.isFile()) {
 				newFile.createNewFile();
