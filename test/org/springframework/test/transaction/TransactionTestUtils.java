@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,10 @@ package org.springframework.test.transaction;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * <p>
  * Collection of JDK 1.4+ utilities for tests involving transactions. Intended
  * for internal use within the Spring testing suite.
- * </p>
- * <p>
- * All <code>assert*()</code> methods throw {@link AssertionError}s.
- * </p>
+ *
+ * <p>All <code>assert*()</code> methods throw {@link AssertionError}s.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -35,22 +32,20 @@ public abstract class TransactionTestUtils {
 	/**
 	 * Convenience method for determining if a transaction is active for the
 	 * current {@link Thread}.
-	 *
-	 * @return <code>true</code> if a transaction is currently active.
+	 * @return <code>true</code> if a transaction is currently active
 	 */
-	public static final boolean inTransaction() {
+	public static boolean inTransaction() {
 		return TransactionSynchronizationManager.isActualTransactionActive();
 	}
 
 	/**
 	 * Asserts whether or not a transaction is active for the current
 	 * {@link Thread}.
-	 *
-	 * @param transactionExpected whether or not a transaction is expected.
-	 * @throws AssertionError if the supplied assertion fails.
+	 * @param transactionExpected whether or not a transaction is expected
+	 * @throws AssertionError if the supplied assertion fails
 	 * @see #inTransaction()
 	 */
-	public static final void assertInTransaction(final boolean transactionExpected) {
+	public static void assertInTransaction(boolean transactionExpected) {
 		if (transactionExpected) {
 			assertCondition(inTransaction(), "The current thread should be associated with a transaction.");
 		}
@@ -62,12 +57,10 @@ public abstract class TransactionTestUtils {
 	/**
 	 * Fails by throwing an <code>AssertionError</code> with the supplied
 	 * <code>message</code>.
-	 *
 	 * @param message the exception message to use
 	 * @see #assertCondition(boolean,String)
 	 */
-	private static final void fail(final String message) throws AssertionError {
-
+	private static void fail(String message) throws AssertionError {
 		throw new AssertionError(message);
 	}
 
@@ -75,14 +68,12 @@ public abstract class TransactionTestUtils {
 	 * Assert the provided boolean <code>condition</code>, throwing
 	 * <code>AssertionError</code> with the supplied <code>message</code> if
 	 * the test result is <code>false</code>.
-	 *
 	 * @param condition a boolean expression
 	 * @param message the exception message to use if the assertion fails
 	 * @throws AssertionError if condition is <code>false</code>
 	 * @see #fail(String)
 	 */
-	private static final void assertCondition(final boolean condition, final String message) throws AssertionError {
-
+	private static void assertCondition(boolean condition, String message) throws AssertionError {
 		if (!condition) {
 			fail(message);
 		}

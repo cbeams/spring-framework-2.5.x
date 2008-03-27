@@ -95,13 +95,13 @@ public class CharacterEditor extends PropertyEditorSupport {
 	}
 
 
+	private boolean isUnicodeCharacterSequence(String sequence) {
+		return (sequence.startsWith(UNICODE_PREFIX) && sequence.length() == UNICODE_LENGTH);
+	}
+
 	private void setAsUnicode(String text) {
 		int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
 		setValue(new Character((char) code));
-	}
-
-	private static boolean isUnicodeCharacterSequence(String sequence) {
-		return sequence.startsWith(UNICODE_PREFIX) && sequence.length() == UNICODE_LENGTH;
 	}
 
 }
