@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NumberTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
-import org.springframework.core.JdkVersion;
 import org.springframework.test.AssertThrows;
 
 /**
@@ -506,6 +505,9 @@ public class CustomEditorTests extends TestCase {
 		bw.setPropertyValue("myCharacter", "\u0041");
 		assertEquals(new Character('A'), cb.getMyCharacter());
 
+		bw.setPropertyValue("myCharacter", " ");
+		assertEquals(new Character(' '), cb.getMyCharacter());
+
 		bw.setPropertyValue("myCharacter", "");
 		assertNull(cb.getMyCharacter());
 	}
@@ -528,9 +530,7 @@ public class CustomEditorTests extends TestCase {
 		charEditor.setAsText("");
 		assertEquals("", charEditor.getAsText());
 		charEditor.setAsText(" ");
-		assertEquals("", charEditor.getAsText());
-		charEditor.setAsText(" \t  \n ");
-		assertEquals("", charEditor.getAsText());
+		assertEquals(" ", charEditor.getAsText());
 	}
 
 	public void testCharacterEditorSetAsTextWithNullNotAllowingEmptyAsNull() throws Exception {

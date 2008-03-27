@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (this.allowEmpty && !StringUtils.hasText(text)) {
+		if (this.allowEmpty && !StringUtils.hasLength(text)) {
 			// Treat empty String as null value.
 			setValue(null);
 		}
@@ -100,10 +100,8 @@ public class CharacterEditor extends PropertyEditorSupport {
 		setValue(new Character((char) code));
 	}
 
-
 	private static boolean isUnicodeCharacterSequence(String sequence) {
-		return sequence.startsWith(UNICODE_PREFIX)
-				&& sequence.length() == UNICODE_LENGTH;
+		return sequence.startsWith(UNICODE_PREFIX) && sequence.length() == UNICODE_LENGTH;
 	}
 
 }
