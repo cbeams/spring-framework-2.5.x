@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,17 +58,10 @@ public class DelegatingJob implements Job {
 
 
 	/**
-	 * Delegates execution to the underlying Runnable,
-	 * converting any Exception thrown to a Quartz JobExecutionException
-	 * (as required by the Job contract).
+	 * Delegates execution to the underlying Runnable.
 	 */
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		try {
-			this.delegate.run();
-		}
-		catch (Exception ex) {
-			throw new JobExecutionException(ex);
-		}
+		this.delegate.run();
 	}
 
 }
