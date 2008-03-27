@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,15 +95,13 @@ public class CharacterEditor extends PropertyEditorSupport {
 	}
 
 
+	private boolean isUnicodeCharacterSequence(String sequence) {
+		return (sequence.startsWith(UNICODE_PREFIX) && sequence.length() == UNICODE_LENGTH);
+	}
+
 	private void setAsUnicode(String text) {
 		int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
 		setValue(new Character((char) code));
-	}
-
-
-	private static boolean isUnicodeCharacterSequence(String sequence) {
-		return sequence.startsWith(UNICODE_PREFIX)
-				&& sequence.length() == UNICODE_LENGTH;
 	}
 
 }
