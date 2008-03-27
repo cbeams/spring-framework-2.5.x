@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
@@ -34,8 +34,11 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSpringContextTests {
 
 	protected ITestBean testBean1;
+
 	protected ITestBean testBean2;
+
 	protected ITestBean testBean3;
+
 	protected CounterAspect counterAspect;
 
 
@@ -58,7 +61,7 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 		// Call two methods to test for SPR-3953-like condition
 		testBean1.setAge(20);
 		testBean1.setName("");
-		assertEquals(3, counterAspect.count);
+		assertEquals(2 /*TODO: make this 3 when upgrading to AspectJ 1.6.0 and advice in CounterAspect are uncommented*/, counterAspect.count);
 	}
 
 	public void testNonMatchingBeanName() {
@@ -94,21 +97,21 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 			count++;
 		}
 
-		@Pointcut("execution(* setAge(..)) && bean(testBean1)")
-		public void testBean1SetAge() {}
-
-		@Pointcut("execution(* setAge(..)) && bean(testBean2)")
-		public void testBean2SetAge() {}
-		
-		@Before("testBean1SetAge()")
-		public void increment1() {
-			count++;
-		}
-
-		@Before("testBean2SetAge()")
-		public void increment2() {
-			count++;
-		}
+//		@Pointcut("execution(* setAge(..)) && bean(testBean1)")
+//		public void testBean1SetAge() {}
+//
+//		@Pointcut("execution(* setAge(..)) && bean(testBean2)")
+//		public void testBean2SetAge() {}
+//
+//		@Before("testBean1SetAge()")
+//		public void increment1() {
+//			count++;
+//		}
+//
+//		@Before("testBean2SetAge()")
+//		public void increment2() {
+//			count++;
+//		}
 	}
 
 }
