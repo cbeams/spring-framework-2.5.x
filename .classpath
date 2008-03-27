@@ -15,6 +15,7 @@
 	<classpathentry kind="src" output="samples/petclinic/.classes" path="samples/petclinic/src"/>
 	<classpathentry kind="src" path="samples/petclinic/test"/>
 	<classpathentry kind="src" path="samples/petportal/src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/aopalliance/aopalliance.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aspectj/aspectjweaver.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cglib/cglib-nodep-2.1_3.jar"/>
@@ -114,6 +115,5 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-view-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/websphere/websphere_uow_api.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/soylatte16-i386-1.0.2"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
