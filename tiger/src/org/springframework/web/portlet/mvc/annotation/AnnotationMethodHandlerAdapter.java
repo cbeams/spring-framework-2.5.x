@@ -73,6 +73,7 @@ import org.springframework.web.portlet.context.PortletWebRequest;
 import org.springframework.web.portlet.handler.PortletContentGenerator;
 import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 import org.springframework.web.portlet.util.PortletUtils;
+import org.springframework.web.servlet.View;
 
 /**
  * Implementation of the {@link org.springframework.web.portlet.HandlerAdapter}
@@ -519,11 +520,22 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				mav.getModelMap().mergeAttributes(implicitModel);
 				return mav;
 			}
+			else if (returnValue instanceof org.springframework.web.servlet.ModelAndView) {
+				org.springframework.web.servlet.ModelAndView smav = (org.springframework.web.servlet.ModelAndView) returnValue;
+				ModelAndView mav = (smav.isReference() ?
+						new ModelAndView(smav.getViewName(), smav.getModelMap()) :
+						new ModelAndView(smav.getView(), smav.getModelMap()));
+				mav.getModelMap().mergeAttributes(implicitModel);
+				return mav;
+			}
 			else if (returnValue instanceof Model) {
 				return new ModelAndView().addAllObjects(implicitModel).addAllObjects(((Model) returnValue).asMap());
 			}
 			else if (returnValue instanceof Map) {
 				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);
+			}
+			else if (returnValue instanceof View) {
+				return new ModelAndView(returnValue).addAllObjects(implicitModel);
 			}
 			else if (returnValue instanceof String) {
 				return new ModelAndView((String) returnValue).addAllObjects(implicitModel);
