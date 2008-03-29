@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.metadata.CallMetaDataContext;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 /**
@@ -326,7 +325,6 @@ public abstract class AbstractJdbcCall {
 
 	/**
 	 * Method that provides execution of the call using the passed in {@link SqlParameterSource}
-	 *
 	 * @param parameterSource parameter names and values to be used in call
 	 * @return Map of out parameters
 	 */
@@ -348,7 +346,7 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Mathod to perform the actual call processing
+	 * Method to perform the actual call processing
 	 */
 	private Map<String, Object> executeCallInternal(Map params) {
 		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(params);
@@ -359,20 +357,20 @@ public abstract class AbstractJdbcCall {
 				logger.debug(i++ + ": " +  p.getName() + " SQL Type "+ p.getSqlType() + " Type Name " + p.getTypeName() + " " + p.getClass().getName());
 			}
 		}
-		Map<String, Object> result = getJdbcTemplate().call(csc, getCallParameters());
-		return result;
+		return getJdbcTemplate().call(csc, getCallParameters());
 	}
 
 	/**
-	 * Get the name of a single out parameter or return value. Used for functions or procedures with one out parameter
+	 * Get the name of a single out parameter or return value.
+	 * Used for functions or procedures with one out parameter.
 	 */
 	protected String getScalarOutParameterName() {
 		return this.callMetaDataContext.getScalarOutParameterName();
 	}
 
 	/**
-	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
-	 * processing.
+	 * Match the provided in parameter values with registered parameters and
+	 * parameters defined via metadata processing.
 	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
@@ -381,8 +379,8 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
-	 * processing.
+	 * Match the provided in parameter values with registered parameters and
+	 * parameters defined via metadata processing.
 	 * @param args the parameter values provided in a Map
 	 * @return Map with parameter names and values
 	 */
@@ -397,4 +395,5 @@ public abstract class AbstractJdbcCall {
 	protected List<SqlParameter> getCallParameters() {
 		return this.callMetaDataContext.getCallParameters();
 	}
+
 }
