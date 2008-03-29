@@ -1192,7 +1192,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 	}
 
-	@Target( { ElementType.METHOD, ElementType.FIELD })
+	@Target({ElementType.METHOD, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface MyAutowired {
 

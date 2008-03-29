@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ public class JpaTransactionManagerTests extends TestCase {
 			assertSame(l, result);
 		}
 		catch (TransactionSystemException tse) {
-			// it's okay
+			// expected
 			assertTrue(tse.getCause() instanceof RollbackException);
 		}
 
@@ -197,10 +197,11 @@ public class JpaTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("expected exception");
+			fail("Should have propagated RuntimeException");
 		}
-		catch (RuntimeException e) {
-			// okay
+		catch (RuntimeException ex) {
+			// expected
+			assertEquals("some exception", ex.getMessage());
 		}
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -237,10 +238,10 @@ public class JpaTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("expected exception");
+			fail("Should have propagated RuntimeException");
 		}
-		catch (RuntimeException e) {
-			// okay
+		catch (RuntimeException ex) {
+			// expected
 		}
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -369,10 +370,10 @@ public class JpaTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("expected exception");
+			fail("Should have propagated RuntimeException");
 		}
-		catch (RuntimeException e) {
-			// okay
+		catch (RuntimeException ex) {
+			// expected
 		}
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -426,10 +427,10 @@ public class JpaTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("expected exception");
+			fail("Should have thrown TransactionSystemException");
 		}
 		catch (TransactionSystemException tse) {
-			// it's okay
+			// expected
 			assertTrue(tse.getCause() instanceof RollbackException);
 		}
 
@@ -899,7 +900,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.verify();
 		txControl.verify();
 	}
-
 
 	public void testTransactionCommitWithPreboundAndPropagationSupports() {
 		factoryControl.reset();

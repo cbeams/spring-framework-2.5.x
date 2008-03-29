@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ import java.lang.annotation.Target;
  * <em>tear down</em> of the test fixture.
  * </p>
  *
- * @see Repeat
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
+ * @see Repeat
  * @see AbstractAnnotationAwareTransactionalTests
  */
-@Target( { ElementType.METHOD })
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Timed {
@@ -51,8 +51,6 @@ public @interface Timed {
 	/**
 	 * The maximum amount of time (in milliseconds) that a test execution can
 	 * take without being marked as failed due to taking too long.
-	 *
-	 * @return said maximum time
 	 */
 	long millis();
 

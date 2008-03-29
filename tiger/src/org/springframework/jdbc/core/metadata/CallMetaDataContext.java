@@ -474,15 +474,16 @@ public class CallMetaDataContext {
 	 * @return a Map containing the matched parameter names with the value taken from the input
 	 */
 	public Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters) {
-		if (!metaDataProvider.isProcedureColumnMetaDataUsed()) {
+		if (!this.metaDataProvider.isProcedureColumnMetaDataUsed()) {
 			return inParameters;
 		}
 		Map<String, String> callParameterNames = new HashMap<String, String>(this.callParameters.size());
 		for (SqlParameter parameter : this.callParameters) {
-			String parameterName =  parameter.getName();
+			String parameterName = parameter.getName();
 			String parameterNameToMatch = this.metaDataProvider.parameterNameToUse(parameterName);
-			if (parameterNameToMatch != null)
+			if (parameterNameToMatch != null) {
 				callParameterNames.put(parameterNameToMatch.toLowerCase(), parameterName);
+			}
 		}
 		Map<String, Object> matchedParameters = new HashMap<String, Object>(inParameters.size());
 		for (String parameterName : inParameters.keySet()) {
@@ -495,7 +496,6 @@ public class CallMetaDataContext {
 			else {
 				matchedParameters.put(callParameterName, inParameters.get(parameterName));
 			}
-
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Matching " + inParameters + " with " + callParameterNames);
