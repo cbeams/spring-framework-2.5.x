@@ -1657,7 +1657,16 @@ END;</programlisting>As you can see there are four parameters. One is an in
       declares an out parameter to be used in a stored procedure call. There
       is also an <classname>SqlInOutParameter</classname> for inout
       parameters, parameters that provide an in value to the procedure and
-      that also return a value.</para>
+      that also return a value</para>
+
+      <note>
+        <para>Only parameters declared as <classname>SqlParameter</classname>
+        and <classname>SqlInOutParameter</classname> will be used to provide
+        input values. This is different from the
+        <classname>StoredProcedure</classname> class which for backwards
+        compatibility reasons allows input values to be provided for
+        parameters declared as <classname>SqlOutParameter</classname>. </para>
+      </note>
 
       <para>In addition to the name and the SQL type you can specify
       additional options. For in parameters you can specify a scale for
@@ -1955,9 +1964,44 @@ public class UpdateCreditRating extends SqlUpdate {
       typing.</para>
 
       <para>The inherited <literal>sql</literal> property will be the name of
-      the stored procedure in the RDBMS. Note that JDBC 3.0 introduces named
-      parameters, although the other features provided by this class are still
-      necessary in JDBC 3.0.</para>
+      the stored procedure in the RDBMS.</para>
+
+      <para>To define a parameter to be used for the StoredProcedure classe,
+      you use an <classname>SqlParameter</classname> or one of its subclasses.
+      You must specify the parameter name and SQL type in the constructor. The
+      SQL type is specified using the <classname>java.sql.Types</classname>
+      constants. We have already seen declarations like:</para>
+
+      <para><programlisting>   new SqlParameter("in_id", Types.NUMERIC),
+   new SqlOutParameter("out_first_name", Types.VARCHAR),</programlisting></para>
+
+      <para>The first line with the <classname>SqlParameter</classname>
+      declares an in parameter. In parameters can be used for both stored
+      procedure calls and for queries using the
+      <classname>SqlQuery</classname> and its subclasses covered in the
+      following section.</para>
+
+      <para>The second line with the <classname>SqlOutParameter</classname>
+      declares an out parameter to be used in the stored procedure call. There
+      is also an <classname>SqlInOutParameter</classname> for inout
+      parameters, parameters that provide an in value to the procedure and
+      that also return a value</para>
+
+      <para><note>
+          <para> Parameters declared as <classname>SqlParameter</classname>
+          and <classname>SqlInOutParameter</classname> will always be used to
+          provide input values. In addition to this any parameter declared as
+          <classname>SqlOutParameter</classname> where an non-null input value
+          is provided will also be used as an input paraneter. </para>
+        </note></para>
+
+      <para>In addition to the name and the SQL type you can specify
+      additional options. For in parameters you can specify a scale for
+      numeric data or a type name for custom database types. For out
+      parameters you can provide a <classname>RowMapper</classname> to handle
+      mapping of rows returned from a REF cursor. Another option is to specify
+      an <classname>SqlReturnType</classname> that provides and opportunity to
+      define customized handling of the return values.</para>
 
       <para>Here is an example of a program that calls a function,
       <literal>sysdate()</literal>, that comes with any Oracle database. To

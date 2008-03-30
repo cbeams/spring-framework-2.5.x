@@ -98,9 +98,18 @@ public interface CallMetaDataProvider {
 	 * parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta data used for this call
-	 * @return the configured SqlParameter
+	 * @return the configured SqlOutParameter
 	 */
 	SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta);
+
+	/**
+	 * Create a default inout parameter based on the provided meta data.  This is used when no expicit
+	 * parameter declaration has been made.
+	 * @param parameterName the name of the parameter
+	 * @param meta meta data used for this call
+	 * @return the configured SqlInOutParameter
+	 */
+	SqlParameter createDefaultInOutParameter(String parameterName, CallParameterMetaData meta);
 
 	/**
 	 * Create a default in parameter based on the provided meta data.  This is used when no expicit

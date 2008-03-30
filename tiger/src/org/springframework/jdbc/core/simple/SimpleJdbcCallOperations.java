@@ -71,6 +71,11 @@ public interface SimpleJdbcCallOperations {
 	/**
 	 * Specify one or more parameters if desired.  These parameters will be supplemented with any
 	 * parameter information retrieved from the database meta data.
+	 * Note that only parameters declared as <code>SqlParameter</code> and <code>SqlInOutParameter</code>
+	 * will be used to provide input values.  This is different from the <code>StoredProcedure</code> class
+	 * which for backwards compatibility reasons allows input values to be provided for parameters declared
+	 * as <code>SqlOutParameter</code>.
+	 *
 	 * @param sqlParameters the parameters to use
 	 * @return the instance of this SimpleJdbcCall
 	 */

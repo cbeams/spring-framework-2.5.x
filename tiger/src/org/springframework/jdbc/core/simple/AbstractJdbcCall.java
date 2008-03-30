@@ -194,7 +194,11 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Add a declared parameter to teh list of parameters for the call
+	 * Add a declared parameter to the list of parameters for the call.
+	 * Only parameters declared as <code>SqlParameter</code> and <code>SqlInOutParameter</code>
+	 * will be used to provide input values.  This is different from the <code>StoredProcedure</code> class
+	 * which for backwards compatibility reasons allows input values to be provided for parameters declared
+	 * as <code>SqlOutParameter</code>.
 	 * @param parameter the {@link SqlParameter} to add
 	 */
 	public void addDeclaredParameter(SqlParameter parameter) {

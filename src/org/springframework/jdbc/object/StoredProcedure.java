@@ -81,6 +81,10 @@ public abstract class StoredProcedure extends SqlCall {
 
 	/**
 	 * Declare a parameter. Overridden method.
+	 * Parameters declared as <code>SqlParameter</code> and <code>SqlInOutParameter</code>
+	 * will always be used to provide input values.  In addition to this any parameter declared
+	 * as <code>SqlOutParameter</code> where an non-null input value is provided will also be used
+	 * as an input paraneter.
 	 * <b>Note: Calls to declareParameter must be made in the same order as
 	 * they appear in the database's stored procedure parameter list.</b>
 	 * Names are purely used to help mapping.

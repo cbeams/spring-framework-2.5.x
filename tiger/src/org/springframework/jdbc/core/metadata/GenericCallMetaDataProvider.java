@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlInOutParameter;
 
 /**
  * Generic implementation for the {@link CallMetaDataProvider} interface.
@@ -175,6 +176,10 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	public SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
 		return new SqlOutParameter(parameterName, meta.getSqlType());
+	}
+
+	public SqlParameter createDefaultInOutParameter(String parameterName, CallParameterMetaData meta) {
+		return new SqlInOutParameter(parameterName, meta.getSqlType());
 	}
 
 	public SqlParameter createDefaultInParameter(String parameterName, CallParameterMetaData meta) {
