@@ -152,6 +152,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * is added to wrap it. Such a target bean cannot be used if the "target"
 	 * or "targetSource" or "targetName" property is set, in which case the
 	 * "interceptorNames" array must contain only Advice/Advisor bean names.
+	 * <p><b>NOTE: Specifying a target bean as final name in the "interceptorNames"
+	 * list is deprecated and will be removed in a future Spring version.</b>
+	 * Use the {@link #setTargetName "targetName"} property instead.
 	 * @see org.aopalliance.intercept.MethodInterceptor
 	 * @see org.springframework.aop.Advisor
 	 * @see org.aopalliance.aop.Advice
@@ -233,7 +236,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		}
 		else {
 			if (this.targetName == null) {
-				logger.warn("Using non-singleton proxies with singleton targets is often undesirable." +
+				logger.warn("Using non-singleton proxies with singleton targets is often undesirable. " +
 						"Enable prototype proxies by setting the 'targetName' property.");
 			}
 			return newPrototypeInstance();
@@ -363,7 +366,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				// The last name in the chain may be an Advisor/Advice or a target/TargetSource.
 				// Unfortunately we don't know; we must look at type of the bean.
 				if (!finalName.endsWith(GLOBAL_SUFFIX) && !isNamedBeanAnAdvisorOrAdvice(finalName)) {
-					// Must be an interceptor.
+					// The target isn't an interceptor.
 					this.targetName = finalName;
 					if (logger.isDebugEnabled()) {
 						logger.debug("Bean with name '" + finalName + "' concluding interceptor chain " +
@@ -382,16 +385,19 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * which concludes the interceptorNames list, is an Advisor or Advice,
 	 * or may be a target.
 	 * @param beanName bean name to check
-	 * @return true if it's an Advisor or Advice
+	 * @return <code>true</code> if it's an Advisor or Advice
 	 */
 	private boolean isNamedBeanAnAdvisorOrAdvice(String beanName) {
 		Class namedBeanClass = this.beanFactory.getType(beanName);
 		if (namedBeanClass != null) {
-			return Advisor.class.isAssignableFrom(namedBeanClass) ||
-					Advice.class.isAssignableFrom(namedBeanClass);
+			return (Advisor.class.isAssignableFrom(namedBeanClass) || Advice.class.isAssignableFrom(namedBeanClass));
 		}
-		// Treat it as an Advisor if we can't tell.
-		return true;
+		// Treat it as an target bean if we can't tell.
+		if (logger.isDebugEnabled()) {
+			logger.debug("Could not determine type of bean with name '" + beanName +
+					"' - assuming it is neither an Advisor nor an Advice");
+		}
+		return false;
 	}
 
 	/**
@@ -406,7 +412,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		}
 
 		if (!ObjectUtils.isEmpty(this.interceptorNames)) {
-
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
 						"- cannot resolve interceptor names " + Arrays.asList(this.interceptorNames));
