@@ -13,11 +13,14 @@ General
 * Spring reference documentation covers annotation-based controllers in Portlet chapter
 
 Package org.springframework.aop
+* deprecated ProxyFactoryBean's support for a target as last element in "interceptorNames" in favor of "targetName"
+* ProxyFactoryBean assumes a target bean if type cannot be determined for last element in "interceptorNames" list
 * AbstractAutoProxyCreator predicts proxy class as bean type if known already (instead of predicting the target class)
 * AbstractAutoProxyCreator exposes early singleton proxies (for resolving circular reference between proxied beans)
 * "bean(...)" pointcut designator matches against bean name aliases as well, not just against the canonical bean name
 
 Package org.springframework.beans
+* CharacterEditor's "allowEmpty" only translates empty String to null, keeping a single space String as space character
 * GenericTypeAwarePropertyDescriptor respects "propertyEditorClass" specified on original PropertyDescriptor
 * renamed ListableBeanFactory's "includePrototypes" flag to "includeNonSingletons" (affects javadoc only)
 * added "getEarlyBeanReference" hook to SmartInstantiationAwareBeanPostProcessor interface
@@ -26,19 +29,24 @@ Package org.springframework.beans
 * DefaultListableBeanFactory passes full inherited AccessControlContext to the AccessController for bean creation
 * DefaultListableBeanFactory does not eagerly initialize target beans when autowiring a PriorityOrdered post-processor
 * PropertyPlaceholderConfigurer works properly even in case of default-autowire="byType" with FactoryBeans involved
+* fixed PropertyPlaceholderConfigurer's "nullValue" handling to avoid NPE for nested value
 * added "ignoreUnresolvableEditors" property to CustomEditorConfigurer, allowing to ignore type/editor classes not found
 * XmlBeanDefinitionReader's "getValidationModeForResource" method is protected now in order to allow for overriding
 * AbstractSimpleBeanDefinitionParser properly ignores namespace declaration attributes ("xmlns"/"xmlns:")
+* AutowiredAnnotationBeanPostProcessor processes @Autowired annotation on most specific method only (when overriding)
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
+* AbstractApplicationContext's temporary ClassLoader explicitly excludes types to match (for OSGi LTW compatibility)
 * restored support for null location array argument in ClassPathXmlApplicationContext (for Apache CXF compatibility)
 * added "registration" attribute to mbean-export element, accepting "failOnExisting"/"ignoreExisting"/"replaceExisting"
+* CommonAnnotationBeanPostProcessor processes @Resource annotation on most specific method only (when overriding)
 
 Package org.springframework.core
 * Conventions detects special generated subclasses (e.g. by OpenJPA) and derives the variable name from the superclass
 * added "lastModified()" method to Resource interface, for abstract access to the last-modified timestamp
 * ClassPathResource and UrlResource use the last-modified timestamp of the archive file for jar/zip contents
+* PathMatchingResourcePatternResolver sets "useCaches=false" on any JarURLConnection that it opens for path matching
 * PathMatchingResourcePatternResolver detects WebSphere 6.1 "bundleresource:" URLs and resolves them for path matching
 
 Package org.springframework.ejb
@@ -49,10 +57,12 @@ Package org.springframework.ejb
 Package org.springframework.jdbc
 * JndiDataSourceLookup uses "resourceRef"=true by default (being able to resolve J2EE "jdbc/myDb" ENC names by default)
 * NativeJdbcExtractorAdapter only processes DatabaseMetaData Connection if non-null (for WebLogic cluster compatibility)
+* added MySQL NDB error codes to default sql-error-codes.xml
 * factored out common AbstractColumnMaxValueIncrementer base class from Derby/Hsql/MySQLMaxValueIncrementer
 * added DB2MainframeSequenceMaxValueIncrementer for DB2/390 and DB2/400 (differing from DB2 UDB for Unix and Windows)
 * added "wrapAsLob" property to DefaultLobHandler, for passing Blob/Clob instances to the JDBC driver (for PostgreSQL)
 * DefaultLobHandler's "streamAsLob" setting (requires JDBC 4.0) applies to byte array and String arguments as well
+* JdbcTemplate creates LinkedHashMap (instead of plain HashMap) as default results Map returned from "call" operation
 * JdbcDaoSupport does not override specified JdbcTemplate on subsequent "setDataSource" call for same DataSource
 * NamedParameterJdbcTemplate ignores Postgres-style "::" casting operator (i.e. not treated as named parameter)
 
@@ -82,7 +92,9 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * XxxDaoSupport does not override specified XxxTemplate on subsequent "setZzzFactory" call for same factory
+* added "executeWithNewSession" and "executeWithNativeSession" methods to HibernateTemplate
 * revised EntityManagerFactoryInfo handling to autodetect all EntityManager interfaces if no JpaVendorAdapter specified
+* PersistenceAnnotationBeanPostProcessor processes annotations on most specific method only (when overriding)
 
 Package org.springframework.remoting
 * revised (Simple)Hessian/BurlapServiceExporter's handling of non-POST requests (avoiding unnecessary warnings)
@@ -92,6 +104,9 @@ Package org.springframework.scheduling
 * changed ThreadPoolTaskExecutor's default behavior to shutdown immediately, not waiting for scheduled tasks
 * ThreadPoolTaskExecutor extends CustomizableThreadFactory for common bean properties and uses itself as default factory
 * ThreadPoolTaskExecutor uses its bean name as default thread name prefix (analogous to DefaultMessageListenerContainer)
+* MethodInvokingRunnable logs target exception directly at error level (instead of InvocationTargetException wrapper)
+* MethodInvokingJobDetailFactoryBean propagates invocation exceptions as non-JobExecutionExceptions (for error logging)
+* DelegatingJob propagates exceptions as-is instead of wrapping them in JobExecutionExceptions (for error logging)
 
 Package org.springframework.scripting
 * ResourceScriptSource is able to detect updates for a script file stored in a jar/zip as well
@@ -112,8 +127,14 @@ Package org.springframework.web
 * RequestContextFilter supports "threadContextInheritable" init-param (analogous to DispatcherServlet)
 * HttpRequestHandlerServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405
 * DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
+* ControllerClassNameHandlerMapping detects @Controller beans by default as well
+* ControllerClassNameHandlerMapping registers plain path for multi-action controllers too ("/welcome/*" + "/welcome")
+* added ControllerBeanNameHandlerMapping, deriving URL paths from bean names for well-known controller types
 * AnnotationMethodHandlerAdapter's @RequestMapping matching is deterministic independent from the declared methor order
+* AnnotationMethodHandlerAdapter accepts @RequestParam annotations for @InitBinder methods as well
 * AnnotationMethodHandlerAdapter throws clear IllegalStateException in case of invalid BindingResult argument
+* Portlet AnnotationMethodHandlerAdapter supports Servlet ModelAndView and View objects as handler method return values
+* default attribute names for annotated handler method return values are consistently derived from the *declared* type
 * added "exposedContextBeanNames" property to InternalResourceView(Resolver), for exposing specific Spring beans only
 * JSP form tags do not autogenerate id in case of empty id specified (empty id signals no id to be rendered)
 * JSP OptionTag and OptionsTag support "id" attribute now, analogous to RadioButton(s)Tag and Checkbox(es)Tag
