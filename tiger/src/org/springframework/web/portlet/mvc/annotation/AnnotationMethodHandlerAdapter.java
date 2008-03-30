@@ -43,6 +43,8 @@ import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.Conventions;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -251,7 +253,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		PortletHandlerMethodInvoker methodInvoker = new PortletHandlerMethodInvoker(methodResolver);
 
 		Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
-		ModelAndView mav = methodInvoker.getModelAndView(handlerMethod, result, implicitModel);
+		ModelAndView mav = methodInvoker.getModelAndView(handlerMethod, handler.getClass(), result, implicitModel);
 		methodInvoker.updateSessionAttributes(
 				handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);
 
@@ -514,7 +516,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ExtendedModelMap implicitModel) {
+		public ModelAndView getModelAndView(
+				Method handlerMethod, Class handlerType, Object returnValue, ExtendedModelMap implicitModel) {
+
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
 				mav.getModelMap().mergeAttributes(implicitModel);
@@ -550,11 +554,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				String attrName = (attr != null ? attr.value() : "");
 				ModelAndView mav = new ModelAndView().addAllObjects(implicitModel);
 				if ("".equals(attrName)) {
-					return mav.addObject(returnValue);
+					Class resolvedType = GenericTypeResolver.resolveReturnType(handlerMethod, handlerType);
+					attrName = Conventions.getVariableNameForReturnType(handlerMethod, resolvedType, returnValue);
 				}
-				else {
-					return mav.addObject(attrName, returnValue);
-				}
+				return mav.addObject(attrName, returnValue);
 			}
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);

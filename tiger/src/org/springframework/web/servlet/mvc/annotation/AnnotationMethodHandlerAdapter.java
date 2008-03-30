@@ -39,6 +39,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.Conventions;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -306,7 +308,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			ExtendedModelMap implicitModel = new ExtendedModelMap();
 
 			Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
-			ModelAndView mav = methodInvoker.getModelAndView(handlerMethod, result, implicitModel, webRequest);
+			ModelAndView mav =
+					methodInvoker.getModelAndView(handlerMethod, handler.getClass(), result, implicitModel, webRequest);
 			methodInvoker.updateSessionAttributes(
 					handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);
 			return mav;
@@ -588,8 +591,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(
-				Method handlerMethod, Object returnValue, ExtendedModelMap implicitModel, ServletWebRequest webRequest) {
+		public ModelAndView getModelAndView(Method handlerMethod, Class handlerType, Object returnValue,
+				ExtendedModelMap implicitModel, ServletWebRequest webRequest) {
 
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
@@ -624,11 +627,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				String attrName = (attr != null ? attr.value() : "");
 				ModelAndView mav = new ModelAndView().addAllObjects(implicitModel);
 				if ("".equals(attrName)) {
-					return mav.addObject(returnValue);
+					Class resolvedType = GenericTypeResolver.resolveReturnType(handlerMethod, handlerType);
+					attrName = Conventions.getVariableNameForReturnType(handlerMethod, resolvedType, returnValue);
 				}
-				else {
-					return mav.addObject(attrName, returnValue);
-				}
+				return mav.addObject(attrName, returnValue);
 			}
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
