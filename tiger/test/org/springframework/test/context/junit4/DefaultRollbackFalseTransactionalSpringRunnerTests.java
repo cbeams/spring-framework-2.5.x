@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
@@ -26,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -81,8 +81,8 @@ public class DefaultRollbackFalseTransactionalSpringRunnerTests extends Abstract
 
 	public static class DatabaseSetup {
 
-		@Autowired
-		void setDataSource(final DataSource dataSource) {
+		@Resource
+		public void setDataSource(DataSource dataSource) {
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}

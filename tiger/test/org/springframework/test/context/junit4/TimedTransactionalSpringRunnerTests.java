@@ -28,12 +28,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * JUnit 4 based unit test which verifies support of Spring's
  * {@link Transactional @Transactional} and
  * {@link NotTransactional @NotTransactional} annotations in conjunction with
  * {@link Timed @Timed} and JUnit 4's {@link Test#timeout() timeout} attribute.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5

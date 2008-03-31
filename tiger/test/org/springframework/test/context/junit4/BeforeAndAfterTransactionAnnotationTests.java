@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.test.context.junit4;
 
+import javax.annotation.Resource;
+import javax.sql.DataSource;
+
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-
-import javax.sql.DataSource;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,7 +28,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -37,18 +37,16 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * JUnit 4 based unit test which verifies
  * {@link BeforeTransaction @BeforeTransaction} and
  * {@link AfterTransaction @AfterTransaction} behavior.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@TestExecutionListeners( { TransactionalTestExecutionListener.class })
+@TestExecutionListeners({TransactionalTestExecutionListener.class})
 public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactionalSpringRunnerTests {
 
 	protected static SimpleJdbcTemplate simpleJdbcTemplate;
@@ -58,8 +56,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	protected boolean inTransaction = false;
 
-
-	// ------------------------------------------------------------------------|
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -77,7 +73,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 				BeforeAndAfterTransactionAnnotationTests.numAfterTransactionCalls);
 	}
 
-	// ------------------------------------------------------------------------|
 
 	@BeforeTransaction
 	public void beforeTransaction() {
@@ -100,8 +95,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@Before
 	public void before() {
-		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 1
-				: 0), countRowsInPersonTable(simpleJdbcTemplate));
+		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 1 : 0), countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	@Test
@@ -134,12 +128,10 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	}
 
 
-	// ------------------------------------------------------------------------|
-
 	public static class DatabaseSetup {
 
-		@Autowired
-		void setDataSource(final DataSource dataSource) {
+		@Resource
+		void setDataSource(DataSource dataSource) {
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}

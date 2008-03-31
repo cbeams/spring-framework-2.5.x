@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
@@ -26,18 +27,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * JUnit 4 based unit test which verifies proper transactional behavior when the
  * {@link TransactionConfiguration#defaultRollback() defaultRollback} attribute
  * of the {@link TransactionConfiguration} annotation is set to <strong><code>true</code></strong>.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -80,8 +78,8 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 
 	public static class DatabaseSetup {
 
-		@Autowired
-		void setDataSource(final DataSource dataSource) {
+		@Resource
+		public void setDataSource(final DataSource dataSource) {
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}

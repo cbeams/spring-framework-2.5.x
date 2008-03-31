@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	protected static final String LEIA = "leia";
 	protected static final String YODA = "yoda";
 
-	// ------------------------------------------------------------------------|
 
 	private boolean beanInitialized = false;
 
@@ -80,8 +79,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	protected String bar;
 
-
-	// ------------------------------------------------------------------------|
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 		return SimpleJdbcTestUtils.deleteFromTables(simpleJdbcTemplate, "person");
@@ -108,20 +105,10 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
-	// ------------------------------------------------------------------------|
 
-	/**
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
-	public final void afterPropertiesSet() throws Exception {
-		this.beanInitialized = true;
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
-	 */
-	public final void setBeanName(final String beanName) {
-		this.beanName = beanName;
+	@Resource
+	public void setDataSource(DataSource dataSource) {
+		super.setDataSource(dataSource);
 	}
 
 	@Autowired
@@ -134,7 +121,14 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		this.bar = bar;
 	}
 
-	// ------------------------------------------------------------------------|
+	public final void setBeanName(final String beanName) {
+		this.beanName = beanName;
+	}
+
+	public final void afterPropertiesSet() throws Exception {
+		this.beanInitialized = true;
+	}
+
 
 	@Test
 	@NotTransactional
@@ -191,7 +185,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
 
-	// ------------------------------------------------------------------------|
 
 	@BeforeTransaction
 	public void beforeTransaction() {
@@ -229,13 +222,11 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 
-	// ------------------------------------------------------------------------|
-
 	public static class DatabaseSetup {
 
-		@Autowired
-		void setDataSource(final DataSource dataSource) {
-			final SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		@Resource
+		public void setDataSource(DataSource dataSource) {
+			SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 			clearPersonTable(simpleJdbcTemplate);
 			addPerson(simpleJdbcTemplate, BOB);

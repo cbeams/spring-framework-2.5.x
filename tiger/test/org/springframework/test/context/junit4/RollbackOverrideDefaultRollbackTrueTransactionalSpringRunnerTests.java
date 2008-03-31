@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,22 @@ package org.springframework.test.context.junit4;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * Extension of {@link DefaultRollbackTrueTransactionalSpringRunnerTests} which
  * tests method-level <em>rollback override</em> behavior via the
  * {@link Rollback @Rollback} annotation.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -63,7 +61,6 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
-	// ------------------------------------------------------------------------|
 
 	@Test
 	@Transactional
@@ -77,12 +74,10 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 	}
 
 
-	// ------------------------------------------------------------------------|
-
 	public static class DatabaseSetup {
 
-		@Autowired
-		void setDataSource(final DataSource dataSource) {
+		@Resource
+		public void setDataSource(DataSource dataSource) {
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}
