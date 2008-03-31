@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * <p>
  * TestContext encapsulates the context in which a test is executed, agnostic of
  * the actual testing framework in use.
- * </p>
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -51,7 +49,7 @@ public class TestContext extends AttributeAccessorSupport {
 
 	private static final Log logger = LogFactory.getLog(TestContext.class);
 
-	private final ContextCache<String, ApplicationContext> contextCache;
+	private final ContextCache contextCache;
 
 	private final ContextLoader contextLoader;
 
@@ -67,36 +65,31 @@ public class TestContext extends AttributeAccessorSupport {
 
 
 	/**
-	 * Constructs a new test context for the supplied {@link Class test class}
+	 * Construct a new test context for the supplied {@link Class test class}
 	 * and {@link ContextCache context cache} and parses the corresponding
-	 * {@link ContextConfiguration @ContextConfiguration} annotation, if
-	 * present.
-	 *
+	 * {@link ContextConfiguration @ContextConfiguration} annotation, if present.
 	 * @param testClass the {@link Class} object corresponding to the test class
-	 *        for which the test context should be constructed; must not be
-	 *        <code>null</code>.
-	 * @param contextCache the context cache from which the constructed test
-	 *        context should retrieve application contexts; must not be
-	 *        <code>null</code>.
+	 * for which the test context should be constructed (must not be <code>null</code>)
+	 * @param contextCache the context cache from which the constructed test context
+	 * should retrieve application contexts (must not be <code>null</code>)
 	 */
 	@SuppressWarnings("unchecked")
-	public TestContext(final Class<?> testClass, final ContextCache<String, ApplicationContext> contextCache) {
-		Assert.notNull(testClass, "testClass must not be null.");
-		Assert.notNull(contextCache, "contextCache must not be null.");
+	TestContext(Class<?> testClass, ContextCache contextCache) {
+		Assert.notNull(testClass, "Test class must not be null");
+		Assert.notNull(contextCache, "ContextCache must not be null");
 
-		final ContextConfiguration contextConfiguration = testClass.getAnnotation(ContextConfiguration.class);
+		ContextConfiguration contextConfiguration = testClass.getAnnotation(ContextConfiguration.class);
 		String[] locations = null;
 		ContextLoader contextLoader = null;
 
 		if (contextConfiguration == null) {
 			if (logger.isInfoEnabled()) {
-				logger.info("@ContextConfiguration not found for class [" + testClass + "].");
+				logger.info("@ContextConfiguration not found for class [" + testClass + "]");
 			}
 		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Retrieved @ContextConfiguration [" + contextConfiguration + "] for class [" + testClass
-						+ "].");
+				logger.trace("Retrieved @ContextConfiguration [" + contextConfiguration + "] for class [" + testClass + "]");
 			}
 
 			Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
@@ -122,180 +115,139 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * <p>
-	 * Retrieves {@link ApplicationContext} resource locations for the supplied
+	 * Retrieve {@link ApplicationContext} resource locations for the supplied
 	 * {@link Class class}, using the supplied {@link ContextLoader} to
 	 * {@link ContextLoader#processLocations(Class, String...) process} the
 	 * locations.
-	 * </p>
-	 * <p>
-	 * Note that the
+	 * <p>Note that the
 	 * {@link ContextConfiguration#inheritLocations() inheritLocations} flag of
 	 * {@link ContextConfiguration @ContextConfiguration} will be taken into
 	 * consideration. Specifically, if the <code>inheritLocations</code> flag
 	 * is set to <code>true</code>, locations defined in the annotated class
 	 * will be appended to the locations defined in superclasses.
-	 * </p>
-	 *
-	 * @param contextLoader the ContextLoader to use for processing the
-	 *        locations; must not be <code>null</code>.
-	 * @param clazz the class for which to retrieve the resource locations; must
-	 *        not be <code>null</code>.
-	 * @return the list of ApplicationContext resource locations for the
-	 *         specified class, including locations from superclasses if
-	 *         appropriate.
-	 * @throws IllegalArgumentException if
-	 *         {@link ContextConfiguration @ContextConfiguration} is not
-	 *         <em>present</em> on the supplied class.
+	 * @param contextLoader the ContextLoader to use for processing the locations
+	 * (must not be <code>null</code>)
+	 * @param clazz the class for which to retrieve the resource locations
+	 * (must not be <code>null</code>)
+	 * @return the list of ApplicationContext resource locations for the specified
+	 * class, including locations from superclasses if appropriate
+	 * @throws IllegalArgumentException if {@link ContextConfiguration @ContextConfiguration}
+	 * is not <em>present</em> on the supplied class
 	 */
-	private String[] retrieveContextLocations(final ContextLoader contextLoader, final Class<?> clazz)
-			throws IllegalArgumentException {
+	private String[] retrieveContextLocations(ContextLoader contextLoader, Class<?> clazz) {
+		Assert.notNull(contextLoader, "ContextLoader must not be null");
+		Assert.notNull(clazz, "Class must not be null");
 
-		Assert.notNull(contextLoader, "contextLoader must not be null.");
-		Assert.notNull(clazz, "clazz must not be null.");
-
-		final List<String> locationsList = new ArrayList<String>();
-		final Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+		List<String> locationsList = new ArrayList<String>();
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
-		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
-				+ annotationType + "] and class [" + clazz + "].");
+		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type [" +
+				annotationType + "] and class [" + clazz + "]");
 
 		while (declaringClass != null) {
-
-			final ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Retrieved @ContextConfiguration [" + contextConfiguration + "] for declaring class ["
-						+ declaringClass + "].");
+						+ declaringClass + "]");
 			}
-
-			final String[] locations = contextLoader.processLocations(declaringClass, contextConfiguration.locations());
+			String[] locations = contextLoader.processLocations(declaringClass, contextConfiguration.locations());
 			locationsList.addAll(0, Arrays.<String> asList(locations));
-
 			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
 					annotationType, declaringClass.getSuperclass()) : null;
 		}
 
-		return locationsList.toArray(new String[] {});
+		return locationsList.toArray(new String[locationsList.size()]);
 	}
 
 	/**
-	 * <p>
-	 * Builds an {@link ApplicationContext} for this test context using the
+	 * Build an {@link ApplicationContext} for this test context using the
 	 * configured {@link #getContextLoader() ContextLoader} and
 	 * {@link #getLocations() resource locations}.
-	 * </p>
-	 *
-	 * @throws Exception if an error occurs while building the application
-	 *         context
+	 * @throws Exception if an error occurs while building the application context
 	 */
-	private ApplicationContext buildApplicationContext() throws Exception {
-		Assert.notNull(
-				getContextLoader(),
+	private ApplicationContext loadApplicationContext() throws Exception {
+		Assert.notNull(getContextLoader(),
 				"Can not build an ApplicationContext with a NULL 'contextLoader'. Consider annotating your test class with @ContextConfiguration.");
-		Assert.notNull(
-				getLocations(),
+		Assert.notNull(getLocations(),
 				"Can not build an ApplicationContext with a NULL 'locations' array. Consider annotating your test class with @ContextConfiguration.");
 		return getContextLoader().loadContext(getLocations());
 	}
 
 	/**
-	 * <p>
-	 * Converts the supplied context <code>key</code> to a String
+	 * Convert the supplied context <code>key</code> to a String
 	 * representation for use in caching, logging, etc.
-	 * </p>
-	 *
-	 * @param key the context key to convert to a String.
+	 * @param key the context key to convert to a String
 	 */
-	private String contextKeyString(final Serializable key) {
+	private String contextKeyString(Serializable key) {
 		return ObjectUtils.nullSafeToString(key);
 	}
 
 	/**
-	 * <p>
-	 * Gets the {@link ApplicationContext application context} for this test
+	 * Get the {@link ApplicationContext application context} for this test
 	 * context, possibly cached.
-	 * </p>
-	 *
 	 * @return the application context; may be <code>null</code> if the
-	 *         current test context is not configured to use an application
-	 *         context.
-	 * @throws Exception if an error occurs while retrieving the application
-	 *         context.
+	 * current test context is not configured to use an application context
+	 * @throws IllegalStateException if an error occurs while retrieving the application context
 	 */
-	public ApplicationContext getApplicationContext() throws Exception {
-
-		ApplicationContext context;
-		final ContextCache<String, ApplicationContext> cache = getContextCache();
-
+	public ApplicationContext getApplicationContext() {
+		ApplicationContext context = null;
+		ContextCache cache = getContextCache();
 		synchronized (cache) {
 			context = cache.get(contextKeyString(getLocations()));
 			if (context == null) {
-				context = buildApplicationContext();
-				cache.put(contextKeyString(getLocations()), context);
+				try {
+					context = loadApplicationContext();
+					cache.put(contextKeyString(getLocations()), context);
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Failed to load ApplicationContext", ex);
+				}
 			}
 		}
-
 		return context;
 	}
 
 	/**
-	 * <p>
-	 * Gets the {@link ContextCache context cache} for this test context.
-	 * </p>
-	 *
-	 * @return the context cache, never <code>null</code>.
+	 * Get the {@link ContextCache context cache} for this test context.
+	 * @return the context cache (never <code>null</code>)
 	 */
-	final ContextCache<String, ApplicationContext> getContextCache() {
+	ContextCache getContextCache() {
 		return this.contextCache;
 	}
 
 	/**
-	 * <p>
-	 * Gets the {@link ContextLoader} to use for loading the
+	 * Get the {@link ContextLoader} to use for loading the
 	 * {@link ApplicationContext} for this test context.
-	 * </p>
-	 *
-	 * @return the context loader; may be <code>null</code> if the current
-	 *         test context is not configured to use an application context.
+	 * @return the context loader. May be <code>null</code> if the current
+	 * test context is not configured to use an application context.
 	 */
-	final ContextLoader getContextLoader() {
+	ContextLoader getContextLoader() {
 		return this.contextLoader;
 	}
 
 	/**
-	 * <p>
-	 * Gets the resource locations to use for loading the
+	 * Get the resource locations to use for loading the
 	 * {@link ApplicationContext} for this test context.
-	 * </p>
-	 *
-	 * @return the application context resource locations; may be
-	 *         <code>null</code> if the current test context is not configured
-	 *         to use an application context.
+	 * @return the application context resource locations.
+	 * May be <code>null</code> if the current test context is
+	 * not configured to use an application context.
 	 */
-	final String[] getLocations() {
+	String[] getLocations() {
 		return this.locations;
 	}
 
 	/**
-	 * <p>
-	 * Gets the {@link Class test class} for this test context.
-	 * </p>
-	 *
-	 * @return the test class, never <code>null</code>.
+	 * Get the {@link Class test class} for this test context.
+	 * @return the test class (never <code>null</code>)
 	 */
 	public final Class<?> getTestClass() {
 		return this.testClass;
 	}
 
 	/**
-	 * <p>
 	 * Gets the current {@link Object test instance} for this test context.
-	 * </p>
-	 * <p>
-	 * Note: this is a mutable property.
-	 * </p>
-	 *
-	 * @return the current test instance; may be <code>null</code>.
+	 * <p>Note: this is a mutable property.
+	 * @return the current test instance (may be <code>null</code>)
 	 * @see #updateState(Object,Method,Throwable)
 	 */
 	public final Object getTestInstance() {
@@ -303,32 +255,22 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * <p>
 	 * Gets the current {@link Method test method} for this test context.
-	 * </p>
-	 * <p>
-	 * Note: this is a mutable property.
-	 * </p>
-	 *
-	 * @return the current test method; may be <code>null</code>.
-	 * @see #updateState(Object,Method,Throwable)
+	 * <p>Note: this is a mutable property.
+	 * @return the current test method (may be <code>null</code>)
+	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public final Method getTestMethod() {
 		return this.testMethod;
 	}
 
 	/**
-	 * <p>
 	 * Gets the {@link Throwable exception} that was thrown during execution of
 	 * the {@link #getTestMethod() test method}.
-	 * </p>
-	 * <p>
-	 * Note: this is a mutable property.
-	 * </p>
-	 *
+	 * <p>Note: this is a mutable property.
 	 * @return the exception that was thrown, or <code>null</code> if no
-	 *         exception was thrown.
-	 * @see #updateState(Object,Method,Throwable)
+	 * exception was thrown
+	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public final Throwable getTestException() {
 		return this.testException;
@@ -345,20 +287,16 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Updates this test context to reflect the state of the currently executing
-	 * test.
-	 *
-	 * @param testInstance the current test instance; may be <code>null</code>.
-	 * @param testMethod the current test method; may be <code>null</code>.
-	 * @param testException the exception that was thrown in the test method, or
-	 *        <code>null</code> if no exception was thrown.
+	 * Updates this test context to reflect the state of the currently executing test.
+	 * @param testInstance the current test instance (may be <code>null</code>)
+	 * @param testMethod the current test method (may be <code>null</code>)
+	 * @param testException the exception that was thrown in the test method,
+	 * or <code>null</code> if no exception was thrown
 	 */
-	final void updateState(final Object testInstance, final Method testMethod, final Throwable testException) {
-		synchronized (this) {
-			this.testInstance = testInstance;
-			this.testMethod = testMethod;
-			this.testException = testException;
-		}
+	synchronized void updateState(Object testInstance, Method testMethod, Throwable testException) {
+		this.testInstance = testInstance;
+		this.testMethod = testMethod;
+		this.testException = testException;
 	}
 
 	/**
@@ -371,9 +309,11 @@ public class TestContext extends AttributeAccessorSupport {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this).append("testClass", getTestClass()).append("locations", getLocations()).append(
-				"testInstance", getTestInstance()).append("testMethod", getTestMethod()).append("testException",
-				getTestException()).toString();
+		return new ToStringCreator(this).
+				append("testClass", getTestClass()).
+				append("locations", getLocations()).append("testInstance", getTestInstance()).
+				append("testMethod", getTestMethod()).append("testException", getTestException()).
+				toString();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import static org.junit.Assert.assertSame;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.internal.runners.InitializationError;
 import org.junit.runner.RunWith;
 
 import org.springframework.context.ApplicationContext;
@@ -38,10 +37,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext} annotation.
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  */
-@RunWith(SpringRunnerContextCacheTests.TestableSpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
 public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 
 	private static ApplicationContext dirtiedApplicationContext;
@@ -49,20 +49,17 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 	protected ApplicationContext applicationContext;
 
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Asserts the statistics of the supplied context cache.
-	 *
-	 * @param usageScenario the scenario in which the statistics are used.
-	 * @param expectedSize the expected number of contexts in the cache.
-	 * @param expectedHitCount the expected hit count.
-	 * @param expectedMissCount the expected miss count.
+	 * @param usageScenario the scenario in which the statistics are used
+	 * @param expectedSize the expected number of contexts in the cache
+	 * @param expectedHitCount the expected hit count
+	 * @param expectedMissCount the expected miss count
 	 */
-	public static final void assertContextCacheStatistics(final String usageScenario, final int expectedSize,
-			final int expectedHitCount, final int expectedMissCount) {
+	public static final void assertContextCacheStatistics(String usageScenario, int expectedSize,
+			int expectedHitCount, int expectedMissCount) {
 
-		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
+		ContextCache contextCache = TestContextManager.contextCache;
 		assertEquals("Verifying number of contexts in cache (" + usageScenario + ").", expectedSize,
 				contextCache.size());
 		assertEquals("Verifying number of cache hits (" + usageScenario + ").", expectedHitCount,
@@ -74,7 +71,7 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 	@BeforeClass
 	public static void verifyInitialCacheState() {
 		dirtiedApplicationContext = null;
-		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
+		ContextCache contextCache = TestContextManager.contextCache;
 		contextCache.clear();
 		contextCache.clearStatistics();
 		assertContextCacheStatistics("BeforeClass", 0, 0, 0);
@@ -85,14 +82,7 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 		assertContextCacheStatistics("AfterClass", 1, 1, 2);
 	}
 
-	// ------------------------------------------------------------------------|
 
-	/**
-	 * Sets the {@link ApplicationContext} to be used by this test instance,
-	 * provided via {@link ApplicationContextAware} semantics.
-	 *
-	 * @param applicationContext The applicationContext to set.
-	 */
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -123,37 +113,6 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 				this.applicationContext);
 		assertSame("The application context should NOT have been 'dirtied'.",
 				SpringRunnerContextCacheTests.dirtiedApplicationContext, this.applicationContext);
-	}
-
-
-	// ------------------------------------------------------------------------|
-
-	public static class TestableSpringJUnit4ClassRunner extends SpringJUnit4ClassRunner {
-
-		static TestableTestContextManager testableTestContextManager;
-
-
-		public TestableSpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
-			super(clazz);
-		}
-
-		@Override
-		protected TestContextManager createTestContextManager(final Class<?> clazz) {
-			final TestableTestContextManager testableTestContextManager = new TestableTestContextManager(clazz);
-			TestableSpringJUnit4ClassRunner.testableTestContextManager = testableTestContextManager;
-			return testableTestContextManager;
-		}
-	}
-
-	private static class TestableTestContextManager extends TestContextManager {
-
-		public TestableTestContextManager(final Class<?> testClass) {
-			super(testClass);
-		}
-
-		ContextCache<String, ApplicationContext> getVisibleContextCache() {
-			return super.getContextCache();
-		}
 	}
 
 }
