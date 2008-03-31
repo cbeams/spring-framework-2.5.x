@@ -331,6 +331,7 @@ public abstract class ClassUtils {
 	 * @param classLoader the ClassLoader to potentially cache metadata in
 	 */
 	public static boolean isCacheSafe(Class clazz, ClassLoader classLoader) {
+		Assert.notNull(clazz, "Class must not be null");
 		ClassLoader target = clazz.getClassLoader();
 		if (target == null) {
 			return false;

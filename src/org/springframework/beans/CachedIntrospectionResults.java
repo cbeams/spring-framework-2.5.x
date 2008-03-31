@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.JdkVersion;
+import org.springframework.util.ClassUtils;
 
 /**
  * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
@@ -141,7 +142,8 @@ public class CachedIntrospectionResults {
 		if (results == null) {
 			// can throw BeansException
 			results = new CachedIntrospectionResults(beanClass);
-			if (isCacheSafe(beanClass) || isClassLoaderAccepted(beanClass.getClassLoader())) {
+			if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
+					isClassLoaderAccepted(beanClass.getClassLoader())) {
 				classCache.put(beanClass, results);
 			}
 			else {
@@ -168,32 +170,6 @@ public class CachedIntrospectionResults {
 		for (int i = 0; i < acceptedLoaderArray.length; i++) {
 			ClassLoader registeredLoader = (ClassLoader) acceptedLoaderArray[i];
 			if (isUnderneathClassLoader(classLoader, registeredLoader)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Check whether the given class is cache-safe,
-	 * i.e. whether it is loaded by the same class loader as the
-	 * CachedIntrospectionResults class or a parent of it.
-	 * <p>Many thanks to Guillaume Poirier for pointing out the
-	 * garbage collection issues and for suggesting this solution.
-	 * @param clazz the class to analyze
-	 */
-	private static boolean isCacheSafe(Class clazz) {
-		ClassLoader target = clazz.getClassLoader();
-		if (target == null) {
-			return false;
-		}
-		ClassLoader cur = CachedIntrospectionResults.class.getClassLoader();
-		if (cur == target) {
-			return true;
-		}
-		while (cur != null) {
-			cur = cur.getParent();
-			if (cur == target) {
 				return true;
 			}
 		}
