@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.test.context.TestContextManager;
  * </ul>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see TestContextManager
  */
@@ -67,11 +68,10 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 * Constructs a new <code>SpringJUnit4ClassRunner</code> and initializes a
 	 * {@link TestContextManager} to provide Spring testing functionality to
 	 * standard JUnit tests.
-	 *
-	 * @param clazz the Class object corresponding to the test class to be run.
+	 * @param clazz the Class object corresponding to the test class to be run
 	 * @see #createTestContextManager(Class)
 	 */
-	public SpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
+	public SpringJUnit4ClassRunner(Class<?> clazz) throws InitializationError {
 		super(clazz);
 		if (logger.isDebugEnabled()) {
 			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "].");
@@ -84,8 +84,6 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 * instance and then to a {@link TestContextManager} to
 	 * {@link TestContextManager#prepareTestInstance(Object) prepare} the test
 	 * instance for Spring testing functionality.
-	 *
-	 * @return a new test instance
 	 * @see JUnit4ClassRunner#createTest()
 	 * @see TestContextManager#prepareTestInstance(Object)
 	 */
@@ -97,20 +95,15 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	}
 
 	/**
-	 * Creates a new {@link TestContextManager}. Can be overridden by
-	 * subclasses.
-	 *
+	 * Creates a new {@link TestContextManager}. Can be overridden by subclasses.
 	 * @param clazz the Class object corresponding to the test class to be managed
-	 * @return a new TestContextManager
 	 */
-	protected TestContextManager createTestContextManager(final Class<?> clazz) {
+	protected TestContextManager createTestContextManager(Class<?> clazz) {
 		return new TestContextManager(clazz);
 	}
 
 	/**
-	 * Gets the {@link TestContextManager} associated with this runner.
-	 *
-	 * @return the TestContextManager
+	 * Get the {@link TestContextManager} associated with this runner.
 	 */
 	protected final TestContextManager getTestContextManager() {
 		return this.testContextManager;
@@ -119,13 +112,11 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	/**
 	 * Invokes the supplied {@link Method test method} and notifies the supplied
 	 * {@link RunNotifier} of the appropriate events.
-	 *
 	 * @see #createTest()
 	 * @see JUnit4ClassRunner#invokeTestMethod(Method,RunNotifier)
 	 */
 	@Override
-	protected void invokeTestMethod(final Method method, final RunNotifier notifier) {
-
+	protected void invokeTestMethod(Method method, RunNotifier notifier) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking test method [" + method.toGenericString() + "]");
 		}
@@ -133,7 +124,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 		// The following is a 1-to-1 copy of the original JUnit 4.4 code, except
 		// that we use custom implementations for TestMethod and MethodRoadie.
 
-		final Description description = methodDescription(method);
+		Description description = methodDescription(method);
 		Object testInstance;
 		try {
 			testInstance = createTest();
