@@ -19,6 +19,8 @@ package org.springframework.test.context.junit4;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -109,13 +111,13 @@ class SpringMethodRoadie {
 			this.notifier.fireTestIgnored(this.description);
 			return;
 		}
+
 		this.notifier.fireTestStarted(this.description);
 		try {
 			Timed timedAnnotation = this.testMethod.getMethod().getAnnotation(Timed.class);
 			long springTimeout = (timedAnnotation != null && timedAnnotation.millis() > 0 ?
 					timedAnnotation.millis() : 0);
 			long junitTimeout = this.testMethod.getTimeout();
-
 			if (springTimeout > 0 && junitTimeout > 0) {
 				throw new IllegalStateException("Test method [" + this.testMethod.getMethod() +
 						"] has been configured with Spring's @Timed(millis=" + springTimeout +
@@ -130,7 +132,7 @@ class SpringMethodRoadie {
 				finally {
 					long elapsed = System.currentTimeMillis() - startTime;
 					if (elapsed > springTimeout) {
-						addFailure(new Exception("Took " + elapsed + " ms; limit was " + springTimeout));
+						addFailure(new TimeoutException("Took " + elapsed + " ms; limit was " + springTimeout));
 					}
 				}
 			}
@@ -149,11 +151,11 @@ class SpringMethodRoadie {
 	/**
 	 * Runs the test method on the test instance with the specified
 	 * <code>timeout</code>.
-	 * @param timeout the timeout in milliseconds.
+	 * @param timeout the timeout in milliseconds
 	 * @see #runWithRepetitions(Runnable)
 	 * @see #runTestMethod()
 	 */
-	protected void runWithTimeout(final long timeout) {
+	protected void runWithTimeout(final long timeout) throws CancellationException {
 		runWithRepetitions(new Runnable() {
 			public void run() {
 				ExecutorService service = Executors.newSingleThreadExecutor();
@@ -168,7 +170,15 @@ class SpringMethodRoadie {
 					result.get(0, TimeUnit.MILLISECONDS);
 				}
 				catch (TimeoutException ex) {
-					addFailure(new Exception(String.format("Test timed out after %d milliseconds", timeout)));
+					String message = "Test timed out after " + timeout + " milliseconds";
+					addFailure(new TimeoutException(message));
+					// We're cancelling repetitions here since we don't want
+					// the abandoned test method execution to conflict with
+					// further execution attempts of the same test method.
+					throw new CancellationException(message);
+				}
+				catch (ExecutionException ex) {
+					addFailure(ex.getCause());
 				}
 				catch (Exception ex) {
 					addFailure(ex);
@@ -203,7 +213,12 @@ class SpringMethodRoadie {
 			if (runs > 1 && logger.isInfoEnabled()) {
 				logger.info("Repetition " + (i + 1) + " of test " + method.getName());
 			}
-			test.run();
+			try {
+				test.run();
+			}
+			catch (CancellationException ex) {
+				break;
+			}
 		}
 	}
 
@@ -245,10 +260,10 @@ class SpringMethodRoadie {
 	}
 
 	/**
-	 * Calls {@link TestContextManager#beforeTestMethod(Object,Method)} and then
-	 * runs {@link org.junit.Before @Before methods}, registering failures and
-	 * throwing {@link FailedBefore} exceptions as necessary.
-	 * @throws FailedBefore If an error occurs while executing a <em>before</em> method
+	 * Calls {@link TestContextManager#beforeTestMethod} and then runs
+	 * {@link org.junit.Before @Before methods}, registering failures
+	 * and throwing {@link FailedBefore} exceptions as necessary.
+	 * @throws FailedBefore if an error occurs while executing a <em>before</em> method
 	 */
 	protected void runBefores() throws FailedBefore {
 		try {
@@ -272,9 +287,8 @@ class SpringMethodRoadie {
 	}
 
 	/**
-	 * Runs {@link org.junit.After @After methods},
-	 * registering failures as necessary, and then calls
-	 * {@link TestContextManager#afterTestMethod(Object,Method,Throwable)}.
+	 * Runs {@link org.junit.After @After methods}, registering failures as
+	 * necessary, and then calls {@link TestContextManager#afterTestMethod}.
 	 */
 	protected void runAfters() {
 		List<Method> afters = this.testMethod.getAfters();
@@ -289,7 +303,6 @@ class SpringMethodRoadie {
 				addFailure(ex);
 			}
 		}
-
 		try {
 			this.testContextManager.afterTestMethod(this.testInstance, this.testMethod.getMethod(), this.testException);
 		}
