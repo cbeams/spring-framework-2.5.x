@@ -98,8 +98,9 @@ import java.lang.annotation.Target;
  * <li>A <code>ModelAndView</code> object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.ui.Model Model} object,
- * with the model implicitly enriched with command objects and the results
+ * <li>A {@link org.springframework.ui.Model Model} object, with the view name
+ * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link java.util.Map} object for exposing a model,
  * with the view name implicitly determined through a
@@ -110,8 +111,7 @@ import java.lang.annotation.Target;
  * model implicitly determined through command objects and
  * {@link ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
- * declaring a {@link org.springframework.ui.ModelMap} argument
- * (see above).
+ * declaring a {@link org.springframework.ui.Model} argument (see above).
  * <li>A {@link java.lang.String} value which is interpreted as view name,
  * with the model implicitly determined through command objects and
  * {@link ModelAttribute} annotated reference data accessor methods.
@@ -120,6 +120,12 @@ import java.lang.annotation.Target;
  * (see above).
  * <li><code>void</code> if the method handles the response itself
  * (e.g. by writing the response content directly).
+ * <li>Any other return type will be considered as single model attribute
+ * to be exposed to the view, using the attribute name specified through
+ * {@link ModelAttribute} at the method level (or the default attribute name
+ * based on the return type's class name otherwise). The model will be
+ * implicitly enriched with command objects and the results of
+ * {@link ModelAttribute} annotated reference data accessor methods.
  * </ul>
  *
  * <p><b>NOTE: <code>@RequestMapping</code> will only be processed if a

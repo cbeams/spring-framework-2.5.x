@@ -2958,7 +2958,7 @@ public class ClinicController {
     </section>
 
     <section id="mvc-ann-requestmapping-arguments">
-      <title>Supported handler method arguments</title>
+      <title>Supported handler method arguments and return types</title>
 
       <para>Handler methods which are annotated with
       <classname>@RequestMapping</classname> are allowed to have very flexible
@@ -3051,6 +3051,60 @@ public class ClinicController {
           the cleanup of session attributes that have been indicated by the
           <classname>@SessionAttributes</classname> annotation at the
           handler type level).</para>
+        </listitem>
+      </itemizedlist></para>
+
+      <para>The following return types are supported for handler methods:
+
+      <itemizedlist>
+        <listitem>
+          <para>A <classname>ModelAndView</classname> object, with the model implicitly
+          enriched with command objects and the results of <literal>@ModelAttribute</literal>
+          annotated reference data accessor methods.</para>
+        </listitem>
+
+        <listitem>
+          <para>A <interfacename>Model</interfacename> object, with the view name implicitly
+          determined through a <interfacename>RequestToViewNameTranslator</interfacename>
+          and the model implicitly enriched with command objects and the results of
+          <literal>@ModelAttribute</literal> annotated reference data accessor methods.</para>
+        </listitem>
+
+        <listitem>
+          <para>A <interfacename>Map</interfacename> object for exposing a model, with the view name
+          implicitly determined through a <interfacename>RequestToViewNameTranslator</interfacename>
+          and the model implicitly enriched with command objects and the results of
+          <literal>@ModelAttribute</literal> annotated reference data accessor methods.</para>
+        </listitem>
+
+        <listitem>
+          <para>A <interfacename>View</interfacename> object, with the model implicitly
+          determined through command objects and <literal>@ModelAttribute</literal>
+          annotated reference data accessor methods. The handler method may also
+          programmatically enrich the model by declaring a <interfacename>Model</interfacename>
+          argument (see above).</para>
+        </listitem>
+
+        <listitem>
+          <para>A <classname>String</classname> value which is interpreted as view name,
+          with the model implicitly determined through command objects and
+          <literal>@ModelAttribute</literal> annotated reference data accessor methods.
+          The handler method may also programmatically enrich the model by declaring a
+          <interfacename>Model</interfacename> argument (see above).</para>
+        </listitem>
+
+        <listitem>
+          <para><literal>void</literal> if the method handles the response itself
+          (e.g. by writing the response content directly).</para>
+        </listitem>
+
+        <listitem>
+          <para>Any other return type will be considered as single model attribute
+          to be exposed to the view, using the attribute name specified through
+          <literal>@ModelAttribute</literal> at the method level (or the default
+          attribute name based on the return type's class name otherwise). The model
+          will be implicitly enriched with command objects and the results of
+          <literal>@ModelAttribute</literal> annotated reference data accessor methods.</para>
         </listitem>
       </itemizedlist></para>
     </section>
