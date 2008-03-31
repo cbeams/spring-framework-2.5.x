@@ -60,6 +60,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.Ordered;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -181,6 +182,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * respectively.
 	 */
 	public CommonAnnotationBeanPostProcessor() {
+		setOrder(Ordered.LOWEST_PRECEDENCE - 3);
 		setInitAnnotationType(PostConstruct.class);
 		setDestroyAnnotationType(PreDestroy.class);
 		ignoreResourceType("javax.xml.ws.WebServiceContext");

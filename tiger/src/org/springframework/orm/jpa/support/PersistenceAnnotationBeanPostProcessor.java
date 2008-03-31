@@ -172,7 +172,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 	private transient String defaultPersistenceUnitName = "";
 
-	private int order = Ordered.LOWEST_PRECEDENCE - 1;
+	private int order = Ordered.LOWEST_PRECEDENCE - 4;
 
 	private transient ListableBeanFactory beanFactory;
 
