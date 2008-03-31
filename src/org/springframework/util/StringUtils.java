@@ -293,6 +293,23 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Test whether the given string matches the given substring
+	 * at the given index.
+	 * @param str the original string (or StringBuffer)
+	 * @param index the index in the original string to start matching against
+	 * @param substring the substring to match at the given index
+	 */
+	public static boolean substringMatch(CharSequence str, int index, CharSequence substring) {
+		for (int j = 0; j < substring.length(); j++) {
+			int i = index + j;
+			if (i >= str.length() || str.charAt(i) != substring.charAt(j)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Count the occurrences of the substring in string s.
 	 * @param str string to search in. Return 0 if this is null.
 	 * @param sub string to search for. Return 0 if this is null.

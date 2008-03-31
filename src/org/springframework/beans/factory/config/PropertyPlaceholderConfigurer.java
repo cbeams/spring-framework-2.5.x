@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Constants;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -292,14 +293,16 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
-			int endIndex = buf.indexOf(
-			    this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
+			int endIndex = findPlaceholderEndIndex(buf, startIndex);
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				if (!visitedPlaceholders.add(placeholder)) {
 					throw new BeanDefinitionStoreException(
 							"Circular placeholder reference '" + placeholder + "' in property definitions");
 				}
+				// Recursive invocation, parsing placeholders contained in the placeholder key.
+				placeholder = parseStringValue(placeholder, props, visitedPlaceholders);
+				// Now obtain the value for the fully resolved key...
 				String propVal = resolvePlaceholder(placeholder, props, this.systemPropertiesMode);
 				if (propVal != null) {
 					// Recursive invocation, parsing placeholders contained in the
@@ -326,6 +329,30 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		}
 
 		return buf.toString();
+	}
+
+	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
+		int index = startIndex + this.placeholderPrefix.length();
+		int withinNestedPlaceholder = 0;
+		while (index < buf.length()) {
+			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix)) {
+				if (withinNestedPlaceholder > 0) {
+					withinNestedPlaceholder--;
+					index = index + this.placeholderSuffix.length();
+				}
+				else {
+					return index;
+				}
+			}
+			else if (StringUtils.substringMatch(buf, index, this.placeholderPrefix)) {
+				withinNestedPlaceholder++;
+				index = index + this.placeholderPrefix.length();
+			}
+			else {
+				index++;
+			}
+		}
+		return -1;
 	}
 
 	/**

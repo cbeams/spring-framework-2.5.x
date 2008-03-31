@@ -424,6 +424,22 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertNull(tb.getName());
 	}
 
+	public void testPropertyPlaceholderConfigurerWithNestedPlaceholderInKey() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "${my${key}key}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("key", "new");
+		props.put("mynewkey", "myname");
+		pvs.addPropertyValue("properties", props);
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("myname", tb.getName());
+	}
+
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
