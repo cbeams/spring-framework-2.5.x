@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.CachingMapDecorator;
 
 /**
- * Abstract base class for LabeledEnumResolver implementations,
- * caching all retrieved LabeledEnum instances.
+ * Abstract base class for {@link LabeledEnumResolver} implementations,
+ * caching all retrieved {@link LabeledEnum} instances.
  *
  * <p>Subclasses need to implement the template method
- * <code>findLabeledEnums(type)</code>.
+ * {@link #findLabeledEnums(Class)}.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -46,14 +46,15 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	protected transient final Log logger = LogFactory.getLog(getClass());
 
 
-	private CachingMapDecorator labeledEnumCache = new CachingMapDecorator() {
+	private final CachingMapDecorator labeledEnumCache = new CachingMapDecorator() {
 		protected Object create(Object key) {
-			Set typeEnums = findLabeledEnums((Class) key);
+			Class enumType = (Class) key;
+			Set typeEnums = findLabeledEnums(enumType);
 			if (typeEnums == null || typeEnums.isEmpty()) {
 				throw new IllegalArgumentException(
-						"Unsupported labeled enumeration type '" + key + "': "
-						+ "make sure you've properly defined this enumeration: "
-						+ "if it's static, are the class and its fields public/static/final?");
+						"Unsupported labeled enumeration type '" + key + "': " +
+						"make sure you've properly defined this enumeration! " +
+						"If it is static, are the class and its fields public/static/final?");
 			}
 			Map typeEnumMap = new HashMap(typeEnums.size());
 			for (Iterator it = typeEnums.iterator(); it.hasNext();) {
@@ -80,9 +81,9 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 		LabeledEnum codedEnum = (LabeledEnum) typeEnums.get(code);
 		if (codedEnum == null) {
 			throw new IllegalArgumentException(
-					"No enumeration with code '" + code + "'" + " of type [" + type.getName()
-					+ "] exists: this is likely a configuration error; "
-					+ "make sure the code value matches a valid instance's code property");
+					"No enumeration with code '" + code + "'" + " of type [" + type.getName() +
+					"] exists: this is likely a configuration error. " +
+					"Make sure the code value matches a valid instance's code property!");
 		}
 		return codedEnum;
 	}
@@ -97,9 +98,9 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 			}
 		}
 		throw new IllegalArgumentException(
-				"No enumeration with label '" + label + "' of type [" + type
-				+ "] exists: this is likely a configuration error; "
-				+ "make sure the label string matches a valid instance's label property");
+				"No enumeration with label '" + label + "' of type [" + type +
+				"] exists: this is likely a configuration error. " +
+				"Make sure the label string matches a valid instance's label property!");
 	}
 
 

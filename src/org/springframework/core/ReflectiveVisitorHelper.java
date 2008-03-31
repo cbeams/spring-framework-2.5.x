@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
-public final class ReflectiveVisitorHelper {
+public class ReflectiveVisitorHelper {
 
 	private static final String VISIT_METHOD = "visit";
 
@@ -61,7 +61,7 @@ public final class ReflectiveVisitorHelper {
 	private static final Log logger = LogFactory.getLog(ReflectiveVisitorHelper.class);
 
 
-	private CachingMapDecorator visitorClassVisitMethods = new CachingMapDecorator() {
+	private final CachingMapDecorator visitorClassVisitMethods = new CachingMapDecorator() {
 		public Object create(Object key) {
 			return new ClassVisitMethods((Class) key);
 		}
@@ -119,12 +119,12 @@ public final class ReflectiveVisitorHelper {
 
 		private final Class visitorClass;
 
-		private CachingMapDecorator visitMethodCache = new CachingMapDecorator() {
+		private final CachingMapDecorator visitMethodCache = new CachingMapDecorator() {
 			public Object create(Object argumentClazz) {
 				if (argumentClazz == null) {
 					return findNullVisitorMethod();
 				}
-				Method method = findVisitMethod((Class)argumentClazz);
+				Method method = findVisitMethod((Class) argumentClazz);
 				if (method == null) {
 					method = findDefaultVisitMethod();
 				}
@@ -132,7 +132,7 @@ public final class ReflectiveVisitorHelper {
 			}
 		};
 
-		private ClassVisitMethods(Class visitorClass) {
+		public ClassVisitMethods(Class visitorClass) {
 			this.visitorClass = visitorClass;
 		}
 
@@ -180,7 +180,7 @@ public final class ReflectiveVisitorHelper {
 			classQueue.addFirst(rootArgumentType);
 
 			while (!classQueue.isEmpty()) {
-				Class argumentType = (Class)classQueue.removeLast();
+				Class argumentType = (Class) classQueue.removeLast();
 				// Check for a visit method on the visitor class matching this
 				// argument type.
 				try {
@@ -194,7 +194,6 @@ public final class ReflectiveVisitorHelper {
 					if (!argumentType.isInterface() && (argumentType.getSuperclass() != Object.class)) {
 						classQueue.addFirst(argumentType.getSuperclass());
 					}
-
 					// Queue up argument's implemented interfaces.
 					Class[] interfaces = argumentType.getInterfaces();
 					for (int i = 0; i < interfaces.length; i++) {
