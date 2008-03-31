@@ -91,7 +91,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
  */
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
-public class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {
+public abstract class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {
 
 	private static int disabledTestCount = 0;
 

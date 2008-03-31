@@ -69,7 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @TestExecutionListeners({TransactionalTestExecutionListener.class})
 @Transactional
-public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
+public abstract class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
 
 	/**
 	 * The SimpleJdbcTemplate that this base class manages, available to subclasses.
