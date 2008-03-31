@@ -324,6 +324,30 @@ public abstract class ClassUtils {
 				clazz.getSuperclass() : clazz);
 	}
 
+	/**
+	 * Check whether the given class is cache-safe in the given context,
+	 * i.e. whether it is loaded by the given ClassLoader or a parent of it.
+	 * @param clazz the class to analyze
+	 * @param classLoader the ClassLoader to potentially cache metadata in
+	 */
+	public static boolean isCacheSafe(Class clazz, ClassLoader classLoader) {
+		ClassLoader target = clazz.getClassLoader();
+		if (target == null) {
+			return false;
+		}
+		ClassLoader cur = classLoader;
+		if (cur == target) {
+			return true;
+		}
+		while (cur != null) {
+			cur = cur.getParent();
+			if (cur == target) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	/**
 	 * Get the class name without the qualified package name.

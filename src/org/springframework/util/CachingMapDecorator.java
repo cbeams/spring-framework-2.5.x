@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.io.Serializable;
+import java.lang.ref.Reference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -140,12 +141,16 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	 */
 	public Object get(Object key) {
 		Object value = this.targetMap.get(key);
+		if (value instanceof Reference) {
+			value = ((Reference) value).get();
+		}
 		if (value == null) {
-			value = create(key);
-			if (value == null) {
-				value = NULL_VALUE;
+			Object newValue = create(key);
+			value = (newValue instanceof Reference ? ((Reference) newValue).get() : newValue);
+			if (newValue == null) {
+				newValue = NULL_VALUE;
 			}
-			put(key, value);
+			put(key, newValue);
 		}
 		return (value == NULL_VALUE ? null : value);
 	}

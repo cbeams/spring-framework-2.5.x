@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.core.ReflectiveVisitorHelper;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -49,36 +48,44 @@ public class DefaultValueStyler implements ValueStyler {
 	private static final String ARRAY = "array";
 
 
-	private final ReflectiveVisitorHelper reflectiveVisitorHelper = new ReflectiveVisitorHelper();
-
-
 	public String style(Object value) {
-		return (String) this.reflectiveVisitorHelper.invokeVisit(this, value);
+		if (value == null) {
+			return NULL;
+		}
+		else if (value instanceof String) {
+			return "\'" + value + "\'";
+		}
+		else if (value instanceof Class) {
+			return ClassUtils.getShortName((Class) value);
+		}
+		else if (value instanceof Method) {
+			Method method = (Method) value;
+			return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
+		}
+		else if (value instanceof Map) {
+			return style((Map) value);
+		}
+		else if (value instanceof Map.Entry) {
+			return style((Map.Entry) value);
+		}
+		else if (value instanceof Collection) {
+			return style((Collection) value);
+		}
+		else if (value.getClass().isArray()) {
+			return styleArray(ObjectUtils.toObjectArray(value));
+		}
+		else {
+			return String.valueOf(value);
+		}
 	}
 
-	String visit(String value) {
-		return ('\'' + value + '\'');
-	}
-
-	String visit(Number value) {
-		return String.valueOf(value);
-	}
-
-	String visit(Class clazz) {
-		return ClassUtils.getShortName(clazz);
-	}
-
-	String visit(Method method) {
-		return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
-	}
-
-	String visit(Map value) {
+	private String style(Map value) {
 		StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
 		buffer.append(MAP + "[");
-		for (Iterator i = value.entrySet().iterator(); i.hasNext();) {
-			Map.Entry entry = (Map.Entry)i.next();
+		for (Iterator it = value.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
 			buffer.append(style(entry));
-			if (i.hasNext()) {
+			if (it.hasNext()) {
 				buffer.append(',').append(' ');
 			}
 		}
@@ -89,13 +96,13 @@ public class DefaultValueStyler implements ValueStyler {
 		return buffer.toString();
 	}
 
-	String visit(Map.Entry value) {
+	private String style(Map.Entry value) {
 		return style(value.getKey()) + " -> " + style(value.getValue());
 	}
 
-	String visit(Collection value) {
+	private String style(Collection value) {
 		StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
-		buffer.append(getCollectionTypeString(value) + "[");
+		buffer.append(getCollectionTypeString(value)).append('[');
 		for (Iterator i = value.iterator(); i.hasNext();) {
 			buffer.append(style(i.next()));
 			if (i.hasNext()) {
@@ -119,19 +126,6 @@ public class DefaultValueStyler implements ValueStyler {
 		else {
 			return COLLECTION;
 		}
-	}
-
-	String visit(Object value) {
-		if (value.getClass().isArray()) {
-			return styleArray(ObjectUtils.toObjectArray(value));
-		}
-		else {
-			return String.valueOf(value);
-		}
-	}
-
-	String visitNull() {
-		return NULL;
 	}
 
 	private String styleArray(Object[] array) {
