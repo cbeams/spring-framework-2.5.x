@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 
 	/**
-	 * <p>
 	 * If the current test method of the supplied
 	 * {@link TestContext test context} has been annotated with
 	 * {@link DirtiesContext @DirtiesContext}, the
@@ -50,15 +49,13 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
 	 * will be set to <code>true</code> in the test context.
-	 * </p>
 	 */
 	@Override
-	public void afterTestMethod(final TestContext testContext) throws Exception {
+	public void afterTestMethod(TestContext testContext) throws Exception {
+		Method testMethod = testContext.getTestMethod();
+		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		final Method testMethod = testContext.getTestMethod();
-		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null.");
-
-		final boolean dirtiesContext = testMethod.isAnnotationPresent(DirtiesContext.class);
+		boolean dirtiesContext = testMethod.isAnnotationPresent(DirtiesContext.class);
 		if (logger.isDebugEnabled()) {
 			logger.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,45 +43,34 @@ package org.springframework.test.context;
 public interface TestExecutionListener {
 
 	/**
-	 * <p>
 	 * Prepares the {@link Object test instance} of the supplied
 	 * {@link TestContext test context}, for example for injecting
 	 * dependencies.
-	 * </p>
-	 * <p>
-	 * This method should be called immediately after instantiation but prior to
+	 * <p>This method should be called immediately after instantiation but prior to
 	 * any framework-specific lifecycle callbacks.
-	 * </p>
-	 *
-	 * @param testContext the test context for the test
+	 * @param testContext the test context for the test (never <code>null</code>)
 	 * @throws Exception allows any exception to propagate
 	 */
 	void prepareTestInstance(TestContext testContext) throws Exception;
 
 	/**
-	 * <p>
 	 * Pre-processes a test just <em>before</em> execution of the
 	 * {@link java.lang.reflect.Method test method} in the supplied
 	 * {@link TestContext test context}, for example for setting up test
 	 * fixtures.
-	 * </p>
-	 *
 	 * @param testContext the test context in which the test method will be
-	 * executed, not <code>null</code>
+	 * executed (never <code>null</code>)
 	 * @throws Exception allows any exception to propagate
 	 */
 	void beforeTestMethod(TestContext testContext) throws Exception;
 
 	/**
-	 * <p>
 	 * Post-processes a test just <em>after</em> execution of the
 	 * {@link java.lang.reflect.Method test method} in the supplied
 	 * {@link TestContext test context}, for example for tearing down test
 	 * fixtures.
-	 * </p>
-	 *
 	 * @param testContext the test context in which the test method was
-	 * executed, not <code>null</code>
+	 * executed (never <code>null</code>)
 	 * @throws Exception allows any exception to propagate
 	 */
 	void afterTestMethod(TestContext testContext) throws Exception;
