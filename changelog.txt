@@ -28,12 +28,14 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory allows for resolving circular reference between beans wrapped by BeanPostProcessors
 * DefaultListableBeanFactory passes full inherited AccessControlContext to the AccessController for bean creation
 * DefaultListableBeanFactory does not eagerly initialize target beans when autowiring a PriorityOrdered post-processor
+* PropertyPlaceholderConfigurer supports nested keys in placeholder keys as well (e.g. "${db.${environment}}")
 * PropertyPlaceholderConfigurer works properly even in case of default-autowire="byType" with FactoryBeans involved
 * fixed PropertyPlaceholderConfigurer's "nullValue" handling to avoid NPE for nested value
 * added "ignoreUnresolvableEditors" property to CustomEditorConfigurer, allowing to ignore type/editor classes not found
 * XmlBeanDefinitionReader's "getValidationModeForResource" method is protected now in order to allow for overriding
 * AbstractSimpleBeanDefinitionParser properly ignores namespace declaration attributes ("xmlns"/"xmlns:")
 * AutowiredAnnotationBeanPostProcessor processes @Autowired annotation on most specific method only (when overriding)
+* AutowiredAnnotationBeanPostProcessor marks @Autowired bean properties as processed (for @Required to accept them)
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource is able to detect updates for a properties file stored in a jar/zip as well
@@ -41,9 +43,12 @@ Package org.springframework.context
 * restored support for null location array argument in ClassPathXmlApplicationContext (for Apache CXF compatibility)
 * added "registration" attribute to mbean-export element, accepting "failOnExisting"/"ignoreExisting"/"replaceExisting"
 * CommonAnnotationBeanPostProcessor processes @Resource annotation on most specific method only (when overriding)
+* revised default annotation post-processor ordering to apply most specific processors first
 
 Package org.springframework.core
 * Conventions detects special generated subclasses (e.g. by OpenJPA) and derives the variable name from the superclass
+* revised DefaultValueStyler (and deprecated ReflectiveVisitorHelper) for better performance and no class loader leaks
+* StaticLabeledEnumResolver uses weak references to LabeledEnum class in order to avoid class loader leaks
 * added "lastModified()" method to Resource interface, for abstract access to the last-modified timestamp
 * ClassPathResource and UrlResource use the last-modified timestamp of the archive file for jar/zip contents
 * PathMatchingResourcePatternResolver sets "useCaches=false" on any JarURLConnection that it opens for path matching
@@ -116,6 +121,10 @@ Package org.springframework.test
 * @IfProfileValue annotation without specified value checks against presence (non-null value) of the given profile key
 * "executeSqlScript" (as in SimpleJdbcTestUtils) allows for multiple statements per line, separated by semicolons
 * SpringJUnit4ClassRunner catches AssumptionViolatedException in @Before methods (analogous to standard JUnit 4.4)
+* SpringJUnit4ClassRunner executes befores/afters in same thread for test method with JUnit timeout (-> transactions)
+* TransactionalTestExecutionListener is able to manage concurrent transactions for different test methods (with timeout)
+* TransactionalTestExecutionListener reobtains transaction manager for every transaction (picking up context changes)
+* fixed Abstract*JUnit*SpringContextTests classes to be actually marked as abstract
 
 Package org.springframework.util
 * "ClassUtils.resolveClassName" preserves the original root cause in the rethrown IllegalArgumentException
