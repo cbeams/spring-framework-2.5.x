@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,24 +36,18 @@ import org.springframework.util.ClassUtils;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
- * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
- * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
  * @see CommonAnnotationBeanPostProcessor
  * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
+ * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
+ * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
  */
 public class AnnotationConfigUtils {
 
 	/**
-	 * The bean name of the internally managed Required annotation processor.
+	 * The bean name of the internally managed JPA annotation processor.
 	 */
-	public static final String REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalRequiredAnnotationProcessor";
-
-	/**
-	 * The bean name of the internally managed Autowired annotation processor.
-	 */
-	public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalAutowiredAnnotationProcessor";
+	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.annotation.internalPersistenceAnnotationProcessor";
 
 	/**
 	 * The bean name of the internally managed JSR-250 annotation processor.
@@ -62,10 +56,16 @@ public class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed JPA annotation processor.
+	 * The bean name of the internally managed Autowired annotation processor.
 	 */
-	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalPersistenceAnnotationProcessor";
+	public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.annotation.internalAutowiredAnnotationProcessor";
+
+	/**
+	 * The bean name of the internally managed Required annotation processor.
+	 */
+	public static final String REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.annotation.internalRequiredAnnotationProcessor";
 
 
 	private static final String PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME =
@@ -101,18 +101,13 @@ public class AnnotationConfigUtils {
 
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<BeanDefinitionHolder>(4);
 
-		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
+		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
+		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition();
+			def.setBeanClassName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME);
 			def.setSource(source);
 			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			beanDefinitions.add(registerBeanPostProcessor(registry, def, REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		}
-
-		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
-			def.setSource(source);
-			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			beanDefinitions.add(registerBeanPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+			beanDefinitions.add(registerBeanPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
@@ -123,13 +118,18 @@ public class AnnotationConfigUtils {
 			beanDefinitions.add(registerBeanPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
-		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
-		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition def = new RootBeanDefinition();
-			def.setBeanClassName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME);
+		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			beanDefinitions.add(registerBeanPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
+			beanDefinitions.add(registerBeanPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+
+		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
+			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			beanDefinitions.add(registerBeanPostProcessor(registry, def, REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		return beanDefinitions;

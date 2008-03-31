@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.ReflectionUtils;
@@ -127,7 +128,7 @@ public class InjectionMetadata {
 
 		protected final PropertyDescriptor pd;
 
-		protected volatile boolean skip = false;
+		protected volatile Boolean skip;
 
 		protected InjectedElement(Member member, PropertyDescriptor pd) {
 			this.member = member;
@@ -173,18 +174,16 @@ public class InjectionMetadata {
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
 		protected void inject(Object target, String requestingBeanName, PropertyValues pvs) throws Throwable {
-			if (this.skip) {
-				return;
-			}
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
 				field.set(target, getResourceToInject(target, requestingBeanName));
 			}
 			else {
-				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
-					// Explicit value provided as part of the bean definition.
-					this.skip = true;
+				if (this.skip == null) {
+					this.skip = Boolean.valueOf(checkPropertySkipping(pvs));
+				}
+				if (this.skip.booleanValue()) {
 					return;
 				}
 				try {
@@ -196,6 +195,24 @@ public class InjectionMetadata {
 					throw ex.getTargetException();
 				}
 			}
+		}
+
+		/**
+		 * Checks whether this injector's property needs to be skipped due to
+		 * an explicit property value having been specified. Also marks the
+		 * affected property as processed for other processors to ignore it.
+		 */
+		protected boolean checkPropertySkipping(PropertyValues pvs) {
+			if (this.pd != null && pvs != null) {
+				if (pvs.contains(this.pd.getName())) {
+					// Explicit value provided as part of the bean definition.
+					return true;
+				}
+				else if (pvs instanceof MutablePropertyValues) {
+					((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
+				}
+			}
+			return false;
 		}
 
 		/**

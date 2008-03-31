@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
@@ -104,7 +105,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	
 	private boolean requiredParameterValue = true;
 
-	private int order = Ordered.LOWEST_PRECEDENCE - 1;
+	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
 	private ConfigurableListableBeanFactory beanFactory;
 
@@ -455,12 +456,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		@Override
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
-			if (this.skip) {
-				return;
-			}
-			if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
+			if (this.skip == null && this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
 				// Explicit value provided as part of the bean definition.
-				this.skip = true;
+				this.skip = Boolean.TRUE;
+			}
+			if (this.skip != null && this.skip.booleanValue()) {
 				return;
 			}
 			Method method = (Method) this.member;
@@ -524,6 +524,12 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						this.cachedMethodArguments = null;
 					}
 					this.cached = true;
+				}
+				if (this.skip == null) {
+					if (this.pd != null && pvs instanceof MutablePropertyValues) {
+						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
+					}
+					this.skip = Boolean.FALSE;
 				}
 				if (arguments != null) {
 					ReflectionUtils.makeAccessible(method);

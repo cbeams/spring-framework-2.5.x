@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
@@ -38,6 +40,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/** List of PropertyValue objects */
 	private final List propertyValueList;
+
+	private Set processedProperties;
 
 	private volatile boolean converted = false;
 
@@ -253,8 +257,24 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return null;
 	}
 
+	/**
+	 * Register the specified property as "processed" in the sense
+	 * of some processor calling the corresponding setter method
+	 * outside of the PropertyValue(s) mechanism.
+	 * <p>This will lead to <code>true</code> being returned from
+	 * a {@link #contains} call for the specified property.
+	 * @param propertyName the name of the property.
+	 */
+	public void registerProcessedProperty(String propertyName) {
+		if (this.processedProperties == null) {
+			this.processedProperties = new HashSet();
+		}
+		this.processedProperties.add(propertyName);
+	}
+
 	public boolean contains(String propertyName) {
-		return (getPropertyValue(propertyName) != null);
+		return (getPropertyValue(propertyName) != null ||
+				(this.processedProperties != null && this.processedProperties.contains(propertyName)));
 	}
 
 	public boolean isEmpty() {

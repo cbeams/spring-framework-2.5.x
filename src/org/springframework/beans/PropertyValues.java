@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,8 +17,8 @@
 package org.springframework.beans;
 
 /**
- * Holder containing 0 or more PropertyValue objects,
- * typically comprising one update.
+ * Holder containing one or more {@link PropertyValue} objects,
+ * typically comprising one update for a specific target bean.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -40,7 +40,7 @@ public interface PropertyValues {
 	PropertyValue getPropertyValue(String propertyName);
 
 	/**
-	 * Is there a property value for this property?
+	 * Is there a property value (or other processing entry) for this property?
 	 * @param propertyName the name of the property we're interested in
 	 * @return whether there is a property value for this property
 	 */

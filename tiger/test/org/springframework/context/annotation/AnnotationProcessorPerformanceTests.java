@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -144,7 +145,7 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 
 	private static class ResourceAnnotatedTestBean extends TestBean {
 
-		@Resource
+		@Resource @Required
 		public void setSpouse(ITestBean spouse) {
 			super.setSpouse(spouse);
 		}
@@ -153,7 +154,7 @@ public class AnnotationProcessorPerformanceTests extends TestCase {
 
 	private static class AutowiredAnnotatedTestBean extends TestBean {
 
-		@Autowired
+		@Autowired @Required
 		public void setSpouse(ITestBean spouse) {
 			super.setSpouse(spouse);
 		}
