@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,7 @@ import org.springframework.util.StringUtils;
  * <li>"java:comp/UserTransaction" for Resin 2.x, Oracle OC4J (Orion),
  * JOnAS (JOTM), BEA WebLogic
  * <li>"java:comp/TransactionManager" for Resin 3.x
+ * <li>"java:appserver/TransactionManager" for GlassFish
  * <li>"java:pm/TransactionManager" for Borland Enterprise Server and
  * Sun Application Server (Sun ONE 7 and later)
  * <li>"java:/TransactionManager" for JBoss Application Server
@@ -164,7 +165,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setAutodetectTransactionManager
 	 */
 	public static final String[] FALLBACK_TRANSACTION_MANAGER_NAMES =
-			new String[] {"java:comp/TransactionManager", "java:pm/TransactionManager", "java:/TransactionManager"};
+			new String[] {"java:comp/TransactionManager", "java:appserver/TransactionManager",
+					"java:pm/TransactionManager", "java:/TransactionManager"};
 
 	/**
 	 * Standard Java EE 5 JNDI location for the JTA TransactionSynchronizationRegistry.
