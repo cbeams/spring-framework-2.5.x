@@ -113,9 +113,9 @@ public abstract class NumberUtils {
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
-	 * using the corresponding default <code>decode</code> methods. Trims the
-	 * input <code>String</code> before attempting to parse the number. Supports
-	 * numbers in hex format (with leading 0x) and in octal format (with leading 0).
+	 * using the corresponding <code>decode</code> / <code>valueOf</code> methods.
+	 * <p>Trims the input <code>String</code> before attempting to parse the number.
+	 * Supports numbers in hex format (with leading "0x", "0X" or "#") as well.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
@@ -137,19 +137,19 @@ public abstract class NumberUtils {
 		String trimmed = text.trim();
 
 		if (targetClass.equals(Byte.class)) {
-			return Byte.decode(trimmed);
+			return (isHexNumber(trimmed) ? Byte.decode(trimmed) : Byte.valueOf(trimmed));
 		}
 		else if (targetClass.equals(Short.class)) {
-			return Short.decode(trimmed);
+			return (isHexNumber(trimmed) ? Short.decode(trimmed) : Short.valueOf(trimmed));
 		}
 		else if (targetClass.equals(Integer.class)) {
-			return Integer.decode(trimmed);
+			return (isHexNumber(trimmed) ? Integer.decode(trimmed) : Integer.valueOf(trimmed));
 		}
 		else if (targetClass.equals(Long.class)) {
-			return Long.decode(trimmed);
+			return (isHexNumber(trimmed) ? Long.decode(trimmed) : Long.valueOf(trimmed));
 		}
 		else if (targetClass.equals(BigInteger.class)) {
-			return decodeBigInteger(trimmed);
+			return (isHexNumber(trimmed) ? decodeBigInteger(trimmed) : new BigInteger(trimmed));
 		}
 		else if (targetClass.equals(Float.class)) {
 			return Float.valueOf(trimmed);
@@ -199,6 +199,15 @@ public abstract class NumberUtils {
 		else {
 			return parseNumber(text, targetClass);
 		}
+	}
+
+	/**
+	 * Determine whether the given value String indicates a hex number, i.e. needs to be
+	 * passed into <code>Integer.decode</code> instead of <code>Integer.valueOf</code> (etc).
+	 */
+	private static boolean isHexNumber(String value) {
+		int index = (value.startsWith("-") ? 1 : 0);
+		return (value.startsWith("0x", index) || value.startsWith("0X", index) || value.startsWith("#", index));
 	}
 
 	/**

@@ -433,7 +433,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		p.setProperty("test.(class)", "org.springframework.beans.TestBean");
 		p.setProperty("test.name", "Tony");
 		p.setProperty("test.age", "48");
-		//p.setProperty("
 		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		assertTrue("1 beans registered, not " + count, count == 1);
 		testSingleTestBean(lbf);
@@ -445,8 +444,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		Properties p = new Properties();
 		p.setProperty(PREFIX + "test.(class)", "org.springframework.beans.TestBean");
 		p.setProperty(PREFIX + "test.name", "Tony");
-		p.setProperty(PREFIX + "test.age", "48");
-		//p.setProperty("
+		p.setProperty(PREFIX + "test.age", "0x30");
 		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, PREFIX);
 		assertTrue("1 beans registered, not " + count, count == 1);
 		testSingleTestBean(lbf);

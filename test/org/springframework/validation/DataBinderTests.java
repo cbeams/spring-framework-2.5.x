@@ -58,7 +58,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue(binder.isIgnoreUnknownFields());
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", new Integer(32));
+		pvs.addPropertyValue("age", "032");
 		pvs.addPropertyValue("nonExisting", "someValue");
 
 		binder.bind(pvs);

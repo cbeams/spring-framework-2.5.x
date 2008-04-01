@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class NumberUtilsTests extends TestCase {
 
@@ -106,21 +107,6 @@ public class NumberUtilsTests extends TestCase {
 		assertLongEquals(aLong);
 		assertEquals("BigInteger did not parse",
 				new BigInteger(aReallyBigInt, 16), NumberUtils.parseNumber("0x" + aReallyBigInt, BigInteger.class));
-	}
-
-	public void testParseAsOctal() {
-		String aByte = "0" + Integer.toOctalString(Byte.MAX_VALUE);
-		String aShort = "0" + Integer.toOctalString(Short.MAX_VALUE);
-		String anInteger = "0" + Integer.toOctalString(Integer.MAX_VALUE);
-		String aLong = "0" + Long.toOctalString(Long.MAX_VALUE);
-		String aBigInteger = "7776554354453435353631212";
-
-		assertByteEquals(aByte);
-		assertShortEquals(aShort);
-		assertIntegerEquals(anInteger);
-		assertLongEquals(aLong);
-		assertEquals("BigInteger did not parse",
-				new BigInteger(aBigInteger, 8), NumberUtils.parseNumber("0" + aBigInteger, BigInteger.class));
 	}
 
 	public void testParseNegativeHex() throws Exception {
