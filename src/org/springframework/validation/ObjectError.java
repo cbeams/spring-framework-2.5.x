@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,20 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 
 
 	/**
-	 * Creates a new instance of the {@link ObjectError} class.
+	 * Create a new instance of the ObjectError class.
+	 * @param objectName the name of the affected object
+	 * @param defaultMessage the default message to be used to resolve this message
+	 */
+	public ObjectError(String objectName, String defaultMessage) {
+		this(objectName, null, null, defaultMessage);
+	}
+
+	/**
+	 * Create a new instance of the ObjectError class.
 	 * @param objectName the name of the affected object
 	 * @param codes the codes to be used to resolve this message
 	 * @param arguments	the array of arguments to be used to resolve this message
 	 * @param defaultMessage the default message to be used to resolve this message
-	 * @throws IllegalArgumentException if the supplied <code>objectName</code> is <code>null</code> 
 	 */
 	public ObjectError(String objectName, String[] codes, Object[] arguments, String defaultMessage) {
 		super(codes, arguments, defaultMessage);
@@ -50,11 +58,12 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 		this.objectName = objectName;
 	}
 
+
 	/**
 	 * Return the name of the affected object.
 	 */
 	public String getObjectName() {
-		return objectName;
+		return this.objectName;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the MessageSourceResolvable interface.
- * Offers an easy way to store all the necessary values needed to
- * resolve a message via a MessageSource.
+ * Default implementation of the {@link MessageSourceResolvable} interface.
+ * Offers an easy way to store all the necessary values needed to resolve
+ * a message via a {@link org.springframework.context.MessageSource}.
  *
  * @author Juergen Hoeller
  * @since 13.02.2004
@@ -96,7 +96,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 
 
 	public String[] getCodes() {
-		return codes;
+		return this.codes;
 	}
 
 	/**
@@ -108,11 +108,11 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	}
 
 	public Object[] getArguments() {
-		return arguments;
+		return this.arguments;
 	}
 
 	public String getDefaultMessage() {
-		return defaultMessage;
+		return this.defaultMessage;
 	}
 
 
