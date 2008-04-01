@@ -20,10 +20,6 @@ import java.beans.PropertyEditor;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.servlet.support.BindStatus;
-
 /**
  * Abstract base class to provide common methods for
  * implementing databinding-aware JSP tags for rendering an HTML '<code>input</code>'
@@ -50,14 +46,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * bound value.
 	 */
 	protected void renderFromValue(Object item, Object value, TagWriter tagWriter) throws JspException {
-		BindStatus bindStatus = getBindStatus();
-		PropertyEditor editor = null;
-		if (value != null && bindStatus.getErrors() instanceof BindingResult) {
-			PropertyEditorRegistry editorRegistry = ((BindingResult) bindStatus.getErrors()).getPropertyEditorRegistry();
-			if (editorRegistry != null) {
-				editor = editorRegistry.findCustomEditor(value.getClass(), bindStatus.getPath());
-			}
-		}
+		PropertyEditor editor = (value != null ? getBindStatus().findEditor(value.getClass()) : null);
 		tagWriter.writeAttribute("value", getDisplayString(value, editor));
 		if (isOptionSelected(value) || (value != item && isOptionSelected(item))) {
 			tagWriter.writeAttribute("checked", "checked");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.validation;
 
+import java.beans.PropertyEditor;
 import java.util.Map;
 
 import org.springframework.beans.PropertyEditorRegistry;
@@ -77,27 +78,30 @@ public interface BindingResult extends Errors {
 	Map getModel();
 
 	/**
+	 * Extract the raw field value for the given field.
+	 * Typically used for comparison purposes.
+	 * @param field the field to check
+	 * @return the current value of the field in its raw form,
+	 * or <code>null</code> if not known
+	 */
+	Object getRawFieldValue(String field);
+
+	/**
+	 * Find a custom property editor for the given type and property.
+	 * @param valueType the type of the property (can be <code>null</code> if a property
+	 * is given but should be specified in any case for consistency checking)
+	 * @param field the path of the property (name or nested path), or
+	 * <code>null</code> if looking for an editor for all properties of the given type
+	 * @return the registered editor, or <code>null</code> if none
+	 */
+	PropertyEditor findEditor(String field, Class valueType);
+
+	/**
 	 * Return the underlying PropertyEditorRegistry.
 	 * @return the PropertyEditorRegistry, or <code>null</code> if none
 	 * available for this BindingResult
 	 */
 	PropertyEditorRegistry getPropertyEditorRegistry();
-
-	/**
-	 * Mark the specified disallowed field as suppressed.
-	 * <p>The data binder invokes this for each field value that was
-	 * detected to target a disallowed field.
-	 * @see DataBinder#setAllowedFields
-	 */
-	void recordSuppressedField(String fieldName);
-
-	/**
-	 * Return the list of fields that were suppressed during the bind process.
-	 * <p>Can be used to determine whether any field values were targeting
-	 * disallowed fields.
-	 * @see DataBinder#setAllowedFields
-	 */
-	String[] getSuppressedFields();
 
 	/**
 	 * Add a custom {@link ObjectError} or {@link FieldError} to the errors list.
@@ -116,5 +120,21 @@ public interface BindingResult extends Errors {
 	 * @return the resolved message codes
 	 */
 	String[] resolveMessageCodes(String errorCode, String field);
+
+	/**
+	 * Mark the specified disallowed field as suppressed.
+	 * <p>The data binder invokes this for each field value that was
+	 * detected to target a disallowed field.
+	 * @see DataBinder#setAllowedFields
+	 */
+	void recordSuppressedField(String field);
+
+	/**
+	 * Return the list of fields that were suppressed during the bind process.
+	 * <p>Can be used to determine whether any field values were targeting
+	 * disallowed fields.
+	 * @see DataBinder#setAllowedFields
+	 */
+	String[] getSuppressedFields();
 
 }

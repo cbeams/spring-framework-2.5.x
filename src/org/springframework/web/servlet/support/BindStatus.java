@@ -24,7 +24,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.AbstractPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.util.HtmlUtils;
@@ -56,6 +56,8 @@ public class BindStatus {
 	private final String expression;
 
 	private final Errors errors;
+
+	private BindingResult bindingResult;
 
 	private Object value;
 
@@ -106,7 +108,6 @@ public class BindStatus {
 			// Usual case: A BindingResult is available as request attribute.
 			// Can determine error codes and messages for the given expression.
 			// Can use a custom PropertyEditor, as registered by a form controller.
-
 			if (this.expression != null) {
 				if ("*".equals(this.expression)) {
 					this.objectErrors = this.errors.getAllErrors();
@@ -118,18 +119,16 @@ public class BindStatus {
 					this.objectErrors = this.errors.getFieldErrors(this.expression);
 					this.value = this.errors.getFieldValue(this.expression);
 					this.valueType = this.errors.getFieldType(this.expression);
-					if (this.errors instanceof AbstractPropertyBindingResult) {
-						AbstractPropertyBindingResult apbr = ((AbstractPropertyBindingResult) this.errors);
-						this.actualValue = apbr.getActualFieldValue(this.expression);
-						this.editor = apbr.getCustomEditor(this.expression);
+					if (this.errors instanceof BindingResult) {
+						this.bindingResult = (BindingResult) this.errors;
+						this.actualValue = this.bindingResult.getRawFieldValue(this.expression);
+						this.editor = this.bindingResult.findEditor(this.expression, null);
 					}
 				}
 			}
-
 			else {
 				this.objectErrors = this.errors.getGlobalErrors();
 			}
-
 			initErrorCodes();
 		}
 
@@ -137,19 +136,16 @@ public class BindStatus {
 			// No BindingResult available as request attribute:
 			// Probably forwarded directly to a form view.
 			// Let's do the best we can: extract a plain target if appropriate.
-
 			Object target = requestContext.getModelObject(beanName);
 			if (target == null) {
 				throw new IllegalStateException("Neither BindingResult nor plain target object for bean name '" +
 						beanName + "' available as request attribute");
 			}
-
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(target);
 				this.valueType = bw.getPropertyType(this.expression);
 				this.value = bw.getPropertyValue(this.expression);
 			}
-
 			this.errorCodes = new String[0];
 			this.errorMessages = new String[0];
 		}
@@ -316,13 +312,23 @@ public class BindStatus {
 		return this.editor;
 	}
 
+	/**
+	 * Find a PropertyEditor for the given value class, associated with
+	 * the property that this bound status is currently bound to.
+	 * @param valueClass the value class that an editor is needed for
+	 * @return the associated PropertyEditor, or <code>null</code> if none
+	 */
+	public PropertyEditor findEditor(Class valueClass) {
+		return (this.bindingResult != null ? this.bindingResult.findEditor(this.expression, valueClass) : null);
+	}
+
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("BindStatus: ");
 		sb.append("expression=[").append(this.expression).append("]; ");
 		sb.append("value=[").append(this.value).append("]");
 		if (isError()) {
-			sb.append("; errorCodes=" + Arrays.asList(this.errorCodes));
+			sb.append("; errorCodes=").append(Arrays.asList(this.errorCodes));
 		}
 		return sb.toString();
 	}

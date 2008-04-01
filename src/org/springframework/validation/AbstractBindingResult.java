@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.validation;
 
+import java.beans.PropertyEditor;
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,7 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.StringUtils;
@@ -41,19 +40,15 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  * @see Errors
  */
-public abstract class AbstractBindingResult implements BindingResult, Serializable {
-
-	private final List errors = new LinkedList();
+public abstract class AbstractBindingResult extends AbstractErrors implements BindingResult, Serializable {
 
 	private final String objectName;
 
 	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
-	private String nestedPath = "";
+	private final List errors = new LinkedList();
 
-	private final Stack nestedPathStack = new Stack();
-
-	private Set suppressedFields = new HashSet();
+	private final Set suppressedFields = new HashSet();
 
 
 	/**
@@ -83,86 +78,16 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 
 
 	//---------------------------------------------------------------------
-	// Implementation of Errors interface
+	// Implementation of the Errors interface
 	//---------------------------------------------------------------------
 
 	public String getObjectName() {
 		return this.objectName;
 	}
 
-	public void setNestedPath(String nestedPath) {
-		doSetNestedPath(nestedPath);
-		this.nestedPathStack.clear();
-	}
-
-	public String getNestedPath() {
-		return this.nestedPath;
-	}
-
-	public void pushNestedPath(String subPath) {
-		this.nestedPathStack.push(getNestedPath());
-		doSetNestedPath(getNestedPath() + subPath);
-	}
-
-	public void popNestedPath() throws IllegalArgumentException {
-		try {
-			String formerNestedPath = (String) this.nestedPathStack.pop();
-			doSetNestedPath(formerNestedPath);
-		}
-		catch (EmptyStackException ex) {
-			throw new IllegalStateException("Cannot pop nested path: no nested path on stack");
-		}
-	}
-
-	/**
-	 * Actually set the nested path.
-	 * Delegated to by setNestedPath and pushNestedPath.
-	 */
-	protected void doSetNestedPath(String nestedPath) {
-		if (nestedPath == null) {
-			nestedPath = "";
-		}
-		nestedPath = canonicalFieldName(nestedPath);
-		if (nestedPath.length() > 0 && !nestedPath.endsWith(Errors.NESTED_PATH_SEPARATOR)) {
-			nestedPath += Errors.NESTED_PATH_SEPARATOR;
-		}
-		this.nestedPath = nestedPath;
-	}
-
-	/**
-	 * Transform the given field into its full path,
-	 * regarding the nested path of this instance.
-	 */
-	protected String fixedField(String field) {
-		if (StringUtils.hasLength(field)) {
-			return getNestedPath() + canonicalFieldName(field);
-		}
-		else {
-			String path = getNestedPath();
-			return (path.endsWith(Errors.NESTED_PATH_SEPARATOR) ?
-					path.substring(0, path.length() - NESTED_PATH_SEPARATOR.length()) : path);
-		}
-	}
-
-
-	public void reject(String errorCode) {
-		reject(errorCode, null, null);
-	}
-
-	public void reject(String errorCode, String defaultMessage) {
-		reject(errorCode, null, defaultMessage);
-	}
 
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
 		addError(new ObjectError(getObjectName(), resolveMessageCodes(errorCode), errorArgs, defaultMessage));
-	}
-
-	public void rejectValue(String field, String errorCode) {
-		rejectValue(field, errorCode, null, null);
-	}
-
-	public void rejectValue(String field, String errorCode, String defaultMessage) {
-		rejectValue(field, errorCode, null, defaultMessage);
 	}
 
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
@@ -179,6 +104,17 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 				getObjectName(), fixedField, newVal, false,
 				resolveMessageCodes(errorCode, field), errorArgs, defaultMessage);
 		addError(fe);
+	}
+
+	public void addError(ObjectError error) {
+		this.errors.add(error);
+	}
+
+	public void addAllErrors(Errors errors) {
+		if (!errors.getObjectName().equals(getObjectName())) {
+			throw new IllegalArgumentException("Errors object needs to have same object name");
+		}
+		this.errors.addAll(errors.getAllErrors());
 	}
 
 	/**
@@ -198,17 +134,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName(), fixedField, fieldType);
 	}
 
-	public void addError(ObjectError error) {
-		this.errors.add(error);
-	}
-
-	public void addAllErrors(Errors errors) {
-		if (!errors.getObjectName().equals(getObjectName())) {
-			throw new IllegalArgumentException("Errors object needs to have same object name");
-		}
-		this.errors.addAll(errors.getAllErrors());
-	}
-
 
 	public boolean hasErrors() {
 		return !this.errors.isEmpty();
@@ -220,14 +145,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 
 	public List getAllErrors() {
 		return Collections.unmodifiableList(this.errors);
-	}
-
-	public boolean hasGlobalErrors() {
-		return (getGlobalErrorCount() > 0);
-	}
-
-	public int getGlobalErrorCount() {
-		return getGlobalErrors().size();
 	}
 
 	public List getGlobalErrors() {
@@ -251,14 +168,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return null;
 	}
 
-	public boolean hasFieldErrors() {
-		return (getFieldErrorCount() > 0);
-	}
-
-	public int getFieldErrorCount() {
-		return getFieldErrors().size();
-	}
-
 	public List getFieldErrors() {
 		List result = new LinkedList();
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
@@ -280,20 +189,12 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return null;
 	}
 
-	public boolean hasFieldErrors(String field) {
-		return (getFieldErrorCount(field) > 0);
-	}
-
-	public int getFieldErrorCount(String field) {
-		return getFieldErrors(field).size();
-	}
-
 	public List getFieldErrors(String field) {
 		List result = new LinkedList();
 		String fixedField = fixedField(field);
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			Object error = it.next();
-			if (error instanceof FieldError && isMatchingFieldError(fixedField, ((FieldError) error))) {
+			if (error instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) error)) {
 				result.add(error);
 			}
 		}
@@ -313,18 +214,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		}
 		return null;
 	}
-
-	/**
-	 * Check whether the given FieldError matches the given field.
-	 * @param field the field that we are looking up FieldErrors for
-	 * @param fieldError the candidate FieldError
-	 * @return whether the FieldError matches the given field
-	 */
-	protected boolean isMatchingFieldError(String field, FieldError fieldError) {
-		return (field.equals(fieldError.getField()) ||
-				(field.endsWith("*") && fieldError.getField().startsWith(field.substring(0, field.length() - 1))));
-	}
-
 
 	public Object getFieldValue(String field) {
 		FieldError fe = getFieldError(field);
@@ -350,7 +239,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * @see #getActualFieldValue
 	 */
 	public Class getFieldType(String field) {
-		Object value = getActualFieldValue(field);
+		Object value = getActualFieldValue(fixedField(field));
 		if (value != null) {
 			return value.getClass();
 		}
@@ -381,12 +270,33 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
 	public Map getModel() {
-		Map model = new HashMap();
+		Map model = new HashMap(2);
 		// Errors instance, even if no errors.
-		model.put(BindingResult.MODEL_KEY_PREFIX + getObjectName(), this);
+		model.put(MODEL_KEY_PREFIX + getObjectName(), this);
 		// Mapping from name to target object.
 		model.put(getObjectName(), getTarget());
 		return model;
+	}
+
+	public Object getRawFieldValue(String field) {
+		return getActualFieldValue(fixedField(field));
+	}
+
+	/**
+	 * This implementation returns <code>null</code>.
+	 */
+	public PropertyEditor findEditor(String field, Class valueType) {
+		PropertyEditorRegistry editorRegistry = getPropertyEditorRegistry();
+		if (editorRegistry != null) {
+			Class valueTypeToUse = valueType;
+			if (valueTypeToUse == null) {
+				valueTypeToUse = getFieldType(field);
+			}
+			return editorRegistry.findCustomEditor(valueTypeToUse, fixedField(field));
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -402,8 +312,8 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * detected to target a disallowed field.
 	 * @see DataBinder#setAllowedFields
 	 */
-	public void recordSuppressedField(String fieldName) {
-		this.suppressedFields.add(fieldName);
+	public void recordSuppressedField(String field) {
+		this.suppressedFields.add(field);
 	}
 
 	/**
@@ -416,16 +326,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return StringUtils.toStringArray(this.suppressedFields);
 	}
 
-
-	public String toString() {
-		StringBuffer sb = new StringBuffer(getClass().getName());
-		sb.append(": ").append(getErrorCount()).append(" errors");
-		Iterator it = getAllErrors().iterator();
-		while (it.hasNext()) {
-			sb.append('\n').append(it.next());
-		}
-		return sb.toString();
-	}
 
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -453,16 +353,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * Return the wrapped target object.
 	 */
 	public abstract Object getTarget();
-
-	/**
-	 * Determine the canonical field name for the given field.
-	 * <p>The default implementation simply returns the field name as-is.
-	 * @param field the original field name
-	 * @return the canonical field name
-	 */
-	protected String canonicalFieldName(String field) {
-		return field;
-	}
 
 	/**
 	 * Extract the actual field value for the given field.

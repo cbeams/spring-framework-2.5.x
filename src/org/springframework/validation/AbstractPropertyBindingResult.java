@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,14 +67,14 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getPropertyAccessor()
 	 */
 	public Class getFieldType(String field) {
-		return getPropertyAccessor().getPropertyType(field);
+		return getPropertyAccessor().getPropertyType(fixedField(field));
 	}
 
 	/**
 	 * Fetches the field value from the PropertyAccessor.
 	 * @see #getPropertyAccessor()
 	 */
-	public Object getActualFieldValue(String field) {
+	protected Object getActualFieldValue(String field) {
 		return getPropertyAccessor().getPropertyValue(field);
 	}
 
@@ -101,7 +101,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @param field the field name
 	 * @return the custom PropertyEditor, or <code>null</code>
 	 */
-	public PropertyEditor getCustomEditor(String field) {
+	protected PropertyEditor getCustomEditor(String field) {
 		String fixedField = fixedField(field);
 		Class type = getPropertyAccessor().getPropertyType(fixedField);
 		return getPropertyAccessor().findCustomEditor(type, fixedField);

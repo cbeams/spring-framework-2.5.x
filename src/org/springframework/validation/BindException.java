@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.validation;
 
+import java.beans.PropertyEditor;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +25,12 @@ import org.springframework.util.Assert;
 
 /**
  * Thrown when binding errors are considered fatal. Implements the
- * BindingResult interface (and thus its super-interface Errors)
+ * {@link BindingResult} interface (and its super-interface {@link Errors})
  * to allow for the direct analysis of binding errors.
  *
- * <p>As of Spring 2.0, this is a special-purpose class. Normally, application
- * code will work with the BindingResult interface, or a DataBinder that
- * in turn exposes a BindingResult via
+ * <p>As of Spring 2.0, this is a special-purpose class. Normally,
+ * application code will work with the {@link BindingResult} interface,
+ * or with a {@link DataBinder} that in turn exposes a BindingResult via
  * {@link org.springframework.validation.DataBinder#getBindingResult()}.
  *
  * @author Rod Johnson
@@ -81,14 +82,6 @@ public class BindException extends Exception implements BindingResult {
 	 */
 	public final BindingResult getBindingResult() {
 		return this.bindingResult;
-	}
-
-	/**
-	 * Return the PropertyEditorRegistry that the underlying BindingResult uses.
-	 * @see #getBindingResult()
-	 */
-	public final PropertyEditorRegistry getPropertyEditorRegistry() {
-		return this.bindingResult.getPropertyEditorRegistry();
 	}
 
 
@@ -218,12 +211,16 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getModel();
 	}
 
-	public void recordSuppressedField(String fieldName) {
-		this.bindingResult.recordSuppressedField(fieldName);
+	public Object getRawFieldValue(String field) {
+		return this.bindingResult.getRawFieldValue(field);
 	}
 
-	public String[] getSuppressedFields() {
-		return this.bindingResult.getSuppressedFields();
+	public PropertyEditor findEditor(String field, Class valueType) {
+		return this.bindingResult.findEditor(field, valueType);
+	}
+
+	public PropertyEditorRegistry getPropertyEditorRegistry() {
+		return this.bindingResult.getPropertyEditorRegistry();
 	}
 
 	public void addError(ObjectError error) {
@@ -232,6 +229,14 @@ public class BindException extends Exception implements BindingResult {
 
 	public String[] resolveMessageCodes(String errorCode, String field) {
 		return this.bindingResult.resolveMessageCodes(errorCode, field);
+	}
+
+	public void recordSuppressedField(String field) {
+		this.bindingResult.recordSuppressedField(field);
+	}
+
+	public String[] getSuppressedFields() {
+		return this.bindingResult.getSuppressedFields();
 	}
 
 

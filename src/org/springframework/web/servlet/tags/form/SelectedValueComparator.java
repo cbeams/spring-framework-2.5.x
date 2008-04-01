@@ -22,12 +22,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.support.BindStatus;
 
 /**
@@ -80,7 +78,8 @@ abstract class SelectedValueComparator {
 			return true;
 		}
 		Object actualValue = bindStatus.getActualValue();
-		if (actualValue != boundValue && ObjectUtils.nullSafeEquals(actualValue, candidateValue)) {
+		if (actualValue != null && actualValue != boundValue &&
+				ObjectUtils.nullSafeEquals(actualValue, candidateValue)) {
 			return true;
 		}
 		if (actualValue != null) {
@@ -135,20 +134,16 @@ abstract class SelectedValueComparator {
 	private static boolean exhaustiveCollectionCompare(
 			Collection collection, Object candidateValue, BindStatus bindStatus) {
 
-		PropertyEditorRegistry editorRegistry = null;
-		if (bindStatus.getErrors() instanceof BindingResult) {
-			editorRegistry = ((BindingResult) bindStatus.getErrors()).getPropertyEditorRegistry();
-		}
 		Map convertedValueCache = new HashMap(1);
 		PropertyEditor editor = null;
 		boolean candidateIsString = (candidateValue instanceof String);
-		if (editorRegistry != null && !candidateIsString) {
-			editor = editorRegistry.findCustomEditor(candidateValue.getClass(), bindStatus.getPath());
+		if (!candidateIsString) {
+			editor = bindStatus.findEditor(candidateValue.getClass());
 		}
 		for (Iterator it = collection.iterator(); it.hasNext();) {
 			Object element = it.next();
-			if (editor == null && editorRegistry != null && element != null && candidateIsString) {
-				editor = editorRegistry.findCustomEditor(element.getClass(), bindStatus.getPath());
+			if (editor == null && element != null && candidateIsString) {
+				editor = bindStatus.findEditor(element.getClass());
 			}
 			if (exhaustiveCompare(element, candidateValue, editor, convertedValueCache)) {
 				return true;
