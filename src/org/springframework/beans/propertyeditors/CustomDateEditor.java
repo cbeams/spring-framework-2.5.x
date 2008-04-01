@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,17 @@ import java.util.Date;
 import org.springframework.util.StringUtils;
 
 /**
- * PropertyEditor for <code>java.util.Date</code>, supporting a custom
- * <code>java.text.DateFormat</code>.
+ * Property editor for <code>java.util.Date</code>,
+ * supporting a custom <code>java.text.DateFormat</code>.
  *
- * <p>This is not meant to be used as system PropertyEditor but rather as
- * locale-specific date editor within custom controller code, to parse
- * user-entered date strings into Date properties of beans, and render
- * them in the UI form.
+ * <p>This is not meant to be used as system PropertyEditor but rather
+ * as locale-specific date editor within custom controller code,
+ * parsing user-entered number strings into Date properties of beans
+ * and rendering them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * <code>binder.registerCustomEditor</code> calls in an implementation
- * of BaseCommandController's <code>initBinder</code> method.
+ * <code>binder.registerCustomEditor</code> calls in a custom
+ * <code>initBinder</code> method.
  *
  * @author Juergen Hoeller
  * @since 28.04.2003
