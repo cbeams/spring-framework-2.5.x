@@ -1617,7 +1617,14 @@ public class SimpleProfiler implements Ordered {
       defined in the <filename class="libraryfile">spring-aspects.jar</filename> file.
       The aspect must also be configured with a transaction manager. You could of course
       use the Spring Framework's IoC container to take care of dependency injecting the
-      aspect, but since we're focusing here on applications running outside of a Spring
+      aspect.  The simplest way to 
+      configure the transaction management aspect is to use the 
+      <literal>'&lt;tx:annotation-driven/&gt;'</literal> element and specify the 
+      <literal>mode</literal> attribute to <literal>asepctj</literal> as described in
+      <xref linkend="transaction-declarative-annotations"/>. 
+      
+      
+      Since we're focusing here on applications running outside of a Spring
       container, we'll show you how to do it programmatically.</para>
       <note>
         <para>Prior to continuing, you may well want to read the previous sections entitled
