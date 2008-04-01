@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.0.9 (March 2008)
+THE SPRING FRAMEWORK, release 2.0.9 (April 2008)
 ------------------------------------------------
 http://www.springframework.org
 
@@ -114,7 +114,7 @@ MODULE JARS (dist/modules):
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~300 KB)
+* "spring-aop" (~305 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
@@ -170,7 +170,7 @@ MODULE JARS (dist/modules):
 - Contents: JDO 1.0/2.0 support
 - Dependencies: spring-jdbc, JDO API, (spring-web)
 
-* "spring-jpa" (~95 KB)
+* "spring-jpa" (~100 KB)
 - Contents: JPA 1.0 support
 - Dependencies: spring-jdbc, JPA API, (spring-web)
 
