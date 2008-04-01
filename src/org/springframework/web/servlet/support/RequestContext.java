@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,14 @@ public class RequestContext {
 	 * avoid package interdependencies.
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
 	 */
-	public final static String DEFAULT_THEME_NAME = "theme";
+	public static final String DEFAULT_THEME_NAME = "theme";
+
+	/**
+	 * Request attribute to hold the current web application context for RequestContext usage.
+	 * By default, the DispatcherServlet's context (or the root context as fallback) is exposed.
+	 */
+	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
+
 
 	protected static final boolean jstlPresent = ClassUtils.isPresent(
 			"javax.servlet.jsp.jstl.core.Config", JspAwareRequestContext.class.getClassLoader());
@@ -197,7 +204,11 @@ public class RequestContext {
 
 		// Fetch WebApplicationContext, either from DispatcherServlet or the root context.
 		// ServletContext needs to be specified to be able to fall back to the root context!
-		this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request, servletContext);
+		this.webApplicationContext =
+				(WebApplicationContext) request.getAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		if (this.webApplicationContext == null) {
+			this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request, servletContext);
+		}
 
 		// Determine locale to use for this RequestContext.
 		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
