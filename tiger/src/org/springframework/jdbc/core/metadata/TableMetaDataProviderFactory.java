@@ -60,6 +60,9 @@ public class TableMetaDataProviderFactory {
 					if ("HSQL Database Engine".equals(databaseProductName)) {
 						provider = new HsqlTableMetaDataProvider(databaseMetaData);
 					}
+					else if ("PostgreSQL".equals(databaseProductName)) {
+						provider = new PostgresTableMetaDataProvider(databaseMetaData);
+					}
 					else {
 						provider = new GenericTableMetaDataProvider(databaseMetaData);
 					}

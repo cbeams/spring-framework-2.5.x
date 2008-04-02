@@ -128,6 +128,8 @@ public class TableMetaDataContextTests extends TestCase {
 		ctrlDatabaseMetaData.setReturnValue(false);
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
+		mockDatabaseMetaData.getDatabaseProductVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.0");
 		mockDatabaseMetaData.getUserName();
 		ctrlDatabaseMetaData.setReturnValue(USER);
 		mockDatabaseMetaData.storesUpperCaseIdentifiers();
@@ -205,6 +207,8 @@ public class TableMetaDataContextTests extends TestCase {
 		ctrlDatabaseMetaData.setReturnValue(false);
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
+		mockDatabaseMetaData.getDatabaseProductVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.0");
 		mockDatabaseMetaData.getUserName();
 		ctrlDatabaseMetaData.setReturnValue(USER);
 		mockDatabaseMetaData.storesUpperCaseIdentifiers();

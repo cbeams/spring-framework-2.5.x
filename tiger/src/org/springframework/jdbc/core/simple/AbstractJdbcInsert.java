@@ -48,6 +48,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.util.Assert;
 
 /**
  * Abstract class to provide base functionality for easy inserts
@@ -416,7 +417,18 @@ public abstract class AbstractJdbcInsert {
 			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);
 		}
 		final KeyHolder keyHolder = new GeneratedKeyHolder();
-		if (!this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
+		if (this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
+			jdbcTemplate.update(
+					new PreparedStatementCreator() {
+						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
+							setParameterValues(ps, values, null);
+							return ps;
+						}
+					},
+					keyHolder);
+		}
+		else {
 			if (!this.tableMetaDataContext.isGetGeneratedKeysSimulated()) {
 				throw new InvalidDataAccessResourceUsageException(
 						"The getGeneratedKeys feature is not supported by this database");
@@ -431,54 +443,53 @@ public abstract class AbstractJdbcInsert {
 						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
 			}
 			// This is a hack to be able to get the generated key from a database that doesn't support
-			// get generated keys feature.  HSQL is one, PostgreSQL is another.  Has to be done with the same
-			// connection.
-			jdbcTemplate.execute(new ConnectionCallback() {
-				public Object doInConnection(Connection con) throws SQLException, DataAccessException {
-					// Do the insert
-					PreparedStatement ps = null;
-					try {
-						ps = con.prepareStatement(getInsertString());
-						setParameterValues(ps, values, null);
-						ps.executeUpdate();
-					} finally {
-						JdbcUtils.closeStatement(ps);
-					}
-					//Get the key
-					String keyQuery = tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
-							tableMetaDataContext.getTableName(),
-							getGeneratedKeyNames()[0]);
-					Statement keyStmt = null;
-					ResultSet rs = null;
-					HashMap keys = new HashMap(1);
-					try {
-						keyStmt = con.createStatement();
-						rs = keyStmt.executeQuery(keyQuery);
-						if (rs.next()) {
-							long key = rs.getLong(1);
-							keys.put(getGeneratedKeyNames()[0], key);
-							keyHolder.getKeyList().add(keys);
-						}
-					} finally {
-						JdbcUtils.closeResultSet(rs);
-						JdbcUtils.closeStatement(keyStmt);
-					}
-					return null;
-				}
-			});
-			return keyHolder;
-		}
-		else {
-			//TODO Add support for SQL Type info
-			int updateCount = jdbcTemplate.update(
-					new PreparedStatementCreator() {
-						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
+			// get generated keys feature.  HSQL is one, PostgreSQL is another.  Postgres uses a RETURNING
+			// clause while HSQL uses a second query that has to be executed with the same connection.
+			final String keyQuery = tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
+					tableMetaDataContext.getTableName(),
+					getGeneratedKeyNames()[0]);
+			Assert.notNull(keyQuery, "Query for simulating get generated keys can't be null");
+			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
+				Long key = jdbcTemplate.queryForLong(
+						getInsertString() + " " + keyQuery,
+						values.toArray(new Object[values.size()]));
+				HashMap keys = new HashMap(1);
+				keys.put(getGeneratedKeyNames()[0], key);
+				keyHolder.getKeyList().add(keys);
+			}
+			else {
+				jdbcTemplate.execute(new ConnectionCallback() {
+					public Object doInConnection(Connection con) throws SQLException, DataAccessException {
+						// Do the insert
+						PreparedStatement ps = null;
+						try {
+							ps = con.prepareStatement(getInsertString());
 							setParameterValues(ps, values, null);
-							return ps;
+							ps.executeUpdate();
+						} finally {
+							JdbcUtils.closeStatement(ps);
 						}
-					},
-					keyHolder);
+						//Get the key
+						Statement keyStmt = null;
+						ResultSet rs = null;
+						HashMap keys = new HashMap(1);
+						try {
+							keyStmt = con.createStatement();
+							rs = keyStmt.executeQuery(keyQuery);
+							if (rs.next()) {
+								long key = rs.getLong(1);
+								keys.put(getGeneratedKeyNames()[0], key);
+								keyHolder.getKeyList().add(keys);
+							}
+						} finally {
+							JdbcUtils.closeResultSet(rs);
+							JdbcUtils.closeStatement(keyStmt);
+						}
+						return null;
+					}
+				});
+			}
+			return keyHolder;
 		}
 		return keyHolder;
 	}

@@ -45,6 +45,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/** indicator whether column metadata should be used */
 	private boolean tableColumnMetaDataUsed = false;
 
+	/** the version of the database */
+	private String databaseVersion;
+
 	/** the name of the user currently connected */
 	private String userName;
 
@@ -173,6 +176,12 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			logger.warn("Error retrieving 'DatabaseMetaData.getDatabaseProductName' - " + se.getMessage());
 		}
 		try {
+			databaseVersion = databaseMetaData.getDatabaseProductVersion();
+		}
+		catch (SQLException se) {
+			logger.warn("Error retrieving 'DatabaseMetaData.getDatabaseProductVersion' - " + se.getMessage());
+		}
+		try {
 			setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
 		}
 		catch (SQLException se) {
@@ -241,6 +250,13 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		return schemaNameToUse(schemaName);
 	}
 
+
+	/**
+	 * Provide access to version info for subclasses 
+	 */
+	protected String getDatabaseVersion() {
+		return databaseVersion;
+	}
 
 	/**
 	 * Method supporting the metedata processing for a table
