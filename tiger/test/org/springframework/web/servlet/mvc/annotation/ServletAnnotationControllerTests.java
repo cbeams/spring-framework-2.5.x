@@ -899,7 +899,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 				public String getContentType() {
 					return null;
 				}
-				@SuppressWarnings({ "unchecked", "deprecation" })
+				@SuppressWarnings({"unchecked", "deprecation"})
 				public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 					TestBean tb = (TestBean) model.get("testBean");
 					if (tb == null) {
@@ -914,6 +914,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 					}
 					if (errors.hasFieldErrors("date")) {
 						throw new IllegalStateException();
+					}
+					if (model.containsKey("ITestBean")) {
+						assertTrue(model.get(BindingResult.MODEL_KEY_PREFIX + "ITestBean") instanceof Errors);
 					}
 					List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 					response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +

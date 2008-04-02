@@ -310,7 +310,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
 			ModelAndView mav =
 					methodInvoker.getModelAndView(handlerMethod, handler.getClass(), result, implicitModel, webRequest);
-			methodInvoker.updateSessionAttributes(
+			methodInvoker.updateModelAttributes(
 					handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);
 			return mav;
 		}

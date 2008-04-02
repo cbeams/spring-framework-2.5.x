@@ -19,6 +19,8 @@ package org.springframework.web.bind.annotation.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +36,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -361,34 +364,47 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	public final void updateSessionAttributes(
+	public final void updateModelAttributes(
 			Object handler, Map mavModel, ExtendedModelMap implicitModel, NativeWebRequest webRequest)
 			throws Exception {
 
-		if (this.methodResolver.hasSessionAttributes()) {
-			if (this.sessionStatus.isComplete()) {
-				for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
-					this.sessionAttributeStore.cleanupAttribute(webRequest, attrName);
-				}
+		if (this.methodResolver.hasSessionAttributes() && this.sessionStatus.isComplete()) {
+			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
+				this.sessionAttributeStore.cleanupAttribute(webRequest, attrName);
 			}
-			// Expose model attributes as session attributes, if required.
-			Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
-			for (Map.Entry entry : new HashSet<Map.Entry>(model.entrySet())) {
-				String attrName = (String) entry.getKey();
-				Object attrValue = entry.getValue();
-				if (this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null))) {
-					if (!this.sessionStatus.isComplete()) {
-						this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
-					}
-					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
-					if (mavModel != null && !model.containsKey(bindingResultKey)) {
-						WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
-						initBinder(handler, attrName, binder, webRequest);
-						mavModel.put(bindingResultKey, binder.getBindingResult());
-					}
+		}
+
+		// Expose model attributes as session attributes, if required.
+		// Expose BindingResults for all attributes, making custom editors available.
+		Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
+		for (Map.Entry<String, Object> entry : new HashSet<Map.Entry>(model.entrySet())) {
+			String attrName = entry.getKey();
+			Object attrValue = entry.getValue();
+			boolean isSessionAttr =
+					this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null));
+			if (isSessionAttr && !this.sessionStatus.isComplete()) {
+				this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
+			}
+			if (!attrName.startsWith(BindingResult.MODEL_KEY_PREFIX) &&
+					(isSessionAttr || isBindingCandidate(attrValue))) {
+				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
+				if (mavModel != null && !model.containsKey(bindingResultKey)) {
+					WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
+					initBinder(handler, attrName, binder, webRequest);
+					mavModel.put(bindingResultKey, binder.getBindingResult());
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the given value qualifies as a "binding candidate",
+	 * i.e. might potentially be subject to bean-style data binding later on.
+	 */
+	protected boolean isBindingCandidate(Object value) {
+		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
+				!(value instanceof Map) && !ClassUtils.isPrimitiveOrWrapper(value.getClass()) &&
+				!(value instanceof CharSequence) && !(value instanceof Number) && !(value instanceof Date));
 	}
 
 	private Object doInvokeMethod(Method method, Object target, Object[] args) throws Exception {
