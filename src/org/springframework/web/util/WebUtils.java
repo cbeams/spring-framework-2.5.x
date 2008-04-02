@@ -159,7 +159,9 @@ public abstract class WebUtils {
 	 * @return whether default HTML escaping is enabled (default is false)
 	 */
 	public static boolean isDefaultHtmlEscape(ServletContext servletContext) {
-		Assert.notNull(servletContext, "ServletContext must not be null");
+		if (servletContext == null) {
+			return false;
+		}
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
 		return Boolean.valueOf(param).booleanValue();
 	}
@@ -175,6 +177,9 @@ public abstract class WebUtils {
 	 * @return whether default HTML escaping is enabled (null = no explicit default)
 	 */
 	public static Boolean getDefaultHtmlEscape(ServletContext servletContext) {
+		if (servletContext == null) {
+			return null;
+		}
 		Assert.notNull(servletContext, "ServletContext must not be null");
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
 		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
