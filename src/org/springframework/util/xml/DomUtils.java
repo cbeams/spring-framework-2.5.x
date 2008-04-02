@@ -17,8 +17,8 @@
 package org.springframework.util.xml;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.w3c.dom.CharacterData;
@@ -54,14 +54,15 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
-	public static List getChildElementsByTagNames(Element ele, Collection childEleNames) {
+	public static List getChildElementsByTagName(Element ele, String[] childEleNames) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleNames, "Element names collection must not be null");
+		List childEleNameList = Arrays.asList(childEleNames);
 		NodeList nl = ele.getChildNodes();
 		List childEles = new ArrayList();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && nodeNameMatch(node, childEleNames)) {
+			if (node instanceof Element && nodeNameMatch(node, childEleNameList)) {
 				childEles.add(node);
 			}
 		}
@@ -80,7 +81,7 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
 	public static List getChildElementsByTagName(Element ele, String childEleName) {
-		return getChildElementsByTagNames(ele, Collections.singleton(childEleName));
+		return getChildElementsByTagName(ele, new String[] {childEleName});
 	}
 
 	/**
