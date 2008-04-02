@@ -49,13 +49,15 @@ public class CallMetaDataProviderFactory {
 			"MySQL",
 			"Microsoft SQL Server",
 			"Oracle",
+			"PostgreSQL",
 			"Sybase"
 		);
 	/** List of supported database products for function calls */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
 			"MySQL",
 			"Microsoft SQL Server",
-			"Oracle"
+			"Oracle",
+			"PostgreSQL"
 		);
 
 	/**
@@ -104,6 +106,9 @@ public class CallMetaDataProviderFactory {
 					}
 					else if ("Apache Derby".equals(databaseProductName)) {
 						provider = new DerbyCallMetaDataProvider((databaseMetaData));
+					}
+					else if ("PostgreSQL".equals(databaseProductName)) {
+						provider = new PostgresCallMetaDataProvider((databaseMetaData));
 					}
 					else if ("Sybase".equals(databaseProductName)) {
 						provider = new SybaseCallMetaDataProvider((databaseMetaData));

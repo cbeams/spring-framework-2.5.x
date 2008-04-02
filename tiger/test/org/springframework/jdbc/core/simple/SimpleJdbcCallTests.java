@@ -180,6 +180,18 @@ public class SimpleJdbcCallTests extends TestCase {
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString("PROCEDURE_CAT");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getString("PROCEDURE_SCHEM");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getString("PROCEDURE_NAME");
+		ctrlResultSet.setReturnValue("add_invoice");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getString("COLUMN_NAME");
 		ctrlResultSet.setReturnValue("amount");
 		mockResultSet.getInt("COLUMN_TYPE");
@@ -232,6 +244,8 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlDatabaseMetaData.setReturnValue(true);
 		mockDatabaseMetaData.storesLowerCaseIdentifiers();
 		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.getProcedures("", "ME", "ADD_INVOICE");
+		ctrlDatabaseMetaData.setReturnValue(mockResultSet);
 		mockDatabaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE", null);
 		ctrlDatabaseMetaData.setReturnValue(mockResultSet);
 
@@ -326,6 +340,18 @@ public class SimpleJdbcCallTests extends TestCase {
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString("PROCEDURE_CAT");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getString("PROCEDURE_SCHEM");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getString("PROCEDURE_NAME");
+		ctrlResultSet.setReturnValue("add_invoice");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getString("COLUMN_NAME");
 		ctrlResultSet.setReturnValue(null);
 		mockResultSet.getInt("COLUMN_TYPE");
@@ -378,6 +404,8 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlDatabaseMetaData.setReturnValue(true);
 		mockDatabaseMetaData.storesLowerCaseIdentifiers();
 		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.getProcedures("", "ME", "ADD_INVOICE");
+		ctrlDatabaseMetaData.setReturnValue(mockResultSet);
 		mockDatabaseMetaData.getProcedureColumns("", "ME", "ADD_INVOICE", null);
 		ctrlDatabaseMetaData.setReturnValue(mockResultSet);
 
