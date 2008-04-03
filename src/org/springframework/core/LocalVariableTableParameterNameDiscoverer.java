@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.objectweb.asm.commons.EmptyVisitor;
 import org.springframework.util.ClassUtils;
 
 /**
- * Implementation of ParameterNameDiscover that uses the LocalVariableTable
+ * Implementation of {@link ParameterNameDiscoverer} that uses the LocalVariableTable
  * information in the method attributes to discover parameter names. Returns
  * <code>null</code> if the class file was compiled without debug information.
  *
@@ -82,8 +82,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			if (logger.isDebugEnabled()) {
 				logger.debug("IOException whilst attempting to read '.class' file for class [" +
 						ctor.getDeclaringClass().getName() +
-						"] - unable to determine parameter names for constructor: " + ctor,
-						ex);
+						"] - unable to determine parameter names for constructor: " + ctor, ex);
 			}
 		}
 		return null;
@@ -130,8 +129,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		private int numParamsExpected;
 		
 		/*
-		 * the nth entry contains the slot index of the LVT table entry holding the
-		 * argument name for the nth parameter
+		 * The nth entry contains the slot index of the LVT table entry holding the
+		 * argument name for the nth parameter.
 		 */
 		private int[] lvtSlotIndex;
 
@@ -142,7 +141,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		public ParameterNameDiscoveringVisitor(String name, boolean isStatic, Class[] paramTypes) {
 			this.methodNameToMatch = name;
 			this.numParamsExpected = paramTypes.length;
-			computeLVTSlotIndices(isStatic, paramTypes);
+			computeLvtSlotIndices(isStatic, paramTypes);
 		}
 		
 		public void setDescriptorToMatch(String descriptor) {
@@ -153,7 +152,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			if (name.equals(this.methodNameToMatch) &&
 				desc.equals(this.descriptorToMatch)) {
 				this.foundTargetMember = true;
-				return new LocalVariableTableVisitor(isStatic(access), this,this.numParamsExpected,this.lvtSlotIndex);	
+				return new LocalVariableTableVisitor(isStatic(access), this, this.numParamsExpected, this.lvtSlotIndex);
 			} 
 			else {
 				// not interested in this method...
@@ -173,7 +172,6 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			if (!foundTargetMember()) {
 				throw new IllegalStateException("Can't ask for parameter names when target member has not been found");
 			}
-			
 			return this.parameterNames;
 		}
 		
@@ -181,7 +179,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			this.parameterNames = names;
 		}
 		
-		private void computeLVTSlotIndices(boolean isStatic, Class[] paramTypes) {
+		private void computeLvtSlotIndices(boolean isStatic, Class[] paramTypes) {
 			this.lvtSlotIndex = new int[paramTypes.length];
 			int nextIndex = (isStatic ? 0 : 1);
 			for (int i = 0; i < paramTypes.length; i++) {
@@ -196,7 +194,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		
 		private boolean isWideType(Class aType) {
-			return (aType ==Long.TYPE || aType == Double.TYPE);
+			return (aType == Long.TYPE || aType == Double.TYPE);
 		}
 	}
 
@@ -204,7 +202,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private static class FindMethodParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
 		public FindMethodParameterNamesClassVisitor(Method method) {
-			super(method.getName(),Modifier.isStatic(method.getModifiers()),method.getParameterTypes());
+			super(method.getName(), Modifier.isStatic(method.getModifiers()), method.getParameterTypes());
 			setDescriptorToMatch(Type.getMethodDescriptor(method));
 		}
 	}
@@ -212,13 +210,13 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 	private static class FindConstructorParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
-		public FindConstructorParameterNamesClassVisitor(Constructor cons) {
-			super("<init>",false,cons.getParameterTypes());
-			Type[] pTypes = new Type[cons.getParameterTypes().length];
+		public FindConstructorParameterNamesClassVisitor(Constructor ctor) {
+			super("<init>", false, ctor.getParameterTypes());
+			Type[] pTypes = new Type[ctor.getParameterTypes().length];
 			for (int i = 0; i < pTypes.length; i++) {
-				pTypes[i] = Type.getType(cons.getParameterTypes()[i]);
+				pTypes[i] = Type.getType(ctor.getParameterTypes()[i]);
 			}
-			setDescriptorToMatch(Type.getMethodDescriptor(Type.VOID_TYPE,pTypes));
+			setDescriptorToMatch(Type.getMethodDescriptor(Type.VOID_TYPE, pTypes));
 		}
 	}
 
@@ -226,11 +224,16 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
 
 		private boolean isStatic;
+
 		private ParameterNameDiscoveringVisitor memberVisitor;
+
 		private int numParameters;
+
 		private int[] lvtSlotIndices;
+
 		private String[] parameterNames;
-		private boolean hasLVTInfo = false;
+
+		private boolean hasLvtInfo = false;
 
 		public LocalVariableTableVisitor(
 				boolean isStatic, ParameterNameDiscoveringVisitor memberVisitor, int numParams, int[] lvtSlotIndices) {
@@ -243,17 +246,17 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 		public void visitLocalVariable(
 				String name, String description, String signature, Label start, Label end, int index) {
-			this.hasLVTInfo = true;
+			this.hasLvtInfo = true;
 			if (isMethodArgumentSlot(index)) {
 				this.parameterNames[parameterNameIndexForSlot(index)] = name;
 			}
 		}
 
 		public void visitEnd() {
-			if (this.hasLVTInfo || this.isStatic && numParameters == 0) {
+			if (this.hasLvtInfo || this.isStatic && numParameters == 0) {
 				 // visitLocalVariable will never be called for static no args methods
 				 // which doesn't use any local variables.
-				 // This means that hasLVTInfo could be false for that kind of methods
+				 // This means that hasLvtInfo could be false for that kind of methods
 				 // even if the class has local variable info.
 				this.memberVisitor.setParameterNames(this.parameterNames);
 			}
