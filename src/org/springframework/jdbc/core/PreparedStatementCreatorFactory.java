@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
@@ -206,10 +208,24 @@ public class PreparedStatementCreatorFactory {
 			this.actualSql = actualSql;
 			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
-			if (this.parameters.size() != declaredParameters.size())
-				throw new InvalidDataAccessApiUsageException(
-						"SQL [" + sql + "]: given " + this.parameters.size() +
-						" parameters but expected " + declaredParameters.size());
+			if (this.parameters.size() != declaredParameters.size()) {
+				// account for named parameters being used multiple times
+				Set names = new HashSet();
+				for (int i = 0; i < parameters.size(); i++) {
+					Object o = parameters.get(i);
+					if (o instanceof SqlParameterValue) {
+						names.add(((SqlParameterValue)o).getName());
+					}
+					else {
+						names.add(o);
+					}
+				}
+				if (names.size() != declaredParameters.size()) {
+					throw new InvalidDataAccessApiUsageException(
+							"SQL [" + sql + "]: given " + names.size() +
+							" parameters but expected " + declaredParameters.size());
+				}
+			}
 		}
 
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -260,6 +276,12 @@ public class PreparedStatementCreatorFactory {
 					declaredParameter = paramValue;
 				}
 				else {
+					if (declaredParameters.size() <= i) {
+						throw new InvalidDataAccessApiUsageException(
+								"SQL [" + sql + "]: unable to access parameter number " + (i + 1) +
+								" given only " + declaredParameters.size() + " parameters");
+
+					}
 					declaredParameter = (SqlParameter) declaredParameters.get(i);
 				}
 				if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {

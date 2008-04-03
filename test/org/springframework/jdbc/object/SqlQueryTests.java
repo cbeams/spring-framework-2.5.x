@@ -61,6 +61,10 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		"select id, forename from custmr where id in (?, ?)";
 	private static final String SELECT_ID_FORENAME_WHERE_ID_IN_LIST_2 =
 		"select id, forename from custmr where id in (:ids)";
+	private static final String SELECT_ID_FORENAME_WHERE_ID_REUSED_1 =
+		"select id, forename from custmr where id = ? or id = ?)";
+	private static final String SELECT_ID_FORENAME_WHERE_ID_REUSED_2 =
+		"select id, forename from custmr where id = :id1 or id = :id1)";
 	private static final String SELECT_ID_FORENAME_WHERE_ID =
 		"select id, forename from custmr where id <= ?";
 
@@ -931,7 +935,118 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
 		assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
 	}
+	
+	public void testNamedParameterQueryReusingParameter() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(2);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("juergen");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(
+				SELECT_ID_FORENAME_WHERE_ID_REUSED_1, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		class CustomerQuery extends MappingSqlQuery {
+
+			public CustomerQuery(DataSource ds) {
+				super(ds, SELECT_ID_FORENAME_WHERE_ID_REUSED_2);
+				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
+				declareParameter(new SqlParameter("id1", Types.NUMERIC));
+				compile();
+			}
+
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
+				Customer cust = new Customer();
+				cust.setId(rs.getInt(COLUMN_NAMES[0]));
+				cust.setForename(rs.getString(COLUMN_NAMES[1]));
+				return cust;
+			}
+
+			public List findCustomers(Integer id) {
+				Map params = new HashMap();
+				params.put("id1", id);
+				return (List) executeByNamedParam(params);
+			}
+		}
+
+		CustomerQuery query = new CustomerQuery(mockDataSource);
+		List cust = query.findCustomers(new Integer(1));
+
+		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("First customer id was assigned correctly", ((Customer)cust.get(0)).getId(), 1);
+		assertEquals("First customer forename was assigned correctly", ((Customer)cust.get(0)).getForename(), "rod");
+		assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
+		assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
+	}
+
+	public void testNamedParameterUsingInvalidQuestionMarkPlaceHolders() throws SQLException {
+
+		mockPreparedStatement.setNull(1, 2);
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(
+				SELECT_ID_FORENAME_WHERE_ID_REUSED_1, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		class CustomerQuery extends MappingSqlQuery {
+
+			public CustomerQuery(DataSource ds) {
+				super(ds, SELECT_ID_FORENAME_WHERE_ID_REUSED_1);
+				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
+				declareParameter(new SqlParameter("id1", Types.NUMERIC));
+				compile();
+			}
+
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
+				Customer cust = new Customer();
+				cust.setId(rs.getInt(COLUMN_NAMES[0]));
+				cust.setForename(rs.getString(COLUMN_NAMES[1]));
+				return cust;
+			}
+
+			public List findCustomers(Integer id1) {
+				Map params = new HashMap();
+				params.put("id1", id1);
+				return (List) executeByNamedParam(params);
+			}
+		}
+
+		CustomerQuery query = new CustomerQuery(mockDataSource);
+		try {
+			List cust = query.findCustomers(new Integer(1));
+			fail("Should have caused an InvalidDataAccessApiUsageException");
+		}
+		catch (InvalidDataAccessApiUsageException e){
+		}
+
+	}
 
 	public void testUpdateCustomers() throws SQLException {
 		mockResultSet.next();
