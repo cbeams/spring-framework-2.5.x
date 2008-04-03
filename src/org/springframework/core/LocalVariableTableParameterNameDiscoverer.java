@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,9 +63,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		String[] paramNames = (String[]) this.parameterNamesCache.get(method);
 		if (paramNames == null) {
 			try {
-				ParameterNameDiscoveringVisitor visitor = visitMethod(method);
-				if (visitor.foundTargetMember()) {
-					paramNames = visitor.getParameterNames();
+				paramNames = visitMethod(method).getParameterNames();
+				if (paramNames != null) {
 					this.parameterNamesCache.put(method, paramNames);
 				}
 			}
@@ -86,9 +85,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		String[] paramNames = (String[]) this.parameterNamesCache.get(ctor);
 		if (paramNames == null) {
 			try {
-				ParameterNameDiscoveringVisitor visitor = visitConstructor(ctor);
-				if (visitor.foundTargetMember()) {
-					paramNames = visitor.getParameterNames();
+				paramNames = visitConstructor(ctor).getParameterNames();
+				if (paramNames != null) {
 					this.parameterNamesCache.put(ctor, paramNames);
 				}
 			}
@@ -98,8 +96,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 				if (logger.isDebugEnabled()) {
 					logger.debug("IOException whilst attempting to read '.class' file for class [" +
 							ctor.getDeclaringClass().getName() +
-							"] - unable to determine parameter names for constructor: " + ctor,
-							ex);
+							"] - unable to determine parameter names for constructor: " + ctor, ex);
 				}
 			}
 		}
@@ -163,19 +160,17 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		private int numParamsExpected;
 		
 		/*
-		 * the nth entry contains the slot index of the LVT table entry holding the
-		 * argument name for the nth parameter
+		 * The nth entry contains the slot index of the LVT table entry holding the
+		 * argument name for the nth parameter.
 		 */
 		private int[] lvtSlotIndex;
-
-		private boolean foundTargetMember = false;
 
 		private String[] parameterNames;
 		
 		public ParameterNameDiscoveringVisitor(String name, boolean isStatic, Class[] paramTypes) {
 			this.methodNameToMatch = name;
 			this.numParamsExpected = paramTypes.length;
-			computeLVTSlotIndices(isStatic, paramTypes);
+			computeLvtSlotIndices(isStatic, paramTypes);
 		}
 		
 		public void setDescriptorToMatch(String descriptor) {
@@ -183,10 +178,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-			if (name.equals(this.methodNameToMatch) &&
-				desc.equals(this.descriptorToMatch)) {
-				this.foundTargetMember = true;
-				return new LocalVariableTableVisitor(isStatic(access), this,this.numParamsExpected,this.lvtSlotIndex);	
+			if (name.equals(this.methodNameToMatch) && desc.equals(this.descriptorToMatch)) {
+				return new LocalVariableTableVisitor(this, isStatic(access));
 			} 
 			else {
 				// Not interested in this method...
@@ -198,23 +191,11 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			return ((access & Opcodes.ACC_STATIC) > 0);
 		}
 
-		public boolean foundTargetMember() {
-			return this.foundTargetMember;
-		}
-		
 		public String[] getParameterNames() {
-			if (!foundTargetMember()) {
-				throw new IllegalStateException("Can't ask for parameter names when target member has not been found");
-			}
-			
 			return this.parameterNames;
 		}
-		
-		public void setParameterNames(String[] names) {
-			this.parameterNames = names;
-		}
-		
-		private void computeLVTSlotIndices(boolean isStatic, Class[] paramTypes) {
+
+		private void computeLvtSlotIndices(boolean isStatic, Class[] paramTypes) {
 			this.lvtSlotIndex = new int[paramTypes.length];
 			int nextIndex = (isStatic ? 0 : 1);
 			for (int i = 0; i < paramTypes.length; i++) {
@@ -229,7 +210,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		
 		private boolean isWideType(Class aType) {
-			return (aType ==Long.TYPE || aType == Double.TYPE);
+			return (aType == Long.TYPE || aType == Double.TYPE);
 		}
 	}
 
@@ -237,7 +218,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private static class FindMethodParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
 		public FindMethodParameterNamesClassVisitor(Method method) {
-			super(method.getName(),Modifier.isStatic(method.getModifiers()),method.getParameterTypes());
+			super(method.getName(), Modifier.isStatic(method.getModifiers()), method.getParameterTypes());
 			setDescriptorToMatch(Type.getMethodDescriptor(method));
 		}
 	}
@@ -245,11 +226,11 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 	private static class FindConstructorParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
-		public FindConstructorParameterNamesClassVisitor(Constructor cons) {
-			super("<init>",false,cons.getParameterTypes());
-			Type[] pTypes = new Type[cons.getParameterTypes().length];
+		public FindConstructorParameterNamesClassVisitor(Constructor ctor) {
+			super("<init>", false, ctor.getParameterTypes());
+			Type[] pTypes = new Type[ctor.getParameterTypes().length];
 			for (int i = 0; i < pTypes.length; i++) {
-				pTypes[i] = Type.getType(cons.getParameterTypes()[i]);
+				pTypes[i] = Type.getType(ctor.getParameterTypes()[i]);
 			}
 			setDescriptorToMatch(Type.getMethodDescriptor(Type.VOID_TYPE,pTypes));
 		}
@@ -258,61 +239,39 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
 
-		private boolean isStatic;
-		private ParameterNameDiscoveringVisitor memberVisitor;
-		private int numParameters;
-		private int[] lvtSlotIndices;
-		private String[] parameterNames;
-		private boolean hasLVTInfo = false;
+		private final ParameterNameDiscoveringVisitor memberVisitor;
 
-		public LocalVariableTableVisitor(
-				boolean isStatic, ParameterNameDiscoveringVisitor memberVisitor, int numParams, int[] lvtSlotIndices) {
-			this.isStatic = isStatic;
-			this.numParameters = numParams;
-			this.parameterNames = new String[this.numParameters];
+		private final boolean isStatic;
+
+		private String[] parameterNames;
+
+		private boolean hasLvtInfo = false;
+
+		public LocalVariableTableVisitor(ParameterNameDiscoveringVisitor memberVisitor, boolean isStatic) {
 			this.memberVisitor = memberVisitor;
-			this.lvtSlotIndices = lvtSlotIndices;
+			this.isStatic = isStatic;
+			this.parameterNames = new String[memberVisitor.numParamsExpected];
 		}
 
 		public void visitLocalVariable(
 				String name, String description, String signature, Label start, Label end, int index) {
-			this.hasLVTInfo = true;
-			if (isMethodArgumentSlot(index)) {
-				this.parameterNames[parameterNameIndexForSlot(index)] = name;
+			this.hasLvtInfo = true;
+			int[] lvtSlotIndices = this.memberVisitor.lvtSlotIndex;
+			for (int i = 0; i < lvtSlotIndices.length; i++) {
+				if (lvtSlotIndices[i] == index) {
+					this.parameterNames[i] = name;
+				}
 			}
 		}
 
 		public void visitEnd() {
-			if (this.hasLVTInfo || this.isStatic && numParameters == 0) {
+			if (this.hasLvtInfo || (this.isStatic && this.parameterNames.length == 0)) {
 				 // visitLocalVariable will never be called for static no args methods
 				 // which doesn't use any local variables.
-				 // This means that hasLVTInfo could be false for that kind of methods
+				 // This means that hasLvtInfo could be false for that kind of methods
 				 // even if the class has local variable info.
-				this.memberVisitor.setParameterNames(this.parameterNames);
+				this.memberVisitor.parameterNames = this.parameterNames;
 			}
-		}
-
-		/**
-		 * An lvt entry describes an argument (as opposed to a local var) if 
-		 * it appears in the lvtSlotIndices table
-		 */
-		private boolean isMethodArgumentSlot(int index) {
-			for (int i = 0; i < this.lvtSlotIndices.length; i++) {
-				if (this.lvtSlotIndices[i] == index) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private int parameterNameIndexForSlot(int slot) {
-			for (int i = 0; i < this.lvtSlotIndices.length; i++) {
-				if (this.lvtSlotIndices[i] == slot) {
-					return i;
-				}
-			}
-			throw new IllegalStateException(
-					"Asked for index for a slot which failed the isMethodArgumentSlot test: " + slot);
 		}
 	}
 
