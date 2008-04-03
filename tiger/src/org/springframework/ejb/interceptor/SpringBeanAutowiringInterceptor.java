@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,13 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
  * method and provide a specific locator key for each autowired EJB.</b>
  * Alternatively, override the {@link #getBeanFactory} template method and
  * obtain the target factory explicitly.
+ *
+ * <p><b>WARNING: Do not define the same bean as Spring-managed bean and as
+ * EJB3 session bean in the same deployment unit.</b> In particular, be
+ * careful when using the <code>&lt;context:component-scan&gt;</code> feature
+ * in combination with the deployment of Spring-based EJB3 session beans:
+ * Make sure that the EJB3 session beans are <i>not</i> autodetected as
+ * Spring-managed beans as well, using appropriate package restrictions.
  *
  * @author Juergen Hoeller
  * @since 2.5.1
