@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.3 (2008-03-31)
+Changes in version 2.5.3 (2008-04-04)
 -------------------------------------
 
 General
@@ -21,6 +21,7 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * CharacterEditor's "allowEmpty" only translates empty String to null, keeping a single space String as space character
+* CustomNumberEditor treats number with leading zeros as decimal (removed unwanted octal support while preserving hex)
 * GenericTypeAwarePropertyDescriptor respects "propertyEditorClass" specified on original PropertyDescriptor
 * renamed ListableBeanFactory's "includePrototypes" flag to "includeNonSingletons" (affects javadoc only)
 * added "getEarlyBeanReference" hook to SmartInstantiationAwareBeanPostProcessor interface
@@ -47,6 +48,7 @@ Package org.springframework.context
 
 Package org.springframework.core
 * Conventions detects special generated subclasses (e.g. by OpenJPA) and derives the variable name from the superclass
+* revised LocalVariableTableParameterNameDiscoverer to avoid potential NPE in case of no parameter names found on Java 5
 * revised DefaultValueStyler (and deprecated ReflectiveVisitorHelper) for better performance and no class loader leaks
 * StaticLabeledEnumResolver uses weak references to LabeledEnum class in order to avoid class loader leaks
 * added "lastModified()" method to Resource interface, for abstract access to the last-modified timestamp
@@ -62,6 +64,7 @@ Package org.springframework.ejb
 Package org.springframework.jdbc
 * JndiDataSourceLookup uses "resourceRef"=true by default (being able to resolve J2EE "jdbc/myDb" ENC names by default)
 * NativeJdbcExtractorAdapter only processes DatabaseMetaData Connection if non-null (for WebLogic cluster compatibility)
+* fixed SQLException translation for IBM DB2 and MS SQL to operate on error codes first, just falling back to SQL state
 * added MySQL NDB error codes to default sql-error-codes.xml
 * factored out common AbstractColumnMaxValueIncrementer base class from Derby/Hsql/MySQLMaxValueIncrementer
 * added DB2MainframeSequenceMaxValueIncrementer for DB2/390 and DB2/400 (differing from DB2 UDB for Unix and Windows)
@@ -128,25 +131,40 @@ Package org.springframework.test
 * TransactionalTestExecutionListener reobtains transaction manager for every transaction (picking up context changes)
 * fixed Abstract*JUnit*SpringContextTests classes to be actually marked as abstract
 
+Package org.springframework.transaction
+* JtaTransactionManager" checks JNDI location "java:appserver/TransactionManager" for GlassFish's primary TM handle
+
 Package org.springframework.util
 * "ClassUtils.resolveClassName" preserves the original root cause in the rethrown IllegalArgumentException
+* NumberUtils treats number with leading zeros as decimal (removed unwanted octal support while preserving hex)
 * MethodInvoker scans all declared methods (of any visibility), being able to invoke protected/private methods as well
 * added "getChildElementsByTagNames" method with tag names Collection argument to DomUtils
 
+Package org.springframework.validation
+* factored out AbstractErrors base class from AbstractBindingResult, providing common access to evaluated errors
+* added "getRawFieldValue" and "findEditor" methods to BindingResult interface (for a completely decoupled BindStatus)
+* fixed AbstractPropertyBindingResult's "getFieldType" to correctly apply nested path to field name
+* added convenience constructors to ObjectError and FieldError
+
 Package org.springframework.web
 * ContextLoader accepts system property placeholders in "contextConfigLocation" value (again)
+* OncePerRequestFilter cleans up its marker attribute at the end of each outer request (for Portlet compatibility)
 * RequestContextFilter supports "threadContextInheritable" init-param (analogous to DispatcherServlet)
 * HttpRequestHandlerServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405
 * DispatcherServlet translates HttpRequestMethodNotSupportedException into HTTP status code 405 by default
+* introduced WEB_APPLICATION_CONTEXT_ATTRIBUTE in RequestContext, for overriding the DispatcherServlet context
 * ControllerClassNameHandlerMapping detects @Controller beans by default as well
 * ControllerClassNameHandlerMapping registers plain path for multi-action controllers too ("/welcome/*" + "/welcome")
 * added ControllerBeanNameHandlerMapping, deriving URL paths from bean names for well-known controller types
 * AnnotationMethodHandlerAdapter's @RequestMapping matching is deterministic independent from the declared methor order
 * AnnotationMethodHandlerAdapter accepts @RequestParam annotations for @InitBinder methods as well
+* AnnotationMethodHandlerAdapter always exposes BindingResult objects for model attributes which are binding candidates
 * AnnotationMethodHandlerAdapter throws clear IllegalStateException in case of invalid BindingResult argument
 * Portlet AnnotationMethodHandlerAdapter supports Servlet ModelAndView and View objects as handler method return values
 * default attribute names for annotated handler method return values are consistently derived from the *declared* type
 * added "exposedContextBeanNames" property to InternalResourceView(Resolver), for exposing specific Spring beans only
+* InternalResourceView does not enforce ApplicationContext to be set anymore (allowing for "getServletContext" checking)
+* JstlView, Tiles(Jstl)View and AbstractJasperReportsView expose current RequestContext's MessageSource for localization
 * JSP form tags do not autogenerate id in case of empty id specified (empty id signals no id to be rendered)
 * JSP OptionTag and OptionsTag support "id" attribute now, analogous to RadioButton(s)Tag and Checkbox(es)Tag
 * added standard HTML "target" attribute to JSP FormTag, for submitting to another window/frame
