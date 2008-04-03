@@ -18,17 +18,17 @@
 		<property name="databaseProductName">
 			<value>DB2*</value>
 		</property>
-    <property name="useSqlStateForTranslation">
-      <value>true</value>
-    </property>
+		<property name="useSqlStateForTranslation">
+			<value>true</value>
+		</property>
 		<property name="badSqlGrammarCodes">
-			<value>-204,-206,-301,-408</value>
+			<value>-007,-029,-097,-104,-109,-115,-128,-199,-204,-206,-301,-408,-441,-491</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
-			<value>-904</value>
+			<value>-904,-971</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>-803</value>
+			<value>-407,-530,-531,-532,-543,-544,-545,-603,-667,-803</value>
 		</property>
 		<property name="deadlockLoserCodes">
 			<value>-911,-913</value>
@@ -99,9 +99,9 @@
 	</bean>
 
 	<bean id="MS-SQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="useSqlStateForTranslation">
-      <value>true</value>
-    </property>
+		<property name="useSqlStateForTranslation">
+			<value>true</value>
+		</property>
 		<property name="databaseProductName">
 			<value>Microsoft SQL Server</value>
 		</property>
@@ -153,6 +153,9 @@
 		<property name="cannotAcquireLockCodes">
 			<value>54</value>
 		</property>
+		<property name="cannotSerializeTransactionCodes">
+			<value>8177</value>
+		</property>
 		<property name="deadlockLoserCodes">
 			<value>60</value>
 		</property>
@@ -163,17 +166,17 @@
 			<value>true</value>
 		</property>
 		<property name="badSqlGrammarCodes">
-			<value>03000,42000,42601,42602,42622,42804</value>
+			<value>03000,42000,42601,42602,42622,42804,42P01</value>
 		</property>
-    <property name="dataAccessResourceFailureCodes">
-      <value>53000,53100,53200,53300</value>
-    </property>
-    <property name="dataIntegrityViolationCodes">
-      <value>23000,23502,23503,23505,23514</value>
-    </property>
-    <property name="cannotAcquireLockCodes">
-      <value>55P03</value>
-    </property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>53000,53100,53200,53300</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>23000,23502,23503,23505,23514</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>55P03</value>
+		</property>
 		<property name="cannotSerializeTransactionCodes">
 			<value>40001</value>
 		</property>
