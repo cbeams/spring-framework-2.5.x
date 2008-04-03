@@ -394,6 +394,7 @@ public class ViewResolverTests extends TestCase {
 
 		HttpServletRequest request = new MockHttpServletRequest(sc);
 		HttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		view1.render(model, request, response);
@@ -403,6 +404,7 @@ public class ViewResolverTests extends TestCase {
 
 		request = new MockHttpServletRequest(sc);
 		response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		view2.render(model, request, response);

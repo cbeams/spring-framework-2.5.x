@@ -24,10 +24,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,7 +51,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.ui.jasperreports.JasperReportsUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
@@ -592,12 +590,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see org.springframework.web.servlet.support.JstlUtils#exposeLocalizationContext
 	 */
 	protected void exposeLocalizationContext(Map model, HttpServletRequest request) {
-		Locale locale = RequestContextUtils.getLocale(request);
-		model.put(JRParameter.REPORT_LOCALE, locale);
+		RequestContext rc = new RequestContext(request, getServletContext());
+		model.put(JRParameter.REPORT_LOCALE, rc.getLocale());
 		JasperReport report = getReport();
 		if (report == null || report.getResourceBundle() == null) {
-			ResourceBundle bundle = new MessageSourceResourceBundle(getApplicationContext(), locale);
-			model.put(JRParameter.REPORT_RESOURCE_BUNDLE, bundle);
+			model.put(JRParameter.REPORT_RESOURCE_BUNDLE,
+					new MessageSourceResourceBundle(rc.getMessageSource(), rc.getLocale()));
 		}
 	}
 

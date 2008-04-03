@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
-import org.springframework.context.support.StaticApplicationContext;
-
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+
+import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * @author Rob Harrop
@@ -37,9 +41,8 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo/bar");
 
 		AbstractJasperReportsView view = new AbstractJasperReportsView() {
-			protected void renderReport(
-							JasperPrint filledReport, Map model, HttpServletResponse response)
-							throws Exception {
+			protected void renderReport(JasperPrint filledReport, Map model, HttpServletResponse response)
+					throws Exception {
 
 				assertEquals("Invalid number of exporter parameters", 1, getConvertedExporterParameters().size());
 
@@ -54,7 +57,6 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 			 * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
 			 * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
 			 * override those specified in the configuration.
-			 *
 			 * @see #setExporterParameters(java.util.Map)
 			 */
 			protected Map mergeExporterParameters(Map model) {
@@ -148,9 +150,11 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	private void setViewProperties(AbstractJasperReportsView view) {
 		view.setUrl("org/springframework/ui/jasperreports/DataSourceReport.jasper");
-		StaticApplicationContext ac = new StaticApplicationContext();
+		StaticWebApplicationContext ac = new StaticWebApplicationContext();
+		ac.setServletContext(new MockServletContext());
 		ac.addMessage("page", Locale.GERMAN, "MeineSeite");
 		ac.refresh();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, ac);
 		view.setApplicationContext(ac);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,10 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.ui.jasperreports.PersonBean;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * @author Rob Harrop
@@ -47,9 +49,11 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	protected AbstractJasperReportsView getView(String url) throws Exception {
 		AbstractJasperReportsView view = getViewImplementation();
 		view.setUrl(url);
-		StaticApplicationContext ac = new StaticApplicationContext();
+		StaticWebApplicationContext ac = new StaticWebApplicationContext();
+		ac.setServletContext(new MockServletContext());
 		ac.addMessage("page", Locale.GERMAN, "MeineSeite");
 		ac.refresh();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, ac);
 		view.setApplicationContext(ac);
 		return view;
 	}

@@ -26,17 +26,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.tiles.TilesContainer;
 import org.apache.tiles.access.TilesAccess;
 
-import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.util.WebUtils;
 
 /**
- * View implementation that retrieves a Tiles definition.
- * The "url" property is interpreted as name of a Tiles definition.
+ * {@link org.springframework.web.servlet.View} implementation that retrieves a
+ * Tiles definition. The "url" property is interpreted as name of a Tiles definition.
  *
  * <p>This class builds on Tiles2, which requires JSP 2.0.
- * JSTL support is integrated out of the box.
+ * JSTL support is integrated out of the box due to JSTL's inclusion in JSP 2.0.
  *
  * <p>Depends on a TilesContainer which must be available in
  * the ServletContext. This container is typically set up via a
@@ -49,26 +49,18 @@ import org.springframework.web.util.WebUtils;
  */
 public class TilesView extends AbstractUrlBasedView {
 
-	private MessageSource jstlAwareMessageSource;
-
-
-	protected void initApplicationContext() {
-		super.initApplicationContext();
-		this.jstlAwareMessageSource =
-				JstlUtils.getJstlAwareMessageSource(getServletContext(), getApplicationContext());
-	}
-
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		TilesContainer container = TilesAccess.getContainer(getServletContext());
+		ServletContext servletContext = getServletContext();
+		TilesContainer container = TilesAccess.getContainer(servletContext);
 		if (container == null) {
 			throw new ServletException("Tiles container is not initialized. " +
 					"Have you added a TilesConfigurer to your web application context?");
 		}
 
 		exposeModelAsRequestAttributes(model, request);
-		JstlUtils.exposeLocalizationContext(request, this.jstlAwareMessageSource);
+		JstlUtils.exposeLocalizationContext(new RequestContext(request, servletContext));
 
 		if (!response.isCommitted()) {
 			// Tiles is going to use a forward, but some web containers (e.g. OC4J 10.1.3)

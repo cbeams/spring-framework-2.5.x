@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.ui.context.Theme;
@@ -273,6 +274,14 @@ public class RequestContext {
 	}
 
 	/**
+	 * Return the underlying ServletContext.
+	 * Only intended for cooperating classes in this package.
+	 */
+	protected final ServletContext getServletContext() {
+		return this.webApplicationContext.getServletContext();
+	}
+
+	/**
 	 * Return the current WebApplicationContext.
 	 */
 	public final WebApplicationContext getWebApplicationContext() {
@@ -280,11 +289,10 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the underlying ServletContext.
-	 * Only intended for cooperating classes in this package.
+	 * Return the current WebApplicationContext as MessageSource.
 	 */
-	protected final ServletContext getServletContext() {
-		return this.webApplicationContext.getServletContext();
+	public final MessageSource getMessageSource() {
+		return this.webApplicationContext;
 	}
 
 	/**

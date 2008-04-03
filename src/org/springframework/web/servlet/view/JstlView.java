@@ -19,9 +19,9 @@ package org.springframework.web.servlet.view;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
+import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * Specialization of {@link InternalResourceView} for JSTL pages,
@@ -109,24 +109,15 @@ public class JstlView extends InternalResourceView {
 
 
 	/**
-	 * Initializes the ApplicationContext as default MessageSource
-	 * if none has been specified explicitly.
-	 */
-	protected void initApplicationContext(ApplicationContext context) {
-		if (this.messageSource == null) {
-			this.messageSource = context;
-		}
-		super.initApplicationContext(context);
-	}
-
-	/**
 	 * Wraps the MessageSource with a JSTL-aware MessageSource that is aware
 	 * of JSTL's <code>javax.servlet.jsp.jstl.fmt.localizationContext</code>
 	 * context-param.
 	 * @see JstlUtils#getJstlAwareMessageSource
 	 */
 	protected void initServletContext(ServletContext servletContext) {
-		this.messageSource = JstlUtils.getJstlAwareMessageSource(servletContext, this.messageSource);
+		if (this.messageSource != null) {
+			this.messageSource = JstlUtils.getJstlAwareMessageSource(servletContext, this.messageSource);
+		}
 		super.initServletContext(servletContext);
 	}
 
@@ -135,7 +126,12 @@ public class JstlView extends InternalResourceView {
 	 * @see JstlUtils#exposeLocalizationContext
 	 */
 	protected void exposeHelpers(HttpServletRequest request) throws Exception {
-		JstlUtils.exposeLocalizationContext(request, this.messageSource);
+		if (this.messageSource != null) {
+			JstlUtils.exposeLocalizationContext(request, this.messageSource);
+		}
+		else {
+			JstlUtils.exposeLocalizationContext(new RequestContext(request, getServletContext()));
+		}
 	}
 
 }

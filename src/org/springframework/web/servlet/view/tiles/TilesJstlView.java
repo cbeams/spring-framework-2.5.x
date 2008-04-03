@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.web.servlet.view.tiles;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
+import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * Specialization of {@link TilesView} for JSTL pages,
@@ -43,18 +43,8 @@ import org.springframework.web.servlet.support.JstlUtils;
  */
 public class TilesJstlView extends TilesView {
 
-	private MessageSource jstlAwareMessageSource;
-
-
-	protected void initApplicationContext() {
-		super.initApplicationContext();
-		this.jstlAwareMessageSource =
-				JstlUtils.getJstlAwareMessageSource(getServletContext(), getApplicationContext());
-	}
-
-
 	protected void exposeHelpers(HttpServletRequest request) throws Exception {
-		JstlUtils.exposeLocalizationContext(request, this.jstlAwareMessageSource);
+		JstlUtils.exposeLocalizationContext(new RequestContext(request, getServletContext()));
 	}
 
 }

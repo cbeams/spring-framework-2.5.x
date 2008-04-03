@@ -75,17 +75,30 @@ public abstract class JstlUtils {
 	 * @param request the current HTTP request
 	 * @param messageSource the MessageSource to expose,
 	 * typically the current ApplicationContext (may be <code>null</code>)
+	 * @see #exposeLocalizationContext(RequestContext)
 	 */
-	public static void exposeLocalizationContext(
-			HttpServletRequest request, MessageSource messageSource) {
-
+	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource) {
 		Locale jstlLocale = RequestContextUtils.getLocale(request);
 		Config.set(request, Config.FMT_LOCALE, jstlLocale);
-
 		if (messageSource != null) {
 			LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, request);
 			Config.set(request, Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
 		}
+	}
+
+	/**
+	 * Exposes JSTL-specific request attributes specifying locale
+	 * and resource bundle for JSTL's formatting and message tags,
+	 * using Spring's locale and MessageSource.
+	 * @param requestContext the context for the current HTTP request,
+	 * including the ApplicationContext to expose as MessageSource
+	 */
+	public static void exposeLocalizationContext(RequestContext requestContext) {
+		Config.set(requestContext.getRequest(), Config.FMT_LOCALE, requestContext.getLocale());
+		MessageSource messageSource = getJstlAwareMessageSource(
+				requestContext.getServletContext(), requestContext.getMessageSource());
+		LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, requestContext.getRequest());
+		Config.set(requestContext.getRequest(), Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
 	}
 
 

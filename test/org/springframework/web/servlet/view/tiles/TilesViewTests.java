@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class TilesViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 
 		view.render(new HashMap(), request, response);
@@ -98,6 +99,7 @@ public class TilesViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new FixedLocaleResolver(locale));
 		wac.addMessage("code1", locale, "messageX");
 		view.render(new HashMap(), request, response);
@@ -128,6 +130,7 @@ public class TilesViewTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		wac.addMessage("code1", locale, "messageX");
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new FixedLocaleResolver(locale));
 
 		view.render(new HashMap(), request, response);
