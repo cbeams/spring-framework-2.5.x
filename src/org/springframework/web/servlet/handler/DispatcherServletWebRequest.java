@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * ServletWebRequest that is aware of DispatcherServlet's request context,
- * such as the Locale determined by a LocaleResolver.
+ * {@link ServletWebRequest} subclass that is aware of
+ * {@link org.springframework.web.servlet.DispatcherServlet}'s
+ * request context, such as the Locale determined by the configured
+ * {@link org.springframework.web.servlet.LocaleResolver}.
  *
  * @author Juergen Hoeller
  * @since 2.0

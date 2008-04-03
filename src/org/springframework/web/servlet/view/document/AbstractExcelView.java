@@ -171,8 +171,7 @@ public abstract class AbstractExcelView extends AbstractView {
 			logger.debug("Loading Excel workbook from " + inputFile);
 		}
 		POIFSFileSystem fs = new POIFSFileSystem(inputFile.getInputStream());
-		HSSFWorkbook workBook = new HSSFWorkbook(fs);
-		return workBook;
+		return new HSSFWorkbook(fs);
 	}
 
 	/**
