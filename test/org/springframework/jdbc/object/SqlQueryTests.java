@@ -1006,9 +1006,6 @@ public class SqlQueryTests extends AbstractJdbcTests {
 
 	public void testNamedParameterUsingInvalidQuestionMarkPlaceHolders() throws SQLException {
 
-		mockPreparedStatement.setNull(1, 2);
-		ctrlPreparedStatement.setVoidCallable();
-
 		mockConnection.prepareStatement(
 				SELECT_ID_FORENAME_WHERE_ID_REUSED_1, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
