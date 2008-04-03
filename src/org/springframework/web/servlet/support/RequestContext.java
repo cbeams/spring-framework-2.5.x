@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class RequestContext {
 	 * avoid package interdependencies.
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
 	 */
-	public final static String DEFAULT_THEME_NAME = "theme";
+	public static final String DEFAULT_THEME_NAME = "theme";
 
 	/**
 	 * JSTL locale attribute, as used by JSTL implementations to expose their
@@ -84,7 +84,7 @@ public class RequestContext {
 	 * @see javax.servlet.jsp.jstl.core.Config#FMT_LOCALE
 	 * @see javax.servlet.http.HttpServletRequest#getLocale
 	 */
-	public final static String JSTL_LOCALE_ATTRIBUTE = "javax.servlet.jsp.jstl.fmt.locale";
+	public static final String JSTL_LOCALE_ATTRIBUTE = "javax.servlet.jsp.jstl.fmt.locale";
 
 
 	/** JSTL suffix for request-scoped attributes */

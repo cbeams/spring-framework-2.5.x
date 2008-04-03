@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,22 +66,22 @@ public class FieldError extends ObjectError {
 	 * Return the affected field of the object.
 	 */
 	public String getField() {
-		return field;
+		return this.field;
 	}
 
 	/**
 	 * Return the rejected field value.
 	 */
 	public Object getRejectedValue() {
-		return rejectedValue;
+		return this.rejectedValue;
 	}
 
 	/**
 	 * Return whether this error represents a binding failure
-	 * (like a type mismatch); else, it is a validation failure.
+	 * (like a type mismatch); otherwise it is a validation failure.
 	 */
 	public boolean isBindingFailure() {
-		return bindingFailure;
+		return this.bindingFailure;
 	}
 
 
