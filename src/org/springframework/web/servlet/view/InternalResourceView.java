@@ -177,6 +177,13 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * An ApplicationContext is not strictly required for InternalResourceView.
+	 */
+	protected boolean isContextRequired() {
+		return false;
+	}
+
+	/**
 	 * Checks whether we need explictly expose the Servlet 2.4 request attributes
 	 * by default.
 	 * @see #setExposeForwardAttributes
