@@ -217,7 +217,7 @@ public class PreparedStatementCreatorFactory {
 						names.add(((SqlParameterValue)o).getName());
 					}
 					else {
-						names.add("Parameter #" + i +":" + o);
+						names.add("Parameter #" + i);
 					}
 				}
 				if (names.size() != declaredParameters.size()) {
