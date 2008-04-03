@@ -232,7 +232,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			for (int i = 0; i < pTypes.length; i++) {
 				pTypes[i] = Type.getType(ctor.getParameterTypes()[i]);
 			}
-			setDescriptorToMatch(Type.getMethodDescriptor(Type.VOID_TYPE,pTypes));
+			setDescriptorToMatch(Type.getMethodDescriptor(Type.VOID_TYPE, pTypes));
 		}
 	}
 
