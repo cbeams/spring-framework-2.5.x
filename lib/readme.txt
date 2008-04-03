@@ -271,8 +271,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Jar Jar Links 1.0 RC5 (http://code.google.com/p/jarjar)
 - required for building the framework jars
 
-* jasperreports/jasperreports-2.0.2.jar
-- JasperReports 2.0.2 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-2.0.5.jar
+- JasperReports 2.0.5 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
