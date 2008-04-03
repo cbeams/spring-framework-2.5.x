@@ -115,7 +115,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			if (allowCreate) {
 				boolean canAskForExistingSession = false;
 				try {
-					this.session = this.request.getSession(false);
+					this.request.getSession(false);
 					canAskForExistingSession = true;
 				}
 				catch (IllegalStateException ex2) {
