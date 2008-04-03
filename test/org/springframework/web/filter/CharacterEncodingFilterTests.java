@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.mock.web.MockServletContext;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class CharacterEncodingFilterTests extends TestCase {
+public class CharacterEncodingFilterTests extends TestCase {
 
 	private static final String FILTER_NAME = "boot";
 
@@ -46,6 +46,8 @@ public final class CharacterEncodingFilterTests extends TestCase {
 		request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
 		mockRequest.setReturnValue(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
+		mockRequest.setVoidCallable();
+		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
 		mockRequest.setVoidCallable();
 		mockRequest.replay();
 
@@ -82,6 +84,8 @@ public final class CharacterEncodingFilterTests extends TestCase {
 		mockRequest.setReturnValue(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		mockRequest.setVoidCallable();
+		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
+		mockRequest.setVoidCallable();
 		mockRequest.replay();
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -109,6 +113,8 @@ public final class CharacterEncodingFilterTests extends TestCase {
 		request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
 		mockRequest.setReturnValue(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
+		mockRequest.setVoidCallable();
+		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
 		mockRequest.setVoidCallable();
 		mockRequest.replay();
 
@@ -139,6 +145,8 @@ public final class CharacterEncodingFilterTests extends TestCase {
 		mockRequest.setReturnValue(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		mockRequest.setVoidCallable();
+		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
+		mockRequest.setVoidCallable();
 		mockRequest.replay();
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -168,6 +176,8 @@ public final class CharacterEncodingFilterTests extends TestCase {
 		request.getAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
 		mockRequest.setReturnValue(null);
 		request.setAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
+		mockRequest.setVoidCallable();
+		request.removeAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
 		mockRequest.setVoidCallable();
 		mockRequest.replay();
 
