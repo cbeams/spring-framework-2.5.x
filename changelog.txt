@@ -33,7 +33,6 @@ Package org.springframework.jdbc
 * NativeJdbcExtractorAdapter only processes DatabaseMetaData Connection if non-null (for WebLogic cluster compatibility)
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
-* SQLErrorCodesSQLExceptionTranslator falls back to SQL state translation for IBM DB2 and MS SQL by default
 * added further default "sql-error-codes.xml" mappings for MS SQL, MySQL and Oracle
 
 Package org.springframework.jms
@@ -65,6 +64,7 @@ Package org.springframework.util
 
 Package org.springframework.web
 * ServletRequestAttributes keeps hold onto the original session if a "request.getSession" call suddenly returns null
+* OncePerRequestFilter cleans up its marker attribute at the end of each outer request (for Portlet compatibility)
 * AbstractTemplateView catches "HttpServletResponse.getContentType()" exceptions (for JBoss Portal compatibility)
 * InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
