@@ -631,7 +631,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		if (isRunning()) {
 			resumePausedTasks();
 			synchronized (this.activeInvokerMonitor) {
-				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
+				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && getIdleInvokerCount() == 0) {
 					scheduleNewInvoker();
 					if (logger.isDebugEnabled()) {
 						logger.debug("Raised scheduled invoker count: " + this.scheduledInvokers.size());
@@ -642,20 +642,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Determine whether this listener container currently has more
-	 * than one idle instance among its scheduled invokers.
-	 */
-	private boolean hasIdleInvokers() {
-		for (Iterator it = this.scheduledInvokers.iterator(); it.hasNext();) {
-			AsyncMessageListenerInvoker invoker = (AsyncMessageListenerInvoker) it.next();
-			if (invoker.isIdle()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Determine whether the current invoker should be rescheduled,
 	 * given that it might not have received a message in a while.
 	 * @param idleTaskExecutionCount the number of idle executions
@@ -663,9 +649,26 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	private boolean shouldRescheduleInvoker(int idleTaskExecutionCount) {
 		synchronized (this.activeInvokerMonitor) {
-			boolean idle = (idleTaskExecutionCount >= this.idleTaskExecutionLimit);
-			return (this.scheduledInvokers.size() <= (idle ? this.concurrentConsumers : this.maxConcurrentConsumers));
+			boolean superfluous =
+					(idleTaskExecutionCount >= this.idleTaskExecutionLimit && getIdleInvokerCount() > 1);
+			return (this.scheduledInvokers.size() <=
+					(superfluous ? this.concurrentConsumers : this.maxConcurrentConsumers));
 		}
+	}
+
+	/**
+	 * Determine whether this listener container currently has more
+	 * than one idle instance among its scheduled invokers.
+	 */
+	private int getIdleInvokerCount() {
+		int count = 0;
+		for (Iterator it = this.scheduledInvokers.iterator(); it.hasNext();) {
+			AsyncMessageListenerInvoker invoker = (AsyncMessageListenerInvoker) it.next();
+			if (invoker.isIdle()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 
