@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,8 @@ import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
- * Custom JSP tag to look up a message in the scope of this page.
- * Messages are looked up using the ApplicationContext, and thus should
- * support internationalization.
+ * Custom JSP tag to look up a message in the scope of this page. Messages are
+ * resolved using the ApplicationContext and thus support internationalization.
  *
  * <p>Detects an HTML escaping setting, either on this tag instance, the page level,
  * or the <code>web.xml</code> level. Can also apply JavaScript escaping.
@@ -288,10 +287,10 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Use the application context itself for default message resolution.
+	 * Use the current RequestContext's application context as MessageSource.
 	 */
 	protected MessageSource getMessageSource() {
-		return getRequestContext().getWebApplicationContext();
+		return getRequestContext().getMessageSource();
 	}
 
 	/**
