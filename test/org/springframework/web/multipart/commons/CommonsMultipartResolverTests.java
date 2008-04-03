@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,6 +291,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 					FilterChain filterChain) throws ServletException, IOException {
 				super.doFilterInternal(request, response, filterChain);
+				super.doFilterInternal(request, response, filterChain);
 				if (invoked) {
 					throw new ServletException("Should not have been invoked twice");
 				}
@@ -304,7 +305,6 @@ public class CommonsMultipartResolverTests extends TestCase {
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
 		HttpServletResponse response = new MockHttpServletResponse();
-		filter.doFilter(originalRequest, response, filterChain);
 		filter.doFilter(originalRequest, response, filterChain);
 		CommonsMultipartFile file1 = (CommonsMultipartFile) files.get(0);
 		CommonsMultipartFile file2 = (CommonsMultipartFile) files.get(1);
