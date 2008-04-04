@@ -2,6 +2,8 @@ Export-Package: org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
   org.springframework.beans*;version=${spring-version-osgi}, \
   com.ibm.websphere.management;resolution:=optional, \
+  javax.persistence;resolution:=optional, \
+  org.springframework.orm.jpa.support;version=${spring-version-osgi}, \
   *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
