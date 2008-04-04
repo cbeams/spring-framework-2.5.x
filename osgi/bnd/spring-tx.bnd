@@ -1,10 +1,11 @@
 Export-Package: org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
-   javax.transaction*;version=${tx-version};resolution:=optional, \
-   oracle.j2ee.transaction;resolution:=optional, \
-   com.evermind.server;resolution:=optional, \
-   com.ibm.ws.Transaction;resolution:=optional, \
-   *;resolution:=optional
+  javax.transaction*;version=${tx-version};resolution:=optional, \
+  com.ibm.ws.Transaction;resolution:=optional, \
+  weblogic.transaction;resolution:=optional, \
+  oracle.j2ee.transaction;resolution:=optional, \
+  com.evermind.server;resolution:=optional, \
+  *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-tx
