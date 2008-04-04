@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -515,16 +515,16 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 			else {
 				throw new IllegalArgumentException(
-						"Report URL [" + getUrl() + "] must end in either .jasper or .jrxml");
+						"Report filename [" + fileName + "] must end in either .jasper or .jrxml");
 			}
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException(
-					"Could not load JasperReports report for URL [" + getUrl() + "]", ex);
+					"Could not load JasperReports report from " + resource, ex);
 		}
 		catch (JRException ex) {
 			throw new ApplicationContextException(
-					"Could not parse JasperReports report for URL [" + getUrl() + "]", ex);
+					"Could not parse JasperReports report from " + resource, ex);
 		}
 	}
 
