@@ -525,16 +525,16 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 			else {
 				throw new IllegalArgumentException(
-						"Report URL [" + getUrl() + "] must end in either .jasper or .jrxml");
+						"Report filename [" + fileName + "] must end in either .jasper or .jrxml");
 			}
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException(
-					"Could not load JasperReports report for URL [" + getUrl() + "]", ex);
+					"Could not load JasperReports report from " + resource, ex);
 		}
 		catch (JRException ex) {
 			throw new ApplicationContextException(
-					"Could not parse JasperReports report for URL [" + getUrl() + "]", ex);
+					"Could not parse JasperReports report from " + resource, ex);
 		}
 	}
 
