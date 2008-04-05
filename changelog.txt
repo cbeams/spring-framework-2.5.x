@@ -9,6 +9,7 @@ Changes in version 2.5.3 (2008-04-04)
 General
 * replaced junit-4.4.jar in with-dependencies distribution with official JUnit 4.4 jar
 * spring.jar does not include InstrumentationSavingAgent class anymore (for parent-last class loaders)
+* spring-context.jar includes optional OSGi imports for "context:annotation-config"'s autodetection purposes
 * Spring reference documentation covers JSF 1.2 and contains updated Struts 2.0 and Tapestry references
 * Spring reference documentation covers annotation-based controllers in Portlet chapter
 
@@ -65,7 +66,7 @@ Package org.springframework.jdbc
 * JndiDataSourceLookup uses "resourceRef"=true by default (being able to resolve J2EE "jdbc/myDb" ENC names by default)
 * NativeJdbcExtractorAdapter only processes DatabaseMetaData Connection if non-null (for WebLogic cluster compatibility)
 * fixed SQLException translation for IBM DB2 and MS SQL to operate on error codes first, just falling back to SQL state
-* added MySQL NDB error codes to default sql-error-codes.xml
+* added MySQL NDB error codes and further DB2 error codes to default "sql-error-codes.xml" file
 * factored out common AbstractColumnMaxValueIncrementer base class from Derby/Hsql/MySQLMaxValueIncrementer
 * added DB2MainframeSequenceMaxValueIncrementer for DB2/390 and DB2/400 (differing from DB2 UDB for Unix and Windows)
 * added "wrapAsLob" property to DefaultLobHandler, for passing Blob/Clob instances to the JDBC driver (for PostgreSQL)
@@ -169,6 +170,7 @@ Package org.springframework.web
 * JSP OptionTag and OptionsTag support "id" attribute now, analogous to RadioButton(s)Tag and Checkbox(es)Tag
 * added standard HTML "target" attribute to JSP FormTag, for submitting to another window/frame
 * fixed JSP LabelTag to render valid default "for" attribute for collection/map paths as well
+* fixed AbstractJasperReportsView to build exception messages for the specific sub-report location
 
 
 Changes in version 2.5.2 (2008-02-29)

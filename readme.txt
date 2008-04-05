@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.5.3 (March 2008)
+THE SPRING FRAMEWORK, release 2.5.3 (April 2008)
 ------------------------------------------------
 http://www.springframework.org
 
@@ -56,8 +56,8 @@ required for building the framework; for the full build including all aspects, A
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5, Commons Attributes 2.2, JMX 1.2, JCA 1.0/1.5,
 Hibernate 3.1/3.2, TopLink 10.1.3/11, JDO 2.0, JPA 1.0, iBATIS SQL Maps 2.3, Caucho's Hessian 2.1/3.0/3.1,
-JAX-RPC 1.1, JAX-WS 2.0, Quartz 1.5/1.6, EHCache 1.2/1.3, Commons FileUpload 1.2, Velocity 1.5, FreeMarker 2.3,
-JasperReports 1.3/2.0, JSTL 1.0/1.1, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 1.2/2.0, etc.
+JAX-RPC 1.1, JAX-WS 2.0/2.1, Quartz 1.5/1.6, EHCache 1.2/1.3, Commons FileUpload 1.2, Velocity 1.5,
+FreeMarker 2.3, JasperReports 1.3/2.0, JSTL 1.0/1.1, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 1.2/2.0, etc.
 
 Basic release contents (~5 MB):
 * "dist" contains the Spring binary jar files
@@ -101,7 +101,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2820 KB)
+* "spring" (~2850 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Spring MVC support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar and spring-webmvc*.jar!
@@ -116,7 +116,7 @@ MODULE JARS (dist/modules):
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
-* "spring-context" (~455 KB)
+* "spring-context" (~460 KB)
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
@@ -128,11 +128,11 @@ MODULE JARS (dist/modules):
 - Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
 - Dependencies: Commons Logging, (Commons Attributes)
 
-* "spring-jdbc" (~305 KB)
+* "spring-jdbc" (~310 KB)
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
-* "spring-jms" (~180 KB)
+* "spring-jms" (~185 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-tx, JMS API
 
@@ -152,7 +152,7 @@ MODULE JARS (dist/modules):
 - Contents: web application context, multipart resolver, HTTP-based remoting support
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
-* "spring-webmvc" (~390 KB)
+* "spring-webmvc" (~395 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-context-support)
 
