@@ -2112,6 +2112,7 @@
 				<include name="lib/concurrent/**"/>
 				<include name="lib/dom4j/**"/>
 				<include name="lib/easymock/**"/>
+        <include name="lib/eclipselink/**"/>
 				<include name="lib/ehcache/**"/>
 				<include name="lib/freemarker/**"/>
 				<include name="lib/glassfish/**"/>
