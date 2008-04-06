@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.3 (2008-04-04)
+Changes in version 2.5.3 (2008-04-06)
 -------------------------------------
 
 General
@@ -130,7 +130,7 @@ Package org.springframework.test
 * SpringJUnit4ClassRunner executes befores/afters in same thread for test method with JUnit timeout (-> transactions)
 * TransactionalTestExecutionListener is able to manage concurrent transactions for different test methods (with timeout)
 * TransactionalTestExecutionListener reobtains transaction manager for every transaction (picking up context changes)
-* fixed Abstract*JUnit*SpringContextTests classes to be actually marked as abstract
+* fixed Abstract(Transactional)JUnit(38/4)SpringContextTests classes to be actually marked as abstract
 
 Package org.springframework.transaction
 * JtaTransactionManager" checks JNDI location "java:appserver/TransactionManager" for GlassFish's primary TM handle
@@ -162,7 +162,7 @@ Package org.springframework.web
 * AnnotationMethodHandlerAdapter always exposes BindingResult objects for model attributes which are binding candidates
 * AnnotationMethodHandlerAdapter throws clear IllegalStateException in case of invalid BindingResult argument
 * Portlet AnnotationMethodHandlerAdapter supports Servlet ModelAndView and View objects as handler method return values
-* default attribute names for annotated handler method return values are consistently derived from the *declared* type
+* default attribute names for annotated handler method return values are consistently derived from the declared type
 * added "exposedContextBeanNames" property to InternalResourceView(Resolver), for exposing specific Spring beans only
 * InternalResourceView does not enforce ApplicationContext to be set anymore (allowing for "getServletContext" checking)
 * JstlView, Tiles(Jstl)View and AbstractJasperReportsView expose current RequestContext's MessageSource for localization
