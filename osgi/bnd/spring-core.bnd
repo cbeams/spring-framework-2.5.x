@@ -1,6 +1,6 @@
 Export-Package: org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
-  org.eclipse.core.runtime;common="split",resolution:=optional, \
+  org.eclipse.core.runtime;common="split";resolution:=optional, \
   *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
