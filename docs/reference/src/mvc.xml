@@ -677,7 +677,7 @@
             </row>
 
             <row>
-              <entry><literal>requiresSession</literal></entry>
+              <entry><literal>requireSession</literal></entry>
 
               <entry>indicates whether or not this controller requires a HTTP
               session to do its work. If a session is not present when such a
