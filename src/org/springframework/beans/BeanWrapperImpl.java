@@ -58,9 +58,9 @@ import org.springframework.util.StringUtils;
  * comma-delimited String via <code>setAsText</code>, as String arrays are
  * converted in such a format if the array itself is not assignable.
  *
- * <p><b>NOTE: This is - for almost all purposes - an internal class.
- * It is only public in order to allow for access from other framework
- * packages. For standard application access purposes, use the
+ * <p><b>NOTE: As of Spring 2.5, this is - for almost all purposes - an
+ * internal class.</b> It is just public in order to allow for access from
+ * other framework packages. For standard application access purposes, use the
  * {@link PropertyAccessorFactory#forBeanPropertyAccess} factory method instead.
  *
  * @author Rod Johnson
