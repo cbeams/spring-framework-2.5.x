@@ -5800,16 +5800,16 @@ public @interface MovieQualifier {
 
     &lt;bean class="example.SimpleMovieCatalog"&gt;
         &lt;qualifier type="MovieQualifier"&gt;
-            &lt;attribute name="format" value="VHS"/&gt;
-            &lt;attribute name="genre" value="Action"/&gt;
+            &lt;attribute key="format" value="VHS"/&gt;
+            &lt;attribute key="genre" value="Action"/&gt;
         &lt;/qualifier&gt;
         <lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation>
     &lt;/bean&gt;
 
     &lt;bean class="example.SimpleMovieCatalog"&gt;
         &lt;qualifier type="MovieQualifier"&gt;
-            &lt;attribute name="format" value="VHS"/&gt;
-            &lt;attribute name="genre" value="Comedy"/&gt;
+            &lt;attribute key="format" value="VHS"/&gt;
+            &lt;attribute key="genre" value="Comedy"/&gt;
         &lt;/qualifier&gt;
         <lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation>
     &lt;/bean&gt;
