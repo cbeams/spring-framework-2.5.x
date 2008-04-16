@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,12 @@ class SimpleMetadataReader implements MetadataReader {
 
 	private final ClassReader classReader;
 
+	private final ClassLoader classLoader;
 
-	public SimpleMetadataReader(ClassReader classReader) {
+
+	public SimpleMetadataReader(ClassReader classReader, ClassLoader classLoader) {
 		this.classReader = classReader;
+		this.classLoader = classLoader;
 	}
 
 
@@ -48,7 +51,7 @@ class SimpleMetadataReader implements MetadataReader {
 	}
 
 	public AnnotationMetadata getAnnotationMetadata() {
-		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor();
+		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(this.classLoader);
 		this.classReader.accept(visitor, true);
 		return visitor;
 	}

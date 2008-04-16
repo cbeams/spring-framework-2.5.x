@@ -46,6 +46,14 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
 
 
+	private final ClassLoader classLoader;
+
+
+	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
+
+
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		final String className = Type.getType(desc).getClassName();
 		final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
@@ -56,7 +64,7 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 			}
 			public void visitEnd() {
 				try {
-					Class annotationClass = getClass().getClassLoader().loadClass(className);
+					Class annotationClass = classLoader.loadClass(className);
 					// Check declared default values of attributes in the annotation type.
 					Method[] annotationAttributes = annotationClass.getMethods();
 					for (int i = 0; i < annotationAttributes.length; i++) {
