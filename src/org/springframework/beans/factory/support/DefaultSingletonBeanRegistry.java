@@ -90,6 +90,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Cache of singleton factories: bean name --> ObjectFactory */
 	private final Map singletonFactories = new HashMap();
 
+	/** Cache of early singleton objects: bean name --> bean instance */
+	private final Map earlySingletonObjects = new HashMap();
+
 	/** Set of registered singletons, containing the bean names in registration order */
 	private final Set registeredSingletons = new LinkedHashSet(16);
 
@@ -126,8 +129,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Add the given singleton object to the singleton cache of this factory.
-	 * <p>To be called for eager registration of singletons, e.g. to be able to
-	 * resolve circular references.
+	 * <p>To be called for eager registration of singletons.
 	 * @param beanName the name of the bean
 	 * @param singletonObject the singleton object
 	 */
@@ -135,6 +137,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
 			this.singletonFactories.remove(beanName);
+			this.earlySingletonObjects.remove(beanName);
 			this.registeredSingletons.add(beanName);
 		}
 	}
@@ -149,9 +152,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void addSingletonFactory(String beanName, ObjectFactory singletonFactory) {
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
-		if (!this.singletonObjects.containsKey(beanName)) {
-			synchronized (this.singletonObjects) {
+		synchronized (this.singletonObjects) {
+			if (!this.singletonObjects.containsKey(beanName)) {
 				this.singletonFactories.put(beanName, singletonFactory);
+				this.earlySingletonObjects.remove(beanName);
 				this.registeredSingletons.add(beanName);
 			}
 		}
@@ -166,24 +170,24 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * <p>Checks already instantiated singletons and also allows for an early
 	 * reference to a currently created singleton (resolving a circular reference).
 	 * @param beanName the name of the bean to look for
+	 * @param allowEarlyReference whether early references should be created or not
 	 * @return the registered singleton object, or <code>null</code> if none found
 	 */
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		Object singletonObject = this.singletonObjects.get(beanName);
-		if (singletonObject != null) {
-			return (singletonObject != NULL_OBJECT ? singletonObject : null);
-		}
-		if (allowEarlyReference) {
+		if (singletonObject == null) {
 			synchronized (this.singletonObjects) {
-				ObjectFactory singletonFactory = (ObjectFactory) this.singletonFactories.get(beanName);
-				if (singletonFactory != null) {
-					singletonObject = singletonFactory.getObject();
-					this.singletonObjects.put(beanName, singletonObject);
-					this.singletonFactories.remove(beanName);
+				singletonObject = this.earlySingletonObjects.get(beanName);
+				if (singletonObject == null && allowEarlyReference) {
+					ObjectFactory singletonFactory = (ObjectFactory) this.singletonFactories.remove(beanName);
+					if (singletonFactory != null) {
+						singletonObject = singletonFactory.getObject();
+						this.earlySingletonObjects.put(beanName, singletonObject);
+					}
 				}
 			}
 		}
-		return singletonObject;
+		return (singletonObject != NULL_OBJECT ? singletonObject : null);
 	}
 
 	/**
@@ -197,7 +201,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public Object getSingleton(String beanName, ObjectFactory singletonFactory) {
 		Assert.notNull(beanName, "'beanName' must not be null");
 		synchronized (this.singletonObjects) {
-			// Re-check singleton cache within synchronized block.
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
 				if (this.singletonsCurrentlyInDestruction) {
@@ -257,6 +260,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.remove(beanName);
 			this.singletonFactories.remove(beanName);
+			this.earlySingletonObjects.remove(beanName);
 			this.registeredSingletons.remove(beanName);
 		}
 	}
@@ -402,6 +406,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.clear();
+			this.singletonFactories.clear();
+			this.earlySingletonObjects.clear();
 			this.registeredSingletons.clear();
 			this.singletonsCurrentlyInDestruction = false;
 		}
