@@ -83,6 +83,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+
 	public void testUnreferencedSingletonWasInstantiated() {
 		KnowsIfInstantiated.clearInstantiationRecord();
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -1052,7 +1053,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			fail("Should have unsatisfied constructor dependency on SideEffectBean");
 		}
 		catch (UnsatisfiedDependencyException ex) {
-			// Ok
+			// expected
 		}
 	}
 
@@ -1304,7 +1305,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		TestBean spouse = (TestBean) lbf.getBean("spouse");
 		assertEquals(spouse, tb.getSpouse());
 	}
-
 
 	public void testExtensiveCircularReference() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
