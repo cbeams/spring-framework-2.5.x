@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
@@ -418,11 +419,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected Set doFindPathMatchingJarResources(Resource rootDirResource, String subPattern) throws IOException {
 		URLConnection con = rootDirResource.getURL().openConnection();
 		JarFile jarFile = null;
-		boolean newJarFile = false;
 		String jarFileUrl = null;
 		String rootEntryPath = null;
+		boolean newJarFile = false;
 
-		if (con instanceof JarURLConnection) {
+		if (false && con instanceof JarURLConnection) {
 			// Should usually be the case for traditional JAR files.
 			JarURLConnection jarCon = (JarURLConnection) con;
 			jarCon.setUseCaches(false);
@@ -438,14 +439,17 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// We'll also handle paths with and without leading "file:" prefix.
 			String urlFile = rootDirResource.getURL().getFile();
 			int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
-			jarFileUrl = urlFile.substring(0, separatorIndex);
-			if (jarFileUrl.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
-				jarFileUrl = jarFileUrl.substring(ResourceUtils.FILE_URL_PREFIX.length());
+			if (separatorIndex != -1) {
+				jarFileUrl = urlFile.substring(0, separatorIndex);
+				rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+				jarFile = getJarFile(jarFileUrl);
 			}
-			jarFile = new JarFile(jarFileUrl);
+			else {
+				jarFile = new JarFile(urlFile);
+				jarFileUrl = urlFile;
+				rootEntryPath = "";
+			}
 			newJarFile = true;
-			jarFileUrl = ResourceUtils.FILE_URL_PREFIX + jarFileUrl;
-			rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
 		}
 
 		try {
@@ -476,6 +480,24 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (newJarFile) {
 				jarFile.close();
 			}
+		}
+	}
+
+	/**
+	 * Resolve the given jar file URL into a JarFile object.
+	 */
+	protected JarFile getJarFile(String jarFileUrl) throws IOException {
+		if (jarFileUrl.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
+			try {
+				return new JarFile(ResourceUtils.toURI(jarFileUrl).getSchemeSpecificPart());
+			}
+			catch (URISyntaxException ex) {
+				// Fallback for URLs that are not valid URIs (should hardly ever happen).
+				return new JarFile(jarFileUrl.substring(ResourceUtils.FILE_URL_PREFIX.length()));
+			}
+		}
+		else {
+			return new JarFile(jarFileUrl);
 		}
 	}
 

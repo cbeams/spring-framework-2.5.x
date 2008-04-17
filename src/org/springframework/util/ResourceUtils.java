@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,8 +287,8 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Create a URI instance for the given URL, replacing spaces with
-	 * "%20" quotes first.
+	 * Create a URI instance for the given URL,
+	 * replacing spaces with "%20" quotes first.
 	 * <p>Furthermore, this method works on JDK 1.4 as well,
 	 * in contrast to the <code>URL.toURI()</code> method.
 	 * @param url the URL to convert into a URI instance
@@ -297,7 +297,18 @@ public abstract class ResourceUtils {
 	 * @see java.net.URL#toURI()
 	 */
 	public static URI toURI(URL url) throws URISyntaxException {
-		return new URI(StringUtils.replace(url.toString(), " ", "%20"));
+		return toURI(url.toString());
+	}
+
+	/**
+	 * Create a URI instance for the given location String,
+	 * replacing spaces with "%20" quotes first.
+	 * @param location the location String to convert into a URI instance
+	 * @return the URI instance
+	 * @throws URISyntaxException if the location wasn't a valid URI
+	 */
+	public static URI toURI(String location) throws URISyntaxException {
+		return new URI(StringUtils.replace(location, " ", "%20"));
 	}
 
 }
