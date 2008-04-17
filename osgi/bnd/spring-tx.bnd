@@ -10,4 +10,3 @@ Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-tx
 Bundle-SymbolicName: ${spring-bundle-prefix}.tx
-DynamicImport-Package: weblogic.transaction
