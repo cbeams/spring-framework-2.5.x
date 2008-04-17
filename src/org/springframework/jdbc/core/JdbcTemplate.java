@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1109,6 +1110,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return Map that contains returned results
 	 */
 	protected Map processResultSet(ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
+		if (rs == null) {
+			return Collections.EMPTY_MAP;
+		}
 		Map returnedResults = new HashMap();
 		try {
 			ResultSet rsToUse = rs;
