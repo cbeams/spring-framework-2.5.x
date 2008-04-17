@@ -160,7 +160,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of PersistenceManagerFactory proxy.
-				return new Integer(hashCode());
+				return new Integer(System.identityHashCode(proxy));
 			}
 
 			// Invoke method on target PersistenceManagerFactory.
@@ -198,7 +198,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of PersistenceManager proxy.
-				return new Integer(hashCode());
+				return new Integer(System.identityHashCode(proxy));
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.

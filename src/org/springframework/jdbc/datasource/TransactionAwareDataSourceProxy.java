@@ -183,7 +183,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
-				return new Integer(hashCode());
+				return new Integer(System.identityHashCode(proxy));
 			}
 			else if (method.getName().equals("toString")) {
 				// Allow for differentiating between the proxy and the raw Connection.

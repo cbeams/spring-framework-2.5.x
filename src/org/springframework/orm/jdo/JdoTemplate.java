@@ -594,7 +594,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of PersistenceManager proxy.
-				return new Integer(hashCode());
+				return new Integer(System.identityHashCode(proxy));
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: suppress, not valid.

@@ -202,7 +202,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
-				return new Integer(hashCode());
+				return new Integer(System.identityHashCode(proxy));
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: don't pass the call on.

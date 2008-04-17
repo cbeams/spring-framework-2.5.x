@@ -411,7 +411,7 @@ public class SingleConnectionFactory
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
-				return new Integer(hashCode());
+				return new Integer(System.identityHashCode(proxy));
 			}
 			else if (method.getName().equals("setClientID")) {
 				// Handle setClientID method: throw exception if not compatible.

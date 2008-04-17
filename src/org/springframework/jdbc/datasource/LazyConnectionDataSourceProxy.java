@@ -284,7 +284,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// We must avoid fetching a target Connection for "hashCode",
 				// and we must return the same hash code even when the target
 				// Connection has been fetched: use hashCode of Connection proxy.
-				return new Integer(hashCode());
+				return new Integer(System.identityHashCode(proxy));
 			}
 			else if (method.getName().equals("getTargetConnection")) {
 				// Handle getTargetConnection method: return underlying connection.
