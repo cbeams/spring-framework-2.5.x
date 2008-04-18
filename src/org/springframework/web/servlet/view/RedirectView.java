@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,9 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
  * @author Sam Brannen
- * @see #setContextRelative(boolean)
- * @see #setHttp10Compatible(boolean)
- * @see #setExposeModelAttributes(boolean)
+ * @see #setContextRelative
+ * @see #setHttp10Compatible
+ * @see #setExposeModelAttributes
  * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
 public class RedirectView extends AbstractUrlBasedView {
@@ -128,12 +128,13 @@ public class RedirectView extends AbstractUrlBasedView {
 		this.exposeModelAttributes = exposeModelAttributes;
 	}
 
+
 	/**
 	 * Set whether to interpret a given URL that starts with a slash ("/")
 	 * as relative to the current ServletContext, i.e. as relative to the
 	 * web application root.
 	 * <p>Default is "false": A URL that starts with a slash will be interpreted
-	 * as absolute, i.e. taken as-is. If true, the context path will be
+	 * as absolute, i.e. taken as-is. If "true", the context path will be
 	 * prepended to the URL in such a case.
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath
 	 */
