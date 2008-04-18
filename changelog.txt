@@ -3,6 +3,42 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5.4 (2008-04-30)
+-------------------------------------
+
+General
+* upgraded to AspectJ 1.6 (while retaining compatibility with AspectJ 1.5.x)
+* fixed spring-core.jar's manifest to contain correct OSGi Import-Package declaration
+* removed superfluous DynamicImport-Package declarations from OSGi manifests
+* all decorator proxies are using identity hash code of the proxy instead of the InvocationHandler hash code now
+
+Package org.springframework.beans
+* added CharsetEditor for JDK 1.4's "java.nio.charset.Charset" class to default property editors
+* AbstractAutowireCapableBeanFactory's handling of lazy-init singletons is thread-safe again
+* AbstractAutowireCapableBeanFactory only invokes "predictBeanType" post-processor method for non-null bean Class
+
+Package org.springframework.core
+* PathMatchingResourcePatternResolver resolves encoded jar URIs before creating JarFiles (for WebSphere compatibility)
+* SimpleMetadataReaderFactory uses ResourceLoader's ClassLoader for loading annotation classes (for OSGi compatibility)
+
+Package org.springframework.jdbc
+* JdbcTemplate explicitly detects and skips null ResultSets returned from CallableStatement
+
+Package org.springframework.orm
+* fixed Hibernate 3.2 support to flush updates before queries even within purely Spring-managed JTA transactions
+* Hibernate3 LocalSessionFactoryBean sets new SpringTransactionFactory as default in case of no JTA TransactionManager
+
+Package org.springframework.remoting
+* JndiRmiClientInterceptor/ProxyFactoryBean work for JNDI objects which do not implement the Remote interface as well
+
+Package org.springframework.transaction
+* AbstractFallbackTransactionAttributeSource uses concurrent Map for attribute cache in order to avoid lock contention
+
+Package org.springframework.validation
+* AbstractPropertyBindingResult's "formatFieldValue" finds PropertyEditor according to 'Editor' suffix convention too
+* DefaultBindingErrorProcessor registers "missing field" errors within specified nested path (if any)
+
+
 Changes in version 2.5.3 (2008-04-06)
 -------------------------------------
 
@@ -1733,11 +1769,11 @@ Package org.springframework.beans
 * MethodInvokingFactoryBean obtains the TypeConverter from the BeanFactory that it runs in
 * List/Set/MapFactoryBean convert elements to the generic type expressed in a superclass/interface of the target class
 * added SmartInstantiationAwareBeanPostProcessor interface, supporting type prediction (for scripted object types)
+* PropertyPlaceholderConfigurer detects and processes placeholders in scope names as well
 * PropertyPlaceholderConfigurer does not log resolved (potentially decrypted) placeholder values at debug level anymore
 * PreferencesPlaceholderConfigurer resolves paths in placeholders ("myPath/myPlaceholderKey") as preference nodes
 * added "isPrototype(beanName)" method to BeanFactory interface, explicitly checking for an independent instance
 * added extended SmartFactoryBean interface, including an "isPrototype()" method that checks for an independent instance
-* PropertyPlaceholderConfigurer detects and processes placeholders in scope names as well
 * AbstractBeanFactory throws BeanCreationException will full context info if "postProcessObjectFromFactoryBean" fails
 * DisposableBeanAdapter (as passed into "Scope.registerDestructionCallback") is serializable, even for post-processors
 * AbstractAutowireCapableBeanFactory does not trigger "toString()" call on argument for UnsatisfiedDependencyException
