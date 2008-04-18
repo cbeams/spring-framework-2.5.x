@@ -95,7 +95,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 		EJBObject ejb = null;
 		try {
 			ejb = getSessionBeanInstance();
-			return RmiClientInterceptorUtils.doInvoke(invocation, ejb);
+			return RmiClientInterceptorUtils.invokeRemoteMethod(invocation, ejb);
 		}
 		catch (NamingException ex) {
 			throw new RemoteLookupFailureException("Failed to locate remote EJB [" + getJndiName() + "]", ex);

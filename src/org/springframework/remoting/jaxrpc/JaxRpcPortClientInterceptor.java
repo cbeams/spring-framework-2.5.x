@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -614,7 +614,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 */
 	protected Object doInvoke(MethodInvocation invocation, Remote portStub) throws Throwable {
 		try {
-			return RmiClientInterceptorUtils.doInvoke(invocation, portStub);
+			return RmiClientInterceptorUtils.invokeRemoteMethod(invocation, portStub);
 		}
 		catch (InvocationTargetException ex) {
 			throw ex.getTargetException();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.remoting.rmi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import javax.naming.NamingException;
@@ -77,8 +76,7 @@ import org.springframework.util.ReflectionUtils;
  * @see java.rmi.Remote
  * @see javax.rmi.PortableRemoteObject#narrow
  */
-public class JndiRmiClientInterceptor extends JndiObjectLocator
-    implements MethodInterceptor, InitializingBean {
+public class JndiRmiClientInterceptor extends JndiObjectLocator implements MethodInterceptor, InitializingBean {
 
 	private Class serviceInterface;
 
@@ -90,7 +88,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	private boolean refreshStubOnConnectFailure = false;
 
-	private Remote cachedStub;
+	private Object cachedStub;
 
 	private final Object stubMonitor = new Object();
 
@@ -183,7 +181,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	public void prepare() throws RemoteLookupFailureException {
 		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
-			Remote remoteObj = lookupStub();
+			Object remoteObj = lookupStub();
 			if (logger.isDebugEnabled()) {
 				if (remoteObj instanceof RmiInvocationHandler) {
 					logger.debug("JNDI RMI object [" + getJndiName() + "] is an RMI invoker");
@@ -212,10 +210,10 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @see #setCacheStub
 	 * @see #lookup
 	 */
-	protected Remote lookupStub() throws RemoteLookupFailureException {
+	protected Object lookupStub() throws RemoteLookupFailureException {
 		try {
 			Object stub = lookup();
-			if (getServiceInterface() != null && Remote.class.isAssignableFrom(getServiceInterface())) {
+			if (getServiceInterface() != null) {
 				try {
 					stub = PortableRemoteObject.narrow(stub, getServiceInterface());
 				}
@@ -224,11 +222,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 							"Could not narrow RMI stub to service interface [" + getServiceInterface().getName() + "]", ex);
 				}
 			}
-			if (!(stub instanceof Remote)) {
-				throw new RemoteLookupFailureException("Located RMI stub of class [" + stub.getClass().getName() +
-						"], with JNDI name [" + getJndiName() + "], does not implement interface [java.rmi.Remote]");
-			}
-			return (Remote) stub;
+			return stub;
 		}
 		catch (NamingException ex) {
 			throw new RemoteLookupFailureException("JNDI lookup for RMI service [" + getJndiName() + "] failed", ex);
@@ -246,7 +240,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @throws NamingException if stub creation failed
 	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 */
-	protected Remote getStub() throws NamingException, RemoteLookupFailureException {
+	protected Object getStub() throws NamingException, RemoteLookupFailureException {
 		if (!this.cacheStub || (this.lookupStubOnStartup && !this.refreshStubOnConnectFailure)) {
 			return (this.cachedStub != null ? this.cachedStub : lookupStub());
 		}
@@ -273,7 +267,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @see java.rmi.NoSuchObjectException
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Remote stub = null;
+		Object stub = null;
 		try {
 			stub = getStub();
 		}
@@ -359,7 +353,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @see #invoke
 	 */
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
-		Remote freshStub = null;
+		Object freshStub = null;
 		synchronized (this.stubMonitor) {
 			this.cachedStub = null;
 			freshStub = lookupStub();
@@ -378,7 +372,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure
 	 */
-	protected Object doInvoke(MethodInvocation invocation, Remote stub) throws Throwable {
+	protected Object doInvoke(MethodInvocation invocation, Object stub) throws Throwable {
 		if (stub instanceof RmiInvocationHandler) {
 			// RMI invoker
 			try {
@@ -401,7 +395,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 		else {
 			// traditional RMI stub
 			try {
-				return RmiClientInterceptorUtils.doInvoke(invocation, stub);
+				return RmiClientInterceptorUtils.invokeRemoteMethod(invocation, stub);
 			}
 			catch (InvocationTargetException ex) {
 				Throwable targetEx = ex.getTargetException();

@@ -57,23 +57,17 @@ public abstract class RmiClientInterceptorUtils {
 
 	/**
 	 * Apply the given method invocation to the given RMI stub.
-	 * <p>Delegate to the corresponding method if the RMI stub does not directly
-	 * implemented the invoked method. This typically happens when a non-RMI service
+	 * <p>Delegates to the corresponding method if the RMI stub does not directly
+	 * implement the invoked method. This typically happens when a non-RMI service
 	 * interface is used for an RMI service. The methods of such a service interface
 	 * have to match the RMI stub methods, but they typically don't declare
 	 * <code>java.rmi.RemoteException</code>: A RemoteException thrown by the RMI stub
 	 * will be automatically converted to Spring's RemoteAccessException.
-	 * @param invocation the AOP MethodInvocation
-	 * @param stub the RMI stub
-	 * @param serviceName the name of the service (for debugging purposes)
-	 * @return the invocation result, if any
-	 * @throws Throwable exception to be thrown to the caller
-	 * @see java.rmi.RemoteException
-	 * @see org.springframework.remoting.RemoteAccessException
+	 * @deprecated as of Spring 2.5, in favor of {@link #invokeRemoteMethod}
 	 */
 	public static Object invoke(MethodInvocation invocation, Remote stub, String serviceName) throws Throwable {
 		try {
-			return doInvoke(invocation, stub);
+			return invokeRemoteMethod(invocation, stub);
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
@@ -90,12 +84,23 @@ public abstract class RmiClientInterceptorUtils {
 	/**
 	 * Perform a raw method invocation on the given RMI stub,
 	 * letting reflection exceptions through as-is.
+	 * @deprecated as of Spring 2.5, in favor of {@link #invokeRemoteMethod}
+	 */
+	public static Object doInvoke(MethodInvocation invocation, Remote stub) throws InvocationTargetException {
+		return invokeRemoteMethod(invocation, stub);
+	}
+
+	/**
+	 * Perform a raw method invocation on the given RMI stub,
+	 * letting reflection exceptions through as-is.
 	 * @param invocation the AOP MethodInvocation
 	 * @param stub the RMI stub
 	 * @return the invocation result, if any
 	 * @throws InvocationTargetException if thrown by reflection
 	 */
-	public static Object doInvoke(MethodInvocation invocation, Remote stub) throws InvocationTargetException {
+	public static Object invokeRemoteMethod(MethodInvocation invocation, Object stub)
+			throws InvocationTargetException {
+
 		Method method = invocation.getMethod();
 		try {
 			if (method.getDeclaringClass().isInstance(stub)) {
