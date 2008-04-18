@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.beans.PropertyAccessException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 /**
- * Default <code>BindingErrorProcessor</code> implementation.
+ * Default {@link BindingErrorProcessor} implementation.
  *
  * <p>Uses the "required" error code and the field name to resolve message codes
  * for a missing field error.
@@ -52,11 +52,12 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 
 	public void processMissingFieldError(String missingField, BindingResult bindingResult) {
 		// Create field error with code "required".
-		String[] codes = bindingResult.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, missingField);
-		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), missingField);
+		String fixedField = bindingResult.getNestedPath() + missingField;
+		String[] codes = bindingResult.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, fixedField);
+		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), fixedField);
 		bindingResult.addError(new FieldError(
-				bindingResult.getObjectName(), missingField, "", true,
-				codes, arguments, "Field '" + missingField + "' is required"));
+				bindingResult.getObjectName(), fixedField, "", true,
+				codes, arguments, "Field '" + fixedField + "' is required"));
 	}
 
 	public void processPropertyAccessException(PropertyAccessException ex, BindingResult bindingResult) {
