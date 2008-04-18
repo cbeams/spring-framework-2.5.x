@@ -139,10 +139,16 @@ public abstract class SimpleJdbcTestUtils {
 		try {
 			LineNumberReader lnr = new LineNumberReader(resource.getReader());
 			String currentStatement = lnr.readLine();
+			StringBuilder script = new StringBuilder();
+			char delimiter = ';';
 			while (currentStatement != null) {
-				statements.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(currentStatement, ";")));
+				if (script.length() > 0) {
+					script.append(" ");
+				}
+				script.append(currentStatement.trim());
 				currentStatement = lnr.readLine();
 			}
+			JdbcTestUtils.splitSqlScript(script.toString(), delimiter, statements);
 			for (Iterator<String> itr = statements.iterator(); itr.hasNext();) {
 				String statement = itr.next();
 				try {

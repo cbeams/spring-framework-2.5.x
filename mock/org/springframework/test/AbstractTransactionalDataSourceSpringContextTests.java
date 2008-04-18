@@ -30,6 +30,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
+import org.springframework.test.jdbc.JdbcTestUtils;
 
 /**
  * Subclass of AbstractTransactionalSpringContextTests that adds some convenience
@@ -158,10 +159,16 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 		try {
 			LineNumberReader lnr = new LineNumberReader(resource.getReader());
 			String currentStatement = lnr.readLine();
+			StringBuffer script = new StringBuffer();
+			char delimiter = ';';
 			while (currentStatement != null) {
-				statements.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(currentStatement, ";")));
+				if (script.length() > 0) {
+					script.append(" ");
+				}
+				script.append(currentStatement.trim());
 				currentStatement = lnr.readLine();
 			}
+			JdbcTestUtils.splitSqlScript(script.toString(), delimiter, statements);
 			for (Iterator itr = statements.iterator(); itr.hasNext(); ) {
 				String statement = (String) itr.next();
 				try {
