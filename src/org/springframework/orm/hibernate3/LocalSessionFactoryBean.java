@@ -30,7 +30,6 @@ import java.util.Properties;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
-import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
@@ -552,23 +551,22 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				// Set Hibernate 3.1 CurrentSessionContext implementation,
 				// providing the Spring-managed Session as current Session.
 				// Can be overridden by a custom value for the corresponding Hibernate property.
-				config.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
+				config.setProperty(
+						Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 			}
 
 			if (this.jtaTransactionManager != null) {
 				// Set Spring-provided JTA TransactionManager as Hibernate property.
 				config.setProperty(
-						Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
-				config.setProperty(
 						Environment.TRANSACTION_STRATEGY, JTATransactionFactory.class.getName());
+				config.setProperty(
+						Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
 			}
 			else {
-				// Set connection release mode "on_close" as default.
-				// This was the case for Hibernate 3.0; Hibernate 3.1 changed
-				// it to "auto" (i.e. "after_statement" or "after_transaction").
-				// However, for Spring's resource management (in particular for
-				// HibernateTransactionManager), "on_close" is the better default.
-				config.setProperty(Environment.RELEASE_CONNECTIONS, ConnectionReleaseMode.ON_CLOSE.toString());
+				// Makes the Hibernate Session aware of the presence of a Spring-managed transaction.
+				// Also sets connection release mode to ON_CLOSE by default.
+				config.setProperty(
+						Environment.TRANSACTION_STRATEGY, SpringTransactionFactory.class.getName());
 			}
 
 			if (this.entityInterceptor != null) {
