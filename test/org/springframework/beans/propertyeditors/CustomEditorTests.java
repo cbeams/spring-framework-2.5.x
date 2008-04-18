@@ -22,6 +22,7 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1345,24 +1346,34 @@ public class CustomEditorTests extends TestCase {
 	}
 
 	public void testClassArrayEditorSetAsTextWithNull() throws Exception {
-		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
-		classArrayEditor.setAsText(null);
-		assertNull(classArrayEditor.getValue());
-		assertEquals("", classArrayEditor.getAsText());
+		ClassArrayEditor editor = new ClassArrayEditor();
+		editor.setAsText(null);
+		assertNull(editor.getValue());
+		assertEquals("", editor.getAsText());
 	}
 
 	public void testClassArrayEditorSetAsTextWithEmptyString() throws Exception {
-		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
-		classArrayEditor.setAsText("");
-		assertNull(classArrayEditor.getValue());
-		assertEquals("", classArrayEditor.getAsText());
+		ClassArrayEditor editor = new ClassArrayEditor();
+		editor.setAsText("");
+		assertNull(editor.getValue());
+		assertEquals("", editor.getAsText());
 	}
 
 	public void testClassArrayEditorSetAsTextWithWhitespaceString() throws Exception {
-		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
-		classArrayEditor.setAsText("\n");
-		assertNull(classArrayEditor.getValue());
-		assertEquals("", classArrayEditor.getAsText());
+		ClassArrayEditor editor = new ClassArrayEditor();
+		editor.setAsText("\n");
+		assertNull(editor.getValue());
+		assertEquals("", editor.getAsText());
+	}
+
+	public void testCharsetEditopr() throws Exception {
+		CharsetEditor editor = new CharsetEditor();
+		String name = "UTF-8";
+		editor.setAsText(name);
+		Charset charset = Charset.forName(name);
+		assertEquals("Invalid Charset conversion", charset, editor.getValue());
+		editor.setValue(charset);
+		assertEquals("Invalid Charset conversion", name, editor.getAsText());
 	}
 
 

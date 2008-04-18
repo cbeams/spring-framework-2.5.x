@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharacterEditor;
+import org.springframework.beans.propertyeditors.CharsetEditor;
 import org.springframework.beans.propertyeditors.ClassArrayEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
@@ -154,6 +156,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		// Simple editors, without parameterization capabilities.
 		// The JDK does not contain a default editor for any of these target types.
+		this.defaultEditors.put(Charset.class, new CharsetEditor());
 		this.defaultEditors.put(Class.class, new ClassEditor());
 		this.defaultEditors.put(Class[].class, new ClassArrayEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
