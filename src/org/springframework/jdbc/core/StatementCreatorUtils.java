@@ -214,10 +214,14 @@ public abstract class StatementCreatorUtils {
 					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
 					String databaseProductName = dbmd.getDatabaseProductName();
 					String jdbcDriverName = dbmd.getDriverName();
-					if (databaseProductName.startsWith("Informix") || jdbcDriverName.startsWith("Apache Derby Embedded")) {
+					if (databaseProductName.startsWith("Informix") ||
+							jdbcDriverName.startsWith("Microsoft SQL Server") ||
+							jdbcDriverName.startsWith("Apache Derby Embedded")) {
 						useSetObject = true;
 					}
-					else if (databaseProductName.startsWith("DB2")) {
+					else if (databaseProductName.startsWith("DB2") ||
+							jdbcDriverName.startsWith("jConnect") ||
+							jdbcDriverName.startsWith("SQLServer")) {
 						sqlTypeToUse = Types.VARCHAR;
 					}
 				}
