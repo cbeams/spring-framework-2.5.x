@@ -510,7 +510,7 @@ public class CustomProfileValueSourceTests {
 
           <para>The presence of this annotation on a test method indicates
           that the underlying Spring container is 'dirtied' during the
-          execution of of the test method, and thus must be rebuilt after the
+          execution of the test method, and thus must be rebuilt after the
           test method finishes execution (regardless of whether the test
           passed or not).</para>
 
