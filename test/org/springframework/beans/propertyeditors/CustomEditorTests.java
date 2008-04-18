@@ -56,6 +56,8 @@ import org.springframework.test.AssertThrows;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Rob Harrop
+ * @author Arjen Poutsma
+ * 
  * @since 10.06.2003
  */
 public class CustomEditorTests extends TestCase {
@@ -1366,7 +1368,7 @@ public class CustomEditorTests extends TestCase {
 		assertEquals("", editor.getAsText());
 	}
 
-	public void testCharsetEditopr() throws Exception {
+	public void testCharsetEditor() throws Exception {
 		CharsetEditor editor = new CharsetEditor();
 		String name = "UTF-8";
 		editor.setAsText(name);
