@@ -17,12 +17,19 @@
 package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
@@ -42,6 +49,11 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  */
 public abstract class BeanUtils {
+
+	private static final Log logger = LogFactory.getLog(BeanUtils.class);
+
+	static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
+
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
@@ -332,6 +344,47 @@ public abstract class BeanUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Find a JavaBeans PropertyEditor following the 'Editor' suffix convention
+	 * (e.g. "mypackage.MyDomainClass" -> "mypackage.MyDomainClassEditor").
+	 * <p>Compatible to the standard JavaBeans convention as implemented by
+	 * {@link java.beans.PropertyEditorManager} but isolated from the latter's
+	 * registered default editors for primitive types.
+	 * @param targetType the type to find an editor for
+	 * @return the corresponding editor, or <code>null</code> if none found
+	 */
+	public static PropertyEditor findEditorByConvention(Class targetType) {
+		if (targetType == null || unknownEditorTypes.containsKey(targetType)) {
+			return null;
+		}
+		ClassLoader cl = targetType.getClassLoader();
+		if (cl == null) {
+			cl = ClassLoader.getSystemClassLoader();
+			if (cl == null) {
+				return null;
+			}
+		}
+		String editorName = targetType.getName() + "Editor";
+		try {
+			Class editorClass = cl.loadClass(editorName);
+			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
+				logger.warn("Editor class [" + editorName +
+						"] does not implement [java.beans.PropertyEditor] interface");
+				unknownEditorTypes.put(targetType, Boolean.TRUE);
+				return null;
+			}
+			return (PropertyEditor) instantiateClass(editorClass);
+		}
+		catch (ClassNotFoundException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No property editor [" + editorName + "] found for type " +
+						targetType.getName() + " according to 'Editor' suffix convention");
+			}
+			unknownEditorTypes.put(targetType, Boolean.TRUE);
+			return null;
+		}
 	}
 
 	/**

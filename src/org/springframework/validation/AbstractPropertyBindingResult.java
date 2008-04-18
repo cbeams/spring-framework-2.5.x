@@ -18,6 +18,7 @@ package org.springframework.validation;
 
 import java.beans.PropertyEditor;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
@@ -103,8 +104,12 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	protected PropertyEditor getCustomEditor(String field) {
 		String fixedField = fixedField(field);
-		Class type = getPropertyAccessor().getPropertyType(fixedField);
-		return getPropertyAccessor().findCustomEditor(type, fixedField);
+		Class targetType = getPropertyAccessor().getPropertyType(fixedField);
+		PropertyEditor editor = getPropertyAccessor().findCustomEditor(targetType, fixedField);
+		if (editor == null) {
+			editor = BeanUtils.findEditorByConvention(targetType);
+		}
+		return editor;
 	}
 
 

@@ -22,10 +22,8 @@ import java.beans.PropertyEditorManager;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,8 +50,6 @@ import org.springframework.util.StringUtils;
 class TypeConverterDelegate {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
-
-	private static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -167,27 +163,8 @@ class TypeConverterDelegate {
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
-			if (editor == null && descriptor != null) {
-				if (JdkVersion.isAtLeastJava15()) {
-					editor = descriptor.createPropertyEditor(this.targetObject);
-				}
-				else {
-					Class editorClass = descriptor.getPropertyEditorClass();
-					if (editorClass != null) {
-						editor = (PropertyEditor) BeanUtils.instantiateClass(editorClass);
-					}
-				}
-			}
-			if (editor == null && requiredType != null) {
-				// No custom editor -> check BeanWrapperImpl's default editors.
-				editor = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
-				if (editor == null && !unknownEditorTypes.containsKey(requiredType)) {
-					// No BeanWrapper default editor -> check standard JavaBean editors.
-					editor = PropertyEditorManager.findEditor(requiredType);
-					if (editor == null) {
-						unknownEditorTypes.put(requiredType, Boolean.TRUE);
-					}
-				}
+			if (editor == null) {
+				editor = findDefaultEditor(requiredType, descriptor);
 			}
 			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
@@ -244,6 +221,39 @@ class TypeConverterDelegate {
 		}
 
 		return convertedValue;
+	}
+
+	/**
+	 * Find a default editor for the given type.
+	 * @param requiredType the type to find an editor for
+	 * @param descriptor the JavaBeans descriptor for the property
+	 * @return the corresponding editor, or <code>null</code> if none
+	 */
+	protected PropertyEditor findDefaultEditor(Class requiredType, PropertyDescriptor descriptor) {
+		PropertyEditor editor = null;
+		if (descriptor != null) {
+			if (JdkVersion.isAtLeastJava15()) {
+				editor = descriptor.createPropertyEditor(this.targetObject);
+			}
+			else {
+				Class editorClass = descriptor.getPropertyEditorClass();
+				if (editorClass != null) {
+					editor = (PropertyEditor) BeanUtils.instantiateClass(editorClass);
+				}
+			}
+		}
+		if (editor == null && requiredType != null) {
+			// No custom editor -> check BeanWrapperImpl's default editors.
+			editor = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
+			if (editor == null && !BeanUtils.unknownEditorTypes.containsKey(requiredType)) {
+				// No BeanWrapper default editor -> check standard JavaBean editors.
+				editor = PropertyEditorManager.findEditor(requiredType);
+				if (editor == null) {
+					BeanUtils.unknownEditorTypes.put(requiredType, Boolean.TRUE);
+				}
+			}
+		}
+		return editor;
 	}
 
 	/**
