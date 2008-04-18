@@ -509,8 +509,8 @@
   <section id="mvc-controller">
     <title>Controllers</title>
 
-    <para>The notion of a controller is part of the MVC design pattern (more specifically
-    it is the <emphasis>'C'</emphasis> in MVC. Controllers provide access to the application
+    <para>The notion of a controller is part of the MVC design pattern (more specifically,
+    it is the <emphasis>'C'</emphasis> in MVC). Controllers provide access to the application
     behavior which is typically defined by a service interface. Controllers interpret user
     input and transform such input into a sensible model which will be represented to the
     user by the view. Spring has implemented the notion of a controller in a very abstract
