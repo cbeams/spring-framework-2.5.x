@@ -481,7 +481,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
-		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+		if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
 				BeanPostProcessor bp = (BeanPostProcessor) it.next();
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
