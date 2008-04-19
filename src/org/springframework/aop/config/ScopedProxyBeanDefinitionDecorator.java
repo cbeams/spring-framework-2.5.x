@@ -21,6 +21,7 @@ import org.w3c.dom.Node;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.ParserContext;
 
@@ -46,6 +47,11 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 				proxyTargetClass = Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
 			}
 		}
+		
+		// Register the original bean definition as it will be referenced by the scoped proxy and is relevant for tooling (validation, navigation).
+		String targetBeanName = ScopedProxyUtils.getTargetBeanName(definition.getBeanName());
+		parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(definition.getBeanDefinition(), targetBeanName));
+		
 		return ScopedProxyUtils.createScopedProxy(definition, parserContext.getRegistry(), proxyTargetClass);
 	}
 

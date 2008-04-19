@@ -55,8 +55,9 @@ public abstract class ScopedProxyUtils {
 		RootBeanDefinition scopedProxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
 		scopedProxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
 		scopedProxyDefinition.setSource(definition.getSource());
-
-		String targetBeanName = TARGET_NAME_PREFIX + originalBeanName;
+		scopedProxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		
+		String targetBeanName = getTargetBeanName(originalBeanName);
 		scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
 
 		if (proxyTargetClass) {
@@ -77,6 +78,15 @@ public abstract class ScopedProxyUtils {
 		// Return the scoped proxy definition as primary bean definition
 		// (potentially an inner bean).
 		return new BeanDefinitionHolder(scopedProxyDefinition, originalBeanName, definition.getAliases());
+	}
+	
+	/**
+	 * Generates the bean name that is used within the scoped proxy to reference the target bean.
+	 * @param originalBeanName the original name of bean
+	 * @return the generated bean to be used to reference the target bean
+	 */
+	public static String getTargetBeanName(String originalBeanName) {
+		return TARGET_NAME_PREFIX + originalBeanName;
 	}
 
 }
