@@ -31,6 +31,9 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * JndiRmiClientInterceptor/ProxyFactoryBean work for JNDI objects which do not implement the Remote interface as well
 
+Package org.springframework.test
+* "executeSqlScript" (as in SimpleJdbcTestUtils) allows for multi-line statements, each statement must be separated by a semicolon
+
 Package org.springframework.transaction
 * AbstractFallbackTransactionAttributeSource uses concurrent Map for attribute cache in order to avoid lock contention
 

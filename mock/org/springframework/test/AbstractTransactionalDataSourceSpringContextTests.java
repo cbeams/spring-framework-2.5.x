@@ -18,7 +18,6 @@ package org.springframework.test;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,8 +28,8 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.StringUtils;
 import org.springframework.test.jdbc.JdbcTestUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Subclass of AbstractTransactionalSpringContextTests that adds some convenience
@@ -42,6 +41,7 @@ import org.springframework.test.jdbc.JdbcTestUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @since 1.1.1
  * @see #setDataSource(javax.sql.DataSource)
  * @see #getJdbcTemplate()
@@ -139,9 +139,11 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * Execute the given SQL script. Will be rolled back by default,
 	 * according to the fate of the current transaction.
 	 * @param sqlResourcePath Spring resource path for the SQL script.
-	 * Should normally be loaded by classpath. There should be one statement
-	 * per line. Any semicolons will be removed.
-	 * <b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * Should normally be loaded by classpath.
+	 * <p>Statements should be delimited with a semicolon.  If statements are not delimited with
+	 * a semicolon then there should be one statement per line.  Statements are allowed to span
+	 * lines only if they are delimited with a semicolon.
+	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing
 	 * an exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
@@ -158,17 +160,12 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 		List statements = new LinkedList();
 		try {
 			LineNumberReader lnr = new LineNumberReader(resource.getReader());
-			String currentStatement = lnr.readLine();
-			StringBuffer script = new StringBuffer();
+			String script = JdbcTestUtils.readScript(lnr);
 			char delimiter = ';';
-			while (currentStatement != null) {
-				if (script.length() > 0) {
-					script.append(" ");
-				}
-				script.append(currentStatement.trim());
-				currentStatement = lnr.readLine();
+			if (JdbcTestUtils.countSqlScriptDelimiters(script, delimiter) == 0) {
+				delimiter = '\n';
 			}
-			JdbcTestUtils.splitSqlScript(script.toString(), delimiter, statements);
+			JdbcTestUtils.splitSqlScript(script, delimiter, statements);
 			for (Iterator itr = statements.iterator(); itr.hasNext(); ) {
 				String statement = (String) itr.next();
 				try {
@@ -189,7 +186,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 				}
 			}
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			logger.info("Done executing SQL script '" + sqlResourcePath + "' in " + elapsedTime + " ms");
+			logger.info("Done executing SQL scriptBuilder '" + sqlResourcePath + "' in " + elapsedTime + " ms");
 		}
 		catch (IOException ex) {
 			throw new DataAccessResourceFailureException("Failed to open SQL script '" + sqlResourcePath + "'", ex);

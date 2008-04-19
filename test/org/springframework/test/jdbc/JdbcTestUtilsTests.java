@@ -29,15 +29,38 @@ import java.util.ArrayList;
  */
 public class JdbcTestUtilsTests extends TestCase {
 
-	public void testSplitSqlScript() {
+	public void testCountDelimiters() {
+		assertEquals("count with ';' is wrong", 2, JdbcTestUtils.countSqlScriptDelimiters("select 1; select ';';", ';'));		
+		assertEquals("count with '\\n' is wrong", 2, JdbcTestUtils.countSqlScriptDelimiters("select 1\n select '\\n\n'\n", '\n'));		
+	}
+
+	public void testSplitSqlScriptDelimitedWithSemicolon() {
+		String statement1 = "insert into customer (id, name) \n" +
+				"values (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
+		String statement2 = "insert into orders(id, order_date, customer_id) \n" +
+				"values (1, '2008-01-02', 2)";
+		String statement3 = "insert into orders(id, order_date, customer_id) " +
+				"values (1, '2008-01-02', 2)";
+		char delim = ';';
+		String script = statement1 + delim + statement2 + delim + statement3;
+		List statements = new ArrayList();
+		JdbcTestUtils.splitSqlScript(script, delim, statements);
+		assertEquals("wrong number of statements", 3, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
+		assertEquals("statement 3 not split correctly", statement3, statements.get(2));
+
+	}
+
+	public void testSplitSqlScriptDelimitedWithNewLine() {
 		String statement1 = "insert into customer (id, name) " +
 				"values (1, 'Rod ; Johnson'), (2, 'Adrian ; Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) " +
 				"values (1, '2008-01-02', 2)";
 		String statement3 = "insert into orders(id, order_date, customer_id) " +
 				"values (1, '2008-01-02', 2)";
-		String script = statement1 + ";" + statement2 + " ; " + statement2;
-		char delim = ';';
+		char delim = '\n';
+		String script = statement1 + delim + statement2 + delim + statement3;
 		List statements = new ArrayList();
 		JdbcTestUtils.splitSqlScript(script, delim, statements);
 		assertEquals("wrong number of statements", 3, statements.size());

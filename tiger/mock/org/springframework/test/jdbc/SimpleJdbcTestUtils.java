@@ -18,7 +18,6 @@ package org.springframework.test.jdbc;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @since 2.5
  */
 public abstract class SimpleJdbcTestUtils {
@@ -97,10 +97,11 @@ public abstract class SimpleJdbcTestUtils {
 	}
 
 	/**
-	 * Execute the given SQL script.
-	 * <p>The script will normally be loaded by classpath. There should be one statement
-	 * per line. Any semicolons will be removed. <b>Do not use this method to execute
-	 * DDL if you expect rollback.</b>
+	 * Execute the given SQL script. The script will normally be loaded by classpath. 
+	 * <p>Statements should be delimited with a semicolon.  If statements are not delimited with
+	 * a semicolon then there should be one statement per line.  Statements are allowed to span
+	 * lines only if they are delimited with a semicolon.
+	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param simpleJdbcTemplate the SimpleJdbcTemplate with which to perform JDBC operations
 	 * @param resource the resource to load the SQL script from.
 	 * @param continueOnError whether or not to continue without throwing an
@@ -138,17 +139,12 @@ public abstract class SimpleJdbcTestUtils {
 		List<String> statements = new LinkedList<String>();
 		try {
 			LineNumberReader lnr = new LineNumberReader(resource.getReader());
-			String currentStatement = lnr.readLine();
-			StringBuilder script = new StringBuilder();
+			String script = JdbcTestUtils.readScript(lnr);
 			char delimiter = ';';
-			while (currentStatement != null) {
-				if (script.length() > 0) {
-					script.append(" ");
-				}
-				script.append(currentStatement.trim());
-				currentStatement = lnr.readLine();
+			if (JdbcTestUtils.countSqlScriptDelimiters(script, delimiter) == 0) {
+				delimiter = '\n';			
 			}
-			JdbcTestUtils.splitSqlScript(script.toString(), delimiter, statements);
+			JdbcTestUtils.splitSqlScript(script, delimiter, statements);
 			for (Iterator<String> itr = statements.iterator(); itr.hasNext();) {
 				String statement = itr.next();
 				try {
@@ -170,7 +166,7 @@ public abstract class SimpleJdbcTestUtils {
 			}
 			long elapsedTime = System.currentTimeMillis() - startTime;
 			if (logger.isInfoEnabled()) {
-				logger.info("Done executing SQL script from " + resource + " in " + elapsedTime + " ms.");
+				logger.info("Done executing SQL scriptBuilder from " + resource + " in " + elapsedTime + " ms.");
 			}
 		}
 		catch (IOException ex) {
