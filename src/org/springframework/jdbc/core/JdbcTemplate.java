@@ -1034,8 +1034,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					}
 				}
 				else {
-					if (updateCountParameters != null && updateCountParameters.size() > rsIndex) {
-						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount)updateCountParameters.get(rsIndex);
+					if (updateCountParameters != null && updateCountParameters.size() > updateIndex) {
+						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount)updateCountParameters.get(updateIndex);
 						String declaredUcName = ucParam.getName();
 						returnedResults.put(declaredUcName, new Integer(updateCount));
 						updateIndex++;
