@@ -73,7 +73,6 @@ DataSources in your Java EE container.
 
 Notes on enabling Log4J:
  - Log4J is disabled by default, due to JBoss issues
- - Drop a copy of log4j.jar into the deployed "WEB-INF/lib" directory
  - Uncomment the Log4J listener in "WEB-INF/web.xml"
 
 --------------------------------------------------------------------------------
