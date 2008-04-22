@@ -141,7 +141,7 @@ public abstract class SimpleJdbcTestUtils {
 			LineNumberReader lnr = new LineNumberReader(resource.getReader());
 			String script = JdbcTestUtils.readScript(lnr);
 			char delimiter = ';';
-			if (JdbcTestUtils.countSqlScriptDelimiters(script, delimiter) == 0) {
+			if (!JdbcTestUtils.containsSqlScriptDelimiters(script, delimiter)) {
 				delimiter = '\n';			
 			}
 			JdbcTestUtils.splitSqlScript(script, delimiter, statements);

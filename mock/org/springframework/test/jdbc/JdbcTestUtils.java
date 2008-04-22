@@ -54,12 +54,12 @@ public class JdbcTestUtils {
 	}
 
 	/**
-	 * Count the number of occurreces of the provided delimiter in an SQL script.
+	 * Does the provided SQL script contain the specified delimiter?
+	 * 
 	 * @param script the SQL script
 	 * @param delim charecter delimiting each statement - typically a ';' character
 	 */
-	public static int countSqlScriptDelimiters(String script, char delim) {
-		int count = 0;
+	public static boolean containsSqlScriptDelimiters(String script, char delim) {
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
 
@@ -68,10 +68,10 @@ public class JdbcTestUtils {
 				inLiteral = inLiteral ? false : true;
 			}
 			if (content[i] == delim && !inLiteral) {
-				count++;
+				return true;
 			}
 		}
-		return count;
+		return false;
 	}
 
 	/**

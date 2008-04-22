@@ -29,9 +29,11 @@ import java.util.ArrayList;
  */
 public class JdbcTestUtilsTests extends TestCase {
 
-	public void testCountDelimiters() {
-		assertEquals("count with ';' is wrong", 2, JdbcTestUtils.countSqlScriptDelimiters("select 1; select ';';", ';'));		
-		assertEquals("count with '\\n' is wrong", 2, JdbcTestUtils.countSqlScriptDelimiters("select 1\n select '\\n\n'\n", '\n'));		
+	public void testContainsDelimiters() {
+		assertTrue("test with ';' is wrong", !JdbcTestUtils.containsSqlScriptDelimiters("select 1\n select ';'", ';'));		
+		assertTrue("test with delimiter ; is wrong", JdbcTestUtils.containsSqlScriptDelimiters("select 1; select 2", ';'));
+		assertTrue("test with '\\n' is wrong", !JdbcTestUtils.containsSqlScriptDelimiters("select 1; select '\\n\n';", '\n'));
+		assertTrue("test with delimiter \\n is wrong", JdbcTestUtils.containsSqlScriptDelimiters("select 1\n select 2", '\n'));
 	}
 
 	public void testSplitSqlScriptDelimitedWithSemicolon() {
