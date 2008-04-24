@@ -78,8 +78,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JPA support with EclipseLink as provider
 
-* ehcache/ehcache-1.3.0.jar
-- EHCache 1.3.0 (http://ehcache.sourceforge.net)
+* ehcache/ehcache-1.4.1.jar
+- EHCache 1.4.1 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
 - required for running PetClinic (by Hibernate)
@@ -321,8 +321,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - JUnit 3.8.2 / 4.4 (http://www.junit.org)
 - required for building and running the framework's test suite
 
-* log4j/log4j-1.2.14.jar
-- Log4J 1.2.14 (http://logging.apache.org/log4j)
+* log4j/log4j-1.2.15.jar
+- Log4J 1.2.15 (http://logging.apache.org/log4j)
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
