@@ -726,7 +726,7 @@ public class RequestContext {
 				if (session != null) {
 					localeObject = Config.get(session, Config.FMT_LOCALE);
 				}
-				if (localeObject == null) {
+				if (localeObject == null && servletContext != null) {
 					localeObject = Config.get(servletContext, Config.FMT_LOCALE);
 				}
 			}
