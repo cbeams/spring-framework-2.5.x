@@ -17,7 +17,7 @@ distribution/website before using any of them in your own applications.
 - included in spring.jar and spring-aop.jar
 
 * aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, (aspectj/aspectjtools.jar)
-- AspectJ 1.5.4 (http://www.aspectj.org)
+- AspectJ 1.6.0 (http://www.aspectj.org)
 - required for building the framework
 - required at runtime when using Spring's AspectJ support
 
