@@ -33,6 +33,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 /**
  * Base class for listener container implementations which are based on polling.
@@ -186,8 +187,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	public void initialize() {
 		// Set sessionTransacted=true in case of a non-JTA transaction manager.
-		if (!this.sessionTransactedCalled && this.transactionManager instanceof ResourceTransactionManager &&
-				((ResourceTransactionManager) this.transactionManager).getResourceFactory() != getConnectionFactory()) {
+		if (!this.sessionTransactedCalled &&
+				this.transactionManager instanceof ResourceTransactionManager &&
+				!TransactionSynchronizationUtils.sameResourceFactory(
+						(ResourceTransactionManager) this.transactionManager, getConnectionFactory())) {
 			super.setSessionTransacted(true);
 		}
 

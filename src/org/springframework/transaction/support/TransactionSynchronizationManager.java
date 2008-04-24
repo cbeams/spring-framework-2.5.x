@@ -123,9 +123,9 @@ public abstract class TransactionSynchronizationManager {
 	 * @see ResourceTransactionManager#getResourceFactory() 
 	 */
 	public static boolean hasResource(Object key) {
-		Assert.notNull(key, "Key must not be null");
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Map map = (Map) resources.get();
-		return (map != null && map.containsKey(key));
+		return (map != null && map.containsKey(actualKey));
 	}
 
 	/**
@@ -136,14 +136,14 @@ public abstract class TransactionSynchronizationManager {
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static Object getResource(Object key) {
-		Assert.notNull(key, "Key must not be null");
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Map map = (Map) resources.get();
 		if (map == null) {
 			return null;
 		}
-		Object value = map.get(key);
+		Object value = map.get(actualKey);
 		if (value != null && logger.isDebugEnabled()) {
-			logger.debug("Retrieved value [" + value + "] for key [" + key + "] bound to thread [" +
+			logger.debug("Retrieved value [" + value + "] for key [" + actualKey + "] bound to thread [" +
 					Thread.currentThread().getName() + "]");
 		}
 		return value;
@@ -157,7 +157,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
-		Assert.notNull(key, "Key must not be null");
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Assert.notNull(value, "Value must not be null");
 		Map map = (Map) resources.get();
 		// set ThreadLocal Map if none found
@@ -165,13 +165,13 @@ public abstract class TransactionSynchronizationManager {
 			map = new HashMap();
 			resources.set(map);
 		}
-		if (map.containsKey(key)) {
-			throw new IllegalStateException("Already value [" + map.get(key) + "] for key [" + key +
+		if (map.containsKey(actualKey)) {
+			throw new IllegalStateException("Already value [" + map.get(actualKey) + "] for key [" + actualKey +
 					"] bound to thread [" + Thread.currentThread().getName() + "]");
 		}
-		map.put(key, value);
+		map.put(actualKey, value);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Bound value [" + value + "] for key [" + key + "] to thread [" +
+			logger.debug("Bound value [" + value + "] for key [" + actualKey + "] to thread [" +
 					Thread.currentThread().getName() + "]");
 		}
 	}
@@ -184,19 +184,19 @@ public abstract class TransactionSynchronizationManager {
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static Object unbindResource(Object key) throws IllegalStateException {
-		Assert.notNull(key, "Key must not be null");
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Map map = (Map) resources.get();
-		if (map == null || !map.containsKey(key)) {
+		if (map == null || !map.containsKey(actualKey)) {
 			throw new IllegalStateException(
-					"No value for key [" + key + "] bound to thread [" + Thread.currentThread().getName() + "]");
+					"No value for key [" + actualKey + "] bound to thread [" + Thread.currentThread().getName() + "]");
 		}
-		Object value = map.remove(key);
+		Object value = map.remove(actualKey);
 		// remove entire ThreadLocal if empty
 		if (map.isEmpty()) {
 			resources.set(null);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Removed value [" + value + "] for key [" + key + "] from thread [" +
+			logger.debug("Removed value [" + value + "] for key [" + actualKey + "] from thread [" +
 					Thread.currentThread().getName() + "]");
 		}
 		return value;

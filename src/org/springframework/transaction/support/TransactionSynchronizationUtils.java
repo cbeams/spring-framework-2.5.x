@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.InfrastructureProxy;
+import org.springframework.util.Assert;
+
 /**
  * Utility methods for triggering specific {@link TransactionSynchronization}
  * callback methods on all currently registered synchronizations.
@@ -34,6 +37,27 @@ import org.apache.commons.logging.LogFactory;
 public abstract class TransactionSynchronizationUtils {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationUtils.class);
+
+
+	/**
+	 * Check whether the given resource transaction managers refers to the given
+	 * (underlying) resource factory.
+	 * @see ResourceTransactionManager#getResourceFactory()
+	 * @see org.springframework.core.InfrastructureProxy#getWrappedObject()
+	 */
+	public static boolean sameResourceFactory(ResourceTransactionManager tm, Object resourceFactory) {
+		return unwrapResourceIfNecessary(tm.getResourceFactory()).equals(unwrapResourceIfNecessary(resourceFactory));
+	}
+
+	/**
+	 * Unwrap the given resource handle if necessary; otherwise return
+	 * the given handle as-is.
+	 * @see org.springframework.core.InfrastructureProxy#getWrappedObject()
+	 */
+	static Object unwrapResourceIfNecessary(Object resource) {
+		Assert.notNull(resource, "Resource must not be null");
+		return (resource instanceof InfrastructureProxy ? ((InfrastructureProxy) resource).getWrappedObject() : resource);
+	}
 
 
 	/**
