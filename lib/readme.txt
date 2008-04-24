@@ -93,8 +93,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - GlassFish ClassLoader API extract (http://glassfish.dev.java.net)
 - required for building the framework
 
-* groovy/groovy-1.5.1.jar
-- Groovy 1.5.1 (http://groovy.codehaus.org)
+* groovy/groovy-1.5.5.jar
+- Groovy 1.5.5 (http://groovy.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's Groovy support
 
