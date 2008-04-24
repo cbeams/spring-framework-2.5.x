@@ -51,8 +51,11 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	private long timeToLive;
 
 
-	public CachedMessageProducer(MessageProducer target) {
+	public CachedMessageProducer(MessageProducer target) throws JMSException {
 		this.target = target;
+		this.deliveryMode = target.getDeliveryMode();
+		this.priority = target.getPriority();
+		this.timeToLive = target.getTimeToLive();
 	}
 
 
