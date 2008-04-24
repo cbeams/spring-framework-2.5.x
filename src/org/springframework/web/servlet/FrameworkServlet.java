@@ -83,6 +83,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @see #doService
  * @see #setContextClass
  * @see #setContextConfigLocation
@@ -110,7 +111,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	public static final String SERVLET_CONTEXT_PREFIX = FrameworkServlet.class.getName() + ".CONTEXT.";
 
 
-	/** WebApplicationContext implementation class to use */
+	/** ServletContext attribute to find the WebApplicationContext in */
+	private String contextAttribute;
+
+	/** WebApplicationContext implementation class to create */
 	private Class contextClass = DEFAULT_CONTEXT_CLASS;
 
 	/** Namespace for this servlet */
@@ -137,6 +141,22 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/** Flag used to detect whether onRefresh has already been called */
 	private boolean refreshEventReceived = false;
 
+
+	/**
+	 * Set the name of the ServletContext attribute which should be used to retrieve the
+	 * {@link WebApplicationContext} that this servlet is supposed to use.
+	 */
+	public void setContextAttribute(String contextAttribute) {
+		this.contextAttribute = contextAttribute;
+	}
+
+	/**
+	 * Return the name of the ServletContext attribute which should be used to retrieve the
+	 * {@link WebApplicationContext} that this servlet is supposed to use.
+	 */
+	public String getContextAttribute() {
+		return this.contextAttribute;
+	}
 
 	/**
 	 * Set a custom context class. This class must be of type
@@ -288,8 +308,13 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #setContextConfigLocation
 	 */
 	protected WebApplicationContext initWebApplicationContext() throws BeansException {
-		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-		WebApplicationContext wac = createWebApplicationContext(parent);
+		WebApplicationContext wac = findWebApplicationContext();
+		if (wac == null) {
+			// No fixed context defined for this servlet - create a local one.
+			WebApplicationContext parent =
+					WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+			wac = createWebApplicationContext(parent);
+		}
 
 		if (!this.refreshEventReceived) {
 			// Apparently not a ConfigurableApplicationContext with refresh support:
@@ -307,6 +332,29 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 		}
 
+		return wac;
+	}
+
+	/**
+	 * Retrieve a <code>WebApplicationContext</code> from the <code>ServletContext</code>
+	 * attribute with the {@link #setContextAttribute configured name}. Thus, the
+	 * <code>WebApplicationContext</code> must have already been loaded and stored in the
+	 * <code>ServletContext</code> before this servlet gets initialized (or invoked).
+	 * <p>Subclasses may override this method to provide a different
+	 * <code>WebApplicationContext</code> retrieval strategy.
+	 * @return the WebApplicationContext for this proxy, or <code>null</code> if not found
+	 * @see #getContextAttribute()
+	 */
+	protected WebApplicationContext findWebApplicationContext() {
+		String attrName = getContextAttribute();
+		if (attrName == null) {
+			return null;
+		}
+		WebApplicationContext wac =
+				WebApplicationContextUtils.getWebApplicationContext(getServletContext(), attrName);
+		if (wac == null) {
+			throw new IllegalStateException("No WebApplicationContext found: initializer not registered?");
+		}
 		return wac;
 	}
 

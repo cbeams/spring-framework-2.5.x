@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * written by Ben Alex.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.2
  * @see #setTargetBeanName
  * @see #setTargetFilterLifecycle
@@ -64,12 +65,32 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  */
 public class DelegatingFilterProxy extends GenericFilterBean {
 
+	private String contextAttribute;
+
 	private String targetBeanName;
 
 	private boolean targetFilterLifecycle = false;
 
 	private Filter delegate;
 
+	private final Object delegateMonitor = new Object();
+
+
+	/**
+	 * Set the name of the ServletContext attribute which should be used to retrieve the
+	 * {@link WebApplicationContext} from which to load the delegate {@link Filter} bean.
+	 */
+	public void setContextAttribute(String contextAttribute) {
+		this.contextAttribute = contextAttribute;
+	}
+
+	/**
+	 * Return the name of the ServletContext attribute which should be used to retrieve the
+	 * {@link WebApplicationContext} from which to load the delegate {@link Filter} bean.
+	 */
+	public String getContextAttribute() {
+		return this.contextAttribute;
+	}
 
 	/**
 	 * Set the name of the target bean in the Spring application context.
@@ -114,13 +135,15 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 		if (this.targetBeanName == null) {
 			this.targetBeanName = getFilterName();
 		}
+
 		// Fetch Spring root application context and initialize the delegate early,
 		// if possible. If the root application context will be started after this
 		// filter proxy, we'll have to resort to lazy initialization.
-		WebApplicationContext wac =
-				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-		if (wac != null) {
-			this.delegate = initDelegate(wac);
+		synchronized (this.delegateMonitor) {
+			WebApplicationContext wac = findWebApplicationContext();
+			if (wac != null) {
+				this.delegate = initDelegate(wac);
+			}
 		}
 	}
 
@@ -128,22 +151,52 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 			throws ServletException, IOException {
 
 		// Lazily initialize the delegate if necessary.
-		if (this.delegate == null) {
-			WebApplicationContext wac =
-					WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-			this.delegate = initDelegate(wac);
+		Filter delegateToUse = null;
+		synchronized (this.delegateMonitor) {
+			if (this.delegate == null) {
+				WebApplicationContext wac = findWebApplicationContext();
+				if (wac == null) {
+					throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+				}
+				this.delegate = initDelegate(wac);
+			}
+			delegateToUse = this.delegate;
 		}
 
 		// Let the delegate perform the actual doFilter operation.
-		invokeDelegate(this.delegate, request, response, filterChain);
+		invokeDelegate(delegateToUse, request, response, filterChain);
 	}
 
 	public void destroy() {
-		if (this.delegate != null) {
-			destroyDelegate(this.delegate);
+		Filter delegateToUse = null;
+		synchronized (this.delegateMonitor) {
+			delegateToUse = this.delegate;
+		}
+		if (delegateToUse != null) {
+			destroyDelegate(delegateToUse);
 		}
 	}
 
+
+	/**
+	 * Retrieve a <code>WebApplicationContext</code> from the <code>ServletContext</code>
+	 * attribute with the {@link #setContextAttribute configured name}. Thus, the
+	 * <code>WebApplicationContext</code> must have already been loaded and stored in the
+	 * <code>ServletContext</code> before this filter gets initialized (or invoked).
+	 * <p>Subclasses may override this method to provide a different
+	 * <code>WebApplicationContext</code> retrieval strategy.
+	 * @return the WebApplicationContext for this proxy, or <code>null</code> if not found
+	 * @see #getContextAttribute()
+	 */
+	protected WebApplicationContext findWebApplicationContext() {
+		String attrName = getContextAttribute();
+		if (attrName != null) {
+			return WebApplicationContextUtils.getWebApplicationContext(getServletContext(), attrName);
+		}
+		else {
+			return WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+		}
+	}
 
 	/**
 	 * Initialize the Filter delegate, defined as bean the given Spring

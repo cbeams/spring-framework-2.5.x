@@ -31,9 +31,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.SessionScope;
 
 /**
- * Convenience methods for retrieving the root WebApplicationContext for a given
- * ServletContext. This is e.g. useful for accessing a Spring context from
- * within custom web views or Struts actions.
+ * Convenience methods for retrieving the root
+ * {@link org.springframework.web.context.WebApplicationContext} for a given
+ * <code>ServletContext</code>. This is e.g. useful for accessing a Spring
+ * context from within custom web views or Struts actions.
  *
  * <p>Note that there are more convenient ways of accessing the root context for
  * many web frameworks, either part of Spring or available as external library.
@@ -52,34 +53,8 @@ public abstract class WebApplicationContextUtils {
 	
 	/**
 	 * Find the root WebApplicationContext for this web application, which is
-	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
-	 * <p>Will rethrow an exception that happened on root context startup,
-	 * to differentiate between a failed context startup and no context at all.
-	 * @param sc ServletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
-	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
-	 */
-	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
-		Assert.notNull(sc, "ServletContext must not be null");
-		Object attr = sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		if (attr == null) {
-			return null;
-		}
-		if (attr instanceof RuntimeException) {
-			throw (RuntimeException) attr;
-		}
-		if (attr instanceof Error) {
-			throw (Error) attr;
-		}
-		if (!(attr instanceof WebApplicationContext)) {
-			throw new IllegalStateException("Root context attribute is not of type WebApplicationContext: " + attr);
-		}
-		return (WebApplicationContext) attr;
-	}
-
-	/**
-	 * Find the root WebApplicationContext for this web application, which is
-	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener} or
+	 * {@link org.springframework.web.context.ContextLoaderServlet}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
@@ -95,6 +70,49 @@ public abstract class WebApplicationContextUtils {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
 		}
 		return wac;
+	}
+
+	/**
+	 * Find the root WebApplicationContext for this web application, which is
+	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener} or
+	 * {@link org.springframework.web.context.ContextLoaderServlet}.
+	 * <p>Will rethrow an exception that happened on root context startup,
+	 * to differentiate between a failed context startup and no context at all.
+	 * @param sc ServletContext to find the web application context for
+	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
+	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 */
+	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
+		return getWebApplicationContext(sc, WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+	}
+
+	/**
+	 * Find a custom WebApplicationContext for this web application.
+	 * @param sc ServletContext to find the web application context for
+	 * @param attrName the name of the ServletContext attribute to look for
+	 * @return the desired WebApplicationContext for this web app, or <code>null</code> if none
+	 */
+	public static WebApplicationContext getWebApplicationContext(ServletContext sc, String attrName) {
+		Assert.notNull(sc, "ServletContext must not be null");
+		Object attr = sc.getAttribute(attrName);
+		if (attr == null) {
+			return null;
+		}
+		if (attr instanceof RuntimeException) {
+			throw (RuntimeException) attr;
+		}
+		if (attr instanceof Error) {
+			throw (Error) attr;
+		}
+		if (attr instanceof Exception) {
+			IllegalStateException ex = new IllegalStateException();
+			ex.initCause((Exception) attr);
+			throw ex;
+		}
+		if (!(attr instanceof WebApplicationContext)) {
+			throw new IllegalStateException("Context attribute is not of type WebApplicationContext: " + attr);
+		}
+		return (WebApplicationContext) attr;
 	}
 
 
