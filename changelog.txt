@@ -8,6 +8,7 @@ Changes in version 2.0.9 (2008-06-05)
 
 General
 * various documentation fixes and clarifications
+* updated various libraries to the most recent point releases
 
 Package org.springframework.aop
 * Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
@@ -68,6 +69,7 @@ Package org.springframework.web
 * OncePerRequestFilter cleans up its marker attribute at the end of each outer request (for Portlet compatibility)
 * AbstractTemplateView catches "HttpServletResponse.getContentType()" exceptions (for JBoss Portal compatibility)
 * InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
+* fixed JSP form tags to properly return SKIP_BODY instead of the non-defined EVAL_PAGE (for WebLogic compatibility)
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
 
 
