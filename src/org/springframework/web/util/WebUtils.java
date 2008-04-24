@@ -462,6 +462,68 @@ public abstract class WebUtils {
 	}
 
 	/**
+	 * Obtain a named parameter from the given request parameters.
+	 * <p>See {@link #findParameterValue(java.util.Map, String)}
+	 * for a description of the lookup algorithm.
+	 * @param request current HTTP request
+	 * @param name the <i>logical</i> name of the request parameter
+	 * @return the value of the parameter, or <code>null</code>
+	 * if the parameter does not exist in given request
+	 */
+	public static String findParameterValue(ServletRequest request, String name) {
+		return findParameterValue(request.getParameterMap(), name);
+	}
+
+	/**
+	 * Obtain a named parameter from the given request parameters.
+	 * <p>This method will try to obtain a parameter value using the
+	 * following algorithm:
+	 * <ol>
+	 * <li>Try to get the parameter value using just the given <i>logical</i> name.
+	 * This handles parameters of the form <tt>logicalName = value</tt>. For normal
+	 * parameters, e.g. submitted using a hidden HTML form field, this will return
+	 * the requested value.</li>
+	 * <li>Try to obtain the parameter value from the parameter name, where the
+	 * parameter name in the request is of the form <tt>logicalName_value = xyz</tt>
+	 * with "_" being the configured delimiter. This deals with parameter values
+	 * submitted using an HTML form submit button.</li>
+	 * <li>If the value obtained in the previous step has a ".x" or ".y" suffix,
+	 * remove that. This handles cases where the value was submitted using an
+	 * HTML form image button. In this case the parameter in the request would
+	 * actually be of the form <tt>logicalName_value.x = 123</tt>. </li>
+	 * </ol>
+	 * @param parameters the available parameter map
+	 * @param name the <i>logical</i> name of the request parameter
+	 * @return the value of the parameter, or <code>null</code>
+	 * if the parameter does not exist in given request
+	 */
+	public static String findParameterValue(Map parameters, String name) {
+		// First try to get it as a normal name=value parameter
+		String value = (String) parameters.get(name);
+		if (value != null) {
+			return value;
+		}
+		// If no value yet, try to get it as a name_value=xyz parameter
+		String prefix = name + "_";
+		Iterator paramNames = parameters.keySet().iterator();
+		while (paramNames.hasNext()) {
+			String paramName = (String) paramNames.next();
+			if (paramName.startsWith(prefix)) {
+				// Support images buttons, which would submit parameters as name_value.x=123
+				for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
+					String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+					if (paramName.endsWith(suffix)) {
+						return paramName.substring(prefix.length(), paramName.length() - suffix.length());
+					}
+				}
+				return paramName.substring(prefix.length());
+			}
+		}
+		// We couldn't find the parameter value...
+		return null;
+	}
+
+	/**
 	 * Return a map containing all parameters with the given prefix.
 	 * Maps single values to String and multiple values to String array.
 	 * <p>For example, with a prefix of "spring_", "spring_param1" and
