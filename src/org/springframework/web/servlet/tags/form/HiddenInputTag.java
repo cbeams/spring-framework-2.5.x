@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
-
 /**
  * Data-binding aware JSP tag for rendering a hidden HTML '<code>input</code>' field
  * containing the databound value.
