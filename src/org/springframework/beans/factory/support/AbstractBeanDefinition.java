@@ -927,10 +927,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (this.abstractFlag != that.abstractFlag) return false;
 		if (this.lazyInit != that.lazyInit) return false;
 
-		if (this.autowireCandidate != that.autowireCandidate) return false;
 		if (this.autowireMode != that.autowireMode) return false;
 		if (this.dependencyCheck != that.dependencyCheck) return false;
 		if (!Arrays.equals(this.dependsOn, that.dependsOn)) return false;
+		if (this.autowireCandidate != that.autowireCandidate) return false;
+		if (!ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers)) return false;
+		if (this.primary != that.primary) return false;
 
 		if (!ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues)) return false;
@@ -942,6 +944,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (this.enforceInitMethod != that.enforceInitMethod) return false;
 		if (!ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName)) return false;
 		if (this.enforceDestroyMethod != that.enforceDestroyMethod) return false;
+
+		if (this.synthetic != that.synthetic) return false;
+		if (!ObjectUtils.nullSafeEquals(this.resource, that.resource)) return false;
+		if (this.role != that.role) return false;
 
 		return super.equals(other);
 	}
@@ -963,9 +969,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		sb.append("; scope=").append(this.scope);
 		sb.append("; abstract=").append(this.abstractFlag);
 		sb.append("; lazyInit=").append(this.lazyInit);
-		sb.append("; autowireCandidate=").append(this.autowireCandidate);
 		sb.append("; autowireMode=").append(this.autowireMode);
 		sb.append("; dependencyCheck=").append(this.dependencyCheck);
+		sb.append("; autowireCandidate=").append(this.autowireCandidate);
+		sb.append("; primary=").append(this.primary);
 		sb.append("; factoryBeanName=").append(this.factoryBeanName);
 		sb.append("; factoryMethodName=").append(this.factoryMethodName);
 		sb.append("; initMethodName=").append(this.initMethodName);
