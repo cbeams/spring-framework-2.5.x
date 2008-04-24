@@ -24,7 +24,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
- * JSP tag that evaluates content if there are bind errors
+ * JSP tag that evaluates content if there are binding errors
  * for a certain bean. Exports an "errors" variable of type
  * {@link org.springframework.validation.Errors} for the given bean.
  *
@@ -54,13 +54,14 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 	 * Return the name of the bean that this tag checks.
 	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 
 	protected final int doStartTagInternal() throws ServletException, JspException {
 		String resolvedName = ExpressionEvaluationUtils.evaluateString("name", this.name, pageContext);
 		this.errors = getRequestContext().getErrors(resolvedName, isHtmlEscape());
+
 		if (this.errors != null && this.errors.hasErrors()) {
 			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, this.errors, PageContext.REQUEST_SCOPE);
 			return EVAL_BODY_INCLUDE;
@@ -77,7 +78,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Retrieve the Errors instance that this tag is currently bound to.
-	 * Intended for cooperating nesting tags.
+	 * <p>Intended for cooperating nesting tags.
 	 */
 	public final Errors getErrors() {
 		return this.errors;
