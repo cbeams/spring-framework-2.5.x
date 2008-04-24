@@ -204,7 +204,7 @@ private static final class ActorMapper implements RowMapper {
 					<title>Other operations</title>
 					<para>The <methodname>execute(..)</methodname> method can be used to execute any
 					arbitrary SQL, and as such is often used for DDL statements. It is heavily overloaded
-					with variants taking callback interfaces, bind variable arrays, and suchlike.</para>
+					with variants taking callback interfaces, binding variable arrays, and suchlike.</para>
 					<programlisting><![CDATA[this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");]]></programlisting>
 					<para>Invoking a simple stored procedure (more sophisticated stored procedure
 					support is <link linkend="jdbc-StoredProcedure">covered later</link>).</para>
