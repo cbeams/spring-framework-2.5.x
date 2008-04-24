@@ -280,7 +280,7 @@ public class ContextLoader {
 		else {
 			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
 			try {
-				return ClassUtils.forName(contextClassName);
+				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
 			}
 			catch (ClassNotFoundException ex) {
 				throw new ApplicationContextException(
