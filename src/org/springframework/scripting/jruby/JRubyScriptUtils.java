@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for handling JRuby-scripted objects.
  *
- * <p>Note: As of Spring 2.0.4, this class requires JRuby 0.9.8 or 0.9.9.
- * As of Spring 2.0.6 / 2.1, it supports JRuby 1.0 as well.
+ * <p>As of Spring 2.5, this class supports JRuby 0.9.9, 0.9.9 and 1.0.x.
+ * <b>Note that there is no support for JRuby 1.1 at this point!</b>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
