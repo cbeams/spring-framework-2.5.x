@@ -220,7 +220,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 			throw new IllegalArgumentException("Attribute 'items' must be a Collection, an Array or a Map");
 		}
 
-		return EVAL_PAGE;
+		return SKIP_BODY;
 	}
 
 	private void writeObjectEntry(TagWriter tagWriter, String valueProperty,

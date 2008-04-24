@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		assertEquals("<select id=\"country\" name=\"country\"></select>", output);
@@ -90,7 +90,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		assertEquals("<select id=\"country\" name=\"country\"></select>", output);
@@ -129,7 +129,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${countries}");
 		this.tag.setItemValue("isoCode");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		validateOutput(getOutput(), true);
 	}
 
@@ -175,7 +175,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setPath("sex");
 		this.tag.setItems("${sexes}");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 	}
 
 	public void testWithInvalidList() throws Exception {
@@ -231,7 +231,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		}
 		this.tag.setItems(array);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
@@ -271,7 +271,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 		this.tag.setItems(array);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		assertTrue(output.startsWith("<select "));
@@ -302,7 +302,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${countries}");
 		this.tag.setItemValue("isoCode");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
@@ -344,7 +344,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${countries}");
 		this.tag.setItemValue("isoCode");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
@@ -378,7 +378,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${sexes}");
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
@@ -453,7 +453,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 			exposeBindingResult(bindingResult);
 
 			int result = this.tag.doStartTag();
-			assertEquals(Tag.EVAL_PAGE, result);
+			assertEquals(Tag.SKIP_BODY, result);
 
 			String output = getOutput();
 			output = "<doc>" + output + "</doc>";
@@ -497,7 +497,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${countries}");
 		this.tag.setItemValue("isoCode");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
@@ -522,7 +522,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	private void assertStringArray() throws JspException, DocumentException {
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		assertTrue(output.startsWith("<select "));
@@ -578,7 +578,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemLabel("name");
 		this.tag.setSize("5");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 		validateOutput(output, selected);

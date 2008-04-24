@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 	public void testWithSingleValueBooleanObjectChecked() throws Exception {
 		this.tag.setPath("someBoolean");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 
 		// wrap the output so it is valid XML
@@ -79,7 +79,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 	public void testWithSingleValueBooleanChecked() throws Exception {
 		this.tag.setPath("jedi");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 
 		// wrap the output so it is valid XML
@@ -99,7 +99,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.bean.setSomeBoolean(new Boolean(false));
 		this.tag.setPath("someBoolean");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -120,7 +120,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.bean.setJedi(false);
 		this.tag.setPath("jedi");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -142,7 +142,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.tag.setValue("Rob Harrop");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -164,7 +164,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.tag.setValue("Rob Harrop");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -190,7 +190,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -211,7 +211,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("stringArray");
 		this.tag.setValue("foo");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -232,7 +232,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("stringArray");
 		this.tag.setValue("abc");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -258,7 +258,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		assertEquals(1, editor.count);
 
 		String output = getOutput();
@@ -285,7 +285,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		assertEquals(1, editor.count);
 
 		String output = getOutput();
@@ -307,7 +307,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("someList");
 		this.tag.setValue("foo");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -329,7 +329,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue(getDate());
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -352,7 +352,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue(date);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -374,7 +374,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue("RED");
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -395,7 +395,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue("PURPLE");
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -416,7 +416,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue("Spot");
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -437,7 +437,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue("Santa's Little Helper");
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -458,7 +458,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue(new Pet("Rudiger"));
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -480,7 +480,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setValue(new Pet("Santa's Little Helper"));
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -507,7 +507,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -539,7 +539,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("someBoolean");
 		this.tag.setDisabled("true");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 
 		// wrap the output so it is valid XML

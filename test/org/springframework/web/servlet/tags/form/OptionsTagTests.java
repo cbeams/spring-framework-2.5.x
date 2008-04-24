@@ -71,7 +71,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setCssClass("myClass");
 		this.tag.setOnclick("CLICK");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
@@ -104,7 +104,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 		this.tag.setItems("${floats}");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
@@ -135,7 +135,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
@@ -154,7 +154,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 

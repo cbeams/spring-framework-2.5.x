@@ -93,7 +93,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 			tagWriter.endTag();
 		}
 
-		return EVAL_PAGE;
+		return SKIP_BODY;
 	}
 
 	/**

@@ -59,7 +59,7 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 			tagWriter.endTag();
 		}
 
-		return EVAL_PAGE;
+		return SKIP_BODY;
 	}
 
 	protected void writeTagDetails(TagWriter tagWriter) throws JspException {

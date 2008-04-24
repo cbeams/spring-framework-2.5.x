@@ -63,7 +63,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -102,7 +102,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -150,7 +150,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		m.put("baz", "BAZ");
 		this.tag.setItems(m);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -195,7 +195,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		m.put("baz", "BAZ");
 		this.tag.setItems(m);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -239,7 +239,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		assertEquals(3, editor.allProcessedValues.size());
 
 		String output = getOutput();
@@ -285,7 +285,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.tag.setItemLabel("label");
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -354,7 +354,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getOutput();
 
@@ -421,7 +421,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setDisabled("true");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 
 		// wrap the output so it is valid XML
@@ -446,7 +446,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setElement("element");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
 
 		// wrap the output so it is valid XML

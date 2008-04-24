@@ -45,7 +45,7 @@ public class CheckboxesTag extends AbstractMultiCheckedElementTag {
 			tagWriter.endTag();
 		}
 
-		return EVAL_PAGE;
+		return SKIP_BODY;
 	}
 
 	protected String getInputType() {

@@ -157,7 +157,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 			OptionsWriter optionWriter = new OptionsWriter(itemsObject, valueProperty, labelProperty);
 			optionWriter.writeOptions(tagWriter);
 		}
-		return EVAL_PAGE;
+		return SKIP_BODY;
 	}
 
 	/**
