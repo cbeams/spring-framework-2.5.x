@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	public void testRender() throws Exception {
 		this.tag.setPath("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		String output = getWriter().toString();
 
@@ -61,7 +61,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
 		exposeBindingResult(errors);
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 

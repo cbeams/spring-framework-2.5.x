@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	public void testSimpleBind() throws Exception {
 		this.tag.setPath("name");
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 
@@ -66,7 +66,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setHtmlEscape("true");
 		this.rob.setName(NAME);
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 
@@ -84,7 +84,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	public void testComplexBind() throws Exception {
 		this.tag.setPath("spouse.name");
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 
@@ -157,7 +157,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setReadonly(readonly);
 		this.tag.setAutocomplete(autocomplete);
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 		String output = getWriter().toString();
 
 		assertTagOpened(output);
@@ -201,7 +201,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		this.tag.setPath("name");
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 
@@ -222,7 +222,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 
@@ -248,7 +248,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
 		exposeBindingResult(errors);
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 
@@ -266,7 +266,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.tag.setReadonly("true");
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 
@@ -285,7 +285,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.tag.setReadonly("nope, this is not readonly");
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
 		String output = getWriter().toString();
 

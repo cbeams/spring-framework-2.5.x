@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
-
 /**
  * Data-binding aware JSP tag for rendering a hidden HTML '<code>input</code>' field
  * containing the databound value.
@@ -27,16 +26,12 @@ import javax.servlet.jsp.JspException;
  * <pre class="code>
  * &lt;form:hidden path=&quot;name&quot;/&gt;
  * </pre>
- * 
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class HiddenInputTag extends AbstractDataBoundFormElementTag {
-
-	/**
-	 * The CSS class to use when the field bound to a particular tag has errors.
-	 */
-	private String cssErrorClass;
 
 	/**
 	 * Writes the HTML '<code>input</code>' tag to the supplied {@link TagWriter} including the
@@ -50,22 +45,7 @@ public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 		tagWriter.writeAttribute("type", "hidden");
 		tagWriter.writeAttribute("value", getDisplayString(getBoundValue(), getPropertyEditor()));
 		tagWriter.endTag();
-		return EVAL_PAGE;
+		return SKIP_BODY;
 	}
 
-	/**
-	 * The CSS class to use when the field bound to a particular tag has errors.
-	 * May be a runtime expression.
-	 */
-	public String getCssErrorClass() {
-		return cssErrorClass;
-	}
-
-	/**
-	 * The CSS class to use when the field bound to a particular tag has errors.
-	 * May be a runtime expression.
-	 */
-	public void setCssErrorClass(String cssErrorClass) {
-		this.cssErrorClass = cssErrorClass;
-	}
 }

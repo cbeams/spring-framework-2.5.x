@@ -35,8 +35,6 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
 
 /**
- * Unit tests for the {@link OptionTag} class.
- *
  * @author Rob Harrop
  * @author Rick Evans
  */

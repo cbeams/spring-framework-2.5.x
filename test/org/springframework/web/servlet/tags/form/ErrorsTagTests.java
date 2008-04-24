@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
@@ -223,7 +223,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 	public void testWithoutErrorsInstance() throws Exception {
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
@@ -325,7 +325,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);

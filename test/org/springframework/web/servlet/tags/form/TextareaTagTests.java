@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.tag.setReadonly("true");
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "name");
 		assertContainsAttribute(output, "readonly", "readonly");
@@ -58,7 +58,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setPath("spouse.name");
 		this.tag.setOnselect(onselect);
 
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "spouse.name");
 		assertContainsAttribute(output, "onselect", onselect);
@@ -73,7 +73,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.rob.setName(NAME);
 		this.tag.setHtmlEscape("true");
 		
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 		String output = getWriter().toString();
 		System.out.println(output);
 		assertContainsAttribute(output, "name", "name");
@@ -85,7 +85,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		result.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
 		exposeBindingResult(result);
 		this.tag.setPath("myFloat");
-		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "myFloat");
 		assertBlockTagContains(output, "12.34f");

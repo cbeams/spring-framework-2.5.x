@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 2.0
  */
 public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
@@ -69,7 +68,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getWriter().toString();
 		output = "<doc>" + output + "</doc>";
 
@@ -99,7 +98,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 		this.tag.setItems("${floats}");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getWriter().toString();
 		output = "<doc>" + output + "</doc>";
 
@@ -128,7 +127,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getWriter().toString();
 		output = "<doc>" + output + "</doc>";
 
@@ -147,7 +146,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(Tag.SKIP_BODY, result);
 		String output = getWriter().toString();
 		output = "<doc>" + output + "</doc>";
 

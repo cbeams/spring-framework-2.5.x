@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.StringUtils;
-
 import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Convenient super class for many html tags that render content using the databinding
@@ -47,7 +47,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 			return EVAL_BODY_BUFFERED;
 		}
 		else {
-			return EVAL_PAGE;
+			return SKIP_BODY;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,8 @@ import java.io.StringWriter;
 /**
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0
  */
-public final class PasswordInputTagTests extends InputTagTests {
+public class PasswordInputTagTests extends InputTagTests {
 
 	/*
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
@@ -32,7 +31,7 @@ public final class PasswordInputTagTests extends InputTagTests {
 	public void testPasswordValueIsNotRenderedByDefault() throws Exception {
 		this.getTag().setPath("name");
 
-		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
 
 		String output = getWriter().toString();
 
@@ -50,7 +49,7 @@ public final class PasswordInputTagTests extends InputTagTests {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(true);
 
-		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
 
 		String output = getWriter().toString();
 
@@ -68,7 +67,7 @@ public final class PasswordInputTagTests extends InputTagTests {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(false);
 
-		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
+		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
 
 		String output = getWriter().toString();
 
