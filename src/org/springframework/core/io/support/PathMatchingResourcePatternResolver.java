@@ -175,7 +175,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", new Class[] {URL.class});
 			logger.debug("Found Equinox FileLocator for OSGi bundle URL resolution");
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			equinoxResolveMethod = null;
 		}
 	}
