@@ -22,8 +22,10 @@ import java.beans.PropertyEditorManager;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,6 +52,8 @@ import org.springframework.util.StringUtils;
 class TypeConverterDelegate {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
+
+	private static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -245,11 +249,21 @@ class TypeConverterDelegate {
 		if (editor == null && requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
 			editor = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
-			if (editor == null && !BeanUtils.unknownEditorTypes.containsKey(requiredType)) {
-				// No BeanWrapper default editor -> check standard JavaBean editors.
-				editor = PropertyEditorManager.findEditor(requiredType);
-				if (editor == null) {
-					BeanUtils.unknownEditorTypes.put(requiredType, Boolean.TRUE);
+			if (editor == null && !String.class.equals(requiredType)) {
+				// No BeanWrapper default editor -> check standard JavaBean editor.
+				editor = BeanUtils.findEditorByConvention(requiredType);
+				if (editor == null && !unknownEditorTypes.containsKey(requiredType)) {
+					// Deprecated global PropertyEditorManager fallback...
+					editor = PropertyEditorManager.findEditor(requiredType);
+					if (editor == null) {
+						// Regular case as of Spring 2.5
+						unknownEditorTypes.put(requiredType, Boolean.TRUE);
+					}
+					else {
+						logger.warn("PropertyEditor [" + editor.getClass().getName() +
+								"] found through deprecated global PropertyEditorManager fallback - " +
+								"consider using a more isolated form of registration, e.g. on the BeanWrapper/BeanFactory!");
+					}
 				}
 			}
 		}

@@ -52,7 +52,7 @@ public abstract class BeanUtils {
 
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
 
-	static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
+	private static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
 
 
 	/**
