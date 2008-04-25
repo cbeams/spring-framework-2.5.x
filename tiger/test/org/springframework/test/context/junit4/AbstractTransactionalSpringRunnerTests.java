@@ -45,28 +45,28 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 	protected static final String YODA = "yoda";
 
 
-	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
+	protected static int clearPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
 		return simpleJdbcTemplate.update("DELETE FROM person");
 	}
 
-	protected static void createPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
+	protected static void createPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
 		try {
 			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
 		}
-		catch (final BadSqlGrammarException bsge) {
-			/* ignore */
+		catch (BadSqlGrammarException bsge) {
+			// ignore
 		}
 	}
 
-	protected static int countRowsInPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
+	protected static int countRowsInPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
 		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM person");
 	}
 
-	protected static int addPerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
+	protected static int addPerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
 		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
-	protected static int deletePerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
+	protected static int deletePerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 

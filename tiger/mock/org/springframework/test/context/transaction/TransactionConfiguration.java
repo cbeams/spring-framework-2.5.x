@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,19 +42,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 public @interface TransactionConfiguration {
 
 	/**
-	 * <p>
 	 * The bean name of the {@link PlatformTransactionManager} that is to be
 	 * used to drive transactions. This attribute is not required and only needs
 	 * to be specified explicitly if the bean name of the desired
 	 * PlatformTransactionManager is not &quot;transactionManager&quot;.
-	 * </p>
 	 */
 	String transactionManager() default "transactionManager";
 
 	/**
-	 * <p>
 	 * Should transactions be rolled back by default?
-	 * </p>
 	 */
 	boolean defaultRollback() default true;
 

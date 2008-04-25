@@ -79,7 +79,7 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 	public static class DatabaseSetup {
 
 		@Resource
-		public void setDataSource(final DataSource dataSource) {
+		public void setDataSource(DataSource dataSource) {
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}
