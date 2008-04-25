@@ -1012,9 +1012,9 @@ jdbcTemplate.update(
       <title><classname>DriverManagerDataSource</classname></title>
 
       <para>The <classname>DriverManagerDataSource</classname> class is an
-      implementation of the <interfacename>SmartDataSource</interfacename>
-      interface that configures a plain old JDBC Driver via bean properties,
-      and returns a new connection every time.</para>
+      implementation of the standard <interfacename>DataSource</interfacename>
+      interface that configures a plain old JDBC Driver via bean properties, and
+      returns a new <interfacename>Connection</interfacename> every time.</para>
 
       <para>This is potentially useful for test or standalone environments
       outside of a J2EE container, either as a
