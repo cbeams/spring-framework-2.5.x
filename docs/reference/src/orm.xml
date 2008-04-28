@@ -948,7 +948,7 @@
   <section id="orm-jdo">
     <title>JDO</title>
 
-    <para>Spring supports the standard JDO 1.0/2.0 API as data access
+    <para>Spring supports the standard JDO 2.0/2.1 API as data access
     strategy, following the same style as the Hibernate support. The
     corresponding integration classes reside in the
     <literal>org.springframework.orm.jdo</literal> package.</para>
@@ -1288,11 +1288,8 @@
       exposing a JDO transaction to JDBC access code that accesses the same
       JDBC <interfacename>DataSource</interfacename>, provided that the
       registered <classname>JdoDialect</classname> supports retrieval of the
-      underlying JDBC <interfacename>Connection</interfacename>. This is by
-      default the case for JDBC-based JDO 2.0 implementations; for JDO 1.0
-      implementations, a custom <classname>JdoDialect</classname> needs to be
-      used. See next section for details on the
-      <classname>JdoDialect</classname> mechanism.</para>
+      underlying JDBC <interfacename>Connection</interfacename>. This is
+      the case for JDBC-based JDO 2.0 implementations by default.</para>
     </section>
 
     <section id="orm-jdo-dialect">
@@ -1338,18 +1335,8 @@
         </listitem>
       </itemizedlist>
 
-      <para>This is particularly valuable for JDO 1.0 implementations, where
-      none of those features are covered by the standard API. On JDO 2.0, most
-      of those features are supported in a standard manner: Hence, Spring's
-      <literal>DefaultJdoDialect</literal> uses the corresponding JDO 2.0 API
-      methods by default (as of Spring 1.2). For special transaction semantics
-      and for advanced translation of exception, it is still valuable to
-      derive vendor-specific <classname>JdoDialect</classname>
-      subclasses.</para>
-
       <para>See the <classname>JdoDialect</classname> Javadoc for more details
-      on its operations and how they are used within Spring's JDO
-      support.</para>
+      on its operations and how they are used within Spring's JDO support.</para>
     </section>
   </section>
 
