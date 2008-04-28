@@ -54,19 +54,19 @@ knowledge about it immediately.
 The Spring Framework 2.5 requires JDK 1.4.2 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5, Commons Attributes 2.2, JMX 1.2, JCA 1.0/1.5,
-Hibernate 3.1/3.2, TopLink 10.1.3/11, JDO 2.0, JPA 1.0, iBATIS SQL Maps 2.3, Caucho's Hessian 2.1/3.0/3.1,
-JAX-RPC 1.1, JAX-WS 2.0/2.1, Quartz 1.5/1.6, EHCache 1.2/1.3, Commons FileUpload 1.2, Velocity 1.5,
+Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5/1.6, Commons Attributes 2.2, JCA 1.0/1.5,
+JMX 1.2, Hibernate 3.1/3.2, TopLink 10/11, JDO 2.0/2.1, JPA 1.0, iBATIS SQL Maps 2.3, Hessian 2.1/3.1,
+JAX-RPC 1.1, JAX-WS 2.0/2.1, Quartz 1.5/1.6, EHCache 1.3/1.4, Commons FileUpload 1.2, Velocity 1.5,
 FreeMarker 2.3, JasperReports 1.3/2.0, JSTL 1.0/1.1, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 1.2/2.0, etc.
 
-Basic release contents (~5 MB):
+Basic release contents (~6 MB):
 * "dist" contains the Spring binary jar files
 
-Contents of the "-with-docs" distribution (~32 MB):
+Contents of the "-with-docs" distribution (~35 MB):
 * "dist" contains the Spring binary jar files, as well as corresponding source jars
 * "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
 
-Contents of the "-with-dependencies" distribution (~71 MB):
+Contents of the "-with-dependencies" distribution (~79 MB):
 * "dist" contains the Spring binary jar files, as well as corresponding source jars
 * "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
 * "lib" contains all third-party libraries needed for building the framework and/or running the samples
@@ -112,7 +112,7 @@ MODULE JARS (dist/modules):
 - Contents: AOP framework
 - Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-beans" (~470 KB)
+* "spring-beans" (~475 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
