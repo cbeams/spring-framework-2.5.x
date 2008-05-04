@@ -5620,6 +5620,15 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
         since type matching is not properly applicable to them.
         Use <interfacename>@Resource</interfacename> for such beans,
         referring to the specific collection/map bean by unique name.</para>
+
+        <para><emphasis>Note:</emphasis> In contrast to
+        <interfacename>@Autowired</interfacename> which is applicable to
+        fields, constructors and multi-argument methods (allowing for
+        narrowing through qualifier annotations at the parameter level),
+        <interfacename>@Resource</interfacename> is only supported for
+        fields and bean property setter methods with a single argument.
+        As a consequence, stick with qualifiers if your injection target
+        is a constructor or a multi-argument method.</para>
       </tip>
 
       <para>You may create your own custom qualifier annotations as well.
