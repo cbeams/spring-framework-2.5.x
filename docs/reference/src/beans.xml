@@ -2644,7 +2644,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			    like so:</para>
 			    <programlisting><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis role="bold">not</emphasis> ship with the Spring Framework</lineannotation><![CDATA[
 Scope customScope = new ThreadScope();
-beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[", scope);]]></programlisting>
+beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[", customScope);]]></programlisting>
                 <para>You can then create bean definitions that adhere to the scoping rules of your
                 custom <interfacename>Scope</interfacename> like so:</para>
                 <programlisting>&lt;bean id="..." class="..." <emphasis role="bold">scope="thread"</emphasis>/&gt;</programlisting>
