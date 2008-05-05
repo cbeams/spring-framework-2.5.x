@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,6 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * Constructor for AbstractSingleSpringContextTests with a JUnit name.
-	 *
 	 * @param name the name of this text fixture
 	 */
 	public AbstractSingleSpringContextTests(String name) {
@@ -91,7 +90,6 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * This implementation is final. Override <code>onSetUp</code> for custom behavior.
-	 *
 	 * @see #onSetUp()
 	 */
 	protected final void setUp() throws Exception {
@@ -104,13 +102,9 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
 	 * Prepare this test instance, for example populating its fields.
 	 * The context has already been loaded at the time of this callback.
-	 * </p>
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
+	 * <p>The default implementation does nothing.
 	 * @throws Exception in case of preparation failure
 	 */
 	protected void prepareTestInstance() throws Exception {
@@ -118,8 +112,8 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * Subclasses can override this method in place of the <code>setUp()</code>
-	 * method, which is final in this class. This implementation does nothing.
-	 *
+	 * method, which is final in this class.
+	 * <p>The default implementation does nothing.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUp() throws Exception {
@@ -137,7 +131,6 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	/**
 	 * This implementation is final. Override <code>onTearDown</code> for
 	 * custom behavior.
-	 *
 	 * @see #onTearDown()
 	 */
 	protected final void tearDown() throws Exception {
@@ -146,23 +139,17 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * Subclasses can override this to add custom behavior on teardown.
-	 *
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onTearDown() throws Exception {
 	}
 
 	/**
-	 * <p>
 	 * Return a key for this context. Default is the config location array as
 	 * determined by {@link #getConfigLocations()}.
-	 * </p>
-	 * <p>
-	 * If you override this method, you will typically have to override
+	 * <p>If you override this method, you will typically have to override
 	 * {@link #loadContext(Object)} as well, being able to handle the key type
 	 * that this method returns.
-	 * </p>
-	 *
 	 * @return the context key
 	 * @see #getConfigLocations()
 	 */
@@ -171,16 +158,11 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
 	 * This implementation assumes a key of type String array and loads a
 	 * context from the given locations.
-	 * </p>
-	 * <p>
-	 * If you override {@link #contextKey()}, you will typically have to
+	 * <p>If you override {@link #contextKey()}, you will typically have to
 	 * override this method as well, being able to handle the key type that
 	 * <code>contextKey()</code> returns.
-	 * </p>
-	 *
 	 * @see #getConfigLocations()
 	 */
 	protected ConfigurableApplicationContext loadContext(Object key) throws Exception {
@@ -188,16 +170,11 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
 	 * Load a Spring ApplicationContext from the given config locations.
-	 * </p>
-	 * <p>
-	 * The default implementation creates a standard
+	 * <p>The default implementation creates a standard
 	 * {@link #createApplicationContext GenericApplicationContext}, allowing
 	 * for customizing the internal bean factory through
 	 * {@link #customizeBeanFactory}.
-	 * </p>
-	 *
 	 * @param locations the config locations (as Spring resource locations,
 	 * e.g. full classpath locations or any kind of URL)
 	 * @return the corresponding ApplicationContext instance (potentially cached)
@@ -213,22 +190,14 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
-	 * Create a Spring {@link ConfigurableApplicationContext} for use by this
-	 * test.
-	 * </p>
-	 * <p>
-	 * The default implementation creates a standard
-	 * {@link GenericApplicationContext} instance, calls
-	 * {@link #customizeBeanFactory(DefaultListableBeanFactory) customizeBeanFactory()}
-	 * to allow for customizing the context's DefaultListableBeanFactory,
-	 * populates the context from the specified config <code>locations</code>
-	 * through the configured
+	 * Create a Spring {@link ConfigurableApplicationContext} for use by this test.
+	 * <p>The default implementation creates a standard {@link GenericApplicationContext}
+	 * instance, calls the {@link #prepareApplicationContext} prepareApplicationContext}
+	 * method and the {@link #customizeBeanFactory customizeBeanFactory} method to allow
+	 * for customizing the context and its DefaultListableBeanFactory, populates the
+	 * context from the specified config <code>locations</code> through the configured
 	 * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader},
-	 * and finally {@link ConfigurableApplicationContext#refresh() refreshes}
-	 * the context.
-	 * </p>
-	 *
+	 * and finally {@link ConfigurableApplicationContext#refresh() refreshes} the context.
 	 * @param locations the config locations (as Spring resource locations,
 	 * e.g. full classpath locations or any kind of URL)
 	 * @return the GenericApplicationContext instance
@@ -236,8 +205,9 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * @see #customizeBeanFactory(DefaultListableBeanFactory)
 	 * @see #createBeanDefinitionReader(GenericApplicationContext)
 	 */
-	protected ConfigurableApplicationContext createApplicationContext(final String[] locations) {
+	protected ConfigurableApplicationContext createApplicationContext(String[] locations) {
 		GenericApplicationContext context = new GenericApplicationContext();
+		prepareApplicationContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
 		context.refresh();
@@ -245,15 +215,23 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
+	 * Prepare the GenericApplicationContext used by this test.
+	 * Called before bean definitions are read.
+	 * <p>The default implementation is empty. Can be overridden in subclasses to
+	 * customize GenericApplicationContext's standard settings.
+	 * @param context the context for which the BeanDefinitionReader should be created
+	 * @see #createApplicationContext
+	 * @see org.springframework.context.support.GenericApplicationContext#setResourceLoader
+	 * @see org.springframework.context.support.GenericApplicationContext#setId
+	 */
+	protected void prepareApplicationContext(GenericApplicationContext context) {
+	}
+
+	/**
 	 * Customize the internal bean factory of the ApplicationContext used by
-	 * this test.
-	 * </p>
-	 * <p>
-	 * The default implementation is empty. Can be overridden in subclasses to
+	 * this test. Called before bean definitions are read.
+	 * <p>The default implementation is empty. Can be overridden in subclasses to
 	 * customize DefaultListableBeanFactory's standard settings.
-	 * </p>
-	 *
 	 * @param beanFactory the newly created bean factory for this context
 	 * @see #loadContextLocations
 	 * @see #createApplicationContext
@@ -266,47 +244,35 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
 	 * Factory method for creating new {@link BeanDefinitionReader}s for
 	 * loading bean definitions into the supplied
 	 * {@link GenericApplicationContext context}.
-	 * </p>
-	 * <p>
-	 * The default implementation creates a new {@link XmlBeanDefinitionReader}.
+	 * <p>The default implementation creates a new {@link XmlBeanDefinitionReader}.
 	 * Can be overridden in subclasses to provide a different
 	 * BeanDefinitionReader implementation.
-	 * </p>
-	 *
 	 * @param context the context for which the BeanDefinitionReader should be created
 	 * @return a BeanDefinitionReader for the supplied context
 	 * @see #createApplicationContext(String[])
 	 * @see BeanDefinitionReader
 	 * @see XmlBeanDefinitionReader
 	 */
-	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
+	protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
 		return new XmlBeanDefinitionReader(context);
 	}
 
 	/**
-	 * <p>
 	 * Subclasses can override this method to return the locations of their
 	 * config files, unless they override {@link #contextKey()} and
 	 * {@link #loadContext(Object)} instead.
-	 * </p>
-	 * <p>
-	 * A plain path will be treated as class path location, e.g.:
+	 * <p>A plain path will be treated as class path location, e.g.:
 	 * "org/springframework/whatever/foo.xml". Note however that you may prefix
 	 * path locations with standard Spring resource prefixes. Therefore, a
 	 * config location path prefixed with "classpath:" with behave the same as a
 	 * plain path, but a config location such as
 	 * "file:/some/path/path/location/appContext.xml" will be treated as a
 	 * filesystem location.
-	 * </p>
-	 * <p>
-	 * The default implementation builds config locations for the config paths
+	 * <p>The default implementation builds config locations for the config paths
 	 * specified through {@link #getConfigPaths()}.
-	 * </p>
-	 *
 	 * @return an array of config locations
 	 * @see #getConfigPaths()
 	 * @see org.springframework.core.io.ResourceLoader#getResource(String)
@@ -328,21 +294,14 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
 	 * Subclasses can override this method to return paths to their config
 	 * files, relative to the concrete test class.
-	 * </p>
-	 * <p>
-	 * A plain path, e.g. "context.xml", will be loaded as classpath resource
+	 * <p>A plain path, e.g. "context.xml", will be loaded as classpath resource
 	 * from the same package that the concrete test class is defined in. A path
 	 * starting with a slash is treated as fully qualified class path location,
 	 * e.g.: "/org/springframework/whatever/foo.xml".
-	 * </p>
-	 * <p>
-	 * The default implementation builds an array for the config path specified
+	 * <p>The default implementation builds an array for the config path specified
 	 * through {@link #getConfigPath()}.
-	 * </p>
-	 *
 	 * @return an array of config locations
 	 * @see #getConfigPath()
 	 * @see java.lang.Class#getResource(String)
@@ -353,20 +312,13 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * <p>
 	 * Subclasses can override this method to return a single path to a config
 	 * file, relative to the concrete test class.
-	 * </p>
-	 * <p>
-	 * A plain path, e.g. "context.xml", will be loaded as classpath resource
+	 * <p>A plain path, e.g. "context.xml", will be loaded as classpath resource
 	 * from the same package that the concrete test class is defined in. A path
 	 * starting with a slash is treated as fully qualified class path location,
 	 * e.g.: "/org/springframework/whatever/foo.xml".
-	 * </p>
-	 * <p>
-	 * The default implementation simply returns <code>null</code>.
-	 * </p>
-	 *
+	 * <p>The default implementation simply returns <code>null</code>.
 	 * @return an array of config locations
 	 * @see #getConfigPath()
 	 * @see java.lang.Class#getResource(String)
@@ -388,8 +340,8 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 			catch (Exception e) {
 				// log and continue...
 				if (this.logger.isDebugEnabled()) {
-					this.logger.debug("Caught exception while retrieving the ApplicationContext for test ["
-							+ getClass().getName() + "." + getName() + "].", e);
+					this.logger.debug("Caught exception while retrieving the ApplicationContext for test [" +
+							getClass().getName() + "." + getName() + "].", e);
 				}
 			}
 		}

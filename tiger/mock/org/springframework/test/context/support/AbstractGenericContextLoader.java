@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,15 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.StringUtils;
 
 /**
- * <p>
  * Abstract, generic extension of {@link AbstractContextLoader} which loads a
  * {@link GenericApplicationContext} from the <em>locations</em> provided to
  * {@link #loadContext(String...)}.
- * </p>
- * <p>
- * Concrete subclasses must provide an appropriate
+ *
+ * <p>Concrete subclasses must provide an appropriate
  * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader}.
- * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see #loadContext(String...)
  */
@@ -47,13 +45,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 
 
 	/**
-	 * <p>
-	 * Loads a Spring ApplicationContext from the supplied
-	 * <code>locations</code>.
-	 * </p>
-	 * <p>
-	 * Implementation details:
-	 * </p>
+	 * Loads a Spring ApplicationContext from the supplied <code>locations</code>.
+	 * <p>Implementation details:
 	 * <ul>
 	 * <li>Creates a standard {@link GenericApplicationContext} instance.</li>
 	 * <li>Populates it from the specified config locations through a
@@ -67,13 +60,9 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * for customizing the context before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh() Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
-	 * </p>
 	 * </ul>
-	 * <p>
-	 * Subclasses must provide an appropriate implementation of
+	 * <p>Subclasses must provide an appropriate implementation of
 	 * {@link #createBeanDefinitionReader(GenericApplicationContext)}.
-	 * </p>
-	 *
 	 * @return a new application context
 	 * @see org.springframework.test.context.ContextLoader#loadContext
 	 * @see GenericApplicationContext
@@ -81,14 +70,13 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see #createBeanDefinitionReader(GenericApplicationContext)
 	 * @see BeanDefinitionReader
 	 */
-	public final ConfigurableApplicationContext loadContext(final String... locations) throws Exception {
-
+	public final ConfigurableApplicationContext loadContext(String... locations) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Loading ApplicationContext for locations ["
-					+ StringUtils.arrayToCommaDelimitedString(locations) + "].");
+			logger.debug("Loading ApplicationContext for locations [" +
+					StringUtils.arrayToCommaDelimitedString(locations) + "].");
 		}
-
-		final GenericApplicationContext context = new GenericApplicationContext();
+		GenericApplicationContext context = new GenericApplicationContext();
+		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
@@ -99,55 +87,54 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	}
 
 	/**
-	 * <p>
+	 * Prepare the {@link GenericApplicationContext} created by this ContextLoader.
+	 * Called <i>before</> bean definitions are read.
+	 * <p>The default implementation is empty. Can be overridden in subclasses to
+	 * customize GenericApplicationContext's standard settings.
+	 * @param context the context for which the BeanDefinitionReader should be created
+	 * @see #loadContext
+	 * @see org.springframework.context.support.GenericApplicationContext#setResourceLoader
+	 * @see org.springframework.context.support.GenericApplicationContext#setId
+	 */
+	protected void prepareContext(GenericApplicationContext context) {
+	}
+
+	/**
 	 * Customize the internal bean factory of the ApplicationContext created by
 	 * this ContextLoader.
-	 * </p>
-	 * <p>
-	 * The default implementation is empty but can be overridden in subclasses
+	 * <p>The default implementation is empty but can be overridden in subclasses
 	 * to customize DefaultListableBeanFactory's standard settings.
-	 * </p>
-	 *
 	 * @param beanFactory the bean factory created by this ContextLoader
-	 * @see #loadContext(String...)
+	 * @see #loadContext
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding(boolean)
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading(boolean)
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences(boolean)
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping(boolean)
 	 */
-	protected void customizeBeanFactory(final DefaultListableBeanFactory beanFactory) {
-		/* no-op */
+	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 	}
 
 	/**
 	 * Factory method for creating new {@link BeanDefinitionReader}s for
 	 * loading bean definitions into the supplied
 	 * {@link GenericApplicationContext context}.
-	 *
-	 * @param context The context for which the BeanDefinitionReader should be
-	 *        created.
-	 * @return A BeanDefinitionReader for the supplied context.
-	 * @see #loadContext(String...)
+	 * @param context the context for which the BeanDefinitionReader should be created
+	 * @return a BeanDefinitionReader for the supplied context
+	 * @see #loadContext
 	 * @see BeanDefinitionReader
 	 */
-	protected abstract BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context);
+	protected abstract BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context);
 
 	/**
-	 * <p>
-	 * Customize the {@link GenericApplicationContext} created by this
-	 * ContextLoader after bean definitions have been loaded into the context
-	 * but before the context is refreshed.
-	 * </p>
-	 * <p>
-	 * The default implementation is empty but can be overridden in subclasses
+	 * Customize the {@link GenericApplicationContext} created by this ContextLoader
+	 * <i>after</i> bean definitions have been loaded into the context but
+	 * before the context is refreshed.
+	 * <p>The default implementation is empty but can be overridden in subclasses
 	 * to customize the application context.
-	 * </p>
-	 *
 	 * @param context the newly created application context
 	 * @see #loadContext(String...)
 	 */
-	protected void customizeContext(final GenericApplicationContext context) {
-		/* no-op */
+	protected void customizeContext(GenericApplicationContext context) {
 	}
 
 }
