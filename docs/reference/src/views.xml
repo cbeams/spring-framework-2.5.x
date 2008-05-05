@@ -1064,17 +1064,8 @@ public class HomePage extends AbstractXsltView {
         <methodname>getParameters()</methodname> method of the
         <classname>AbstractXsltView</classname> class and return a
         <interfacename>Map</interfacename> of the name/value pairs. If your parameters
-        need to derive information from the current request, you can (from Spring version
-        1.1) override the
+        need to derive information from the current request, you can override the
         <methodname>getParameters(HttpServletRequest request)</methodname> method instead.</para>
-
-        <para>Unlike JSTL and Velocity, XSLT has relatively poor support for
-        locale based currency and date formatting. In recognition of the
-        fact, Spring provides a helper class that you can use from within
-        your <methodname>createXsltSource(..)</methodname> method(s) to get such
-        support. See the Javadocs for the
-        <classname>org.springframework.web.servlet.view.xslt.FormatHelper</classname>
-        class.</para>
 
       </section>
 
