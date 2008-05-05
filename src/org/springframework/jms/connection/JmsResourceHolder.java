@@ -203,6 +203,9 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			Connection con = (Connection) it.next();
 			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory, true);
 		}
+		this.connections.clear();
+		this.sessions.clear();
+		this.sessionsPerConnection.clear();
 	}
 
 }
