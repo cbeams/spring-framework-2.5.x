@@ -3302,7 +3302,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <programlisting><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis
               role="bold">not</emphasis> ship with the Spring Framework</lineannotation>
 Scope customScope = new ThreadScope();
-beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", scope);</programlisting>
+beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope);</programlisting>
 
         <para>You can then create bean definitions that adhere to the scoping
         rules of your custom <interfacename>Scope</interfacename> like
