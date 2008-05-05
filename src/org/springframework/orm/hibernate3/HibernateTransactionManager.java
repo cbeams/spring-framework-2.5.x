@@ -471,7 +471,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					throw new InvalidIsolationLevelException(
 							"HibernateTransactionManager is not allowed to support custom isolation levels: " +
 							"make sure that its 'prepareConnection' flag is on (the default) and that the " +
-							"Hibernate connection release mode is set to 'on_close' (LocalSessionFactoryBean's default)");
+							"Hibernate connection release mode is set to 'on_close' (SpringTransactionFactory's default). " +
+							"Make sure that your LocalSessionFactoryBean actually uses SpringTransactionFactory: Your " +
+							"Hibernate properties should *not* include a 'hibernate.transaction.factory_class' property!");
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug(
