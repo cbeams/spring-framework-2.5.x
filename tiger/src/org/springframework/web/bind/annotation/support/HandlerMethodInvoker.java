@@ -377,9 +377,8 @@ public class HandlerMethodInvoker {
 		// Expose model attributes as session attributes, if required.
 		// Expose BindingResults for all attributes, making custom editors available.
 		Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
-		for (Map.Entry<String, Object> entry : new HashSet<Map.Entry>(model.entrySet())) {
-			String attrName = entry.getKey();
-			Object attrValue = entry.getValue();
+		for (String attrName : new HashSet<String>(model.keySet())) {
+			Object attrValue = model.get(attrName);
 			boolean isSessionAttr =
 					this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null));
 			if (isSessionAttr && !this.sessionStatus.isComplete()) {
