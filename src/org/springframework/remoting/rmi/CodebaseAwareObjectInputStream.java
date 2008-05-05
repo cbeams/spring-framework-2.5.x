@@ -18,12 +18,9 @@ package org.springframework.remoting.rmi;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
-import java.lang.reflect.Proxy;
 import java.rmi.server.RMIClassLoader;
 
-import org.springframework.util.ClassUtils;
+import org.springframework.core.ConfigurableObjectInputStream;
 
 /**
  * Special ObjectInputStream subclass that falls back to a specified codebase
@@ -53,9 +50,7 @@ import org.springframework.util.ClassUtils;
  * @see RemoteInvocationSerializingExporter#createObjectInputStream
  * @see org.springframework.remoting.httpinvoker.HttpInvokerClientInterceptor#setCodebaseUrl
  */
-public class CodebaseAwareObjectInputStream extends ObjectInputStream {
-
-	private final ClassLoader classLoader;
+public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStream {
 
 	private final String codebaseUrl;
 
@@ -83,80 +78,24 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 	public CodebaseAwareObjectInputStream(
 			InputStream in, ClassLoader classLoader, String codebaseUrl) throws IOException {
 
-		super(in);
-		this.classLoader = classLoader;
+		super(in, classLoader);
 		this.codebaseUrl = codebaseUrl;
 	}
 
 
-	/**
-	 * Overridden version delegates to super class first,
-	 * falling back to the specified codebase if not found locally.
-	 */
-	protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
-		try {
-			if (this.classLoader != null) {
-				// Use the specified ClassLoader to resolve local classes.
-				return ClassUtils.forName(classDesc.getName(), this.classLoader);
-			}
-			else {
-				// Let RMI use it's default ClassLoader...
-				return super.resolveClass(classDesc);
-			}
+	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
+			throws IOException, ClassNotFoundException {
+
+		// If codebaseUrl is set, try to load the class with the RMIClassLoader.
+		// Else, propagate the ClassNotFoundException.
+		if (this.codebaseUrl == null) {
+			throw ex;
 		}
-		catch (ClassNotFoundException ex) {
-			// If codebaseUrl is set, try to load the class with the RMIClassLoader.
-			// Else, propagate the ClassNotFoundException.
-			if (this.codebaseUrl == null) {
-				throw ex;
-			}
-			return RMIClassLoader.loadClass(this.codebaseUrl, classDesc.getName());
-		}
+		return RMIClassLoader.loadClass(this.codebaseUrl, className);
 	}
 
-	/**
-	 * Overridden version delegates to super class first,
-	 * falling back to the specified codebase if not found locally.
-	 */
-	protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
-		if (this.classLoader != null) {
-			// Use the specified ClassLoader to resolve local proxy classes.
-			Class[] resolvedInterfaces = new Class[interfaces.length];
-			for (int i = 0; i < interfaces.length; i++) {
-				try {
-					resolvedInterfaces[i] = ClassUtils.forName(interfaces[i], this.classLoader);
-				}
-				catch (ClassNotFoundException ex) {
-					if (this.codebaseUrl == null) {
-						throw ex;
-					}
-					resolvedInterfaces[i] = RMIClassLoader.loadClass(this.codebaseUrl, interfaces[i]);
-				}
-			}
-			try {
-				return Proxy.getProxyClass(this.classLoader, resolvedInterfaces);
-			}
-			catch (IllegalArgumentException ex) {
-				throw new ClassNotFoundException(null, ex);
-			}
-		}
-		else {
-			// Let RMI use it's default ClassLoader...
-			try {
-				return super.resolveProxyClass(interfaces);
-			}
-			catch (ClassNotFoundException ex) {
-				if (this.codebaseUrl == null) {
-					throw ex;
-				}
-				ClassLoader loader = RMIClassLoader.getClassLoader(this.codebaseUrl);
-				Class[] resolvedInterfaces = new Class[interfaces.length];
-				for (int i = 0; i < interfaces.length; i++) {
-					resolvedInterfaces[i] = loader.loadClass(interfaces[i]);
-				}
-				return Proxy.getProxyClass(loader, resolvedInterfaces);
-			}
-		}
+	protected ClassLoader getFallbackClassLoader() throws IOException {
+		return RMIClassLoader.getClassLoader(this.codebaseUrl);
 	}
 
 }
