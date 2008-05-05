@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,17 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 */
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName) {
 		super(beanDefinition, beanName);
+		findInnerBeanDefinitionsAndBeanReferences(beanDefinition);
+	}
+
+	/**
+	 * Create a new BeanComponentDefinition for the given bean.
+	 * @param beanDefinition the BeanDefinition
+	 * @param beanName the name of the bean
+	 * @param aliases alias names for the bean, or <code>null</code> if none
+	 */
+	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, String[] aliases) {
+		super(beanDefinition, beanName, aliases);
 		findInnerBeanDefinitionsAndBeanReferences(beanDefinition);
 	}
 
