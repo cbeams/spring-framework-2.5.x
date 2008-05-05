@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,54 +26,20 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * <p>
  * Abstract application context loader, which provides a basis for all concrete
  * implementations of the {@link ContextLoader} strategy. Provides a
  * <em>Template Method</em> based approach for
  * {@link #processLocations(Class,String...) processing} locations.
- * </p>
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
- * @see #generateDefaultLocations(Class)
- * @see #modifyLocations(Class,String...)
+ * @see #generateDefaultLocations
+ * @see #modifyLocations
  */
 public abstract class AbstractContextLoader implements ContextLoader {
 
 	/**
-	 * <p>
-	 * Determines whether or not <em>default</em> resource locations should be
-	 * generated if the <code>locations</code> provided to
-	 * {@link #processLocations(Class,String...) processLocations()} are
-	 * <code>null</code> or empty.
-	 * </p>
-	 * <p>
-	 * Can be overridden by subclasses to change the default behavior.
-	 * </p>
-	 *
-	 * @return always <code>true</code> by default
-	 */
-	protected boolean isGenerateDefaultLocations() {
-		return true;
-	}
-
-	/**
-	 * <p>
-	 * Gets the suffix to append to {@link ApplicationContext} resource
-	 * locations when generating default locations.
-	 * </p>
-	 * <p>
-	 * Must be implemented by subclasses.
-	 * </p>
-	 *
-	 * @return the resource suffix; should not be <code>null</code> or empty.
-	 * @see #generateDefaultLocations(Class)
-	 */
-	protected abstract String getResourceSuffix();
-
-	/**
-	 * <p>
 	 * If the supplied <code>locations</code> are <code>null</code> or
 	 * <em>empty</em> and {@link #isGenerateDefaultLocations()} is
 	 * <code>true</code>, default locations will be
@@ -83,57 +49,45 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * <code>locations</code> will be
 	 * {@link #modifyLocations(Class,String...) modified} if necessary and
 	 * returned.
-	 * </p>
-	 *
 	 * @param clazz the class with which the locations are associated: to be
-	 * used when generating default locations.
+	 * used when generating default locations
 	 * @param locations the unmodified locations to use for loading the
-	 * application context; can be <code>null</code> or empty.
+	 * application context (can be <code>null</code> or empty)
 	 * @return an array of application context resource locations
-	 * @see #generateDefaultLocations(Class)
-	 * @see #modifyLocations(Class,String...)
+	 * @see #generateDefaultLocations
+	 * @see #modifyLocations
 	 * @see org.springframework.test.context.ContextLoader#processLocations
 	 */
-	public final String[] processLocations(final Class<?> clazz, final String... locations) {
-		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
-				: modifyLocations(clazz, locations);
+	public final String[] processLocations(Class<?> clazz, String... locations) {
+		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ?
+				generateDefaultLocations(clazz) : modifyLocations(clazz, locations);
 	}
 
 	/**
-	 * <p>
 	 * Generates the default classpath resource locations array based on the
 	 * supplied class.
-	 * </p>
-	 * <p>
-	 * For example, if the supplied class is <code>com.example.MyTest</code>,
+	 * <p>For example, if the supplied class is <code>com.example.MyTest</code>,
 	 * the generated locations will contain a single string with a value of
 	 * &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
 	 * where <code>&lt;suffix&gt;</code> is the value of the
 	 * {@link #getResourceSuffix() resource suffix} string.
-	 * </p>
-	 * <p>
-	 * Subclasses can override this method to implement a different
+	 * <p>Subclasses can override this method to implement a different
 	 * <em>default location generation</em> strategy.
-	 * </p>
-	 *
 	 * @param clazz the class for which the default locations are to be generated
 	 * @return an array of default application context resource locations
 	 * @see #getResourceSuffix()
 	 */
-	protected String[] generateDefaultLocations(final Class<?> clazz) {
-		Assert.notNull(clazz, "clazz can not be null.");
-		Assert.hasText(getResourceSuffix(), "resourceSuffix can not be empty.");
-		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/"
-				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + getResourceSuffix() };
+	protected String[] generateDefaultLocations(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		String suffix = getResourceSuffix();
+		Assert.hasText(suffix, "Resource suffix must not be empty");
+		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/" +
+				ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix };
 	}
 
 	/**
-	 * <p>
-	 * Generates a modified version of the supplied locations array and returns
-	 * it.
-	 * </p>
-	 * <p>
-	 * A plain path, e.g. &quot;context.xml&quot;, will be treated as a
+	 * Generate a modified version of the supplied locations array and returns it.
+	 * <p>A plain path, e.g. &quot;context.xml&quot;, will be treated as a
 	 * classpath resource from the same package in which the specified class is
 	 * defined. A path starting with a slash is treated as a fully qualified
 	 * class path location, e.g.:
@@ -142,17 +96,13 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, <code>http:</code>,
 	 * etc.) will be added to the results unchanged.
-	 * </p>
-	 * <p>
-	 * Subclasses can override this method to implement a different
+	 * <p>Subclasses can override this method to implement a different
 	 * <em>location modification</em> strategy.
-	 * </p>
-	 *
 	 * @param clazz the class with which the locations are associated
 	 * @param locations the resource locations to be modified
 	 * @return an array of modified application context resource locations
 	 */
-	protected String[] modifyLocations(final Class<?> clazz, final String... locations) {
+	protected String[] modifyLocations(Class<?> clazz, String... locations) {
 		String[] modifiedLocations = new String[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			String path = locations[i];
@@ -169,5 +119,27 @@ public abstract class AbstractContextLoader implements ContextLoader {
 		}
 		return modifiedLocations;
 	}
+
+
+	/**
+	 * Determine whether or not <em>default</em> resource locations should be
+	 * generated if the <code>locations</code> provided to
+	 * {@link #processLocations(Class,String...) processLocations()} are
+	 * <code>null</code> or empty.
+	 * <p>Can be overridden by subclasses to change the default behavior.
+	 * @return always <code>true</code> by default
+	 */
+	protected boolean isGenerateDefaultLocations() {
+		return true;
+	}
+
+	/**
+	 * Get the suffix to append to {@link ApplicationContext} resource
+	 * locations when generating default locations.
+	 * <p>Must be implemented by subclasses.
+	 * @return the resource suffix; should not be <code>null</code> or empty
+	 * @see #generateDefaultLocations(Class)
+	 */
+	protected abstract String getResourceSuffix();
 
 }
