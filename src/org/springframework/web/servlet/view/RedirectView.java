@@ -18,7 +18,11 @@ package org.springframework.web.servlet.view;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
@@ -220,18 +225,32 @@ public class RedirectView extends AbstractUrlBasedView {
 		boolean first = (getUrl().indexOf('?') < 0);
 		Iterator entries = queryProperties(model).entrySet().iterator();
 		while (entries.hasNext()) {
-			if (first) {
-				targetUrl.append('?');
-				first = false;
+			Map.Entry entry = (Map.Entry) entries.next();
+			String key = entry.getKey().toString();
+			Object rawValue = entry.getValue();
+			Iterator valueIter = null;
+			if (rawValue != null && rawValue.getClass().isArray()) {
+				valueIter = Arrays.asList(ObjectUtils.toObjectArray(rawValue)).iterator();
+			}
+			else if (rawValue instanceof Collection) {
+				valueIter = ((Collection) rawValue).iterator();
 			}
 			else {
-				targetUrl.append('&');
+				valueIter = Collections.singleton(rawValue).iterator();
 			}
-			Map.Entry entry = (Map.Entry) entries.next();
-			String encodedKey = urlEncode(entry.getKey().toString(), encodingScheme);
-			String encodedValue =
-					(entry.getValue() != null ? urlEncode(entry.getValue().toString(), encodingScheme) : "");
-			targetUrl.append(encodedKey).append('=').append(encodedValue);
+			while (valueIter.hasNext()) {
+				Object value = valueIter.next();
+				if (first) {
+					targetUrl.append('?');
+					first = false;
+				}
+				else {
+					targetUrl.append('&');
+				}
+				String encodedKey = urlEncode(key, encodingScheme);
+				String encodedValue = (value != null ? urlEncode(value.toString(), encodingScheme) : "");
+				targetUrl.append(encodedKey).append('=').append(encodedValue);
+			}
 		}
 
 		// Append anchor fragment, if any, to end of URL.
@@ -254,8 +273,10 @@ public class RedirectView extends AbstractUrlBasedView {
 		Map result = new LinkedHashMap();
 		for (Iterator it = model.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
-			if (isEligibleProperty(entry.getKey().toString(), entry.getValue())) {
-				result.put(entry.getKey().toString(), entry.getValue().toString());
+			String key = entry.getKey().toString();
+			Object value = entry.getValue();
+			if (isEligibleProperty(key, value)) {
+				result.put(key, value);
 			}
 		}
 		return result;
@@ -264,18 +285,67 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Determine whether the given model element should be exposed
 	 * as a query property.
+	 * <p>The default implementation considers Strings and primitives
+	 * as eligible, and also arrays and Collections/Iterables with
+	 * corresponding elements. This can be overridden in subclasses.
 	 * @param key the key of the model element
 	 * @param value the value of the model element
 	 * @return whether the element is eligible as query property
 	 */
 	protected boolean isEligibleProperty(String key, Object value) {
+		if (value == null) {
+			return false;
+		}
+		if (isEligibleValue(value)) {
+			return true;
+		}
+
+		if (value.getClass().isArray()) {
+			int length = Array.getLength(value);
+			if (length == 0) {
+				return false;
+			}
+			for (int i = 0; i < length; i++) {
+				Object element = Array.get(value, i);
+				if (!isEligibleValue(element)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		if (value instanceof Collection) {
+			Collection coll = (Collection) value;
+			if (coll.isEmpty()) {
+				return false;
+			}
+			for (Iterator it = coll.iterator(); it.hasNext();) {
+				Object element = it.next();
+				if (!isEligibleValue(element)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine whether the given model element value is eligible for exposure.
+	 * <p>The default implementation considers Strings and primitives
+	 * as eligible. This can be overridden in subclasses.
+	 * @param value the model element value
+	 * @return whether the element value is eligible
+	 */
+	protected boolean isEligibleValue(Object value) {
 		return (value != null &&
 				(value instanceof String || ClassUtils.isPrimitiveOrWrapper(value.getClass())));
 	}
 
 	/**
 	 * URL-encode the given input String with the given encoding scheme.
-	 * <p>Default implementation uses <code>URLEncoder.encode(input, enc)</code>.
+	 * <p>The default implementation uses <code>URLEncoder.encode(input, enc)</code>.
 	 * @param input the unencoded input String
 	 * @param encodingScheme the encoding scheme
 	 * @return the encoded output String

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.web.servlet.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,30 +80,30 @@ public class RedirectViewTests extends TestCase {
 		String url = "http://url.somewhere.com";
 		String key = "foo";
 		String val = "bar";
-		Map m = new HashMap();
-		m.put(key, val);
+		Map model = new HashMap();
+		model.put(key, val);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val;
-		doTest(m, url, false, expectedUrlForEncoding);
+		doTest(model, url, false, expectedUrlForEncoding);
 	}
 
 	public void testSingleParamWithoutExposingModelAttributes() throws Exception {
 		String url = "http://url.somewhere.com";
 		String key = "foo";
 		String val = "bar";
-		Map m = new HashMap();
-		m.put(key, val);
+		Map model = new HashMap();
+		model.put(key, val);
 		String expectedUrlForEncoding = url; // + "?" + key + "=" + val;
-		doTest(m, url, false, false, expectedUrlForEncoding);
+		doTest(model, url, false, false, expectedUrlForEncoding);
 	}
 
 	public void testParamWithAnchor() throws Exception {
 		String url = "http://url.somewhere.com/test.htm#myAnchor";
 		String key = "foo";
 		String val = "bar";
-		Map m = new HashMap();
-		m.put(key, val);
+		Map model = new HashMap();
+		model.put(key, val);
 		String expectedUrlForEncoding = "http://url.somewhere.com/test.htm" + "?" + key + "=" + val + "#myAnchor";
-		doTest(m, url, false, expectedUrlForEncoding);
+		doTest(model, url, false, expectedUrlForEncoding);
 	}
 
 	public void testTwoParams() throws Exception {
@@ -110,17 +112,53 @@ public class RedirectViewTests extends TestCase {
 		String val = "bar";
 		String key2 = "thisIsKey2";
 		String val2 = "andThisIsVal2";
-		Map m = new HashMap();
-		m.put(key, val);
-		m.put(key2, val2);
+		Map model = new HashMap();
+		model.put(key, val);
+		model.put(key2, val2);
 		try {
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
-			doTest(m, url, false, expectedUrlForEncoding);
+			doTest(model, url, false, expectedUrlForEncoding);
 		}
 		catch (AssertionFailedError err) {
 			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
 			String expectedUrlForEncoding = "http://url.somewhere.com?" + key2 + "=" + val2 + "&" + key + "=" + val;
-			doTest(m, url, false, expectedUrlForEncoding);
+			doTest(model, url, false, expectedUrlForEncoding);
+		}
+	}
+
+	public void testArrayParam() throws Exception {
+		String url = "http://url.somewhere.com";
+		String key = "foo";
+		String[] val = new String[] {"bar", "baz"};
+		Map model = new HashMap();
+		model.put(key, val);
+		try {
+			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val[0] + "&" + key + "=" + val[1];
+			doTest(model, url, false, expectedUrlForEncoding);
+		}
+		catch (AssertionFailedError err) {
+			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
+			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val[1] + "&" + key + "=" + val[0];
+			doTest(model, url, false, expectedUrlForEncoding);
+		}
+	}
+
+	public void testCollectionParam() throws Exception {
+		String url = "http://url.somewhere.com";
+		String key = "foo";
+		List val = new ArrayList();
+		val.add("bar");
+		val.add("baz");
+		Map model = new HashMap();
+		model.put(key, val);
+		try {
+			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val.get(0) + "&" + key + "=" + val.get(1);
+			doTest(model, url, false, expectedUrlForEncoding);
+		}
+		catch (AssertionFailedError err) {
+			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
+			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val.get(1) + "&" + key + "=" + val.get(0);
+			doTest(model, url, false, expectedUrlForEncoding);
 		}
 	}
 
@@ -132,15 +170,15 @@ public class RedirectViewTests extends TestCase {
 		Object val2 = new Long(611);
 		Object key3 = "tb";
 		Object val3 = new TestBean();
-		Map m = new LinkedHashMap();
-		m.put(key, val);
-		m.put(key2, val2);
-		m.put(key3, val3);
+		Map model = new LinkedHashMap();
+		model.put(key, val);
+		model.put(key2, val2);
+		model.put(key3, val3);
 		String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
-		doTest(m, url, false, expectedUrlForEncoding);
+		doTest(model, url, false, expectedUrlForEncoding);
 	}
 
-	private void doTest(final Map map, final String url, final boolean contextRelative, String expectedUrlForEncoding)
+	private void doTest(Map map, String url, boolean contextRelative, String expectedUrlForEncoding)
 			throws Exception {
 		doTest(map, url, contextRelative, true, expectedUrlForEncoding);
 	}
