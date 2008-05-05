@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRExporter;
@@ -47,12 +46,6 @@ import org.springframework.web.util.WebUtils;
  * @see #useWriter()
  */
 public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasperReportsView {
-
-	/**
-	 * Initial size for the output array.
-	 */
-	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
-
 
 	protected boolean generatesDownloadContent() {
 		return !useWriter();
@@ -138,21 +131,10 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	protected void renderReportUsingOutputStream(
 			JRExporter exporter, JasperPrint populatedReport, HttpServletResponse response) throws Exception {
 
-		// Apply the content type as specified - we don't need an encoding here.
-		response.setContentType(getContentType());
-
-		// Render report into local OutputStream.
 		// IE workaround: write into byte array first.
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
+		ByteArrayOutputStream baos = createTemporaryOutputStream();
 		JasperReportsUtils.render(exporter, populatedReport, baos);
-
-		// Write content length (determined via byte array).
-		response.setContentLength(baos.size());
-
-		// Flush byte array to servlet output stream.
-		ServletOutputStream out = response.getOutputStream();
-		baos.writeTo(out);
-		out.flush();
+		writeToResponse(response, baos);
 	}
 
 

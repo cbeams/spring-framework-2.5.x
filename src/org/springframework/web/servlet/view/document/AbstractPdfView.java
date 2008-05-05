@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,13 +40,11 @@ import org.springframework.web.servlet.view.AbstractView;
  * it doesn't always respect the declared content type.
  *
  * @author Rod Johnson
- * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
+ * @author Jean-Pierre Pawlak
+ * @see AbstractPdfStamperView
  */
 public abstract class AbstractPdfView extends AbstractView {
-	
-	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
-
 
 	/**
 	 * This constructor sets the appropriate content type "application/pdf".
@@ -66,23 +63,12 @@ public abstract class AbstractPdfView extends AbstractView {
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		// The following simple method doesn't work in IE, which
-		// needs to know the content length.
-
-		// PdfWriter writer = PdfWriter.getInstance(document, response.getOutputStream());
-		// document.open();
-		// buildPdfDocument(model, document, writer, request, response);
-		// document.close();
-
-		// See http://www.lowagie.com/iText/faq.html#msie
-		// for an explanation of why we can't use the obvious form above.
-
 		// IE workaround: write into byte array first.
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
-		Document document = newDocument();
-		PdfWriter writer = newWriter(document, baos);
+		ByteArrayOutputStream baos = createTemporaryOutputStream();
 
 		// Apply preferences and build metadata.
+		Document document = newDocument();
+		PdfWriter writer = newWriter(document, baos);
 		prepareWriter(model, writer, request);
 		buildPdfMetadata(model, document, request);
 
@@ -91,14 +77,8 @@ public abstract class AbstractPdfView extends AbstractView {
 		buildPdfDocument(model, document, writer, request, response);
 		document.close();
 
-		// Write content type and also length (determined via byte array).
-		response.setContentType(getContentType());
-		response.setContentLength(baos.size());
-
-		// Flush byte array to servlet output stream.
-		ServletOutputStream out = response.getOutputStream();
-		baos.writeTo(out);
-		out.flush();
+		// Flush to HTTP response.
+		writeToResponse(response, baos);
 	}
 
 	/**

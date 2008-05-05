@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.view;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -55,6 +58,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/** Default content type. Overridable as bean property. */
 	public static final String DEFAULT_CONTENT_TYPE = "text/html;charset=ISO-8859-1";
+
+	/** Initial size for the temporary output byte array (if any) */
+	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
 
 	private String beanName;
@@ -343,6 +349,32 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				}
 			}
 		}
+	}
+
+	/**
+	 * Create a temporary OutputStream for this view.
+	 * <p>This is typically used as IE workaround, for setting the content length header
+	 * from the temporary stream before actually writing the content to the HTTP response.
+	 */
+	protected ByteArrayOutputStream createTemporaryOutputStream() {
+		return new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
+	}
+
+	/**
+	 * Write the given temporary OutputStream to the HTTP response.
+	 * @param response current HTTP response
+	 * @param baos the temporary OutputStream to write
+	 * @throws IOException if writing/flushing failed
+	 */
+	protected void writeToResponse(HttpServletResponse response, ByteArrayOutputStream baos) throws IOException {
+		// Write content type and also length (determined via byte array).
+		response.setContentType(getContentType());
+		response.setContentLength(baos.size());
+
+		// Flush byte array to servlet output stream.
+		ServletOutputStream out = response.getOutputStream();
+		baos.writeTo(out);
+		out.flush();
 	}
 
 
