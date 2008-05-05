@@ -103,6 +103,10 @@
 
 	AspectJ weaving requires spring-aspects.jar on the classpath,
 	as well as load-time weaving (or compile-time weaving) enabled.
+
+	Note: The weaving-based aspect requires the @Transactional annotation to be
+	defined on the concrete class. Annotations in interfaces will not work
+	in that case (they will rather only work with interface-based proxies)!
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -117,6 +121,10 @@
 					<xsd:documentation><![CDATA[
 	Are class-based (CGLIB) proxies to be created? By default, standard
 	Java interface-based proxies are created.
+
+	Note: Class-based proxies require the @Transactional annotation to be
+	defined on the concrete class. Annotations in interfaces will not work
+	in that case (they will rather only work with interface-based proxies)!
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
