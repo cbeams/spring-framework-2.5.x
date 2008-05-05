@@ -1120,9 +1120,10 @@ public class DefaultFooService implements FooService {
       an interface method), but this will only work as you would expect it to if
       you are using interface-based proxies. The fact that annotations are
       <emphasis>not inherited</emphasis> means that if you are using class-based
-      proxies then the transaction settings will not be recognised by the
-      class-based proxying infrastructure and the object will not be wrapped in a
-      transactional proxy (which would be decidedly <emphasis>bad</emphasis>).
+      proxies (<literal>proxy-target-class="true"</literal>) or the weaving-based aspect
+      (<literal>mode="aspectj"</literal>) then the transaction settings will not be
+      recognised by the proxying/weaving infrastructure and the object will not be
+      wrapped in a transactional proxy (which would be decidedly <emphasis>bad</emphasis>).
       So please do take the Spring team's advice and only annotate concrete classes
       (and the methods of concrete classes) with the
       <interfacename>@Transactional</interfacename> annotation.</para>
@@ -1203,16 +1204,16 @@ public class DefaultFooService implements FooService {
       </para>
 
 			<note>
-      <para>The "<literal>proxy-target-class</literal>" attribute on the
-      <literal>&lt;tx:annotation-driven/&gt;</literal> element controls
-      what type of transactional proxies are created for classes annotated
-      with the <interfacename>@Transactional</interfacename> annotation.
-      If "<literal>proxy-target-class</literal>" attribute is set to
-      "<literal>true</literal>", then class-based proxies will be created.
-      If "<literal>proxy-target-class</literal>" is "<literal>false</literal>"
-      or if the attribute is omitted, then standard JDK interface-based proxies
-      will be created. (See the section entitled <xref linkend="aop-proxying"/>
-      for a detailed examination of the different proxy types.)</para>
+        <para>The "<literal>proxy-target-class</literal>" attribute on the
+        <literal>&lt;tx:annotation-driven/&gt;</literal> element controls
+        what type of transactional proxies are created for classes annotated
+        with the <interfacename>@Transactional</interfacename> annotation.
+        If "<literal>proxy-target-class</literal>" attribute is set to
+        "<literal>true</literal>", then class-based proxies will be created.
+        If "<literal>proxy-target-class</literal>" is "<literal>false</literal>"
+        or if the attribute is omitted, then standard JDK interface-based proxies
+        will be created. (See the section entitled <xref linkend="aop-proxying"/>
+        for a detailed examination of the different proxy types.)</para>
       </note>
       <para>The most derived location takes precedence when evaluating the transactional
       settings for a method. In the case of the following example, the
