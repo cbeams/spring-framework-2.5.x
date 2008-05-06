@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,7 +42,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.ResourceHolder;
+import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -327,22 +329,15 @@ public abstract class EntityManagerFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class EntityManagerSynchronization extends TransactionSynchronizationAdapter {
-
-		private final EntityManagerHolder entityManagerHolder;
-
-		private final EntityManagerFactory entityManagerFactory;
+	private static class EntityManagerSynchronization extends ResourceHolderSynchronization implements Ordered {
 
 		private final Object transactionData;
 
 		private final boolean newEntityManager;
 
-		private boolean holderActive = true;
-
 		public EntityManagerSynchronization(
 				EntityManagerHolder emHolder, EntityManagerFactory emf, Object transactionData, boolean newEntityManager) {
-			this.entityManagerHolder = emHolder;
-			this.entityManagerFactory = emf;
+			super(emHolder, emf);
 			this.transactionData = transactionData;
 			this.newEntityManager = newEntityManager;
 		}
@@ -351,36 +346,21 @@ public abstract class EntityManagerFactoryUtils {
 			return ENTITY_MANAGER_SYNCHRONIZATION_ORDER;
 		}
 
-		public void suspend() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.unbindResource(this.entityManagerFactory);
-			}
+		protected boolean shouldUnbindAtCompletion() {
+			return this.newEntityManager;
 		}
 
-		public void resume() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.bindResource(this.entityManagerFactory, this.entityManagerHolder);
-			}
+		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
+			closeEntityManager(((EntityManagerHolder) resourceHolder).getEntityManager());
 		}
 
-		public void beforeCompletion() {
-			if (this.newEntityManager) {
-				TransactionSynchronizationManager.unbindResource(this.entityManagerFactory);
-				this.holderActive = false;
-				closeEntityManager(this.entityManagerHolder.getEntityManager());
+		protected void cleanupResource(ResourceHolder resourceHolder, Object resourceKey, boolean committed) {
+			if (!committed) {
+				// Clear all pending inserts/updates/deletes in the EntityManager.
+				// Necessary for pre-bound EntityManagers, to avoid inconsistent state.
+				((EntityManagerHolder) resourceHolder).getEntityManager().clear();
 			}
-		}
-
-		public void afterCompletion(int status) {
-			if (!this.newEntityManager) {
-				if (status != STATUS_COMMITTED) {
-					// Clear all pending inserts/updates/deletes in the EntityManager.
-					// Necessary for pre-bound EntityManagers, to avoid inconsistent state.
-					this.entityManagerHolder.getEntityManager().clear();
-				}
-				cleanupTransaction(this.transactionData, this.entityManagerFactory);
-			}
-			this.entityManagerHolder.setSynchronizedWithTransaction(false);
+			cleanupTransaction(this.transactionData, (EntityManagerFactory) resourceKey);
 		}
 	}
 

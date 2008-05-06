@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.transaction.TransactionTimedOutException;
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager#doBegin
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
  */
-public abstract class ResourceHolderSupport {
+public abstract class ResourceHolderSupport implements ResourceHolder {
 
 	private boolean synchronizedWithTransaction = false;
 
@@ -41,6 +41,8 @@ public abstract class ResourceHolderSupport {
 	private Date deadline;
 
 	private int referenceCount = 0;
+
+	private boolean isVoid = false;
 
 
 	/**
@@ -178,6 +180,14 @@ public abstract class ResourceHolderSupport {
 	public void reset() {
 		clear();
 		this.referenceCount = 0;
+	}
+
+	public void unbound() {
+		this.isVoid = true;
+	}
+
+	public boolean isVoid() {
+		return this.isVoid;
 	}
 
 }

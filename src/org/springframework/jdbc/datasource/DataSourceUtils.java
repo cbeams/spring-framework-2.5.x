@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -437,17 +437,15 @@ public abstract class DataSourceUtils {
 			if (this.holderActive) {
 				// The thread-bound ConnectionHolder might not be available anymore,
 				// since afterCompletion might get called from a different thread.
-				if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
-					TransactionSynchronizationManager.unbindResource(this.dataSource);
-				}
+				TransactionSynchronizationManager.unbindResourceIfPossible(this.dataSource);
 				this.holderActive = false;
 				if (this.connectionHolder.hasConnection()) {
 					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
 					// Reset the ConnectionHolder: It might remain bound to the thread.
 					this.connectionHolder.setConnection(null);
 				}
-				this.connectionHolder.reset();
 			}
+			this.connectionHolder.reset();
 		}
 	}
 

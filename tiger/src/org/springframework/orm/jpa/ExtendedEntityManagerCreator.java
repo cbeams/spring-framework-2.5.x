@@ -35,9 +35,10 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -415,9 +416,8 @@ public abstract class ExtendedEntityManagerCreator {
 				logger.debug("Starting resource local transaction on application-managed " +
 						"EntityManager [" + this.target + "]");
 			}
-			EntityManagerHolder emh = new EntityManagerHolder(this.target);
 			ExtendedEntityManagerSynchronization extendedEntityManagerSynchronization =
-					new ExtendedEntityManagerSynchronization(emh, this.exceptionTranslator);
+					new ExtendedEntityManagerSynchronization(this.target, this.exceptionTranslator);
 			TransactionSynchronizationManager.bindResource(this.target,
 					extendedEntityManagerSynchronization);
 			TransactionSynchronizationManager.registerSynchronization(extendedEntityManagerSynchronization);
@@ -429,18 +429,17 @@ public abstract class ExtendedEntityManagerCreator {
 	 * TransactionSynchronization enlisting an extended EntityManager
 	 * with a current Spring transaction.
 	 */
-	private static class ExtendedEntityManagerSynchronization extends TransactionSynchronizationAdapter {
+	private static class ExtendedEntityManagerSynchronization extends ResourceHolderSynchronization
+			implements Ordered {
 
-		private final EntityManagerHolder entityManagerHolder;
+		private final EntityManager entityManager;
 
 		private final PersistenceExceptionTranslator exceptionTranslator;
 
-		private boolean holderActive = true;
-
 		public ExtendedEntityManagerSynchronization(
-				EntityManagerHolder emHolder, PersistenceExceptionTranslator exceptionTranslator) {
-
-			this.entityManagerHolder = emHolder;
+				EntityManager em, PersistenceExceptionTranslator exceptionTranslator) {
+			super(new EntityManagerHolder(em), em);
+			this.entityManager = em;
 			this.exceptionTranslator = exceptionTranslator;
 		}
 
@@ -448,28 +447,15 @@ public abstract class ExtendedEntityManagerCreator {
 			return EntityManagerFactoryUtils.ENTITY_MANAGER_SYNCHRONIZATION_ORDER + 1;
 		}
 
-		public void suspend() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.unbindResource(this.entityManagerHolder.getEntityManager());
-			}
-		}
-
-		public void resume() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.bindResource(
-						this.entityManagerHolder.getEntityManager(), this.entityManagerHolder);
-			}
-		}
-
-		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.entityManagerHolder.getEntityManager());
-			this.holderActive = false;
+		protected boolean shouldReleaseBeforeCompletion() {
+			return false;
 		}
 
 		public void afterCommit() {
+			super.afterCommit();
 			// Trigger commit here to let exceptions propagate to the caller.
 			try {
-				this.entityManagerHolder.getEntityManager().getTransaction().commit();
+				this.entityManager.getTransaction().commit();
 			}
 			catch (RuntimeException ex) {
 				throw convertCompletionException(ex);
@@ -477,17 +463,16 @@ public abstract class ExtendedEntityManagerCreator {
 		}
 
 		public void afterCompletion(int status) {
-			this.entityManagerHolder.setSynchronizedWithTransaction(false);
+			super.afterCompletion(status);
 			if (status != STATUS_COMMITTED) {
 				// Haven't had an afterCommit call: trigger a rollback.
 				try {
-					this.entityManagerHolder.getEntityManager().getTransaction().rollback();
+					this.entityManager.getTransaction().rollback();
 				}
 				catch (RuntimeException ex) {
 					throw convertCompletionException(ex);
 				}
 			}
-			// Don't close the EntityManager... That's up to the user.
 		}
 
 		private RuntimeException convertCompletionException(RuntimeException ex) {

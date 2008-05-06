@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,15 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.ResourceHolder;
+import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -291,20 +293,14 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class PersistenceManagerSynchronization extends TransactionSynchronizationAdapter {
-
-		private final PersistenceManagerHolder persistenceManagerHolder;
-
-		private final PersistenceManagerFactory persistenceManagerFactory;
+	private static class PersistenceManagerSynchronization extends ResourceHolderSynchronization
+			implements Ordered {
 
 		private final boolean newPersistenceManager;
 
-		private boolean holderActive = true;
-
 		public PersistenceManagerSynchronization(
 				PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf, boolean newPersistenceManager) {
-			this.persistenceManagerHolder = pmHolder;
-			this.persistenceManagerFactory = pmf;
+			super(pmHolder, pmf);
 			this.newPersistenceManager = newPersistenceManager;
 		}
 
@@ -312,30 +308,13 @@ public abstract class PersistenceManagerFactoryUtils {
 			return PERSISTENCE_MANAGER_SYNCHRONIZATION_ORDER;
 		}
 
-		public void suspend() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
-			}
+		protected boolean shouldUnbindAtCompletion() {
+			return this.newPersistenceManager;
 		}
 
-		public void resume() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.bindResource(
-						this.persistenceManagerFactory, this.persistenceManagerHolder);
-			}
-		}
-
-		public void beforeCompletion() {
-			if (this.newPersistenceManager) {
-				TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
-				this.holderActive = false;
-				releasePersistenceManager(
-						this.persistenceManagerHolder.getPersistenceManager(), this.persistenceManagerFactory);
-			}
-		}
-
-		public void afterCompletion(int status) {
-			this.persistenceManagerHolder.setSynchronizedWithTransaction(false);
+		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
+			releasePersistenceManager(((PersistenceManagerHolder) resourceHolder).getPersistenceManager(),
+					(PersistenceManagerFactory) resourceKey);
 		}
 	}
 

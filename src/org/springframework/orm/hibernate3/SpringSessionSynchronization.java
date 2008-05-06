@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -43,7 +43,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see SessionFactoryUtils
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-class SpringSessionSynchronization extends TransactionSynchronizationAdapter implements Ordered {
+class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
 
 	private final SessionHolder sessionHolder;
 
@@ -154,15 +154,7 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 			if (session != null) {
 				if (this.sessionHolder.isEmpty()) {
 					// No Sessions for JTA transactions bound anymore -> could remove it.
-					if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
-						// Explicit check necessary because of remote transaction propagation:
-						// The synchronization callbacks will execute in a different thread
-						// in such a scenario, as they're triggered by a remote server.
-						// The best we can do is to leave the SessionHolder bound to the
-						// thread that originally performed the data access. It will be
-						// reused when a new data access operation starts on that thread.
-						TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-					}
+					TransactionSynchronizationManager.unbindResourceIfPossible(this.sessionFactory);
 					this.holderActive = false;
 				}
 				// Do not close a pre-bound Session. In that case, we'll find the
@@ -206,6 +198,9 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 				session.disconnect();
 			}
 		}
+	}
+
+	public void afterCommit() {
 	}
 
 	public void afterCompletion(int status) {

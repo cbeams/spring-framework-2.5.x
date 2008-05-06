@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.TypeMismatchDataAccessException;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.ResourceHolder;
+import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -216,38 +217,18 @@ public abstract class SessionFactoryUtils {
 	 * i.e. when participating in a JtaTransactionManager transaction.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class SessionSynchronization extends TransactionSynchronizationAdapter {
+	private static class SessionSynchronization extends ResourceHolderSynchronization {
 
-		private final SessionHolder sessionHolder;
-
-		private final SessionFactory sessionFactory;
-
-		private boolean holderActive = true;
-
-		private SessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
-			this.sessionHolder = sessionHolder;
-			this.sessionFactory = sessionFactory;
+		public SessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
+			super(sessionHolder, sessionFactory);
 		}
 
-		public void suspend() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			}
+		protected boolean shouldReleaseBeforeCompletion() {
+			return false;
 		}
 
-		public void resume() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
-			}
-		}
-
-		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			this.holderActive = false;
-		}
-
-		public void afterCompletion(int status) {
-			releaseSession(this.sessionHolder.getSession(), this.sessionFactory);
+		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
+			releaseSession(((SessionHolder) resourceHolder).getSession(), (SessionFactory) resourceKey);
 		}
 	}
 

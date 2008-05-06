@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jca.cci.CannotGetCciConnectionException;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.ResourceHolder;
+import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
  
@@ -198,35 +199,14 @@ public abstract class ConnectionFactoryUtils {
 	 * Callback for resource cleanup at the end of a non-native CCI transaction
 	 * (e.g. when participating in a JTA transaction).
 	 */
-	private static class ConnectionSynchronization extends TransactionSynchronizationAdapter {
-
-		private final ConnectionHolder connectionHolder;
-
-		private final ConnectionFactory connectionFactory;
-
-		private boolean holderActive = true;
+	private static class ConnectionSynchronization extends ResourceHolderSynchronization {
 
 		public ConnectionSynchronization(ConnectionHolder connectionHolder, ConnectionFactory connectionFactory) {
-			this.connectionHolder = connectionHolder;
-			this.connectionFactory = connectionFactory;
+			super(connectionHolder, connectionFactory);
 		}
 
-		public void suspend() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.unbindResource(this.connectionFactory);
-			}
-		}
-
-		public void resume() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.bindResource(this.connectionFactory, this.connectionHolder);
-			}
-		}
-
-		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.connectionFactory);
-			this.holderActive = false;
-			releaseConnection(this.connectionHolder.getConnection(), this.connectionFactory);
+		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
+			releaseConnection(((ConnectionHolder) resourceHolder).getConnection(), (ConnectionFactory) resourceKey);
 		}
 	}
 

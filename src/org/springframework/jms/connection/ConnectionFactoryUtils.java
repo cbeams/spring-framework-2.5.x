@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import javax.jms.TopicSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.ResourceHolder;
+import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -307,7 +308,7 @@ public abstract class ConnectionFactoryUtils {
 		if (resourceHolderToUse != resourceHolder) {
 			TransactionSynchronizationManager.registerSynchronization(
 					new JmsResourceSynchronization(
-							connectionFactory, resourceHolderToUse, resourceFactory.isSynchedLocalTransactionAllowed()));
+							resourceHolderToUse, connectionFactory, resourceFactory.isSynchedLocalTransactionAllowed()));
 			resourceHolderToUse.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.bindResource(connectionFactory, resourceHolderToUse);
 		}
@@ -368,57 +369,30 @@ public abstract class ConnectionFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class JmsResourceSynchronization extends TransactionSynchronizationAdapter {
-
-		private final Object resourceKey;
-
-		private final JmsResourceHolder resourceHolder;
+	private static class JmsResourceSynchronization extends ResourceHolderSynchronization {
 
 		private final boolean transacted;
 
-		private boolean holderActive = true;
-
-		public JmsResourceSynchronization(Object resourceKey, JmsResourceHolder resourceHolder, boolean transacted) {
-			this.resourceKey = resourceKey;
-			this.resourceHolder = resourceHolder;
+		public JmsResourceSynchronization(JmsResourceHolder resourceHolder, Object resourceKey, boolean transacted) {
+			super(resourceHolder, resourceKey);
 			this.transacted = transacted;
 		}
 
-		public void suspend() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.unbindResource(this.resourceKey);
+		protected boolean shouldReleaseBeforeCompletion() {
+			return !this.transacted;
+		}
+
+		protected void processResourceAfterCommit(ResourceHolder resourceHolder) {
+			try {
+				((JmsResourceHolder) resourceHolder).commitAll();
+			}
+			catch (JMSException ex) {
+				throw new SynchedLocalTransactionFailedException("Local JMS transaction failed to commit", ex);
 			}
 		}
 
-		public void resume() {
-			if (this.holderActive) {
-				TransactionSynchronizationManager.bindResource(this.resourceKey, this.resourceHolder);
-			}
-		}
-
-		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.resourceKey);
-			this.holderActive = false;
-			if (!this.transacted) {
-				this.resourceHolder.closeAll();
-			}
-		}
-
-		public void afterCommit() {
-			if (this.transacted) {
-				try {
-					this.resourceHolder.commitAll();
-				}
-				catch (JMSException ex) {
-					throw new SynchedLocalTransactionFailedException("Local JMS transaction failed to commit", ex);
-				}
-			}
-		}
-
-		public void afterCompletion(int status) {
-			if (this.transacted) {
-				this.resourceHolder.closeAll();
-			}
+		protected void releaseResource(ResourceHolder resourceHolder, Object resourceKey) {
+			((JmsResourceHolder) resourceHolder).closeAll();
 		}
 	}
 
