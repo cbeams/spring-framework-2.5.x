@@ -36,6 +36,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
@@ -139,6 +140,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private boolean autodetectDataSource = true;
 
 	private boolean prepareConnection = true;
+
+	private boolean hibernateManagedSession = false;
 
 	private boolean earlyFlushBeforeCommit = false;
 
@@ -262,6 +265,34 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
 		this.prepareConnection = prepareConnection;
+	}
+
+	/**
+	 * Set whether to operate on a Hibernate-managed Session instead of a
+	 * Spring-managed Session, that is, whether to obtain the Session through
+	 * Hibernate's {@link org.hibernate.SessionFactory#getCurrentSession()}
+	 * instead of {@link org.hibernate.SessionFactory#openSession()} (with a Spring
+	 * {@link org.springframework.transaction.support.TransactionSynchronizationManager}
+	 * check preceding it).
+	 * <p>Default is "false", i.e. using a Spring-managed Session: taking the current
+	 * thread-bound Session if available (e.g. in an Open-Session-in-View scenario),
+	 * creating a new Session for the current transaction otherwise.
+	 * <p>Switch this flag to "true" in order to enforce use of a Hibernate-managed Session.
+	 * Note that this requires {@link org.hibernate.SessionFactory#getCurrentSession()}
+	 * to always return a proper Session when called for a Spring-managed transaction;
+	 * transaction begin will fail if the <code>getCurrentSession()</code> call fails.
+	 * <p>This mode will typically be used in combination with a custom Hibernate
+	 * {@link org.hibernate.context.CurrentSessionContext} implementation that stores
+	 * Sessions in a place other than Spring's TransactionSynchronizationManager.
+	 * It may also be used in combination with Spring's Open-Session-in-View support
+	 * (using Spring's default {@link SpringSessionContext}), in which case it subtly
+	 * differs from the Spring-managed Session mode: The pre-bound Session will <i>not</i>
+	 * receive a <code>clear()</code> call (on rollback) or a <code>disconnect()</code>
+	 * call (on transaction completion) in such a scenario; this is rather left up
+	 * to a custom CurrentSessionContext implementation (if desired).
+	 */
+	public void setHibernateManagedSession(boolean hibernateManagedSession) {
+		this.hibernateManagedSession = hibernateManagedSession;
 	}
 
 	/**
@@ -411,7 +442,21 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				logger.debug("Found thread-bound Session [" +
 						SessionFactoryUtils.toString(sessionHolder.getSession()) + "] for Hibernate transaction");
 			}
-			txObject.setSessionHolder(sessionHolder, false);
+			txObject.setSessionHolder(sessionHolder);
+		}
+		else if (this.hibernateManagedSession) {
+			try {
+				Session session = getSessionFactory().getCurrentSession();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found Hibernate-managed Session [" +
+							SessionFactoryUtils.toString(session) + "] for Spring-managed transaction");
+				}
+				txObject.setExistingSession(session);
+			}
+			catch (HibernateException ex) {
+				throw new DataAccessResourceFailureException(
+						"Could not obtain Hibernate-managed Session for Spring-managed transaction", ex);
+			}
 		}
 
 		if (getDataSource() != null) {
@@ -424,7 +469,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
-		return ((HibernateTransactionObject) transaction).hasTransaction();
+		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+		return (txObject.hasSpringManagedTransaction() ||
+				(this.hibernateManagedSession && txObject.hasHibernateManagedTransaction()));
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
@@ -449,7 +496,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					logger.debug("Opened new Session [" + SessionFactoryUtils.toString(newSession) +
 							"] for Hibernate transaction");
 				}
-				txObject.setSessionHolder(new SessionHolder(newSession), true);
+				txObject.setSession(newSession);
 			}
 
 			session = txObject.getSessionHolder().getSession();
@@ -481,12 +528,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 			}
 
-			if (definition.isReadOnly() && txObject.isNewSessionHolder()) {
+			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to NEVER in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.NEVER);
 			}
 
-			if (!definition.isReadOnly() && !txObject.isNewSessionHolder()) {
+			if (!definition.isReadOnly() && !txObject.isNewSession()) {
 				// We need AUTO or COMMIT for a non-read-only transaction.
 				FlushMode flushMode = session.getFlushMode();
 				if (flushMode.lessThan(FlushMode.COMMIT)) {
@@ -536,7 +583,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		catch (Exception ex) {
-			if (txObject.isNewSessionHolder()) {
+			if (txObject.isNewSession()) {
 				try {
 					if (session.getTransaction().isActive()) {
 						session.getTransaction().rollback();
@@ -555,7 +602,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected Object doSuspend(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-		txObject.setSessionHolder(null, false);
+		txObject.setSessionHolder(null);
 		SessionHolder sessionHolder =
 				(SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		txObject.setConnectionHolder(null);
@@ -634,7 +681,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			throw convertHibernateAccessException(ex);
 		}
 		finally {
-			if (!txObject.isNewSessionHolder()) {
+			if (!txObject.isNewSession() && !this.hibernateManagedSession) {
 				// Clear all pending inserts/updates/deletes in the Session.
 				// Necessary for pre-bound Sessions, to avoid inconsistent state.
 				txObject.getSessionHolder().getSession().clear();
@@ -678,7 +725,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 		}
 
-		if (txObject.isNewSessionHolder()) {
+		if (txObject.isNewSession()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Hibernate Session [" + SessionFactoryUtils.toString(session) +
 						"] after transaction");
@@ -693,7 +740,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
-			session.disconnect();
+			if (!this.hibernateManagedSession) {
+				session.disconnect();
+			}
 		}
 		txObject.getSessionHolder().clear();
 	}
@@ -781,9 +830,24 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private boolean newSessionHolder;
 
-		public void setSessionHolder(SessionHolder sessionHolder, boolean newSessionHolder) {
+		private boolean newSession;
+
+		public void setSession(Session session) {
+			this.sessionHolder = new SessionHolder(session);
+			this.newSessionHolder = true;
+			this.newSession = true;
+		}
+
+		public void setExistingSession(Session session) {
+			this.sessionHolder = new SessionHolder(session);
+			this.newSessionHolder = true;
+			this.newSession = false;
+		}
+
+		public void setSessionHolder(SessionHolder sessionHolder) {
 			this.sessionHolder = sessionHolder;
-			this.newSessionHolder = newSessionHolder;
+			this.newSessionHolder = false;
+			this.newSession = false;
 		}
 
 		public SessionHolder getSessionHolder() {
@@ -794,8 +858,16 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			return this.newSessionHolder;
 		}
 
-		public boolean hasTransaction() {
+		public boolean isNewSession() {
+			return this.newSession;
+		}
+
+		public boolean hasSpringManagedTransaction() {
 			return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
+		}
+
+		public boolean hasHibernateManagedTransaction() {
+			return (this.sessionHolder != null && this.sessionHolder.getSession().getTransaction().isActive());
 		}
 
 		public void setRollbackOnly() {

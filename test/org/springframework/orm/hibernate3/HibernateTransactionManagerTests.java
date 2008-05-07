@@ -1310,6 +1310,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.verify();
 		txControl.verify();
 	}
+
 	public void testTransactionRollbackWithPreBound() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
@@ -1426,6 +1427,104 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		dsControl.verify();
 		conControl.verify();
+		sfControl.verify();
+		sessionControl.verify();
+		tx1Control.verify();
+		tx2Control.verify();
+	}
+
+	public void testTransactionRollbackWithHibernateManagedSession() throws Exception {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		MockControl tx1Control = MockControl.createControl(Transaction.class);
+		final Transaction tx1 = (Transaction) tx1Control.getMock();
+		MockControl tx2Control = MockControl.createControl(Transaction.class);
+		final Transaction tx2 = (Transaction) tx2Control.getMock();
+
+		sf.getCurrentSession();
+		sfControl.setReturnValue(session, 4);
+		session.getTransaction();
+		sessionControl.setReturnValue(tx1, 1);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx1, 1);
+		tx1.isActive();
+		tx1Control.setReturnValue(false, 1);
+		tx1.rollback();
+		tx1Control.setVoidCallable(1);
+		session.getTransaction();
+		sessionControl.setReturnValue(tx2, 1);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx2, 1);
+		tx2.isActive();
+		tx2Control.setReturnValue(false, 1);
+		tx2.commit();
+		tx2Control.setVoidCallable(1);
+
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER, 2);
+		session.setFlushMode(FlushMode.AUTO);
+		sessionControl.setVoidCallable(2);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(2);
+
+		sfControl.replay();
+		sessionControl.replay();
+		tx1Control.replay();
+		tx2Control.replay();
+
+		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setSessionFactory(sf);
+		tm.setPrepareConnection(false);
+		tm.setHibernateManagedSession(true);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				public void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+					tt.execute(new TransactionCallbackWithoutResult() {
+						public void doInTransactionWithoutResult(TransactionStatus status) {
+							status.setRollbackOnly();
+							HibernateTemplate ht = new HibernateTemplate(sf);
+							ht.setAllowCreate(false);
+							ht.setExposeNativeSession(true);
+							ht.execute(new HibernateCallback() {
+								public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
+									assertEquals(session, sess);
+									return null;
+								}
+							});
+						}
+					});
+				}
+			});
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			public void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				ht.setAllowCreate(false);
+				ht.setExposeNativeSession(true);
+				ht.execute(new HibernateCallback() {
+					public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
+						assertEquals(session, sess);
+						return null;
+					}
+				});
+			}
+		});
+
 		sfControl.verify();
 		sessionControl.verify();
 		tx1Control.verify();
