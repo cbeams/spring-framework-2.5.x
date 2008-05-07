@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,9 @@ import org.quartz.TriggerListener;
 import org.quartz.impl.RemoteScheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
+import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobFactory;
+import org.quartz.xml.JobSchedulingDataProcessor;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -51,7 +53,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.Lifecycle;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.SchedulingException;
@@ -90,7 +94,9 @@ import org.springframework.util.CollectionUtils;
  * automatically apply to Scheduler operations performed within those scopes.
  * Alternatively, you may add transactional advice for the Scheduler itself.
  *
- * <p>This version of Spring's SchedulerFactoryBean requires Quartz 1.5 or higher.
+ * <p><b>Note:</b> This version of Spring's SchedulerFactoryBean requires
+ * Quartz 1.5.x or 1.6.x. The "jobSchedulingDataLocation" feature requires
+ * Quartz 1.6.1 or higher (as of Spring 2.5.5).
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -101,12 +107,14 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class SchedulerFactoryBean
-    implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
+    implements FactoryBean, ResourceLoaderAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
 	public static final int DEFAULT_THREAD_COUNT = 10;
 
+
+	private static final ThreadLocal configTimeResourceLoaderHolder = new ThreadLocal();
 
 	private static final ThreadLocal configTimeTaskExecutorHolder = new ThreadLocal();
 
@@ -115,13 +123,26 @@ public class SchedulerFactoryBean
 	private static final ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
 
 	/**
+	 * Return the ResourceLoader for the currently configured Quartz Scheduler,
+	 * to be used by ResourceLoaderClassLoadHelper.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * Scheduler, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setApplicationContext
+	 * @see ResourceLoaderClassLoadHelper
+	 */
+	public static ResourceLoader getConfigTimeResourceLoader() {
+		return (ResourceLoader) configTimeResourceLoaderHolder.get();
+	}
+
+	/**
 	 * Return the TaskExecutor for the currently configured Quartz Scheduler,
 	 * to be used by LocalTaskExecutorThreadPool.
 	 * <p>This instance will be set before initialization of the corresponding
 	 * Scheduler, and reset immediately afterwards. It is thus only available
 	 * during configuration.
-	 * @see #setDataSource
-	 * @see LocalDataSourceJobStore
+	 * @see #setTaskExecutor
+	 * @see LocalTaskExecutorThreadPool
 	 */
 	public static TaskExecutor getConfigTimeTaskExecutor() {
 		return (TaskExecutor) configTimeTaskExecutorHolder.get();
@@ -176,6 +197,8 @@ public class SchedulerFactoryBean
 
 
 	private Map schedulerContextMap;
+
+	private ResourceLoader resourceLoader;
 
 	private ApplicationContext applicationContext;
 
@@ -345,10 +368,6 @@ public class SchedulerFactoryBean
 		this.schedulerContextMap = schedulerContextAsMap;
 	}
 
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
 	/**
 	 * Set the key of an ApplicationContext reference to expose in the
 	 * SchedulerContext, for example "applicationContext". Default is none.
@@ -399,10 +418,9 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set the location of a Quartz job definition XML file that follows the
-	 * "job_scheduling_data_1_0" DTD. Can be specified to automatically
+	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
 	 * register jobs that are defined in such a file, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see ResourceJobSchedulingDataProcessor
 	 * @see org.quartz.xml.JobSchedulingDataProcessor
 	 */
 	public void setJobSchedulingDataLocation(String jobSchedulingDataLocation) {
@@ -411,10 +429,9 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set the locations of Quartz job definition XML files that follow the
-	 * "job_scheduling_data_1_0" DTD. Can be specified to automatically
+	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
 	 * register jobs that are defined in such files, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see ResourceJobSchedulingDataProcessor
 	 * @see org.quartz.xml.JobSchedulingDataProcessor
 	 */
 	public void setJobSchedulingDataLocations(String[] jobSchedulingDataLocations) {
@@ -520,7 +537,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set whether to automatically start the scheduler after initialization.
-	 * Default is "true"; set this to "false" to allow for manual startup.
+	 * <p>Default is "true"; set this to "false" to allow for manual startup.
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
@@ -548,11 +565,24 @@ public class SchedulerFactoryBean
 	}
 
 
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+
 	//---------------------------------------------------------------------
 	// Implementation of InitializingBean interface
 	//---------------------------------------------------------------------
 
 	public void afterPropertiesSet() throws Exception {
+		if (this.applicationContext != null && this.resourceLoader == null) {
+			this.resourceLoader = this.applicationContext;
+		}
+
 		if (this.dataSource == null && this.nonTransactionalDataSource != null) {
 			this.dataSource = this.nonTransactionalDataSource;
 		}
@@ -563,6 +593,10 @@ public class SchedulerFactoryBean
 
 		initSchedulerFactory(schedulerFactory);
 
+		if (this.resourceLoader != null) {
+			// Make given ResourceLoader available for SchedulerFactory configuration.
+			configTimeResourceLoaderHolder.set(this.resourceLoader);
+		}
 		if (this.taskExecutor != null) {
 			// Make given TaskExecutor available for SchedulerFactory configuration.
 			configTimeTaskExecutorHolder.set(this.taskExecutor);
@@ -594,6 +628,9 @@ public class SchedulerFactoryBean
 		}
 
 		finally {
+			if (this.resourceLoader != null) {
+				configTimeResourceLoaderHolder.set(null);
+			}
 			if (this.taskExecutor != null) {
 				configTimeTaskExecutorHolder.set(null);
 			}
@@ -625,45 +662,49 @@ public class SchedulerFactoryBean
 	private void initSchedulerFactory(SchedulerFactory schedulerFactory)
 			throws SchedulerException, IOException {
 
-		if (this.configLocation != null || this.quartzProperties != null ||
-				this.dataSource != null || this.schedulerName != null || this.taskExecutor != null) {
+		if (!(schedulerFactory instanceof StdSchedulerFactory) &&
+			(this.configLocation != null || this.quartzProperties != null ||
+					this.taskExecutor != null || this.dataSource != null)) {
+			throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
+		}
 
-			if (!(schedulerFactory instanceof StdSchedulerFactory)) {
-				throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
-			}
+		Properties mergedProps = new Properties();
 
-			Properties mergedProps = new Properties();
+		if (this.resourceLoader != null) {
+			mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_CLASS_LOAD_HELPER_CLASS,
+					ResourceLoaderClassLoadHelper.class.getName());
+		}
 
+		if (this.taskExecutor != null) {
+			mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS,
+					LocalTaskExecutorThreadPool.class.getName());
+		}
+		else {
 			// Set necessary default properties here, as Quartz will not apply
 			// its default configuration when explicitly given properties.
-			if (this.taskExecutor != null) {
-				mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, LocalTaskExecutorThreadPool.class.getName());
-			}
-			else {
-				mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
-				mergedProps.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
-			}
-
-			if (this.configLocation != null) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Loading Quartz config from [" + this.configLocation + "]");
-				}
-				PropertiesLoaderUtils.fillProperties(mergedProps, this.configLocation);
-			}
-
-			CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
-
-			if (this.dataSource != null) {
-				mergedProps.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
-			}
-
-			// Make sure to set the scheduler name as configured in the Spring configuration.
-			if (this.schedulerName != null) {
-				mergedProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
-			}
-
-			((StdSchedulerFactory) schedulerFactory).initialize(mergedProps);
+			mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
+			mergedProps.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
 		}
+
+		if (this.configLocation != null) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Loading Quartz config from [" + this.configLocation + "]");
+			}
+			PropertiesLoaderUtils.fillProperties(mergedProps, this.configLocation);
+		}
+
+		CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
+
+		if (this.dataSource != null) {
+			mergedProps.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
+		}
+
+		// Make sure to set the scheduler name as configured in the Spring configuration.
+		if (this.schedulerName != null) {
+			mergedProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
+		}
+
+		((StdSchedulerFactory) schedulerFactory).initialize(mergedProps);
 	}
 
 	/**
@@ -681,10 +722,23 @@ public class SchedulerFactoryBean
 	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
 			throws SchedulerException {
 
-		// StdSchedulerFactory's default "getScheduler" implementation
-		// uses the scheduler name specified in the Quartz properties,
-		// which we have set before (in "initSchedulerFactory").
-		return schedulerFactory.getScheduler();
+		// Override thread context ClassLoader to work around naive Quartz ClassLoadHelper loading.
+		Thread currentThread = Thread.currentThread();
+		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
+		boolean overrideClassLoader = (this.resourceLoader != null &&
+				!this.resourceLoader.getClassLoader().equals(threadContextClassLoader));
+		if (overrideClassLoader) {
+			currentThread.setContextClassLoader(this.resourceLoader.getClassLoader());
+		}
+		try {
+			return schedulerFactory.getScheduler();
+		}
+		finally {
+			if (overrideClassLoader) {
+				// Reset original thread context ClassLoader.
+				currentThread.setContextClassLoader(threadContextClassLoader);
+			}
+		}
 	}
 
 	/**
@@ -751,10 +805,9 @@ public class SchedulerFactoryBean
 		try {
 
 			if (this.jobSchedulingDataLocations != null) {
-				ResourceJobSchedulingDataProcessor dataProcessor = new ResourceJobSchedulingDataProcessor();
-				if (this.applicationContext != null) {
-					dataProcessor.setResourceLoader(this.applicationContext);
-				}
+				ClassLoadHelper clh = new ResourceLoaderClassLoadHelper(this.resourceLoader);
+				clh.initialize();
+				JobSchedulingDataProcessor dataProcessor = new JobSchedulingDataProcessor(clh, true, true);
 				for (int i = 0; i < this.jobSchedulingDataLocations.length; i++) {
 					dataProcessor.processFileAndScheduleJobs(
 					    this.jobSchedulingDataLocations[i], this.scheduler, this.overwriteExistingJobs);
