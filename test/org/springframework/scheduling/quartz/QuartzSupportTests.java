@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TestMethodInvokingTask;
 
@@ -803,8 +804,8 @@ public class QuartzSupportTests extends TestCase {
 	}
 
 	public void testSchedulerWithSpringBeanJobFactoryAndRunnable() throws Exception {
-		DummyJob.param = 0;
-		DummyJob.count = 0;
+		DummyRunnable.param = 0;
+		DummyRunnable.count = 0;
 
 		JobDetail jobDetail = new JobDetailBean();
 		jobDetail.setJobClass(DummyRunnable.class);
@@ -833,8 +834,8 @@ public class QuartzSupportTests extends TestCase {
 	}
 
 	public void testSchedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
-		DummyJob.param = 0;
-		DummyJob.count = 0;
+		DummyJobBean.param = 0;
+		DummyJobBean.count = 0;
 
 		JobDetail jobDetail = new JobDetail();
 		jobDetail.setJobClass(DummyJobBean.class);
@@ -862,17 +863,32 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	public void testSchedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setJobFactory(new SpringBeanJobFactory());
+		bean.setJobSchedulingDataLocation("org/springframework/scheduling/quartz/job-scheduling-data.xml");
+		bean.setResourceLoader(new FileSystemResourceLoader());
+		bean.afterPropertiesSet();
+
+		Thread.sleep(500);
+		assertEquals(10, DummyJob.param);
+		assertTrue(DummyJob.count > 0);
+
+		bean.destroy();
+	}
+
 	/**
 	 * Tests the creation of multiple schedulers (SPR-772)
 	 */
 	public void testMultipleSchedulers() throws Exception {
 		ClassPathXmlApplicationContext ctx =
-						new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
-
+				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
 		try {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
-
 			assertNotSame(scheduler1, scheduler2);
 			assertFalse(scheduler1.getSchedulerName().equals(scheduler2.getSchedulerName()));
 		}
@@ -883,7 +899,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
 		ClassPathXmlApplicationContext ctx =
-						new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
+				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
 		try {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
