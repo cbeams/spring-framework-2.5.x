@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,8 +120,8 @@ public class SchedulerFactoryBean
 	 * <p>This instance will be set before initialization of the corresponding
 	 * Scheduler, and reset immediately afterwards. It is thus only available
 	 * during configuration.
-	 * @see #setDataSource
-	 * @see LocalDataSourceJobStore
+	 * @see #setTaskExecutor
+	 * @see LocalTaskExecutorThreadPool
 	 */
 	public static TaskExecutor getConfigTimeTaskExecutor() {
 		return (TaskExecutor) configTimeTaskExecutorHolder.get();
@@ -399,7 +399,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set the location of a Quartz job definition XML file that follows the
-	 * "job_scheduling_data_1_0" DTD. Can be specified to automatically
+	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
 	 * register jobs that are defined in such a file, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
 	 * @see ResourceJobSchedulingDataProcessor
@@ -411,7 +411,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set the locations of Quartz job definition XML files that follow the
-	 * "job_scheduling_data_1_0" DTD. Can be specified to automatically
+	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
 	 * register jobs that are defined in such files, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
 	 * @see ResourceJobSchedulingDataProcessor
@@ -520,7 +520,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set whether to automatically start the scheduler after initialization.
-	 * Default is "true"; set this to "false" to allow for manual startup.
+	 * <p>Default is "true"; set this to "false" to allow for manual startup.
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
@@ -626,7 +626,7 @@ public class SchedulerFactoryBean
 			throws SchedulerException, IOException {
 
 		if (this.configLocation != null || this.quartzProperties != null ||
-				this.dataSource != null || this.schedulerName != null || this.taskExecutor != null) {
+				this.taskExecutor != null || this.dataSource != null || this.schedulerName != null) {
 
 			if (!(schedulerFactory instanceof StdSchedulerFactory)) {
 				throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
