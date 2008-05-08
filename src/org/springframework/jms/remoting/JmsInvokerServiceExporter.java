@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,19 +140,25 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Create the invocation result response message.
-	 * <p>The default implementation creates a JMS ObjectMessage
-	 * for the given RemoteInvocationResult object.
-	 * @param requestMessage the original request message
+	 * <p>The default implementation creates a JMS ObjectMessage for the given
+	 * RemoteInvocationResult object. It sets the response's correlation id
+	 * to the request message's correlation id, if any; otherwise to the
+	 * request message id.
+	 * @param request the original request message
 	 * @param session the JMS session to use
 	 * @param result the invocation result
 	 * @return the message response to send
 	 * @throws javax.jms.JMSException if creating the messsage failed
 	 */
-	protected Message createResponseMessage(Message requestMessage, Session session, RemoteInvocationResult result)
+	protected Message createResponseMessage(Message request, Session session, RemoteInvocationResult result)
 			throws JMSException {
 
 		Message response = this.messageConverter.toMessage(result, session);
-		response.setJMSCorrelationID(requestMessage.getJMSCorrelationID());
+		String correlation = request.getJMSCorrelationID();
+		if (correlation == null) {
+			correlation = request.getJMSMessageID();
+		}
+		response.setJMSCorrelationID(correlation);
 		return response;
 	}
 

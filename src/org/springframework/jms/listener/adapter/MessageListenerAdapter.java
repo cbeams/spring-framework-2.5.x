@@ -528,14 +528,19 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	/**
 	 * Post-process the given response message before it will be sent.
 	 * <p>The default implementation sets the response's correlation id
-	 * to the request message's correlation id.
+	 * to the request message's correlation id, if any; otherwise to the
+	 * request message id.
 	 * @param request the original incoming JMS message
 	 * @param response the outgoing JMS message about to be sent
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see javax.jms.Message#setJMSCorrelationID
 	 */
 	protected void postProcessResponse(Message request, Message response) throws JMSException {
-		response.setJMSCorrelationID(request.getJMSCorrelationID());
+		String correlation = request.getJMSCorrelationID();
+		if (correlation == null) {
+			correlation = request.getJMSMessageID();
+		}
+		response.setJMSCorrelationID(correlation);
 	}
 
 	/**

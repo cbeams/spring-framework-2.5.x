@@ -242,7 +242,6 @@ public class MessageListenerAdapterTests extends TestCase {
 	}
 
 	public void testWithResponsiveMessageDelegate_DoesNotSendReturnTextMessageIfNoSessionSupplied() throws Exception {
-
 		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
 		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
 		mockTextMessage.replay();
@@ -330,6 +329,8 @@ public class MessageListenerAdapterTests extends TestCase {
 		TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
 		// correlation ID is queried when response is being created...
 		sentTextMessage.getJMSCorrelationID();
+		mockSentTextMessage.setReturnValue(null);
+		sentTextMessage.getJMSMessageID();
 		mockSentTextMessage.setReturnValue(CORRELATION_ID);
 		// Reply-To is queried when response is being created...
 		sentTextMessage.getJMSReplyTo();
