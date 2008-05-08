@@ -217,6 +217,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			if (sharedConnectionEnabled()) {
 				synchronized (this.sharedConnectionMonitor) {
 					ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), false);
+					this.sharedConnection = null;
 				}
 			}
 		}
