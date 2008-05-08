@@ -35,7 +35,13 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class beanClass;
 
-	private Class resolvedPropertyType;
+	private final Method readMethod;
+
+	private final Method writeMethod;
+
+	private final Class propertyEditorClass;
+
+	private Class propertyType;
 
 	private MethodParameter writeMethodParameter;
 
@@ -44,39 +50,50 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 			Method readMethod, Method writeMethod, Class propertyEditorClass)
 			throws IntrospectionException {
 
-		super(propertyName, readMethod, writeMethod);
-		setPropertyEditorClass(propertyEditorClass);
+		super(propertyName, null, null);
 		this.beanClass = beanClass;
+		this.readMethod = readMethod;
+		this.writeMethod = writeMethod;
+		this.propertyEditorClass = propertyEditorClass;
 	}
 
 
+	public Method getReadMethod() {
+		return this.readMethod;
+	}
+
+	public Method getWriteMethod() {
+		return this.writeMethod;
+	}
+
+	public Class getPropertyEditorClass() {
+		return this.propertyEditorClass;
+	}
+
 	public synchronized Class getPropertyType() {
-		if (this.resolvedPropertyType == null) {
-			Class propertyType = super.getPropertyType();
-			Method readMethod = getReadMethod();
-			if (readMethod != null) {
-				this.resolvedPropertyType = GenericTypeResolver.resolveReturnType(readMethod, this.beanClass);
+		if (this.propertyType == null) {
+			if (this.readMethod != null) {
+				this.propertyType = GenericTypeResolver.resolveReturnType(this.readMethod, this.beanClass);
 			}
 			else {
 				MethodParameter writeMethodParam = getWriteMethodParameter();
 				if (writeMethodParam != null) {
-					this.resolvedPropertyType = writeMethodParam.getParameterType();
+					this.propertyType = writeMethodParam.getParameterType();
 				}
 				else {
-					this.resolvedPropertyType = propertyType;
+					this.propertyType = super.getPropertyType();
 				}
 			}
 		}
-		return this.resolvedPropertyType;
+		return this.propertyType;
 	}
 
 	public synchronized MethodParameter getWriteMethodParameter() {
-		Method writeMethod = getWriteMethod();
-		if (writeMethod == null) {
+		if (this.writeMethod == null) {
 			return null;
 		}
 		if (this.writeMethodParameter == null) {
-			this.writeMethodParameter = new MethodParameter(writeMethod, 0);
+			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0);
 			GenericTypeResolver.resolveParameterType(this.writeMethodParameter, this.beanClass);
 		}
 		return this.writeMethodParameter;

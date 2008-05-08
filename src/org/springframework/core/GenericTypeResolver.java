@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.springframework.util.Assert;
+
 /**
  * Helper class for resolving generic types against type variables.
  *
@@ -53,6 +55,7 @@ public abstract class GenericTypeResolver {
 	 * @return the corresponding generic parameter type
 	 */
 	public static Type getTargetType(MethodParameter methodParam) {
+		Assert.notNull(methodParam, "MethodParameter must not be null");
 		if (methodParam.getConstructor() != null) {
 			return methodParam.getConstructor().getGenericParameterTypes()[methodParam.getParameterIndex()];
 		}
@@ -74,6 +77,7 @@ public abstract class GenericTypeResolver {
 	 */
 	public static Class resolveParameterType(MethodParameter methodParam, Class clazz) {
 		Type genericType = getTargetType(methodParam);
+		Assert.notNull(clazz, "Class must not be null");
 		Map typeVariableMap = getTypeVariableMap(clazz);
 		Type rawType = getRawType(genericType, typeVariableMap);
 		Class result = (rawType instanceof Class ? (Class) rawType : methodParam.getParameterType());
@@ -89,11 +93,14 @@ public abstract class GenericTypeResolver {
 	 * @return the corresponding generic parameter or return type
 	 */
 	public static Class resolveReturnType(Method method, Class clazz) {
+		Assert.notNull(method, "Method must not be null");
 		Type genericType = method.getGenericReturnType();
+		Assert.notNull(clazz, "Class must not be null");
 		Map typeVariableMap = getTypeVariableMap(clazz);
 		Type rawType = getRawType(genericType, typeVariableMap);
 		return (rawType instanceof Class ? (Class) rawType : method.getReturnType());
 	}
+
 
 	/**
 	 * Resolve the specified generic type against the given TypeVariable map.
