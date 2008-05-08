@@ -158,6 +158,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean synthetic = false;
 
+	private String description;
+
 	private Resource resource;
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
@@ -786,6 +788,17 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public boolean isSynthetic() {
 		return this.synthetic;
+	}
+
+	/**
+	 * Set a human-readable description of this bean definition.
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return this.description;
 	}
 
 	/**
