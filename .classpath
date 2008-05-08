@@ -56,7 +56,7 @@
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-commons-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-entitymanager.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient/commons-httpclient-3.0.jar"/>
-	<classpathentry kind="lib" path="lib/ibatis/ibatis-2.3.0.677.jar"/>
+	<classpathentry kind="lib" path="lib/ibatis/ibatis-2.3.2.715.jar"/>
 	<classpathentry kind="lib" path="lib/itext/iText-2.0.7.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/activation.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/connector.jar"/>

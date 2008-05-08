@@ -117,8 +117,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
 - required for running JPetStore and PetClinic
 
-* ibatis/ibatis-2.3.0.677.jar
-- iBATIS SQL Maps 2.3.0 b677 (http://ibatis.apache.org)
+* ibatis/ibatis-2.3.2.715.jar
+- iBATIS SQL Maps 2.3.2 b715 (http://ibatis.apache.org)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.x support
 
