@@ -3,6 +3,41 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5.5 (2008-05-28)
+-------------------------------------
+
+Package org.springframework.beans
+* DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
+* added overloaded BeanComponentDefinition constructor with aliases argument
+
+Package org.springframework.core
+* factored out generic ConfigurableObjectInputStream class from CodebaseAwareObjectInputStream in RMI support
+
+Package org.springframework.orm
+* improved HibernateTransactionManager's InvalidIsolationLevelException exception message (-> SpringTransactionFactory)
+* added "hibernateManagedSession" flag to HibernateTransactionManager, for working with a custom CurrentSessionContext
+
+Package org.springframework.test
+* added "prepareApplicationContext(GenericApplicationContext)" template method to AbstractSingleSpringContextTests
+* added "prepareContext(GenericApplicationContext)" template method to AbstractGenericContextLoader
+
+Package org.springframework.transaction
+* transactional resource synchronization works even for operations triggered during commit (e.g. by JPA PostUpdate)
+* strengthened warning regarding @Transactional use on interfaces versus classes
+
+Package org.springframework.util
+* added various overloaded methods with a CharSequence argument (as alternative to a String argument) to StringUtils
+
+Package org.springframework.validation
+* fixed DefaultBindingErrorProcessor to register correct "missing field" errors within specified nested path
+
+Package org.springframework.web
+* HandlerMethodInvoker does not eagerly copy entire model Map in order to avoid lazy initialization of attribute values
+* RedirectView considers arrays and collections with eligible values, turning them into multi-value request parameters
+* factored out common temporary byte array handling from AbstractPdfView etc into AbstractView base class
+* added AbstractPdfStamperView as alternative to AbstractPdfView, operating on an existing document with an AcroForm
+
+
 Changes in version 2.5.4 (2008-04-28)
 -------------------------------------
 
@@ -61,6 +96,7 @@ Package org.springframework.web
 * ContextLoader uses its own ClassLoader for loading the default strategy (XmlWebApplicationContext)
 * added "contextAttribute" property (for WebApplicationContext retrieval) to DelegatingFilterProxy and FrameworkServlet
 * RequestContext does not fail when WebApplicationContext's ServletContext is null (like in a plain Portlet environment)
+* HandlerMethodInvoker does not copy whole model Set for session attribute exposure anymore (avoiding lazy value init)
 * fixed JSP form tags to properly return SKIP_BODY instead of the non-defined EVAL_PAGE (for WebLogic compatibility)
 
 
