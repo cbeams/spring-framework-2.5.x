@@ -705,8 +705,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @return whether the given bean qualifies as primary
 	 */
 	protected boolean isPrimary(String beanName, Object beanInstance) {
-		return ((containsBeanDefinition(beanName) && getMergedLocalBeanDefinition(beanName).isPrimary()) ||
-				this.resolvableDependencies.values().contains(beanInstance));
+		if (containsBeanDefinition(beanName)) {
+			return getMergedLocalBeanDefinition(beanName).isPrimary();
+		}
+		if (this.resolvableDependencies.values().contains(beanInstance)) {
+			return true;
+		}
+		BeanFactory parentFactory = getParentBeanFactory();
+		return (parentFactory instanceof DefaultListableBeanFactory &&
+				((DefaultListableBeanFactory) parentFactory).isPrimary(beanName, beanInstance));
 	}
 
 	/**
