@@ -179,10 +179,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			synchronized (this.singletonObjects) {
 				singletonObject = this.earlySingletonObjects.get(beanName);
 				if (singletonObject == null && allowEarlyReference) {
-					ObjectFactory singletonFactory = (ObjectFactory) this.singletonFactories.remove(beanName);
+					ObjectFactory singletonFactory = (ObjectFactory) this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
 						this.earlySingletonObjects.put(beanName, singletonObject);
+						this.singletonFactories.remove(beanName);
 					}
 				}
 			}
