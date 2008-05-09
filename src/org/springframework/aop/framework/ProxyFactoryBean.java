@@ -111,17 +111,12 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
-	/**
-	 * Indicates whether the proxy should be frozen before creation.
-	 */
 	private boolean freezeProxy = false;
 
-	private transient ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private transient ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
 
-	/**
-	 * Owning bean factory, which cannot be changed after this
-	 * object is initialized.
-	 */
+	private transient boolean classLoaderConfigured = false;
+
 	private transient BeanFactory beanFactory;
 
 	/** Whether the advisor chain has already been initialized */
@@ -212,8 +207,21 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		this.freezeProxy = frozen;
 	}
 
+	/**
+	 * Set the ClassLoader to generate the proxy class in.
+	 * <p>Default is the bean ClassLoader, i.e. the ClassLoader used by the
+	 * containing BeanFactory for loading all bean classes. This can be
+	 * overridden here for specific proxies.
+	 */
+	public void setProxyClassLoader(ClassLoader classLoader) {
+		this.proxyClassLoader = classLoader;
+		this.classLoaderConfigured = (classLoader != null);
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
+		if (!this.classLoaderConfigured) {
+			this.proxyClassLoader = classLoader;
+		}
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -285,7 +293,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
 	protected Class createCompositeInterface(Class[] interfaces) {
-		return ClassUtils.createCompositeInterface(interfaces, this.beanClassLoader);
+		return ClassUtils.createCompositeInterface(interfaces, this.proxyClassLoader);
 	}
 
 	/**
@@ -302,7 +310,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				if (targetClass == null) {
 					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy");
 				}
-				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.beanClassLoader));
+				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.proxyClassLoader));
 			}
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
@@ -332,7 +340,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
 			// Rely on AOP infrastructure to tell us what interfaces to proxy.
 			copy.setInterfaces(
-					ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(), this.beanClassLoader));
+					ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(), this.proxyClassLoader));
 		}
 		copy.setFrozen(this.freezeProxy);
 
@@ -352,7 +360,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * @see AopProxy#getProxy(ClassLoader)
 	 */
 	protected Object getProxy(AopProxy aopProxy) {
-		return aopProxy.getProxy(this.beanClassLoader);
+		return aopProxy.getProxy(this.proxyClassLoader);
 	}
 
 	/**
@@ -611,7 +619,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		ois.defaultReadObject();
 
 		// Initialize transient fields.
-		this.beanClassLoader = ClassUtils.getDefaultClassLoader();
+		this.proxyClassLoader = ClassUtils.getDefaultClassLoader();
 	}
 
 

@@ -51,7 +51,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	/** Default is global AdvisorAdapterRegistry */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
-	private transient ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private transient ClassLoader proxyClassLoader;
 
 	private Object proxy;
 
@@ -113,8 +113,20 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		this.advisorAdapterRegistry = advisorAdapterRegistry;
 	}
 
+	/**
+	 * Set the ClassLoader to generate the proxy class in.
+	 * <p>Default is the bean ClassLoader, i.e. the ClassLoader used by the
+	 * containing BeanFactory for loading all bean classes. This can be
+	 * overridden here for specific proxies.
+	 */
+	public void setProxyClassLoader(ClassLoader classLoader) {
+		this.proxyClassLoader = classLoader;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
+		if (this.proxyClassLoader == null) {
+			this.proxyClassLoader = classLoader;
+		}
 	}
 
 
@@ -124,6 +136,9 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		}
 		if (this.target instanceof String) {
 			throw new IllegalArgumentException("'target' needs to be a bean reference, not a bean name as value");
+		}
+		if (this.proxyClassLoader == null) {
+			this.proxyClassLoader = ClassUtils.getDefaultClassLoader();
 		}
 
 		ProxyFactory proxyFactory = new ProxyFactory();
@@ -154,7 +169,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		else if (!isProxyTargetClass()) {
 			// Rely on AOP infrastructure to tell us what interfaces to proxy.
 			proxyFactory.setInterfaces(
-					ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(), this.beanClassLoader));
+					ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(), this.proxyClassLoader));
 		}
 
 		this.proxy = getProxy(proxyFactory);
@@ -185,7 +200,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	 * @see AopProxy#getProxy(ClassLoader)
 	 */
 	protected Object getProxy(AopProxy aopProxy) {
-		return aopProxy.getProxy(this.beanClassLoader);
+		return aopProxy.getProxy(this.proxyClassLoader);
 	}
 
 
