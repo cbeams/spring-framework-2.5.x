@@ -404,8 +404,13 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #registerBeans()
 	 */
 	public void afterPropertiesSet() {
-		logger.info("Registering beans for JMX exposure on startup");
+		// If no server was provided then try to find one. This is useful in an environment
+		// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
+		if (this.server == null) {
+			this.server = JmxUtils.locateMBeanServer();
+		}
 		try {
+			logger.info("Registering beans for JMX exposure on startup");
 			registerBeans();
 			registerNotificationListeners();
 		}
@@ -514,11 +519,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 
 		if (!this.beans.isEmpty()) {
-			// If no server was provided then try to find one. This is useful in an environment
-			// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
-			if (this.server == null) {
-				this.server = JmxUtils.locateMBeanServer();
-			}
 			for (Iterator it = this.beans.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				Assert.notNull(entry.getKey(), "Beans key must not be null");
