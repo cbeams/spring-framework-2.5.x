@@ -6,16 +6,39 @@ http://www.springframework.org
 Changes in version 2.5.5 (2008-05-28)
 -------------------------------------
 
+General
+* upgraded to iBATIS SQL Maps 2.3.2 (while retaining compatibility with iBATIS 2.3.0)
+* upgraded to Quartz 1.6.1 (includes a fix for the Spring trigger persistence problem that was introduced in 1.6.0)
+
+Package org.springframework.aop
+* added "proxyClassLoader" property to ProxyFactoryBean, AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator
+
 Package org.springframework.beans
+* revised GenericTypeAwarePropertyDescriptor for compatibility with IBM's JDK 1.6 (avoiding NPE)
+* added "getDescription()" method to BeanDefinition interface (exposing the value of the XML bean description element)
+* fixed DefaultSingletonBeanRegistry's singleton exposure to remove singleton factory after creation of singleton object
 * DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
 * added overloaded BeanComponentDefinition constructor with aliases argument
 
 Package org.springframework.core
+* added assertions to GenericTypeResolver (avoiding NPEs)
 * factored out generic ConfigurableObjectInputStream class from CodebaseAwareObjectInputStream in RMI support
+
+Package org.springframework.jms
+* AbstractJmsListeningContainer sets Connection to null on shutdown, allowing for smooth reinitialization
+* MessageListenerAdapter and JmsInvokerServiceExporter use message id as correlation id if no request correlation id set
+
+Package org.springframework.jmx
+* MBeanExporter performs default MBeanServer lookup even when registering notification listeners only
 
 Package org.springframework.orm
 * improved HibernateTransactionManager's InvalidIsolationLevelException exception message (-> SpringTransactionFactory)
 * added "hibernateManagedSession" flag to HibernateTransactionManager, for working with a custom CurrentSessionContext
+* iBATIS SqlMapClientFactoryBean supports multiple sql-map-config files and also patterns ("configLocations" property)
+* iBATIS SqlMapClientFactoryBean supports Spring resource/pattern lookup of sql-map files ("mappingLocations" property)
+
+Package org.springframework.scheduling
+* SchedulerFactoryBean's "jobSchedulingDataLocation" feature is compatible with Quartz 1.6.1 now (requiring 1.6.1+)
 
 Package org.springframework.test
 * added "prepareApplicationContext(GenericApplicationContext)" template method to AbstractSingleSpringContextTests
