@@ -130,7 +130,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private TargetSourceCreator[] customTargetSourceCreators;
 
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
+
+	private boolean classLoaderConfigured = false;
 
 	private BeanFactory beanFactory;
 
@@ -224,8 +226,21 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		this.applyCommonInterceptorsFirst = applyCommonInterceptorsFirst;
 	}
 
+	/**
+	 * Set the ClassLoader to generate the proxy class in.
+	 * <p>Default is the bean ClassLoader, i.e. the ClassLoader used by the
+	 * containing BeanFactory for loading all bean classes. This can be
+	 * overridden here for specific proxies.
+	 */
+	public void setProxyClassLoader(ClassLoader classLoader) {
+		this.proxyClassLoader = classLoader;
+		this.classLoaderConfigured = (classLoader != null);
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
+		if (!this.classLoaderConfigured) {
+			this.proxyClassLoader = classLoader;
+		}
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -233,7 +248,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Return the owning BeanFactory
+	 * Return the owning BeanFactory.
 	 * May be <code>null</code>, as this object doesn't need to belong to a bean factory.
 	 */
 	protected BeanFactory getBeanFactory() {
@@ -451,7 +466,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (!shouldProxyTargetClass(beanClass, beanName)) {
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.
-			Class[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.beanClassLoader);
+			Class[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.proxyClassLoader);
 			for (int i = 0; i < targetInterfaces.length; i++) {
 				proxyFactory.addInterface(targetInterfaces[i]);
 			}
@@ -470,7 +485,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			proxyFactory.setPreFiltered(true);
 		}
 
-		return proxyFactory.getProxy(this.beanClassLoader);
+		return proxyFactory.getProxy(this.proxyClassLoader);
 	}
 
 	/**
