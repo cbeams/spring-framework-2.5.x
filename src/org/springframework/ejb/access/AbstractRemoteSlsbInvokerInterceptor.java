@@ -217,23 +217,15 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @throws InvocationTargetException if thrown by the create method
 	 * @see #create
 	 */
-	protected EJBObject newSessionBeanInstance() throws NamingException, InvocationTargetException {
+	protected Object newSessionBeanInstance() throws NamingException, InvocationTargetException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Trying to create reference to remote EJB");
 		}
-
-		// invoke the superclass' generic create method
 		Object ejbInstance = create();
-		if (!(ejbInstance instanceof EJBObject)) {
-			throw new RemoteLookupFailureException(
-					"EJB instance [" + ejbInstance + "] is not a Remote Stateless Session Bean");
-		}
-		// if it throws remote exception (wrapped in InvocationTargetException), retry?
-
 		if (logger.isDebugEnabled()) {
 			logger.debug("Obtained reference to remote EJB: " + ejbInstance);
 		}
-		return (EJBObject) ejbInstance;
+		return ejbInstance;
 	}
 
 	/**

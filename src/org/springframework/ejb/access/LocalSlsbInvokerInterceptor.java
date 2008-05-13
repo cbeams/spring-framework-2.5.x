@@ -61,7 +61,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * for example to hold a single shared EJB instance.
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		EJBLocalObject ejb = null;
+		Object ejb = null;
 		try {
 			ejb = getSessionBeanInstance();
 			Method method = invocation.getMethod();
@@ -95,7 +95,9 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 			    "] of local EJB [" + getJndiName() + "]", ex);
 		}
 		finally {
-			releaseSessionBeanInstance(ejb);
+			if (ejb instanceof EJBLocalObject) {
+				releaseSessionBeanInstance((EJBLocalObject) ejb);
+			}
 		}
 	}
 
@@ -121,7 +123,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * @throws InvocationTargetException if thrown by the create method
 	 * @see #newSessionBeanInstance
 	 */
-	protected EJBLocalObject getSessionBeanInstance() throws NamingException, InvocationTargetException {
+	protected Object getSessionBeanInstance() throws NamingException, InvocationTargetException {
 		return newSessionBeanInstance();
 	}
 
@@ -142,21 +144,15 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * @throws InvocationTargetException if thrown by the create method
 	 * @see #create
 	 */
-	protected EJBLocalObject newSessionBeanInstance() throws NamingException, InvocationTargetException {
+	protected Object newSessionBeanInstance() throws NamingException, InvocationTargetException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Trying to create reference to local EJB");
 		}
-
-		// Call superclass to invoke the EJB create method on the cached home.
 		Object ejbInstance = create();
-		if (!(ejbInstance instanceof EJBLocalObject)) {
-			throw new EjbAccessException("EJB instance [" + ejbInstance + "] is not a local SLSB");
-		}
-
 		if (logger.isDebugEnabled()) {
 			logger.debug("Obtained reference to local EJB: " + ejbInstance);
 		}
-		return (EJBLocalObject) ejbInstance;
+		return ejbInstance;
 	}
 
 	/**

@@ -67,7 +67,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 
 	private boolean cacheSessionBean = false;
 
-	private EJBObject beanInstance;
+	private Object beanInstance;
 
 	private final Object beanInstanceMonitor = new Object();
 
@@ -92,7 +92,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * for example to hold a single shared EJB component instance.
 	 */
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
-		EJBObject ejb = null;
+		Object ejb = null;
 		try {
 			ejb = getSessionBeanInstance();
 			return RmiClientInterceptorUtils.invokeRemoteMethod(invocation, ejb);
@@ -114,8 +114,8 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 			throw targetEx;
 		}
 		finally {
-			if (ejb != null) {
-				releaseSessionBeanInstance(ejb);
+			if (ejb instanceof EJBObject) {
+				releaseSessionBeanInstance((EJBObject) ejb);
 			}
 		}
 	}
@@ -128,7 +128,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * @throws InvocationTargetException if thrown by the create method
 	 * @see #newSessionBeanInstance
 	 */
-	protected EJBObject getSessionBeanInstance() throws NamingException, InvocationTargetException {
+	protected Object getSessionBeanInstance() throws NamingException, InvocationTargetException {
 		if (this.cacheSessionBean) {
 			synchronized (this.beanInstanceMonitor) {
 				if (this.beanInstance == null) {
@@ -172,7 +172,9 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	public void destroy() {
 		if (this.cacheSessionBean) {
 			synchronized (this.beanInstanceMonitor) {
-				removeSessionBeanInstance(this.beanInstance);
+				if (this.beanInstance instanceof EJBObject) {
+					removeSessionBeanInstance((EJBObject) this.beanInstance);
+				}
 			}
 		}
 	}
