@@ -62,11 +62,12 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String method = "POST";
 		String target = "myTarget";
 		String enctype = "my/enctype";
+		String acceptCharset = "iso-8859-1";
 		String onsubmit = "onsubmit";
 		String onreset = "onreset";
+		String autocomplete = "off";
 		String cssClass = "myClass";
 		String cssStyle = "myStyle";
-		String acceptCharset = "iso-8859-1";
 
 		this.tag.setName(name);
 		this.tag.setCssClass(cssClass);
@@ -76,9 +77,10 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setMethod(method);
 		this.tag.setTarget(target);
 		this.tag.setEnctype(enctype);
+		this.tag.setAcceptCharset(acceptCharset);
 		this.tag.setOnsubmit(onsubmit);
 		this.tag.setOnreset(onreset);
-		this.tag.setAcceptCharset(acceptCharset);
+		this.tag.setAutocomplete(autocomplete);
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
@@ -102,11 +104,12 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "method", method);
 		assertContainsAttribute(output, "target", target);
 		assertContainsAttribute(output, "enctype", enctype);
+		assertContainsAttribute(output, "accept-charset", acceptCharset);
 		assertContainsAttribute(output, "onsubmit", onsubmit);
 		assertContainsAttribute(output, "onreset", onreset);
+		assertContainsAttribute(output, "autocomplete", autocomplete);
 		assertContainsAttribute(output, "id", commandName);
 		assertContainsAttribute(output, "name", name);
-		assertContainsAttribute(output, "accept-charset", acceptCharset);
 	}
 
 	public void testWithActionFromRequest() throws Exception {
@@ -117,8 +120,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String onreset = "onreset";
 
 		this.tag.setCommandName(commandName);
-		this.tag.setEnctype(enctype);
 		this.tag.setMethod(method);
+		this.tag.setEnctype(enctype);
 		this.tag.setOnsubmit(onsubmit);
 		this.tag.setOnreset(onreset);
 
@@ -139,8 +142,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertFormTagClosed(output);
 
 		assertContainsAttribute(output, "action", REQUEST_URI + "?" + QUERY_STRING);
-		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "method", method);
+		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "onsubmit", onsubmit);
 		assertContainsAttribute(output, "onreset", onreset);
 		assertAttributeNotPresent(output, "name");

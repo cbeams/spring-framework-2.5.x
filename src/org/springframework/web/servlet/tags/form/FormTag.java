@@ -54,9 +54,16 @@ public class FormTag extends AbstractHtmlElementTag {
 	/** The default attribute name: &quot;command&quot; */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
-	private static final String ONSUBMIT_ATTRIBUTE = "onsubmit";
+	/** The name of the '<code>modelAttribute</code>' setting */
+	private static final String MODEL_ATTRIBUTE = "modelAttribute";
 
-	private static final String ONRESET_ATTRIBUTE = "onreset";
+	/**
+	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
+	 * form object name is exposed.
+	 */
+	public static final String MODEL_ATTRIBUTE_VARIABLE_NAME =
+			Conventions.getQualifiedAttributeName(AbstractFormTag.class, MODEL_ATTRIBUTE);
+
 
 	private static final String ACTION_ATTRIBUTE = "action";
 
@@ -68,15 +75,11 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	private static final String ACCEPT_CHARSET_ATTRIBUTE = "accept-charset";
 
-	/** The name of the '<code>modelAttribute</code>' setting */
-	private static final String MODEL_ATTRIBUTE = "modelAttribute";
+	private static final String ONSUBMIT_ATTRIBUTE = "onsubmit";
 
-	/**
-	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
-	 * form object name is exposed.
-	 */
-	public static final String MODEL_ATTRIBUTE_VARIABLE_NAME =
-			Conventions.getQualifiedAttributeName(AbstractFormTag.class, MODEL_ATTRIBUTE);
+	private static final String ONRESET_ATTRIBUTE = "onreset";
+
+	private static final String AUTOCOMPLETE_ATTRIBUTE = "autocomplete";
 
 
 	private TagWriter tagWriter;
@@ -93,11 +96,13 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	private String enctype;
 
+	private String acceptCharset;
+
 	private String onsubmit;
 
 	private String onreset;
 
-	private String acceptCharset;
+	private String autocomplete;
 
 	/** Caching a previous nested path, so that it may be reset */
 	private String previousNestedPath;
@@ -257,6 +262,22 @@ public class FormTag extends AbstractHtmlElementTag {
 		return this.onreset;
 	}
 
+	/**
+	 * Set the value of the '<code>autocomplete</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setAutocomplete(String autocomplete) {
+		this.autocomplete = autocomplete;
+	}
+
+	/**
+	 * Get the value of the '<code>autocomplete</code>' attribute.
+	 */
+	protected String getAutocomplete() {
+		return this.autocomplete;
+	}
+
+
 
 	/**
 	 * Writes the opening part of the block	'<code>form</code>' tag and exposes
@@ -273,9 +294,10 @@ public class FormTag extends AbstractHtmlElementTag {
 		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, getMethod());
 		writeOptionalAttribute(tagWriter, TARGET_ATTRIBUTE, getTarget());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
+		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, getOnsubmit());
 		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, getOnreset());
-		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
+		writeOptionalAttribute(tagWriter, AUTOCOMPLETE_ATTRIBUTE, getAutocomplete());
 
 		tagWriter.forceBlock();
 
