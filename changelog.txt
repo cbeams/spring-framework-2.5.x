@@ -24,6 +24,9 @@ Package org.springframework.core
 * added assertions to GenericTypeResolver (avoiding NPEs)
 * factored out generic ConfigurableObjectInputStream class from CodebaseAwareObjectInputStream in RMI support
 
+Package org.springframework.ejb
+* "jee:local/remote-slsb" accepts plain object returned from EJBHome create method (for JBoss 4.2 EJB3 compatibility)
+
 Package org.springframework.jms
 * AbstractJmsListeningContainer sets Connection to null on shutdown, allowing for smooth reinitialization
 * MessageListenerAdapter and JmsInvokerServiceExporter use message id as correlation id if no request correlation id set
@@ -36,6 +39,13 @@ Package org.springframework.orm
 * added "hibernateManagedSession" flag to HibernateTransactionManager, for working with a custom CurrentSessionContext
 * iBATIS SqlMapClientFactoryBean supports multiple sql-map-config files and also patterns ("configLocations" property)
 * iBATIS SqlMapClientFactoryBean supports Spring resource/pattern lookup of sql-map files ("mappingLocations" property)
+
+Package org.springframework.remoting
+* (Simple)HttpInvokerServiceExporter uses the ClassLoader of the containing BeanFactory for deserialization
+* fixed JaxWsClientInterceptor to throw a RemoteConnectFailureException (if applicable) instead of returning it
+* added support for "username"/"password"/"maintainSession"/"useSoapAction"/etc properties to JaxWsClientInterceptor
+* added SimpleHttpServerJaxWsServiceExporter, allowing for exposure through a fully configurable Sun JDK 1.6 HttpServer
+* added "filters" and "authenticator" property to SimpleHttpServerFactoryBean for Sun's JDK 1.6 HttpServer
 
 Package org.springframework.scheduling
 * SchedulerFactoryBean's "jobSchedulingDataLocation" feature is compatible with Quartz 1.6.1 now (requiring 1.6.1+)
@@ -55,10 +65,12 @@ Package org.springframework.validation
 * fixed DefaultBindingErrorProcessor to register correct "missing field" errors within specified nested path
 
 Package org.springframework.web
+* DispatcherServlet exposes the Servlet spec's error attributes to error views (for JSP error page compatibility)
 * HandlerMethodInvoker does not eagerly copy entire model Map in order to avoid lazy initialization of attribute values
 * RedirectView considers arrays and collections with eligible values, turning them into multi-value request parameters
 * factored out common temporary byte array handling from AbstractPdfView etc into AbstractView base class
 * added AbstractPdfStamperView as alternative to AbstractPdfView, operating on an existing document with an AcroForm
+* added "autocomplete" attribute to JSP FormTag (for a form-wide setting, as alternative to InputTag's "autocomplete")
 
 
 Changes in version 2.5.4 (2008-04-28)
