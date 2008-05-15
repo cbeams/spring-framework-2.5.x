@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,11 @@ package org.springframework.remoting.jaxws;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
@@ -32,6 +35,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
 
 /**
@@ -56,6 +60,20 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	private Service jaxWsService;
 
 	private String portName;
+
+	private String username;
+
+	private String password;
+
+	private String endpointAddress;
+
+	private boolean maintainSession;
+
+	private boolean useSoapAction;
+
+	private String soapActionUri;
+
+	private Map<String, Object> customProperties;
 
 	private Class<?> serviceInterface;
 
@@ -104,6 +122,130 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	}
 
 	/**
+	 * Set the username to specify on the stub.
+	 * @see javax.xml.ws.BindingProvider#USERNAME_PROPERTY
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * Return the username to specify on the stub.
+	 */
+	public String getUsername() {
+		return this.username;
+	}
+
+	/**
+	 * Set the password to specify on the stub.
+	 * @see javax.xml.ws.BindingProvider#PASSWORD_PROPERTY
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * Return the password to specify on the stub.
+	 */
+	public String getPassword() {
+		return this.password;
+	}
+
+	/**
+	 * Set the endpoint address to specify on the stub.
+	 * @see javax.xml.ws.BindingProvider#ENDPOINT_ADDRESS_PROPERTY
+	 */
+	public void setEndpointAddress(String endpointAddress) {
+		this.endpointAddress = endpointAddress;
+	}
+
+	/**
+	 * Return the endpoint address to specify on the stub.
+	 */
+	public String getEndpointAddress() {
+		return this.endpointAddress;
+	}
+
+	/**
+	 * Set the "session.maintain" flag to specify on the stub.
+	 * @see javax.xml.ws.BindingProvider#SESSION_MAINTAIN_PROPERTY
+	 */
+	public void setMaintainSession(boolean maintainSession) {
+		this.maintainSession = maintainSession;
+	}
+
+	/**
+	 * Return the "session.maintain" flag to specify on the stub.
+	 */
+	public boolean isMaintainSession() {
+		return this.maintainSession;
+	}
+
+	/**
+	 * Set the "soapaction.use" flag to specify on the stub.
+	 * @see javax.xml.ws.BindingProvider#SOAPACTION_USE_PROPERTY
+	 */
+	public void setUseSoapAction(boolean useSoapAction) {
+		this.useSoapAction = useSoapAction;
+	}
+
+	/**
+	 * Return the "soapaction.use" flag to specify on the stub.
+	 */
+	public boolean isUseSoapAction() {
+		return this.useSoapAction;
+	}
+
+	/**
+	 * Set the SOAP action URI to specify on the stub.
+	 * @see javax.xml.ws.BindingProvider#SOAPACTION_URI_PROPERTY
+	 */
+	public void setSoapActionUri(String soapActionUri) {
+		this.soapActionUri = soapActionUri;
+	}
+
+	/**
+	 * Return the SOAP action URI to specify on the stub.
+	 */
+	public String getSoapActionUri() {
+		return this.soapActionUri;
+	}
+
+	/**
+	 * Set custom properties to be set on the stub.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see javax.xml.ws.BindingProvider#getRequestContext()
+	 */
+	public void setCustomProperties(Map<String, Object> customProperties) {
+		this.customProperties = customProperties;
+	}
+
+	/**
+	 * Allow Map access to the custom properties to be set on the stub,
+	 * with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "customProperties[myKey]". This is particularly useful for
+	 * adding or overriding entries in child bean definitions.
+	 */
+	public Map<String, Object> getCustomProperties() {
+		if (this.customProperties == null) {
+			this.customProperties = new HashMap<String, Object>();
+		}
+		return this.customProperties;
+	}
+
+	/**
+	 * Add a custom property to this JAX-WS BindingProvider.
+	 * @param name the name of the attribute to expose
+	 * @param value the attribute value to expose
+	 * @see javax.xml.ws.BindingProvider#getRequestContext()
+	 */
+	public void addCustomProperty(String name, Object value) {
+		getCustomProperties().put(name, value);
+	}
+
+	/**
 	 * Set the interface of the service that this factory should create a proxy for.
 	 */
 	public void setServiceInterface(Class serviceInterface) {
@@ -146,8 +288,10 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 			serviceToUse = createJaxWsService();
 		}
 		this.portQName = getQName(getPortName() != null ? getPortName() : getServiceInterface().getName());
-		this.portStub = (getPortName() != null ?
+		Object stub = (getPortName() != null ?
 				serviceToUse.getPort(this.portQName, getServiceInterface()) : serviceToUse.getPort(getServiceInterface()));
+		preparePortStub(stub);
+		this.portStub = stub;
 	}
 
 	/**
@@ -167,6 +311,50 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	protected final QName getPortQName() {
 		return this.portQName;
+	}
+
+	/**
+	 * Prepare the given JAX-WS port stub, applying properties to it.
+	 * Called by {@link #prepare}.
+	 * @param stub the current JAX-WS port stub
+	 * @see #setUsername
+	 * @see #setPassword
+	 * @see #setEndpointAddress
+	 * @see #setMaintainSession
+	 * @see #setCustomProperties
+	 */
+	protected void preparePortStub(Object stub) {
+		Map<String, Object> stubProperties = new HashMap<String, Object>();
+		String username = getUsername();
+		if (username != null) {
+			stubProperties.put(BindingProvider.USERNAME_PROPERTY, username);
+		}
+		String password = getPassword();
+		if (password != null) {
+			stubProperties.put(BindingProvider.PASSWORD_PROPERTY, password);
+		}
+		String endpointAddress = getEndpointAddress();
+		if (endpointAddress != null) {
+			stubProperties.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
+		}
+		if (isMaintainSession()) {
+			stubProperties.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
+		}
+		if (isUseSoapAction()) {
+			stubProperties.put(BindingProvider.SOAPACTION_USE_PROPERTY, Boolean.TRUE);
+		}
+		String soapActionUri = getSoapActionUri();
+		if (soapActionUri != null) {
+			stubProperties.put(BindingProvider.SOAPACTION_URI_PROPERTY, soapActionUri);
+		}
+		stubProperties.putAll(getCustomProperties());
+		if (!stubProperties.isEmpty()) {
+			if (!(stub instanceof BindingProvider)) {
+				throw new RemoteLookupFailureException("Port stub of class [" + stub.getClass().getName() +
+						"] is not a customizable JAX-WS stub: it does not implement interface [javax.xml.ws.BindingProvider]");
+			}
+			((BindingProvider) stub).getRequestContext().putAll(stubProperties);
+		}
 	}
 
 	/**
@@ -207,7 +395,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 			throw new JaxWsSoapFaultException(ex);
 		}
 		catch (ProtocolException ex) {
-			return new RemoteConnectFailureException("Could not connect to remote service [" + this.portQName + "]", ex);
+			throw new RemoteConnectFailureException("Could not connect to remote service [" + this.portQName + "]", ex);
 		}
 		catch (WebServiceException ex) {
 			throw new RemoteAccessException("Could not access remote service at [" + this.portQName + "]", ex);
