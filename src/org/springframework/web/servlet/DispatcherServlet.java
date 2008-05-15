@@ -1116,6 +1116,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv, ex);
 			}
+			WebUtils.exposeErrorRequestAttributes(request, ex, getServletName());
 			return exMv;
 		}
 

@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
@@ -62,6 +63,19 @@ public abstract class WebUtils {
 	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
 	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
 	public static final String FORWARD_QUERY_STRING_ATTRIBUTE = "javax.servlet.forward.query_string";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attributes for error pages.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_STATUS_CODE_ATTRIBUTE = "javax.servlet.error.status_code";
+	public static final String ERROR_EXCEPTION_TYPE_ATTRIBUTE = "javax.servlet.error.exception_type";
+	public static final String ERROR_MESSAGE_ATTRIBUTE = "javax.servlet.error.message";
+	public static final String ERROR_EXCEPTION_ATTRIBUTE = "javax.servlet.error.exception";
+	public static final String ERROR_REQUEST_URI_ATTRIBUTE = "javax.servlet.error.request_uri";
+	public static final String ERROR_SERVLET_NAME_ATTRIBUTE = "javax.servlet.error.servlet_name";
 
 
 	/**
@@ -381,20 +395,49 @@ public abstract class WebUtils {
 	 * @param request current servlet request
 	 */
 	public static void exposeForwardRequestAttributes(HttpServletRequest request) {
-		if (request.getAttribute(FORWARD_REQUEST_URI_ATTRIBUTE) == null) {
-			request.setAttribute(FORWARD_REQUEST_URI_ATTRIBUTE, request.getRequestURI());
-		}
-		if (request.getAttribute(FORWARD_CONTEXT_PATH_ATTRIBUTE) == null) {
-			request.setAttribute(FORWARD_CONTEXT_PATH_ATTRIBUTE, request.getContextPath());
-		}
-		if (request.getAttribute(FORWARD_SERVLET_PATH_ATTRIBUTE) == null) {
-			request.setAttribute(FORWARD_SERVLET_PATH_ATTRIBUTE, request.getServletPath());
-		}
-		if (request.getAttribute(FORWARD_PATH_INFO_ATTRIBUTE) == null) {
-			request.setAttribute(FORWARD_PATH_INFO_ATTRIBUTE, request.getPathInfo());
-		}
-		if (request.getAttribute(FORWARD_QUERY_STRING_ATTRIBUTE) == null) {
-			request.setAttribute(FORWARD_QUERY_STRING_ATTRIBUTE, request.getQueryString());
+		exposeRequestAttributeIfNotPresent(request, FORWARD_REQUEST_URI_ATTRIBUTE, request.getRequestURI());
+		exposeRequestAttributeIfNotPresent(request, FORWARD_CONTEXT_PATH_ATTRIBUTE, request.getContextPath());
+		exposeRequestAttributeIfNotPresent(request, FORWARD_SERVLET_PATH_ATTRIBUTE, request.getServletPath());
+		exposeRequestAttributeIfNotPresent(request, FORWARD_PATH_INFO_ATTRIBUTE, request.getPathInfo());
+		exposeRequestAttributeIfNotPresent(request, FORWARD_QUERY_STRING_ATTRIBUTE, request.getQueryString());
+	}
+
+	/**
+	 * Expose the Servlet spec's error attributes as {@link javax.servlet.http.HttpServletRequest}
+	 * attributes under the keys defined in the Servlet 2.3 specification, for error pages that
+	 * are rendered directly rather than through the Servlet container's error page resolution.
+	 * <code>javax.servlet.error.status_code</code>,
+	 * <code>javax.servlet.error.exception_type</code>,
+	 * <code>javax.servlet.error.message</code>,
+	 * <code>javax.servlet.error.exception</code>,
+	 * <code>javax.servlet.error.request_uri</code>,
+	 * <code>javax.servlet.error.servlet_name</code>.
+	 * <p>Does not override values if already present, to respect attribute values
+	 * that have been exposed explicitly before.
+	 * <p>Exposes status code 200 by default. Set the "javax.servlet.error.status_code"
+	 * attribute explicitly (before or after) in order to expose a different status code.
+	 * @param request current servlet request
+	 * @param ex the exception encountered
+	 * @param servletName the name of the offending servlet
+	 */
+	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex, String servletName) {
+		exposeRequestAttributeIfNotPresent(request, ERROR_STATUS_CODE_ATTRIBUTE, new Integer(HttpServletResponse.SC_OK));
+		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_TYPE_ATTRIBUTE, ex.getClass());
+		exposeRequestAttributeIfNotPresent(request, ERROR_MESSAGE_ATTRIBUTE, ex.getMessage());
+		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_ATTRIBUTE, ex);
+		exposeRequestAttributeIfNotPresent(request, ERROR_REQUEST_URI_ATTRIBUTE, request.getRequestURI());
+		exposeRequestAttributeIfNotPresent(request, ERROR_SERVLET_NAME_ATTRIBUTE, servletName);
+	}
+
+	/**
+	 * Expose the specified request attribute if not already present.
+	 * @param request current servlet request
+	 * @param name the name of the attribute
+	 * @param value the suggested value of the attribute
+	 */
+	private static void exposeRequestAttributeIfNotPresent(ServletRequest request, String name, Object value) {
+		if (request.getAttribute(name) == null) {
+			request.setAttribute(name, value);
 		}
 	}
 

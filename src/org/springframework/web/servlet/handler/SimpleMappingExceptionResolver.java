@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,6 +407,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 				logger.debug("Applying HTTP status code " + statusCode);
 			}
 			response.setStatus(statusCode);
+			request.setAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE, new Integer(statusCode));
 		}
 	}
 
