@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,33 +20,37 @@ import org.springframework.core.NestedRuntimeException;
 
 /**
  * Generic remote access exception. A service proxy for any remoting
- * protocol and toolkit should throw this exception or subclasses of it,
- * to be able to transparently expose a plain Java business interface.
+ * protocol should throw this exception or subclasses of it, in order
+ * to transparently expose a plain Java business interface.
  *
- * <p>When using conforming proxies, switching the actual remoting toolkit
- * e.g. from Hessian to Burlap does not affect client code. The latter
- * works with a plain Java business interface that the service exposes.
+ * <p>When using conforming proxies, switching the actual remoting protocol
+ * e.g. from Hessian to Burlap does not affect client code. Clients work
+ * with a plain natural Java business interface that the service exposes.
  * A client object simply receives an implementation for the interface that
- * it needs via a bean reference, like it does for local beans too.
+ * it needs via a bean reference, like it does for a local bean as well.
  *
- * <p>A client can catch RemoteAccessException if it wants to, but as
+ * <p>A client may catch RemoteAccessException if it wants to, but as
  * remote access errors are typically unrecoverable, it will probably let
  * such exceptions propagate to a higher level that handles them generically.
  * In this case, the client code doesn't show any signs of being involved in
  * remote access, as there aren't any remoting-specific dependencies.
  *
  * <p>Even when switching from a remote service proxy to a local implementation
- * of the same interface, this amounts to just a matter of configuration.
- * Obviously, the client code should be somewhat aware that it _could work_
- * on a remote service, for example in terms of repeated method calls that
- * cause unnecessary roundtrips etc. But it doesn't have to be aware whether
- * it <i>actually works</i> on a remote service or a local implementation, or
- * with which remoting toolkit under the hood.
+ * of the same interface, this amounts to just a matter of configuration. Obviously,
+ * the client code should be somewhat aware that it <i>might be working</i>
+ * against a remote service, for example in terms of repeated method calls that
+ * cause unnecessary roundtrips etc. However, it doesn't have to be aware whether
+ * it is <i>actually working</i> against a remote service or a local implementation,
+ * or with which remoting protocol it is working under the hood.
  *
  * @author Juergen Hoeller
  * @since 14.05.2003
  */
 public class RemoteAccessException extends NestedRuntimeException {
+
+	/** Use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = -4906825139312227864L;
+
 
 	/**
 	 * Constructor for RemoteAccessException.
