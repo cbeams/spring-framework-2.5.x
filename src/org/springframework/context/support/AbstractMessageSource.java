@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,8 @@ package org.springframework.context.support;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
@@ -65,23 +60,11 @@ import org.springframework.util.ObjectUtils;
  * @see #setAlwaysUseMessageFormat
  * @see java.text.MessageFormat
  */
-public abstract class AbstractMessageSource implements HierarchicalMessageSource {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class AbstractMessageSource extends MessageSourceSupport implements HierarchicalMessageSource {
 
 	private MessageSource parentMessageSource;
 
 	private boolean useCodeAsDefaultMessage = false;
-
-	private boolean alwaysUseMessageFormat = false;
-
-	/**
-	 * Cache to hold already generated MessageFormats per message.
-	 * Used for passed-in default messages. MessageFormats for resolved
-	 * codes are cached on a specific basis in subclasses.
-	 */
-	private final Map cachedMessageFormats = new HashMap();
 
 
 	public void setParentMessageSource(MessageSource parent) {
@@ -124,32 +107,6 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 */
 	protected boolean isUseCodeAsDefaultMessage() {
 		return this.useCodeAsDefaultMessage;
-	}
-
-	/**
-	 * Set whether to always apply the MessageFormat rules, parsing even
-	 * messages without arguments.
-	 * <p>Default is "false": Messages without arguments are by default
-	 * returned as-is, without parsing them through MessageFormat.
-	 * Set this to "true" to enforce MessageFormat for all messages,
-	 * expecting all message texts to be written with MessageFormat escaping.
-	 * <p>For example, MessageFormat expects a single quote to be escaped
-	 * as "''". If your message texts are all written with such escaping,
-	 * even when not defining argument placeholders, you need to set this
-	 * flag to "true". Else, only message texts with actual arguments
-	 * are supposed to be written with MessageFormat escaping.
-	 * @see java.text.MessageFormat
-	 */
-	public void setAlwaysUseMessageFormat(boolean alwaysUseMessageFormat) {
-		this.alwaysUseMessageFormat = alwaysUseMessageFormat;
-	}
-
-	/**
-	 * Return whether to always apply the MessageFormat rules, parsing even
-	 * messages without arguments.
-	 */
-	protected boolean isAlwaysUseMessageFormat() {
-		return this.alwaysUseMessageFormat;
 	}
 
 
@@ -207,8 +164,8 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 	/**
 	 * Resolve the given code and arguments as message in the given Locale,
-	 * returning null if not found. Does <i>not</i> fall back to the code
-	 * as default message. Invoked by getMessage methods.
+	 * returning <code>null</code> if not found. Does <i>not</i> fall back to
+	 * the code as default message. Invoked by <code>getMessage</code> methods.
 	 * @param code the code to lookup up, such as 'calculator.noRateSet'
 	 * @param args array of arguments that will be filled in for params
 	 * within the message
@@ -301,12 +258,11 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		return null;
 	}
 
-
 	/**
 	 * Render the given default message String. The default message is
 	 * passed in as specified by the caller and can be rendered into
 	 * a fully formatted default message shown to the user.
-	 * <p>Default implementation passes the String to <code>formatMessage</code>,
+	 * <p>The default implementation passes the String to <code>formatMessage</code>,
 	 * resolving any argument placeholders found in them. Subclasses may override
 	 * this method to plug in custom processing of default messages.
 	 * @param defaultMessage the passed-in default message String
@@ -320,57 +276,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		return formatMessage(defaultMessage, args, locale);
 	}
 
-	/**
-	 * Format the given message String, using cached MessageFormats.
-	 * By default invoked for passed-in default messages, to resolve
-	 * any argument placeholders found in them.
-	 * @param msg the message to format
-	 * @param args array of arguments that will be filled in for params within
-	 * the message, or <code>null</code> if none.
-	 * @param locale the Locale used for formatting
-	 * @return the formatted message (with resolved arguments)
-	 */
-	protected String formatMessage(String msg, Object[] args, Locale locale) {
-		if (msg == null || (!this.alwaysUseMessageFormat && (args == null || args.length == 0))) {
-			return msg;
-		}
-		MessageFormat messageFormat = null;
-		synchronized (this.cachedMessageFormats) {
-			messageFormat = (MessageFormat) this.cachedMessageFormats.get(msg);
-			if (messageFormat == null) {
-				messageFormat = createMessageFormat(msg, locale);
-				this.cachedMessageFormats.put(msg, messageFormat);
-			}
-		}
-		synchronized (messageFormat) {
-			return messageFormat.format(resolveArguments(args, locale));
-		}
-	}
 
 	/**
-	 * Create a MessageFormat for the given message and Locale.
-	 * <p>This implementation creates an empty MessageFormat first,
-	 * populating it with Locale and pattern afterwards, to stay
-	 * compatible with J2SE 1.3.
-	 * @param msg the message to create a MessageFormat for
-	 * @param locale the Locale to create a MessageFormat for
-	 * @return the MessageFormat instance
-	 */
-	protected MessageFormat createMessageFormat(String msg, Locale locale) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating MessageFormat for pattern [" + msg + "] and locale '" + locale + "'");
-		}
-		MessageFormat messageFormat = new MessageFormat("");
-		messageFormat.setLocale(locale);
-		if (msg != null) {
-			messageFormat.applyPattern(msg);
-		}
-		return messageFormat;
-	}
-
-
-	/**
-	 * Search through the given array of objects, find any
+	 * Searches through the given array of objects, find any
 	 * MessageSourceResolvable objects and resolve them.
 	 * <p>Allows for messages to have MessageSourceResolvables as arguments.
 	 * @param args array of arguments for a message

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 
 /**
- * Empty MessageSource that delegates all calls to the parent MessageSource.
+ * Empty {@link MessageSource} that delegates all calls to the parent MessageSource.
  * If no parent is available, it simply won't resolve any message.
  *
  * <p>Used as placeholder by AbstractApplicationContext, if the context doesn't
@@ -34,7 +34,7 @@ import org.springframework.context.NoSuchMessageException;
  * @since 1.1.5
  * @see AbstractApplicationContext
  */
-public class DelegatingMessageSource implements HierarchicalMessageSource {
+public class DelegatingMessageSource extends MessageSourceSupport implements HierarchicalMessageSource {
 
 	private MessageSource parentMessageSource;
 
@@ -44,7 +44,7 @@ public class DelegatingMessageSource implements HierarchicalMessageSource {
 	}
 
 	public MessageSource getParentMessageSource() {
-		return parentMessageSource;
+		return this.parentMessageSource;
 	}
 
 
@@ -53,7 +53,7 @@ public class DelegatingMessageSource implements HierarchicalMessageSource {
 			return this.parentMessageSource.getMessage(code, args, defaultMessage, locale);
 		}
 		else {
-			return defaultMessage;
+			return renderDefaultMessage(defaultMessage, args, locale);
 		}
 	}
 
@@ -72,7 +72,7 @@ public class DelegatingMessageSource implements HierarchicalMessageSource {
 		}
 		else {
 			if (resolvable.getDefaultMessage() != null) {
-				return resolvable.getDefaultMessage();
+				return renderDefaultMessage(resolvable.getDefaultMessage(), resolvable.getArguments(), locale);
 			}
 			String[] codes = resolvable.getCodes();
 			String code = (codes != null && codes.length > 0 ? codes[0] : null);

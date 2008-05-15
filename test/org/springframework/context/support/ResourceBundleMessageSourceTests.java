@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,38 @@ import org.springframework.core.JdkVersion;
  * @since 03.02.2004
  */
 public class ResourceBundleMessageSourceTests extends TestCase {
+
+	public void testMessageAccessWithDefaultMessageSource() {
+		doTestMessageAccess(false, true, false, false, false);
+	}
+
+	public void testMessageAccessWithDefaultMessageSourceAndMessageFormat() {
+		doTestMessageAccess(false, true, false, false, true);
+	}
+
+	public void testMessageAccessWithDefaultMessageSourceAndFallbackToGerman() {
+		doTestMessageAccess(false, true, true, true, false);
+	}
+
+	public void testMessageAccessWithReloadableMessageSource() {
+		doTestMessageAccess(true, true, false, false, false);
+	}
+
+	public void testMessageAccessWithReloadableMessageSourceAndMessageFormat() {
+		doTestMessageAccess(true, true, false, false, true);
+	}
+
+	public void testMessageAccessWithReloadableMessageSourceAndFallbackToGerman() {
+		doTestMessageAccess(true, true, true, true, false);
+	}
+
+	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOff() {
+		doTestMessageAccess(true, false, false, false, false);
+	}
+
+	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
+		doTestMessageAccess(true, false, true, true, false);
+	}
 
 	protected void doTestMessageAccess(
 			boolean reloadable, boolean fallbackToSystemLocale,
@@ -148,36 +180,11 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		}
 	}
 
-	public void testMessageAccessWithDefaultMessageSource() {
-		doTestMessageAccess(false, true, false, false, false);
-	}
-
-	public void testMessageAccessWithDefaultMessageSourceAndMessageFormat() {
-		doTestMessageAccess(false, true, false, false, true);
-	}
-
-	public void testMessageAccessWithDefaultMessageSourceAndFallbackToGerman() {
-		doTestMessageAccess(false, true, true, true, false);
-	}
-
-	public void testMessageAccessWithReloadableMessageSource() {
-		doTestMessageAccess(true, true, false, false, false);
-	}
-
-	public void testMessageAccessWithReloadableMessageSourceAndMessageFormat() {
-		doTestMessageAccess(true, true, false, false, true);
-	}
-
-	public void testMessageAccessWithReloadableMessageSourceAndFallbackToGerman() {
-		doTestMessageAccess(true, true, true, true, false);
-	}
-
-	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOff() {
-		doTestMessageAccess(true, false, false, false, false);
-	}
-
-	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
-		doTestMessageAccess(true, false, true, true, false);
+	public void testDefaultApplicationContextMessageSource() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		ac.refresh();
+		assertEquals("default", ac.getMessage("code1", null, "default", Locale.ENGLISH));
+		assertEquals("default value", ac.getMessage("code1", new Object[] {"value"}, "default {0}", Locale.ENGLISH));
 	}
 
 	public void testResourceBundleMessageSourceStandalone() {
