@@ -18,9 +18,13 @@ package org.springframework.remoting.support;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.Filter;
+import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.logging.Log;
@@ -59,11 +63,15 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 
 	private int backlog = -1;
 
+	private int shutdownDelay = 0;
+
 	private Executor executor;
 
 	private Map<String, HttpHandler> contexts;
 
-	private int shutdownDelay = 0;
+	private List<Filter> filters;
+
+	private Authenticator authenticator;
 
 	private HttpServer server;
 
@@ -89,6 +97,14 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 	 */
 	public void setBacklog(int backlog) {
 		this.backlog = backlog;
+	}
+
+	/**
+	 * Specify the number of seconds to wait until HTTP exchanges have
+	 * completed when shutting down the HTTP server. Default is 0.
+	 */
+	public void setShutdownDelay(int shutdownDelay) {
+		this.shutdownDelay = shutdownDelay;
 	}
 
 	/**
@@ -121,28 +137,42 @@ public class SimpleHttpServerFactoryBean implements FactoryBean, InitializingBea
 	}
 
 	/**
-	 * Specify the number of seconds to wait until HTTP exchanges have
-	 * completed when shutting down the HTTP server. Default is 0.
+	 * Register common {@link com.sun.net.httpserver.Filter Filters} to be
+	 * applied to all locally registered {@link #setContexts contexts}.
 	 */
-	public void setShutdownDelay(int shutdownDelay) {
-		this.shutdownDelay = shutdownDelay;
+	public void setFilters(List<Filter> filters) {
+		this.filters = filters;
+	}
+
+	/**
+	 * Register a common {@link com.sun.net.httpserver.Authenticator} to be
+	 * applied to all locally registered {@link #setContexts contexts}.
+	 */
+	public void setAuthenticator(Authenticator authenticator) {
+		this.authenticator = authenticator;
 	}
 
 
 	public void afterPropertiesSet() throws IOException {
 		InetSocketAddress address = (this.hostname != null ?
 				new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Binding HttpServer to address " + address);
-		}
 		this.server = HttpServer.create(address, this.backlog);
 		if (this.executor != null) {
 			this.server.setExecutor(this.executor);
 		}
 		if (this.contexts != null) {
-			for (Map.Entry<String, HttpHandler> entry : this.contexts.entrySet()) {
-				this.server.createContext(entry.getKey(), entry.getValue());
+			for (String key : this.contexts.keySet()) {
+				HttpContext httpContext = this.server.createContext(key, this.contexts.get(key));
+				if (this.filters != null) {
+					httpContext.getFilters().addAll(this.filters);
+				}
+				if (this.authenticator != null) {
+					httpContext.setAuthenticator(this.authenticator);
+				}
 			}
+		}
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Starting HttpServer at address " + address);
 		}
 		this.server.start();
 	}
