@@ -484,7 +484,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Prepare the given JAX-RPC port stub, applying properties to it.
-	 * Called by {@link #afterPropertiesSet}.
+	 * Called by {@link #prepare}.
 	 * <p>Just applied when actually creating a JAX-RPC port stub, in case of a
 	 * compliant port interface. Else, JAX-RPC dynamic calls will be used.
 	 * @param stub the current JAX-RPC port stub
