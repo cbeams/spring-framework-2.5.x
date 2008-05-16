@@ -74,7 +74,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building and running the framework's test suite
 
 * eclipselink/eclipselink.jar
-- Eclipse Persistence Services 1.0 M5 (http://www.eclipse.org/eclipselink)
+- Eclipse Persistence Services 1.0 M7 (http://www.eclipse.org/eclipselink)
 - required for building the framework
 - required at runtime when using Spring's JPA support with EclipseLink as provider
 
