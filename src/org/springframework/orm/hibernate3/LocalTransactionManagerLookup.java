@@ -18,14 +18,15 @@ package org.springframework.orm.hibernate3;
 
 import java.util.Properties;
 
+import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.hibernate.transaction.TransactionManagerLookup;
 
 /**
- * Implementation of Hibernate's TransactionManagerLookup interface that
- * returns a Spring-managed JTA TransactionManager, determined by
- * LocalSessionFactoryBean's "transactionManager" property.
+ * Implementation of Hibernate's {@link TransactionManagerLookup} interface
+ * that returns a Spring-managed JTA {@link TransactionManager}, determined
+ * by LocalSessionFactoryBean's "jtaTransactionManager" property.
  *
  * <p>The main advantage of this TransactionManagerLookup is that it avoids
  * double configuration of JTA specifics. A single TransactionManager bean can
@@ -63,6 +64,10 @@ public class LocalTransactionManagerLookup implements TransactionManagerLookup {
 
 	public String getUserTransactionName() {
 		return null;
+	}
+
+	public Object getTransactionIdentifier(Transaction transaction) {
+		return transaction;
 	}
 
 }

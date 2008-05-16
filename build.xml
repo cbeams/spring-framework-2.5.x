@@ -2145,6 +2145,7 @@
 				<include name="lib/qdox/**"/>
 				<include name="lib/quartz/**"/>
 				<include name="lib/serp/**"/>
+				<include name="lib/slf4j/**"/>
 				<include name="lib/struts/**"/>
         <include name="lib/testng/**"/>
 				<include name="lib/tiles/**"/>

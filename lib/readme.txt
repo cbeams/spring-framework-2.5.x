@@ -359,6 +359,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Serp 1.13.1 (http://serp.sourceforge.net)
 - required at runtime when using OpenJPA
 
+* slf4j/slf4j-api-1.5.0.jar, slf4j/slf4j-log4j12-1.5.0.jar
+- SLF4J 1.5.0 (http://www.slf4j.org)
+- required at runtime when using OpenJPA
+
 * struts/struts.jar
 - Apache Struts 1.2.9 (http://jakarta.apache.org/struts)
 - required for building the framework
