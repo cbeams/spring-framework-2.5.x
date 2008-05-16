@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.CollectionUtils;
  * Base class for any class that needs to access an EntityManagerFactory,
  * usually in order to obtain an EntityManager. Defines common properties.
  *
- * <p>Not intended to be used directly. See JpaAccessor.
+ * <p>Not intended to be used directly. See {@link JpaAccessor}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -65,7 +65,7 @@ public abstract class EntityManagerFactoryAccessor {
 	 * EntityManagers.
 	 */
 	public EntityManagerFactory getEntityManagerFactory() {
-		return entityManagerFactory;
+		return this.entityManagerFactory;
 	}
 
 	/**
@@ -97,7 +97,7 @@ public abstract class EntityManagerFactoryAccessor {
 	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
 	 */
 	public Map getJpaPropertyMap() {
-		return jpaPropertyMap;
+		return this.jpaPropertyMap;
 	}
 
 

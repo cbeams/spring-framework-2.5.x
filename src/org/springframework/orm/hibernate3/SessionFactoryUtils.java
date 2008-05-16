@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -532,7 +532,7 @@ public abstract class SessionFactoryUtils {
 	 * Stringify the given Session for debug logging.
 	 * Returns output equivalent to <code>Object.toString()</code>:
 	 * the fully qualified class name + "@" + the identity hash code.
-	 * <p>The only reason why this is necessary is because Hibernate3's
+	 * <p>The sole reason why this is necessary is because Hibernate3's
 	 * <code>Session.toString()</code> implementation is broken (and won't be fixed):
 	 * it logs the toString representation of all persistent objects in the Session,
 	 * which might lead to ConcurrentModificationExceptions if the persistent objects

@@ -343,12 +343,12 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 	 * @see com.ibatis.sqlmap.engine.impl.SqlMapExecutorDelegate#setTxManager
 	 */
 	protected void applyTransactionConfig(SqlMapClient sqlMapClient, TransactionConfig transactionConfig) {
-		if (!(this.sqlMapClient instanceof ExtendedSqlMapClient)) {
+		if (!(sqlMapClient instanceof ExtendedSqlMapClient)) {
 			throw new IllegalArgumentException(
 					"Cannot set TransactionConfig with DataSource for SqlMapClient if not of type " +
-					"ExtendedSqlMapClient: " + this.sqlMapClient);
+					"ExtendedSqlMapClient: " + sqlMapClient);
 		}
-		ExtendedSqlMapClient extendedClient = (ExtendedSqlMapClient) this.sqlMapClient;
+		ExtendedSqlMapClient extendedClient = (ExtendedSqlMapClient) sqlMapClient;
 		transactionConfig.setMaximumConcurrentTransactions(extendedClient.getDelegate().getMaxTransactions());
 		extendedClient.getDelegate().setTxManager(new TransactionManager(transactionConfig));
 	}

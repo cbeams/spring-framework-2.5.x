@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,7 +278,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("serviceInterface must be an interface");
+			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
 	}
@@ -308,7 +308,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (portInterface != null &&
 				(!portInterface.isInterface() || !Remote.class.isAssignableFrom(portInterface))) {
 			throw new IllegalArgumentException(
-					"portInterface must be an interface derived from [java.rmi.Remote]");
+					"'portInterface' must be an interface derived from [java.rmi.Remote]");
 		}
 		this.portInterface = portInterface;
 	}
@@ -478,7 +478,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Prepare the given JAX-RPC port stub, applying properties to it.
-	 * Called by {@link #afterPropertiesSet}.
+	 * Called by {@link #prepare}.
 	 * <p>Just applied when actually creating a JAX-RPC port stub, in case of a
 	 * compliant port interface. Else, JAX-RPC dynamic calls will be used.
 	 * @param stub the current JAX-RPC port stub
@@ -601,7 +601,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
-	 * Perform a JAX-RPC service invocation based on the given port stub.
+	 * Perform a JAX-RPC service invocation on the given port stub.
 	 * @param invocation the AOP method invocation
 	 * @param portStub the RMI port stub to invoke
 	 * @return the invocation result, if any
@@ -655,7 +655,6 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @param service the JAX-RPC Service to use for the call
 	 * @return the return value of the invocation, if any
 	 * @throws Throwable the exception thrown by the invocation, if any
-	 * @see #getPortQName
 	 * @see #prepareJaxRpcCall
 	 * @see #postProcessJaxRpcCall
 	 */

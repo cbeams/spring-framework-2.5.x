@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,8 +207,8 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 	/**
 	 * Resolve the given code and arguments as message in the given Locale,
-	 * returning null if not found. Does <i>not</i> fall back to the code
-	 * as default message. Invoked by getMessage methods.
+	 * returning <code>null</code> if not found. Does <i>not</i> fall back to
+	 * the code as default message. Invoked by <code>getMessage</code> methods.
 	 * @param code the code to lookup up, such as 'calculator.noRateSet'
 	 * @param args array of arguments that will be filled in for params
 	 * within the message

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,7 +294,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	/**
 	 * Post-process the given result object, which might be a Collection.
 	 * Called by the <code>execute</code> method.
-	 * <p>Default implementation always returns the passed-in Object as-is.
+	 * <p>The default implementation always returns the passed-in Object as-is.
 	 * Subclasses might override this to automatically detach result
 	 * collections or even single result objects.
 	 * @param pm the current JDO PersistenceManager
