@@ -7,8 +7,11 @@ Changes in version 2.5.5 (2008-05-28)
 -------------------------------------
 
 General
-* upgraded to iBATIS SQL Maps 2.3.2 (while retaining compatibility with iBATIS 2.3.0)
+* fixed SCM URL in Maven POMs
+* "-with-dependencies" distribution includes "jarcontent" folder now (needed for building from the source)
 * upgraded to Quartz 1.6.1 (includes a fix for the Spring trigger persistence problem that was introduced in 1.6.0)
+* upgraded to Hibernate 3.3.0 (while retaining compatibility with Hibernate 3.1/3.2)
+* upgraded to iBATIS SQL Maps 2.3.2 (while retaining compatibility with iBATIS 2.3.0)
 
 Package org.springframework.aop
 * added "proxyClassLoader" property to ProxyFactoryBean, AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator
@@ -19,6 +22,10 @@ Package org.springframework.beans
 * fixed DefaultSingletonBeanRegistry's singleton exposure to remove singleton factory after creation of singleton object
 * DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
 * added overloaded BeanComponentDefinition constructor with aliases argument
+
+Package org.springframework.context
+* factored out MessageSourceSupport base class from AbstractMessageSource, providing common MessageFormat handling
+* DelegatingMessageSource resolves message arguments in default messages even if there is no parent MessageSource
 
 Package org.springframework.core
 * added assertions to GenericTypeResolver (avoiding NPEs)
@@ -41,6 +48,7 @@ Package org.springframework.orm
 * iBATIS SqlMapClientFactoryBean supports Spring resource/pattern lookup of sql-map files ("mappingLocations" property)
 
 Package org.springframework.remoting
+* RemoteAccessException explicitly declares serialVersionUID (for serialization compatibility on WebLogic)
 * (Simple)HttpInvokerServiceExporter uses the ClassLoader of the containing BeanFactory for deserialization
 * fixed JaxWsClientInterceptor to throw a RemoteConnectFailureException (if applicable) instead of returning it
 * added support for "username"/"password"/"maintainSession"/"useSoapAction"/etc properties to JaxWsClientInterceptor
