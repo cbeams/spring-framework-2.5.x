@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-06-05)
+Changes in version 2.0.9 (2008-06-30)
 -------------------------------------
 
 General
@@ -39,6 +39,7 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
+* AbstractJmsListeningContainer sets Connection to null on shutdown, allowing for smooth reinitialization
 * DefaultMessageListenerContainer logs listener setup failures at INFO instead of ERROR level
 * DefaultMessageListenerContainer propagates JMSExceptions thrown from a listener, potentially triggering recovery
 * DefaultMessageListenerContainer lets shutdown continue instead of 'busy' waiting in case of thread interruption
@@ -54,6 +55,7 @@ Package org.springframework.orm
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
 
 Package org.springframework.remoting
+* RemoteAccessException explicitly declares serialVersionUID (for serialization compatibility on WebLogic)
 * fixed Hessian/BurlapServiceExporter to throw HttpRequestMethodNotSupportedException with correct method value
 
 Package org.springframework.scheduling
