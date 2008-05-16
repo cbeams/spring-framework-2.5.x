@@ -2094,6 +2094,7 @@
 				<include name="test/**"/>
 				<include name="tiger/**"/>
 				<include name="aspectj/**"/>
+				<include name="jarcontent/**"/>
 				<include name="lib/*.txt"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/antlr/**"/>
