@@ -82,7 +82,7 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-pool.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-validator.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
-	<classpathentry kind="lib" path="lib/jamon/jamon-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/jamon/jamon-2.7.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-2.0.5.jar"/>
 	<classpathentry kind="lib" path="lib/jdo/jdo2-api.jar"/>
 	<classpathentry kind="lib" path="lib/jexcelapi/jxl.jar"/>

@@ -262,13 +262,13 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Jakarta's JSTL implementation 1.1.2 (http://jakarta.apache.org/taglibs)
 - required for running JPetStore, PetClinic, Countries
 
-* jamon/jamon-2.4.jar
-- JAMon API (Java Application Monitor) 2.4 (http://www.jamonapi.com)
+* jamon/jamon-2.7.jar
+- JAMon API (Java Application Monitor) 2.7 (http://www.jamonapi.com)
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
 * jarjar/jarjar.jar
-- Jar Jar Links 1.0 RC5 (http://code.google.com/p/jarjar)
+- Jar Jar Links 1.0 RC7 (http://code.google.com/p/jarjar)
 - required for building the framework jars
 
 * jasperreports/jasperreports-2.0.5.jar
