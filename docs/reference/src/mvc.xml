@@ -2968,14 +2968,14 @@ public class ClinicController {
 
       <itemizedlist>
         <listitem>
-          <para>Request and/or response objects (Servlet API).
-          You may choose any specific request/response type,
-          e.g. ServletRequest / HttpServletRequest.</para>
+          <para>Request and/or response objects (Servlet API). You may choose any
+          specific request/response type, e.g. <interfacename>ServletRequest</interfacename> /
+          <interfacename>HttpServletRequest</interfacename>.</para>
         </listitem>
 
         <listitem>
-          <para>Session object (Servlet API): of type HttpSession. An argument
-          of this type will enforce the presence of a corresponding session.
+          <para>Session object (Servlet API): of type <interfacename>HttpSession</interfacename>.
+          An argument of this type will enforce the presence of a corresponding session.
           As a consequence, such an argument will never be <literal>null</literal>.
           <emphasis>Note that session access may not be thread-safe, in particular
           in a Servlet environment: Consider switching the
@@ -3095,7 +3095,12 @@ public class ClinicController {
 
         <listitem>
           <para><literal>void</literal> if the method handles the response itself
-          (e.g. by writing the response content directly).</para>
+          (by writing the response content directly, declaring an argument of type
+          <interfacename>ServletResponse</interfacename> /
+          <interfacename>HttpServletResponse</interfacename> for that purpose)
+          or if the view name is supposed to be implicitly determined through a
+          <interfacename>RequestToViewNameTranslator</interfacename>
+          (not declaring a response argument in the handler method signature).</para>
         </listitem>
 
         <listitem>

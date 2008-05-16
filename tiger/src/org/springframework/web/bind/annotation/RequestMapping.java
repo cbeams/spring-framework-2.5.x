@@ -118,8 +118,14 @@ import java.lang.annotation.Target;
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.ModelMap} argument
  * (see above).
- * <li><code>void</code> if the method handles the response itself
- * (e.g. by writing the response content directly).
+ * <li><code>void</code> if the method handles the response itself (by
+ * writing the response content directly, declaring an argument of type
+ * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
+ * / {@link javax.portlet.RenderResponse} for that purpose)
+ * or if the view name is supposed to be implicitly determined through a
+ * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * (not declaring a response argument in the handler method signature;
+ * only applicable in a Servlet environment).
  * <li>Any other return type will be considered as single model attribute
  * to be exposed to the view, using the attribute name specified through
  * {@link ModelAttribute} at the method level (or the default attribute name
