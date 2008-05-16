@@ -20,8 +20,8 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</connection>
-		<developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</developerConnection>
+		<connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework:spring</connection>
+		<developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework:spring</developerConnection>
 		<url>http://springframework.cvs.sourceforge.net/springframework/</url>
 	</scm>
 	<organization>
