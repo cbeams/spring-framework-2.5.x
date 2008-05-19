@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable cause) {
 		super(propertyChangeEvent,
 				"Failed to convert property value of type [" +
-				(propertyChangeEvent.getNewValue() != null ?
-				 ClassUtils.getQualifiedName(propertyChangeEvent.getNewValue().getClass()) : null) + "]" +
+				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "]" +
 				(requiredType != null ?
 				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
@@ -84,11 +83,8 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param cause the root cause (may be <code>null</code>)
 	 */
 	public TypeMismatchException(Object value, Class requiredType, Throwable cause) {
-		super("Failed to convert value of type [" +
-				(value != null ?
-				 ClassUtils.getQualifiedName(value.getClass()) : null) + "]" +
-				(requiredType != null ?
-				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : ""),
+		super("Failed to convert value of type [" + ClassUtils.getDescriptiveType(value) + "]" +
+				(requiredType != null ? " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : ""),
 				cause);
 		this.value = value;
 		this.requiredType = requiredType;

@@ -461,6 +461,38 @@ public abstract class ClassUtils {
 		return method.getDeclaringClass().getName() + "." + method.getName();
 	}
 
+	/**
+	 * Return a descriptive name for the given object's type: usually simply
+	 * the class name, but component type class name + "[]" for arrays,
+	 * and an appended list of implemented interfaces for JDK proxies.
+	 * @param value the value to introspect
+	 * @return the qualified name of the class
+	 */
+	public static String getDescriptiveType(Object value) {
+		if (value == null) {
+			return null;
+		}
+		Class clazz = value.getClass();
+		if (Proxy.isProxyClass(clazz)) {
+			StringBuffer buf = new StringBuffer(clazz.getName());
+			buf.append(" implementing ");
+			Class[] ifcs = clazz.getInterfaces();
+			for (int i = 0; i < ifcs.length; i++) {
+				buf.append(ifcs[i].getName());
+				if (i < ifcs.length - 1) {
+					buf.append(',');
+				}
+			}
+			return buf.toString();
+		}
+		else if (clazz.isArray()) {
+			return getQualifiedNameForArray(clazz);
+		}
+		else {
+			return clazz.getName();
+		}
+	}
+
 
 	/**
 	 * Determine whether the given class has a constructor with the given signature.
