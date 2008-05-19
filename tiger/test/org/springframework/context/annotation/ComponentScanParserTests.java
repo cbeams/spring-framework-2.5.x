@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,13 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.TypeFilter;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class ComponentScanParserTests extends TestCase {
 
@@ -67,6 +71,13 @@ public class ComponentScanParserTests extends TestCase {
 		assertNotNull(testBean.getDependency());
 	}
 
+	public void testCustomTypeFilter() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/context/annotation/customTypeFilterTests.xml");
+		CustomAnnotationAutowiredBean testBean = (CustomAnnotationAutowiredBean) context.getBean("testBean");
+		assertNotNull(testBean.getDependency());
+	}
+
 
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -88,6 +99,14 @@ public class ComponentScanParserTests extends TestCase {
 
 	@CustomAnnotation
 	public static class CustomAnnotationDependencyBean {	
+	}
+
+
+	public static class CustomTypeFilter implements TypeFilter {
+
+		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) {
+			return metadataReader.getClassMetadata().getClassName().contains("Custom");
+		}
 	}
 
 }

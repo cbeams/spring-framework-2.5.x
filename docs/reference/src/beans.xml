@@ -117,13 +117,11 @@
       <para>
         <mediaobject>
           <imageobject role="fo">
-            <imagedata align="center" fileref="images/container-magic.png"
-                       format="PNG" />
+            <imagedata align="center" fileref="images/container-magic.png" format="PNG"/>
           </imageobject>
 
           <imageobject role="html">
-            <imagedata align="center" fileref="images/container-magic.png"
-                       format="PNG" />
+            <imagedata align="center" fileref="images/container-magic.png" format="PNG"/>
           </imageobject>
 
           <caption>
@@ -158,7 +156,7 @@
 
           <para>You can find details of another form of metadata that the
           Spring container can consume in the section entitled <xref
-          linkend="beans-annotation-config" /></para>
+          linkend="beans-annotation-config"/></para>
         </note>
       </section>
 
@@ -175,7 +173,7 @@
         <para>Once you have learned about Spring's IoC container, you may wish
         to learn a little more about Spring's
         <interfacename>Resource</interfacename> abstraction, as described in
-        the chapter entitled <xref linkend="resources" />.</para>
+        the chapter entitled <xref linkend="resources"/>.</para>
       </sidebar>
 
       <para>In the vast majority of application scenarios, explicit user code
@@ -183,7 +181,7 @@
       container. For example, in a web application scenario, a simple eight
       (or so) lines of boilerplate J2EE web descriptor XML in the
       <literal>web.xml</literal> file of the application will typically
-      suffice (see <xref linkend="context-create" />).</para>
+      suffice (see <xref linkend="context-create"/>).</para>
     </section>
 
     <para>Spring configuration consists of at least one bean definition that
@@ -352,14 +350,12 @@ BeanFactory factory = context;</programlisting>
         <title>The bean definition</title>
 
         <tgroup cols="2">
-          <colspec colname="c1" colwidth="2*" />
-
-          <colspec colname="c2" colwidth="4*" />
+          <colspec colname="c1" colwidth="2*"/>
+          <colspec colname="c2" colwidth="4*"/>
 
           <thead>
             <row>
               <entry>Feature</entry>
-
               <entry>Explained in...</entry>
             </row>
           </thead>
@@ -367,100 +363,90 @@ BeanFactory factory = context;</programlisting>
           <tbody>
             <row>
               <entry>class</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-class" />
+                  <xref linkend="beans-factory-class"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>name</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-beanname" />
+                  <xref linkend="beans-beanname"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>scope</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-scopes" />
+                  <xref linkend="beans-factory-scopes"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>constructor arguments</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-collaborators" />
+                  <xref linkend="beans-factory-collaborators"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>properties</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-collaborators" />
+                  <xref linkend="beans-factory-collaborators"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>autowiring mode</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-autowire" />
+                  <xref linkend="beans-factory-autowire"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>dependency checking mode</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-dependencies" />
+                  <xref linkend="beans-factory-dependencies"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>lazy-initialization mode</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-lazy-init" />
+                  <xref linkend="beans-factory-lazy-init"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>initialization method</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-lifecycle-initializingbean" />
+                  <xref linkend="beans-factory-lifecycle-initializingbean"/>
                 </para>
               </entry>
             </row>
 
             <row>
               <entry>destruction method</entry>
-
               <entry>
                 <para>
-                  <xref linkend="beans-factory-lifecycle-disposablebean" />
+                  <xref linkend="beans-factory-lifecycle-disposablebean"/>
                 </para>
               </entry>
             </row>
@@ -611,8 +597,8 @@ BeanFactory factory = context;</programlisting>
         boils down to being a <classname>Class</classname> property on a
         <interfacename>BeanDefinition</interfacename> instance) is normally
         mandatory (see <xref
-        linkend="beans-factory-class-instance-factory-method" /> and <xref
-        linkend="beans-child-bean-definitions" /> for the two exceptions) and
+        linkend="beans-factory-class-instance-factory-method"/> and <xref
+        linkend="beans-child-bean-definitions"/> for the two exceptions) and
         is used for one of two purposes. The class property specifies the
         class of the bean to be constructed in the common case where the
         container itself directly creates the bean by calling its constructor
@@ -1019,7 +1005,7 @@ public class ExampleBean {
         </listitem>
 
         <listitem>
-          <para><anchor id="beans-factory-collaborators-propertyeditor" />
+          <para><anchor id="beans-factory-collaborators-propertyeditor"/>
           Each property or constructor argument which is a value must be able
           to be converted from whatever format it was specified in, to the
           actual type of that property or constructor argument. By default
@@ -2048,7 +2034,7 @@ support=support@example.co.uk</programlisting>
       need to specify properties or constructor arguments, thus saving a
       significant amount of typing. <footnote>
           <para>See the section entitled <xref
-          linkend="beans-factory-collaborators" /></para>
+          linkend="beans-factory-collaborators"/></para>
         </footnote> When using XML-based configuration metadata, the autowire
       mode for a bean definition is specified by using the
       <literal>autowire</literal> attribute of the
@@ -2059,14 +2045,12 @@ support=support@example.co.uk</programlisting>
         <title>Autowiring modes</title>
 
         <tgroup cols="2">
-          <colspec colname="c1" colwidth="1*" />
-
-          <colspec colname="c2" colwidth="5*" />
+          <colspec colname="c1" colwidth="1*"/>
+          <colspec colname="c2" colwidth="5*"/>
 
           <thead>
             <row>
               <entry>Mode</entry>
-
               <entry>Explanation</entry>
             </row>
           </thead>
@@ -2212,7 +2196,7 @@ support=support@example.co.uk</programlisting>
       Finally, if you are using at least Java 5, you may be interested in
       exploring the more fine-grained control available with annotation-based
       configuration as described in the section entitled <xref
-      linkend="beans-annotation-config" />.</para>
+      linkend="beans-annotation-config"/>.</para>
 
       <para>When deciding whether to use autowiring, there is no wrong or
       right answer in all cases. A degree of consistency across a project is
@@ -2278,9 +2262,8 @@ support=support@example.co.uk</programlisting>
         <title>Dependency checking modes</title>
 
         <tgroup cols="2">
-          <colspec colname="c1" colwidth="1*" />
-
-          <colspec colname="c2" colwidth="5*" />
+          <colspec colname="c1" colwidth="1*"/>
+          <colspec colname="c2" colwidth="5*"/>
 
           <thead>
             <row>
@@ -2326,7 +2309,7 @@ support=support@example.co.uk</programlisting>
 
       <para>If you are using Java 5 and thus have access to source-level
       annotations, you may find the section entitled <xref
-      linkend="metadata-annotations-required" /> to be of interest.</para>
+      linkend="metadata-annotations-required"/> to be of interest.</para>
     </section>
 
     <section id="beans-factory-method-injection">
@@ -2712,12 +2695,12 @@ public class ReplacementComputeValue implements MethodReplacer {
         <mediaobject>
           <imageobject role="fo">
             <imagedata align="center" fileref="images/singleton.png"
-                       format="PNG" />
+                       format="PNG"/>
           </imageobject>
 
           <imageobject role="html">
             <imagedata align="center" fileref="images/singleton.png"
-                       format="PNG" />
+                       format="PNG"/>
           </imageobject>
         </mediaobject>
       </para>
@@ -2767,12 +2750,12 @@ public class ReplacementComputeValue implements MethodReplacer {
         <mediaobject>
           <imageobject role="fo">
             <imagedata align="center" fileref="images/prototype.png"
-                       format="PNG" />
+                       format="PNG"/>
           </imageobject>
 
           <imageobject role="html">
             <imagedata align="center" fileref="images/prototype.png"
-                       format="PNG" />
+                       format="PNG"/>
           </imageobject>
         </mediaobject>
       </para>
@@ -2808,7 +2791,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       the Java <literal>'new'</literal> operator. All lifecycle aspects past
       that point have to be handled by the client. (The lifecycle of a bean in
       the Spring container is further described in the section entitled <xref
-      linkend="beans-factory-lifecycle" />.)</para>
+      linkend="beans-factory-lifecycle"/>.)</para>
     </section>
 
     <section id="beans-factory-scopes-sing-prot-interaction">
@@ -2834,7 +2817,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       in the scenario where you need to get a brand new instance of a
       (prototype) bean again and again and again at runtime, you are referred
       to the section entitled <xref
-      linkend="beans-factory-method-injection" /></para>
+      linkend="beans-factory-method-injection"/></para>
     </section>
 
     <note>
@@ -3095,7 +3078,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a scoped
         bean definition (you may also need the CGLIB library on your classpath
         so that the container can effect class-based proxying; you will also
-        need to be using <xref linkend="xsd-config" />). So, just why do you
+        need to be using <xref linkend="xsd-config"/>). So, just why do you
         need this <literal>&lt;aop:scoped-proxy/&gt;</literal> element in the
         definition of beans scoped at the <literal>request</literal>,
         <literal>session</literal>, <literal>globalSession</literal> and
@@ -3202,7 +3185,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     &lt;property name="userPreferences" ref="userPreferences"/&gt;
 &lt;/bean&gt;</programlisting>
 
-          <para>The section entitled <xref linkend="aop-proxying" /> may also
+          <para>The section entitled <xref linkend="aop-proxying"/> may also
           be of some interest with regard to understanding the nuances of
           choosing whether class-based or interface-based proxying is right
           for you.</para>
@@ -3375,7 +3358,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       doesn't offer out-of-the-box, you can implement a
       <interfacename>BeanPostProcessor</interfacename> yourself. More
       information about this can be found in the section entitled <xref
-      linkend="beans-factory-extension" />.</para>
+      linkend="beans-factory-extension"/>.</para>
 
       <para>All the different lifecycle callback interfaces are described below.
       In one of the appendices, you can find diagrams that show how Spring
@@ -3835,7 +3818,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
         to implementing the <interfacename>BeanFactoryAware</interfacename>
         interface. The "traditional" <literal>constructor</literal> and
         <literal>byType</literal> autowiring modes (as described in the
-        section entitled <xref linkend="beans-factory-autowire" />) are now
+        section entitled <xref linkend="beans-factory-autowire"/>) are now
         capable of providing a dependency of type
         <interfacename>BeanFactory</interfacename> for either a constructor
         argument or setter method parameter respectively. For more flexibility
@@ -4014,7 +3997,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!'</programlisting>
         recipe that defines the bean), then you rather need to use a
         <interfacename>BeanFactoryPostProcessor</interfacename> (described
         below in the section entitled <xref
-        linkend="beans-factory-extension-factory-postprocessors" />.</para>
+        linkend="beans-factory-extension-factory-postprocessors"/>.</para>
 
         <para>Also, <literal>BeanPostProcessors</literal> are scoped
         <emphasis>per-container</emphasis>. This is only relevant if you are
@@ -4165,7 +4148,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
         be dependency injected just like any other bean. (The above
         configuration also just so happens to define a bean that is backed by
         a Groovy script. The Spring 2.0 dynamic language support is detailed
-        in the chapter entitled <xref linkend="dynamic-language" />.)</para>
+        in the chapter entitled <xref linkend="dynamic-language"/>.)</para>
 
         <para>Find below a small driver script to exercise the above code and
         configuration;</para>
@@ -4198,7 +4181,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         custom <interfacename>BeanPostProcessor</interfacename> implementation
         is a common means of extending the Spring IoC container. This next
         example is a bit of a cop-out, in that you are directed to the section
-        entitled <xref linkend="metadata-annotations-required" /> which
+        entitled <xref linkend="metadata-annotations-required"/> which
         demonstrates the usage of a custom
         <interfacename>BeanPostProcessor</interfacename> implementation that
         ships with the Spring distribution which ensures that JavaBean
@@ -4241,7 +4224,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         configuration metadata), then you rather need to use a
         <interfacename>BeanPostProcessor</interfacename> (described above in
         the section entitled <xref
-        linkend="beans-factory-extension-bpp" />.</para>
+        linkend="beans-factory-extension-bpp"/>.</para>
 
         <para>Also, <literal>BeanFactoryPostProcessors</literal> are scoped
         <emphasis>per-container</emphasis>. This is only relevant if you are
@@ -4289,7 +4272,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
       especially when using
       <literal>BeanFactoryPostProcessors</literal>.</para>
 
-      <anchor id="beans-factory-autodetect-beanfactorypostprocessors" />
+      <anchor id="beans-factory-autodetect-beanfactorypostprocessors"/>
 
       <para>An <interfacename>ApplicationContext</interfacename> will detect
       any beans which are deployed into it which implement the
@@ -4608,17 +4591,13 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         <title>Feature Matrix</title>
 
         <tgroup cols="3">
-          <colspec align="left" />
+          <colspec align="left"/>
 
           <thead>
             <row>
               <entry align="center">Feature</entry>
-
-              <entry
-              align="center"><interfacename>BeanFactory</interfacename></entry>
-
-              <entry
-              align="center"><interfacename>ApplicationContext</interfacename></entry>
+              <entry align="center"><interfacename>BeanFactory</interfacename></entry>
+              <entry align="center"><interfacename>ApplicationContext</interfacename></entry>
             </row>
           </thead>
 
@@ -4894,8 +4873,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
         <title>Built-in Events</title>
 
         <tgroup cols="2">
-          <colspec colname="c1" colwidth="2*" />
-          <colspec colname="c2" colwidth="5*" />
+          <colspec colname="c1" colwidth="2*"/>
+          <colspec colname="c2" colwidth="5*"/>
 
           <thead>
             <row>
@@ -5055,7 +5034,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>For optimal usage and understanding of application contexts, users
       should generally familiarize themselves with Spring's
       <interfacename>Resource</interfacename> abstraction, as described in the
-      chapter entitled <xref linkend="resources" />.</para>
+      chapter entitled <xref linkend="resources"/>.</para>
 
       <para>An application context is a
       <interfacename>ResourceLoader</interfacename>, able to be used to load
@@ -5282,7 +5261,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     <title>Annotation-based configuration</title>
 
     <para>As mentioned in the section entitled <xref
-    linkend="beans-factory-extension-bpp-examples-rabpp" />, using a
+    linkend="beans-factory-extension-bpp-examples-rabpp"/>, using a
     <interfacename>BeanPostProcessor</interfacename> in conjunction with
     annotations is a common means of extending the Spring IoC container. For
     example, Spring 2.0 introduced the possibility of enforcing required
@@ -5291,7 +5270,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     Spring 2.5, it is now possible to follow that same general approach to
     drive Spring's dependency injection. Essentially, the
     <interfacename>@Autowired</interfacename> annotation provides the same
-    capabilities as described in <xref linkend="beans-factory-autowire" /> but
+    capabilities as described in <xref linkend="beans-factory-autowire"/> but
     with more fine-grained control and wider applicability. Spring 2.5 also
     adds support for JSR-250 annotations such as
     <interfacename>@Resource</interfacename>,
@@ -6000,7 +5979,7 @@ public @interface MovieQualifier {
       <note>
         <para>For details regarding the effects of combining various lifecycle
         mechanisms, see <xref
-        linkend="beans-factory-lifecycle-combined-effects" />.</para>
+        linkend="beans-factory-lifecycle-combined-effects"/>.</para>
       </note>
     </section>
   </section>
@@ -6011,7 +5990,7 @@ public @interface MovieQualifier {
     <para>Thus far most of the examples within this chapter have used XML for
     specifying the configuration metadata that produces each
     <interfacename>BeanDefinition</interfacename> within the Spring container.
-    The previous section (<xref linkend="beans-annotation-config" />)
+    The previous section (<xref linkend="beans-annotation-config"/>)
     demonstrated the possibility of providing a considerable amount of the
     configuration metadata using source-level annotations. Even in those
     examples however, the "base" bean definitions were explicitly defined in
@@ -6030,7 +6009,7 @@ public @interface MovieQualifier {
       <emphasis>stereotype</emphasis> of a repository (a.k.a. Data Access
       Object or DAO). Among the possibilities for leveraging such a marker is
       the automatic translation of exceptions as described in <xref
-      linkend="orm-jpa-exceptions" />.</para>
+      linkend="orm-jpa-exceptions"/>.</para>
 
       <para>Spring 2.5 introduces further stereotype annotations:
       <interfacename>@Component</interfacename>,
@@ -6138,36 +6117,47 @@ public class JpaMovieFinder implements MovieFinder {
       <emphasis>exclude-filter</emphasis> sub-elements of the 
       '<literal>component-scan</literal>' element. Each filter element requires 
       the '<literal>type</literal>' and '<literal>expression</literal>'
-      attributes. Four filtering options exist as described below.</para>
+      attributes. Five filtering options exist as described below.</para>
 
       <table id="beans-scanning-filters-tbl">
         <title>Filter Types</title>
 
-        <tgroup cols="2">
-          <colspec colname="c1" colwidth="1*" />
-          <colspec colname="c2" colwidth="1*" />
+        <tgroup cols="3">
+          <colspec colname="c1" colwidth="1*"/>
+          <colspec colname="c2" colwidth="3*"/>
+          <colspec colname="c" colwidth="4*"/>
           <thead>
             <row>
               <entry>Filter Type</entry>
               <entry>Example Expression</entry>
+              <entry>Description</entry>
             </row>
           </thead>
           <tbody>
             <row>
               <entry>annotation</entry>
-              <entry><para><classname>org.example.SomeAnnotation</classname></para></entry>
+              <entry><literal>org.example.SomeAnnotation</literal></entry>
+              <entry>An annotation to be present at the type level in target components.</entry>
             </row>
             <row>
               <entry>assignable</entry>
-              <entry><para><classname>org.example.SomeClass</classname></para></entry>
-            </row>
-            <row>
-              <entry>regex</entry>
-              <entry><para>org\.example\.Default.*</para></entry>
+              <entry><literal>org.example.SomeClass</literal></entry>
+              <entry>A class (or interface) that the target components are assignable to (extend/implement).</entry>
             </row>
             <row>
               <entry>aspectj</entry>
-              <entry><para><interfacename>org.example..*Service+</interfacename></para></entry>
+              <entry><literal>org.example..*Service+</literal></entry>
+              <entry>An AspectJ type expression to be matched by the target components.</entry>
+            </row>
+            <row>
+              <entry>regex</entry>
+              <entry><literal>org\.example\.Default.*</literal></entry>
+              <entry>A regex expression to be matched by the target components' class names.</entry>
+            </row>
+            <row>
+              <entry>custom</entry>
+              <entry><literal>org.example.MyCustomTypeFilter</literal></entry>
+              <entry>A custom implementation of the <interfacename>org.springframework.core.type.TypeFilter</interfacename> interface.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -6285,7 +6275,7 @@ public class MovieFinderImpl implements MovieFinder {
       <para>When using certain non-singleton scopes, it may be necessary to
       generate proxies for the scoped objects. The reasoning is described in
       detail within the section entitled <xref
-      linkend="beans-factory-scopes-other-injection" />. For this purpose, a
+      linkend="beans-factory-scopes-other-injection"/>. For this purpose, a
       <emphasis>scoped-proxy</emphasis> attribute is available on the
       'component-scan' element. The three possible values are: 'no',
       'interfaces', and 'targetClass'. For example, the following
@@ -6366,6 +6356,6 @@ public class CachingMovieCatalog implements MovieCatalog {
     load-time weaving may be necessary for JPA class transformation. Consult
     the <classname>LocalContainerEntityManagerFactoryBean</classname> Javadoc
     for more detail. For more on AspectJ load-time weaving, see <xref
-    linkend="aop-aj-ltw" />.</para>
+    linkend="aop-aj-ltw"/>.</para>
   </section>
 </chapter>

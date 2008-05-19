@@ -308,9 +308,10 @@
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
 					<xsd:enumeration value="annotation"/>
-					<xsd:enumeration value="aspectj"/>
-					<xsd:enumeration value="assignable"/>
-					<xsd:enumeration value="regex"/>
+          <xsd:enumeration value="assignable"/>
+          <xsd:enumeration value="aspectj"/>
+          <xsd:enumeration value="regex"/>
+          <xsd:enumeration value="custom"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>

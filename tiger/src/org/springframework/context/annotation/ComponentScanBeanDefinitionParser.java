@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -88,14 +89,16 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	protected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {
+		XmlReaderContext readerContext = parserContext.getReaderContext();
+
 		boolean useDefaultFilters = true;
 		if (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {
 			useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
 		}
 
 		// Delegate bean definition registration to scanner class.
-		ClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);
-		scanner.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
+		ClassPathBeanDefinitionScanner scanner = createScanner(readerContext, useDefaultFilters);
+		scanner.setResourceLoader(readerContext.getResourceLoader());
 		scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
 		scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
 
@@ -104,25 +107,20 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		try {
-			parseBeanNameGenerator(scanner, element);
+			parseBeanNameGenerator(element, scanner);
 		}
 		catch (Exception ex) {
-			parserContext.getReaderContext().error(ex.getMessage(), element, ex.getCause());
+			readerContext.error(ex.getMessage(), readerContext.extractSource(element), ex.getCause());
 		}
 
 		try {
-			parseScope(scanner, element);
+			parseScope(element, scanner);
 		}
 		catch (Exception ex) {
-			parserContext.getReaderContext().error(ex.getMessage(), element, ex.getCause());
+			readerContext.error(ex.getMessage(), readerContext.extractSource(element), ex.getCause());
 		}
 
-		try {
-			parseTypeFilters(scanner, element);
-		}
-		catch (Exception ex) {
-			parserContext.getReaderContext().error(ex.getMessage(), element, ex.getCause());
-		}
+		parseTypeFilters(element, scanner, readerContext);
 
 		return scanner;
 	}
@@ -160,7 +158,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		readerContext.fireComponentRegistered(compositeDef);
 	}
 
-	protected void parseBeanNameGenerator(ClassPathBeanDefinitionScanner scanner, Element element) {
+	protected void parseBeanNameGenerator(Element element, ClassPathBeanDefinitionScanner scanner) {
 		if (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {
 			BeanNameGenerator beanNameGenerator = (BeanNameGenerator) instantiateUserDefinedStrategy(
 					element.getAttribute(NAME_GENERATOR_ATTRIBUTE), BeanNameGenerator.class,
@@ -169,7 +167,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	protected void parseScope(ClassPathBeanDefinitionScanner scanner, Element element) {
+	protected void parseScope(Element element, ClassPathBeanDefinitionScanner scanner) {
 		// Register ScopeMetadataResolver if class name provided.
 		if (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {
 			if (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {
@@ -199,7 +197,9 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	protected void parseTypeFilters(ClassPathBeanDefinitionScanner scanner, Element element) {
+	protected void parseTypeFilters(
+			Element element, ClassPathBeanDefinitionScanner scanner, XmlReaderContext readerContext) {
+
 		// Parse exclude and include filter elements.
 		ClassLoader classLoader = scanner.getResourceLoader().getClassLoader();
 		NodeList nodeList = element.getChildNodes();
@@ -207,17 +207,21 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			Node node = nodeList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				String localName = node.getLocalName();
-				if (INCLUDE_FILTER_ELEMENT.equals(localName)) {
-					TypeFilter typeFilter = createTypeFilter((Element) node, classLoader);
-					scanner.addIncludeFilter(typeFilter);
+				try {
+					if (INCLUDE_FILTER_ELEMENT.equals(localName)) {
+						TypeFilter typeFilter = createTypeFilter((Element) node, classLoader);
+						scanner.addIncludeFilter(typeFilter);
+					}
+					else if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {
+						TypeFilter typeFilter = createTypeFilter((Element) node, classLoader);
+						scanner.addExcludeFilter(typeFilter);
+					}
 				}
-				else if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {
-					TypeFilter typeFilter = createTypeFilter((Element) node, classLoader);
-					scanner.addExcludeFilter(typeFilter);
+				catch (Exception ex) {
+					readerContext.error(ex.getMessage(), readerContext.extractSource(element), ex.getCause());
 				}
 			}
 		}
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -231,11 +235,19 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			else if ("assignable".equals(filterType)) {
 				return new AssignableTypeFilter(classLoader.loadClass(expression));
 			}
+			else if ("aspectj".equals(filterType)) {
+				return new AspectJTypeFilter(expression, classLoader);
+			}
 			else if ("regex".equals(filterType)) {
 				return new RegexPatternTypeFilter(Pattern.compile(expression));
 			}
-			else if ("aspectj".equals(filterType)) {
-				return new AspectJTypeFilter(expression, classLoader);
+			else if ("custom".equals(filterType)) {
+				Class filterClass = classLoader.loadClass(expression);
+				if (!TypeFilter.class.isAssignableFrom(filterClass)) {
+					throw new IllegalArgumentException(
+							"Class is not assignable to [" + TypeFilter.class.getName() + "]: " + expression);
+				}
+				return (TypeFilter) BeanUtils.instantiateClass(filterClass);
 			}
 			else {
 				throw new IllegalArgumentException("Unsupported filter type: " + filterType);
