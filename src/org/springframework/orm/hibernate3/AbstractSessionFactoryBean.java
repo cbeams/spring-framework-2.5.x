@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public abstract class AbstractSessionFactoryBean
 	 * <p>Note: If you want to use Hibernate's Connection release mode "after_statement"
 	 * with a DataSource specified on this LocalSessionFactoryBean (for example, a
 	 * JTA-aware DataSource fetched from JNDI), switch this setting to "true".
-	 * Else, the ConnectionProvider used underneath will vote against aggressive
+	 * Otherwise, the ConnectionProvider used underneath will vote against aggressive
 	 * release and thus silently switch to release mode "after_transaction".
 	 * @see #setDataSource
 	 * @see #setExposeTransactionAwareSessionFactory
