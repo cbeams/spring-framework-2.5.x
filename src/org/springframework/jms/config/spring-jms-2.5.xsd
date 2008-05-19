@@ -51,6 +51,26 @@
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
+			<xsd:attribute name="container-class" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A custom listener container implementation class as fully qualified class name.
+	Default is Spring's standard DefaultMessageListenerContainer or
+	SimpleMessageListenerContainer, according to the "container-type" attribute.
+	Note that a custom container class will typically be a subclass of either of
+	those two Spring-provided standard container classes: Nake sure that the
+	"container-type" attribute matches the actual base type that the custom class
+	derives from ("default" will usually be fine anyway, since most custom classes
+	will derive from DefaultMessageListenerContainer).
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation>
+							<tool:expected-type type="java.lang.Class"/>
+							<tool:assignable-to type="org.springframework.jms.listener.AbstractMessageListenerContainer"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="connection-factory" type="xsd:string" default="connectionFactory">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

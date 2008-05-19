@@ -37,6 +37,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String CONTAINER_TYPE_ATTRIBUTE = "container-type";
 
+	private static final String CONTAINER_CLASS_ATTRIBUTE = "container-class";
+
 	private static final String CONNECTION_FACTORY_ATTRIBUTE = "connection-factory";
 
 	private static final String TASK_EXECUTOR_ATTRIBUTE = "task-executor";
@@ -52,7 +54,11 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		parseContainerConfiguration(containerEle, parserContext, containerDef);
 
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
-		if ("".equals(containerType) || "default".equals(containerType)) {
+		String containerClass = containerEle.getAttribute(CONTAINER_CLASS_ATTRIBUTE);
+		if (!"".equals(containerClass)) {
+			containerDef.setBeanClassName(containerClass);
+		}
+		else if ("".equals(containerType) || "default".equals(containerType)) {
 			containerDef.setBeanClassName("org.springframework.jms.listener.DefaultMessageListenerContainer");
 		}
 		else if ("default102".equals(containerType)) {
