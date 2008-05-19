@@ -25,6 +25,8 @@ import javax.persistence.spi.PersistenceProvider;
 
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.DB2Dialect;
+import org.hibernate.dialect.DerbyDialect;
+import org.hibernate.dialect.H2Dialect;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.dialect.InformixDialect;
 import org.hibernate.dialect.MySQLDialect;
@@ -97,10 +99,12 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	protected Class determineDatabaseDialectClass(Database database) {
 		switch (database) {
 			case DB2: return DB2Dialect.class;
+			case DERBY: return DerbyDialect.class;
+			case H2: return H2Dialect.class;
 			case HSQL: return HSQLDialect.class;
 			case INFORMIX: return InformixDialect.class;
 			case MYSQL: return MySQLDialect.class;
-			case ORACLE: return Oracle9Dialect.class;
+			case ORACLE: return Oracle9Dialect.class;  // deprecated since Hibernate 3.2.5 - to be updated in Spring 3.0
 			case POSTGRESQL: return PostgreSQLDialect.class;
 			case SQL_SERVER: return SQLServerDialect.class;
 			case SYBASE: return SybaseDialect.class;

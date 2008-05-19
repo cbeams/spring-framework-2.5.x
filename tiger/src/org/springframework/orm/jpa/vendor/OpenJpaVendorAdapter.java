@@ -90,6 +90,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	protected String determineDatabaseDictionary(Database database) {
 		switch (database) {
 			case DB2: return "db2";
+			case DERBY: return "derby";
 			case HSQL: return "hsql(SimulateLocking=true)";
 			case INFORMIX: return "informix";
 			case MYSQL: return "mysql";
