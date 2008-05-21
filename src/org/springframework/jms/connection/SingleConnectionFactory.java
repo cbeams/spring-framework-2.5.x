@@ -387,7 +387,7 @@ public class SingleConnectionFactory
 			classes.add(TopicConnection.class);
 		}
 		return (Connection) Proxy.newProxyInstance(
-				getClass().getClassLoader(),
+				Connection.class.getClassLoader(),
 				(Class[]) classes.toArray(new Class[classes.size()]),
 				new SharedConnectionInvocationHandler(target));
 	}

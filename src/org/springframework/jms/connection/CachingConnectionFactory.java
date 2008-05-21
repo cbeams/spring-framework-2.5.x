@@ -173,7 +173,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			classes.add(TopicSession.class);
 		}
 		return (Session) Proxy.newProxyInstance(
-				getClass().getClassLoader(),
+				Session.class.getClassLoader(),
 				(Class[]) classes.toArray(new Class[classes.size()]),
 				new CachedSessionInvocationHandler(target, sessionList));
 	}
