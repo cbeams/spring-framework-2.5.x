@@ -215,7 +215,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 			}
 		}
 		if (ifcs == null) {
-			ifcs = ClassUtils.getAllInterfacesForClass(em.getClass(), getClass().getClassLoader());
+			ifcs = ClassUtils.getAllInterfacesForClass(em.getClass());
 		}
 		return (EntityManager) Proxy.newProxyInstance(
 				em.getClass().getClassLoader(), ifcs, new CloseSuppressingInvocationHandler(em));
