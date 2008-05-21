@@ -232,7 +232,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	protected PersistenceManager createPersistenceManagerProxy(PersistenceManager pm) {
 		Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), getClass().getClassLoader());
 		return (PersistenceManager) Proxy.newProxyInstance(
-				getClass().getClassLoader(), ifcs, new CloseSuppressingInvocationHandler(pm));
+				pm.getClass().getClassLoader(), ifcs, new CloseSuppressingInvocationHandler(pm));
 	}
 
 	/**

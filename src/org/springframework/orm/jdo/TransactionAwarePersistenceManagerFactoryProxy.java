@@ -88,7 +88,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 		this.target = target;
 		Class[] ifcs = ClassUtils.getAllInterfacesForClass(target.getClass(), getClass().getClassLoader());
 		this.proxy = (PersistenceManagerFactory) Proxy.newProxyInstance(
-				getClass().getClassLoader(), ifcs, new TransactionAwareFactoryInvocationHandler());
+				target.getClass().getClassLoader(), ifcs, new TransactionAwareFactoryInvocationHandler());
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
 				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), getClass().getClassLoader());
 				return (PersistenceManager) Proxy.newProxyInstance(
-						getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
+						pm.getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
 			}
 			else if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.

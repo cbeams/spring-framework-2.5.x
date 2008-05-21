@@ -503,7 +503,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			sessionIfcs = new Class[] {mainIfc};
 		}
 		return (Session) Proxy.newProxyInstance(
-				getClass().getClassLoader(), sessionIfcs,
+				session.getClass().getClassLoader(), sessionIfcs,
 				new CloseSuppressingInvocationHandler(session));
 	}
 

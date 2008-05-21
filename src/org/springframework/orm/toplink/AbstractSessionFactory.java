@@ -60,9 +60,9 @@ public abstract class AbstractSessionFactory implements SessionFactory {
 	 */
 	public Session createManagedClientSession() throws TopLinkException {
 		logger.debug("Creating managed TopLink client Session");
-		return (Session) Proxy.newProxyInstance(
-				getClass().getClassLoader(), new Class[] {Session.class},
-				new ManagedClientInvocationHandler(createClientSession()));
+		Session target = createClientSession();
+		return (Session) Proxy.newProxyInstance(target.getClass().getClassLoader(),
+				new Class[] {Session.class}, new ManagedClientInvocationHandler(target));
 	}
 
 	/**
@@ -89,9 +89,10 @@ public abstract class AbstractSessionFactory implements SessionFactory {
 	 * @see oracle.toplink.sessions.Session#getActiveUnitOfWork()
 	 */
 	public Session createTransactionAwareSession(SessionFactory sessionFactory) throws TopLinkException {
+		Session target = getMasterSession();
 		return (Session) Proxy.newProxyInstance(
-				getClass().getClassLoader(), new Class[] {Session.class},
-				new TransactionAwareInvocationHandler(sessionFactory, getMasterSession()));
+				target.getClass().getClassLoader(), new Class[] {Session.class},
+				new TransactionAwareInvocationHandler(sessionFactory, target));
 	}
 
 
