@@ -221,7 +221,15 @@ public class TransactionAwareConnectionFactoryProxy
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (Session.class.equals(method.getReturnType())) {
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Connection proxy.
+				return new Integer(System.identityHashCode(proxy));
+			}
+			else if (Session.class.equals(method.getReturnType())) {
 				Session session = ConnectionFactoryUtils.getTransactionalSession(
 						getTargetConnectionFactory(), this.target, isSynchedLocalTransactionAllowed());
 				if (session != null) {
@@ -243,14 +251,6 @@ public class TransactionAwareConnectionFactoryProxy
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);
 				}
-			}
-			else if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of Connection proxy.
-				return new Integer(System.identityHashCode(proxy));
 			}
 
 			// Invoke method on target Connection.
@@ -293,11 +293,7 @@ public class TransactionAwareConnectionFactoryProxy
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on SessionProxy interface coming in...
 
-			if (method.getName().equals("getTargetSession")) {
-				// Handle getTargetSession method: return underlying Session.
-				return this.target;
-			}
-			else if (method.getName().equals("equals")) {
+			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
 			}
@@ -314,6 +310,10 @@ public class TransactionAwareConnectionFactoryProxy
 			else if (method.getName().equals("close")) {
 				// Handle close method: not to be closed within a transaction.
 				return null;
+			}
+			else if (method.getName().equals("getTargetSession")) {
+				// Handle getTargetSession method: return underlying Session.
+				return this.target;
 			}
 
 			// Invoke method on target Session.

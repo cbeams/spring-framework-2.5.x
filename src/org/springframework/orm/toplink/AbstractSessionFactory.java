@@ -129,7 +129,17 @@ public abstract class AbstractSessionFactory implements SessionFactory {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("getActiveSession")) {
+			// Invocation on Session interface coming in...
+
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of SessionFactory proxy.
+				return new Integer(System.identityHashCode(proxy));
+			}
+			else if (method.getName().equals("getActiveSession")) {
 				return this.target;
 			}
 			else if (method.getName().equals("getActiveUnitOfWork")) {
@@ -138,14 +148,6 @@ public abstract class AbstractSessionFactory implements SessionFactory {
 			else if (method.getName().equals("release")) {
 				this.uow.release();
 				this.target.release();
-			}
-			else if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of SessionFactory proxy.
-				return new Integer(System.identityHashCode(proxy));
 			}
 
 			// Invoke method on target Session.
@@ -177,7 +179,15 @@ public abstract class AbstractSessionFactory implements SessionFactory {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Session interface coming in...
 
-			if (method.getName().equals("getActiveSession")) {
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of SessionFactory proxy.
+				return new Integer(System.identityHashCode(proxy));
+			}
+			else if (method.getName().equals("getActiveSession")) {
 				// Handle getActiveSession method: return transactional Session, if any.
 				try {
 					return SessionFactoryUtils.doGetSession(this.sessionFactory, false);
@@ -196,14 +206,6 @@ public abstract class AbstractSessionFactory implements SessionFactory {
 					// getActiveUnitOfWork is supposed to return null if no active one found.
 					return null;
 				}
-			}
-			else if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of SessionFactory proxy.
-				return new Integer(System.identityHashCode(proxy));
 			}
 
 			// Invoke method on target Session.

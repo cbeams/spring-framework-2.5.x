@@ -317,11 +317,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying Connection.
-				return this.target;
-			}
-			else if (method.getName().equals("equals")) {
+			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
 			}
@@ -332,6 +328,10 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 			else if (method.getName().equals("close")) {
 				// Handle close method: don't pass the call on.
 				return null;
+			}
+			else if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying Connection.
+				return this.target;
 			}
 
 			// Invoke method on target Connection.

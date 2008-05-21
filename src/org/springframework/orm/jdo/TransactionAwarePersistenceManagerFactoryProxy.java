@@ -145,16 +145,8 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on PersistenceManagerFactory interface coming in...
-			PersistenceManagerFactory target = getTargetPersistenceManagerFactory();
 
-			if (method.getName().equals("getPersistenceManager")) {
-				PersistenceManager pm =
-						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
-				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), getClass().getClassLoader());
-				return (PersistenceManager) Proxy.newProxyInstance(
-						pm.getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
-			}
-			else if (method.getName().equals("equals")) {
+			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
 			}
@@ -162,10 +154,18 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 				// Use hashCode of PersistenceManagerFactory proxy.
 				return new Integer(System.identityHashCode(proxy));
 			}
+			else if (method.getName().equals("getPersistenceManager")) {
+				PersistenceManagerFactory target = getTargetPersistenceManagerFactory();
+				PersistenceManager pm =
+						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
+				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), getClass().getClassLoader());
+				return (PersistenceManager) Proxy.newProxyInstance(
+						pm.getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
+			}
 
 			// Invoke method on target PersistenceManagerFactory.
 			try {
-				return method.invoke(target, args);
+				return method.invoke(getTargetPersistenceManagerFactory(), args);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
