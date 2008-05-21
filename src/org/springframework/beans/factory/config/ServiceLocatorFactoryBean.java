@@ -292,8 +292,8 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 				}
 				catch (NoSuchMethodException ex3) {
 					throw new IllegalArgumentException(
-							"serviceLocatorException [" + exceptionClass.getName() +
-									"] neither has a (String, Throwable) constructor nor a (String) constructor");
+							"Service locator exception [" + exceptionClass.getName() +
+							"] neither has a (String, Throwable) constructor nor a (String) constructor");
 				}
 			}
 		}
