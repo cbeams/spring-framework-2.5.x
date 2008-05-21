@@ -192,6 +192,13 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
+				<xsd:attribute name="expose-access-context" type="xsd:boolean" default="false">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	TODO
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>

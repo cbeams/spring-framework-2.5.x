@@ -24,6 +24,7 @@
 			cache="true"
 			resource-ref="true"
 			lookup-on-startup="true"
+			expose-access-context="true"
 			expected-type="com.myapp.DefaultFoo"
 			proxy-interface="com.myapp.Foo"
 			default-value="myValue"/>

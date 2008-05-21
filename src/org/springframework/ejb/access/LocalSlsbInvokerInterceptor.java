@@ -56,11 +56,11 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	/**
 	 * This implementation "creates" a new EJB instance for each invocation.
 	 * Can be overridden for custom invocation strategies.
-	 * <p>Alternatively, override getSessionBeanInstance and
-	 * releaseSessionBeanInstance to change EJB instance creation,
+	 * <p>Alternatively, override {@link #getSessionBeanInstance} and
+	 * {@link #releaseSessionBeanInstance} to change EJB instance creation,
 	 * for example to hold a single shared EJB instance.
 	 */
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {
 			ejb = getSessionBeanInstance();

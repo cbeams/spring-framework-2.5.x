@@ -125,17 +125,14 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 
 	/**
-	 * Fetches an EJB home object and delegates to doInvoke.
-	 * If configured to refresh on connect failure, it will call
-	 * refreshAndRetry on corresponding RMI exceptions.
+	 * Fetches an EJB home object and delegates to <code>doInvoke</code>.
+	 * <p>If configured to refresh on connect failure, it will call
+	 * {@link #refreshAndRetry} on corresponding RMI exceptions.
 	 * @see #getHome
 	 * @see #doInvoke
 	 * @see #refreshAndRetry
-	 * @see java.rmi.ConnectException
-	 * @see java.rmi.ConnectIOException
-	 * @see java.rmi.NoSuchObjectException
 	 */
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		try {
 			return doInvoke(invocation);
 		}
@@ -154,7 +151,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
-	 * Default implementation delegates to RmiClientInterceptorUtils.
+	 * <p>The default implementation delegates to RmiClientInterceptorUtils.
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure
 	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
@@ -199,7 +196,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	/**
 	 * Perform the given invocation on the current EJB home.
-	 * Template method to be implemented by a subclass.
+	 * Template method to be implemented by subclasses.
 	 * @param invocation the AOP method invocation
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure

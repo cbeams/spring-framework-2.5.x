@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.springframework.jndi;
 
+import javax.naming.Context;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
+import org.easymock.MockControl;
 
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
@@ -27,6 +29,7 @@ import org.springframework.mock.jndi.ExpectedLookupTemplate;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class JndiObjectFactoryBeanTests extends TestCase {
 
@@ -297,9 +300,9 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		jof.setLookupOnStartup(false);
 		try {
 			jof.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -308,11 +311,12 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		jof.setJndiName("foo");
 		jof.setCache(false);
+		jof.setLookupOnStartup(false);
 		try {
 			jof.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -346,6 +350,36 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		catch (NamingException ex) {
 			assertTrue(ex.getMessage().indexOf("org.springframework.beans.DerivedTestBean") != -1);
 		}
+	}
+
+	public void testLookupWithExposeAccessContext() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		TestBean tb = new TestBean();
+		MockControl ctxControl = MockControl.createControl(Context.class);
+		final Context mockCtx = (Context) ctxControl.getMock();
+		mockCtx.lookup("foo");
+		ctxControl.setReturnValue(tb);
+		mockCtx.close();
+		ctxControl.setVoidCallable(2);
+		ctxControl.replay();
+		jof.setJndiTemplate(new JndiTemplate() {
+			protected Context createInitialContext() {
+				return mockCtx;
+			}
+		});
+		jof.setJndiName("foo");
+		jof.setProxyInterface(ITestBean.class);
+		jof.setExposeAccessContext(true);
+		jof.afterPropertiesSet();
+		assertTrue(jof.getObject() instanceof ITestBean);
+		ITestBean proxy = (ITestBean) jof.getObject();
+		assertEquals(0, tb.getAge());
+		proxy.setAge(99);
+		assertEquals(99, tb.getAge());
+		proxy.equals(proxy);
+		proxy.hashCode();
+		proxy.toString();
+		ctxControl.verify();
 	}
 
 }

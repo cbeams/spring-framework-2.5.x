@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.ejb.access;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.jndi.JndiObjectLocator;
 
@@ -42,6 +44,8 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	private boolean lookupHomeOnStartup = true;
 
 	private boolean cacheHome = true;
+
+	private boolean exposeAccessContext = false;
 
 	/**
 	 * The EJB's home object, potentially cached.
@@ -77,6 +81,18 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 */
 	public void setCacheHome(boolean cacheHome) {
 		this.cacheHome = cacheHome;
+	}
+
+	/**
+	 * Set whether to expose the JNDI environment context for all access to the target
+	 * EJB, i.e. for all method invocations on the exposed object reference.
+	 * <p>Default is "false", i.e. to only expose the JNDI context for object lookup.
+	 * Switch this flag to "true" in order to expose the JNDI environment (including
+	 * the authorization context) for each EJB invocation, as needed by WebLogic
+	 * for EJBs with authorization requirements.
+	 */
+	public void setExposeAccessContext(boolean exposeAccessContext) {
+		this.exposeAccessContext = exposeAccessContext;
 	}
 
 
@@ -161,8 +177,34 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 		return false;
 	}
 
+
 	/**
-	 * Invoke the create() method on the cached EJB home object.
+	 * Prepares the thread context if necessar, and delegates to
+	 * {@link #invokeInContext}.
+	 */
+	public Object invoke(MethodInvocation invocation) throws Throwable {
+		Context ctx = (this.exposeAccessContext ? getJndiTemplate().getContext() : null);
+		try {
+			return invokeInContext(invocation);
+		}
+		finally {
+			getJndiTemplate().releaseContext(ctx);
+		}
+	}
+
+	/**
+	 * Perform the given invocation on the current EJB home,
+	 * within the thread context being prepared accordingly.
+	 * Template method to be implemented by subclasses.
+	 * @param invocation the AOP method invocation
+	 * @return the invocation result, if any
+	 * @throws Throwable in case of invocation failure
+	 */
+	protected abstract Object invokeInContext(MethodInvocation invocation) throws Throwable;
+
+
+	/**
+	 * Invokes the <code>create()</code> method on the cached EJB home object.
 	 * @return a new EJBObject or EJBLocalObject
 	 * @throws NamingException if thrown by JNDI
 	 * @throws InvocationTargetException if thrown by the create method

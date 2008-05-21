@@ -16,7 +16,13 @@
 
 package org.springframework.jndi;
 
+import java.lang.reflect.Method;
+
+import javax.naming.Context;
 import javax.naming.NamingException;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -62,6 +68,8 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	private boolean lookupOnStartup = true;
 
 	private boolean cache = true;
+
+	private boolean exposeAccessContext = false;
 
 	private Object defaultObject;
 
@@ -122,6 +130,19 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	}
 
 	/**
+	 * Set whether to expose the JNDI environment context for all access to the target
+	 * object, i.e. for all method invocations on the exposed object reference.
+	 * <p>Default is "false", i.e. to only expose the JNDI context for object lookup.
+	 * Switch this flag to "true" in order to expose the JNDI environment (including
+	 * the authorization context) for each method invocation, as needed by WebLogic
+	 * for JNDI-obtained factories (e.g. JDBC DataSource, JMS ConnectionFactory)
+	 * with authorization requirements.
+	 */
+	public void setExposeAccessContext(boolean exposeAccessContext) {
+		this.exposeAccessContext = exposeAccessContext;
+	}
+
+	/**
 	 * Specify a default object to fall back to if the JNDI lookup fails.
 	 * Default is none.
 	 * <p>This can be an arbitrary bean reference or literal value.
@@ -145,21 +166,8 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	public void afterPropertiesSet() throws IllegalArgumentException, NamingException {
 		super.afterPropertiesSet();
 
-		if (!this.lookupOnStartup || !this.cache) {
+		if (this.proxyInterfaces != null || !this.lookupOnStartup || !this.cache || this.exposeAccessContext) {
 			// We need to create a proxy for this...
-			if (this.proxyInterfaces == null) {
-				Class expectedType = getExpectedType();
-				if (expectedType != null) {
-					this.proxyInterfaces = ClassUtils.getAllInterfacesForClass(expectedType, this.beanClassLoader);
-				}
-			}
-			if (this.proxyInterfaces == null) {
-				throw new IllegalArgumentException(
-						"Cannot deactivate 'lookupOnStartup' or 'cache' without specifying a 'proxyInterface'");
-			}
-		}
-
-		if (this.proxyInterfaces != null) {
 			if (this.defaultObject != null) {
 				throw new IllegalArgumentException(
 						"'defaultObject' is not supported in combination with 'proxyInterface'");
@@ -167,7 +175,6 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 			// We need a proxy and a JndiObjectTargetSource.
 			this.jndiObject = JndiObjectProxyFactory.createJndiObjectProxy(this);
 		}
-
 		else {
 			if (this.defaultObject != null && getExpectedType() != null &&
 					!getExpectedType().isInstance(this.defaultObject)) {
@@ -278,9 +285,50 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 			// Create a proxy with JndiObjectFactoryBean's proxy interface and the JndiObjectTargetSource.
 			ProxyFactory proxyFactory = new ProxyFactory();
-			proxyFactory.setInterfaces(jof.proxyInterfaces);
+			if (jof.proxyInterfaces != null) {
+				proxyFactory.setInterfaces(jof.proxyInterfaces);
+			}
+			else {
+				Class targetClass = targetSource.getTargetClass();
+				if (targetClass == null) {
+					throw new IllegalStateException(
+							"Cannot deactivate 'lookupOnStartup' without specifying a 'proxyInterface' or 'expectedType'");
+				}
+				proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, jof.beanClassLoader));
+			}
+			if (jof.exposeAccessContext) {
+				proxyFactory.addAdvice(new JndiContextExposingInterceptor(jof.getJndiTemplate()));
+			}
 			proxyFactory.setTargetSource(targetSource);
 			return proxyFactory.getProxy(jof.beanClassLoader);
+		}
+	}
+
+
+	/**
+	 * Interceptor that exposes the JNDI context for all method invocations,
+	 * according to JndiObjectFactoryBean's "exposeAccessContext" flag.
+	 */
+	private static class JndiContextExposingInterceptor implements MethodInterceptor {
+
+		private final JndiTemplate jndiTemplate;
+
+		public JndiContextExposingInterceptor(JndiTemplate jndiTemplate) {
+			this.jndiTemplate = jndiTemplate;
+		}
+
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			Context ctx = (isEligible(invocation.getMethod()) ? this.jndiTemplate.getContext() : null);
+			try {
+				return invocation.proceed();
+			}
+			finally {
+				this.jndiTemplate.releaseContext(ctx);
+			}
+		}
+
+		protected boolean isEligible(Method method) {
+			return !Object.class.equals(method.getDeclaringClass());
 		}
 	}
 

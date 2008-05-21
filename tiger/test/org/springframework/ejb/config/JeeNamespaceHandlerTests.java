@@ -60,6 +60,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 		assertPropertyValue(beanDefinition, "cache", "true");
 		assertPropertyValue(beanDefinition, "lookupOnStartup", "true");
+		assertPropertyValue(beanDefinition, "exposeAccessContext", "true");
 		assertPropertyValue(beanDefinition, "expectedType", "com.myapp.DefaultFoo");
 		assertPropertyValue(beanDefinition, "proxyInterface", "com.myapp.Foo");
 		assertPropertyValue(beanDefinition, "defaultObject", "myValue");

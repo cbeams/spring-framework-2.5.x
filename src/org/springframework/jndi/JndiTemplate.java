@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,11 +83,34 @@ public class JndiTemplate {
 	 * @see #createInitialContext
 	 */
 	public Object execute(JndiCallback contextCallback) throws NamingException {
-		Context ctx = createInitialContext();
+		Context ctx = getContext();
 		try {
 			return contextCallback.doInContext(ctx);
 		}
 		finally {
+			releaseContext(ctx);
+		}
+	}
+
+	/**
+	 * Obtain a JNDI context corresponding to this template's configuration.
+	 * Called by {@link #execute}; may also be called directly.
+	 * <p>The default implementation delegates to {@link #createInitialContext()}.
+	 * @return the JNDI context (never <code>null</code>)
+	 * @throws NamingException if context retrieval failed
+	 * @see #releaseContext
+	 */
+	public Context getContext() throws NamingException {
+		return createInitialContext();
+	}
+
+	/**
+	 * Release a JNDI context as obtained from {@link #getContext()}.
+	 * @param ctx the JNDI context to release (may be <code>null</code>)
+	 * @see #getContext
+	 */
+	public void releaseContext(Context ctx) {
+		if (ctx != null) {
 			try {
 				ctx.close();
 			}
@@ -98,15 +121,15 @@ public class JndiTemplate {
 	}
 
 	/**
-	 * Create a new JNDI initial context. Invoked by {@link #execute}.
+	 * Create a new JNDI initial context. Invoked by {@link #getContext}.
 	 * <p>The default implementation use this template's environment settings.
 	 * Can be subclassed for custom contexts, e.g. for testing.
 	 * @return the initial Context instance
 	 * @throws NamingException in case of initialization errors
 	 */
 	protected Context createInitialContext() throws NamingException {
-		Properties env = getEnvironment();
 		Hashtable icEnv = null;
+		Properties env = getEnvironment();
 		if (env != null) {
 			icEnv = new Hashtable(env.size());
 			CollectionUtils.mergePropertiesIntoMap(env, icEnv);
