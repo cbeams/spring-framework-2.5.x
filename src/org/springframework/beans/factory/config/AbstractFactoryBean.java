@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,14 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * Simple template superclass for {@link FactoryBean} implementations that
@@ -50,16 +52,18 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 1.0.2
- * @see #setSingleton(boolean)
+ * @see #setSingleton
  * @see #createInstance()
  */
 public abstract class AbstractFactoryBean
-		implements FactoryBean, BeanFactoryAware, InitializingBean, DisposableBean {
+		implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean singleton = true;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private BeanFactory beanFactory;
 
@@ -80,6 +84,10 @@ public abstract class AbstractFactoryBean
 
 	public boolean isSingleton() {
 		return this.singleton;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -148,7 +156,7 @@ public abstract class AbstractFactoryBean
 					getClass().getName() + " does not support circular references");
 		}
 		if (this.earlySingletonInstance == null) {
-			this.earlySingletonInstance = Proxy.newProxyInstance(getClass().getClassLoader(), ifcs,
+			this.earlySingletonInstance = Proxy.newProxyInstance(this.beanClassLoader, ifcs,
 				new InvocationHandler() {
 					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 						try {
