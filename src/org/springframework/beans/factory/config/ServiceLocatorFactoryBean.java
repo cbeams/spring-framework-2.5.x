@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,8 +207,6 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 * (typically, <code>MyService getService()</code> or <code>MyService getService(String id)</code>).
 	 * See the {@link ServiceLocatorFactoryBean class-level Javadoc} for
 	 * information on the semantics of such methods.
-	 *
-	 * @param interfaceType the {@link java.lang.Class} of the interface to be used for the service locator
 	 */
 	public void setServiceLocatorInterface(Class interfaceType) {
 		this.serviceLocatorInterface = interfaceType;
@@ -223,11 +221,8 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 * for example NoSuchBeanDefinitionException. As those are unchecked, the
 	 * caller does not need to handle them, so it might be acceptable that
 	 * Spring exceptions get thrown as long as they are just handled generically.
-	 *
-	 * @see #determineServiceLocatorExceptionConstructor(Class)
-	 * @see #createServiceLocatorException(java.lang.reflect.Constructor,org.springframework.beans.BeansException)
-	 * @see org.springframework.beans.BeansException
-	 * @see org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * @see #determineServiceLocatorExceptionConstructor
+	 * @see #createServiceLocatorException
 	 */
 	public void setServiceLocatorExceptionClass(Class serviceLocatorExceptionClass) {
 		if (serviceLocatorExceptionClass != null && !Exception.class.isAssignableFrom(serviceLocatorExceptionClass)) {
@@ -245,7 +240,6 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 * <p>The empty string as service id key defines the mapping for <code>null</code> and
 	 * empty string, and for factory methods without parameter. If not defined,
 	 * a single matching bean will be retrieved from the bean factory.
-	 *
 	 * @param serviceMappings mappings between service ids and bean names,
 	 * with service ids as keys as bean names as values
 	 */
@@ -263,13 +257,13 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 
 	public void afterPropertiesSet() {
 		if (this.serviceLocatorInterface == null) {
-			throw new IllegalArgumentException("serviceLocatorInterface is required");
+			throw new IllegalArgumentException("Property 'serviceLocatorInterface' is required");
 		}
 
 		// Create service locator proxy.
 		this.proxy = Proxy.newProxyInstance(
 				this.serviceLocatorInterface.getClassLoader(),
-				new Class[]{this.serviceLocatorInterface},
+				new Class[] {this.serviceLocatorInterface},
 				new ServiceLocatorInvocationHandler());
 	}
 
@@ -280,22 +274,21 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 * <p>The default implementation looks for a constructor with one of the
 	 * following parameter types: <code>(String, Throwable)</code>
 	 * or <code>(Throwable)</code> or <code>(String)</code>.
-	 *
 	 * @param exceptionClass the exception class
 	 * @return the constructor to use
 	 * @see #setServiceLocatorExceptionClass
 	 */
 	protected Constructor determineServiceLocatorExceptionConstructor(Class exceptionClass) {
 		try {
-			return exceptionClass.getConstructor(new Class[]{String.class, Throwable.class});
+			return exceptionClass.getConstructor(new Class[] {String.class, Throwable.class});
 		}
 		catch (NoSuchMethodException ex) {
 			try {
-				return exceptionClass.getConstructor(new Class[]{Throwable.class});
+				return exceptionClass.getConstructor(new Class[] {Throwable.class});
 			}
 			catch (NoSuchMethodException ex2) {
 				try {
-					return exceptionClass.getConstructor(new Class[]{String.class});
+					return exceptionClass.getConstructor(new Class[] {String.class});
 				}
 				catch (NoSuchMethodException ex3) {
 					throw new IllegalArgumentException(
@@ -311,7 +304,6 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 * Only called in case of a custom service locator exception.
 	 * <p>The default implementation can handle all variations of
 	 * message and exception arguments.
-	 *
 	 * @param exceptionConstructor the constructor to use
 	 * @param cause the cause of the service lookup failure
 	 * @return the service locator exception to throw
@@ -361,11 +353,6 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 			return service;
 		}
 
-		public String toString() {
-			return "Service locator: " + serviceLocatorInterface.getName();
-		}
-
-
 		private Object invokeServiceLocatorMethod(Method method, Object[] args) throws Exception {
 			Class serviceLocatorMethodReturnType = getServiceLocatorMethodReturnType(method);
 			try {
@@ -414,7 +401,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 			if (paramTypes.length > 1 || void.class.equals(serviceLocatorReturnType)) {
 				throw new UnsupportedOperationException(
 						"May only call methods with signature '<type> xxx()' or '<type> xxx(<idtype> id)' " +
-								"on factory interface, but tried to call: " + interfaceMethod);
+						"on factory interface, but tried to call: " + interfaceMethod);
 			}
 			return serviceLocatorReturnType;
 		}
@@ -430,6 +417,10 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 			catch (InvocationTargetException invEx) {
 				throw invEx.getTargetException();
 			}
+		}
+
+		public String toString() {
+			return "Service locator: " + serviceLocatorInterface.getName();
 		}
 	}
 
