@@ -70,6 +70,19 @@ public class FileSystemUtilsTests extends TestCase {
 		assertTrue(new File(dest, child.getName()).exists());
 		
 		FileSystemUtils.deleteRecursively(src);
+		assertTrue(!src.exists());
+	}
+
+	protected void tearDown() throws Exception {
+		File tmp = new File("./tmp");
+		if (tmp.exists()) {
+			FileSystemUtils.deleteRecursively(tmp);
+		}
+		File dest = new File("./dest");
+		if (dest.exists()) {
+			FileSystemUtils.deleteRecursively(dest);
+		}
+		super.tearDown();
 	}
 
 }
