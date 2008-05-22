@@ -224,16 +224,22 @@ public abstract class JdbcUtils {
 	 */
 	public static Object getResultSetValue(ResultSet rs, int index) throws SQLException {
 		Object obj = rs.getObject(index);
+		String className = null;
+		if (obj != null) {
+			className = obj.getClass().getName();
+		}
 		if (obj instanceof Blob) {
 			obj = rs.getBytes(index);
 		}
 		else if (obj instanceof Clob) {
 			obj = rs.getString(index);
 		}
-		else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
+		else if (className != null &&
+				("oracle.sql.TIMESTAMP".equals(className) ||
+				"oracle.sql.TIMESTAMPTZ".equals(className))) {
 			obj = rs.getTimestamp(index);
 		}
-		else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.DATE")) {
+		else if (className != null && className.startsWith("oracle.sql.DATE")) {
 			String metaDataClassName = rs.getMetaData().getColumnClassName(index);
 			if ("java.sql.Timestamp".equals(metaDataClassName) ||
 					"oracle.sql.TIMESTAMP".equals(metaDataClassName)) {
