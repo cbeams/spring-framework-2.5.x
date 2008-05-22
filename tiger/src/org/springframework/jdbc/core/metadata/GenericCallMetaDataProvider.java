@@ -30,6 +30,7 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlInOutParameter;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.util.StringUtils;
 
 /**
  * Generic implementation for the {@link CallMetaDataProvider} interface.
@@ -293,6 +294,15 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 				throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature - " +
 						"multiple procedures/functions/signatures for " + metaDataProcedureName + " found " + found);
 			}
+			if (found.size() < 1) {
+				if (metaDataProcedureName.contains(".") && !StringUtils.hasText(metaDataCatalogName)) {
+					String packageName = metaDataProcedureName.substring(0, metaDataProcedureName.indexOf("."));
+					throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature for " +
+							metaDataProcedureName + " - package name should be specified separately using " +
+							"'.withCatalogName(\"" + packageName + "\")'");
+				}
+			}
+
 			procs = databaseMetaData.getProcedureColumns(
 					metaDataCatalogName,
 					metaDataSchemaName,

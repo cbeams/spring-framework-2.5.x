@@ -283,6 +283,14 @@ public class CallMetaDataContext {
 		final Map<String, SqlParameter> declaredParameters = new LinkedHashMap<String, SqlParameter>();
 		boolean returnDeclared = false;
 		List<String> outParameterNames = new ArrayList<String>();
+		List<String> metaDataParameterNames = new ArrayList<String>();
+
+		// get the names of the meta data parameters
+		for (CallParameterMetaData meta : metaDataProvider.getCallParameterMetaData()) {
+			if (meta.getParameterType() != DatabaseMetaData.procedureColumnReturn) {
+				metaDataParameterNames.add(meta.getParameterName().toLowerCase());
+			}
+		}
 
 		// Separate implicit return parameters from explicit parameters...
 		for (SqlParameter parameter : parameters) {
@@ -294,13 +302,14 @@ public class CallMetaDataContext {
 				declaredParameters.put(parameterNameToMatch, parameter);
 				if (parameter instanceof SqlOutParameter) {
 					outParameterNames.add(parameter.getName());
-					if (logger.isDebugEnabled()) {
-						logger.debug("Added metadata out parameter for: " + parameter.getName());
-					}
-					if (this.isFunction()) {
-						if (!returnDeclared)
+					if (this.isFunction() && !metaDataParameterNames.contains(parameterNameToMatch)) {
+						if (!returnDeclared) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Using declared out parameter '" + parameter.getName() + "' for function return value");
+							}
 							this.setFunctionReturnName(parameter.getName());
-						returnDeclared = true;
+							returnDeclared = true;
+						}
 					}
 				}
 			}
