@@ -217,13 +217,13 @@ public abstract class StatementCreatorUtils {
 					String databaseProductName = dbmd.getDatabaseProductName();
 					String jdbcDriverName = dbmd.getDriverName();
 					if (databaseProductName.startsWith("Informix") ||
-							jdbcDriverName.startsWith("Microsoft SQL Server") ||
-							jdbcDriverName.startsWith("Apache Derby Embedded")) {
+							jdbcDriverName.startsWith("Microsoft SQL Server")) {
 						useSetObject = true;
 					}
 					else if (databaseProductName.startsWith("DB2") ||
 							jdbcDriverName.startsWith("jConnect") ||
-							jdbcDriverName.startsWith("SQLServer")) {
+							jdbcDriverName.startsWith("SQLServer")||
+							jdbcDriverName.startsWith("Apache Derby Embedded")) {
 						sqlTypeToUse = Types.VARCHAR;
 					}
 				}

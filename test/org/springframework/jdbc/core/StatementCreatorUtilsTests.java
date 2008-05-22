@@ -101,7 +101,7 @@ public class StatementCreatorUtilsTests extends TestCase {
 		metaDataControl.setReturnValue("Apache Derby");
 		metaData.getDriverName();
 		metaDataControl.setReturnValue("Apache Derby Embedded Driver");
-		ps.setObject(1, null);
+		ps.setNull(1, Types.VARCHAR);
 		psControl.setVoidCallable(1);
 		psControl.replay();
 		conControl.replay();
