@@ -3,6 +3,8 @@ Import-Package: org.apache.commons.logging*, \
   org.springframework.dao*;version=${spring-version-osgi}, \
   javax.transaction*;version=${tx-version};resolution:=optional, \
   org.hibernate*;version=${hb-version};resolution:=optional, \
+  oracle.toplink.essentials.expressions;resolution:=optional, \
+  org.eclipse.persistence.expressions;resolution:=optional, \
   *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
