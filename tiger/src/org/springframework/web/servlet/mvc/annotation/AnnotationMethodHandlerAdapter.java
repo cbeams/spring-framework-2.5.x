@@ -297,7 +297,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		return invokeHandlerMethod(request, response, handler);
 	}
 
-	private ModelAndView invokeHandlerMethod(
+	protected ModelAndView invokeHandlerMethod(
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
 		try {
@@ -424,19 +424,21 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
 					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
 						if (methodNameResolver != null && mappingInfo.paths.length == 0) {
-							if (resolvedMethodName == null) {
-								resolvedMethodName = methodNameResolver.getHandlerMethodName(request);
-							}
-							if (!resolvedMethodName.equals(oldMappedMethod.getName())) {
-								oldMappedMethod = null;
-							}
-							if (!resolvedMethodName.equals(handlerMethod.getName())) {
-								if (oldMappedMethod != null) {
-									targetHandlerMethods.put(mappingInfo, oldMappedMethod);
+							if (!oldMappedMethod.getName().equals(handlerMethod.getName())) {
+								if (resolvedMethodName == null) {
+									resolvedMethodName = methodNameResolver.getHandlerMethodName(request);
+								}
+								if (!resolvedMethodName.equals(oldMappedMethod.getName())) {
 									oldMappedMethod = null;
 								}
-								else {
-									targetHandlerMethods.remove(mappingInfo);
+								if (!resolvedMethodName.equals(handlerMethod.getName())) {
+									if (oldMappedMethod != null) {
+										targetHandlerMethods.put(mappingInfo, oldMappedMethod);
+										oldMappedMethod = null;
+									}
+									else {
+										targetHandlerMethods.remove(mappingInfo);
+									}
 								}
 							}
 						}

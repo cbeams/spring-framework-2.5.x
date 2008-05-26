@@ -72,6 +72,7 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * @author Juergen Hoeller
@@ -571,6 +572,30 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
+	public void testEquivalentMappingsWithSameMethodName() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(ChildController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/child/test");
+		request.addParameter("childId", "100");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			servlet.service(request, response);
+		}
+		catch (NestedServletException ex) {
+			assertTrue(ex.getCause() instanceof IllegalStateException);
+			assertTrue(ex.getCause().getMessage().contains("doGet"));
+		}
+	}
+
 
 	@RequestMapping("/myPath.do")
 	private static class MyController extends AbstractController {
@@ -578,6 +603,15 @@ public class ServletAnnotationControllerTests extends TestCase {
 		protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			response.getWriter().write("test");
 			return null;
+		}
+	}
+
+
+	private static class BaseController {
+
+		@RequestMapping(method = RequestMethod.GET)
+		public void myPath2(HttpServletResponse response) throws IOException  {
+			response.getWriter().write("test");
 		}
 	}
 
@@ -923,6 +957,24 @@ public class ServletAnnotationControllerTests extends TestCase {
 							"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
 				}
 			};
+		}
+	}
+
+
+	public static class ParentController {
+
+		@RequestMapping(method = RequestMethod.GET)
+		public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+		}
+	}
+
+
+	@Controller
+	@RequestMapping("/child/test")
+	public static class ChildController extends ParentController {
+
+		@RequestMapping(method = RequestMethod.GET)
+		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId") String id) {
 		}
 	}
 
