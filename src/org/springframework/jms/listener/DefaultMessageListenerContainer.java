@@ -681,7 +681,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		try {
 			super.establishSharedConnection();
 		}
-		catch (JMSException ex) {
+		catch (Exception ex) {
 			logger.debug("Could not establish shared JMS Connection - " +
 					"leaving it up to asynchronous invokers to establish a Connection as soon as possible", ex);
 		}
@@ -696,7 +696,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		try {
 			super.startSharedConnection();
 		}
-		catch (JMSException ex) {
+		catch (Exception ex) {
 			logger.debug("Connection start failed - relying on listeners to perform recovery", ex);
 		}
 	}
@@ -710,7 +710,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		try {
 			super.stopSharedConnection();
 		}
-		catch (JMSException ex) {
+		catch (Exception ex) {
 			logger.debug("Connection stop failed - relying on listeners to perform recovery after restart", ex);
 		}
 	}
