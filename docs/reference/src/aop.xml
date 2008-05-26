@@ -474,14 +474,22 @@ private void anyOldTransfer() {}]]><lineannotation>// the pointcut signature</li
 	    </listitem>
 	  </itemizedlist>
 
-   	  <remark>Because Spring AOP limits matching to only method execution join points, the
+   	  <para>Because Spring AOP limits matching to only method execution join points, the
 	    discussion of the pointcut designators above gives a narrower definition than you will
 	    find in the AspectJ programming guide. In addition, AspectJ itself has type-based
 	    semantics and at an execution join point both 'this' and 'target' refer to the same
 	    object - the object executing the method. Spring AOP is a proxy based system and
 	    differentiates between the proxy object itself (bound to 'this') and the target
-	    object behind the proxy (bound to 'target').</remark>
-		
+	    object behind the proxy (bound to 'target').</para>
+
+	    <note>
+        <para>Due to the proxy-based nature of Spring's AOP framework,
+        protected methods are by definition <emphasis>not</emphasis>
+        intercepted, neither for JDK proxies (where this isn't applicable)
+        nor for CGLIB proxies (where this is technically possible but not
+        recommendable for AOP purposes). As a consequence, any given pointcut
+        will be matched against <emphasis>public methods only</emphasis>!</para>
+	    </note>
     </section>
     
     <section id="aop-pointcuts-combining">
