@@ -273,8 +273,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	protected final void initServletBean() throws ServletException, BeansException {
 		getServletContext().log("Initializing Spring FrameworkServlet '" + getServletName() + "'");
-		if (logger.isInfoEnabled()) {
-			logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
 		}
 		long startTime = System.currentTimeMillis();
 
@@ -283,17 +283,17 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			initFrameworkServlet();
 		}
 		catch (ServletException ex) {
-			logger.error("Context initialization failed", ex);
+			this.logger.error("Context initialization failed", ex);
 			throw ex;
 		}
 		catch (BeansException ex) {
-			logger.error("Context initialization failed", ex);
+			this.logger.error("Context initialization failed", ex);
 			throw ex;
 		}
 
-		if (logger.isInfoEnabled()) {
+		if (this.logger.isInfoEnabled()) {
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			logger.info("FrameworkServlet '" + getServletName() + "': initialization completed in " +
+			this.logger.info("FrameworkServlet '" + getServletName() + "': initialization completed in " +
 					elapsedTime + " ms");
 		}
 	}
@@ -326,8 +326,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
 						"' as ServletContext attribute with name [" + attrName + "]");
 			}
 		}
@@ -337,12 +337,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/**
 	 * Retrieve a <code>WebApplicationContext</code> from the <code>ServletContext</code>
-	 * attribute with the {@link #setContextAttribute configured name}. Thus, the
+	 * attribute with the {@link #setContextAttribute configured name}. The
 	 * <code>WebApplicationContext</code> must have already been loaded and stored in the
 	 * <code>ServletContext</code> before this servlet gets initialized (or invoked).
 	 * <p>Subclasses may override this method to provide a different
 	 * <code>WebApplicationContext</code> retrieval strategy.
-	 * @return the WebApplicationContext for this proxy, or <code>null</code> if not found
+	 * @return the WebApplicationContext for this servlet, or <code>null</code> if not found
 	 * @see #getContextAttribute()
 	 */
 	protected WebApplicationContext findWebApplicationContext() {
@@ -377,8 +377,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
 			throws BeansException {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Servlet with name '" + getServletName() +
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Servlet with name '" + getServletName() +
 					"' will try to create custom WebApplicationContext context of class '" +
 					getContextClass().getName() + "'" + ", using parent context [" + parent + "]");
 		}
@@ -585,10 +585,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		finally {
 			if (failureCause != null) {
-				logger.debug("Could not complete request", failureCause);
+				this.logger.debug("Could not complete request", failureCause);
 			}
 			else {
-				logger.debug("Successfully completed request");
+				this.logger.debug("Successfully completed request");
 			}
 			if (this.publishEvents) {
 				// Whether or not we succeeded, publish an event.

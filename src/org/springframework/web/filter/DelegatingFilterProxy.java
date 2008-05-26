@@ -180,7 +180,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 
 	/**
 	 * Retrieve a <code>WebApplicationContext</code> from the <code>ServletContext</code>
-	 * attribute with the {@link #setContextAttribute configured name}. Thus, the
+	 * attribute with the {@link #setContextAttribute configured name}. The
 	 * <code>WebApplicationContext</code> must have already been loaded and stored in the
 	 * <code>ServletContext</code> before this filter gets initialized (or invoked).
 	 * <p>Subclasses may override this method to provide a different
