@@ -517,6 +517,33 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
           </listitem>
         </itemizedlist>
 
+        <para>Because Spring AOP limits matching to only method execution
+        join points, the discussion of the pointcut designators above gives a
+        narrower definition than you will find in the AspectJ programming
+        guide. In addition, AspectJ itself has type-based semantics and at an
+        execution join point both '<literal>this</literal>' and
+        '<literal>target</literal>' refer to the same object - the object
+        executing the method. Spring AOP is a proxy-based system and
+        differentiates between the proxy object itself (bound to
+        '<literal>this</literal>') and the target object behind the proxy
+        (bound to '<literal>target</literal>').</para>
+
+        <note>
+          <para>Due to the proxy-based nature of Spring's AOP framework,
+          protected methods are by definition <emphasis>not</emphasis>
+          intercepted, neither for JDK proxies (where this isn't applicable)
+          nor for CGLIB proxies (where this is technically possible but not
+          recommendable for AOP purposes). As a consequence, any given pointcut
+          will be matched against <emphasis>public methods only</emphasis>!</para>
+
+          <para>If your interception needs include protected/private methods
+          or even constructors, consider the use of Spring-driven
+          <link linkend="aop-aj-ltw">native AspectJ weaving</link> instead
+          of Spring's proxy-based AOP framework. This constitutes a different
+          mode of AOP usage with different characteristics, so be sure to make
+          yourself familiar with weaving first before making a decision.</para>
+        </note>
+
         <para>Spring AOP also supports an additional PCD named
         '<literal>bean</literal>'. This PCD allows you to limit the matching
         of join points to a particular named Spring bean, or to a set of named
@@ -537,25 +564,19 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         <note>
           <para>Please note that the '<literal>bean</literal>' PCD is
           <emphasis>only</emphasis> supported in Spring AOP - and
-          <emphasis>not</emphasis> in AspectJ. It is a Spring-specific
-          extension to the standard PCDs that AspectJ defines.</para>
+          <emphasis>not</emphasis> in native AspectJ weaving. It is a
+          Spring-specific extension to the standard PCDs that AspectJ
+          defines.</para>
 
           <para>The '<literal>bean</literal>' PCD operates at the
           <emphasis>instance</emphasis> level (building on the Spring
           bean name concept) rather than at the type level only
-          (which is what weaving-based AOP is limited to).</para>
+          (which is what weaving-based AOP is limited to).
+          Instance-based pointcut designators are a special capability
+          of Spring's proxy-based AOP framework and its close integration
+          with the Spring bean factory, where it is natural and
+          straightforward to identify specific beans by name.</para>
         </note>
-
-        <remark>Because Spring AOP limits matching to only method execution
-        join points, the discussion of the pointcut designators above gives a
-        narrower definition than you will find in the AspectJ programming
-        guide. In addition, AspectJ itself has type-based semantics and at an
-        execution join point both '<literal>this</literal>' and
-        '<literal>target</literal>' refer to the same object - the object
-        executing the method. Spring AOP is a proxy-based system and
-        differentiates between the proxy object itself (bound to
-        '<literal>this</literal>') and the target object behind the proxy
-        (bound to '<literal>target</literal>').</remark>
       </section>
 
       <section id="aop-pointcuts-combining">
@@ -2690,11 +2711,11 @@ MyInterfaceType proxy = factory.getProxy();</programlisting>
     standalone in your distribution as <filename
     class="libraryfile">spring-aspects.jar</filename>; you'll need to add this
     to your classpath in order to use the aspects in it. <xref
-    linkend="aop-atconfigurable" /> and <xref linkend="aop-ajlib-other" />
+    linkend="aop-atconfigurable"/> and <xref linkend="aop-ajlib-other"/>
     discuss the content of this library and how you can use it. <xref
-    linkend="aop-aj-configure" /> discusses how to dependency inject AspectJ
+    linkend="aop-aj-configure"/> discusses how to dependency inject AspectJ
     aspects that are woven using the AspectJ compiler. Finally, <xref
-    linkend="aop-aj-ltw" /> provides an introduction to load-time weaving for
+    linkend="aop-aj-ltw"/> provides an introduction to load-time weaving for
     Spring applications using AspectJ.</para>
 
     <section id="aop-atconfigurable">
