@@ -30,7 +30,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -391,47 +390,55 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	/**
 	 * Obtain the resource object for the given name and type.
-	 * @param resourceElement the descriptor for the annotated field/method
+	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
 	 * @return the resource object (never <code>null</code>)
 	 * @throws BeansException if we failed to obtain the target resource
 	 */
-	protected Object getResource(ResourceElement resourceElement, String requestingBeanName)
+	protected Object getResource(LookupElement element, String requestingBeanName) throws BeansException {
+		if (StringUtils.hasLength(element.mappedName)) {
+			return this.jndiFactory.getBean(element.mappedName, element.lookupType);
+		}
+		if (this.alwaysUseJndiLookup) {
+			return this.jndiFactory.getBean(element.name, element.lookupType);
+		}
+		if (this.resourceFactory == null) {
+			throw new NoSuchBeanDefinitionException(element.lookupType,
+					"No resource factory configured - specify the 'resourceFactory' property");
+		}
+		return autowireResource(this.resourceFactory, element, requestingBeanName);
+	}
+
+	/**
+	 * Obtain a resource object for the given name and type through autowiring
+	 * based on the given factory.
+	 * @param factory the factory to autowire against
+	 * @param element the descriptor for the annotated field/method
+	 * @param requestingBeanName the name of the requesting bean
+	 * @return the resource object (never <code>null</code>)
+	 * @throws BeansException if we failed to obtain the target resource
+	 */
+	protected Object autowireResource(BeanFactory factory, LookupElement element, String requestingBeanName)
 			throws BeansException {
 
 		Object resource = null;
-		Set autowiredBeanNames = null;
-		String name = resourceElement.name;
-		Class type = resourceElement.lookupType;
-		String mappedName = resourceElement.mappedName;
+		Set<String> autowiredBeanNames = null;
+		String name = element.name;
 
-		if (StringUtils.hasLength(mappedName)) {
-			return this.jndiFactory.getBean(mappedName, type);
-		}
-		if (this.alwaysUseJndiLookup) {
-			return this.jndiFactory.getBean(name, type);
-		}
-
-		if (this.resourceFactory == null) {
-			throw new NoSuchBeanDefinitionException(type, "No resource factory configured - " +
-					"override the getResource method or specify the 'resourceFactory' property");
-		}
-
-		if (this.fallbackToDefaultTypeMatch && resourceElement.isDefaultName &&
-				this.resourceFactory instanceof AutowireCapableBeanFactory && !this.resourceFactory.containsBean(name)) {
-			autowiredBeanNames = new LinkedHashSet();
-			resource = ((AutowireCapableBeanFactory) this.resourceFactory).resolveDependency(
-					resourceElement.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
+		if (this.fallbackToDefaultTypeMatch && element.isDefaultName &&
+				factory instanceof AutowireCapableBeanFactory && !factory.containsBean(name)) {
+			autowiredBeanNames = new LinkedHashSet<String>();
+			resource = ((AutowireCapableBeanFactory) factory).resolveDependency(
+					element.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
 		}
 		else {
-			resource = this.resourceFactory.getBean(name, type);
+			resource = factory.getBean(name, element.lookupType);
 			autowiredBeanNames = Collections.singleton(name);
 		}
 
-		if (this.resourceFactory instanceof ConfigurableBeanFactory) {
-			ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) this.resourceFactory;
-			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
-				String autowiredBeanName = (String) it.next();
+		if (factory instanceof ConfigurableBeanFactory) {
+			ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) factory;
+			for (String autowiredBeanName : autowiredBeanNames) {
 				beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
 			}
 		}
@@ -441,10 +448,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	/**
-	 * Class representing injection information about an annotated field
-	 * or setter method, supporting the @Resource annotation.
+	 * Class representing generic injection information about an annotated field
+	 * or setter method, supporting @Resource and related annotations.
 	 */
-	private class ResourceElement extends InjectionMetadata.InjectedElement {
+	protected abstract class LookupElement extends InjectionMetadata.InjectedElement {
 
 		protected String name;
 
@@ -454,11 +461,51 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		protected String mappedName;
 
+		public LookupElement(Member member, PropertyDescriptor pd) {
+			super(member, pd);
+			initAnnotation((AnnotatedElement) member);
+		}
+
+		protected abstract void initAnnotation(AnnotatedElement ae);
+
+		/**
+		 * Return the resource name for the lookup.
+		 */
+		public final String getName() {
+			return this.name;
+		}
+
+		/**
+		 * Return the desired type for the lookup.
+		 */
+		public final Class<?> getLookupType() {
+			return this.lookupType;
+		}
+
+		/**
+		 * Build a DependencyDescriptor for the underlying field/method.
+		 */
+		public final DependencyDescriptor getDependencyDescriptor() {
+			if (this.isField) {
+				return new LookupDependencyDescriptor((Field) this.member, this.lookupType);
+			}
+			else {
+				return new LookupDependencyDescriptor((Method) this.member, this.lookupType);
+			}
+		}
+	}
+
+
+	/**
+	 * Class representing injection information about an annotated field
+	 * or setter method, supporting the @Resource annotation.
+	 */
+	private class ResourceElement extends LookupElement {
+
 		protected boolean shareable = true;
 
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
-			initAnnotation((AnnotatedElement) member);
 		}
 
 		protected void initAnnotation(AnnotatedElement ae) {
@@ -485,18 +532,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.shareable = resource.shareable();
 		}
 
-		/**
-		 * Build a DependencyDescriptor for the underlying field/method.
-		 */
-		public DependencyDescriptor getDependencyDescriptor() {
-			if (this.isField) {
-				return new ResourceDependencyDescriptor((Field) this.member, this.lookupType);
-			}
-			else {
-				return new ResourceDependencyDescriptor((Method) this.member, this.lookupType);
-			}
-		}
-
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
 			return getResource(this, requestingBeanName);
@@ -508,7 +543,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * Class representing injection information about an annotated field
 	 * or setter method, supporting the @WebServiceRef annotation.
 	 */
-	private class WebServiceRefElement extends ResourceElement {
+	private class WebServiceRefElement extends LookupElement {
 
 		private Class elementType;
 
@@ -596,7 +631,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * Class representing injection information about an annotated field
 	 * or setter method, supporting the @EJB annotation.
 	 */
-	private class EjbRefElement extends ResourceElement {
+	private class EjbRefElement extends LookupElement {
 
 		private String beanName;
 
@@ -655,22 +690,22 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * Extension of the DependencyDescriptor class,
 	 * overriding the dependency type with the specified resource type.
 	 */
-	private static class ResourceDependencyDescriptor extends DependencyDescriptor {
+	private static class LookupDependencyDescriptor extends DependencyDescriptor {
 
-		private final Class resourceType;
+		private final Class lookupType;
 
-		public ResourceDependencyDescriptor(Field field, Class resourceType) {
+		public LookupDependencyDescriptor(Field field, Class lookupType) {
 			super(field, true);
-			this.resourceType = resourceType;
+			this.lookupType = lookupType;
 		}
 
-		public ResourceDependencyDescriptor(Method method, Class resourceType) {
+		public LookupDependencyDescriptor(Method method, Class lookupType) {
 			super(new MethodParameter(method, 0), true);
-			this.resourceType = resourceType;
+			this.lookupType = lookupType;
 		}
 
 		public Class getDependencyType() {
-			return this.resourceType;
+			return this.lookupType;
 		}
 	}
 
