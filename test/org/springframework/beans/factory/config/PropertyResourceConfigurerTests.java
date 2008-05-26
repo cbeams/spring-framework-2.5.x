@@ -261,6 +261,8 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		pvs.addPropertyValue("someSet", someSet);
 
 		Map someMap = new ManagedMap();
+		someMap.put(new TypedStringValue("key${age}"), new TypedStringValue("${age}"));
+		someMap.put(new TypedStringValue("key${age}ref"), new RuntimeBeanReference("${ref}"));
 		someMap.put("key1", new RuntimeBeanReference("${ref}"));
 		someMap.put("key2", "${age}name");
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
@@ -292,7 +294,9 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertTrue(tb2.getSomeSet().contains("na98me"));
 		assertTrue(tb2.getSomeSet().contains(tb2));
 		assertTrue(tb2.getSomeSet().contains(new Integer(98)));
-		assertEquals(4, tb2.getSomeMap().size());
+		assertEquals(6, tb2.getSomeMap().size());
+		assertEquals("98", tb2.getSomeMap().get("key98"));
+		assertEquals(tb2, tb2.getSomeMap().get("key98ref"));
 		assertEquals(tb2, tb2.getSomeMap().get("key1"));
 		assertEquals("98name", tb2.getSomeMap().get("key2"));
 		TestBean inner1 = (TestBean) tb2.getSomeMap().get("key3");
