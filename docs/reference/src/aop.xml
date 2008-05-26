@@ -595,7 +595,7 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         <programlisting>    @Pointcut("execution(public * *(..))")
     private void anyPublicOperation() {}
     
-    @Pointcut("within(com.xyz.someapp.trading..*")
+    @Pointcut("within(com.xyz.someapp.trading..*)")
     private void inTrading() {}
     
     @Pointcut("anyPublicOperation() &amp;&amp; inTrading()")
