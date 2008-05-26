@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -216,30 +216,39 @@ public class BeanDefinitionVisitor {
 	}
 
 	protected void visitSet(Set setVal) {
-		for (Iterator it = new HashSet(setVal).iterator(); it.hasNext();) {
+		Set newContent = new LinkedHashSet();
+		boolean entriesModified = false;
+		for (Iterator it = setVal.iterator(); it.hasNext();) {
 			Object elem = it.next();
+			int elemHash = (elem != null ? elem.hashCode() : 0);
 			Object newVal = resolveValue(elem);
-			if (!ObjectUtils.nullSafeEquals(newVal, elem)) {
-				setVal.remove(elem);
-				setVal.add(newVal);
-			}
+			int newValHash = (newVal != null ? newVal.hashCode() : 0);
+			newContent.add(newVal);
+			entriesModified = entriesModified || (newVal != elem || newValHash != elemHash);
+		}
+		if (entriesModified) {
+			setVal.clear();
+			setVal.addAll(newContent);
 		}
 	}
 
 	protected void visitMap(Map mapVal) {
-		for (Iterator it = new HashMap(mapVal).entrySet().iterator(); it.hasNext();) {
+		Map newContent = new LinkedHashMap();
+		boolean entriesModified = false;
+		for (Iterator it = mapVal.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			Object key = entry.getKey();
+			int keyHash = (key != null ? key.hashCode() : 0);
 			Object newKey = resolveValue(key);
-			boolean isNewKey = !ObjectUtils.nullSafeEquals(key, newKey);
+			int newKeyHash = (newKey != null ? newKey.hashCode() : 0);
 			Object val = entry.getValue();
 			Object newVal = resolveValue(val);
-			if (isNewKey) {
-				mapVal.remove(key);
-			}
-			if (isNewKey || !ObjectUtils.nullSafeEquals(newVal, val)) {
-				mapVal.put(newKey, newVal);
-			}
+			newContent.put(newKey, newVal);
+			entriesModified = entriesModified || (newVal != val || newKey != key || newKeyHash != keyHash);
+		}
+		if (entriesModified) {
+			mapVal.clear();
+			mapVal.putAll(newContent);
 		}
 	}
 
