@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -57,11 +58,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 	private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
 
+	private String[] autowireCandidatePatterns;
+
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
-
-	private String[] autowireCandidatePatterns;
 
 	private boolean includeAnnotationConfig = true;
 
@@ -204,11 +205,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-				BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
-				if (checkCandidate(beanName, beanDefinition)) {
-					BeanDefinitionHolder bdHolder = new BeanDefinitionHolder(beanDefinition, beanName);
-					beanDefinitions.add(bdHolder);
-					registerBeanDefinition(bdHolder, this.registry);
+				if (checkCandidate(beanName, candidate)) {
+					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					definitionHolder = applyScope(definitionHolder, scopeMetadata);
+					beanDefinitions.add(definitionHolder);
+					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}
 		}
@@ -256,6 +257,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			return true;
 		}
 		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
+		BeanDefinition originatingDef = existingDef.getOriginatingBeanDefinition();
+		if (originatingDef != null) {
+			existingDef = originatingDef;
+		}
 		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
@@ -270,32 +275,31 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * <p>The default implementation simply considers them as compatible
 	 * when the bean class name matches.
 	 * @param newDefinition the new bean definition, originated from scanning
-	 * @param existingDefinition the existing bean definition, probably from
-	 * an existing bean definition
+	 * @param existingDefinition the existing bean definition, potentially an
+	 * explicitly defined one or a previously generated one from scanning
 	 * @return whether the definitions are considered as compatible, with the
 	 * new definition to be skipped in favor of the existing definition
 	 */
 	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
-		return newDefinition.getBeanClassName().equals(existingDefinition.getBeanClassName());
+		return (newDefinition.getSource().equals(existingDefinition.getSource()) ||  // scanned same class twice
+				!(existingDefinition instanceof AnnotatedBeanDefinition));  // explicitly registered overriding bean
 	}
 
 	/**
 	 * Apply the specified scope to the given bean definition.
-	 * @param beanDefinition the bean definition to configure
-	 * @param beanName the name of the bean
+	 * @param definitionHolder the bean definition to configure
 	 * @param scopeMetadata the corresponding scope metadata
 	 * @return the final bean definition to use (potentially a proxy)
 	 */
-	private BeanDefinition applyScope(BeanDefinition beanDefinition, String beanName, ScopeMetadata scopeMetadata) {
+	private BeanDefinitionHolder applyScope(BeanDefinitionHolder definitionHolder, ScopeMetadata scopeMetadata) {
 		String scope = scopeMetadata.getScopeName();
 		ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();
-		beanDefinition.setScope(scope);
+		definitionHolder.getBeanDefinition().setScope(scope);
 		if (BeanDefinition.SCOPE_SINGLETON.equals(scope) || BeanDefinition.SCOPE_PROTOTYPE.equals(scope) ||
 				scopedProxyMode.equals(ScopedProxyMode.NO)) {
-			return beanDefinition;
+			return definitionHolder;
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
-		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, beanName);
 		return ScopedProxyCreator.createScopedProxy(definitionHolder, this.registry, proxyTargetClass);
 	}
 
@@ -306,12 +310,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	private static class ScopedProxyCreator {
 
-		public static BeanDefinition createScopedProxy(
+		public static BeanDefinitionHolder createScopedProxy(
 				BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry, boolean proxyTargetClass) {
 
-			BeanDefinitionHolder scopedProxyDefinition =
-					ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
-			return scopedProxyDefinition.getBeanDefinition();
+			return ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
 		}
 	}
 

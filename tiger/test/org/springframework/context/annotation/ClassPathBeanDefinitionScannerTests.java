@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation2.NamedStubDao2;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
@@ -71,19 +72,27 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("myNamedDao"));
 	}
 
-	public void testSimpleScanWithDefaultFiltersAndOverriddenBean() {
+	public void testSimpleScanWithDefaultFiltersAndOverridingBean() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(TestBean.class));
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
+		// should not fail!
+		scanner.scan(BASE_PACKAGE);
+	}
+
+	public void testSimpleScanWithDefaultFiltersAndDefaultBeanNameClash() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(false);
 		try {
+			scanner.scan("org.springframework.context.annotation3");
 			scanner.scan(BASE_PACKAGE);
 			fail("Should have thrown IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
 			// expected
 			assertTrue(ex.getMessage().indexOf("stubFooDao") != -1);
-			assertTrue(ex.getMessage().indexOf(TestBean.class.getName()) != -1);
 			assertTrue(ex.getMessage().indexOf(StubFooDao.class.getName()) != -1);
 		}
 	}
@@ -120,19 +129,28 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("myNamedDao"));
 	}
 
-	public void testSimpleScanWithDefaultFiltersAndOverriddenIncompatibleNamedBean() {
+	public void testSimpleScanWithDefaultFiltersAndSameBeanTwice() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		context.registerBeanDefinition("myNamedDao", new RootBeanDefinition(TestBean.class));
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(false);
+		// should not fail!
+		scanner.scan(BASE_PACKAGE);
+		scanner.scan(BASE_PACKAGE);
+	}
+
+	public void testSimpleScanWithDefaultFiltersAndSpecifiedBeanNameClash() {
+		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
 		try {
+			scanner.scan("org.springframework.context.annotation2");
 			scanner.scan(BASE_PACKAGE);
 			fail("Must have thrown IllegalStateException");
 		}
 		catch (IllegalStateException expected) {
 			assertTrue(expected.getMessage().contains("myNamedDao"));
 			assertTrue(expected.getMessage().contains(NamedStubDao.class.getName()));
-			assertTrue(expected.getMessage().contains(TestBean.class.getName()));
+			assertTrue(expected.getMessage().contains(NamedStubDao2.class.getName()));
 		}
 	}
 
