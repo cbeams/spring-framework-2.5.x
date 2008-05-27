@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  *
  * <p>The exact type of annotation that is checked for is configurable via the
  * {@link #setScopeAnnotationType(Class)} property.
- * 
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
@@ -53,11 +53,10 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 
 	/**
 	 * Create a new instance of the <code>AnnotationScopeMetadataResolver</code> class.
-	 * @param scopedProxyMode the desired scoped-proxy-mode; must not be <code>null</code>
-	 * @throws IllegalArgumentException if the supplied <code>scopedProxyMode</code> is <code>null</code>.
+	 * @param scopedProxyMode the desired scoped-proxy mode
 	 */
 	public AnnotationScopeMetadataResolver(ScopedProxyMode scopedProxyMode) {
-		Assert.notNull(scopedProxyMode, "'scopedProxyMode' cannot be null.");
+		Assert.notNull(scopedProxyMode, "'scopedProxyMode' must not be null");
 		this.scopedProxyMode = scopedProxyMode;
 	}
 
@@ -65,11 +64,10 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	/**
 	 * Set the type of annotation that is checked for by this
 	 * {@link AnnotationScopeMetadataResolver}.
-	 * @param scopeAnnotationType the target annotation type; must not be <code>null</code>
-	 * @throws IllegalArgumentException if the supplied <code>scopeAnnotationType</code> is <code>null</code>.
+	 * @param scopeAnnotationType the target annotation type
 	 */
 	public void setScopeAnnotationType(Class<? extends Annotation> scopeAnnotationType) {
-		Assert.notNull(scopeAnnotationType, "'scopeAnnotationType' cannot be null.");
+		Assert.notNull(scopeAnnotationType, "'scopeAnnotationType' must not be null");
 		this.scopeAnnotationType = scopeAnnotationType;
 	}
 	
