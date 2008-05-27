@@ -181,6 +181,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 					MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
 					if (isCandidateComponent(metadataReader)) {
 						ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+						sbd.setResource(resource);
 						sbd.setSource(resource);
 						if (isCandidateComponent(sbd)) {
 							candidates.add(sbd);
