@@ -46,12 +46,12 @@ public interface SqlXmlObjectMappingHandler {
     Object getXmlAsObject(ResultSet rs, int columnIndex) throws SQLException;
 
     /**
-     * Get an instance of an <code>SqlXmlMarshallingValue</code> implementation to be used
+     * Get an instance of an <code>SqlXmlValue</code> implementation to be used
 	 * together with the database specific implementation of this <code>SqlXmlHandler</code>.
      * @param value the Object to be marshalled to XML
      * @return the implementation specific instance
      * @see org.springframework.jdbc.support.xml.SqlXmlValue
      */
-    SqlXmlMarshallingValue newSqlXmlMarshallingValue(Object value);
+    SqlXmlValue newMarshallingSqlXmlValue(Object value);
 
 }
