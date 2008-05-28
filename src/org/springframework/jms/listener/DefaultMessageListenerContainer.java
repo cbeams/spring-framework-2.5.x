@@ -738,6 +738,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 		}
 		else {
+			// Recovery during active operation..
 			if (alreadyRecovered) {
 				logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
 			}
@@ -789,8 +790,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
-				if (logger.isInfoEnabled()) {
+				if (logger.isDebugEnabled()) {
 					logger.info("Could not refresh JMS Connection - retrying in " + this.recoveryInterval + " ms", ex);
+				}
+				else if (logger.isInfoEnabled()) {
+					logger.info("Could not refresh JMS Connection - retrying in " + this.recoveryInterval + " ms: " + ex);
 				}
 			}
 			sleepInbetweenRecoveryAttempts();
