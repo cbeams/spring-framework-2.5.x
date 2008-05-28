@@ -457,8 +457,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Matcher class for the BeanNamePointcutDesignatorHandler.
 	 * 
-	 * Static and dynamic match tests for this matcher always return true, 
+	 * Dynamic match tests for this matcher always return true, 
 	 * since the matching decision is made at the proxy creation time.
+	 * For static match tests, this matcher abstains to allow the overall
+	 * pointcut to match even when negation is used with the bean() poitncut.
 	 */
 	private class BeanNameContextMatcher implements ContextBasedMatcher {
 
@@ -473,7 +475,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		public boolean couldMatchJoinPointsInType(Class someClass, MatchingContext context) {
-			return contextMatch();
+			return contextMatch() == FuzzyBoolean.YES ? true : false;
 		}
 
 		public boolean matchesDynamically(MatchingContext context) {
@@ -481,30 +483,34 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		public FuzzyBoolean matchesStatically(MatchingContext context) {
-			return FuzzyBoolean.YES;
+			return contextMatch();
 		}
 
 		public boolean mayNeedDynamicTest() {
 			return false;
 		}
 
-		private boolean contextMatch() {
+		private FuzzyBoolean contextMatch() {
 			String advisedBeanName = getCurrentProxiedBeanName();
-			if (advisedBeanName == null || BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
-				return false;
+			if (advisedBeanName == null) { // no proxy creation in progress
+				// abstain; can't return YES, since that will make pointcut with negation fail
+				return FuzzyBoolean.MAYBE; 
+			}
+			if (BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
+				return FuzzyBoolean.NO;
 			}
 			if (this.expressionPattern.matches(advisedBeanName)) {
-				return true;
+				return FuzzyBoolean.YES;
 			}
 			if (beanFactory != null) {
 				String[] aliases = beanFactory.getAliases(advisedBeanName);
 				for (int i = 0; i < aliases.length; i++) {
 					if (this.expressionPattern.matches(aliases[i])) {
-						return true;
+						return FuzzyBoolean.YES;
 					}
 				}
 			}
-			return false;
+			return FuzzyBoolean.NO;
 		}
 	}
 

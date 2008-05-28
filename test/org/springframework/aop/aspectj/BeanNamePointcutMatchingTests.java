@@ -51,9 +51,14 @@ public class BeanNamePointcutMatchingTests extends TestCase {
 		assertMatch("someName", "bean(*some*Name*)");
 		assertMatch("someName", "bean(*s*N*)");
 
-		// Or, not expressions
+		// Or, and, not expressions
 		assertMatch("someName", "bean(someName) || bean(someOtherName)");
+		assertMatch("someOtherName", "bean(someName) || bean(someOtherName)");
+		
 		assertMatch("someName", "!bean(someOtherName)");
+		
+		assertMatch("someName", "bean(someName) || !bean(someOtherName)");
+		assertMatch("someName", "bean(someName) && !bean(someOtherName)");
 	}
 
 	public void testNonMatchingPointcuts() {
@@ -63,6 +68,8 @@ public class BeanNamePointcutMatchingTests extends TestCase {
 		// And, not expressions
 		assertMisMatch("someName", "bean(someName) && bean(someOtherName)");
 		assertMisMatch("someName", "!bean(someName)");
+		assertMisMatch("someName", "!bean(someName) && bean(someOtherName)");
+		assertMisMatch("someName", "!bean(someName) || bean(someOtherName)");
 	}
 
 	private void assertMatch(String beanName, String pcExpression) {

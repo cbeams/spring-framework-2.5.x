@@ -16,6 +16,9 @@
 
 package org.springframework.aop.aspectj;
 
+import java.lang.reflect.Method;
+
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -31,8 +34,11 @@ public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringCont
 	protected ITestBean testBean2;
 	protected ITestBean testBeanContainingNestedBean;
 	protected Counter counterAspect;
-
-
+	
+	protected ITestBean interceptThis;
+	protected ITestBean dontInterceptThis;
+	protected TestInterceptor testInterceptor;
+	
 	public BeanNamePointcutTests() {
 		setPopulateProtectedVariables(true);
 	}
@@ -66,5 +72,22 @@ public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringCont
 	public void testNonMatchingNestedBeanName() {
 		assertFalse("Non-matching bean must *not* be advised (proxied)", this.testBeanContainingNestedBean.getDoctor() instanceof Advised);
 	}
+	
+	
+	public void testPointcutAdvisorCombination() {
+		assertTrue("Matching bean must be advised (proxied)", this.interceptThis instanceof Advised);
+		assertFalse("Non-matching bean must *not* be advised (proxied)", this.dontInterceptThis instanceof Advised);
+		interceptThis.setAge(20);
+		assertEquals(1, testInterceptor.interceptionCount);
+		dontInterceptThis.setAge(20);
+		assertEquals(1, testInterceptor.interceptionCount);
+	}
 
+	public static class TestInterceptor implements MethodBeforeAdvice {
+		private int interceptionCount;
+		
+		public void before(Method method, Object[] args, Object target) throws Throwable {
+			interceptionCount++;
+		}
+	}
 }
