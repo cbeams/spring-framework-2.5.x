@@ -433,9 +433,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	protected void startSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
+			this.sharedConnectionStarted = true;
 			if (this.sharedConnection != null) {
 				try {
-					this.sharedConnectionStarted = true;
 					this.sharedConnection.start();
 				}
 				catch (javax.jms.IllegalStateException ex) {
@@ -452,9 +452,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	protected void stopSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
+			this.sharedConnectionStarted = false;
 			if (this.sharedConnection != null) {
 				try {
-					this.sharedConnectionStarted = false;
 					this.sharedConnection.stop();
 				}
 				catch (javax.jms.IllegalStateException ex) {
