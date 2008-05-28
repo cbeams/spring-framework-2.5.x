@@ -34,6 +34,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.metadata.CallMetaDataContext;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract class to provide base functionality for easy stored procedure calls
@@ -202,6 +203,9 @@ public abstract class AbstractJdbcCall {
 	 * @param parameter the {@link SqlParameter} to add
 	 */
 	public void addDeclaredParameter(SqlParameter parameter) {
+		if (!StringUtils.hasText(parameter.getName())) {
+			throw new InvalidDataAccessApiUsageException("You must specify a parameter name when declaring parameters for \"" + getProcedureName() + "\"");
+		}
 		this.declaredParameters.add(parameter);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added declared parameter for [" + getProcedureName() + "]: " + parameter.getName());

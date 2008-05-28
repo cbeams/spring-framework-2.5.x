@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -118,6 +119,20 @@ public class SimpleJdbcCallTests extends TestCase {
 			sproc.execute();
 			fail("Shouldn't succeed in running stored procedure which doesn't exist");
 		} catch (BadSqlGrammarException ex) {
+			// OK
+		}
+	}
+
+	public void testUnnamedParameterHandling() throws Exception {
+		final String MY_PROC = "my_proc";
+
+		replay();
+
+		SimpleJdbcCall sproc = new SimpleJdbcCall(mockDataSource).withProcedureName(MY_PROC);
+		try {
+			sproc.addDeclaredParameter(new SqlParameter(1));
+			fail("Shouldn't succeed in adding unnamed parameter");
+		} catch (InvalidDataAccessApiUsageException ex) {
 			// OK
 		}
 	}
