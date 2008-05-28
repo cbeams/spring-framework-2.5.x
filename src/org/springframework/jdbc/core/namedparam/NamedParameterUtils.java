@@ -45,6 +45,18 @@ public abstract class NamedParameterUtils {
 	private static final char[] PARAMETER_SEPARATORS =
 			new char[] {'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^'};
 
+	/**
+	 * Set of characters that qualify as comment or quotes starting characters.
+	 */
+	private static final String[] START_SKIP =
+			new String[] {"'", "\"", "--", "/*"};
+
+	/**
+	 * Set of characters that at are the corresponding comment or quotes ending characters.
+	 */
+	private static final String[] STOP_SKIP =
+			new String[] {"'", "\"", "\n", "*/"};
+
 
 	//-------------------------------------------------------------------------
 	// Core methods used by NamedParameterJdbcTemplate and SqlQuery/SqlUpdate
@@ -63,54 +75,45 @@ public abstract class NamedParameterUtils {
 		ParsedSql parsedSql = new ParsedSql(sql);
 
 		char[] statement = sql.toCharArray();
-		boolean withinQuotes = false;
-		char currentQuote = '-';
 		int namedParameterCount = 0;
 		int unnamedParameterCount = 0;
 		int totalParameterCount = 0;
 
 		int i = 0;
 		while (i < statement.length) {
-			char c = statement[i];
-			if (withinQuotes) {
-				if (c == currentQuote) {
-					withinQuotes = false;
-					currentQuote = '-';
+			int skipToPosition = skipCommentsAndQuotes(statement, i);
+			if (i != skipToPosition) {
+				if (skipToPosition >= statement.length) {
+					break;
 				}
+				i = skipToPosition;
+			}
+			char c = statement[i];
+			if (c == ':' || c == '&') {
+				int j = i + 1;
+				if (j < statement.length && statement[j] == ':' && c == ':') {
+					// Postgres-style "::" casting operator - to be skipped.
+					i = i + 2;
+					continue;
+				}
+				while (j < statement.length && !isParameterSeparator(statement[j])) {
+					j++;
+				}
+				if (j - i > 1) {
+					String parameter = sql.substring(i + 1, j);
+					if (!namedParameters.contains(parameter)) {
+						namedParameters.add(parameter);
+						namedParameterCount++;
+					}
+					parsedSql.addNamedParameter(parameter, i, j);
+					totalParameterCount++;
+				}
+				i = j - 1;
 			}
 			else {
-				if (c == '"' || c == '\'') {
-					withinQuotes = true;
-					currentQuote = c;
-				}
-				else {
-					if (c == ':' || c == '&') {
-						int j = i + 1;
-						if (j < statement.length && statement[j] == ':' && c == ':') {
-							// Postgres-style "::" casting operator - to be skipped.
-							i = i + 2;
-							continue;
-						}
-						while (j < statement.length && !isParameterSeparator(statement[j])) {
-							j++;
-						}
-						if (j - i > 1) {
-							String parameter = sql.substring(i + 1, j);
-							if (!namedParameters.contains(parameter)) {
-								namedParameters.add(parameter);
-								namedParameterCount++;
-							}
-							parsedSql.addNamedParameter(parameter, i, j);
-							totalParameterCount++;
-						}
-						i = j - 1;
-					}
-					else {
-						if (c == '?') {
-							unnamedParameterCount++;
-							totalParameterCount++;
-						}
-					}
+				if (c == '?') {
+					unnamedParameterCount++;
+					totalParameterCount++;
 				}
 			}
 			i++;
@@ -121,6 +124,55 @@ public abstract class NamedParameterUtils {
 		return parsedSql;
 	}
 
+	/**
+	 * Skip over comments and quoted names present in an SQL statement
+	 * @param statement character array containing SQL statement
+	 * @param position current position of statement
+	 * @return next position to process after any comments or quotes are skipped
+	 */
+	private static int skipCommentsAndQuotes(final char[] statement, final int position) {
+
+		for (int i = 0; i < START_SKIP.length; i++) {
+			if (statement[position] == START_SKIP[i].charAt(0)) {
+				boolean match = true;
+				for (int j = 1; j < START_SKIP[i].length(); j++) {
+					if (!(statement[position + j] == START_SKIP[i].charAt(j))) {
+						match = false;
+						break;
+					}
+				}
+				if (match) {
+					int offset = START_SKIP[i].length();
+					for (int m = position + offset; m < statement.length; m++) {
+						if (statement[m] == STOP_SKIP[i].charAt(0)) {
+							boolean endMatch = true;
+							int endPos = m;
+							for (int n = 1; n < STOP_SKIP[i].length(); n++) {
+								if (m + n >= statement.length) {
+									//last comment not closed properly
+									return statement.length;
+								}
+								if (!(statement[m + n] == STOP_SKIP[i].charAt(n))) {
+									endMatch = false;
+									break;
+								}
+								endPos = m + n;
+							}
+							if (endMatch) {
+								// found character sequence ending comment or quote
+								return endPos + 1;
+							}
+						}
+					}
+					// character sequence ending comment or quote not found
+					return statement.length;
+				}
+
+			}
+		}
+		return position;
+	}
+	
 	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
 	 * Named parameters are substituted for a JDBC placeholder and any select list

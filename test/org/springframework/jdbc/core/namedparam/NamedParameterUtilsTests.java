@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -32,9 +33,8 @@ import org.springframework.test.AssertThrows;
 public class NamedParameterUtilsTests extends TestCase {
 
 	public void testParseSql() {
+
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
-		String sql2 = "xxx &a yyyy ? zzzzz";
-		String sql3 = "xxx &a+:b" + '\t' + ":c%10 yyyy ? zzzzz";
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals("xxx ? yyyy ? ? ? zzzzz", NamedParameterUtils.substituteNamedParameters(psql, null));
 		assertEquals("a", psql.getParameterNames().get(0));
@@ -42,15 +42,20 @@ public class NamedParameterUtilsTests extends TestCase {
 		assertEquals("a", psql.getParameterNames().get(3));
 		assertEquals(4, psql.getTotalParameterCount());
 		assertEquals(3, psql.getNamedParameterCount());
+
+		String sql2 = "xxx &a yyyy ? zzzzz";
 		ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
 		assertEquals("xxx ? yyyy ? zzzzz", NamedParameterUtils.substituteNamedParameters(psql2, null));
 		assertEquals("a", psql2.getParameterNames().get(0));
 		assertEquals(2, psql2.getTotalParameterCount());
 		assertEquals(1, psql2.getNamedParameterCount());
+
+		String sql3 = "xxx &a+:b" + '\t' + ":c%10 yyyy ? zzzzz";
 		ParsedSql psql3 = NamedParameterUtils.parseSqlStatement(sql3);
 		assertEquals("a", psql3.getParameterNames().get(0));
 		assertEquals("b", psql3.getParameterNames().get(1));
 		assertEquals("c", psql3.getParameterNames().get(2));
+
 	}
 
 	public void testSubstituteNamedParameters() {
@@ -107,6 +112,38 @@ public class NamedParameterUtilsTests extends TestCase {
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
+	/*
+	 * SPR-4789
+	 */
+	public void testParseSqlContainingComments() {
+
+		String sql1 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz -- :xx XX\n";
+		ParsedSql psql1 = NamedParameterUtils.parseSqlStatement(sql1);
+		assertEquals("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz -- :xx XX\n",
+				NamedParameterUtils.substituteNamedParameters(psql1, null));
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("a", "a");
+		paramMap.addValue("b", "b");
+		paramMap.addValue("c", "c");
+		Object[] params = NamedParameterUtils.buildValueArray(psql1, paramMap, null);
+		assertEquals(4, params.length);
+		assertEquals("a", params[0]);
+		assertEquals("b", params[1]);
+		assertEquals("c", params[2]);
+		assertEquals("a", params[3]);
+
+		String sql2 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz -- :xx XX";
+		ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
+		assertEquals("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz -- :xx XX",
+				NamedParameterUtils.substituteNamedParameters(psql2, null));
+
+		String sql3 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz /* :xx XX*";
+		ParsedSql psql3 = NamedParameterUtils.parseSqlStatement(sql3);
+		assertEquals("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz /* :xx XX*",
+				NamedParameterUtils.substituteNamedParameters(psql3, null));
+
 	}
 
 	/*
