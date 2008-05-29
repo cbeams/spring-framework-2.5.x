@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.5.5 (May 2008)
-----------------------------------------------
+THE SPRING FRAMEWORK, release 2.5.5 (June 2008)
+-----------------------------------------------
 http://www.springframework.org
 
 
@@ -43,10 +43,10 @@ A central focus of Spring is to allow for reusable business and data access obje
 specific J2EE services. Such objects can be reused across J2EE environments (web or EJB), standalone
 applications, test environments, etc without any hassle.
 
-Spring has a layered architecture; all its functionality builds on lower levels. So you can e.g. use the
-JavaBeans configuration management without using the MVC framework or AOP support. But if you use the web
-MVC framework or AOP support, you'll find they build on the configuration framework, so you can apply your
-knowledge about it immediately.
+Spring has a layered architecture; all of its functionality builds on lower levels. So you can for example
+use the JavaBeans configuration management without using the MVC framework or AOP support. However, if you
+use the web MVC framework or the AOP support, you'll find that they build on the configuration framework,
+so you can apply your knowledge about it immediately.
 
 
 2. RELEASE INFO
@@ -101,7 +101,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2850 KB)
+* "spring" (~2870 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Spring MVC support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar and spring-webmvc*.jar!
@@ -116,7 +116,7 @@ MODULE JARS (dist/modules):
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
-* "spring-context" (~460 KB)
+* "spring-context" (~465 KB)
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
@@ -128,7 +128,7 @@ MODULE JARS (dist/modules):
 - Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
 - Dependencies: Commons Logging, (Commons Attributes)
 
-* "spring-jdbc" (~310 KB)
+* "spring-jdbc" (~315 KB)
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
@@ -140,7 +140,7 @@ MODULE JARS (dist/modules):
 - Contents: JDO support, JPA support, Hibernate support, TopLink support, iBATIS support
 - Dependencies: spring-jdbc, (spring-web)
 
-* "spring-test" (~175 KB)
+* "spring-test" (~180 KB)
 - Contents: test context framework, JUnit support, JNDI mocks, Servlet API mocks, Portlet API mocks
 - Dependencies: spring-core, (spring-context, spring-jdbc, spring-web, JUnit, Servlet API, Portlet API)
 
@@ -148,7 +148,7 @@ MODULE JARS (dist/modules):
 - Contents: transaction infrastructure, JCA support, DAO support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
 
-* "spring-web" (~185 KB)
+* "spring-web" (~190 KB)
 - Contents: web application context, multipart resolver, HTTP-based remoting support
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
