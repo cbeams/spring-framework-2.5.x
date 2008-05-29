@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -370,12 +370,21 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
-				if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
+				if (method.getName().equals("equals")) {
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				}
+				else if (method.getName().equals("hashCode")) {
+					// Use hashCode of EntityManagerFactory proxy.
+					return new Integer(System.identityHashCode(proxy));
+				}
+				else if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
 					return method.invoke(this.entityManagerFactoryInfo, args);
 				}
-				if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
+				else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
 					return method.invoke(this.entityManagerFactoryPlusOperations, args);
 				}
+
 				Object retVal = method.invoke(this.targetEntityManagerFactory, args);
 				if (retVal instanceof EntityManager) {
 					EntityManager rawEntityManager = (EntityManager) retVal;
