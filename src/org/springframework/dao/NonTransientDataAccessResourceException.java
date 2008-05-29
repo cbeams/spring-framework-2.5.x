@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package org.springframework.dao;
 
 /**
- * Data access exception thrown when a resource fails completely and the failure is permamnet.
+ * Data access exception thrown when a resource fails completely and the failure is permanent.
  *
  * @author Thomas Risberg
  * @since 2.5
+ * @see java.sql.SQLNonTransientConnectionException
  */
 public class NonTransientDataAccessResourceException extends NonTransientDataAccessException {
 
