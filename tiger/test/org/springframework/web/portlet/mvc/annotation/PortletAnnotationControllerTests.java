@@ -378,7 +378,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 		};
 		portlet.init(new MockPortletConfig());
 
-		MockRenderRequest request = new MockRenderRequest(PortletMode.EDIT);
+		MockRenderRequest request = new MockRenderRequest(PortletMode.HELP);
 		MockRenderResponse response = new MockRenderResponse();
 		try {
 			portlet.render(request, response);
@@ -387,6 +387,11 @@ public class PortletAnnotationControllerTests extends TestCase {
 		catch (UnavailableException ex) {
 			// expected
 		}
+
+		request = new MockRenderRequest(PortletMode.EDIT);
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myDefaultView", response.getContentAsString());
 
 		request = new MockRenderRequest(PortletMode.EDIT);
 		request.addParameter("myParam", "myValue");
@@ -726,6 +731,11 @@ public class PortletAnnotationControllerTests extends TestCase {
 		@RequestMapping(params = "myParam=mySpecialValue")
 		public void myHandle(RenderResponse response) throws IOException {
 			response.getWriter().write("mySpecialView");
+		}
+
+		@RequestMapping
+		public void myDefaultHandle(RenderResponse response) throws IOException {
+			response.getWriter().write("myDefaultView");
 		}
 	}
 

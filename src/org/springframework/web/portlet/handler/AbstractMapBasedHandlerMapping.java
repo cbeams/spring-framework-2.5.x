@@ -16,9 +16,12 @@
 
 package org.springframework.web.portlet.handler;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.portlet.PortletRequest;
@@ -71,7 +74,9 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 		}
 		if (handler instanceof Map) {
 			Map predicateMap = (Map) handler;
-			for (Iterator it = predicateMap.keySet().iterator(); it.hasNext();) {
+			List predicates = new LinkedList(predicateMap.keySet());
+			Collections.sort(predicates);
+			for (Iterator it = predicates.iterator(); it.hasNext();) {
 				PortletRequestMappingPredicate predicate = (PortletRequestMappingPredicate) it.next();
 				if (predicate.match(request)) {
 					return predicateMap.get(predicate);
@@ -173,7 +178,7 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	/**
 	 * Predicate interface for determining a match with a given request.
 	 */
-	protected interface PortletRequestMappingPredicate {
+	protected interface PortletRequestMappingPredicate extends Comparable {
 
 		/**
 		 * Determine whether the given request matches this predicate.

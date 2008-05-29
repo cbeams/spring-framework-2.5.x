@@ -24,8 +24,8 @@ import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -94,23 +94,14 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	 * @throws org.springframework.beans.BeansException if the handler couldn't be registered
 	 */
 	protected void detectHandlers() throws BeansException {
-		String[] beanNames = getApplicationContext().getBeanNamesForType(Object.class);
+		ApplicationContext context = getApplicationContext();
+		String[] beanNames = context.getBeanNamesForType(Object.class);
 		for (String beanName : beanNames) {
-			ApplicationContext context = getApplicationContext();
 			Class<?> handlerType = context.getType(beanName);
-			RequestMapping mapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
-			if (mapping == null && context instanceof ConfigurableApplicationContext &&
-					context.containsBeanDefinition(beanName)) {
-				ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-				BeanDefinition bd = cac.getBeanFactory().getMergedBeanDefinition(beanName);
-				if (bd instanceof AbstractBeanDefinition) {
-					AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-					if (abd.hasBeanClass()) {
-						Class<?> beanClass = abd.getBeanClass();
-						mapping = AnnotationUtils.findAnnotation(beanClass, RequestMapping.class);
-					}
-				}
-			}
+			ListableBeanFactory bf = (context instanceof ConfigurableApplicationContext ?
+					((ConfigurableApplicationContext) context).getBeanFactory() : context);
+			GenericBeanFactoryAccessor bfa = new GenericBeanFactoryAccessor(bf);
+			RequestMapping mapping = bfa.findAnnotationOnBean(beanName, RequestMapping.class);
 			if (mapping != null) {
 				String[] modeKeys = mapping.value();
 				String[] params = mapping.params();
@@ -134,6 +125,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	/**
 	 * Derive portlet mode mappings from the handler's method-level mappings.
 	 * @param handlerType the handler type to introspect
+	 * @param beanName the name of the bean introspected
+	 * @param typeMapping the type level mapping (if any)
+	 * @return <code>true</code> if at least 1 handler method has been registered;
+	 * <code>false</code> otherwise
 	 */
 	protected boolean detectHandlerMethods(Class handlerType, final String beanName, final RequestMapping typeMapping) {
 		final Set<Boolean> handlersRegistered = new HashSet<Boolean>(1);
@@ -188,6 +183,15 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 		public boolean match(PortletRequest request) {
 			return PortletAnnotationMappingUtils.checkParameters(this.params, request);
+		}
+
+		public int compareTo(Object other) {
+			if (other instanceof PortletRequestMappingPredicate) {
+				return new Integer(((ParameterMappingPredicate) other).params.length).compareTo(this.params.length);
+			}
+			else {
+				return 0;
+			}
 		}
 
 		public String toString() {
