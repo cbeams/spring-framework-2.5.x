@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,12 +101,12 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	/**
 	 * Constructor for AbstractDependencyInjectionSpringContextTests with a
 	 * JUnit name.
-	 *
 	 * @param name the name of this text fixture
 	 */
 	public AbstractDependencyInjectionSpringContextTests(String name) {
 		super(name);
 	}
+
 
 	/**
 	 * Set whether to populate protected variables of this test case. Default is
@@ -124,14 +124,9 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
-	 * <p>
 	 * Set the autowire mode for test properties set by Dependency Injection.
-	 * </p>
-	 * <p>
-	 * The default is {@link #AUTOWIRE_BY_TYPE}. Can be set to
+	 * <p>The default is {@link #AUTOWIRE_BY_TYPE}. Can be set to
 	 * {@link #AUTOWIRE_BY_NAME} or {@link #AUTOWIRE_NO} instead.
-	 * </p>
-	 *
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_NO
@@ -148,14 +143,10 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
-	 * <p>
 	 * Set whether or not dependency checking should be performed for test
 	 * properties set by Dependency Injection.
-	 * </p>
-	 * <p>
-	 * The default is <code>true</code>, meaning that tests cannot be run
+	 * <p>The default is <code>true</code>, meaning that tests cannot be run
 	 * unless all properties are populated.
-	 * </p>
 	 */
 	public final void setDependencyCheck(final boolean dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
@@ -170,21 +161,15 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
-	 * <p>
 	 * Prepare this test instance, injecting dependencies into its protected
 	 * fields and its bean properties.
-	 * </p>
-	 * <p>
-	 * Note: if the {@link ApplicationContext} for this test instance has not
+	 * <p>Note: if the {@link ApplicationContext} for this test instance has not
 	 * been configured (e.g., is <code>null</code>), dependency injection
 	 * will naturally <strong>not</strong> be performed, but an informational
 	 * message will be written to the log.
-	 * </p>
-	 *
 	 * @see #injectDependencies()
 	 */
 	protected void prepareTestInstance() throws Exception {
-
 		if (getApplicationContext() == null) {
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info("ApplicationContext has not been configured for test [" + getClass().getName()
@@ -197,49 +182,37 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
-	 * <p>
 	 * Inject dependencies into 'this' instance (that is, this test instance).
-	 * </p>
-	 * <p>
-	 * The default implementation populates protected variables if the
+	 * <p>The default implementation populates protected variables if the
 	 * {@link #populateProtectedVariables() appropriate flag is set}, else uses
 	 * autowiring if autowiring is switched on (which it is by default).
-	 * </p>
-	 * <p>
-	 * Override this method if you need full control over how dependencies are
+	 * <p>Override this method if you need full control over how dependencies are
 	 * injected into the test instance.
-	 * </p>
-	 *
-	 * @throws Exception in case of dependency injection failure.
+	 * @throws Exception in case of dependency injection failure
 	 * @throws IllegalStateException if the {@link ApplicationContext} for this
-	 *         test instance has not been configured.
+	 * test instance has not been configured
 	 * @see #populateProtectedVariables()
 	 */
 	protected void injectDependencies() throws Exception {
-
 		Assert.state(getApplicationContext() != null,
-				"injectDependencies() called without first configuring an ApplicationContext.");
-
+				"injectDependencies() called without first configuring an ApplicationContext");
 		if (isPopulateProtectedVariables()) {
 			if (this.managedVariableNames == null) {
 				initManagedVariableNames();
 			}
 			populateProtectedVariables();
 		}
-
 		getApplicationContext().getBeanFactory().autowireBeanProperties(this, getAutowireMode(), isDependencyCheck());
 	}
 
 	private void initManagedVariableNames() throws IllegalAccessException {
 		List managedVarNames = new LinkedList();
 		Class clazz = getClass();
-
 		do {
 			Field[] fields = clazz.getDeclaredFields();
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Found " + fields.length + " fields on " + clazz);
 			}
-
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
 				field.setAccessible(true);
