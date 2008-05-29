@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,21 @@
 
 package org.springframework.transaction.annotation;
 
+import java.util.Collection;
+import java.util.Map;
+
 import junit.framework.TestCase;
+
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.CallCountingTransactionManager;
-
-import java.util.Collection;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
@@ -39,6 +44,8 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	public void testIsProxy() throws Exception {
 		TransactionalTestBean bean = getTestBean();
 		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
+		Map services = new GenericBeanFactoryAccessor(this.context).getBeansWithAnnotation(Service.class);
+		assertTrue("Stereotype annotation not visible", services.containsKey("testBean"));
 	}
 
 	public void testInvokeTransactional() throws Exception {
@@ -67,7 +74,6 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		}
 	}
 	
-	// TODO: this test is failing (see SPR-2514)
 	public void testNonPublicMethodsNotAdvised() {
 		TransactionalTestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
@@ -82,6 +88,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	}
 
 
+	@Service
 	public static class TransactionalTestBean {
 
 		@Transactional(readOnly = true)
