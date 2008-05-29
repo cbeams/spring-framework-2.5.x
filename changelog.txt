@@ -25,6 +25,8 @@ Package org.springframework.beans
 * fixed DefaultSingletonBeanRegistry's singleton exposure to remove singleton factory after creation of singleton object
 * DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
 * added overloaded BeanComponentDefinition constructor with aliases argument
+* GenericBeanFactoryAccessor's "getBeansWithAnnotation" performs deep search (including interfaces and target class)
+* added "findAnnotationOnBean" method to GenericBeanFactoryAccessor, performing a deep search on a specific bean
 
 Package org.springframework.context
 * factored out MessageSourceSupport base class from AbstractMessageSource, providing common MessageFormat handling
@@ -67,6 +69,7 @@ Package org.springframework.orm
 * added support for Derby and H2 through Hibernate/OpenJpa/TopLink/EclipseLinkJpaVendorAdapter's "database" property
 * Hibernate/TopLink/JDO/JPA proxy classes are generated in the ORM provider's ClassLoader (for full visibility in OSGi)
 * Spring-enriched JPA proxies are created in the application's ClassLoader (making any vendor interfaces work in OSGi)
+* fixed AbstractEntityManagerFactoryBean's EMF proxy to handle equals/hashCode locally (for correct equals behavior)
 * iBATIS SqlMapClientFactoryBean supports multiple sql-map-config files and also patterns ("configLocations" property)
 * iBATIS SqlMapClientFactoryBean supports Spring resource/pattern lookup of sql-map files ("mappingLocations" property)
 
@@ -84,6 +87,8 @@ Package org.springframework.scheduling
 Package org.springframework.test
 * added "prepareApplicationContext(GenericApplicationContext)" template method to AbstractSingleSpringContextTests
 * added "prepareContext(GenericApplicationContext)" template method to AbstractGenericContextLoader
+* removed unnecessary "throws Exception" declarations from ReflectionTestUtils
+* added "getField" and "invokeGetterMethod" methods to ReflectionTestUtils
 
 Package org.springframework.transaction
 * transactional resource synchronization works even for operations triggered during commit (e.g. by JPA PostUpdate)
@@ -91,6 +96,7 @@ Package org.springframework.transaction
 
 Package org.springframework.util
 * publicly exposed "isVisible" method on ClassUtils
+* added "getField" and simple "findField" method to ReflectionUtils
 * added various overloaded methods with a CharSequence argument (as alternative to a String argument) to StringUtils
 
 Package org.springframework.validation
@@ -100,6 +106,8 @@ Package org.springframework.web
 * DispatcherServlet exposes the Servlet spec's error attributes to error views (for JSP error page compatibility)
 * HandlerMethodInvoker does not eagerly copy entire model Map in order to avoid lazy initialization of attribute values
 * Servlet AnnotationMethodHandlerAdapter throws ambiguity exception in case of equivalent mappings with same method name
+* Portlet AbstractMapBasedHandlerMapping sorts predicates before checking them (according to their natural order)
+* Portlet DefaultAnnotationHandlerMapping checks default mappings last, independent from order of controller definition
 * RedirectView considers arrays and collections with eligible values, turning them into multi-value request parameters
 * factored out common temporary byte array handling from AbstractPdfView etc into AbstractView base class
 * added AbstractPdfStamperView as alternative to AbstractPdfView, operating on an existing document with an AcroForm
