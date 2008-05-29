@@ -25,8 +25,8 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -108,20 +108,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	protected String[] determineUrlsForHandler(String beanName) {
 		ApplicationContext context = getApplicationContext();
 		Class<?> handlerType = context.getType(beanName);
-		RequestMapping mapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
-
-		if (mapping == null && context instanceof ConfigurableApplicationContext &&
-				context.containsBeanDefinition(beanName)) {
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-			BeanDefinition bd = cac.getBeanFactory().getMergedBeanDefinition(beanName);
-			if (bd instanceof AbstractBeanDefinition) {
-				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-				if (abd.hasBeanClass()) {
-					Class<?> beanClass = abd.getBeanClass();
-					mapping = AnnotationUtils.findAnnotation(beanClass, RequestMapping.class);
-				}
-			}
-		}
+		ListableBeanFactory bf = (context instanceof ConfigurableApplicationContext ?
+				((ConfigurableApplicationContext) context).getBeanFactory() : context);
+		GenericBeanFactoryAccessor bfa = new GenericBeanFactoryAccessor(bf);
+		RequestMapping mapping = bfa.findAnnotationOnBean(beanName, RequestMapping.class);
 
 		if (mapping != null) {
 			// @RequestMapping found at type level

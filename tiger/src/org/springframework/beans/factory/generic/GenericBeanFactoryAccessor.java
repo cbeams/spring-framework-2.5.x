@@ -17,11 +17,15 @@
 package org.springframework.beans.factory.generic;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -63,21 +67,21 @@ public class GenericBeanFactoryAccessor {
 	 * @see org.springframework.beans.factory.BeanFactory#getBean(String)
 	 */
 	public <T> T getBean(String name) throws BeansException {
-		return (T) getBeanFactory().getBean(name);
+		return (T) this.beanFactory.getBean(name);
 	}
 
 	/**
 	 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
 	 */
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-		return (T) getBeanFactory().getBean(name, requiredType);
+		return (T) this.beanFactory.getBean(name, requiredType);
 	}
 
 	/**
 	 * @see ListableBeanFactory#getBeansOfType(Class)
 	 */
 	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
-		return getBeanFactory().getBeansOfType(type);
+		return this.beanFactory.getBeansOfType(type);
 	}
 
 	/**
@@ -86,7 +90,7 @@ public class GenericBeanFactoryAccessor {
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
-		return getBeanFactory().getBeansOfType(type, includeNonSingletons, allowEagerInit);
+		return this.beanFactory.getBeansOfType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	/**
@@ -96,14 +100,41 @@ public class GenericBeanFactoryAccessor {
 	 * keys and the corresponding bean instances as values
 	 */
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
-		Map<String, Object> results = new HashMap<String, Object>();
-		for (String beanName : getBeanFactory().getBeanNamesForType(null)) {
-			Class beanType = getBeanFactory().getType(beanName);
-			if (beanType.getAnnotation(annotationType) != null) {
-				results.put(beanName, getBeanFactory().getBean(beanName));
+		Map<String, Object> results = new LinkedHashMap<String, Object>();
+		for (String beanName : this.beanFactory.getBeanNamesForType(Object.class)) {
+			if (findAnnotationOnBean(beanName, annotationType) != null) {
+				results.put(beanName, this.beanFactory.getBean(beanName));
 			}
 		}
 		return results;
+	}
+
+	/**
+	 * Find a {@link Annotation} of <code>annotationType</code> on the specified
+	 * bean, traversing its interfaces and super classes if no annotation can be
+	 * found on the given class itself, as well as checking its raw bean class
+	 * if not found on the exposed bean reference (e.g. in case of a proxy).
+	 * @param beanName the name of the bean to look for annotations on
+	 * @param annotationType the annotation class to look for
+	 * @return the annotation of the given type found, or <code>null</code>
+	 * @see org.springframework.core.annotation.AnnotationUtils#findAnnotation(Class, Class)
+	 */
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+		Class<?> handlerType = this.beanFactory.getType(beanName);
+		A ann = AnnotationUtils.findAnnotation(handlerType, annotationType);
+		if (ann == null && this.beanFactory instanceof ConfigurableBeanFactory &&
+				this.beanFactory.containsBeanDefinition(beanName)) {
+			ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) this.beanFactory;
+			BeanDefinition bd = cbf.getMergedBeanDefinition(beanName);
+			if (bd instanceof AbstractBeanDefinition) {
+				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+				if (abd.hasBeanClass()) {
+					Class<?> beanClass = abd.getBeanClass();
+					ann = AnnotationUtils.findAnnotation(beanClass, annotationType);
+				}
+			}
+		}
+		return ann;
 	}
 
 }
