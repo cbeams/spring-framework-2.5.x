@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0.9 (June 2008)
------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0.9 (May 2008)
+----------------------------------------------
 http://www.springframework.org
 
 
@@ -43,10 +43,10 @@ A central focus of Spring is to allow for reusable business and data access obje
 specific J2EE services. Such objects can be reused across J2EE environments (web or EJB), standalone
 applications, test environments, etc without any hassle.
 
-Spring has a layered architecture; all its functionality builds on lower levels. So you can e.g. use the
-JavaBeans configuration management without using the MVC framework or AOP support. But if you use the web
-MVC framework or AOP support, you'll find they build on the configuration framework, so you can apply your
-knowledge about it immediately.
+Spring has a layered architecture; all of its functionality builds on lower levels. So you can for example
+use the JavaBeans configuration management without using the MVC framework or AOP support. However, if you
+use the web MVC framework or the AOP support, you'll find that they build on the configuration framework,
+so you can apply your knowledge about it immediately.
 
 
 2. RELEASE INFO

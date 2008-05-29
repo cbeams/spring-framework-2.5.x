@@ -3,12 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-06-30)
+Changes in version 2.0.9 (2008-05-29)
 -------------------------------------
 
 General
 * various documentation fixes and clarifications
-* updated various libraries to the most recent point releases
+* updated various libraries to the most recent point releases (as supported by Spring 2.0.x)
 
 Package org.springframework.aop
 * Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
@@ -52,6 +52,7 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * fixed TopLinkTransactionManager to correctly expose the underlying JDBC Connection in read-write transaction scenarios
+* fixed AbstractEntityManagerFactoryBean's EMF proxy to handle equals/hashCode locally (for correct equals behavior)
 * JPA PersistenceUnitReader supports location patterns for the "jar-file" attribute in "persistence.xml" files
 
 Package org.springframework.remoting
