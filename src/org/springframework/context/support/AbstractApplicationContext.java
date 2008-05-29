@@ -90,11 +90,11 @@ import org.springframework.util.ObjectUtils;
  * which are defined as beans in the context.
  *
  * <p>A {@link org.springframework.context.MessageSource} may also be supplied
- * as a bean in the context, with the name "messageSource"; else, message
+ * as a bean in the context, with the name "messageSource"; otherwise, message
  * resolution is delegated to the parent context. Furthermore, a multicaster
  * for application events can be supplied as "applicationEventMulticaster" bean
  * of type {@link org.springframework.context.event.ApplicationEventMulticaster}
- * in the context; else, a default multicaster of type
+ * in the context; otherwise, a default multicaster of type
  * {@link org.springframework.context.event.SimpleApplicationEventMulticaster} will be used.
  *
  * <p>Implements resource loading through extending
@@ -371,7 +371,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 
-			// Initialize other special beans in specific context subclasses.
+				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
 				// Check for listener beans and register them.
@@ -586,11 +586,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 
-		// First, invoke the BeanPostProcessors that implement PriorityOrdered.
+		// First, register the BeanPostProcessors that implement PriorityOrdered.
 		Collections.sort(priorityOrderedPostProcessors, new OrderComparator());
 		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
-		// Next, invoke the BeanPostProcessors that implement Ordered.
+		// Next, register the BeanPostProcessors that implement Ordered.
 		List orderedPostProcessors = new ArrayList();
 		for (Iterator it = orderedPostProcessorNames.iterator(); it.hasNext();) {
 			String postProcessorName = (String) it.next();
@@ -599,7 +599,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		Collections.sort(orderedPostProcessors, new OrderComparator());
 		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
-		// Finally, invoke all other BeanPostProcessors.
+		// Finally, register all other BeanPostProcessors.
 		List nonOrderedPostProcessors = new ArrayList();
 		for (Iterator it = nonOrderedPostProcessorNames.iterator(); it.hasNext();) {
 			String postProcessorName = (String) it.next();
