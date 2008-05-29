@@ -43,25 +43,34 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Attempt to find a {@link Field field} on the supplied {@link Class} with
-	 * the supplied <code>name</code> and {@link Class type}. Searches all
-	 * superclasses up to {@link Object}.
+	 * the supplied <code>name</code>. Searches all superclasses up to {@link Object}.
 	 * @param clazz the class to introspect
 	 * @param name the name of the field
-	 * @param type the type of the field
 	 * @return the corresponding Field object, or <code>null</code> if not found
-	 * @throws IllegalArgumentException if the class or field type is
-	 * <code>null</code> or if the field name is <em>empty</em>
 	 */
-	public static Field findField(final Class clazz, final String name, final Class type) {
-		Assert.notNull(clazz, "The 'class to introspect' supplied to findField() can not be null.");
-		Assert.hasText(name, "The field name supplied to findField() can not be empty.");
-		Assert.notNull(type, "The field type supplied to findField() can not be null.");
+	public static Field findField(Class clazz, String name) {
+		return findField(clazz, name, null);
+	}
+
+	/**
+	 * Attempt to find a {@link Field field} on the supplied {@link Class} with
+	 * the supplied <code>name</code> and/or {@link Class type}. Searches all
+	 * superclasses up to {@link Object}.
+	 * @param clazz the class to introspect
+	 * @param name the name of the field (may be <code>null</code> if type is specified)
+	 * @param type the type of the field (may be <code>null</code> if name is specified)
+	 * @return the corresponding Field object, or <code>null</code> if not found
+	 */
+	public static Field findField(Class clazz, String name, Class type) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
 		Class searchType = clazz;
 		while (!Object.class.equals(searchType) && searchType != null) {
-			final Field[] fields = searchType.getDeclaredFields();
+			Field[] fields = searchType.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
-				if (name.equals(field.getName()) && type.equals(field.getType())) {
+				if ((name == null || name.equals(field.getName()))
+						&& (type == null || type.equals(field.getType()))) {
 					return field;
 				}
 			}
@@ -88,8 +97,30 @@ public abstract class ReflectionUtils {
 		}
 		catch (IllegalAccessException ex) {
 			handleReflectionException(ex);
-			throw new IllegalStateException("Unexpected reflection exception - " + ex.getClass().getName() + ": " +
-					ex.getMessage());
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+	}
+
+	/**
+	 * Get the field represented by the supplied {@link Field field object} on
+	 * the specified {@link Object target object}. In accordance with
+	 * {@link Field#get(Object)} semantics, the returned value is
+	 * automatically wrapped if the underlying field has a primitive type.
+	 * <p>Thrown exceptions are handled via a call to
+	 * {@link #handleReflectionException(Exception)}.
+	 * @param field the field to get
+	 * @param target the target object from which to get the field
+	 * @return the field's current value
+	 */
+	public static Object getField(Field field, Object target) {
+		try {
+			return field.get(target);
+		}
+		catch (IllegalAccessException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
 		}
 	}
 
@@ -112,6 +143,7 @@ public abstract class ReflectionUtils {
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
 	 * @param paramTypes the parameter types of the method
+	 * (may be <code>null</code> to indicate any signature)
 	 * @return the Method object, or <code>null</code> if none found
 	 */
 	public static Method findMethod(Class clazz, String name, Class[] paramTypes) {
@@ -122,7 +154,8 @@ public abstract class ReflectionUtils {
 			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
 			for (int i = 0; i < methods.length; i++) {
 				Method method = methods[i];
-				if (name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
+				if (name.equals(method.getName()) &&
+						(paramTypes == null || Arrays.equals(paramTypes, method.getParameterTypes()))) {
 					return method;
 				}
 			}

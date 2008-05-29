@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,37 +25,23 @@ import org.springframework.test.util.subpackage.Person;
  * JUnit 3.8 based unit tests for {@link ReflectionTestUtils}.
  *
  * @author Sam Brannen
- * @since 2.5
+ * @author Juergen Hoeller
  */
 public class ReflectionTestUtilsTests extends TestCase {
 
 	protected static final Float PI = new Float((float) 22 / 7);
 
 
-	public ReflectionTestUtilsTests() {
-		this(null);
-	}
-
-	public ReflectionTestUtilsTests(final String name) {
-		super(name);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.springframework.test.util.ReflectionTestUtils#setField(Object, String, Object, Class)}.
-	 */
-	public final void testSetField() throws Exception {
-
+	public void testSetField() throws Exception {
 		final Person person = new Person();
 
-		// ---------------------------------------------------------------------
 		// Standard
 
 		ReflectionTestUtils.setField(person, "id", new Long(99), long.class);
-		ReflectionTestUtils.setField(person, "name", "Tom", String.class);
-		ReflectionTestUtils.setField(person, "age", new Integer(42), int.class);
+		ReflectionTestUtils.setField(person, "name", "Tom");
+		ReflectionTestUtils.setField(person, "age", new Integer(42));
 		ReflectionTestUtils.setField(person, "eyeColor", "blue", String.class);
-		ReflectionTestUtils.setField(person, "likesPets", Boolean.TRUE, boolean.class);
+		ReflectionTestUtils.setField(person, "likesPets", Boolean.TRUE);
 		ReflectionTestUtils.setField(person, "favoriteNumber", PI, Number.class);
 
 		assertEquals("Verifying that the person's ID (private field in a superclass) was set.", 99, person.getId());
@@ -68,7 +54,13 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertEquals("Verifying that the person's 'favorite number' (package field) was set.", PI,
 				person.getFavoriteNumber());
 
-		// ---------------------------------------------------------------------
+		assertEquals(new Long(99), ReflectionTestUtils.getField(person, "id"));
+		assertEquals("Tom", ReflectionTestUtils.getField(person, "name"));
+		assertEquals(new Integer(42), ReflectionTestUtils.getField(person, "age"));
+		assertEquals("blue", ReflectionTestUtils.getField(person, "eyeColor"));
+		assertEquals(Boolean.TRUE, ReflectionTestUtils.getField(person, "likesPets"));
+		assertEquals(PI, ReflectionTestUtils.getField(person, "favoriteNumber"));
+
 		// Null - non-primitives
 
 		ReflectionTestUtils.setField(person, "name", null, String.class);
@@ -79,7 +71,6 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertNull("Verifying that the person's eye color (package private field) was set.", person.getEyeColor());
 		assertNull("Verifying that the person's 'favorite number' (package field) was set.", person.getFavoriteNumber());
 
-		// ---------------------------------------------------------------------
 		// Null - primitives
 
 		new AssertThrows(IllegalArgumentException.class,
@@ -107,22 +98,16 @@ public class ReflectionTestUtilsTests extends TestCase {
 		}.runTest();
 	}
 
-	/**
-	 * Test method for
-	 * {@link org.springframework.test.util.ReflectionTestUtils#invokeSetterMethod(Object, String, Object, Class)}.
-	 */
-	public final void testInvokeSetterMethod() throws Exception {
-
+	public void testInvokeSetterMethod() throws Exception {
 		final Person person = new Person();
 
-		// ---------------------------------------------------------------------
 		// Standard - properties
 
 		ReflectionTestUtils.invokeSetterMethod(person, "id", new Long(99), long.class);
-		ReflectionTestUtils.invokeSetterMethod(person, "name", "Tom", String.class);
-		ReflectionTestUtils.invokeSetterMethod(person, "age", new Integer(42), int.class);
+		ReflectionTestUtils.invokeSetterMethod(person, "name", "Tom");
+		ReflectionTestUtils.invokeSetterMethod(person, "age", new Integer(42));
 		ReflectionTestUtils.invokeSetterMethod(person, "eyeColor", "blue", String.class);
-		ReflectionTestUtils.invokeSetterMethod(person, "likesPets", Boolean.TRUE, boolean.class);
+		ReflectionTestUtils.invokeSetterMethod(person, "likesPets", Boolean.TRUE);
 		ReflectionTestUtils.invokeSetterMethod(person, "favoriteNumber", PI, Number.class);
 
 		assertEquals("Verifying that the person's ID (protected method in a superclass) was set.", 99, person.getId());
@@ -135,7 +120,13 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertEquals("Verifying that the person's 'favorite number' (protected method for a Number) was set.", PI,
 				person.getFavoriteNumber());
 
-		// ---------------------------------------------------------------------
+		assertEquals(new Long(99), ReflectionTestUtils.invokeGetterMethod(person, "id"));
+		assertEquals("Tom", ReflectionTestUtils.invokeGetterMethod(person, "name"));
+		assertEquals(new Integer(42), ReflectionTestUtils.invokeGetterMethod(person, "age"));
+		assertEquals("blue", ReflectionTestUtils.invokeGetterMethod(person, "eyeColor"));
+		assertEquals(Boolean.TRUE, ReflectionTestUtils.invokeGetterMethod(person, "likesPets"));
+		assertEquals(PI, ReflectionTestUtils.invokeGetterMethod(person, "favoriteNumber"));
+
 		// Standard - setter methods
 
 		ReflectionTestUtils.invokeSetterMethod(person, "setId", new Long(1), long.class);
@@ -155,7 +146,13 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertEquals("Verifying that the person's 'favorite number' (protected method for a Number) was set.",
 				new Integer(42), person.getFavoriteNumber());
 
-		// ---------------------------------------------------------------------
+		assertEquals(new Long(1), ReflectionTestUtils.invokeGetterMethod(person, "getId"));
+		assertEquals("Jerry", ReflectionTestUtils.invokeGetterMethod(person, "getName"));
+		assertEquals(new Integer(33), ReflectionTestUtils.invokeGetterMethod(person, "getAge"));
+		assertEquals("green", ReflectionTestUtils.invokeGetterMethod(person, "getEyeColor"));
+		assertEquals(Boolean.FALSE, ReflectionTestUtils.invokeGetterMethod(person, "likesPets"));
+		assertEquals(new Integer(42), ReflectionTestUtils.invokeGetterMethod(person, "getFavoriteNumber"));
+
 		// Null - non-primitives
 
 		ReflectionTestUtils.invokeSetterMethod(person, "name", null, String.class);
@@ -167,7 +164,6 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertNull("Verifying that the person's 'favorite number' (protected method for a Number) was set.",
 				person.getFavoriteNumber());
 
-		// ---------------------------------------------------------------------
 		// Null - primitives
 
 		new AssertThrows(RuntimeException.class,

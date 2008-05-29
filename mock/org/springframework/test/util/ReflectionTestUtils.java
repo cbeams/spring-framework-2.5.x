@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -47,122 +48,204 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see ReflectionUtils
  */
 public class ReflectionTestUtils {
 
-	/** Class Logger. */
+	private static final String SETTER_PREFIX = "set";
+
+	private static final String GETTER_PREFIX = "get";
+
 	private static final Log logger = LogFactory.getLog(ReflectionTestUtils.class);
 
 
 	/**
-	 * <p>
-	 * Sets the {@link Field field} with the given <code>name</code> on the
+	 * Set the {@link Field field} with the given <code>name</code> on the
 	 * provided {@link Object target object} to the supplied <code>value</code>.
-	 * </p>
-	 * <p>
-	 * This method traverses the class hierarchy in search of the desired field.
+	 * <p>This method traverses the class hierarchy in search of the desired field.
 	 * In addition, an attempt will be made to make non-<code>public</code>
 	 * fields <em>accessible</em>, thus allowing one to set
 	 * <code>protected</code>, <code>private</code>, and
 	 * <em>package-private</em> fields.
-	 * </p>
-	 *
-	 * @param target The target object on which to set the field.
-	 * @param name The name of the field to set.
-	 * @param value The value to set; may be <code>null</code> unless the
-	 *        field type is a primitive type.
-	 * @param type The type of the field.
-	 * @throws IllegalArgumentException if the target object or field type is
-	 *         <code>null</code>; if the field name is <em>empty</em>; or
-	 *         if the field could not be found on the target object.
-	 * @throws Exception Allows all other exceptions to propagate.
+	 * @param target the target object on which to set the field
+	 * @param name the name of the field to set
+	 * @param value the value to set
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
 	 * @see ReflectionUtils#setField(Field, Object, Object)
 	 */
-	public static final void setField(final Object target, final String name, final Object value, final Class type)
-			throws Exception {
+	public static void setField(Object target, String name, Object value) {
+		setField(target, name, value, null);
+	}
 
-		Assert.notNull(target, "The target object supplied to setField() can not be null.");
-		Assert.hasText(name, "The field name supplied to setField() can not be empty.");
-		Assert.notNull(type, "The field type supplied to setField() can not be null.");
+	/**
+	 * Set the {@link Field field} with the given <code>name</code> on the
+	 * provided {@link Object target object} to the supplied <code>value</code>.
+	 * <p>This method traverses the class hierarchy in search of the desired field.
+	 * In addition, an attempt will be made to make non-<code>public</code>
+	 * fields <em>accessible</em>, thus allowing one to set
+	 * <code>protected</code>, <code>private</code>, and
+	 * <em>package-private</em> fields.
+	 * @param target the target object on which to set the field
+	 * @param name the name of the field to set
+	 * @param value the value to set
+	 * @param type the type of the field (may be <code>null</code>)
+	 * @see ReflectionUtils#findField(Class, String, Class)
+	 * @see ReflectionUtils#makeAccessible(Field)
+	 * @see ReflectionUtils#setField(Field, Object, Object)
+	 */
+	public static void setField(Object target, String name, Object value, Class type) {
+		Assert.notNull(target, "Target object must not be null");
+		Field field = ReflectionUtils.findField(target.getClass(), name, type);
+		if (field == null) {
+			throw new IllegalArgumentException("Could not find field [" + name + "] on target [" + target + "]");
+		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting field [" + name + "] on target [" + target + "] with value [" + value
-					+ "] and target type [" + type + "].");
+			logger.debug("Setting field [" + name + "] on target [" + target + "]");
 		}
-
-		final Field field = ReflectionUtils.findField(target.getClass(), name, type);
-		if (field == null) {
-			throw new IllegalArgumentException("Could not find field [" + name + "] on target [" + target
-					+ "] with type [" + type + "].");
-		}
-
 		ReflectionUtils.makeAccessible(field);
 		ReflectionUtils.setField(field, target, value);
 	}
 
 	/**
-	 * <p>
-	 * Invokes the {@link Method setter method} with the given <code>name</code>
-	 * on the supplied {@link Object target object} with the supplied
-	 * <code>value</code>.
-	 * </p>
-	 * <p>
-	 * This method traverses the class hierarchy in search of the desired
+	 * Get the field with the given <code>name</code> from the provided
+	 * target object.
+	 * <p>This method traverses the class hierarchy in search of the desired field.
+	 * In addition, an attempt will be made to make non-<code>public</code> fields
+	 * <em>accessible</em>, thus allowing one to get <code>protected</code>,
+	 * <code>private</code>, and <em>package-private</em> fields.
+	 * @param target the target object on which to set the field
+	 * @param name the name of the field to get
+	 * @return the field's current value
+	 * @see ReflectionUtils#findField(Class, String, Class)
+	 * @see ReflectionUtils#makeAccessible(Field)
+	 * @see ReflectionUtils#setField(Field, Object, Object)
+	 */
+	public static Object getField(Object target, String name) {
+		Assert.notNull(target, "Target object must not be null");
+		Field field = ReflectionUtils.findField(target.getClass(), name);
+		if (field == null) {
+			throw new IllegalArgumentException("Could not find field [" + name + "] on target [" + target + "]");
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Getting field [" + name + "] from target [" + target + "]");
+		}
+		ReflectionUtils.makeAccessible(field);
+		return ReflectionUtils.getField(field, target);
+	}
+
+	/**
+	 * Invoke the setter method with the given <code>name</code> on the supplied
+	 * target object with the supplied <code>value</code>.
+	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-<code>public</code>
-	 * methods <em>accessible</em>, thus allowing one to invoke
-	 * <code>protected</code>, <code>private</code>, and
-	 * <em>package-private</em> setter methods.
-	 * </p>
-	 * <p>
-	 * In addition, this method supports JavaBean-style <em>property</em>
+	 * methods <em>accessible</em>, thus allowing one to invoke <code>protected</code>,
+	 * <code>private</code>, and <em>package-private</em> setter methods.
+	 * <p>In addition, this method supports JavaBean-style <em>property</em>
 	 * names. For example, if you wish to set the <code>name</code> property
 	 * on the target object, you may pass either &quot;name&quot; or
 	 * &quot;setName&quot; as the method name.
-	 * </p>
-	 *
-	 * @param target The target object on which to invoke the specified setter
-	 *        method.
-	 * @param name The name of the setter method to invoke or the corresponding
-	 *        property name.
-	 * @param value The value to provide to the setter method; may be
-	 *        <code>null</code> unless the parameter type is a primitive type.
-	 * @param type The formal parameter type declared by the setter method.
-	 * @throws IllegalArgumentException if the target object or parameter type
-	 *         is <code>null</code>; if the name is <em>empty</em>; or if
-	 *         the method could not be found on the target object.
-	 * @throws Exception Allows all other exceptions to propagate.
+	 * @param target the target object on which to invoke the specified setter method
+	 * @param name the name of the setter method to invoke or the corresponding property name
+	 * @param value the value to provide to the setter method
 	 * @see ReflectionUtils#findMethod(Class, String, Class[])
 	 * @see ReflectionUtils#makeAccessible(Method)
 	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
 	 */
-	public static final void invokeSetterMethod(final Object target, final String name, final Object value,
-			final Class type) throws Exception {
+	public static void invokeSetterMethod(Object target, String name, Object value) {
+		invokeSetterMethod(target, name, value, null);
+	}
 
-		Assert.notNull(target, "The target object supplied to invokeSetterMethod() can not be null.");
-		Assert.hasText(name, "The method name supplied to invokeSetterMethod() can not be empty.");
-		Assert.notNull(type, "The parameter type supplied to invokeSetterMethod() can not be null.");
+	/**
+	 * Invoke the setter method with the given <code>name</code> on the supplied
+	 * target object with the supplied <code>value</code>.
+	 * <p>This method traverses the class hierarchy in search of the desired
+	 * method. In addition, an attempt will be made to make non-<code>public</code>
+	 * methods <em>accessible</em>, thus allowing one to invoke <code>protected</code>,
+	 * <code>private</code>, and <em>package-private</em> setter methods.
+	 * <p>In addition, this method supports JavaBean-style <em>property</em>
+	 * names. For example, if you wish to set the <code>name</code> property
+	 * on the target object, you may pass either &quot;name&quot; or
+	 * &quot;setName&quot; as the method name.
+	 * @param target the target object on which to invoke the specified setter method
+	 * @param name the name of the setter method to invoke or the corresponding property name
+	 * @param value the value to provide to the setter method
+	 * @param type the formal parameter type declared by the setter method
+	 * @see ReflectionUtils#findMethod(Class, String, Class[])
+	 * @see ReflectionUtils#makeAccessible(Method)
+	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
+	 */
+	public static void invokeSetterMethod(Object target, String name, Object value, Class type) {
+		Assert.notNull(target, "Target object must not be null");
+		Assert.notNull(name, "Method name must not be empty");
+		Class[] paramTypes = (type != null ? new Class[] {type} : null);
 
 		String setterMethodName = name;
-		if (!setterMethodName.startsWith("set")) {
-			setterMethodName = "set" + StringUtils.capitalize(setterMethodName);
+		if (!name.startsWith(SETTER_PREFIX)) {
+			setterMethodName = SETTER_PREFIX + StringUtils.capitalize(name);
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking setter method [" + setterMethodName + "] on target [" + target + "] with value ["
-					+ value + "] and parameter type [" + type + "].");
+		Method method = ReflectionUtils.findMethod(target.getClass(), setterMethodName, paramTypes);
+		if (method == null && !setterMethodName.equals(name)) {
+			setterMethodName = name;
+			method = ReflectionUtils.findMethod(target.getClass(), setterMethodName, paramTypes);
 		}
-
-		Method method = ReflectionUtils.findMethod(target.getClass(), setterMethodName, new Class[] { type });
 		if (method == null) {
-			throw new IllegalArgumentException("Could not find setter method [" + setterMethodName + "] on target ["
-					+ target + "] with parameter type [" + type + "].");
+			throw new IllegalArgumentException("Could not find setter method [" + setterMethodName +
+					"] on target [" + target + "] with parameter type [" + type + "]");
 		}
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking setter method [" + setterMethodName + "] on target [" + target + "]");
+		}
 		ReflectionUtils.makeAccessible(method);
-		ReflectionUtils.invokeMethod(method, target, new Object[] { value });
+		ReflectionUtils.invokeMethod(method, target, new Object[] {value});
+	}
+
+	/**
+	 * Invoke the getter method with the given <code>name</code> on the supplied
+	 * target object with the supplied <code>value</code>.
+	 * <p>This method traverses the class hierarchy in search of the desired
+	 * method. In addition, an attempt will be made to make non-<code>public</code>
+	 * methods <em>accessible</em>, thus allowing one to invoke <code>protected</code>,
+	 * <code>private</code>, and <em>package-private</em> getter methods.
+	 * <p>In addition, this method supports JavaBean-style <em>property</em>
+	 * names. For example, if you wish to get the <code>name</code> property
+	 * on the target object, you may pass either &quot;name&quot; or
+	 * &quot;getName&quot; as the method name.
+	 * @param target the target object on which to invoke the specified getter method
+	 * @param name the name of the getter method to invoke or the corresponding property name
+	 * @return the value returned from the invocation
+	 * @see ReflectionUtils#findMethod(Class, String, Class[])
+	 * @see ReflectionUtils#makeAccessible(Method)
+	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
+	 */
+	public static Object invokeGetterMethod(Object target, String name) {
+		Assert.notNull(target, "Target object must not be null");
+		Assert.notNull(name, "Method name must not be empty");
+
+		String getterMethodName = name;
+		if (!name.startsWith(GETTER_PREFIX)) {
+			getterMethodName = GETTER_PREFIX + StringUtils.capitalize(name);
+		}
+		Method method = ReflectionUtils.findMethod(target.getClass(), getterMethodName);
+		if (method == null && !getterMethodName.equals(name)) {
+			getterMethodName = name;
+			method = ReflectionUtils.findMethod(target.getClass(), getterMethodName);
+		}
+		if (method == null) {
+			throw new IllegalArgumentException("Could not find getter method [" + getterMethodName +
+					"] on target [" + target + "]");
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking getter method [" + getterMethodName + "] on target [" + target + "]");
+		}
+		ReflectionUtils.makeAccessible(method);
+		return ReflectionUtils.invokeMethod(method, target);
 	}
 
 }
