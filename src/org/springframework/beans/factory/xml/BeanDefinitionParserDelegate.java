@@ -403,7 +403,7 @@ public class BeanDefinitionParserDelegate {
 						if (beanClassName != null &&
 								beanName.startsWith(beanClassName) && beanName.length() > beanClassName.length() &&
 								!this.readerContext.getRegistry().isBeanNameInUse(beanClassName)) {
-							this.readerContext.getRegistry().registerAlias(beanName, beanClassName);
+							aliases.add(beanClassName);
 						}
 					}
 					if (logger.isDebugEnabled()) {
