@@ -283,7 +283,9 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	/**
-	 * This implementation returns <code>null</code>.
+	 * This implementation delegates to the
+	 * {@link #getPropertyEditorRegistry() PropertyEditorRegistry}'s
+	 * editor lookup facility, if available.
 	 */
 	public PropertyEditor findEditor(String field, Class valueType) {
 		PropertyEditorRegistry editorRegistry = getPropertyEditorRegistry();
