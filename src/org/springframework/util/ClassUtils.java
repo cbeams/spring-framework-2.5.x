@@ -891,7 +891,7 @@ public abstract class ClassUtils {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];
 				if (!interfaces.contains(ifc) &&
-						(classLoader == null || isInterfaceVisible(ifc, classLoader))) {
+						(classLoader == null || isVisible(ifc, classLoader))) {
 					interfaces.add(ifc);
 				}
 			}
@@ -940,42 +940,13 @@ public abstract class ClassUtils {
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];
-				if (classLoader == null || isInterfaceVisible(ifc, classLoader)) {
+				if (classLoader == null || isVisible(ifc, classLoader)) {
 					interfaces.add(ifc);
 				}
 			}
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
-	}
-
-	/**
-	 * Check whether the given interface is visible in the given ClassLoader.
-	 * @param ifc the interface to check
-	 * @param classLoader the ClassLoader to check against
-	 */
-	private static boolean isInterfaceVisible(Class ifc, ClassLoader classLoader) {
-		try {
-			Class interfaceClass = classLoader.loadClass(ifc.getName());
-			if (ifc == interfaceClass) {
-				return true;
-			}
-			else {
-				// Different interface class found...
-				if (logger.isDebugEnabled()) {
-					logger.debug("Ignoring interface [" + ifc.getName() + "] - " +
-							"different class of same name visible in Classloader [" + classLoader + "]");
-				}
-			}
-		}
-		catch (ClassNotFoundException ex) {
-			// No interface class found...
-			if (logger.isDebugEnabled()) {
-				logger.debug("Ignoring interface [" + ifc.getName() + "] - " +
-						"not visible in Classloader [" + classLoader + "]: " + ex);
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -991,6 +962,39 @@ public abstract class ClassUtils {
 		Assert.notEmpty(interfaces, "Interfaces must not be empty");
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		return Proxy.getProxyClass(classLoader, interfaces);
+	}
+
+	/**
+	 * Check whether the given class is visible in the given ClassLoader.
+	 * @param clazz the class to check (typically an interface)
+	 * @param classLoader the ClassLoader to check against (may be <code>null</code>,
+	 * in which case this method will always return <code>true</code>)
+	 */
+	public static boolean isVisible(Class clazz, ClassLoader classLoader) {
+		if (classLoader == null) {
+			return true;
+		}
+		try {
+			Class actualClass = classLoader.loadClass(clazz.getName());
+			if (clazz == actualClass) {
+				return true;
+			}
+			else {
+				// Different interface class found...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring [" + clazz.getName() + "] - " +
+							"different class of same name visible in Classloader [" + classLoader + "]");
+				}
+			}
+		}
+		catch (ClassNotFoundException ex) {
+			// No interface class found...
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring [" + clazz.getName() + "] - " +
+						"class not visible in Classloader [" + classLoader + "]: " + ex);
+			}
+		}
+		return false;
 	}
 
 }
