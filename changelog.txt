@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.5 (2008-05-28)
+Changes in version 2.5.5 (2008-06-05)
 -------------------------------------
 
 General
@@ -18,7 +18,10 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * revised GenericTypeAwarePropertyDescriptor for compatibility with IBM's JDK 1.6 (avoiding NPE)
+* TypeMismatchException shows type description for mismatching JDK proxy values (listing their implemented interfaces)
 * added "getDescription()" method to BeanDefinition interface (exposing the value of the XML bean description element)
+* AbstractFactoryBean uses bean ClassLoader for the generation of early singleton proxies
+* PropertyPlaceholderConfigurer correctly manages resolution of set entries and map keys with modified hash code
 * fixed DefaultSingletonBeanRegistry's singleton exposure to remove singleton factory after creation of singleton object
 * DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
 * added overloaded BeanComponentDefinition constructor with aliases argument
@@ -26,6 +29,10 @@ Package org.springframework.beans
 Package org.springframework.context
 * factored out MessageSourceSupport base class from AbstractMessageSource, providing common MessageFormat handling
 * DelegatingMessageSource resolves message arguments in default messages even if there is no parent MessageSource
+* revised CommonAnnotationBeanPostProcessor's "getResource" method to allow for proper overriding in subclasses
+* ClassPathBeanDefinitionScanner always accepts explicit bean definition of same name as override for scanned bean
+* added type="custom" expression="<classname>" option to component-scan's "include-filter"/"exclude-filter"
+* component-scan's "include-filter"/"exclude-filter" entries are validated individually (for Spring IDE)
 
 Package org.springframework.core
 * added assertions to GenericTypeResolver (avoiding NPEs)
@@ -33,17 +40,33 @@ Package org.springframework.core
 
 Package org.springframework.ejb
 * "jee:local/remote-slsb" accepts plain object returned from EJBHome create method (for JBoss 4.2 EJB3 compatibility)
+* added "exposeAccessContext" flag to AbstractSlsbInvokerInterceptor, for WebLogic resource factories with authorization
+* added "expose-access-context" flag to "jee:local-slsb", "jee:remote-slsb" and "jee:jndi-lookup"
+
+Package org.springframework.jdbc
+* BeanPropertySqlParameterSource uses specific integer/decimal SQL types by default now (e.g. TINYINT, BIGINT, DOUBLE)
 
 Package org.springframework.jms
+* SingleConnectionFactory and TransactionAwareConnectionFactoryProxy use JMS API ClassLoader for proxy generation
 * AbstractJmsListeningContainer sets Connection to null on shutdown, allowing for smooth reinitialization
+* DefaultMessageListenerContainer performs lazy setup in case of any connection exception (also JNDI lookup failure)
+* DefaultMessageListenerContainer is able to recover all cases where the provider is not available on startup
+* added "container-class" attribute to "jms:listener-container" element, for specifying a custom implementation class
 * MessageListenerAdapter and JmsInvokerServiceExporter use message id as correlation id if no request correlation id set
 
 Package org.springframework.jmx
 * MBeanExporter performs default MBeanServer lookup even when registering notification listeners only
 
+Package org.springframework.jndi
+* added "exposeAccessContext" flag to JndiObjectFactoryBean, for WebLogic resource factories with authorization
+
 Package org.springframework.orm
 * improved HibernateTransactionManager's InvalidIsolationLevelException exception message (-> SpringTransactionFactory)
 * added "hibernateManagedSession" flag to HibernateTransactionManager, for working with a custom CurrentSessionContext
+* documented use of Hibernate StatelessSession with Spring's DataSourceTransactionManager/HibernateTransactionManager
+* added support for Derby and H2 through Hibernate/OpenJpa/TopLink/EclipseLinkJpaVendorAdapter's "database" property
+* Hibernate/TopLink/JDO/JPA proxy classes are generated in the ORM provider's ClassLoader (for full visibility in OSGi)
+* Spring-enriched JPA proxies are created in the application's ClassLoader (making any vendor interfaces work in OSGi)
 * iBATIS SqlMapClientFactoryBean supports multiple sql-map-config files and also patterns ("configLocations" property)
 * iBATIS SqlMapClientFactoryBean supports Spring resource/pattern lookup of sql-map files ("mappingLocations" property)
 
@@ -67,6 +90,7 @@ Package org.springframework.transaction
 * strengthened warning regarding @Transactional use on interfaces versus classes
 
 Package org.springframework.util
+* publicly exposed "isVisible" method on ClassUtils
 * added various overloaded methods with a CharSequence argument (as alternative to a String argument) to StringUtils
 
 Package org.springframework.validation
@@ -75,6 +99,7 @@ Package org.springframework.validation
 Package org.springframework.web
 * DispatcherServlet exposes the Servlet spec's error attributes to error views (for JSP error page compatibility)
 * HandlerMethodInvoker does not eagerly copy entire model Map in order to avoid lazy initialization of attribute values
+* Servlet AnnotationMethodHandlerAdapter throws ambiguity exception in case of equivalent mappings with same method name
 * RedirectView considers arrays and collections with eligible values, turning them into multi-value request parameters
 * factored out common temporary byte array handling from AbstractPdfView etc into AbstractView base class
 * added AbstractPdfStamperView as alternative to AbstractPdfView, operating on an existing document with an AcroForm
