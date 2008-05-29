@@ -72,7 +72,7 @@ public abstract class ExtendedEntityManagerCreator {
 	public static EntityManager createApplicationManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations) {
 
-		return createProxy(rawEntityManager, null, plusOperations, null, null, false);
+		return createProxy(rawEntityManager, null, null, plusOperations, null, null, false);
 	}
 
 	/**
@@ -92,7 +92,7 @@ public abstract class ExtendedEntityManagerCreator {
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
 			PersistenceExceptionTranslator exceptionTranslator) {
 
-		return createProxy(rawEntityManager, null, plusOperations, exceptionTranslator, null, false);
+		return createProxy(rawEntityManager, null, null, plusOperations, exceptionTranslator, null, false);
 	}
 
 	/**
@@ -124,7 +124,7 @@ public abstract class ExtendedEntityManagerCreator {
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations) {
 
-		return createProxy(rawEntityManager, null, plusOperations, null, null, true);
+		return createProxy(rawEntityManager, null, null, plusOperations, null, null, true);
 	}
 
 	/**
@@ -143,7 +143,7 @@ public abstract class ExtendedEntityManagerCreator {
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
 			PersistenceExceptionTranslator exceptionTranslator) {
 
-		return createProxy(rawEntityManager, null, plusOperations, exceptionTranslator, null, true);
+		return createProxy(rawEntityManager, null, null, plusOperations, exceptionTranslator, null, true);
 	}
 
 	/**
@@ -202,7 +202,7 @@ public abstract class ExtendedEntityManagerCreator {
 		else {
 			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
 					emf.createEntityManager(properties) : emf.createEntityManager());
-			return createProxy(rawEntityManager, null, null, null, null, true);
+			return createProxy(rawEntityManager, null, null, null, null, null, true);
 		}
 	}
 
@@ -228,13 +228,13 @@ public abstract class ExtendedEntityManagerCreator {
 		PersistenceUnitInfo pui = emfInfo.getPersistenceUnitInfo();
 		Boolean jta = (pui != null ? pui.getTransactionType() == PersistenceUnitTransactionType.JTA : null);
 		return createProxy(rawEntityManager, emfInfo.getEntityManagerInterface(),
-				plusOperations, jpaDialect, jta, containerManaged);
+				emfInfo.getBeanClassLoader(), plusOperations, jpaDialect, jta, containerManaged);
 	}
 
 	/**
 	 * Actually create the EntityManager proxy.
-	 * @param rawEntityManager raw EntityManager
-	 * @param entityManagerInterface the (potentially vendor-specific) EntityManager
+	 * @param rawEm raw EntityManager
+	 * @param emIfc the (potentially vendor-specific) EntityManager
 	 * interface to proxy, or <code>null</code> for default detection of all interfaces
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
 	 * interface, if those operations should be exposed (may be <code>null</code>)
@@ -246,27 +246,27 @@ public abstract class ExtendedEntityManagerCreator {
 	 * @return the EntityManager proxy
 	 */
 	private static EntityManager createProxy(
-			EntityManager rawEntityManager, Class<? extends EntityManager> entityManagerInterface,
+			EntityManager rawEm, Class<? extends EntityManager> emIfc, ClassLoader cl,
 			EntityManagerPlusOperations plusOperations, PersistenceExceptionTranslator exceptionTranslator,
 			Boolean jta, boolean containerManaged) {
 
-		Assert.notNull(rawEntityManager, "EntityManager must not be null");
-		ClassLoader cl = ExtendedEntityManagerCreator.class.getClassLoader();
-		Set ifcs = new LinkedHashSet();
-		if (entityManagerInterface != null) {
-			ifcs.add(entityManagerInterface);
+		Assert.notNull(rawEm, "EntityManager must not be null");
+		Set<Class> ifcs = new LinkedHashSet<Class>();
+		if (emIfc != null) {
+			ifcs.add(emIfc);
 		}
 		else {
-			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(rawEntityManager.getClass(), cl));
+			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(rawEm.getClass(), cl));
 		}
 		ifcs.add(EntityManagerProxy.class);
 		if (plusOperations != null) {
 			ifcs.add(EntityManagerPlusOperations.class);
 		}
 		return (EntityManager) Proxy.newProxyInstance(
-				cl, (Class[]) ifcs.toArray(new Class[ifcs.size()]),
+				(cl != null ? cl : ExtendedEntityManagerCreator.class.getClassLoader()),
+				ifcs.toArray(new Class[ifcs.size()]),
 				new ExtendedEntityManagerInvocationHandler(
-						rawEntityManager, plusOperations, exceptionTranslator, jta, containerManaged));
+						rawEm, plusOperations, exceptionTranslator, jta, containerManaged));
 	}
 
 

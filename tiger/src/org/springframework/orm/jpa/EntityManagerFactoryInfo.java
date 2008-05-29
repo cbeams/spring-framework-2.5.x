@@ -92,4 +92,10 @@ public interface EntityManagerFactoryInfo {
 	 */
 	JpaDialect getJpaDialect();
 
+	/**
+	 * Return the ClassLoader that the application's beans are loaded with.
+	 * <p>Proxies will be generated in this ClassLoader.
+	 */
+	ClassLoader getBeanClassLoader();
+
 }

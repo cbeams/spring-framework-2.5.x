@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -74,7 +75,8 @@ import org.springframework.util.CollectionUtils;
  * @see LocalContainerEntityManagerFactoryBean
  */
 public abstract class AbstractEntityManagerFactoryBean implements
-		FactoryBean, InitializingBean, DisposableBean, EntityManagerFactoryInfo, PersistenceExceptionTranslator {
+		FactoryBean, BeanClassLoaderAware, InitializingBean, DisposableBean,
+		EntityManagerFactoryInfo, PersistenceExceptionTranslator {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -92,6 +94,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	private JpaDialect jpaDialect;
 
 	private JpaVendorAdapter jpaVendorAdapter;
+
+	private ClassLoader beanClassLoader = getClass().getClassLoader();
 
 	/** Raw EntityManagerFactory as returned by the PersistenceProvider */
 	public EntityManagerFactory nativeEntityManagerFactory;
@@ -244,6 +248,14 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		return this.jpaVendorAdapter;
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
+	public ClassLoader getBeanClassLoader() {
+		return this.beanClassLoader;
+	}
+
 
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {
@@ -261,9 +273,15 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			}
 			if (this.entityManagerFactoryInterface == null) {
 				this.entityManagerFactoryInterface = this.jpaVendorAdapter.getEntityManagerFactoryInterface();
+				if (!ClassUtils.isVisible(this.entityManagerFactoryInterface, this.beanClassLoader)) {
+					this.entityManagerFactoryInterface = EntityManagerFactory.class;
+				}
 			}
 			if (this.entityManagerInterface == null) {
 				this.entityManagerInterface = this.jpaVendorAdapter.getEntityManagerInterface();
+				if (!ClassUtils.isVisible(this.entityManagerInterface, this.beanClassLoader)) {
+					this.entityManagerInterface = EntityManager.class;
+				}
 			}
 			if (this.jpaDialect == null) {
 				this.jpaDialect = this.jpaVendorAdapter.getJpaDialect();
@@ -294,13 +312,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @return proxy entity manager
 	 */
 	protected EntityManagerFactory createEntityManagerFactoryProxy(EntityManagerFactory emf) {
-		ClassLoader cl = getClass().getClassLoader();
-		Set ifcs = new LinkedHashSet();
+		Set<Class> ifcs = new LinkedHashSet<Class>();
 		if (this.entityManagerFactoryInterface != null) {
 			ifcs.add(this.entityManagerFactoryInterface);
 		}
 		else {
-			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(), cl));
+			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(), this.beanClassLoader));
 		}
 		ifcs.add(EntityManagerFactoryInfo.class);
 		EntityManagerFactoryPlusOperations plusOperations = null;
@@ -309,7 +326,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			ifcs.add(EntityManagerFactoryPlusOperations.class);
 		}
 		return (EntityManagerFactory) Proxy.newProxyInstance(
-				cl, (Class[]) ifcs.toArray(new Class[ifcs.size()]),
+				this.beanClassLoader, ifcs.toArray(new Class[ifcs.size()]),
 				new ManagedEntityManagerFactoryInvocationHandler(emf, this, plusOperations));
 	}
 

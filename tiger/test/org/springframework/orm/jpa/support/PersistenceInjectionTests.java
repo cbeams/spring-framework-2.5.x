@@ -152,9 +152,11 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		mockEmf.getJpaDialect();
 		emfMc.setReturnValue(new DefaultJpaDialect());
 		mockEmf.getEntityManagerInterface();
-		emfMc.setReturnValue(EntityManager.class, 1);
+		emfMc.setReturnValue(EntityManager.class);
+		mockEmf.getBeanClassLoader();
+		emfMc.setReturnValue(getClass().getClassLoader());
 		mockEmf.createEntityManager();
-		emfMc.setReturnValue(mockEm, 1);
+		emfMc.setReturnValue(mockEm);
 		emfMc.replay();
 
 		GenericApplicationContext gac = new GenericApplicationContext();

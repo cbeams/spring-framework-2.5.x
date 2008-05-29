@@ -71,26 +71,25 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
-		Class[] entityManagerInterfaces = null;
+		Class[] emIfcs = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
-			Class entityManagerInterface = emfInfo.getEntityManagerInterface();
-			if (entityManagerInterface == null) {
-				entityManagerInterface = EntityManager.class;
+			Class emIfc = emfInfo.getEntityManagerInterface();
+			if (emIfc == null) {
+				emIfc = EntityManager.class;
 			}
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
-				entityManagerInterfaces =
-						new Class[] {entityManagerInterface, EntityManagerPlus.class};
+				emIfcs = new Class[] {emIfc, EntityManagerPlus.class};
 			}
 			else {
-				entityManagerInterfaces = new Class[] {entityManagerInterface};
+				emIfcs = new Class[] {emIfc};
 			}
 		}
 		else {
-			entityManagerInterfaces = new Class[] {EntityManager.class};
+			emIfcs = new Class[] {EntityManager.class};
 		}
-		return createSharedEntityManager(emf, properties, entityManagerInterfaces);
+		return createSharedEntityManager(emf, properties, emIfcs);
 	}
 
 	/**
@@ -105,12 +104,16 @@ public abstract class SharedEntityManagerCreator {
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
 
+		ClassLoader cl = null;
+		if (emf instanceof EntityManagerFactoryInfo) {
+			cl = ((EntityManagerFactoryInfo) emf).getBeanClassLoader();
+		}
 		Class[] ifcs = new Class[entityManagerInterfaces.length + 1];
 		System.arraycopy(entityManagerInterfaces, 0, ifcs, 0, entityManagerInterfaces.length);
 		ifcs[entityManagerInterfaces.length] = EntityManagerProxy.class;
 		return (EntityManager) Proxy.newProxyInstance(
-				SharedEntityManagerCreator.class.getClassLoader(), ifcs,
-				new SharedEntityManagerInvocationHandler(emf, properties));
+				(cl != null ? cl : SharedEntityManagerCreator.class.getClassLoader()),
+				ifcs, new SharedEntityManagerInvocationHandler(emf, properties));
 	}
 
 

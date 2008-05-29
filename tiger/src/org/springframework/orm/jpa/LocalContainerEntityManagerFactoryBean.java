@@ -86,8 +86,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	private final DefaultPersistenceUnitManager internalPersistenceUnitManager =
 			new DefaultPersistenceUnitManager();
 
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
-
 	private PersistenceUnitInfo persistenceUnitInfo;
 
 
@@ -184,7 +182,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
-		this.beanClassLoader = resourceLoader.getClassLoader();
 	}
 
 
@@ -211,7 +208,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 						"No PersistenceProvider specified in EntityManagerFactory configuration, " +
 						"and chosen PersistenceUnitInfo does not specify a provider class name either");
 			}
-			Class providerClass = ClassUtils.resolveClassName(providerClassName, this.beanClassLoader);
+			Class providerClass = ClassUtils.resolveClassName(providerClassName, getBeanClassLoader());
 			provider = (PersistenceProvider) BeanUtils.instantiateClass(providerClass);
 		}
 		if (provider == null) {
