@@ -108,6 +108,9 @@
 		<property name="dataIntegrityViolationCodes">
 			<value>544,2601,2627,8114,8115</value>
 		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>1222</value>
+		</property>
 		<property name="deadlockLoserCodes">
 			<value>1205</value>
 		</property>
