@@ -23,6 +23,8 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.JdkVersion;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -160,6 +162,9 @@ public class NumberUtilsTests extends TestCase {
 	}
 
 	public void testParseLocalizedBigDecimalNumber1() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
 		String bigDecimalAsString = "0.10";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -167,6 +172,9 @@ public class NumberUtilsTests extends TestCase {
 	}
 
 	public void testParseLocalizedBigDecimalNumber2() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
 		String bigDecimalAsString = "0.001";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -174,6 +182,9 @@ public class NumberUtilsTests extends TestCase {
 	}
 
 	public void testParseLocalizedBigDecimalNumber3() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
 		String bigDecimalAsString = "3.14159265358979323846";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
