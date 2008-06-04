@@ -423,7 +423,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		String rootEntryPath = null;
 		boolean newJarFile = false;
 
-		if (false && con instanceof JarURLConnection) {
+		if (con instanceof JarURLConnection) {
 			// Should usually be the case for traditional JAR files.
 			JarURLConnection jarCon = (JarURLConnection) con;
 			jarCon.setUseCaches(false);
