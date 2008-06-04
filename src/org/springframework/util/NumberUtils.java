@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
@@ -31,6 +32,10 @@ import java.text.ParseException;
  * @since 1.1.2
  */
 public abstract class NumberUtils {
+
+	private static final boolean decimalFormatSupportsBigDecimal =
+			ClassUtils.hasMethod(DecimalFormat.class, "setParseBigDecimal", new Class[] {boolean.class});
+
 
 	/**
 	 * Convert the given number into an instance of the given target class.
@@ -81,17 +86,24 @@ public abstract class NumberUtils {
 		else if (targetClass.equals(Long.class)) {
 			return new Long(number.longValue());
 		}
+		else if (targetClass.equals(BigInteger.class)) {
+			if (number instanceof BigDecimal) {
+				// do not lose precision - use BigDecimal's own conversion
+				return ((BigDecimal) number).toBigInteger();
+			}
+			else {
+				// original value is not a Big* number - use standard long conversion
+				return BigInteger.valueOf(number.longValue());
+			}
+		}
 		else if (targetClass.equals(Float.class)) {
 			return new Float(number.floatValue());
 		}
 		else if (targetClass.equals(Double.class)) {
 			return new Double(number.doubleValue());
 		}
-		else if (targetClass.equals(BigInteger.class)) {
-			return BigInteger.valueOf(number.longValue());
-		}
 		else if (targetClass.equals(BigDecimal.class)) {
-			// using BigDecimal(String) here, to avoid unpredictability of BigDecimal(double)
+			// always use BigDecimal(String) here to avoid unpredictability of BigDecimal(double)
 			// (see BigDecimal javadoc for details)
 			return new BigDecimal(number.toString());
 		}
@@ -185,6 +197,16 @@ public abstract class NumberUtils {
 		if (numberFormat != null) {
 			Assert.notNull(text, "Text must not be null");
 			Assert.notNull(targetClass, "Target class must not be null");
+			DecimalFormat decimalFormat = null;
+			boolean resetBigDecimal = false;
+			if (numberFormat instanceof DecimalFormat) {
+				decimalFormat = (DecimalFormat) numberFormat;
+				if (BigDecimal.class.equals(targetClass) && decimalFormatSupportsBigDecimal &&
+						!decimalFormat.isParseBigDecimal()) {
+					decimalFormat.setParseBigDecimal(true);
+					resetBigDecimal = true;
+				}
+			}
 			try {
 				Number number = numberFormat.parse(text.trim());
 				return convertNumberToTargetClass(number, targetClass);
@@ -194,6 +216,11 @@ public abstract class NumberUtils {
 						new IllegalArgumentException("Could not parse number: " + ex.getMessage());
 				iae.initCause(ex);
 				throw iae;
+			}
+			finally {
+				if (resetBigDecimal) {
+					decimalFormat.setParseBigDecimal(false);
+				}
 			}
 		}
 		else {

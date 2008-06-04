@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -109,7 +110,7 @@ public class NumberUtilsTests extends TestCase {
 				new BigInteger(aReallyBigInt, 16), NumberUtils.parseNumber("0x" + aReallyBigInt, BigInteger.class));
 	}
 
-	public void testParseNegativeHex() throws Exception {
+	public void testParseNegativeHex() {
 		String aByte = "-0x80";
 		String aShort = "-0x8000";
 		String anInteger = "-0x80000000";
@@ -122,6 +123,61 @@ public class NumberUtilsTests extends TestCase {
 		assertNegativeLongEquals(aLong);
 		assertEquals("BigInteger did not parse",
 				new BigInteger(aReallyBigInt, 16).negate(), NumberUtils.parseNumber("-0x" + aReallyBigInt, BigInteger.class));
+	}
+
+	public void testDoubleToBigInteger() {
+		Double decimal = new Double(3.14d);
+		assertEquals(new BigInteger("3"), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
+	}
+
+	public void testBigDecimalToBigInteger() {
+		String number = "987459837583750387355346";
+		BigDecimal decimal = new BigDecimal(number);
+		assertEquals(new BigInteger(number), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
+	}
+
+	public void testNonExactBigDecimalToBigInteger() {
+		BigDecimal decimal = new BigDecimal("987459837583750387355346.14");
+		assertEquals(new BigInteger("987459837583750387355346"), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
+	}
+
+	public void testParseBigDecimalNumber1() {
+		String bigDecimalAsString = "0.10";
+		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
+		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
+	}
+
+	public void testParseBigDecimalNumber2() {
+		String bigDecimalAsString = "0.001";
+		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
+		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
+	}
+
+	public void testParseBigDecimalNumber3() {
+		String bigDecimalAsString = "3.14159265358979323846";
+		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
+		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
+	}
+
+	public void testParseLocalizedBigDecimalNumber1() {
+		String bigDecimalAsString = "0.10";
+		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
+		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
+		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
+	}
+
+	public void testParseLocalizedBigDecimalNumber2() {
+		String bigDecimalAsString = "0.001";
+		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
+		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
+		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
+	}
+
+	public void testParseLocalizedBigDecimalNumber3() {
+		String bigDecimalAsString = "3.14159265358979323846";
+		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
+		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
+		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
 	}
 
 	public void testParseOverflow() {
