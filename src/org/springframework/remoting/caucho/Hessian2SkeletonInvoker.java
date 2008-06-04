@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
 import org.apache.commons.logging.Log;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CommonsLogWriter;
 
 /**
@@ -43,7 +44,11 @@ import org.springframework.util.CommonsLogWriter;
  */
 class Hessian2SkeletonInvoker extends HessianSkeletonInvoker {
 
+	private static final boolean debugOutputStreamAvailable = ClassUtils.isPresent(
+			"com.caucho.hessian.io.HessianDebugOutputStream", Hessian2SkeletonInvoker.class.getClassLoader());
+
 	private final Log debugLogger;
+
 
 	public Hessian2SkeletonInvoker(HessianSkeleton skeleton, SerializerFactory serializerFactory, Log debugLog) {
 		super(skeleton, serializerFactory);
@@ -57,7 +62,9 @@ class Hessian2SkeletonInvoker extends HessianSkeletonInvoker {
 		if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
 			PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
 			isToUse = new HessianDebugInputStream(inputStream, debugWriter);
-			osToUse = new HessianDebugOutputStream(outputStream, debugWriter);
+			if (debugOutputStreamAvailable) {
+				osToUse = DebugStreamFactory.createDebugOutputStream(outputStream, debugWriter);
+			}
 		}
 
 		Hessian2Input in = new Hessian2Input(isToUse);
@@ -84,6 +91,17 @@ class Hessian2SkeletonInvoker extends HessianSkeletonInvoker {
 		}
 
 		this.skeleton.invoke(in, out);
+	}
+
+
+	/**
+	 * Inner class to avoid hard dependency on Hessian 3.1.3's HessianDebugOutputStream.
+	 */
+	private static class DebugStreamFactory {
+
+		public static OutputStream createDebugOutputStream(OutputStream os, PrintWriter debug) {
+			return new HessianDebugOutputStream(os, debug);
+		}
 	}
 
 }
