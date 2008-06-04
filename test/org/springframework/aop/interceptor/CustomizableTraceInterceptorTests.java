@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.test.AssertThrows;
 /**
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public class CustomizableTraceInterceptorTests extends TestCase {
 
@@ -107,17 +108,9 @@ public class CustomizableTraceInterceptorTests extends TestCase {
 		log.isTraceEnabled();
 		mockLog.setReturnValue(true);
 		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
+		mockMethodInvocation.setReturnValue(toString, 4);
 		methodInvocation.getThis();
-		mockMethodInvocation.setReturnValue(this);
-		methodInvocation.getThis();
-		mockMethodInvocation.setReturnValue(this);
+		mockMethodInvocation.setReturnValue(this, 2);
 		log.trace("Some tracing output");
 		mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
 		methodInvocation.proceed();
@@ -148,17 +141,9 @@ public class CustomizableTraceInterceptorTests extends TestCase {
 		log.isTraceEnabled();
 		mockLog.setReturnValue(true);
 		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
+		mockMethodInvocation.setReturnValue(toString, 4);
 		methodInvocation.getThis();
-		mockMethodInvocation.setReturnValue(this);
-		methodInvocation.getThis();
-		mockMethodInvocation.setReturnValue(this);
+		mockMethodInvocation.setReturnValue(this, 2);
 		log.trace("Some tracing output");
 		mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
 		methodInvocation.proceed();
@@ -190,37 +175,21 @@ public class CustomizableTraceInterceptorTests extends TestCase {
 		MockControl mockMethodInvocation = MockControl.createControl(MethodInvocation.class);
 		MethodInvocation methodInvocation = (MethodInvocation) mockMethodInvocation.getMock();
 
-		final Method toString = String.class.getMethod("toString", new Class[]{});
-		final Object[] arguments = new Object[]{"One", new Long(2)};
+		Method toString = String.class.getMethod("toString", new Class[0]);
+		Object[] arguments = new Object[]{"$ One \\$", new Long(2)};
 
 		log.isTraceEnabled();
 		mockLog.setReturnValue(true);
 		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
+		mockMethodInvocation.setReturnValue(toString, 7);
 		methodInvocation.getThis();
-		mockMethodInvocation.setReturnValue(this);
-		methodInvocation.getThis();
-		mockMethodInvocation.setReturnValue(this);
+		mockMethodInvocation.setReturnValue(this, 2);
 		methodInvocation.getArguments();
-		mockMethodInvocation.setReturnValue(arguments);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
+		mockMethodInvocation.setReturnValue(arguments, 2);
 		log.trace("Some tracing output");
 		mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
 		methodInvocation.proceed();
 		mockMethodInvocation.setReturnValue("Hello!");
-		methodInvocation.getArguments();
-		mockMethodInvocation.setReturnValue(arguments);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
-		methodInvocation.getMethod();
-		mockMethodInvocation.setReturnValue(toString);
 		log.trace("Some more tracing output");
 		mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
 		mockLog.setVoidCallable();
@@ -242,17 +211,14 @@ public class CustomizableTraceInterceptorTests extends TestCase {
 
 		private final Log log;
 
-
 		public StubCustomizableTraceInterceptor(Log log) {
 			super.setUseDynamicLogger(false);
 			this.log = log;
 		}
 
-
 		protected Log getLoggerForInvocation(MethodInvocation invocation) {
 			return this.log;
 		}
-
 	}
 
 }
