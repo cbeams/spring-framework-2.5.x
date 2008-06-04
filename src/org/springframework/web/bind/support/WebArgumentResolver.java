@@ -27,9 +27,9 @@ import org.springframework.web.context.request.NativeWebRequest;
  * <p>A typical implementation could look like as follows:
  *
  * <pre class="code">
- * private static class MySpecialArgumentResolver implements ArgumentResolver {
+ * public class MySpecialArgumentResolver implements ArgumentResolver {
  *
- *   public Object resolveArgument(NativeWebRequest webRequest, MethodParameter methodParameter) {
+ *   public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
  *     if (methodParameter.getParameterType().equals(MySpecialArg.class)) {
  *       return new MySpecialArg("myValue");
  *     }
