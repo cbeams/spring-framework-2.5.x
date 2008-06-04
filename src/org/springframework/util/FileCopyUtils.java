@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,9 +30,6 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Simple utility methods for file and stream copying.
  * All copy methods use a block size of 4096 bytes,
@@ -45,8 +42,6 @@ import org.apache.commons.logging.LogFactory;
  * @since 06.10.2003
  */
 public abstract class FileCopyUtils {
-
-	private static final Log logger = LogFactory.getLog(FileCopyUtils.class);
 
 	public static final int BUFFER_SIZE = 4096;
 
@@ -126,13 +121,11 @@ public abstract class FileCopyUtils {
 				in.close();
 			}
 			catch (IOException ex) {
-				logger.warn("Could not close InputStream", ex);
 			}
 			try {
 				out.close();
 			}
 			catch (IOException ex) {
-				logger.warn("Could not close OutputStream", ex);
 			}
 		}
 	}
@@ -155,7 +148,6 @@ public abstract class FileCopyUtils {
 				out.close();
 			}
 			catch (IOException ex) {
-				logger.warn("Could not close OutputStream", ex);
 			}
 		}
 	}
@@ -205,13 +197,11 @@ public abstract class FileCopyUtils {
 				in.close();
 			}
 			catch (IOException ex) {
-				logger.warn("Could not close Reader", ex);
 			}
 			try {
 				out.close();
 			}
 			catch (IOException ex) {
-				logger.warn("Could not close Writer", ex);
 			}
 		}
 	}
@@ -234,7 +224,6 @@ public abstract class FileCopyUtils {
 				out.close();
 			}
 			catch (IOException ex) {
-				logger.warn("Could not close Writer", ex);
 			}
 		}
 	}

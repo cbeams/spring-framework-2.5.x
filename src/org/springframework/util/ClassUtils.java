@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
@@ -68,8 +65,6 @@ public abstract class ClassUtils {
 	/** The ".class" file suffix */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
-
-	private static final Log logger = LogFactory.getLog(ClassUtils.class);
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
@@ -124,7 +119,7 @@ public abstract class ClassUtils {
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		catch (Throwable ex) {
-			logger.debug("Cannot access thread context ClassLoader - falling back to system class loader", ex);
+			// Cannot access thread context ClassLoader - falling back to system class loader...
 		}
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
@@ -159,9 +154,7 @@ public abstract class ClassUtils {
 			return true;
 		}
 		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Class [" + className + "] or one of its dependencies is not present: " + ex);
-			}
+			// Class or one of its dependencies is not present...
 			return false;
 		}
 	}
@@ -486,8 +479,9 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		int count = 0;
-		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-			Method method = clazz.getDeclaredMethods()[i];
+		Method[] declaredMethods = clazz.getDeclaredMethods();
+		for (int i = 0; i < declaredMethods.length; i++) {
+			Method method = declaredMethods[i];
 			if (methodName.equals(method.getName())) {
 				count++;
 			}
@@ -512,8 +506,9 @@ public abstract class ClassUtils {
 	public static boolean hasAtLeastOneMethodWithName(Class clazz, String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
-		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-			Method method = clazz.getDeclaredMethods()[i];
+		Method[] declaredMethods = clazz.getDeclaredMethods();
+		for (int i = 0; i < declaredMethods.length; i++) {
+			Method method = declaredMethods[i];
 			if (method.getName().equals(methodName)) {
 				return true;
 			}
