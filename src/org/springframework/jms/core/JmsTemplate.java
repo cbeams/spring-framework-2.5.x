@@ -184,6 +184,15 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		return (this.defaultDestination instanceof Destination ? (Destination) this.defaultDestination : null);
 	}
 
+	private Queue getDefaultQueue() {
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null && !(defaultDestination instanceof Queue)) {
+			throw new IllegalStateException(
+					"'defaultDestination' does not correspond to a Queue. Check configuration of JmsTemplate.");
+		}
+		return (Queue) defaultDestination;
+	}
+
 	/**
 	 * Set the destination name to be used on send/receive operations that
 	 * do not have a destination parameter. The specified name will be
@@ -207,6 +216,15 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		return (this.defaultDestination instanceof String ? (String) this.defaultDestination : null);
 	}
 
+	private String getRequiredDefaultDestinationName() throws IllegalStateException {
+		String name = getDefaultDestinationName();
+		if (name == null) {
+			throw new IllegalStateException(
+					"No 'defaultDestination' or 'defaultDestinationName' specified. Check configuration of JmsTemplate.");
+		}
+		return name;
+	}
+
 	/**
 	 * Set the message converter for this template. Used to resolve
 	 * Object parameters to convertAndSend methods and Object results
@@ -226,6 +244,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	public MessageConverter getMessageConverter() {
 		return this.messageConverter;
+	}
+
+	private MessageConverter getRequiredMessageConverter() throws IllegalStateException {
+		MessageConverter converter = getMessageConverter();
+		if (converter == null) {
+			throw new IllegalStateException("No 'messageConverter' specified. Check configuration of JmsTemplate.");
+		}
+		return converter;
 	}
 
 
@@ -402,20 +428,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 
-	private void checkDefaultDestination() throws IllegalStateException {
-		if (this.defaultDestination == null) {
-			throw new IllegalStateException(
-					"No defaultDestination or defaultDestinationName specified. Check configuration of JmsTemplate.");
-		}
-	}
-
-	private void checkMessageConverter() throws IllegalStateException {
-		if (getMessageConverter() == null) {
-			throw new IllegalStateException("No messageConverter registered. Check configuration of JmsTemplate.");
-		}
-	}
-
-
 	//-------------------------------------------------------------------------
 	// JmsOperations execute methods
 	//-------------------------------------------------------------------------
@@ -468,8 +480,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	public Object execute(ProducerCallback action) throws JmsException {
-		if (getDefaultDestinationName() != null) {
-			return execute(getDefaultDestinationName(), action);
+		String defaultDestinationName = getDefaultDestinationName();
+		if (defaultDestinationName != null) {
+			return execute(defaultDestinationName, action);
 		}
 		else {
 			return execute(getDefaultDestination(), action);
@@ -513,12 +526,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//-------------------------------------------------------------------------
 
 	public void send(MessageCreator messageCreator) throws JmsException {
-		checkDefaultDestination();
-		if (getDefaultDestination() != null) {
-			send(getDefaultDestination(), messageCreator);
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			send(defaultDestination, messageCreator);
 		}
 		else {
-			send(getDefaultDestinationName(), messageCreator);
+			send(getRequiredDefaultDestinationName(), messageCreator);
 		}
 	}
 
@@ -591,40 +604,38 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//-------------------------------------------------------------------------
 
 	public void convertAndSend(Object message) throws JmsException {
-		checkDefaultDestination();
-		if (getDefaultDestination() != null) {
-			convertAndSend(getDefaultDestination(), message);
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			convertAndSend(defaultDestination, message);
 		}
 		else {
-			convertAndSend(getDefaultDestinationName(), message);
+			convertAndSend(getRequiredDefaultDestinationName(), message);
 		}
 	}
 
 	public void convertAndSend(Destination destination, final Object message) throws JmsException {
-		checkMessageConverter();
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				return getMessageConverter().toMessage(message, session);
+				return getRequiredMessageConverter().toMessage(message, session);
 			}
 		});
 	}
 
 	public void convertAndSend(String destinationName, final Object message) throws JmsException {
-		checkMessageConverter();
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				return getMessageConverter().toMessage(message, session);
+				return getRequiredMessageConverter().toMessage(message, session);
 			}
 		});
 	}
 
 	public void convertAndSend(Object message, MessagePostProcessor postProcessor) throws JmsException {
-		checkDefaultDestination();
-		if (getDefaultDestination() != null) {
-			convertAndSend(getDefaultDestination(), message, postProcessor);
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			convertAndSend(defaultDestination, message, postProcessor);
 		}
 		else {
-			convertAndSend(getDefaultDestinationName(), message, postProcessor);
+			convertAndSend(getRequiredDefaultDestinationName(), message, postProcessor);
 		}
 	}
 
@@ -632,10 +643,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			Destination destination, final Object message, final MessagePostProcessor postProcessor)
 			throws JmsException {
 
-		checkMessageConverter();
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				Message msg = getMessageConverter().toMessage(message, session);
+				Message msg = getRequiredMessageConverter().toMessage(message, session);
 				return postProcessor.postProcessMessage(msg);
 			}
 		});
@@ -645,10 +655,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			String destinationName, final Object message, final MessagePostProcessor postProcessor)
 	    throws JmsException {
 
-		checkMessageConverter();
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				Message msg = getMessageConverter().toMessage(message, session);
+				Message msg = getRequiredMessageConverter().toMessage(message, session);
 				return postProcessor.postProcessMessage(msg);
 			}
 		});
@@ -660,30 +669,30 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//-------------------------------------------------------------------------
 
 	public Message receive() throws JmsException {
-		checkDefaultDestination();
-		if (getDefaultDestination() != null) {
-			return receive(getDefaultDestination());
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			return receive(defaultDestination);
 		}
 		else {
-			return receive(getDefaultDestinationName());
+			return receive(getRequiredDefaultDestinationName());
 		}
 	}
 
-	public Message receive(final Destination destination) throws JmsException {
+	public Message receive(Destination destination) throws JmsException {
 		return receiveSelected(destination, null);
 	}
 
-	public Message receive(final String destinationName) throws JmsException {
+	public Message receive(String destinationName) throws JmsException {
 		return receiveSelected(destinationName, null);
 	}
 
 	public Message receiveSelected(String messageSelector) throws JmsException {
-		checkDefaultDestination();
-		if (getDefaultDestination() != null) {
-			return receiveSelected(getDefaultDestination(), messageSelector);
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			return receiveSelected(defaultDestination, messageSelector);
 		}
 		else {
-			return receiveSelected(getDefaultDestinationName(), messageSelector);
+			return receiveSelected(getRequiredDefaultDestinationName(), messageSelector);
 		}
 	}
 
@@ -772,32 +781,26 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//-------------------------------------------------------------------------
 
 	public Object receiveAndConvert() throws JmsException {
-		checkMessageConverter();
 		return doConvertFromMessage(receive());
 	}
 
 	public Object receiveAndConvert(Destination destination) throws JmsException {
-		checkMessageConverter();
 		return doConvertFromMessage(receive(destination));
 	}
 
 	public Object receiveAndConvert(String destinationName) throws JmsException {
-		checkMessageConverter();
 		return doConvertFromMessage(receive(destinationName));
 	}
 
 	public Object receiveSelectedAndConvert(String messageSelector) throws JmsException {
-		checkMessageConverter();
 		return doConvertFromMessage(receiveSelected(messageSelector));
 	}
 
 	public Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException {
-		checkMessageConverter();
 		return doConvertFromMessage(receiveSelected(destination, messageSelector));
 	}
 
 	public Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException {
-		checkMessageConverter();
 		return doConvertFromMessage(receiveSelected(destinationName, messageSelector));
 	}
 
@@ -809,7 +812,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	protected Object doConvertFromMessage(Message message) {
 		if (message != null) {
 			try {
-				return getMessageConverter().fromMessage(message);
+				return getRequiredMessageConverter().fromMessage(message);
 			}
 			catch (JMSException ex) {
 				throw convertJmsAccessException(ex);
@@ -823,39 +826,31 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	// Convenience methods for browsing messages
 	//-------------------------------------------------------------------------
 
-	public Object browse(final BrowserCallback action) throws JmsException {
-		if (getDefaultDestinationName() != null) {
-			return browse(getDefaultDestinationName(), action);
+	public Object browse(BrowserCallback action) throws JmsException {
+		Queue defaultQueue = getDefaultQueue();
+		if (defaultQueue != null) {
+			return browse(defaultQueue, action);
 		}
 		else {
-			Destination defaultDestination = getDefaultDestination();
-			if (!(defaultDestination instanceof Queue)) {
-				throw new IllegalStateException(
-						"defaultDestination does not correspond to a Queue. Check configuration of JmsTemplate.");
-			}
-			return browse((Queue) defaultDestination, action);
+			return browse(getRequiredDefaultDestinationName(), action);
 		}
 	}
 
-	public Object browse(final Queue queue, final BrowserCallback action) throws JmsException {
+	public Object browse(Queue queue, BrowserCallback action) throws JmsException {
 		return browseSelected(queue, null, action);
 	}
 
-	public Object browse(final String queueName, final BrowserCallback action) throws JmsException {
+	public Object browse(String queueName, BrowserCallback action) throws JmsException {
 		return browseSelected(queueName, null, action);
 	}
 
-	public Object browseSelected(final String messageSelector, final BrowserCallback action) throws JmsException {
-		if (getDefaultDestinationName() != null) {
-			return browseSelected(getDefaultDestinationName(), messageSelector, action);
+	public Object browseSelected(String messageSelector, BrowserCallback action) throws JmsException {
+		Queue defaultQueue = getDefaultQueue();
+		if (defaultQueue != null) {
+			return browseSelected(defaultQueue, messageSelector, action);
 		}
 		else {
-			Destination defaultDestination = getDefaultDestination();
-			if (!(defaultDestination instanceof Queue)) {
-				throw new IllegalStateException(
-						"defaultDestination does not correspond to a Queue. Check configuration of JmsTemplate.");
-			}
-			return browseSelected((Queue) defaultDestination, messageSelector, action);
+			return browseSelected(getRequiredDefaultDestinationName(), messageSelector, action);
 		}
 	}
 
