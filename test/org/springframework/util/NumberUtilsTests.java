@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -24,6 +25,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class NumberUtilsTests extends TestCase {
 
@@ -136,6 +138,22 @@ public class NumberUtilsTests extends TestCase {
 		assertNegativeLongEquals(aLong);
 		assertEquals("BigInteger did not parse",
 				new BigInteger(aReallyBigInt, 16).negate(), NumberUtils.parseNumber("-0x" + aReallyBigInt, BigInteger.class));
+	}
+
+	public void testDoubleToBigInteger() {
+		Double decimal = new Double(3.14d);
+		assertEquals(new BigInteger("3"), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
+	}
+
+	public void testBigDecimalToBigInteger() {
+		String number = "987459837583750387355346";
+		BigDecimal decimal = new BigDecimal(number);
+		assertEquals(new BigInteger(number), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
+	}
+
+	public void testNonExactBigDecimalToBigInteger() {
+		BigDecimal decimal = new BigDecimal("987459837583750387355346.14");
+		assertEquals(new BigInteger("987459837583750387355346"), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
 	}
 
 	public void testParseOverflow() {

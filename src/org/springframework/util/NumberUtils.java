@@ -81,17 +81,24 @@ public abstract class NumberUtils {
 		else if (targetClass.equals(Long.class)) {
 			return new Long(number.longValue());
 		}
+		else if (targetClass.equals(BigInteger.class)) {
+			if (number instanceof BigDecimal) {
+				// do not lose precision - use BigDecimal's own conversion
+				return ((BigDecimal) number).toBigInteger();
+			}
+			else {
+				// original value is not a Big* number - use standard long conversion
+				return BigInteger.valueOf(number.longValue());
+			}
+		}
 		else if (targetClass.equals(Float.class)) {
 			return new Float(number.floatValue());
 		}
 		else if (targetClass.equals(Double.class)) {
 			return new Double(number.doubleValue());
 		}
-		else if (targetClass.equals(BigInteger.class)) {
-			return BigInteger.valueOf(number.longValue());
-		}
 		else if (targetClass.equals(BigDecimal.class)) {
-			// using BigDecimal(String) here, to avoid unpredictability of BigDecimal(double)
+			// always use BigDecimal(String) here to avoid unpredictability of BigDecimal(double)
 			// (see BigDecimal javadoc for details)
 			return new BigDecimal(number.toString());
 		}
