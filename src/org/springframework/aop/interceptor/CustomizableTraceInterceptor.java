@@ -152,12 +152,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	private static final Pattern PATTERN = Pattern.compile("\\$\\[\\p{Alpha}+\\]");
 
 	/**
-	 * The <code>Pattern</code> used to escape regex values in class names -
-	 * specifically <code>$</code>.
-	 */
-	private static final Pattern ESCAPE_PATTERN = Pattern.compile("\\$");
-
-	/**
 	 * The <code>Set</code> of allowed placeholders.
 	 */
 	private static final Set ALLOWED_PLACEHOLDERS =
@@ -425,16 +419,25 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
 	 * Replaces <code>$</code> in inner class names with <code>\$</code>.
+	 * <p>This code is equivalent to JDK 1.5's <code>quoteReplacement</code>
+	 * method in the Matcher class itself. We're keeping our own version
+	 * here for JDK 1.4 compliance reasons only.
 	 */
 	private String escape(String input) {
-		Matcher matcher = ESCAPE_PATTERN.matcher(input);
-		StringBuffer output = new StringBuffer(input.length());
-		while (matcher.find()) {
-			matcher.appendReplacement(output, "");
-            output.append("\\").append(matcher.group());
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			if (c == '\\') {
+				sb.append("\\\\");
+			}
+			else if (c == '$') {
+				sb.append("\\$");
+			}
+			else {
+				sb.append(c);
+			}
 		}
-		matcher.appendTail(output);
-		return output.toString();
+		return sb.toString();
 	}
 
 }
