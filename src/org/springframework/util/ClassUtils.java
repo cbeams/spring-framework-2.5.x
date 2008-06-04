@@ -34,9 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
@@ -69,8 +66,6 @@ public abstract class ClassUtils {
 	/** The ".class" file suffix */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
-
-	private static final Log logger = LogFactory.getLog(ClassUtils.class);
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
@@ -125,7 +120,7 @@ public abstract class ClassUtils {
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		catch (Throwable ex) {
-			logger.debug("Cannot access thread context ClassLoader - falling back to system class loader", ex);
+			// Cannot access thread context ClassLoader - falling back to system class loader...
 		}
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
@@ -179,9 +174,7 @@ public abstract class ClassUtils {
 			return true;
 		}
 		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Class [" + className + "] or one of its dependencies is not present: " + ex);
-			}
+			// Class or one of its dependencies is not present...
 			return false;
 		}
 	}
@@ -976,25 +969,13 @@ public abstract class ClassUtils {
 		}
 		try {
 			Class actualClass = classLoader.loadClass(clazz.getName());
-			if (clazz == actualClass) {
-				return true;
-			}
-			else {
-				// Different interface class found...
-				if (logger.isDebugEnabled()) {
-					logger.debug("Ignoring [" + clazz.getName() + "] - " +
-							"different class of same name visible in Classloader [" + classLoader + "]");
-				}
-			}
+			return (clazz == actualClass);
+			// Else: different interface class found...
 		}
 		catch (ClassNotFoundException ex) {
 			// No interface class found...
-			if (logger.isDebugEnabled()) {
-				logger.debug("Ignoring [" + clazz.getName() + "] - " +
-						"class not visible in Classloader [" + classLoader + "]: " + ex);
-			}
+			return false;
 		}
-		return false;
 	}
 
 }

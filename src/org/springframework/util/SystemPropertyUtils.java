@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.util;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
@@ -38,8 +35,6 @@ public abstract class SystemPropertyUtils {
 
 	/** Suffix for system property placeholders: "}" */
 	public static final String PLACEHOLDER_SUFFIX = "}";
-
-	private static final Log logger = LogFactory.getLog(SystemPropertyUtils.class);
 
 
 	/**
@@ -70,17 +65,13 @@ public abstract class SystemPropertyUtils {
 						nextIndex = startIndex + propVal.length();
 					}
 					else {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not resolve placeholder '" + placeholder + "' in [" + text +
-									"] as system property: neither system property nor environment variable found");
-						}
+						System.err.println("Could not resolve placeholder '" + placeholder + "' in [" + text +
+								"] as system property: neither system property nor environment variable found");
 					}
 				}
 				catch (Throwable ex) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Could not resolve placeholder '" + placeholder + "' in [" + text +
-								"] as system property: " + ex);
-					}
+					System.err.println("Could not resolve placeholder '" + placeholder + "' in [" + text +
+							"] as system property: " + ex);
 				}
 				startIndex = buf.indexOf(PLACEHOLDER_PREFIX, nextIndex);
 			}
