@@ -364,8 +364,11 @@ public class SingleConnectionFactory
 				con.close();
 			}
 		}
+		catch (javax.jms.IllegalStateException ex) {
+			logger.debug("Ignoring Connection state exception - assuming already closed: " + ex);
+		}
 		catch (Throwable ex) {
-			logger.warn("Could not close shared JMS Connection", ex);
+			logger.debug("Could not close shared JMS Connection", ex);
 		}
 	}
 

@@ -439,7 +439,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 					this.sharedConnection.start();
 				}
 				catch (javax.jms.IllegalStateException ex) {
-					logger.debug("Ignoring Connection start exception - assuming already started", ex);
+					logger.debug("Ignoring Connection start exception - assuming already started: " + ex);
 				}
 			}
 		}
@@ -458,7 +458,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 					this.sharedConnection.stop();
 				}
 				catch (javax.jms.IllegalStateException ex) {
-					logger.debug("Ignoring Connection stop exception - assuming already stopped", ex);
+					logger.debug("Ignoring Connection stop exception - assuming already stopped: " + ex);
 				}
 			}
 		}

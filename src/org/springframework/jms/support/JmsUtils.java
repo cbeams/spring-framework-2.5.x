@@ -84,6 +84,9 @@ public abstract class JmsUtils {
 					con.close();
 				}
 			}
+			catch (javax.jms.IllegalStateException ex) {
+				logger.debug("Ignoring Connection state exception - assuming already closed: " + ex);
+			}
 			catch (JMSException ex) {
 				logger.debug("Could not close JMS Connection", ex);
 			}
