@@ -59,7 +59,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	private final PortletRequest request;
 
-	private PortletSession session;
+	private volatile PortletSession session;
 
 	private final Map sessionAttributesToUpdate = new HashMap();
 
@@ -73,9 +73,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	public PortletRequestAttributes(PortletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		this.request = request;
-		// Fetch existing session reference early, to have it available even
-		// after request completion (for example, in a custom child thread).
-		this.session = request.getPortletSession(false);
 	}
 
 
@@ -91,35 +88,15 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	 * @param allowCreate whether to allow creation of a new session if none exists yet
 	 */
 	protected final PortletSession getSession(boolean allowCreate) {
-		try {
-			this.session = this.request.getPortletSession(allowCreate);
-			return this.session;
+		if (isRequestActive()) {
+			return this.request.getPortletSession(allowCreate);
 		}
-		catch (IllegalStateException ex) {
-			// Couldn't access session... let's check why.
-			if (this.session == null) {
-				// No matter what happened - we cannot offer a session.
-				throw ex;
+		else {
+			// Access through stored session reference, if any...
+			if (this.session == null && allowCreate) {
+				throw new IllegalStateException(
+						"No session found and request already completed - cannot create new session!");
 			}
-			// We have a fallback session reference...
-			// Let's see whether it is appropriate to return it.
-			if (allowCreate) {
-				boolean canAskForExistingSession = false;
-				try {
-					this.session = this.request.getPortletSession(false);
-					canAskForExistingSession = true;
-				}
-				catch (IllegalStateException ex2) {
-				}
-				if (canAskForExistingSession) {
-					// Could ask for existing session, hence the IllegalStateException
-					// came from trying to create a new session too late -> rethrow.
-					throw ex;
-				}
-			}
-			// Else: Could not even ask for existing session, hence we assume that
-			// the request has been completed and the session is accessed later on
-			// (for example, in a custom child thread).
 			return this.session;
 		}
 	}
@@ -127,6 +104,10 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
+			if (!isRequestActive()) {
+				throw new IllegalStateException(
+						"Cannot ask for request attribute - request is not active anymore!");
+			}
 			return this.request.getAttribute(name);
 		}
 		else {
@@ -135,14 +116,18 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 				if (scope == SCOPE_GLOBAL_SESSION) {
 					Object value = session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
 					if (value != null) {
-						this.globalSessionAttributesToUpdate.put(name, value);
+						synchronized (this.globalSessionAttributesToUpdate) {
+							this.globalSessionAttributesToUpdate.put(name, value);
+						}
 					}
 					return value;
 				}
 				else {
 					Object value = session.getAttribute(name);
 					if (value != null) {
-						this.sessionAttributesToUpdate.put(name, value);
+						synchronized (this.sessionAttributesToUpdate) {
+							this.sessionAttributesToUpdate.put(name, value);
+						}
 					}
 					return value;
 				}
@@ -155,36 +140,50 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == SCOPE_REQUEST) {
+			if (!isRequestActive()) {
+				throw new IllegalStateException(
+						"Cannot set request attribute - request is not active anymore!");
+			}
 			this.request.setAttribute(name, value);
 		}
 		else {
 			PortletSession session = getSession(true);
 			if (scope == SCOPE_GLOBAL_SESSION) {
 				session.setAttribute(name, value, PortletSession.APPLICATION_SCOPE);
-				this.globalSessionAttributesToUpdate.remove(name);
+				synchronized (this.globalSessionAttributesToUpdate) {
+					this.globalSessionAttributesToUpdate.remove(name);
+				}
 			}
 			else {
 				session.setAttribute(name, value);
-				this.sessionAttributesToUpdate.remove(name);
+				synchronized (this.sessionAttributesToUpdate) {
+					this.sessionAttributesToUpdate.remove(name);
+				}
 			}
 		}
 	}
 
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
-			this.request.removeAttribute(name);
-			removeRequestDestructionCallback(name);
+			if (isRequestActive()) {
+				this.request.removeAttribute(name);
+				removeRequestDestructionCallback(name);
+			}
 		}
 		else {
 			PortletSession session = getSession(false);
 			if (session != null) {
 				if (scope == SCOPE_GLOBAL_SESSION) {
 					session.removeAttribute(name, PortletSession.APPLICATION_SCOPE);
-					this.globalSessionAttributesToUpdate.remove(name);
+					synchronized (this.globalSessionAttributesToUpdate) {
+						this.globalSessionAttributesToUpdate.remove(name);
+					}
 				}
 				else {
 					session.removeAttribute(name);
-					this.sessionAttributesToUpdate.remove(name);
+					synchronized (this.sessionAttributesToUpdate) {
+						this.sessionAttributesToUpdate.remove(name);
+					}
 				}
 			}
 		}
@@ -192,6 +191,10 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	public String[] getAttributeNames(int scope) {
 		if (scope == SCOPE_REQUEST) {
+			if (!isRequestActive()) {
+				throw new IllegalStateException(
+						"Cannot ask for request attributes - request is not active anymore!");
+			}
 			return StringUtils.toStringArray(this.request.getAttributeNames());
 		}
 		else {
@@ -233,29 +236,35 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
 	protected void updateAccessedSessionAttributes() {
-		PortletSession session = this.request.getPortletSession(false);
-		if (session != null) {
-			for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String name = (String) entry.getKey();
-				Object newValue = entry.getValue();
-				Object oldValue = session.getAttribute(name);
-				if (oldValue == newValue) {
-					session.setAttribute(name, newValue);
+		this.session = this.request.getPortletSession(false);
+		synchronized (this.sessionAttributesToUpdate) {
+			if (this.session != null) {
+				for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					String name = (String) entry.getKey();
+					Object newValue = entry.getValue();
+					Object oldValue = this.session.getAttribute(name);
+					if (oldValue == newValue) {
+						this.session.setAttribute(name, newValue);
+					}
 				}
 			}
-			for (Iterator it = this.globalSessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String name = (String) entry.getKey();
-				Object newValue = entry.getValue();
-				Object oldValue = session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
-				if (oldValue == newValue) {
-					session.setAttribute(name, newValue, PortletSession.APPLICATION_SCOPE);
-				}
-			}
+			this.sessionAttributesToUpdate.clear();
 		}
-		this.sessionAttributesToUpdate.clear();
-		this.globalSessionAttributesToUpdate.clear();
+		synchronized (this.globalSessionAttributesToUpdate) {
+			if (this.session != null) {
+				for (Iterator it = this.globalSessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					String name = (String) entry.getKey();
+					Object newValue = entry.getValue();
+					Object oldValue = this.session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
+					if (oldValue == newValue) {
+						this.session.setAttribute(name, newValue, PortletSession.APPLICATION_SCOPE);
+					}
+				}
+			}
+			this.globalSessionAttributesToUpdate.clear();
+		}
 	}
 
 	/**

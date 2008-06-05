@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.web.context.request.RequestAttributes;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class PortletRequestAttributesTests extends TestCase {
+public class PortletRequestAttributesTests extends TestCase {
 
 	private static final String KEY = "ThatThingThatThing";
 
@@ -98,6 +98,7 @@ public final class PortletRequestAttributesTests extends TestCase {
 		MockPortletRequest request = new MockPortletRequest();
 		request.setSession(session);
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
 		Object value = session.getAttribute(KEY);
@@ -121,6 +122,7 @@ public final class PortletRequestAttributesTests extends TestCase {
 		MockPortletRequest request = new MockPortletRequest();
 		request.setSession(session);
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
 		Object value = session.getAttribute(KEY);
@@ -131,7 +133,7 @@ public final class PortletRequestAttributesTests extends TestCase {
 		MockControl mockRequest = MockControl.createControl(PortletRequest.class);
 		PortletRequest request = (PortletRequest) mockRequest.getMock();
 		request.getPortletSession(false);
-		mockRequest.setReturnValue(null, 2);
+		mockRequest.setReturnValue(null, 1);
 		mockRequest.replay();
 
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
@@ -156,7 +158,7 @@ public final class PortletRequestAttributesTests extends TestCase {
 		MockControl mockRequest = MockControl.createControl(PortletRequest.class);
 		PortletRequest request = (PortletRequest) mockRequest.getMock();
 		request.getPortletSession(false);
-		mockRequest.setReturnValue(null, 2);
+		mockRequest.setReturnValue(null, 1);
 		mockRequest.replay();
 
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);

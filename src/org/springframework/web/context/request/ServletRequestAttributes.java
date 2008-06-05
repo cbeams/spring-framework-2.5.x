@@ -53,7 +53,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private final HttpServletRequest request;
 
-	private HttpSession session;
+	private volatile HttpSession session;
 
 	private final Map sessionAttributesToUpdate = new HashMap();
 
@@ -65,9 +65,6 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public ServletRequestAttributes(HttpServletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		this.request = request;
-		// Fetch existing session reference early, to have it available even
-		// after request completion (for example, in a custom child thread).
-		this.session = request.getSession(false);
 	}
 
 
@@ -83,41 +80,15 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * @param allowCreate whether to allow creation of a new session if none exists yet
 	 */
 	protected final HttpSession getSession(boolean allowCreate) {
-		try {
-			HttpSession currentSession = this.request.getSession(allowCreate);
-			// If the current session is null, we might be in a custom child thread,
-			// hence we want to preserve the original session reference (if any).
-			// However, if we have a fresh non-null session, then let's use it.
-			if (currentSession != null) {
-				this.session = currentSession;
-			}
-			return this.session;
+		if (isRequestActive()) {
+			return this.request.getSession(allowCreate);
 		}
-		catch (IllegalStateException ex) {
-			// Couldn't access session... let's check why.
-			if (this.session == null) {
-				// No matter what happened - we cannot offer a session.
-				throw ex;
+		else {
+			// Access through stored session reference, if any...
+			if (this.session == null && allowCreate) {
+				throw new IllegalStateException(
+						"No session found and request already completed - cannot create new session!");
 			}
-			// We have a fallback session reference...
-			// Let's see whether it is appropriate to return it.
-			if (allowCreate) {
-				boolean canAskForExistingSession = false;
-				try {
-					this.request.getSession(false);
-					canAskForExistingSession = true;
-				}
-				catch (IllegalStateException ex2) {
-				}
-				if (canAskForExistingSession) {
-					// Could ask for existing session, hence the IllegalStateException
-					// came from trying to create a new session too late -> rethrow.
-					throw ex;
-				}
-			}
-			// Else: Could not even ask for existing session, hence we assume that
-			// the request has been completed and the session is accessed later on
-			// (for example, in a custom child thread).
 			return this.session;
 		}
 	}
@@ -125,6 +96,10 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
+			if (!isRequestActive()) {
+				throw new IllegalStateException(
+						"Cannot ask for request attribute - request is not active anymore!");
+			}
 			return this.request.getAttribute(name);
 		}
 		else {
@@ -133,7 +108,9 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 				try {
 					Object value = session.getAttribute(name);
 					if (value != null) {
-						this.sessionAttributesToUpdate.put(name, value);
+						synchronized (this.sessionAttributesToUpdate) {
+							this.sessionAttributesToUpdate.put(name, value);
+						}
 					}
 					return value;
 				}
@@ -147,24 +124,34 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == SCOPE_REQUEST) {
+			if (!isRequestActive()) {
+				throw new IllegalStateException(
+						"Cannot set request attribute - request is not active anymore!");
+			}
 			this.request.setAttribute(name, value);
 		}
 		else {
 			HttpSession session = getSession(true);
-			this.sessionAttributesToUpdate.remove(name);
+			synchronized (this.sessionAttributesToUpdate) {
+				this.sessionAttributesToUpdate.remove(name);
+			}
 			session.setAttribute(name, value);
 		}
 	}
 
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
-			this.request.removeAttribute(name);
-			removeRequestDestructionCallback(name);
+			if (isRequestActive()) {
+				this.request.removeAttribute(name);
+				removeRequestDestructionCallback(name);
+			}
 		}
 		else {
 			HttpSession session = getSession(false);
 			if (session != null) {
-				this.sessionAttributesToUpdate.remove(name);
+				synchronized (this.sessionAttributesToUpdate) {
+					this.sessionAttributesToUpdate.remove(name);
+				}
 				try {
 					session.removeAttribute(name);
 					// Remove any registered destruction callback as well.
@@ -179,6 +166,10 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	public String[] getAttributeNames(int scope) {
 		if (scope == SCOPE_REQUEST) {
+			if (!isRequestActive()) {
+				throw new IllegalStateException(
+						"Cannot ask for request attributes - request is not active anymore!");
+			}
 			return StringUtils.toStringArray(this.request.getAttributeNames());
 		}
 		else {
@@ -218,24 +209,28 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
 	protected void updateAccessedSessionAttributes() {
-		HttpSession session = getSession(false);
-		if (session != null) {
-			try {
-				for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					String name = (String) entry.getKey();
-					Object newValue = entry.getValue();
-					Object oldValue = session.getAttribute(name);
-					if (oldValue == newValue) {
-						session.setAttribute(name, newValue);
+		// Store session reference for access after request completion.
+		this.session = this.request.getSession(false);
+		// Update all affected session attributes.
+		synchronized (this.sessionAttributesToUpdate) {
+			if (this.session != null) {
+				try {
+					for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
+						Map.Entry entry = (Map.Entry) it.next();
+						String name = (String) entry.getKey();
+						Object newValue = entry.getValue();
+						Object oldValue = this.session.getAttribute(name);
+						if (oldValue == newValue) {
+							this.session.setAttribute(name, newValue);
+						}
 					}
 				}
+				catch (IllegalStateException ex) {
+					// Session invalidated - shouldn't usually happen.
+				}
 			}
-			catch (IllegalStateException ex) {
-				// Session invalidated - shouldn't usually happen.
-			}
+			this.sessionAttributesToUpdate.clear();
 		}
-		this.sessionAttributesToUpdate.clear();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ public abstract class AbstractRequestAttributes implements RequestAttributes {
 	/** Map from attribute name String to destruction callback Runnable */
 	protected final Map requestDestructionCallbacks = new LinkedHashMap(8);
 
+	private volatile boolean requestActive = true;
+
 
 	/**
 	 * Signal that the request has been completed.
@@ -45,6 +47,15 @@ public abstract class AbstractRequestAttributes implements RequestAttributes {
 	public void requestCompleted() {
 		executeRequestDestructionCallbacks();
 		updateAccessedSessionAttributes();
+		this.requestActive = false;
+	}
+
+	/**
+	 * Determine whether the original request is still active.
+	 * @see #requestCompleted()
+	 */
+	protected final boolean isRequestActive() {
+		return this.requestActive;
 	}
 
 	/**
@@ -55,7 +66,9 @@ public abstract class AbstractRequestAttributes implements RequestAttributes {
 	protected final void registerRequestDestructionCallback(String name, Runnable callback) {
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(callback, "Callback must not be null");
-		this.requestDestructionCallbacks.put(name, callback);
+		synchronized (this.requestDestructionCallbacks) {
+			this.requestDestructionCallbacks.put(name, callback);
+		}
 	}
 
 	/**
@@ -64,7 +77,9 @@ public abstract class AbstractRequestAttributes implements RequestAttributes {
 	 */
 	protected final void removeRequestDestructionCallback(String name) {
 		Assert.notNull(name, "Name must not be null");
-		this.requestDestructionCallbacks.remove(name);
+		synchronized (this.requestDestructionCallbacks) {
+			this.requestDestructionCallbacks.remove(name);
+		}
 	}
 
 	/**
@@ -72,10 +87,12 @@ public abstract class AbstractRequestAttributes implements RequestAttributes {
 	 * after request completion.
 	 */
 	private void executeRequestDestructionCallbacks() {
-		for (Iterator it = this.requestDestructionCallbacks.values().iterator(); it.hasNext();) {
-			((Runnable) it.next()).run();
+		synchronized (this.requestDestructionCallbacks) {
+			for (Iterator it = this.requestDestructionCallbacks.values().iterator(); it.hasNext();) {
+				((Runnable) it.next()).run();
+			}
+			this.requestDestructionCallbacks.clear();
 		}
-		this.requestDestructionCallbacks.clear();
 	}
 
 	/**

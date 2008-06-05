@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.test.AssertThrows;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class ServletRequestAttributesTests extends TestCase {
+public class ServletRequestAttributesTests extends TestCase {
 
 	private static final String KEY = "ThatThingThatThing";
 
@@ -97,6 +97,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
 		Object value = session.getAttribute(KEY);
@@ -120,6 +121,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
 		Object value = session.getAttribute(KEY);
@@ -130,7 +132,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
 		request.getSession(false);
-		mockRequest.setReturnValue(null, 2);
+		mockRequest.setReturnValue(null, 1);
 		mockRequest.replay();
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
@@ -155,7 +157,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
 		request.getSession(false);
-		mockRequest.setReturnValue(null, 2);
+		mockRequest.setReturnValue(null, 1);
 		mockRequest.replay();
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
