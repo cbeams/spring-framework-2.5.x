@@ -19,10 +19,10 @@ package org.springframework.jdbc.support.xml;
 import org.springframework.jdbc.core.DisposableSqlTypeValue;
 
 /**
- * Subinterface of SqlTypeValue that supports passing in
- * XML data to specified column and adds a cleanup callback,
- * to be invoked after the value has been set and the corresponding
- * statement has been executed.
+ * Subinterface of {@link org.springframework.jdbc.core.SqlTypeValue}
+ * that supports passing in XML data to specified column and adds a
+ * cleanup callback, to be invoked after the value has been set and
+ * the corresponding statement has been executed.
  *
  * @author Thomas Risberg
  * @since 2.5.5

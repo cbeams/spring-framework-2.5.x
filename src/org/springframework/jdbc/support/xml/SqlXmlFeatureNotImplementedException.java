@@ -22,18 +22,25 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * Exception thrown when the underlying implementation does not support the
  * requested feature of the API.
  *
- * @since 2.5.5
  * @author Thomas Risberg
+ * @since 2.5.5
  */
 public class SqlXmlFeatureNotImplementedException extends InvalidDataAccessApiUsageException {
 
-    private static final long serialVersionUID = -7379792458180775799L;
+	/**
+	 * Constructor for SqlXmlFeatureNotImplementedException.
+	 * @param msg the detail message
+	 */
+	public SqlXmlFeatureNotImplementedException(String msg) {
+		super(msg);
+	}
 
-    public SqlXmlFeatureNotImplementedException(String s) {
-        super(s);
-    }
-
-    public SqlXmlFeatureNotImplementedException(String s, Throwable throwable) {
-        super(s, throwable);
-    }
+	/**
+	 * Constructor for SqlXmlFeatureNotImplementedException.
+	 * @param msg the detail message
+	 * @param cause the root cause from the data access API in use
+	 */
+	public SqlXmlFeatureNotImplementedException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 }
