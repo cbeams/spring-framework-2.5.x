@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,13 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	protected final PortletSession getSession(boolean allowCreate) {
 		try {
-			this.session = this.request.getPortletSession(allowCreate);
+			PortletSession currentSession = this.request.getPortletSession(allowCreate);
+			// If the current session is null, we might be in a custom child thread,
+			// hence we want to preserve the original session reference (if any).
+			// However, if we have a fresh non-null session, then let's use it.
+			if (currentSession != null) {
+				this.session = currentSession;
+			}
 			return this.session;
 		}
 		catch (IllegalStateException ex) {
