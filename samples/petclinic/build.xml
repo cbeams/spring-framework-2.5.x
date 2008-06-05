@@ -78,7 +78,6 @@
 			<include name="hibernate-entitymanager.jar"/>
 			<include name="hibernate-annotations.jar"/>
 			<include name="hibernate-commons-annotations.jar"/>
-			<include name="jboss-archive-browsing.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/hsqldb">
 			<include name="hsqldb.jar"/>
@@ -95,12 +94,19 @@
 			<include name="commons-lang.jar"/>
 			<include name="commons-pool.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/log4j">
+			<include name="log4j*.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/openjpa">
 			<include name="openjpa*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/serp">
 			<!-- Serp only needed for OpenJPA -->
 			<include name="serp*.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/slf4j">
+			<!-- SLF4J only needed for Hibernate -->
+			<include name="slf4j*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/toplink">
       <include name="eclipselink.jar"/>
@@ -222,9 +228,6 @@
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j*.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<!-- connector.jar only needed for OpenJPA -->
 				<include name="connector.jar"/>
@@ -243,12 +246,19 @@
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/log4j">
+				<include name="log4j*.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/openjpa">
 				<include name="openjpa*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/serp">
 				<!-- Serp only needed for OpenJPA -->
 				<include name="serp*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/slf4j">
+				<!-- SLF4J only needed for Hibernate -->
+				<include name="slf4j*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/toplink">
         <include name="eclipselink.jar"/>
