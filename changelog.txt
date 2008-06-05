@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-05-29)
+Changes in version 2.0.9 (2008-06-05)
 -------------------------------------
 
 General
@@ -13,6 +13,7 @@ General
 Package org.springframework.aop
 * Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
 * CustomizableTraceInterceptor properly escapes method names and exception messages for regex parsing (wrt "$" signs)
+* CustomizableTraceInterceptor properly escapes all "\" and "$" symbols in replacement values
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
 * AbstractBeanFactoryBasedTargetSourceCreator applies containing BeanFactory's configuration to internal BeanFactory
 
@@ -35,7 +36,7 @@ Package org.springframework.jdbc
 * NativeJdbcExtractorAdapter only processes DatabaseMetaData Connection if non-null (for WebLogic cluster compatibility)
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
-* added further default "sql-error-codes.xml" mappings for MS SQL, MySQL and Oracle
+* added further default "sql-error-codes.xml" mappings for DB2, MS SQL Server, MySQL, Oracle, PostgreSQL
 
 Package org.springframework.jms
 * improved SimpleMessageConverter's exception message for an unsupported message payload
@@ -65,6 +66,8 @@ Package org.springframework.scheduling
 * DelegatingJob propagates exceptions as-is (instead of wrapping them in JobExecutionExceptions)
 
 Package org.springframework.util
+* NumberUtils avoids overflow when converting from BigDecimal to BigInteger
+* removed Commons Log usage from SystemPropertyUtils, ClassUtils, FileCopyUtils (avoiding early Log4J initialization)
 * revised ConcurrencyThrottleSupport's interruption handling to throw an IllegalStateException instead of 'busy' waiting
 
 Package org.springframework.web
