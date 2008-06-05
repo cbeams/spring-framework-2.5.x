@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.util.Map;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
- * Default implementation of Spring's SqlRowSet interface.
+ * Default implementation of Spring's {@link SqlRowSet} interface.
  *
  * <p>This implementation wraps a <code>javax.sql.ResultSet</code>,
  * catching any SQLExceptions and translating them to the
@@ -52,6 +52,10 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * @see javax.sql.rowset.CachedRowSet
  */
 public class ResultSetWrappingSqlRowSet implements SqlRowSet {
+
+	/** use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = -4688694393146734764L;
+
 
 	private final ResultSet resultSet;
 
@@ -77,20 +81,21 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
+
 	/**
 	 * Return the underlying ResultSet
 	 * (usually a <code>javax.sql.rowset.CachedRowSet</code>).
 	 * @see javax.sql.rowset.CachedRowSet
 	 */
-	public ResultSet getResultSet() {
+	public final ResultSet getResultSet() {
 		return this.resultSet;
 	}
 
 	/**
 	 * @see java.sql.ResultSetMetaData#getCatalogName(int)
 	 */
-	public SqlRowSetMetaData getMetaData() {
+	public final SqlRowSetMetaData getMetaData() {
 		return this.rowSetMetaData;
 	}
 	
