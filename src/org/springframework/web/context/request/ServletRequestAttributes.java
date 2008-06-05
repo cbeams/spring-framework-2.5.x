@@ -253,7 +253,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	/**
 	 * Adapter that implements the Servlet 2.3 HttpSessionBindingListener
-	 * interface, wrapping a request destruction callback.
+	 * interface, wrapping a session destruction callback.
 	 */
 	private static class DestructionCallbackBindingListener implements HttpSessionBindingListener, Serializable {
 
