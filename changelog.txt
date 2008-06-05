@@ -15,6 +15,7 @@ General
 
 Package org.springframework.aop
 * added "proxyClassLoader" property to ProxyFactoryBean, AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator
+* CustomizableTraceInterceptor properly escapes all "\" and "$" symbols in replacement values
 
 Package org.springframework.beans
 * revised GenericTypeAwarePropertyDescriptor for compatibility with IBM's JDK 1.6 (avoiding NPE)
@@ -39,6 +40,7 @@ Package org.springframework.context
 Package org.springframework.core
 * added assertions to GenericTypeResolver (avoiding NPEs)
 * factored out generic ConfigurableObjectInputStream class from CodebaseAwareObjectInputStream in RMI support
+* re-enabled PathMatchingResourcePatternResolver's JarURLConnection handling (accidentally disabled in 2.5.4)
 
 Package org.springframework.ejb
 * "jee:local/remote-slsb" accepts plain object returned from EJBHome create method (for JBoss 4.2 EJB3 compatibility)
@@ -47,9 +49,11 @@ Package org.springframework.ejb
 
 Package org.springframework.jdbc
 * BeanPropertySqlParameterSource uses specific integer/decimal SQL types by default now (e.g. TINYINT, BIGINT, DOUBLE)
+* added further SQL error code mapping for MS SQL Server
 
 Package org.springframework.jms
 * SingleConnectionFactory and TransactionAwareConnectionFactoryProxy use JMS API ClassLoader for proxy generation
+* JmsTemplate properly allows for overriding "getDefaultDestination()" and "getDefaultDestinationName()"
 * AbstractJmsListeningContainer sets Connection to null on shutdown, allowing for smooth reinitialization
 * DefaultMessageListenerContainer performs lazy setup in case of any connection exception (also JNDI lookup failure)
 * DefaultMessageListenerContainer is able to recover all cases where the provider is not available on startup
@@ -80,6 +84,7 @@ Package org.springframework.remoting
 * added support for "username"/"password"/"maintainSession"/"useSoapAction"/etc properties to JaxWsClientInterceptor
 * added SimpleHttpServerJaxWsServiceExporter, allowing for exposure through a fully configurable Sun JDK 1.6 HttpServer
 * added "filters" and "authenticator" property to SimpleHttpServerFactoryBean for Sun's JDK 1.6 HttpServer
+* revised HessianExporter's "debug" feature to work on Hessian 3.0.20+ as well (with input debugging only)
 
 Package org.springframework.scheduling
 * SchedulerFactoryBean's "jobSchedulingDataLocation" feature is compatible with Quartz 1.6.1 now (requiring 1.6.1+)
@@ -97,12 +102,16 @@ Package org.springframework.transaction
 Package org.springframework.util
 * publicly exposed "isVisible" method on ClassUtils
 * added "getField" and simple "findField" method to ReflectionUtils
+* NumberUtils avoids overflow when converting from BigDecimal to BigInteger
+* NumberUtils automatically supports JDK 1.5+ localized BigDecimal parsing
 * added various overloaded methods with a CharSequence argument (as alternative to a String argument) to StringUtils
+* removed Commons Log usage from SystemPropertyUtils, ClassUtils, FileCopyUtils (avoiding early Log4J initialization)
 
 Package org.springframework.validation
 * fixed DefaultBindingErrorProcessor to register correct "missing field" errors within specified nested path
 
 Package org.springframework.web
+* revised RequestAttributes access from child threads in order to not touch the request object after request completion
 * DispatcherServlet exposes the Servlet spec's error attributes to error views (for JSP error page compatibility)
 * HandlerMethodInvoker does not eagerly copy entire model Map in order to avoid lazy initialization of attribute values
 * Servlet AnnotationMethodHandlerAdapter throws ambiguity exception in case of equivalent mappings with same method name
