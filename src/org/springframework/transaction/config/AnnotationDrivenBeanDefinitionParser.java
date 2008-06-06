@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
+import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 /**
@@ -108,26 +109,41 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 
 			if (!parserContext.getRegistry().containsBeanDefinition(TRANSACTION_ADVISOR_BEAN_NAME)) {
+				Object eleSource = parserContext.extractSource(element);
+
+				// Create the TransactionAttributeSource definition.
+				Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
+				RootBeanDefinition sourceDef = new RootBeanDefinition(sourceClass);
+				sourceDef.setSource(eleSource);
+				sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				String sourceName = parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
+
 				// Create the TransactionInterceptor definition.
 				RootBeanDefinition interceptorDef = new RootBeanDefinition(TransactionInterceptor.class);
-				interceptorDef.setSource(parserContext.extractSource(element));
+				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				registerTransactionManager(element, interceptorDef);
-
-				Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
-				interceptorDef.getPropertyValues().addPropertyValue(
-						TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
+				interceptorDef.getPropertyValues().addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE,
+						new RuntimeBeanReference(sourceName));
+				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
 				// Create the TransactionAttributeSourceAdvisor definition.
-				RootBeanDefinition advisorDef = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
-				advisorDef.setSource(parserContext.extractSource(element));
+				RootBeanDefinition advisorDef = new RootBeanDefinition(BeanFactoryTransactionAttributeSourceAdvisor.class);
+				advisorDef.setSource(eleSource);
 				advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-				advisorDef.getPropertyValues().addPropertyValue("transactionInterceptor", interceptorDef);
+				advisorDef.getPropertyValues().addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE,
+						new RuntimeBeanReference(sourceName));
+				advisorDef.getPropertyValues().addPropertyValue("adviceBeanName", interceptorName);
 				if (element.hasAttribute("order")) {
 					advisorDef.getPropertyValues().addPropertyValue("order", element.getAttribute("order"));
 				}
+				parserContext.getRegistry().registerBeanDefinition(TRANSACTION_ADVISOR_BEAN_NAME, advisorDef);
 
-				parserContext.registerBeanComponent(new BeanComponentDefinition(advisorDef, TRANSACTION_ADVISOR_BEAN_NAME));
+				CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), eleSource);
+				compositeDef.addNestedComponent(new BeanComponentDefinition(sourceDef, sourceName));
+				compositeDef.addNestedComponent(new BeanComponentDefinition(interceptorDef, interceptorName));
+				compositeDef.addNestedComponent(new BeanComponentDefinition(advisorDef, TRANSACTION_ADVISOR_BEAN_NAME));
+				parserContext.registerComponent(compositeDef);
 			}
 		}
 	}

@@ -16,56 +16,39 @@
 
 package org.springframework.transaction.interceptor;
 
-import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.support.AbstractPointcutAdvisor;
+import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
 
 /**
  * Advisor driven by a {@link TransactionAttributeSource}, used to include
- * a {@link TransactionInterceptor} only for methods that are transactional.
+ * a transaction advice bean for methods that are transactional.
  *
- * <p>Because the AOP framework caches advice calculations, this is normally
- * faster than just letting the TransactionInterceptor run and find out
- * itself that it has no work to do.
- *
- * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #setTransactionInterceptor
- * @see TransactionProxyFactoryBean
+ * @since 2.5.5
+ * @see #setAdviceBeanName
+ * @see TransactionInterceptor
+ * @see TransactionAttributeSourceAdvisor
  */
-public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
-	
-	private TransactionInterceptor transactionInterceptor;
+public class BeanFactoryTransactionAttributeSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
+
+	private TransactionAttributeSource transactionAttributeSource;
 
 	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut() {
 		protected TransactionAttributeSource getTransactionAttributeSource() {
-			return (transactionInterceptor != null ? transactionInterceptor.getTransactionAttributeSource() : null);
+			return transactionAttributeSource;
 		}
 	};
 
 
 	/**
-	 * Create a new TransactionAttributeSourceAdvisor.
+	 * Set the transaction attribute source which is used to find transaction
+	 * attributes. This should usually be identical to the source reference
+	 * set on the transaction interceptor itself.
+	 * @see TransactionInterceptor#setTransactionAttributeSource
 	 */
-	public TransactionAttributeSourceAdvisor() {
-	}
-
-	/**
-	 * Create a new TransactionAttributeSourceAdvisor.
-	 * @param interceptor the transaction interceptor to use for this advisor
-	 */
-	public TransactionAttributeSourceAdvisor(TransactionInterceptor interceptor) {
-		setTransactionInterceptor(interceptor);
-	}
-
-
-	/**
-	 * Set the transaction interceptor to use for this advisor.
-	 */
-	public void setTransactionInterceptor(TransactionInterceptor interceptor) {
-		this.transactionInterceptor = interceptor;
+	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
+		this.transactionAttributeSource = transactionAttributeSource;
 	}
 
 	/**
@@ -74,11 +57,6 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	 */
 	public void setClassFilter(ClassFilter classFilter) {
 		this.pointcut.setClassFilter(classFilter);
-	}
-
-
-	public Advice getAdvice() {
-		return this.transactionInterceptor;
 	}
 
 	public Pointcut getPointcut() {
