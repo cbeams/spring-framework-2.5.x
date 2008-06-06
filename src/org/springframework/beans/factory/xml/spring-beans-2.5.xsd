@@ -613,8 +613,7 @@
 			<xsd:attribute name="value" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	A short-cut alternative to a nested "<value>...<value/>"
-	element.
+	A short-cut alternative to a nested "<value>...<value/>" element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -787,7 +786,7 @@
 					<xsd:attribute name="parent" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the referenced bean *in a parent factory*.
+	The name of the referenced bean in a parent factory.
 						]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -889,33 +888,69 @@
 		</xsd:sequence>
 	</xsd:group>
 
-	<xsd:element name="list" type="listOrSetType">
+	<xsd:element name="list">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	A list can contain multiple inner bean, ref, collection, or value
-	elements. Java lists are untyped, pending generics support in Java5,
-	although references will be strongly typed. A list can also map to
-	an array type. The necessary conversion is automatically performed
-	by the BeanFactory.
+	A list can contain multiple inner bean, ref, collection, or value elements.
+	A list can also map to an array type; the necessary conversion is performed
+	automatically.
 			]]></xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="listOrSetType">
+					<xsd:attribute name="merge" type="defaultable-boolean">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Enables/disables merging for collections when using parent/child beans.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="set" type="listOrSetType">
+	<xsd:element name="set">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	A set can contain multiple inner bean, ref, collection, or value
-	elements. Java sets are untyped, pending generics support in Java5,
-	although references will be strongly typed.
+	A set can contain multiple inner bean, ref, collection, or value elements.
 			]]></xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="listOrSetType">
+					<xsd:attribute name="merge" type="defaultable-boolean">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Enables/disables merging for collections when using parent/child beans.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
-	<xsd:element name="map" type="mapType">
+
+	<xsd:element name="map">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	A mapping from a key to an object. Maps may be empty.
 			]]></xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="mapType">
+					<xsd:attribute name="merge" type="defaultable-boolean">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Enables/disables merging for collections when using parent/child beans.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="entry" type="entryType">
@@ -927,13 +962,26 @@
 		</xsd:annotation>
 	</xsd:element>
 
-	<xsd:element name="props" type="propsType">
+	<xsd:element name="props">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Props elements differ from map elements in that values must be strings.
 	Props may be empty.
 			]]></xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="propsType">
+					<xsd:attribute name="merge" type="defaultable-boolean">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Enables/disables merging for collections when using parent/child beans.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="key">
@@ -1000,8 +1048,7 @@
 		<xsd:attribute name="value" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	A short-cut alternative to a nested "<value>...</value>"
-	element.
+	A short-cut alternative to a nested "<value>...</value>" element.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -1009,29 +1056,23 @@
 
 	<!-- Collection Types -->
 
-	<!-- base collection type -->
-	<xsd:complexType name="baseCollectionType">
-		<xsd:attribute name="merge" type="defaultable-boolean">
+	<!-- base type for collections that have (possibly) typed nested values -->
+	<xsd:complexType name="collectionType">
+		<xsd:attribute name="value-type" type="xsd:string">
 			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Enables/disables merging for collections when using parent/child beans.
+				<xsd:documentation source="java:java.lang.Class"><![CDATA[
+	The default Java type for nested values. Must be a fully qualified
+	class name.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
 
-	<!-- base type for collections that have (possibly) typed nested values -->
-	<xsd:complexType name="typedCollectionType">
+	<!-- 'list' and 'set' collection type -->
+	<xsd:complexType name="listOrSetType">
 		<xsd:complexContent>
-			<xsd:extension base="baseCollectionType">
-				<xsd:attribute name="value-type" type="xsd:string">
-					<xsd:annotation>
-						<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The default Java type for nested values. Must be a fully qualified
-	class name.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:attribute>
+			<xsd:extension base="collectionType">
+				<xsd:group ref="collectionElements"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
@@ -1039,7 +1080,7 @@
 	<!-- 'map' element type -->
 	<xsd:complexType name="mapType">
 		<xsd:complexContent>
-			<xsd:extension base="typedCollectionType">
+			<xsd:extension base="collectionType">
 				<xsd:sequence>
 					<xsd:choice minOccurs="0" maxOccurs="unbounded">
 						<xsd:element ref="entry"/>
@@ -1096,19 +1137,10 @@
 		</xsd:attribute>
 	</xsd:complexType>
 
-	<!-- 'list' and 'set' collection type -->
-	<xsd:complexType name="listOrSetType">
-		<xsd:complexContent>
-			<xsd:extension base="typedCollectionType">
-				<xsd:group ref="collectionElements"/>
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
 	<!-- 'props' collection type -->
 	<xsd:complexType name="propsType">
 		<xsd:complexContent>
-			<xsd:extension base="baseCollectionType">
+			<xsd:extension base="collectionType">
 				<xsd:sequence>
 					<xsd:choice minOccurs="0" maxOccurs="unbounded">
 						<xsd:element ref="prop"/>
