@@ -145,8 +145,7 @@
 	<xsd:element name="description">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Contains informative text describing the purpose of the enclosing
-	element.
+	Contains informative text describing the purpose of the enclosing element.
 	Used primarily for user documentation of XML bean definition documents.
 			]]></xsd:documentation>
 		</xsd:annotation>
@@ -497,14 +496,14 @@
 		<xsd:attribute name="key" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The key name of the metadata parameter being defined.
+	The key name of the metadata attribute being defined.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="value" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The value of the metadata parameter being defined (as a simple String).
+	The value of the metadata attribute being defined (as a simple String).
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -566,7 +565,7 @@
 			<xsd:attribute name="index" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The exact index of thr argument in the constructor argument list.
+	The exact index of the argument in the constructor argument list.
 	Only needed to avoid ambiguities, e.g. in case of 2 arguments of
 	the exact same type.
 					]]></xsd:documentation>
@@ -591,8 +590,7 @@
 			<xsd:attribute name="value" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	A short-cut alternative to a nested "<value>...<value/>"
-	element.
+	A short-cut alternative to a nested "<value>...<value/>" element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -739,7 +737,7 @@
 					<xsd:attribute name="parent" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the referenced bean *in a parent factory*.
+	The name of the referenced bean in a parent factory.
 						]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -844,11 +842,9 @@
 	<xsd:element name="list" type="listOrSetType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	A list can contain multiple inner bean, ref, collection, or value
-	elements. Java lists are untyped, pending generics support in Java5,
-	although references will be strongly typed. A list can also map to
-	an array type. The necessary conversion is automatically performed
-	by the BeanFactory.
+	A list can contain multiple inner bean, ref, collection, or value elements.
+	A list can also map to an array type; the necessary conversion is performed
+	automatically.
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
@@ -856,12 +852,11 @@
 	<xsd:element name="set" type="listOrSetType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	A set can contain multiple inner bean, ref, collection, or value
-	elements. Java sets are untyped, pending generics support in Java5,
-	although references will be strongly typed.
+	A set can contain multiple inner bean, ref, collection, or value elements.
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
+
 	<xsd:element name="map" type="mapType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
@@ -988,6 +983,15 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 
+	<!-- 'list' and 'set' collection type -->
+	<xsd:complexType name="listOrSetType">
+		<xsd:complexContent>
+			<xsd:extension base="typedCollectionType">
+				<xsd:group ref="collectionElements"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
 	<!-- 'map' element type -->
 	<xsd:complexType name="mapType">
 		<xsd:complexContent>
@@ -1046,15 +1050,6 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-	</xsd:complexType>
-
-	<!-- 'list' and 'set' collection type -->
-	<xsd:complexType name="listOrSetType">
-		<xsd:complexContent>
-			<xsd:extension base="typedCollectionType">
-				<xsd:group ref="collectionElements"/>
-			</xsd:extension>
-		</xsd:complexContent>
 	</xsd:complexType>
 
 	<!-- 'props' collection type -->
