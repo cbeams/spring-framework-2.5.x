@@ -728,8 +728,8 @@
 					<xsd:attribute name="local" type="xsd:IDREF">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the referenced bean. The value must be a bean ID and thus can 
-	be checked by the XML parser. This is therefore the preferred technique 
+	The name of the referenced bean. The value must be a bean ID and thus can
+	be checked by the XML parser. This is therefore the preferred technique
 	for referencing beans within the same bean factory XML file.
 							]]></xsd:documentation>
 						</xsd:annotation>
@@ -737,7 +737,7 @@
 					<xsd:attribute name="parent" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the referenced bean *in a parent factory*.
+	The name of the referenced bean in a parent factory.
 						]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -769,8 +769,8 @@
 					<xsd:attribute name="local" type="xsd:IDREF">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the referenced bean. The value must be a bean ID and thus can 
-	be checked by the XML parser. This is therefore the preferred technique 
+	The name of the referenced bean. The value must be a bean ID and thus can
+	be checked by the XML parser. This is therefore the preferred technique
 	for referencing beans within the same bean factory XML file.
 							]]></xsd:documentation>
 						</xsd:annotation>
