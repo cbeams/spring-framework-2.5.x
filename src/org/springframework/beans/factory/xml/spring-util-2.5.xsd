@@ -38,19 +38,19 @@
 	</xsd:element>
 
 	<xsd:element name="list">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.beans.factory.config.ListFactoryBean">
+	Builds a List instance of the specified type, populated with the specified content.
+			</xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="java.util.List"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="beans:listOrSetType">
-					<xsd:annotation>
-						<xsd:documentation source="java:org.springframework.beans.factory.config.ListFactoryBean">
-	Builds a List instance of the specified type, populated with the specified content.
-						</xsd:documentation>
-						<xsd:appinfo>
-							<tool:annotation>
-								<tool:exports type="java.util.List"/>
-							</tool:annotation>
-						</xsd:appinfo>
-					</xsd:annotation>
 					<xsd:attribute name="id" type="xsd:ID"/>
 					<xsd:attribute name="list-class" type="xsd:string">
 						<xsd:annotation>
@@ -79,19 +79,19 @@
 	</xsd:element>
 
 	<xsd:element name="set">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.beans.factory.config.SetFactoryBean">
+	Builds a Set instance of the specified type, populated with the specified content.
+			</xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="java.util.Set"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="beans:listOrSetType">
-					<xsd:annotation>
-						<xsd:documentation source="java:org.springframework.beans.factory.config.SetFactoryBean">
-	Builds a Set instance of the specified type, populated with the specified content.
-						</xsd:documentation>
-						<xsd:appinfo>
-							<tool:annotation>
-								<tool:exports type="java.util.Set"/>
-							</tool:annotation>
-						</xsd:appinfo>
-					</xsd:annotation>
 					<xsd:attribute name="id" type="xsd:ID"/>
 					<xsd:attribute name="set-class" type="xsd:string">
 						<xsd:annotation>
@@ -120,19 +120,19 @@
 	</xsd:element>
 
 	<xsd:element name="map">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.beans.factory.config.MapFactoryBean">
+	Builds a Map instance of the specified type, populated with the specified content.
+			</xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="java.util.Map"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="beans:mapType">
-					<xsd:annotation>
-						<xsd:documentation source="java:org.springframework.beans.factory.config.MapFactoryBean">
-	Builds a Map instance of the specified type, populated with the specified content.
-						</xsd:documentation>
-						<xsd:appinfo>
-							<tool:annotation>
-								<tool:exports type="java.util.Map"/>
-							</tool:annotation>
-						</xsd:appinfo>
-					</xsd:annotation>
 					<xsd:attribute name="id" type="xsd:ID"/>
 					<xsd:attribute name="map-class" type="xsd:string">
 						<xsd:annotation>
