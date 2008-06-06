@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.5 (2008-06-05)
+Changes in version 2.5.5 (2008-06-09)
 -------------------------------------
 
 General
@@ -20,6 +20,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * revised GenericTypeAwarePropertyDescriptor for compatibility with IBM's JDK 1.6 (avoiding NPE)
 * TypeMismatchException shows type description for mismatching JDK proxy values (listing their implemented interfaces)
+* CustomNumberEditor explicitly removes all inline whitespace from input Strings (for compatibility with French locales)
 * added "getDescription()" method to BeanDefinition interface (exposing the value of the XML bean description element)
 * AbstractFactoryBean uses bean ClassLoader for the generation of early singleton proxies
 * PropertyPlaceholderConfigurer correctly manages resolution of set entries and map keys with modified hash code
@@ -98,6 +99,7 @@ Package org.springframework.test
 Package org.springframework.transaction
 * transactional resource synchronization works even for operations triggered during commit (e.g. by JPA PostUpdate)
 * strengthened warning regarding @Transactional use on interfaces versus classes
+* "tx:annotation-driven" registers revised TransactionAttributeSourceAdvisor, initializing TransactionInterceptor lazily
 
 Package org.springframework.util
 * publicly exposed "isVisible" method on ClassUtils
