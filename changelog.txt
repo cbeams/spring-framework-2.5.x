@@ -25,6 +25,9 @@ Package org.springframework.beans
 * AbstractFactoryBean uses bean ClassLoader for the generation of early singleton proxies
 * PropertyPlaceholderConfigurer correctly manages resolution of set entries and map keys with modified hash code
 * fixed DefaultSingletonBeanRegistry's singleton exposure to remove singleton factory after creation of singleton object
+* DefaultSingletonBeanRegistry only exposes related causes on outermost creation exception (avoiding excessive logging)
+* DefaultSingletonBeanRegistry only registers same related cause (i.e. same message, same chained cause) once
+* DefaultListableBeanFactory only registers causes during constructor resolution when resolution eventually fails
 * DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
 * added overloaded BeanComponentDefinition constructor with aliases argument
 * GenericBeanFactoryAccessor's "getBeansWithAnnotation" performs deep search (including interfaces and target class)
