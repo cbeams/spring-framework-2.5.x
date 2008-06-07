@@ -100,7 +100,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
 
 	/** List of suppressed Exceptions, available for associating related causes */
-	private List suppressedExceptions;
+	private Set suppressedExceptions;
 
 	/** Flag that indicates whether we're currently within destroySingletons */
 	private boolean singletonsCurrentlyInDestruction = false;
@@ -215,14 +215,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				beforeSingletonCreation(beanName);
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
 				if (recordSuppressedExceptions) {
-					this.suppressedExceptions = new LinkedList();
+					this.suppressedExceptions = new LinkedHashSet();
 				}
 				try {
 					singletonObject = singletonFactory.getObject();
 				}
 				catch (BeanCreationException ex) {
-					for (Iterator it = this.suppressedExceptions.iterator(); it.hasNext();) {
-						ex.addRelatedCause((Exception) it.next());
+					if (recordSuppressedExceptions) {
+						for (Iterator it = this.suppressedExceptions.iterator(); it.hasNext();) {
+							ex.addRelatedCause((Exception) it.next());
+						}
 					}
 					throw ex;
 				}

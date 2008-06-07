@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract superclass for all exceptions thrown in the beans package
@@ -26,6 +27,7 @@ import org.springframework.core.NestedRuntimeException;
  * are usually fatal; there is no reason for them to be checked.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class BeansException extends NestedRuntimeException {
 
@@ -45,6 +47,23 @@ public abstract class BeansException extends NestedRuntimeException {
 	 */
 	public BeansException(String msg, Throwable cause) {
 		super(msg, cause);
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansException)) {
+			return false;
+		}
+		BeansException otherBe = (BeansException) other;
+		return (getMessage().equals(otherBe.getMessage()) &&
+				ObjectUtils.nullSafeEquals(getCause(), otherBe.getCause()));
+	}
+
+	public int hashCode() {
+		return getMessage().hashCode();
 	}
 
 }
