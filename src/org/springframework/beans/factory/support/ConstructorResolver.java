@@ -22,6 +22,8 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -183,6 +185,7 @@ class ConstructorResolver {
 				}
 
 				ArgumentsHolder args = null;
+				List causes = null;
 
 				if (resolvedValues != null) {
 					// Try to resolve arguments for current constructor.
@@ -196,11 +199,19 @@ class ConstructorResolver {
 									"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
 						}
 						if (i == candidates.length - 1 && constructorToUse == null) {
+							if (causes != null) {
+								for (Iterator it = causes.iterator(); it.hasNext();) {
+									this.beanFactory.onSuppressedException((Exception) it.next());
+								}
+							}
 							throw ex;
 						}
 						else {
 							// Swallow and try next constructor.
-							this.beanFactory.onSuppressedException(ex);
+							if (causes == null) {
+								causes = new LinkedList();
+							}
+							causes.add(ex);
 							continue;
 						}
 					}
@@ -342,6 +353,8 @@ class ConstructorResolver {
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
+			List causes = null;
+
 			for (int i = 0; i < candidates.length; i++) {
 				Method candidate = candidates[i];
 				Class[] paramTypes = candidate.getParameterTypes();
@@ -364,11 +377,19 @@ class ConstructorResolver {
 										"] of bean '" + beanName + "': " + ex);
 							}
 							if (i == candidates.length - 1 && factoryMethodToUse == null) {
+								if (causes != null) {
+									for (Iterator it = causes.iterator(); it.hasNext();) {
+										this.beanFactory.onSuppressedException((Exception) it.next());
+									}
+								}
 								throw ex;
 							}
 							else {
 								// Swallow and try next overloaded factory method.
-								this.beanFactory.onSuppressedException(ex);
+								if (causes == null) {
+									causes = new LinkedList();
+								}
+								causes.add(ex);
 								continue;
 							}
 						}

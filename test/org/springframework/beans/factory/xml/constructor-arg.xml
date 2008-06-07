@@ -13,6 +13,15 @@
 		<constructor-arg><ref bean="other"/></constructor-arg>
 	</bean>
 
+	<bean id="rod2Accessor" class="org.springframework.beans.TestBean" lazy-init="true">
+		<property name="friends">
+			<list>
+				<ref bean="rod2"/>
+			</list>
+		</property>
+		<property name="touchy" value="."/>
+	</bean>
+
 	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
 			autowire="constructor">
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
