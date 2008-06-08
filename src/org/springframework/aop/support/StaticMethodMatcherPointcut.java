@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,15 +22,13 @@ import org.springframework.aop.Pointcut;
 
 /**
  * Convenient superclass when we want to force subclasses to implement the
- * MethodMatcher interface, but subclasses will want to be pointcuts.
+ * {@link MethodMatcher} interface but subclasses will want to be pointcuts.
  *
- * <p>The "classFilter" property can be set to customize ClassFilter behavior.
- * The default is <code>ClassFilter.TRUE</code>.
+ * <p>The {@link #setClassFilter "classFilter"} property can be set to customize
+ * {@link ClassFilter} behavior. The default is {@link ClassFilter#TRUE}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #setClassFilter
- * @see ClassFilter#TRUE
  */
 public abstract class StaticMethodMatcherPointcut extends StaticMethodMatcher implements Pointcut {
 
@@ -46,7 +44,7 @@ public abstract class StaticMethodMatcherPointcut extends StaticMethodMatcher im
 	}
 
 	public ClassFilter getClassFilter() {
-		return classFilter;
+		return this.classFilter;
 	}
 
 
