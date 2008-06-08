@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,10 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.ClassUtils;
 
 /**
- * Convenient superclass for configurers that can perform Dependency Injection
- * on objects (however they may be created).
+ * Convenient base class for configurers that can perform Dependency Injection
+ * on objects (however they may be created). Typically subclassed by AspectJ aspects.
  *
- * <p>Typically subclassed by AspectJ aspects.
-
- * <p>Subclasses may also need a metadata resolution strategy, in the
+ * <p>Subclasses may also need a custom metadata resolution strategy, in the
  * {@link BeanWiringInfoResolver} interface. The default implementation looks
  * for a bean with the same name as the fully-qualified class name. (This is
  * the default name of the bean in a Spring XML file if the '<code>id</code>'
@@ -47,18 +45,17 @@ import org.springframework.util.ClassUtils;
 public abstract class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean  {
 
 	/** Logger available to subclasses */
-	protected Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
-	private BeanWiringInfoResolver beanWiringInfoResolver;
+	private volatile BeanWiringInfoResolver beanWiringInfoResolver;
 
-	private AutowireCapableBeanFactory beanFactory;
+	private volatile AutowireCapableBeanFactory beanFactory;
 
 
 	/**
 	 * Set the <code>BeanWiringInfoResolver</code> to use.
-	 * <p>Default behavior will be to look for a bean with the same name as the
-	 * class.
-	 * <p>As an alternative, consider using annotation-driven bean wiring.
+	 * <p>The default behavior is to look for a bean with the same name as the class.
+	 * As an alternative, consider using annotation-driven bean wiring.
 	 * @param beanWiringInfoResolver the <code>BeanWiringInfoResolver</code> to use.
 	 * @see ClassNameBeanWiringInfoResolver
 	 * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
@@ -69,8 +66,6 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 
 	/**
 	 * Set the {@link BeanFactory} in which this aspect must configure beans.
-	 * @throws IllegalArgumentException if the supplied <code>beanFactory</code> is
-	 * not an {@link AutowireCapableBeanFactory}.
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof AutowireCapableBeanFactory)) {
@@ -89,7 +84,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 			this.beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
 		}		
 	}
-	
+
 	/**
 	 * Release references to the {@link BeanFactory} and
 	 * {@link BeanWiringInfoResolver} when the container is destroyed.
