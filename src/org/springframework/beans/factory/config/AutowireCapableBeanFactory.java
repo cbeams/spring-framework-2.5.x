@@ -125,7 +125,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * and bean property post-processing (e.g. for annotation-driven injection).
 	 * <p>Note: This is essentially intended for (re-)populating annotated fields and
 	 * methods, either for new instances or for deserialized instances. It does
-	 * <i>not</> imply traditional by-name or by-type autowiring of properties;
+	 * <i>not</i> imply traditional by-name or by-type autowiring of properties;
 	 * use {@link #autowireBeanProperties} for that purposes.
 	 * @param existingBean the existing bean instance
 	 * @throws BeansException if wiring failed

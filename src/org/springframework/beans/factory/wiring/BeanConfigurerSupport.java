@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 
 	/**
 	 * Set the <code>BeanWiringInfoResolver</code> to use.
-	 * <p>Default behavior will be to look for a bean with the same name as the class.
-	 * <p>As an alternative, consider using annotation-driven bean wiring.
+	 * <p>The default behavior is to look for a bean with the same name as the class.
+	 * As an alternative, consider using annotation-driven bean wiring.
 	 * @param beanWiringInfoResolver the <code>BeanWiringInfoResolver</code> to use.
 	 * @see ClassNameBeanWiringInfoResolver
 	 * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
@@ -71,8 +71,6 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 
 	/**
 	 * Set the {@link BeanFactory} in which this aspect must configure beans.
-	 * @throws IllegalArgumentException if the supplied <code>beanFactory</code> is
-	 * not a {@link ConfigurableListableBeanFactory}
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
