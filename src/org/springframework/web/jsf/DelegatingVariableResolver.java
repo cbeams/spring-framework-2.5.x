@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,12 +117,9 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * Resolve the attribute via the original JSF VariableResolver.
 	 */
 	protected Object resolveOriginal(FacesContext facesContext, String name) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Attempting to resolve variable '" + name + "' via original VariableResolver");
-		}
 		Object value = getOriginalVariableResolver().resolveVariable(facesContext, name);
-		if (value != null && logger.isDebugEnabled()) {
-			logger.debug("Successfully resolved variable '" + name + "' via original VariableResolver");
+		if (value != null && logger.isTraceEnabled()) {
+			logger.trace("Successfully resolved variable '" + name + "' via original VariableResolver");
 		}
 		return value;
 	}
@@ -131,13 +128,10 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * Resolve the attribute as a Spring bean in the ApplicationContext.
 	 */
 	protected Object resolveSpringBean(FacesContext facesContext, String name) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Attempting to resolve variable '" + name + "' in Spring ApplicationContext");
-		}
 		BeanFactory bf = getBeanFactory(facesContext);
 		if (bf.containsBean(name)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Successfully resolved variable '" + name + "' in Spring ApplicationContext");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Successfully resolved variable '" + name + "' in Spring BeanFactory");
 			}
 			return bf.getBean(name);
 		}

@@ -46,13 +46,10 @@ public abstract class SpringBeanELResolver extends ELResolver {
 	public Object getValue(ELContext elContext, Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
-			if (logger.isTraceEnabled()) {
-				logger.trace("Attempting to resolve variable '" + beanName + "' in Spring BeanFactory");
-			}
 			BeanFactory bf = getBeanFactory(elContext);
 			if (bf.containsBean(beanName)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Successfully resolved variable '" + beanName + "' in Spring BeanFactory");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Successfully resolved variable '" + beanName + "' in Spring BeanFactory");
 				}
 				elContext.setPropertyResolved(true);
 				return bf.getBean(beanName);
