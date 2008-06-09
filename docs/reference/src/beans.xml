@@ -4242,14 +4242,10 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       case of an <interfacename>ApplicationContext</interfacename>) to apply
       changes of some sort to the configuration metadata that defines a
       container. Spring includes a number of pre-existing bean factory
-      post-processors, such as
-      <classname>PropertyResourceConfigurer</classname> and
-      <classname>PropertyPlaceholderConfigurer</classname>, both described
-      below, and <classname>BeanNameAutoProxyCreator</classname>, which is
-      very useful for wrapping other beans transactionally or with any other
-      kind of proxy, as described later in this manual. The
-      <interfacename>BeanFactoryPostProcessor</interfacename> can be used to
-      add custom property editors.</para>
+      post-processors, such as <classname>PropertyOverrideConfigurer</classname>
+      and <classname>PropertyPlaceholderConfigurer</classname>, both described
+      below. A custom <interfacename>BeanFactoryPostProcessor</interfacename>
+      can also be used to register custom property editors, for example.</para>
 
       <para>In a <interfacename>BeanFactory</interfacename>, the process of
       applying a <interfacename>BeanFactoryPostProcessor</interfacename> is

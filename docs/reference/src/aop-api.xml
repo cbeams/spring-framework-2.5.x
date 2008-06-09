@@ -1438,7 +1438,8 @@ assertEquals("Added two advisors",
       <section id="aop-api-autoproxy">
         <title>BeanNameAutoProxyCreator</title>
 
-        <para>The BeanNameAutoProxyCreator automatically creates AOP proxies
+        <para>The <literal>BeanNameAutoProxyCreator</literal> class is a
+        <literal>BeanPostProcessor</literal> that automatically creates AOP proxies
         for beans with names matching literal values or wildcards.</para>
 
         <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
