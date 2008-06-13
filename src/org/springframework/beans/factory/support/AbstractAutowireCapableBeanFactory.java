@@ -1086,8 +1086,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				autowiredBeanNames.clear();
 			}
 			catch (BeansException ex) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, propertyName, ex.getMessage());
+				throw new UnsatisfiedDependencyException(mbd.getResourceDescription(), beanName, propertyName, ex);
 			}
 		}
 	}

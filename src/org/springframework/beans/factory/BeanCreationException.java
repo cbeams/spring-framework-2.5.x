@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param msg the detail message
 	 */
 	public BeanCreationException(String beanName, String msg) {
-		this(beanName, msg, (Throwable) null);
+		super("Error creating bean with name '" + beanName + "': " + msg);
+		this.beanName = beanName;
 	}
 
 	/**
@@ -73,8 +74,8 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param cause the root cause
 	 */
 	public BeanCreationException(String beanName, String msg, Throwable cause) {
-		super("Error creating bean with name '" + beanName + "': " + msg, cause);
-		this.beanName = beanName;
+		this(beanName, msg);
+		initCause(cause);
 	}
 
 	/**
@@ -85,7 +86,10 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param msg the detail message
 	 */
 	public BeanCreationException(String resourceDescription, String beanName, String msg) {
-		this(resourceDescription, beanName, msg, null);
+		super("Error creating bean with name '" + beanName + "'" +
+				(resourceDescription != null ? " defined in " + resourceDescription : "") + ": " + msg);
+		this.resourceDescription = resourceDescription;
+		this.beanName = beanName;
 	}
 
 	/**
@@ -97,11 +101,8 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param cause the root cause
 	 */
 	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable cause) {
-		super("Error creating bean with name '" + beanName + "'" +
-				(resourceDescription != null ? " defined in " + resourceDescription : "") +
-				": " + msg, cause);
-		this.resourceDescription = resourceDescription;
-		this.beanName = beanName;
+		this(resourceDescription, beanName, msg);
+		initCause(cause);
 	}
 
 

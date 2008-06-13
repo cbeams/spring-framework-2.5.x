@@ -589,7 +589,7 @@ class ConstructorResolver {
 				}
 				catch (BeansException ex) {
 					throw new UnsatisfiedDependencyException(
-							mbd.getResourceDescription(), beanName, paramIndex, paramType, ex.getMessage());
+							mbd.getResourceDescription(), beanName, paramIndex, paramType, ex);
 				}
 			}
 		}

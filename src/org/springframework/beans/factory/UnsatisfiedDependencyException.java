@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory;
 
+import org.springframework.beans.BeansException;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -31,11 +32,9 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 
 	/**
 	 * Create a new UnsatisfiedDependencyException.
-	 * @param resourceDescription description of the resource
-	 * that the bean definition came from
+	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param beanName the name of the bean requested
-	 * @param propertyName the name of the bean property that
-	 * couldn't be satisfied
+	 * @param propertyName the name of the bean property that couldn't be satisfied
 	 * @param msg the detail message
 	 */
 	public UnsatisfiedDependencyException(
@@ -48,13 +47,24 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 
 	/**
 	 * Create a new UnsatisfiedDependencyException.
-	 * @param resourceDescription description of the resource
-	 * that the bean definition came from
+	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param beanName the name of the bean requested
-	 * @param ctorArgIndex the index of the constructor argument
-	 * that couldn't be satisfied
-	 * @param ctorArgType the type of the constructor argument
-	 * that couldn't be satisfied
+	 * @param propertyName the name of the bean property that couldn't be satisfied
+	 * @param ex the bean creation exception that indicated the unsatisfied dependency
+	 */
+	public UnsatisfiedDependencyException(
+			String resourceDescription, String beanName, String propertyName, BeansException ex) {
+
+		this(resourceDescription, beanName, propertyName, (ex != null ? ": " + ex.getMessage() : ""));
+		initCause(ex);
+	}
+
+	/**
+	 * Create a new UnsatisfiedDependencyException.
+	 * @param resourceDescription description of the resource that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
+	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
 	 * @param msg the detail message
 	 */
 	public UnsatisfiedDependencyException(
@@ -64,6 +74,21 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 				"Unsatisfied dependency expressed through constructor argument with index " +
 				ctorArgIndex + " of type [" + ClassUtils.getQualifiedName(ctorArgType) + "]" +
 				(msg != null ? ": " + msg : ""));
+	}
+
+	/**
+	 * Create a new UnsatisfiedDependencyException.
+	 * @param resourceDescription description of the resource that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
+	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
+	 * @param ex the bean creation exception that indicated the unsatisfied dependency
+	 */
+	public UnsatisfiedDependencyException(
+			String resourceDescription, String beanName, int ctorArgIndex, Class ctorArgType, BeansException ex) {
+
+		this(resourceDescription, beanName, ctorArgIndex, ctorArgType, (ex != null ? ": " + ex.getMessage() : ""));
+		initCause(ex);
 	}
 
 }
