@@ -31,7 +31,7 @@ import java.sql.SQLException;
  * @see java.sql.ResultSet#getSQLXML
  * @see java.sql.SQLXML
  */
-public interface SqlXmlObjectMappingHandler {
+public interface SqlXmlObjectMappingHandler extends SqlXmlHandler {
 
 	/**
 	 * Retrieve the given column as an object marshalled from the XML data retrieved

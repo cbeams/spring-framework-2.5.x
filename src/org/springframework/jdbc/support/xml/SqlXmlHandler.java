@@ -171,33 +171,33 @@ public interface SqlXmlHandler {
 	/**
 	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
 	 * the database specific implementation of this <code>SqlXmlHandler</code>.
-	 * @param stream the InputStream providing XML data
+	 * @param provider the <code>XmlBinaryStreamProvider</code> providing XML data
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue
 	 * @see java.sql.SQLXML#setBinaryStream()
 	 */
-	SqlXmlValue newSqlXmlValue(InputStream stream);
+	SqlXmlValue newSqlXmlValue(XmlBinaryStreamProvider provider);
 
 	/**
 	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
 	 * the database specific implementation of this <code>SqlXmlHandler</code>.
-	 * @param writer the Writer providing XML data
+	 * @param provider the <code>XmlCharacterStreamProvider</code> providing XML data
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue
 	 * @see java.sql.SQLXML#setCharacterStream()
 	 */
-	SqlXmlValue newSqlXmlValue(Writer writer);
+	SqlXmlValue newSqlXmlValue(XmlCharacterStreamProvider provider);
 
 	/**
 	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
 	 * the database specific implementation of this <code>SqlXmlHandler</code>.
 	 * @param resultClass the Result implementation class to be used
-	 * @param resultProvider the XmlResultProvider that will provide the XML data
+	 * @param provider the <code>XmlResultProvider</code> that will provide the XML data
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue
 	 * @see java.sql.SQLXML#setResult(Class)
 	 */
-	SqlXmlValue newSqlXmlValue(Class resultClass, XmlResultProvider resultProvider);
+	SqlXmlValue newSqlXmlValue(Class resultClass, XmlResultProvider provider);
 
 	/**
 	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
