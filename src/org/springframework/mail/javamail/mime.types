@@ -235,8 +235,6 @@ application/x-rad-powermedia		rad
 
 # PowerPoint presentation (Microsoft)
 application/mspowerpoint		ppz
-# PointPlus presentation data (Net Scene)
-application/x-pointplus			css
 # ASAP WordPower (Software Publishing Corp.)
 application/x-asap			asp
 # Astound Web Player multimedia data (GoldDisk)
