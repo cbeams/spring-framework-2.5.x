@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public class BeanConfigurerSupportTests extends TestCase {
 
@@ -52,6 +53,7 @@ public class BeanConfigurerSupportTests extends TestCase {
 
 		BeanConfigurerSupport configurer = new StubBeanConfigurerSupport();
 		configurer.setBeanWiringInfoResolver(resolver);
+		configurer.setBeanFactory(new DefaultListableBeanFactory());
 		configurer.configureBean(beanInstance);
 		mock.verify();
 		assertNull(beanInstance.getName());

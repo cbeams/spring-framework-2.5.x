@@ -58,14 +58,14 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 
 
 	/**
-	 * Set the <code>BeanWiringInfoResolver</code> to use.
+	 * Set the {@link BeanWiringInfoResolver} to use.
 	 * <p>The default behavior is to look for a bean with the same name as the class.
 	 * As an alternative, consider using annotation-driven bean wiring.
-	 * @param beanWiringInfoResolver the <code>BeanWiringInfoResolver</code> to use.
 	 * @see ClassNameBeanWiringInfoResolver
 	 * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
 	 */
 	public void setBeanWiringInfoResolver(BeanWiringInfoResolver beanWiringInfoResolver) {
+		Assert.notNull(beanWiringInfoResolver, "BeanWiringInfoResolver must not be null");
 		this.beanWiringInfoResolver = beanWiringInfoResolver;
 	}
 
@@ -118,11 +118,11 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>)
 	 */
 	public void configureBean(Object beanInstance) {
-		if (this.beanWiringInfoResolver == null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn(ClassUtils.getShortName(getClass()) + " has not been set up and is " +
-						"unable to configure bean of type [" + ClassUtils.getDescriptiveType(beanInstance) +
-						"]. Proceeding without injection.");
+		if (this.beanFactory == null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +
+						"Make sure this configurer runs in a Spring container. Unable to configure bean of type [" +
+						ClassUtils.getDescriptiveType(beanInstance) + "]. Proceeding without injection.");
 			}
 			return;
 		}
@@ -130,15 +130,6 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
 		if (bwi == null) {
 			// Skip the bean if no wiring info given.
-			return;
-		}
-
-		if (this.beanFactory == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +
-						"Make sure this configurer runs in a Spring container. Unable to configure bean of type [" +
-						ClassUtils.getDescriptiveType(beanInstance) + "]. Proceeding without injection.");
-			}
 			return;
 		}
 
