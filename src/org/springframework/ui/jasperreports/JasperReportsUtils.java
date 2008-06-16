@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
@@ -53,7 +52,7 @@ public abstract class JasperReportsUtils {
 	 * The latter are converted to <code>JRBeanCollectionDataSource</code>
 	 * or <code>JRBeanArrayDataSource</code>, respectively.
 	 * @param value the report data value to convert
-	 * @return the JRDataSource
+	 * @return the JRDataSource (never <code>null</code>)
 	 * @throws IllegalArgumentException if the value could not be converted
 	 * @see net.sf.jasperreports.engine.JRDataSource
 	 * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
@@ -68,9 +67,6 @@ public abstract class JasperReportsUtils {
 		}
 		else if (value instanceof Object[]) {
 			return new JRBeanArrayDataSource((Object[]) value);
-		}
-		else if (value instanceof JRDataSourceProvider) {
-			return null;
 		}
 		else {
 			throw new IllegalArgumentException("Value [" + value + "] cannot be converted to a JRDataSource");
@@ -90,6 +86,7 @@ public abstract class JasperReportsUtils {
 	 */
 	public static void render(JRExporter exporter, JasperPrint print, Writer writer)
 			throws JRException {
+
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
 		exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, writer);
 		exporter.exportReport();
@@ -108,6 +105,7 @@ public abstract class JasperReportsUtils {
 	 */
 	public static void render(JRExporter exporter, JasperPrint print, OutputStream outputStream)
 			throws JRException {
+
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
 		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
 		exporter.exportReport();
@@ -127,6 +125,7 @@ public abstract class JasperReportsUtils {
 	 */
 	public static void renderAsCsv(JasperReport report, Map parameters, Object reportData, Writer writer)
 			throws JRException {
+
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRCsvExporter(), print, writer);
 	}
@@ -145,7 +144,8 @@ public abstract class JasperReportsUtils {
 	 * @see #convertReportData
 	 */
 	public static void renderAsCsv(JasperReport report, Map parameters, Object reportData, Writer writer,
-								   Map exporterParameters) throws JRException {
+			Map exporterParameters) throws JRException {
+
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRCsvExporter exporter = new JRCsvExporter();
 		exporter.setParameters(exporterParameters);
@@ -166,6 +166,7 @@ public abstract class JasperReportsUtils {
 	 */
 	public static void renderAsHtml(JasperReport report, Map parameters, Object reportData, Writer writer)
 			throws JRException {
+
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRHtmlExporter(), print, writer);
 	}
@@ -184,7 +185,8 @@ public abstract class JasperReportsUtils {
 	 * @see #convertReportData
 	 */
 	public static void renderAsHtml(JasperReport report, Map parameters, Object reportData, Writer writer,
-									Map exporterParameters) throws JRException {
+			Map exporterParameters) throws JRException {
+
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRHtmlExporter exporter = new JRHtmlExporter();
 		exporter.setParameters(exporterParameters);
@@ -224,7 +226,8 @@ public abstract class JasperReportsUtils {
 	 * @see #convertReportData
 	 */
 	public static void renderAsPdf(JasperReport report, Map parameters, Object reportData, OutputStream stream,
-								   Map exporterParameters) throws JRException {
+			Map exporterParameters) throws JRException {
+
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRPdfExporter exporter = new JRPdfExporter();
 		exporter.setParameters(exporterParameters);
@@ -264,11 +267,12 @@ public abstract class JasperReportsUtils {
 	 * @see #convertReportData
 	 */
 	public static void renderAsXls(JasperReport report, Map parameters, Object reportData, OutputStream stream,
-								   Map exporterParameters) throws JRException {
+			Map exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRXlsExporter exporter = new JRXlsExporter();
 		exporter.setParameters(exporterParameters);
 		render(exporter, print, stream);
 	}
+
 }
