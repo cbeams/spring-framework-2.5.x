@@ -4335,8 +4335,8 @@ jdbc.password=root</programlisting>
 
         <para>With the <literal>context</literal> namespace introduced in
         Spring 2.5, it is possible to configure property placeholders with a
-        single element (and multiple locations may be provided as a
-        comma-separated list):</para>
+        dedicated configuration element. Multiple locations may be provided as a
+        comma-separated list for the <literal>location</literal> attribute.</para>
 
         <programlisting>&lt;context:property-placeholder location="classpath:com/foo/jdbc.properties"/&gt;</programlisting>
 
@@ -4427,6 +4427,13 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         <literal>bob</literal> property of the <literal>fred</literal>
         property of the <literal>foo</literal> bean is being set to the scalar
         value <literal>123</literal>.</para>
+
+        <para>With the <literal>context</literal> namespace introduced in
+        Spring 2.5, it is possible to configure property overriding with a
+        dedicated configuration element:</para>
+
+        <programlisting>&lt;context:property-override location="classpath:override.properties"/&gt;</programlisting>
+
       </section>
     </section>
 
