@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 
 	/**
 	 * This implementation resolves the code in the MessageSource.
-	 * Returns null if the message could not be resolved.
+	 * Returns <code>null</code> if the message could not be resolved.
 	 */
 	protected Object handleGetObject(String code) {
 		try {
@@ -84,6 +84,14 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 	 */
 	public Enumeration getKeys() {
 		return null;
+	}
+
+	/**
+	 * This implementation exposes the specified Locale for introspection
+	 * through the standard <code>ResourceBundle.getLocale()</code> method.
+	 */
+	public Locale getLocale() {
+		return this.locale;
 	}
 
 }
