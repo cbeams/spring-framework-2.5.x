@@ -621,7 +621,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #getReportData
 	 * @see #setJdbcDataSource
 	 */
-	protected JasperPrint fillReport(Map model) throws IllegalArgumentException, SQLException, JRException {
+	protected JasperPrint fillReport(Map model) throws Exception {
 		// Determine main report.
 		JasperReport report = getReport();
 		if (report == null) {
@@ -629,44 +629,79 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 					"specify a 'url' on this view or override 'getReport()' or 'fillReport(Map)'");
 		}
 
-		// Determine JRDataSource for main report.
-		JRDataSource jrDataSource = getReportData(model);
-		if (jrDataSource != null) {
-			// Use the JasperReports JRDataSource.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Filling report with JRDataSource [" + jrDataSource + "].");
+		JRDataSource jrDataSource = null;
+		DataSource jdbcDataSourceToUse = null;
+
+		// Try model attribute with specified name.
+		if (this.reportDataKey != null) {
+			Object reportDataValue = model.get(this.reportDataKey);
+			if (reportDataValue instanceof DataSource) {
+				jdbcDataSourceToUse = (DataSource) reportDataValue;
 			}
-			return JasperFillManager.fillReport(report, model, jrDataSource);
+			else {
+				jrDataSource = convertReportData(reportDataValue);
+			}
+		}
+		else {
+			Collection values = model.values();
+			jrDataSource = (JRDataSource) CollectionUtils.findValueOfType(values, JRDataSource.class);
+			if (jrDataSource == null) {
+				JRDataSourceProvider provider =
+						(JRDataSourceProvider) CollectionUtils.findValueOfType(values, JRDataSourceProvider.class);
+				if (provider != null) {
+					jrDataSource = createReport(provider);
+				}
+				else {
+					jdbcDataSourceToUse = (DataSource) CollectionUtils.findValueOfType(values, DataSource.class);
+					if (jdbcDataSourceToUse == null) {
+						jdbcDataSourceToUse = this.jdbcDataSource;
+					}
+				}
+			}
 		}
 
+		if (jdbcDataSourceToUse != null) {
+			return doFillReport(report, model, jdbcDataSourceToUse);
+		}
 		else {
-			if (this.jdbcDataSource == null) {
-				this.jdbcDataSource = (DataSource) CollectionUtils.findValueOfType(model.values(), DataSource.class);
+			// Determine JRDataSource for main report.
+			if (jrDataSource == null) {
+				jrDataSource = getReportData(model);
 			}
-
-			if (this.jdbcDataSource != null) {
-				// Use the JDBC DataSource.
+			if (jrDataSource != null) {
+				// Use the JasperReports JRDataSource.
 				if (logger.isDebugEnabled()) {
-					logger.debug("Filling report with JDBC DataSource [" + this.jdbcDataSource + "].");
+					logger.debug("Filling report with JRDataSource [" + jrDataSource + "]");
 				}
-				Connection con = this.jdbcDataSource.getConnection();
-				try {
-					return JasperFillManager.fillReport(report, model, con);
-				}
-				finally {
-					try {
-						con.close();
-					}
-					catch (Throwable ex) {
-						logger.debug("Could not close JDBC Connection", ex);
-					}
-				}
+				return JasperFillManager.fillReport(report, model, jrDataSource);
 			}
-
 			else {
 				// Assume that the model contains parameters that identify
 				// the source for report data (e.g. Hibernate or JPA queries).
+				logger.debug("Filling report with plain model");
 				return JasperFillManager.fillReport(report, model);
+			}
+		}
+	}
+
+	/**
+	 * Fill the given report using the given JDBC DataSource and model.
+	 */
+	private JasperPrint doFillReport(JasperReport report, Map model, DataSource dataSource) throws Exception {
+		// Use the JDBC DataSource.
+		if (logger.isDebugEnabled()) {
+			logger.debug("Filling report using JDBC DataSource [" + dataSource + "]");
+		}
+		Connection con = dataSource.getConnection();
+		try {
+			return JasperFillManager.fillReport(report, model, con);
+		}
+		finally {
+			try {
+				con.close();
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not close JDBC Connection", ex);
 			}
 		}
 	}
@@ -711,20 +746,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #getReportDataTypes
 	 */
 	protected JRDataSource getReportData(Map model) {
-		// Try model attribute with specified name.
-		if (this.reportDataKey != null) {
-			Object value = model.get(this.reportDataKey);
-			return convertReportData(value);
-		}
-
 		// Try to find matching attribute, of given prioritized types.
 		Object value = CollectionUtils.findValueOfType(model.values(), getReportDataTypes());
-
-		if (value != null) {
-			return convertReportData(value);
-		}
-
-		return null;
+		return (value != null ? convertReportData(value) : null);
 	}
 
 	/**
@@ -748,17 +772,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected JRDataSource convertReportData(Object value) throws IllegalArgumentException {
 		if (value instanceof JRDataSourceProvider) {
-			try {
-				JasperReport report = getReport();
-				if (report == null) {
-					throw new IllegalStateException("No main report defined for JRDataSourceProvider - " +
-							"specify a 'url' on this view or override 'getReport()'");
-				}
-				return ((JRDataSourceProvider) value).create(report);
-			}
-			catch (JRException ex) {
-				throw new IllegalArgumentException("Supplied JRDataSourceProvider is invalid: " + ex);
-			}
+			return createReport((JRDataSourceProvider) value);
 		}
 		else {
 			return JasperReportsUtils.convertReportData(value);
@@ -766,16 +780,35 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Create a report using the given provider.
+	 * @param provider the JRDataSourceProvider to use
+	 * @return the created report
+	 */
+	protected JRDataSource createReport(JRDataSourceProvider provider) {
+		try {
+			JasperReport report = getReport();
+			if (report == null) {
+				throw new IllegalStateException("No main report defined for JRDataSourceProvider - " +
+						"specify a 'url' on this view or override 'getReport()'");
+			}
+			return provider.create(report);
+		}
+		catch (JRException ex) {
+			IllegalArgumentException iaex = new IllegalArgumentException("Supplied JRDataSourceProvider is invalid");
+			iaex.initCause(ex);
+			throw iaex;
+		}
+	}
+
+	/**
 	 * Return the value types that can be converted to a <code>JRDataSource</code>,
 	 * in prioritized order. Should only return types that the
 	 * {@link #convertReportData} method is actually able to convert.
-	 * <p>Default value types are: <code>JRDataSource</code>,
-	 * <code>JRDataSourceProvider</code> <code>java.util.Collection</code>
-	 * and <code>Object</code> array.
+	 * <p>Default value types are: <code>java.util.Collection</code> and <code>Object</code> array.
 	 * @return the value types in prioritized order
 	 */
 	protected Class[] getReportDataTypes() {
-		return new Class[] {JRDataSource.class, JRDataSourceProvider.class, Collection.class, Object[].class};
+		return new Class[] {Collection.class, Object[].class};
 	}
 
 

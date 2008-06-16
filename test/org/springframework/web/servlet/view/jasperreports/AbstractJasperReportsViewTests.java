@@ -130,14 +130,9 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		model.remove("dataSource");
 		model.put("reportData", getData());
 		model.put("otherData", new LinkedList());
-		try {
-			AbstractJasperReportsView view = getView(COMPILED_REPORT);
-			view.render(model, request, response);
-			fail("No unique data source should result in IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+		view.render(model, request, response);
+		// no clear data source found
 	}
 
 	public void testWithJRDataSourceProvider() throws Exception {
@@ -174,14 +169,9 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		model.remove("dataSource");
 		model.put("reportData", getData().toArray());
 		model.put("otherData", new String[0]);
-		try {
-			AbstractJasperReportsView view = getView(COMPILED_REPORT);
-			view.render(model, request, response);
-			fail("No data source should result in NoDataSourceException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+		view.render(model, request, response);
+		// no clear data source found
 	}
 
 	public void testWithSpecificArray() throws Exception {

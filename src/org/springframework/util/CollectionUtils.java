@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,23 +201,23 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Find a value of the given type in the given Collection.
+	 * Find a single value of the given type in the given Collection.
 	 * @param collection the Collection to search
 	 * @param type the type to look for
-	 * @return a value of the given type found, or <code>null</code> if none
-	 * @throws IllegalArgumentException if more than one value of the given type found
+	 * @return a value of the given type found if there is a clear match,
+	 * or <code>null</code> if none or more than one such value found
 	 */
-	public static Object findValueOfType(Collection collection, Class type) throws IllegalArgumentException {
+	public static Object findValueOfType(Collection collection, Class type) {
 		if (isEmpty(collection)) {
 			return null;
 		}
-		Class typeToUse = (type != null ? type : Object.class);
 		Object value = null;
 		for (Iterator it = collection.iterator(); it.hasNext();) {
 			Object obj = it.next();
-			if (typeToUse.isInstance(obj)) {
+			if (type == null || type.isInstance(obj)) {
 				if (value != null) {
-					throw new IllegalArgumentException("More than one value of type [" + typeToUse.getName() + "] found");
+					// More than one value found... no clear single value.
+					return null;
 				}
 				value = obj;
 			}
@@ -226,15 +226,15 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Find a value of one of the given types in the given Collection:
+	 * Find a single value of one of the given types in the given Collection:
 	 * searching the Collection for a value of the first type, then
 	 * searching for a value of the second type, etc.
 	 * @param collection the collection to search
 	 * @param types the types to look for, in prioritized order
-	 * @return a of one of the given types found, or <code>null</code> if none
-	 * @throws IllegalArgumentException if more than one value of the given type found
+	 * @return a value of one of the given types found if there is a clear match,
+	 * or <code>null</code> if none or more than one such value found
 	 */
-	public static Object findValueOfType(Collection collection, Class[] types) throws IllegalArgumentException {
+	public static Object findValueOfType(Collection collection, Class[] types) {
 		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
 			return null;
 		}
