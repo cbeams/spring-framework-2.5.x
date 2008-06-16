@@ -326,10 +326,12 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				matcher.appendReplacement(output, escape(methodInvocation.getMethod().getName()));
 			}
 			else if (PLACEHOLDER_TARGET_CLASS_NAME.equals(match)) {
-				matcher.appendReplacement(output, escape(methodInvocation.getThis().getClass().getName()));
+				String className = getClassForLogging(methodInvocation.getThis()).getName();
+				matcher.appendReplacement(output, escape(className));
 			}
 			else if (PLACEHOLDER_TARGET_CLASS_SHORT_NAME.equals(match)) {
-				matcher.appendReplacement(output, escape(ClassUtils.getShortName(methodInvocation.getThis().getClass())));
+				String shortName = ClassUtils.getShortName(getClassForLogging(methodInvocation.getThis()));
+				matcher.appendReplacement(output, escape(shortName));
 			}
 			else if (PLACEHOLDER_ARGUMENTS.equals(match)) {
 				matcher.appendReplacement(output, escape(StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments())));
