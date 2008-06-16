@@ -206,28 +206,30 @@ public class RedirectViewTests extends TestCase {
 		rv.setContextRelative(contextRelative);
 		rv.setExposeModelAttributes(exposeModelAttributes);
 
-		MockControl rc = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) rc.getMock();
+		MockControl requestControl = MockControl.createControl(HttpServletRequest.class);
+		HttpServletRequest request = (HttpServletRequest) requestControl.getMock();
+		request.getCharacterEncoding();
+		requestControl.setReturnValue(null, 1);
 		if (contextRelative) {
 			expectedUrlForEncoding = "/context" + expectedUrlForEncoding;
 			request.getContextPath();
-			rc.setReturnValue("/context");
+			requestControl.setReturnValue("/context");
 		}
-		rc.replay();
+		requestControl.replay();
 
-		MockControl mc = MockControl.createControl(HttpServletResponse.class);
-		HttpServletResponse resp = (HttpServletResponse) mc.getMock();
+		MockControl responseControl = MockControl.createControl(HttpServletResponse.class);
+		HttpServletResponse resp = (HttpServletResponse) responseControl.getMock();
 		resp.encodeRedirectURL(expectedUrlForEncoding);
-		mc.setReturnValue(expectedUrlForEncoding);
+		responseControl.setReturnValue(expectedUrlForEncoding);
 		resp.sendRedirect(expectedUrlForEncoding);
-		mc.setVoidCallable(1);
-		mc.replay();
+		responseControl.setVoidCallable(1);
+		responseControl.replay();
 
 		rv.render(map, request, resp);
 		if (exposeModelAttributes) {
 			assertTrue("queryProperties() should have been called.", rv.queryPropertiesCalled);
 		}
-		mc.verify();
+		responseControl.verify();
 	}
 
 }

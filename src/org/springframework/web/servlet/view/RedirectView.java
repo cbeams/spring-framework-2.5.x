@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
@@ -63,17 +64,13 @@ import org.springframework.util.ObjectUtils;
  */
 public class RedirectView extends AbstractUrlBasedView {
 
-	/** The default encoding scheme: UTF-8 */
-	public static final String DEFAULT_ENCODING_SCHEME = "UTF-8";
-
-
 	private boolean contextRelative = false;
 
 	private boolean http10Compatible = true;
 
 	private boolean exposeModelAttributes = true;
 
-	private String encodingScheme = DEFAULT_ENCODING_SCHEME;
+	private String encodingScheme;
 
 
 	/**
@@ -172,7 +169,9 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set the encoding scheme for this view. Default is UTF-8.
+	 * Set the encoding scheme for this view.
+	 * <p>Default is the request's encoding scheme
+	 * (which is ISO-8859-1 if not specified otherwise).
 	 */
 	public void setEncodingScheme(String encodingScheme) {
 		this.encodingScheme = encodingScheme;
@@ -195,7 +194,14 @@ public class RedirectView extends AbstractUrlBasedView {
 		}
 		targetUrl.append(getUrl());
 		if (this.exposeModelAttributes) {
-			appendQueryProperties(targetUrl, model, this.encodingScheme);
+			String enc = this.encodingScheme;
+			if (enc == null) {
+				enc = request.getCharacterEncoding();
+			}
+			if (enc == null) {
+				enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
+			}
+			appendQueryProperties(targetUrl, model, enc);
 		}
 
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
