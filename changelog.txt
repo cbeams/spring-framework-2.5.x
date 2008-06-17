@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.5 (2008-06-09)
+Changes in version 2.5.5 (2008-06-23)
 -------------------------------------
 
 General
@@ -15,6 +15,7 @@ General
 
 Package org.springframework.aop
 * added "proxyClassLoader" property to ProxyFactoryBean, AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator
+* CustomizableTraceInterceptor hides proxy class names even in log replacement strings (if hideProxyClassNames=true)
 * CustomizableTraceInterceptor properly escapes all "\" and "$" symbols in replacement values
 
 Package org.springframework.beans
@@ -29,13 +30,17 @@ Package org.springframework.beans
 * DefaultSingletonBeanRegistry only registers same related cause (i.e. same message, same chained cause) once
 * DefaultListableBeanFactory only registers causes during constructor resolution when resolution eventually fails
 * DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
+* UnsatisfiedDependencyException preserves full nested exception stacktrace in case of a BeansException
 * added overloaded BeanComponentDefinition constructor with aliases argument
 * GenericBeanFactoryAccessor's "getBeansWithAnnotation" performs deep search (including interfaces and target class)
 * added "findAnnotationOnBean" method to GenericBeanFactoryAccessor, performing a deep search on a specific bean
+* BeanConfigurerSupport (@Configurable processing) includes type of bean in warn log when called in unconfigured state
+* restored BeanConfigurerSupport's silent skipping in case of no BeanFactory configured yet
 
 Package org.springframework.context
 * factored out MessageSourceSupport base class from AbstractMessageSource, providing common MessageFormat handling
 * DelegatingMessageSource resolves message arguments in default messages even if there is no parent MessageSource
+* MessageSourceResourceBundle exposes Spring-specified locale through overridden "ResourceBundle.getLocale()" method
 * revised CommonAnnotationBeanPostProcessor's "getResource" method to allow for proper overriding in subclasses
 * ClassPathBeanDefinitionScanner always accepts explicit bean definition of same name as override for scanned bean
 * added type="custom" expression="<classname>" option to component-scan's "include-filter"/"exclude-filter"
@@ -69,6 +74,9 @@ Package org.springframework.jmx
 
 Package org.springframework.jndi
 * added "exposeAccessContext" flag to JndiObjectFactoryBean, for WebLogic resource factories with authorization
+
+Package org.springframework.mail
+* removed overlapping "application/x-pointplus" MIME type for "css" extension from MimeMessageHelper's default mappings
 
 Package org.springframework.orm
 * improved HibernateTransactionManager's InvalidIsolationLevelException exception message (-> SpringTransactionFactory)
@@ -111,6 +119,8 @@ Package org.springframework.util
 * NumberUtils automatically supports JDK 1.5+ localized BigDecimal parsing
 * added various overloaded methods with a CharSequence argument (as alternative to a String argument) to StringUtils
 * removed Commons Log usage from SystemPropertyUtils, ClassUtils, FileCopyUtils (avoiding early Log4J initialization)
+* revised CachingMapDecorator to expose all state representations in a thread-safe manner, even for pure introspection
+* revised CachingMapDecorator to use weak references for caching only (not losing a value from get)
 
 Package org.springframework.validation
 * fixed DefaultBindingErrorProcessor to register correct "missing field" errors within specified nested path
@@ -122,10 +132,15 @@ Package org.springframework.web
 * Servlet AnnotationMethodHandlerAdapter throws ambiguity exception in case of equivalent mappings with same method name
 * Portlet AbstractMapBasedHandlerMapping sorts predicates before checking them (according to their natural order)
 * Portlet DefaultAnnotationHandlerMapping checks default mappings last, independent from order of controller definition
+* RedirectView uses request's encoding (default ISO-8859-1) if no encoding scheme specified (previous default was UTF-8)
 * RedirectView considers arrays and collections with eligible values, turning them into multi-value request parameters
 * factored out common temporary byte array handling from AbstractPdfView etc into AbstractView base class
 * added AbstractPdfStamperView as alternative to AbstractPdfView, operating on an existing document with an AcroForm
+* fixed AbstractJasperReportsView to fully isolate a model-specified JDBC DataSource (not setting it as view DataSource)
+* AbstractJasperReportsView gives specified JDBC DataSource precedence over implicit report data value in model
+* AbstractJasperReportsView proceeds without report data value in case of multiple collections or object arrays
 * added "autocomplete" attribute to JSP FormTag (for a form-wide setting, as alternative to InputTag's "autocomplete")
+* JSF DelegatingVariableResolver and SpringBeanFacesELResolver log resolution success at trace level only
 
 
 Changes in version 2.5.4 (2008-04-28)
