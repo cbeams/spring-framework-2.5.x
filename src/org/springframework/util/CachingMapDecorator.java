@@ -18,9 +18,13 @@ package org.springframework.util;
 
 import java.io.Serializable;
 import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -37,11 +41,16 @@ import java.util.WeakHashMap;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
-public abstract class CachingMapDecorator implements Map, Serializable {
+public class CachingMapDecorator implements Map, Serializable {
 
-	private static Object NULL_VALUE = new Object();
+	protected static Object NULL_VALUE = new Object();
+
 
 	private final Map targetMap;
+
+	private final boolean synchronize;
+
+	private final boolean weak;
 
 
 	/**
@@ -55,22 +64,26 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	/**
 	 * Create a CachingMapDecorator,
 	 * using an underlying synchronized Map.
-	 * @param weakKeys whether to use weak references for keys
+	 * @param weak whether to use weak references for keys and values
 	 */
-	public CachingMapDecorator(boolean weakKeys) {
-		Map internalMap = weakKeys ? (Map) new WeakHashMap() : new HashMap();
+	public CachingMapDecorator(boolean weak) {
+		Map internalMap = weak ? (Map) new WeakHashMap() : new HashMap();
 		this.targetMap = Collections.synchronizedMap(internalMap);
+		this.synchronize = true;
+		this.weak = weak;
 	}
 
 	/**
 	 * Create a CachingMapDecorator with initial size,
 	 * using an underlying synchronized Map.
-	 * @param weakKeys whether to use weak references for keys
+	 * @param weak whether to use weak references for keys and values
 	 * @param size the initial cache size
 	 */
-	public CachingMapDecorator(boolean weakKeys, int size) {
-		Map internalMap = weakKeys ? (Map) new WeakHashMap(size) : new HashMap(size);
+	public CachingMapDecorator(boolean weak, int size) {
+		Map internalMap = weak ? (Map) new WeakHashMap(size) : new HashMap(size);
 		this.targetMap = Collections.synchronizedMap(internalMap);
+		this.synchronize = true;
+		this.weak = weak;
 	}
 
 	/**
@@ -80,8 +93,22 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	 * @param targetMap the Map to decorate
 	 */
 	public CachingMapDecorator(Map targetMap) {
+		this(targetMap, false, false);
+	}
+
+	/**
+	 * Create a CachingMapDecorator for the given Map.
+	 * <p>The passed-in Map won't get synchronized explicitly unless
+	 * you specify "synchronize" as "true".
+	 * @param targetMap the Map to decorate
+	 * @param synchronize whether to synchronize on the given Map
+	 * @param weak whether to use weak references for values
+	 */
+	public CachingMapDecorator(Map targetMap, boolean synchronize, boolean weak) {
 		Assert.notNull(targetMap, "Target Map is required");
-		this.targetMap = targetMap;
+		this.targetMap = (synchronize ? Collections.synchronizedMap(targetMap) : targetMap);
+		this.synchronize = synchronize;
+		this.weak = weak;
 	}
 
 
@@ -98,19 +125,39 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	}
 
 	public boolean containsValue(Object value) {
-		return this.targetMap.containsValue(value);
+		Object valueToCheck = value;
+		if (valueToCheck == null) {
+			valueToCheck = NULL_VALUE;
+		}
+		if (this.synchronize) {
+			synchronized (this.targetMap) {
+				return containsValueOrReference(valueToCheck);
+			}
+		}
+		else {
+			return containsValueOrReference(valueToCheck);
+		}
 	}
 
-	public Object put(Object key, Object value) {
-		return this.targetMap.put(key, value);
+	private boolean containsValueOrReference(Object value) {
+		if (this.targetMap.containsValue(value)) {
+			return true;
+		}
+		for (Iterator it = this.targetMap.values().iterator(); it.hasNext();) {
+			Object mapVal = it.next();
+			if (mapVal instanceof Reference && value.equals(((Reference) mapVal).get())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Object remove(Object key) {
 		return this.targetMap.remove(key);
 	}
 
-	public void putAll(Map t) {
-		this.targetMap.putAll(t);
+	public void putAll(Map map) {
+		this.targetMap.putAll(map);
 	}
 
 	public void clear() {
@@ -118,17 +165,75 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	}
 
 	public Set keySet() {
-		return this.targetMap.keySet();
+		if (this.synchronize) {
+			synchronized (this.targetMap) {
+				return new LinkedHashSet(this.targetMap.keySet());
+			}
+		}
+		else {
+			return new LinkedHashSet(this.targetMap.keySet());
+		}
 	}
 
 	public Collection values() {
-		return this.targetMap.values();
+		if (this.synchronize) {
+			synchronized (this.targetMap) {
+				return valuesCopy();
+			}
+		}
+		else {
+			return valuesCopy();
+		}
+	}
+
+	private Collection valuesCopy() {
+		LinkedList values = new LinkedList();
+		for (Iterator it = this.targetMap.values().iterator(); it.hasNext();) {
+			Object value = it.next();
+			values.add(value instanceof Reference ? ((Reference) value).get() : value);
+		}
+		return values;
 	}
 
 	public Set entrySet() {
-		return this.targetMap.entrySet();
+		if (this.synchronize) {
+			synchronized (this.targetMap) {
+				return new LinkedHashSet(this.targetMap.entrySet());
+			}
+		}
+		else {
+			return new LinkedHashSet(this.targetMap.entrySet());
+		}
 	}
 
+
+	/**
+	 * Put an object into the cache, possibly wrapping it with a weak
+	 * reference.
+	 * @see #useWeakValue(Object, Object)
+	 */
+	public Object put(Object key, Object value) {
+		Object newValue = value;
+		if (newValue == null) {
+			newValue = NULL_VALUE;
+		}
+		if (useWeakValue(key, newValue)) {
+			newValue = new WeakReference(newValue);
+		}
+		return this.targetMap.put(key, newValue);
+	}
+
+	/**
+	 * Decide whether use a weak reference for the value of
+	 * the given key-value pair.
+	 * @param key the candidate key
+	 * @param value the candidate value
+	 * @return <code>true</code> in order to use a weak reference;
+	 * <code>false</code> otherwise.
+	 */
+	protected boolean useWeakValue(Object key, Object value) {
+		return this.weak;
+	}
 
 	/**
 	 * Get value for key.
@@ -145,12 +250,10 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 			value = ((Reference) value).get();
 		}
 		if (value == null) {
-			Object newValue = create(key);
-			value = (newValue instanceof Reference ? ((Reference) newValue).get() : newValue);
-			if (newValue == null) {
-				newValue = NULL_VALUE;
+			value = create(key);
+			if (value != null) {
+				put(key, value);
 			}
-			put(key, newValue);
 		}
 		return (value == NULL_VALUE ? null : value);
 	}
@@ -161,7 +264,9 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	 * @param key the cache key
 	 * @see #get(Object)
 	 */
-	protected abstract Object create(Object key);
+	protected Object create(Object key) {
+		return null;
+	}
 
 
 	public String toString() {

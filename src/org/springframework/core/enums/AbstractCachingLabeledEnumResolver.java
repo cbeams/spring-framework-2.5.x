@@ -16,7 +16,6 @@
 
 package org.springframework.core.enums;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,16 +62,18 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 				LabeledEnum labeledEnum = (LabeledEnum) it.next();
 				typeEnumMap.put(labeledEnum.getCode(), labeledEnum);
 			}
-			Object cachedValue = Collections.unmodifiableMap(typeEnumMap);
-			// Check whether we're allowed to hold a strong reference...
-			if (ClassUtils.isCacheSafe(enumType, getClass().getClassLoader())) {
-				return cachedValue;
-			}
-			else {
+			return Collections.unmodifiableMap(typeEnumMap);
+		}
+		protected boolean useWeakValue(Object key, Object value) {
+			Class enumType = (Class) key;
+			if (!ClassUtils.isCacheSafe(enumType, AbstractCachingLabeledEnumResolver.this.getClass().getClassLoader())) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Not strongly caching class [" + enumType.getName() + "] because it is not cache-safe");
 				}
-				return new WeakReference(cachedValue);
+				return true;
+			}
+			else {
+				return false;
 			}
 		}
 	};
