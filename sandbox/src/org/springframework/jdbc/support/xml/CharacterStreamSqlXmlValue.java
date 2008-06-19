@@ -22,6 +22,7 @@ import java.sql.SQLXML;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.io.Writer;
+import java.io.IOException;
 
 /**
  * Implementation of the SqlXmlValue interface that will handle XML input in the form of
@@ -58,7 +59,11 @@ public class CharacterStreamSqlXmlValue implements SqlXmlValue {
 			int sqlType, String typeName) throws SQLException {
 		xmlObject = ps.getConnection().createSQLXML();
 		Writer writer = xmlObject.setCharacterStream();
-		provider.provideXml(writer);
+		try {
+			provider.provideXml(writer);
+		} catch (IOException e) {
+			throw new DataAccessResourceFailureException("Failure encountered while providing XML", e);
+		}
 		ps.setSQLXML(colIndex, xmlObject);
 	}
 
