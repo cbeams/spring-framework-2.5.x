@@ -185,8 +185,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private Runnable stopCallback;
 
-	private final Object activeInvokerMonitor = new Object();
-
 	private Object currentRecoveryMarker = new Object();
 
 	private final Object recoveryMonitor = new Object();
@@ -283,7 +281,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setConcurrentConsumers(int concurrentConsumers) {
 		Assert.isTrue(concurrentConsumers > 0, "'concurrentConsumers' value must be at least 1 (one)");
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			this.concurrentConsumers = concurrentConsumers;
 			if (this.maxConcurrentConsumers < concurrentConsumers) {
 				this.maxConcurrentConsumers = concurrentConsumers;
@@ -299,7 +297,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getConcurrentConsumers() {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			return this.concurrentConsumers;
 		}
 	}
@@ -322,7 +320,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setMaxConcurrentConsumers(int maxConcurrentConsumers) {
 		Assert.isTrue(maxConcurrentConsumers > 0, "'maxConcurrentConsumers' value must be at least 1 (one)");
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			this.maxConcurrentConsumers =
 					(maxConcurrentConsumers > this.concurrentConsumers ? maxConcurrentConsumers : this.concurrentConsumers);
 		}
@@ -336,7 +334,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getMaxConcurrentConsumers() {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			return this.maxConcurrentConsumers;
 		}
 	}
@@ -365,7 +363,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
 		Assert.isTrue(maxMessagesPerTask != 0, "'maxMessagesPerTask' must not be 0");
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			this.maxMessagesPerTask = maxMessagesPerTask;
 		}
 	}
@@ -374,7 +372,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Return the maximum number of messages to process in one task.
 	 */
 	public int getMaxMessagesPerTask() {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			return this.maxMessagesPerTask;
 		}
 	}
@@ -408,7 +406,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setIdleTaskExecutionLimit(int idleTaskExecutionLimit) {
 		Assert.isTrue(idleTaskExecutionLimit > 0, "'idleTaskExecutionLimit' must be 1 or higher");
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			this.idleTaskExecutionLimit = idleTaskExecutionLimit;
 		}
 	}
@@ -417,14 +415,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Return the limit for idle executions of a receive task.
 	 */
 	public int getIdleTaskExecutionLimit() {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			return this.idleTaskExecutionLimit;
 		}
 	}
 
 	protected void validateConfiguration() {
 		super.validateConfiguration();
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
 				throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
 			}
@@ -443,7 +441,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			if (this.taskExecutor == null) {
 				this.taskExecutor = createDefaultTaskExecutor();
 			}
@@ -469,7 +467,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setTaskExecutor
 	 */
 	protected void doInitialize() throws JMSException {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			for (int i = 0; i < this.concurrentConsumers; i++) {
 				scheduleNewInvoker();
 			}
@@ -482,13 +480,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	protected void doShutdown() throws JMSException {
 		logger.debug("Waiting for shutdown of message listener invokers");
 		try {
-			synchronized (this.activeInvokerMonitor) {
+			synchronized (this.lifecycleMonitor) {
 				while (this.activeInvokerCount > 0) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
 								" message listener invokers");
 					}
-					this.activeInvokerMonitor.wait();
+					this.lifecycleMonitor.wait();
 				}
 			}
 		}
@@ -502,7 +500,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Overridden to reset the stop callback, if any.
 	 */
 	public void start() throws JmsException {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			this.stopCallback = null;
 		}
 		super.start();
@@ -522,7 +520,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #stop()
 	 */
 	public void stop(Runnable callback) throws JmsException {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			this.stopCallback = callback;
 		}
 		stop();
@@ -538,7 +536,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getScheduledConsumerCount() {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			return this.scheduledInvokers.size();
 		}
 	}
@@ -553,7 +551,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getActiveConsumerCount() {
-		synchronized (this.activeInvokerMonitor) {
+		synchronized (this.lifecycleMonitor) {
 			return this.activeInvokerCount;
 		}
 	}
@@ -630,7 +628,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	protected void scheduleNewInvokerIfAppropriate() {
 		if (isRunning()) {
 			resumePausedTasks();
-			synchronized (this.activeInvokerMonitor) {
+			synchronized (this.lifecycleMonitor) {
 				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && getIdleInvokerCount() == 0) {
 					scheduleNewInvoker();
 					if (logger.isDebugEnabled()) {
@@ -648,12 +646,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * that this invoker task has already accumulated (in a row)
 	 */
 	private boolean shouldRescheduleInvoker(int idleTaskExecutionCount) {
-		synchronized (this.activeInvokerMonitor) {
-			boolean superfluous =
-					(idleTaskExecutionCount >= this.idleTaskExecutionLimit && getIdleInvokerCount() > 1);
-			return (this.scheduledInvokers.size() <=
-					(superfluous ? this.concurrentConsumers : this.maxConcurrentConsumers));
-		}
+		boolean superfluous =
+				(idleTaskExecutionCount >= this.idleTaskExecutionLimit && getIdleInvokerCount() > 1);
+		return (this.scheduledInvokers.size() <=
+				(superfluous ? this.concurrentConsumers : this.maxConcurrentConsumers));
 	}
 
 	/**
@@ -859,9 +855,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		private volatile boolean idle = true;
 
 		public void run() {
-			synchronized (activeInvokerMonitor) {
+			synchronized (lifecycleMonitor) {
 				activeInvokerCount++;
-				activeInvokerMonitor.notifyAll();
+				lifecycleMonitor.notifyAll();
 			}
 			boolean messageReceived = false;
 			try {
@@ -904,13 +900,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					handleListenerSetupFailure(ex, true);
 				}
 			}
-			synchronized (activeInvokerMonitor) {
+			synchronized (lifecycleMonitor) {
 				activeInvokerCount--;
 				if (stopCallback != null && activeInvokerCount == 0) {
 					stopCallback.run();
 					stopCallback = null;
 				}
-				activeInvokerMonitor.notifyAll();
+				lifecycleMonitor.notifyAll();
 			}
 			if (!messageReceived) {
 				this.idleTaskExecutionCount++;
@@ -918,27 +914,27 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			else {
 				this.idleTaskExecutionCount = 0;
 			}
-			if (!shouldRescheduleInvoker(this.idleTaskExecutionCount) || !rescheduleTaskIfNecessary(this)) {
-				// We're shutting down completely.
-				synchronized (activeInvokerMonitor) {
+			synchronized (lifecycleMonitor) {
+				if (!shouldRescheduleInvoker(this.idleTaskExecutionCount) || !rescheduleTaskIfNecessary(this)) {
+					// We're shutting down completely.
 					scheduledInvokers.remove(this);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Lowered scheduled invoker count: " + scheduledInvokers.size());
 					}
-					activeInvokerMonitor.notifyAll();
+					lifecycleMonitor.notifyAll();
+					clearResources();
 				}
-				clearResources();
-			}
-			else if (isRunning()) {
-				int nonPausedConsumers = getScheduledConsumerCount() - getPausedTaskCount();
-				if (nonPausedConsumers < 1) {
-					logger.error("All scheduled consumers have been paused, probably due to tasks having been rejected. " +
-							"Check your thread pool configuration! Manual recovery necessary through a start() call.");
-				}
-				else if (nonPausedConsumers < getConcurrentConsumers()) {
-					logger.warn("Number of scheduled consumers has dropped below concurrentConsumers limit, probably " +
-							"due to tasks having been rejected. Check your thread pool configuration! Automatic recovery " +
-							"to be triggered by remaining consumers.");
+				else if (isRunning()) {
+					int nonPausedConsumers = getScheduledConsumerCount() - getPausedTaskCount();
+					if (nonPausedConsumers < 1) {
+						logger.error("All scheduled consumers have been paused, probably due to tasks having been rejected. " +
+								"Check your thread pool configuration! Manual recovery necessary through a start() call.");
+					}
+					else if (nonPausedConsumers < getConcurrentConsumers()) {
+						logger.warn("Number of scheduled consumers has dropped below concurrentConsumers limit, probably " +
+								"due to tasks having been rejected. Check your thread pool configuration! Automatic recovery " +
+								"to be triggered by remaining consumers.");
+					}
 				}
 			}
 		}

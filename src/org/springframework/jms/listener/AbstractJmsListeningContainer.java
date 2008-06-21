@@ -504,24 +504,22 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	protected final boolean rescheduleTaskIfNecessary(Object task) {
 		Assert.notNull(task, "Task object must not be null");
-		synchronized (this.lifecycleMonitor) {
-			if (this.running) {
-				try {
-					doRescheduleTask(task);
-				}
-				catch (RuntimeException ex) {
-					logRejectedTask(task, ex);
-					this.pausedTasks.add(task);
-				}
-				return true;
+		if (this.running) {
+			try {
+				doRescheduleTask(task);
 			}
-			else if (this.active) {
+			catch (RuntimeException ex) {
+				logRejectedTask(task, ex);
 				this.pausedTasks.add(task);
-				return true;
 			}
-			else {
-				return false;
-			}
+			return true;
+		}
+		else if (this.active) {
+			this.pausedTasks.add(task);
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 
