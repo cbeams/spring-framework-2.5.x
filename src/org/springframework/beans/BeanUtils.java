@@ -22,9 +22,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -424,19 +428,31 @@ public abstract class BeanUtils {
 
 	/**
 	 * Check if the given type represents a "simple" property:
-	 * a primitive, a String, a Class, or a corresponding array.
+	 * a primitive, a String or other CharSequence, a Number, a Date,
+	 * a URI, a URL, a Locale, a Class, or a corresponding array.
 	 * <p>Used to determine properties to check for a "simple" dependency-check.
 	 * @param clazz the type to check
-	 * @return whether the given type represent a "simple" property
+	 * @return whether the given type represents a "simple" property
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
 	 */
 	public static boolean isSimpleProperty(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		return clazz.isPrimitive() || ClassUtils.isPrimitiveArray(clazz) ||
-				ClassUtils.isPrimitiveWrapper(clazz) || ClassUtils.isPrimitiveWrapperArray(clazz) ||
-				clazz.equals(String.class) || clazz.equals(String[].class) ||
-				clazz.equals(Class.class) || clazz.equals(Class[].class);
+		return isSimpleValueType(clazz) || (clazz.isArray() && isSimpleValueType(clazz.getComponentType()));
+	}
+
+	/**
+	 * Check if the given type represents a "simple" value type:
+	 * a primitive, a String or other CharSequence, a Number, a Date,
+	 * a URI, a URL, a Locale or a Class.
+	 * @param clazz the type to check
+	 * @return whether the given type represents a "simple" value type
+	 */
+	public static boolean isSimpleValueType(Class clazz) {
+		return ClassUtils.isPrimitiveOrWrapper(clazz) || CharSequence.class.isAssignableFrom(clazz) ||
+				Number.class.isAssignableFrom(clazz) || Date.class.isAssignableFrom(clazz) ||
+				clazz.equals(URI.class) || clazz.equals(URL.class) ||
+				clazz.equals(Locale.class) || clazz.equals(Class.class);
 	}
 
 	/**
