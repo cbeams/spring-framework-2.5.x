@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +35,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -402,8 +400,7 @@ public class HandlerMethodInvoker {
 	 */
 	protected boolean isBindingCandidate(Object value) {
 		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
-				!(value instanceof Map) && !ClassUtils.isPrimitiveOrWrapper(value.getClass()) &&
-				!(value instanceof CharSequence) && !(value instanceof Number) && !(value instanceof Date));
+				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 	private Object doInvokeMethod(Method method, Object target, Object[] args) throws Exception {
