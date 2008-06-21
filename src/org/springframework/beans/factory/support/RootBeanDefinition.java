@@ -67,7 +67,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	volatile Boolean beforeInstantiationResolved;
 
 	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
-	volatile boolean postProcessed = false;
+	boolean postProcessed = false;
+
+	final Object postProcessingLock = new Object();
 
 
 	/**

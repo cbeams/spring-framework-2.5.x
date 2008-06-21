@@ -443,9 +443,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Class beanType = (instanceWrapper != null ? instanceWrapper.getWrappedClass() : null);
 
 		// Allow post-processors to modify the merged bean definition.
-		if (!mbd.postProcessed) {
-			applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
-			mbd.postProcessed = true;
+		synchronized (mbd.postProcessingLock) {
+			if (!mbd.postProcessed) {
+				applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
+				mbd.postProcessed = true;
+			}
 		}
 
 		// Eagerly cache singletons to be able to resolve circular references
