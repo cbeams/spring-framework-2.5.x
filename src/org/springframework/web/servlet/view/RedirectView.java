@@ -30,7 +30,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.util.ClassUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -339,14 +339,14 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Determine whether the given model element value is eligible for exposure.
-	 * <p>The default implementation considers Strings and primitives
-	 * as eligible. This can be overridden in subclasses.
+	 * <p>The default implementation considers primitives, Strings, Numbers, Dates,
+	 * URIs, URLs and Locale objects as eligible. This can be overridden in subclasses.
 	 * @param value the model element value
 	 * @return whether the element value is eligible
+	 * @see BeanUtils#isSimpleValueType
 	 */
 	protected boolean isEligibleValue(Object value) {
-		return (value != null &&
-				(value instanceof String || ClassUtils.isPrimitiveOrWrapper(value.getClass())));
+		return (value != null && BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 	/**
