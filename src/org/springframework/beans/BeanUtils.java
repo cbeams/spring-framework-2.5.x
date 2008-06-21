@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -359,7 +359,7 @@ public abstract class BeanUtils {
 	 * a primitive, a String, a Class, or a corresponding array.
 	 * <p>Used to determine properties to check for a "simple" dependency-check.
 	 * @param clazz the type to check
-	 * @return whether the given type represent a "simple" property
+	 * @return whether the given type represents a "simple" property
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
 	 */
