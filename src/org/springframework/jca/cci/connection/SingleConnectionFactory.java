@@ -85,7 +85,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 
 	/**
 	 * Create a new SingleConnectionFactory that always returns a single
-	 * Connection that it will lazily create via the given target
+	 * Connection which it will lazily create via the given target
 	 * ConnectionFactory.
 	 * @param targetConnectionFactory the target ConnectionFactory
 	 */
@@ -94,12 +94,13 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 		setTargetConnectionFactory(targetConnectionFactory);
 	}
 
+
 	/**
 	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
-			throw new IllegalArgumentException("Connection or targetConnectionFactory is required");
+			throw new IllegalArgumentException("Connection or 'targetConnectionFactory' is required");
 		}
 	}
 
@@ -137,7 +138,8 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	 */
 	public void initConnection() throws ResourceException {
 		if (getTargetConnectionFactory() == null) {
-			throw new IllegalStateException("targetConnectionFactory is required for lazily initializing a Connection");
+			throw new IllegalStateException(
+					"'targetConnectionFactory' is required for lazily initializing a Connection");
 		}
 		synchronized (this.connectionMonitor) {
 			if (this.target != null) {
