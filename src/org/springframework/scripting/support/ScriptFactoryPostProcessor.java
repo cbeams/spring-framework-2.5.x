@@ -34,6 +34,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -225,41 +226,49 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 
 		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
-		String scriptFactoryBeanName = SCRIPT_FACTORY_NAME_PREFIX + beanName;
-		String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
-		prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
 
-		ScriptFactory scriptFactory =
-				(ScriptFactory) this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
-		ScriptSource scriptSource =
-				getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
-		Class[] interfaces = scriptFactory.getScriptInterfaces();
-
-		Class scriptedType = null;
 		try {
-			scriptedType = scriptFactory.getScriptedObjectType(scriptSource);
-		}
-		catch (Exception ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not determine the scripted object type for: " + scriptFactory, ex);
-			}
-		}
+			String scriptFactoryBeanName = SCRIPT_FACTORY_NAME_PREFIX + beanName;
+			String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
+			prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
 
-		if (scriptedType != null) {
-			return scriptedType;
-		}
-		else if (!ObjectUtils.isEmpty(interfaces)) {
-			return (interfaces.length == 1 ? interfaces[0] : createCompositeInterface(interfaces));
-		}
-		else {
-			if (bd.isSingleton()) {
-				Object bean = this.scriptBeanFactory.getBean(scriptedObjectBeanName);
-				if (bean != null) {
-					return bean.getClass();
+			ScriptFactory scriptFactory =
+					(ScriptFactory) this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
+			ScriptSource scriptSource =
+					getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
+			Class[] interfaces = scriptFactory.getScriptInterfaces();
+
+			Class scriptedType = scriptFactory.getScriptedObjectType(scriptSource);
+			if (scriptedType != null) {
+				return scriptedType;
+			}
+			else if (!ObjectUtils.isEmpty(interfaces)) {
+				return (interfaces.length == 1 ? interfaces[0] : createCompositeInterface(interfaces));
+			}
+			else {
+				if (bd.isSingleton()) {
+					Object bean = this.scriptBeanFactory.getBean(scriptedObjectBeanName);
+					if (bean != null) {
+						return bean.getClass();
+					}
 				}
 			}
-			return null;
 		}
+		catch (Exception ex) {
+			if (ex instanceof BeanCreationException &&
+					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Could not determine scripted object type for bean '" + beanName + "': " + ex.getMessage());
+				}
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not determine scripted object type for bean '" + beanName + "'", ex);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) {
@@ -287,7 +296,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 		catch (Exception ex) {
 			throw new BeanCreationException(
-					beanName, "Could not determine the scripted object type for: " + scriptFactory, ex);
+					beanName, "Could not determine scripted object type for " + scriptFactory, ex);
 		}
 
 		long refreshCheckDelay = resolveRefreshCheckDelay(bd);
