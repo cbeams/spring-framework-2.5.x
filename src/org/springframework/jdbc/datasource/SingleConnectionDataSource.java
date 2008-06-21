@@ -24,7 +24,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -90,11 +89,13 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * @param password the JDBC password to use for accessing the DriverManager
 	 * @param suppressClose if the returned Connection should be a
 	 * close-suppressing proxy or the physical Connection
+	 * @deprecated since Spring 2.5. Driver parameter usage is generally not recommended
+	 * for a SingleConnectionDataSource. If you insist on using driver parameters
+	 * directly, set up the Driver class manually before invoking this DataSource.
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(
-			String driverClassName, String url, String username, String password, boolean suppressClose)
-			throws CannotGetJdbcConnectionException {
+			String driverClassName, String url, String username, String password, boolean suppressClose) {
 
 		super(driverClassName, url, username, password);
 		this.suppressClose = suppressClose;
@@ -110,9 +111,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
-	public SingleConnectionDataSource(String url, String username, String password, boolean suppressClose)
-			throws CannotGetJdbcConnectionException {
-
+	public SingleConnectionDataSource(String url, String username, String password, boolean suppressClose) {
 		super(url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -125,9 +124,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
-	public SingleConnectionDataSource(String url, boolean suppressClose)
-			throws CannotGetJdbcConnectionException {
-
+	public SingleConnectionDataSource(String url, boolean suppressClose) {
 		super(url);
 		this.suppressClose = suppressClose;
 	}
@@ -241,7 +238,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		}
 		synchronized (this.connectionMonitor) {
 			closeConnection();
-			this.target = getConnectionFromDriverManager();
+			this.target = getConnectionFromDriver(getUsername(), getPassword());
 			prepareConnection(this.target);
 			if (logger.isInfoEnabled()) {
 				logger.info("Established shared JDBC Connection: " + this.target);
