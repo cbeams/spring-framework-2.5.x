@@ -155,28 +155,32 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 			return executeScript(scriptClassToExecute);
 		}
 		catch (CompilationFailedException ex) {
-			throw new ScriptCompilationException(
-					"Could not compile Groovy script: " + scriptSource, ex);
+			throw new ScriptCompilationException("Could not compile Groovy script: " + scriptSource, ex);
 		}
 	}
 
 	public Class getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
-		synchronized (this.scriptClassMonitor) {
-			if (this.scriptClass == null || scriptSource.isModified()) {
-				this.scriptClass = getGroovyClassLoader().parseClass(scriptSource.getScriptAsString());
+		try {
+			synchronized (this.scriptClassMonitor) {
+				if (this.scriptClass == null || scriptSource.isModified()) {
+					this.scriptClass = getGroovyClassLoader().parseClass(scriptSource.getScriptAsString());
 
-				if (Script.class.isAssignableFrom(this.scriptClass)) {
-					// A Groovy script, probably creating an instance: let's execute it.
-					Object result = executeScript(this.scriptClass);
-					this.scriptResultClass = (result != null ? result.getClass() : null);
+					if (Script.class.isAssignableFrom(this.scriptClass)) {
+						// A Groovy script, probably creating an instance: let's execute it.
+						Object result = executeScript(this.scriptClass);
+						this.scriptResultClass = (result != null ? result.getClass() : null);
+					}
+					else {
+						this.scriptResultClass = this.scriptClass;
+					}
 				}
-				else {
-					this.scriptResultClass = this.scriptClass;
-				}
+				return this.scriptResultClass;
 			}
-			return this.scriptResultClass;
+		}
+		catch (CompilationFailedException ex) {
+			throw new ScriptCompilationException("Could not compile Groovy script: " + scriptSource, ex);
 		}
 	}
 
