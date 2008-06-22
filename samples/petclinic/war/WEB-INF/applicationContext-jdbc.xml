@@ -21,13 +21,8 @@
 
 	<!--
 		Uses Apache Commons DBCP for connection pooling. See Commons DBCP documentation
-		for the required JAR files. See the PetStore sample application also shipped with
-		Spring, for an example of Commons DBCP usage and the necessary build script.
-		Alternatively you can use another connection pool such as C3P0, similarly configured
-		using Spring.
-		A standalone connection pool such as Commons DBCP is a good choice for use outside an
-		application server environment, including web applications running in a web container without
-		JTA, or integration testing using the org.springframework.test package.
+		for the required JAR files. Alternatively you can use another connection pool
+		such as C3P0, similarly configured using Spring.
 	-->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
 			p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" p:username="${jdbc.username}"

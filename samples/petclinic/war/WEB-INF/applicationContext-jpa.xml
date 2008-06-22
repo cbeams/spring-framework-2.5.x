@@ -26,11 +26,12 @@
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
 	<context:property-placeholder location="classpath:jdbc.properties"/>
 
-	<!-- DriverManagerDataSource is a local DataSource that works in any environment. -->
-	<!-- Note that DriverManagerDataSource does not pool connections and is therefore not intended for production. -->
-	<!-- See applicationContext-jdbc.xml for an example of using Commons DBCP BasicDataSource as an alternative. -->
-	<!-- See the Image Database sample application for an example of using C3P0 ComboPooledDataSource as alternative. -->
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+	<!--
+		Uses Apache Commons DBCP for connection pooling. See Commons DBCP documentation
+		for the required JAR files. Alternatively you can use another connection pool
+		such as C3P0, similarly configured using Spring.
+	-->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
 			p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" p:username="${jdbc.username}"
 			p:password="${jdbc.password}"/>
 
