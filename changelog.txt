@@ -68,6 +68,9 @@ Package org.springframework.scheduling
 * MethodInvokingJobDetailFactoryBean logs invocation exceptions at error level (instead of warn level)
 * DelegatingJob propagates exceptions as-is (instead of wrapping them in JobExecutionExceptions)
 
+Package org.springframework.scripting
+* GroovyScriptFactory also converts CompilationFailedException to ScriptCompilationException during type determination
+
 Package org.springframework.util
 * NumberUtils avoids overflow when converting from BigDecimal to BigInteger
 * removed Commons Log usage from SystemPropertyUtils, ClassUtils, FileCopyUtils (avoiding early Log4J initialization)
