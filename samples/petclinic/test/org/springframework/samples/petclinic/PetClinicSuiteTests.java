@@ -11,12 +11,9 @@ import org.springframework.samples.petclinic.jpa.HibernateEntityManagerClinicTes
 import org.springframework.samples.petclinic.jpa.OpenJpaEntityManagerClinicTests;
 
 /**
- * <p>
  * JUnit 4 based test suite for all PetClinic tests.
- * </p>
  *
  * @author Sam Brannen
- * @since 2.5
  */
 @RunWith(Suite.class)
 @SuiteClasses({
