@@ -30,6 +30,8 @@ Package org.springframework.beans
 * DefaultSingletonBeanRegistry only registers same related cause (i.e. same message, same chained cause) once
 * DefaultListableBeanFactory only registers causes during constructor resolution when resolution eventually fails
 * DefaultListableBeanFactory checks primary attribute in bean definitions of parent factory as well
+* fixed DefaultListableBeanFactory to use a post-processing lock (for proper synchronization of annotation scanning)
+* dependency check "simple" accepts Number, Date, URI, URL and Locale as well (consistent with simple MVC value types)
 * UnsatisfiedDependencyException preserves full nested exception stacktrace in case of a BeansException
 * added overloaded BeanComponentDefinition constructor with aliases argument
 * GenericBeanFactoryAccessor's "getBeansWithAnnotation" performs deep search (including interfaces and target class)
@@ -57,7 +59,9 @@ Package org.springframework.ejb
 * added "expose-access-context" flag to "jee:local-slsb", "jee:remote-slsb" and "jee:jndi-lookup"
 
 Package org.springframework.jdbc
+* added SimpleDriverDataSource alternative to DriverManagerDataSource, avoiding class loading and synchronization issues
 * BeanPropertySqlParameterSource uses specific integer/decimal SQL types by default now (e.g. TINYINT, BIGINT, DOUBLE)
+* introduced SqlXmlHandler abstraction (for the XML support in the Advanced Pack for Oracle Database)
 * added further SQL error code mapping for MS SQL Server
 
 Package org.springframework.jms
@@ -66,6 +70,7 @@ Package org.springframework.jms
 * AbstractJmsListeningContainer sets Connection to null on shutdown, allowing for smooth reinitialization
 * DefaultMessageListenerContainer performs lazy setup in case of any connection exception (also JNDI lookup failure)
 * DefaultMessageListenerContainer is able to recover all cases where the provider is not available on startup
+* fixed DefaultMessageListenerContainer to avoid race condition when stopping through lock on unified monitor
 * added "container-class" attribute to "jms:listener-container" element, for specifying a custom implementation class
 * MessageListenerAdapter and JmsInvokerServiceExporter use message id as correlation id if no request correlation id set
 
@@ -101,6 +106,10 @@ Package org.springframework.remoting
 Package org.springframework.scheduling
 * SchedulerFactoryBean's "jobSchedulingDataLocation" feature is compatible with Quartz 1.6.1 now (requiring 1.6.1+)
 
+Package org.springframework.scripting
+* ScriptFactoryPostProcessor ignores any "predictBeanType" failure (in particular reference to currently created bean)
+* GroovyScriptFactory also converts CompilationFailedException to ScriptCompilationException during type determination
+
 Package org.springframework.test
 * added "prepareApplicationContext(GenericApplicationContext)" template method to AbstractSingleSpringContextTests
 * added "prepareContext(GenericApplicationContext)" template method to AbstractGenericContextLoader
@@ -134,6 +143,7 @@ Package org.springframework.web
 * Portlet DefaultAnnotationHandlerMapping checks default mappings last, independent from order of controller definition
 * RedirectView uses request's encoding (default ISO-8859-1) if no encoding scheme specified (previous default was UTF-8)
 * RedirectView considers arrays and collections with eligible values, turning them into multi-value request parameters
+* RedirectView accepts StringBuffers, StringBuilders, Numbers, Dates, URIs, URLs and Locales as eligible values as well
 * factored out common temporary byte array handling from AbstractPdfView etc into AbstractView base class
 * added AbstractPdfStamperView as alternative to AbstractPdfView, operating on an existing document with an AcroForm
 * fixed AbstractJasperReportsView to fully isolate a model-specified JDBC DataSource (not setting it as view DataSource)

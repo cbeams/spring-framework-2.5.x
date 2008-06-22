@@ -120,7 +120,7 @@ MODULE JARS (dist/modules):
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
-* "spring-context-support" (~90 KB)
+* "spring-context-support" (~95 KB)
 - Contents: Quartz and CommonJ scheduling, UI templating, mail, caching
 - Dependencies: spring-context, (spring-aop, spring-jdbc)
 
@@ -128,7 +128,7 @@ MODULE JARS (dist/modules):
 - Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
 - Dependencies: Commons Logging, (Commons Attributes)
 
-* "spring-jdbc" (~315 KB)
+* "spring-jdbc" (~320 KB)
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
