@@ -722,7 +722,7 @@ public interface SessionAwareMessageListener {
 </bean>]]></programlisting>
 
 			<para>For participating in an externally managed transaction,
-			you will need to configured a transaction manager and use a listener
+			you will need to configure a transaction manager and use a listener
 			container which supports externally managed transactions: typically
 			<classname>DefaultMessageListenerContainer</classname>.</para>
 
