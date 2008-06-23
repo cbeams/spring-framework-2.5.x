@@ -25,7 +25,7 @@ import java.io.IOException;
  *
  * @author Thomas Risberg
  * @since 2.5.5
- * @see javax.xml.transform.Result
+ * @see java.io.Writer
  */
 public interface XmlCharacterStreamProvider {
 
