@@ -18,7 +18,6 @@ package org.springframework.beans.factory.config;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Properties;
@@ -32,6 +31,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -343,14 +343,20 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	private class ServiceLocatorInvocationHandler implements InvocationHandler {
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			Object service;
-			if (Object.class.equals(method.getDeclaringClass())) {
-				service = invokeStandardObjectMethod(method, args);
+			if (ReflectionUtils.isEqualsMethod(method)) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (ReflectionUtils.isHashCodeMethod(method)) {
+				// Use hashCode of service locator proxy.
+				return new Integer(System.identityHashCode(proxy));
+			}
+			else if (ReflectionUtils.isToStringMethod(method)) {
+				return "Service locator: " + serviceLocatorInterface.getName();
 			}
 			else {
-				service = invokeServiceLocatorMethod(method, args);
+				return invokeServiceLocatorMethod(method, args);
 			}
-			return service;
 		}
 
 		private Object invokeServiceLocatorMethod(Method method, Object[] args) throws Exception {
@@ -404,23 +410,6 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 						"on factory interface, but tried to call: " + interfaceMethod);
 			}
 			return serviceLocatorReturnType;
-		}
-
-		/**
-		 * It's normal to get here for non service locator interface method calls
-		 * (toString, equals, etc.). Simply apply the call to the invocation handler object.
-		 */
-		private Object invokeStandardObjectMethod(Method method, Object[] args) throws Throwable {
-			try {
-				return method.invoke(this, args);
-			}
-			catch (InvocationTargetException invEx) {
-				throw invEx.getTargetException();
-			}
-		}
-
-		public String toString() {
-			return "Service locator: " + serviceLocatorInterface.getName();
 		}
 	}
 
