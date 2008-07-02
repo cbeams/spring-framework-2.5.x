@@ -53,8 +53,8 @@ import org.springframework.jmx.support.ObjectNameManager;
  * Integration tests for the MBeanExporter class.
  * 
  * @author Rob Harrop
- * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @author Mark Fisher
  */
 public class MBeanExporterTests extends AbstractMBeanServerTests {
@@ -111,10 +111,10 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testWithSuppliedMBeanServer() throws Exception {
-		MBeanExporter adaptor = new MBeanExporter();
-		adaptor.setBeans(getBeanMap());
-		adaptor.setServer(server);
-		adaptor.afterPropertiesSet();
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setBeans(getBeanMap());
+		exporter.setServer(server);
+		exporter.afterPropertiesSet();
 		assertIsRegistered("The bean was not registered with the MBeanServer", ObjectNameManager.getInstance(OBJECT_NAME));
 	}
 
@@ -134,11 +134,11 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		InvokeDetectAssembler asm = new InvokeDetectAssembler();
 
-		MBeanExporter adaptor = new MBeanExporter();
-		adaptor.setServer(server);
-		adaptor.setBeans(map);
-		adaptor.setAssembler(asm);
-		adaptor.afterPropertiesSet();
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(map);
+		exporter.setAssembler(asm);
+		exporter.afterPropertiesSet();
 
 		Object name = server.getAttribute(ObjectNameManager.getInstance("spring:name=dynBean"), "Name");
 		assertEquals("The name attribute is incorrect", "Rob Harrop", name);
@@ -217,12 +217,12 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		MockMBeanExporterListener listener1 = new MockMBeanExporterListener();
 		MockMBeanExporterListener listener2 = new MockMBeanExporterListener();
 
-		MBeanExporter adaptor = new MBeanExporter();
-		adaptor.setBeans(getBeanMap());
-		adaptor.setServer(server);
-		adaptor.setListeners(new MBeanExporterListener[]{listener1, listener2});
-		adaptor.afterPropertiesSet();
-		adaptor.destroy();
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setBeans(getBeanMap());
+		exporter.setServer(server);
+		exporter.setListeners(new MBeanExporterListener[] {listener1, listener2});
+		exporter.afterPropertiesSet();
+		exporter.destroy();
 		
 		assertListener(listener1);
 		assertListener(listener2);
@@ -538,28 +538,28 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		catch (MBeanExportException expected) {}
 	}
 
-    /*
-     * SPR-2158
-     */
-    public void testMBeanIsNotUnregisteredSpuriouslyIfSomeExternalProcessHasUnregisteredMBean() throws Exception {
-		MBeanExporter adaptor = new MBeanExporter();
-		adaptor.setBeans(getBeanMap());
-		adaptor.setServer(this.server);
-        MockMBeanExporterListener listener = new MockMBeanExporterListener();
-        adaptor.setListeners(new MBeanExporterListener[]{listener});
-        adaptor.afterPropertiesSet();
+	/**
+	 * SPR-2158
+	 */
+	public void testMBeanIsNotUnregisteredSpuriouslyIfSomeExternalProcessHasUnregisteredMBean() throws Exception {
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setBeans(getBeanMap());
+		exporter.setServer(this.server);
+		MockMBeanExporterListener listener = new MockMBeanExporterListener();
+		exporter.setListeners(new MBeanExporterListener[]{listener});
+		exporter.afterPropertiesSet();
 		assertIsRegistered("The bean was not registered with the MBeanServer", ObjectNameManager.getInstance(OBJECT_NAME));
-        
-        this.server.unregisterMBean(new ObjectName(OBJECT_NAME));
-        adaptor.destroy();
-        assertEquals("Listener should not have been invoked (MBean previously unregistered by external agent)", 0, listener.getUnregistered().size());
-    }
+
+		this.server.unregisterMBean(new ObjectName(OBJECT_NAME));
+		exporter.destroy();
+		assertEquals("Listener should not have been invoked (MBean previously unregistered by external agent)", 0, listener.getUnregistered().size());
+	}
 
 	/**
 	 * SPR-3302
 	 */
 	public void testBeanNameCanBeUsedInNotificationListenersMap() throws Exception {
-		final String beanName = "charlesDexterWard";
+		String beanName = "charlesDexterWard";
 		BeanDefinitionBuilder testBean = BeanDefinitionBuilder.rootBeanDefinition(JmxTestBean.class);
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
@@ -570,12 +570,32 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
 		Map beansToExport = new HashMap();
-		String objectName = "test:what=ever";
-		beansToExport.put(objectName, testBeanInstance);
+		beansToExport.put("test:what=ever", testBeanInstance);
 		exporter.setBeans(beansToExport);
 		exporter.setBeanFactory(factory);
 		StubNotificationListener listener = new StubNotificationListener();
 		exporter.setNotificationListenerMappings(Collections.singletonMap(beanName, listener));
+
+		exporter.afterPropertiesSet();
+	}
+
+	public void testWildcardCanBeUsedInNotificationListenersMap() throws Exception {
+		String beanName = "charlesDexterWard";
+		BeanDefinitionBuilder testBean = BeanDefinitionBuilder.rootBeanDefinition(JmxTestBean.class);
+
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition(beanName, testBean.getBeanDefinition());
+		factory.preInstantiateSingletons();
+		Object testBeanInstance = factory.getBean(beanName);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		Map beansToExport = new HashMap();
+		beansToExport.put("test:what=ever", testBeanInstance);
+		exporter.setBeans(beansToExport);
+		exporter.setBeanFactory(factory);
+		StubNotificationListener listener = new StubNotificationListener();
+		exporter.setNotificationListenerMappings(Collections.singletonMap("*", listener));
 
 		exporter.afterPropertiesSet();
 	}
