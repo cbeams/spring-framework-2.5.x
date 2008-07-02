@@ -614,6 +614,9 @@ public class SchedulerFactoryBean
 		// Get Scheduler instance from SchedulerFactory.
 		try {
 			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
+
+			populateSchedulerContext();
+
 			if (!this.jobFactorySet && !(this.scheduler instanceof RemoteScheduler)) {
 				// Use AdaptableJobFactory as default for a local Scheduler, unless when
 				// explicitly given a null value through the "jobFactory" bean property.
@@ -641,8 +644,6 @@ public class SchedulerFactoryBean
 				configTimeNonTransactionalDataSourceHolder.set(null);
 			}
 		}
-
-		populateSchedulerContext();
 
 		registerListeners();
 
