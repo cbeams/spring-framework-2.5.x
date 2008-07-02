@@ -324,7 +324,7 @@ public abstract class StatementCreatorUtils {
 				}
 				else if (inValueToUse instanceof Calendar) {
 					Calendar cal = (Calendar) inValueToUse;
-					ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()));
+					ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 				}
 				else {
 					// Fall back to generic setObject call without SQL type specified.

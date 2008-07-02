@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ public class StatementCreatorUtilsTests extends TestCase {
 
 	public void testSetParameterValueWithCalendarAndUnknownType() throws SQLException {
 		java.util.Calendar cal = new GregorianCalendar();
-		ps.setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()));
+		ps.setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 		psControl.setVoidCallable(1);
 		psControl.replay();
 		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, cal);
