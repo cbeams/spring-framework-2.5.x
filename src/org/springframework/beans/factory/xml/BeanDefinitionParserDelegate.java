@@ -914,11 +914,11 @@ public class BeanDefinitionParserDelegate {
 			return parseNestedCustomElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
-			BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele, bd);
-			if (bdHolder != null) {
-				bdHolder = decorateBeanDefinitionIfRequired(ele, bdHolder);
+			BeanDefinitionHolder nestedBd = parseBeanDefinitionElement(ele, bd);
+			if (nestedBd != null) {
+				nestedBd = decorateBeanDefinitionIfRequired(ele, nestedBd, bd);
 			}
-			return bdHolder;
+			return nestedBd;
 		}
 		else if (DomUtils.nodeNameEquals(ele, REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -1256,13 +1256,19 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element ele, BeanDefinitionHolder definitionHolder) {
+		return decorateBeanDefinitionIfRequired(ele, definitionHolder, null);
+	}
+
+	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(
+			Element ele, BeanDefinitionHolder definitionHolder, BeanDefinition containingBd) {
+
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 
 		// Decorate based on custom attributes first.
 		NamedNodeMap attributes = ele.getAttributes();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Node node = attributes.item(i);
-			finalDefinition = decorateIfRequired(node, finalDefinition);
+			finalDefinition = decorateIfRequired(node, finalDefinition, containingBd);
 		}
 
 		// Decorate based on custom nested elements.
@@ -1270,18 +1276,20 @@ public class BeanDefinitionParserDelegate {
 		for (int i = 0; i < children.getLength(); i++) {
 			Node node = children.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				finalDefinition = decorateIfRequired(node, finalDefinition);
+				finalDefinition = decorateIfRequired(node, finalDefinition, containingBd);
 			}
 		}
 		return finalDefinition;
 	}
 
-	private BeanDefinitionHolder decorateIfRequired(Node node, BeanDefinitionHolder originalDefinition) {
+	private BeanDefinitionHolder decorateIfRequired(
+			Node node, BeanDefinitionHolder originalDef, BeanDefinition containingBd) {
+
 		String namespaceUri = node.getNamespaceURI();
 		if (!isDefaultNamespace(namespaceUri)) {
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 			if (handler != null) {
-				return handler.decorate(node, originalDefinition, new ParserContext(this.readerContext, this));
+				return handler.decorate(node, originalDef, new ParserContext(this.readerContext, this, containingBd));
 			}
 			else if (namespaceUri.startsWith("http://www.springframework.org/")) {
 				error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", node);
@@ -1293,7 +1301,7 @@ public class BeanDefinitionParserDelegate {
 				}
 			}
 		}
-		return originalDefinition;
+		return originalDef;
 	}
 
 	public boolean isDefaultNamespace(String namespaceUri) {
