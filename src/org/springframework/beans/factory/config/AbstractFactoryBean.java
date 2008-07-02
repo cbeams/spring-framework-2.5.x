@@ -34,6 +34,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Simple template superclass for {@link FactoryBean} implementations that
@@ -156,17 +158,8 @@ public abstract class AbstractFactoryBean
 					getClass().getName() + " does not support circular references");
 		}
 		if (this.earlySingletonInstance == null) {
-			this.earlySingletonInstance = Proxy.newProxyInstance(this.beanClassLoader, ifcs,
-				new InvocationHandler() {
-					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-						try {
-							return method.invoke(getSingletonInstance(), args);
-						}
-						catch (InvocationTargetException ex) {
-							throw ex.getTargetException();
-						}
-					}
-				});
+			this.earlySingletonInstance = Proxy.newProxyInstance(
+					this.beanClassLoader, ifcs, new EarlySingletonInvocationHandler());
 		}
 		return this.earlySingletonInstance;
 	}
@@ -239,6 +232,31 @@ public abstract class AbstractFactoryBean
 	 * @see #createInstance()
 	 */
 	protected void destroyInstance(Object instance) throws Exception {
+	}
+
+
+	private class EarlySingletonInvocationHandler implements InvocationHandler {
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (ReflectionUtils.isEqualsMethod(method)) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (ReflectionUtils.isHashCodeMethod(method)) {
+				// Use hashCode of reference proxy.
+				return new Integer(System.identityHashCode(proxy));
+			}
+			else if (!initialized && ReflectionUtils.isToStringMethod(method)) {
+				return "Early singleton proxy for interfaces " +
+						ObjectUtils.nullSafeToString(getEarlySingletonInterfaces());
+			}
+			try {
+				return method.invoke(getSingletonInstance(), args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		}
 	}
 
 }
