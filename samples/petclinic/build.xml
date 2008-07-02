@@ -5,7 +5,6 @@
 	<property name="name" value="petclinic"/>
 
 	<property name="war.dir" value="war"/>
-	<property name="ear.dir" value="ear"/>
 	<property name="src.dir" value="src"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="docs.dir" value="${war.dir}/docs"/>
@@ -152,7 +151,6 @@
 		<delete dir="${testbuild.dir}"/>
 		<delete dir="${testreports.dir}"/>
 		<delete dir="${dist.dir}"/>
-		<delete dir="${ear.dir}/package"/>
 	</target>
 
 
@@ -351,38 +349,6 @@
 			<exclude name="WEB-INF/lib/commons-logging.jar"/>
 			<exclude name="WEB-INF/lib/cglib*.jar"/>
 		</war>
-
-	</target>
-
-
-	<target name="earfile" depends="build,docs" description="Build the enterprise application archive">
-
-		<mkdir dir="${dist.dir}"/>
-		<mkdir dir="${ear.dir}/package"/>
-
-		<copy file="${war.dir}/WEB-INF/lib/${name}-domain.jar" todir="${ear.dir}/package"/>
-
-		<war warfile="${ear.dir}/package/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
-			<include name="*"/>
-			<include name="docs/**"/>
-			<include name="html/**"/>
-			<include name="styles/**"/>
-			<include name="images/**"/>
-			<include name="WEB-INF/*.*"/>
-			<exclude name="WEB-INF/web.xml"/>
-			<include name="WEB-INF/classes/*.*"/>
-			<include name="WEB-INF/lib/**"/>
-			<include name="WEB-INF/jsp/**"/>
-			<include name="META-INF/*"/>
-			<exclude name="**/petclinic-domain.jar"/>
-			<exclude name="**/.*"/>
-			<exclude name="WEB-INF/geronimo-web.xml"/>
-		</war>
-
-		<ear earfile="${dist.dir}/${name}.ear" basedir="${ear.dir}/package" appxml="${ear.dir}/META-INF/application.xml" manifest="${ear.dir}/META-INF/MANIFEST.MF">
-			<include name="${name}.war"/>
-			<include name="${name}-domain.jar"/>
-		</ear>
 
 	</target>
 
