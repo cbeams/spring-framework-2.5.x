@@ -115,8 +115,7 @@ public abstract class AopUtils {
 	 * @see java.lang.Object#equals
 	 */
 	public static boolean isEqualsMethod(Method method) {
-		return (method != null && method.getName().equals("equals") &&
-				method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == Object.class);
+		return ReflectionUtils.isEqualsMethod(method);
 	}
 
 	/**
@@ -124,8 +123,7 @@ public abstract class AopUtils {
 	 * @see java.lang.Object#hashCode
 	 */
 	public static boolean isHashCodeMethod(Method method) {
-		return (method != null && method.getName().equals("hashCode") &&
-				method.getParameterTypes().length == 0);
+		return ReflectionUtils.isHashCodeMethod(method);
 	}
 
 	/**
@@ -133,8 +131,7 @@ public abstract class AopUtils {
 	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(Method method) {
-		return (method != null && method.getName().equals("toString") &&
-				method.getParameterTypes().length == 0);
+		return ReflectionUtils.isToStringMethod(method);
 	}
 
 	/**

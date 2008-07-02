@@ -37,7 +37,6 @@ import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.DynamicScope;
 import org.jruby.runtime.builtin.IRubyObject;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -172,13 +171,13 @@ public abstract class JRubyScriptUtils {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (AopUtils.isEqualsMethod(method)) {
+			if (ReflectionUtils.isEqualsMethod(method)) {
 				return (isProxyForSameRubyObject(args[0]) ? Boolean.TRUE : Boolean.FALSE);
 			}
-			if (AopUtils.isHashCodeMethod(method)) {
+			else if (ReflectionUtils.isHashCodeMethod(method)) {
 				return new Integer(this.rubyObject.hashCode());
 			}
-			if (AopUtils.isToStringMethod(method)) {
+			else if (ReflectionUtils.isToStringMethod(method)) {
 				String toStringResult = this.rubyObject.toString();
 				if (!StringUtils.hasText(toStringResult)) {
 					toStringResult = ObjectUtils.identityToString(this.rubyObject);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import bsh.Interpreter;
 import bsh.Primitive;
 import bsh.XThis;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods for handling BeanShell-scripted objects.
@@ -174,13 +174,13 @@ public abstract class BshScriptUtils {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (AopUtils.isEqualsMethod(method)) {
+			if (ReflectionUtils.isEqualsMethod(method)) {
 				return (isProxyForSameBshObject(args[0]) ? Boolean.TRUE : Boolean.FALSE);
 			}
-			if (AopUtils.isHashCodeMethod(method)) {
+			else if (ReflectionUtils.isHashCodeMethod(method)) {
 				return new Integer(this.xt.hashCode());
 			}
-			if (AopUtils.isToStringMethod(method)) {
+			else if (ReflectionUtils.isToStringMethod(method)) {
 				return "BeanShell object [" + this.xt + "]";
 			}
 			try {

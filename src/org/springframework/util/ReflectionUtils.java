@@ -357,6 +357,37 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Determine whether the given method is an "equals" method.
+	 * @see java.lang.Object#equals
+	 */
+	public static boolean isEqualsMethod(Method method) {
+		if (method == null || !method.getName().equals("equals")) {
+			return false;
+		}
+		Class[] paramTypes = method.getParameterTypes();
+		return (paramTypes.length == 1 && paramTypes[0] == Object.class);
+	}
+
+	/**
+	 * Determine whether the given method is a "hashCode" method.
+	 * @see java.lang.Object#hashCode
+	 */
+	public static boolean isHashCodeMethod(Method method) {
+		return (method != null && method.getName().equals("hashCode") &&
+				method.getParameterTypes().length == 0);
+	}
+
+	/**
+	 * Determine whether the given method is a "toString" method.
+	 * @see java.lang.Object#toString()
+	 */
+	public static boolean isToStringMethod(Method method) {
+		return (method != null && method.getName().equals("toString") &&
+				method.getParameterTypes().length == 0);
+	}
+
+
+	/**
 	 * Make the given field accessible, explicitly setting it accessible if necessary.
 	 * The <code>setAccessible(true)</code> method is only called when actually necessary,
 	 * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
