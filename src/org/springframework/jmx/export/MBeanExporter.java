@@ -163,7 +163,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private MBeanExporterListener[] listeners;
 
 	/** The NotificationListeners to register for the MBeans registered by this exporter */
-	private NotificationListenerBean[] notificationListeners = new NotificationListenerBean[0];
+	private NotificationListenerBean[] notificationListeners;
 
 	/** Map of actually registered NotificationListeners */
 	private final Map registeredNotificationListeners = new LinkedHashMap();
@@ -621,8 +621,10 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * with the <code>MBeanServer</code>
 	 */
 	private void replaceNotificationListenerBeanNameKeysIfNecessary(String beanName, ObjectName objectName) {
-		for (int i = 0; i < this.notificationListeners.length; i++) {
-			this.notificationListeners[i].replaceObjectName(beanName, objectName);
+		if (this.notificationListeners != null) {
+			for (int i = 0; i < this.notificationListeners.length; i++) {
+				this.notificationListeners[i].replaceObjectName(beanName, objectName);
+			}
 		}
 	}
 
@@ -928,23 +930,25 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * with the {@link MBeanServer}.
 	 */
 	private void registerNotificationListeners() throws MBeanExportException {
-		for (int i = 0; i < this.notificationListeners.length; i++) {
-			NotificationListenerBean bean = this.notificationListeners[i];
-			try {
-				ObjectName[] mappedObjectNames = bean.getResolvedObjectNames();
-				if (mappedObjectNames == null) {
-					// Mapped to all MBeans registered by the MBeanExporter.
-					mappedObjectNames = getRegisteredObjectNames();
-				}
-				if (this.registeredNotificationListeners.put(bean, mappedObjectNames) == null) {
-					for (int j = 0; j < mappedObjectNames.length; j++) {
-						this.server.addNotificationListener(mappedObjectNames[j],
-								bean.getNotificationListener(), bean.getNotificationFilter(), bean.getHandback());
+		if (this.notificationListeners != null) {
+			for (int i = 0; i < this.notificationListeners.length; i++) {
+				NotificationListenerBean bean = this.notificationListeners[i];
+				try {
+					ObjectName[] mappedObjectNames = bean.getResolvedObjectNames();
+					if (mappedObjectNames == null) {
+						// Mapped to all MBeans registered by the MBeanExporter.
+						mappedObjectNames = getRegisteredObjectNames();
+					}
+					if (this.registeredNotificationListeners.put(bean, mappedObjectNames) == null) {
+						for (int j = 0; j < mappedObjectNames.length; j++) {
+							this.server.addNotificationListener(mappedObjectNames[j],
+									bean.getNotificationListener(), bean.getNotificationFilter(), bean.getHandback());
+						}
 					}
 				}
-			}
-			catch (Exception ex) {
-				throw new MBeanExportException("Unable to register NotificationListener", ex);
+				catch (Exception ex) {
+					throw new MBeanExportException("Unable to register NotificationListener", ex);
+				}
 			}
 		}
 	}
