@@ -32,18 +32,17 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  *
  * <p>This implementation wraps a <code>javax.sql.ResultSet</code>,
  * catching any SQLExceptions and translating them to the
- * appropriate Spring DataAccessException.
+ * appropriate Spring {@link InvalidResultSetAccessException}.
  *
- * <p>The passed-in ResultSets should already be disconnected if the
- * SqlRowSet is supposed to be usable in a disconnected fashion.
- * This means that you will usually pass in a
- * <code>javax.sql.rowset.CachedRowSet</code>,
+ * <p>The passed-in ResultSets should already be disconnected if the SqlRowSet
+ * is supposed to be usable in a disconnected fashion. This means that
+ * you will usually pass in a <code>javax.sql.rowset.CachedRowSet</code>,
  * which implements the ResultSet interface.
  *
  * <p>Note: This class implements the <code>java.io.Serializable</code>
  * marker interface through the SqlRowSet interface, but is only actually
  * serializable if the disconnected ResultSet/RowSet contained in it is
- * serializable. Most CachedRowSet implementations are serializable.
+ * serializable. Most CachedRowSet implementations are actually serializable.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -475,8 +474,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar)
 	 */
-	public Timestamp getTimestamp(int columnIndex, Calendar cal)
-			throws InvalidResultSetAccessException {
+	public Timestamp getTimestamp(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTimestamp(columnIndex, cal);
 		}
@@ -500,8 +498,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(String, java.util.Calendar)
 	 */
-	public Timestamp getTimestamp(String columnName, Calendar cal)
-			throws InvalidResultSetAccessException {
+	public Timestamp getTimestamp(String columnName, Calendar cal) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getTimestamp(columnName, cal);
 		}
