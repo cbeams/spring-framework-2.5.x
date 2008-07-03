@@ -83,7 +83,9 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	/**
 	 * Set additional interceptors (or advisors) to be applied before the
-	 * implicit transaction interceptor, e.g. PerformanceMonitorInterceptor.
+	 * implicit transaction interceptor, e.g. a PerformanceMonitorInterceptor.
+	 * <p>You may specify any AOP Alliance MethodInterceptors or other
+	 * Spring AOP Advices, as well as Spring AOP Advisors.
 	 * @see org.springframework.aop.interceptor.PerformanceMonitorInterceptor
 	 */
 	public void setPreInterceptors(Object[] preInterceptors) {
@@ -92,13 +94,9 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	/**
 	 * Set additional interceptors (or advisors) to be applied after the
-	 * implicit transaction interceptor, e.g. HibernateInterceptors for
-	 * eagerly binding Sessions to the current thread when using JTA.
-	 * <p>Note that this is just necessary if you rely on those interceptors in general:
-	 * HibernateTemplate and JdoTemplate work nicely with JtaTransactionManager through
-	 * implicit on-demand thread binding.
-	 * @see org.springframework.orm.hibernate3.HibernateInterceptor
-	 * @see org.springframework.orm.jdo.JdoInterceptor
+	 * implicit transaction interceptor.
+	 * <p>You may specify any AOP Alliance MethodInterceptors or other
+	 * Spring AOP Advices, as well as Spring AOP Advisors.
 	 */
 	public void setPostInterceptors(Object[] postInterceptors) {
 		this.postInterceptors = postInterceptors;
