@@ -22,6 +22,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -64,6 +67,8 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	protected static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -175,8 +180,13 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + "/" + this.resourcePattern;
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
+			boolean traceEnabled = logger.isTraceEnabled();
+			boolean debugEnabled = logger.isDebugEnabled();
 			for (int i = 0; i < resources.length; i++) {
 				Resource resource = resources[i];
+				if (traceEnabled) {
+					logger.trace("Scanning " + resource);
+				}
 				if (resource.isReadable()) {
 					MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
 					if (isCandidateComponent(metadataReader)) {
@@ -184,8 +194,26 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 						sbd.setResource(resource);
 						sbd.setSource(resource);
 						if (isCandidateComponent(sbd)) {
+							if (debugEnabled) {
+								logger.debug("Identified candidate component class: " + resource);
+							}
 							candidates.add(sbd);
 						}
+						else {
+							if (debugEnabled) {
+								logger.debug("Ignored because not a concrete top-level class: " + resource);
+							}
+						}
+					}
+					else {
+						if (traceEnabled) {
+							logger.trace("Ignored because not matching any filter: " + resource);
+						}
+					}
+				}
+				else {
+					if (traceEnabled) {
+						logger.trace("Ignored because not readable: " + resource);
 					}
 				}
 			}
