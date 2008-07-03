@@ -376,9 +376,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			try {
 				doBegin(transaction, definition);
 			}
-			catch (TransactionException ex) {
+			catch (RuntimeException ex) {
 				resume(null, suspendedResources);
 				throw ex;
+			}
+			catch (Error err) {
+				resume(null, suspendedResources);
+				throw err;
 			}
 			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
@@ -422,16 +426,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			try {
 				doBegin(transaction, definition);
 			}
-			catch (TransactionException beginEx) {
-				try {
-					resume(transaction, suspendedResources);
-				}
-				catch (TransactionException resumeEx) {
-					logger.error(
-							"Inner transaction begin exception overridden by outer transaction resume exception", beginEx);
-					throw resumeEx;
-				}
+			catch (RuntimeException beginEx) {
+				resumeAfterBeginException(transaction, suspendedResources, beginEx);
 				throw beginEx;
+			}
+			catch (Error beginErr) {
+				resumeAfterBeginException(transaction, suspendedResources, beginErr);
+				throw beginErr;
 			}
 			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
@@ -563,10 +564,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				return new SuspendedResourcesHolder(
 						suspendedResources, suspendedSynchronizations, name, readOnly, isolationLevel, wasActive);
 			}
-			catch (TransactionException ex) {
+			catch (RuntimeException ex) {
 				// doSuspend failed - original transaction is still active...
 				doResumeSynchronization(suspendedSynchronizations);
 				throw ex;
+			}
+			catch (Error err) {
+				// doSuspend failed - original transaction is still active...
+				doResumeSynchronization(suspendedSynchronizations);
+				throw err;
 			}
 		}
 		else if (transaction != null) {
@@ -606,6 +612,26 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				TransactionSynchronizationManager.setCurrentTransactionName(resourcesHolder.name);
 				doResumeSynchronization(suspendedSynchronizations);
 			}
+		}
+	}
+
+	/**
+	 * Resume outer transaction after inner transaction begin failed.
+	 */
+	private void resumeAfterBeginException(
+			Object transaction, SuspendedResourcesHolder suspendedResources, Throwable beginEx) {
+
+		String exMessage = "Inner transaction begin exception overridden by outer transaction resume exception";
+		try {
+			resume(transaction, suspendedResources);
+		}
+		catch (RuntimeException resumeEx) {
+			logger.error(exMessage, beginEx);
+			throw resumeEx;
+		}
+		catch (Error resumeErr) {
+			logger.error(exMessage, beginEx);
+			throw resumeErr;
 		}
 	}
 
