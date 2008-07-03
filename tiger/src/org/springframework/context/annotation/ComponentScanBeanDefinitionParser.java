@@ -31,7 +31,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -137,8 +136,6 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 		for (Iterator it = beanDefinitions.iterator(); it.hasNext();) {
 			BeanDefinitionHolder beanDefHolder = (BeanDefinitionHolder) it.next();
-			AbstractBeanDefinition beanDef = (AbstractBeanDefinition) beanDefHolder.getBeanDefinition();
-			beanDef.setSource(readerContext.extractSource(beanDef.getSource()));
 			compositeDef.addNestedComponent(new BeanComponentDefinition(beanDefHolder));
 		}
 
