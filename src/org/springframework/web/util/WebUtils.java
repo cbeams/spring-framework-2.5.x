@@ -405,7 +405,7 @@ public abstract class WebUtils {
 	/**
 	 * Expose the Servlet spec's error attributes as {@link javax.servlet.http.HttpServletRequest}
 	 * attributes under the keys defined in the Servlet 2.3 specification, for error pages that
-	 * are rendered directly rather than through the Servlet container's error page resolution.
+	 * are rendered directly rather than through the Servlet container's error page resolution:
 	 * <code>javax.servlet.error.status_code</code>,
 	 * <code>javax.servlet.error.exception_type</code>,
 	 * <code>javax.servlet.error.message</code>,
@@ -439,6 +439,26 @@ public abstract class WebUtils {
 		if (request.getAttribute(name) == null) {
 			request.setAttribute(name, value);
 		}
+	}
+
+	/**
+	 * Clear the Servlet spec's error attributes as {@link javax.servlet.http.HttpServletRequest}
+	 * attributes under the keys defined in the Servlet 2.3 specification:
+	 * <code>javax.servlet.error.status_code</code>,
+	 * <code>javax.servlet.error.exception_type</code>,
+	 * <code>javax.servlet.error.message</code>,
+	 * <code>javax.servlet.error.exception</code>,
+	 * <code>javax.servlet.error.request_uri</code>,
+	 * <code>javax.servlet.error.servlet_name</code>.
+	 * @param request current servlet request
+	 */
+	public static void clearErrorRequestAttributes(HttpServletRequest request) {
+		request.removeAttribute(ERROR_STATUS_CODE_ATTRIBUTE);
+		request.removeAttribute(ERROR_EXCEPTION_TYPE_ATTRIBUTE);
+		request.removeAttribute(ERROR_MESSAGE_ATTRIBUTE);
+		request.removeAttribute(ERROR_EXCEPTION_ATTRIBUTE);
+		request.removeAttribute(ERROR_REQUEST_URI_ATTRIBUTE);
+		request.removeAttribute(ERROR_SERVLET_NAME_ATTRIBUTE);
 	}
 
 	/**

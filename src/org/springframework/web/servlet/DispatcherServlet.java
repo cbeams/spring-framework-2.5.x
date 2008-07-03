@@ -847,6 +847,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		
 		try {
 			ModelAndView mv = null;
+			boolean errorView = false;
+
 			try {
 				processedRequest = checkMultipart(request);
 
@@ -894,11 +896,15 @@ public class DispatcherServlet extends FrameworkServlet {
 			catch (Exception ex) {
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
 				mv = processHandlerException(processedRequest, response, handler, ex);
+				errorView = (mv != null);
 			}
 
 			// Did the handler return a view to render?
 			if (mv != null && !mv.wasCleared()) {
 				render(mv, processedRequest, response);
+				if (errorView) {
+					WebUtils.clearErrorRequestAttributes(request);
+				}
 			}
 			else {
 				if (logger.isDebugEnabled()) {
