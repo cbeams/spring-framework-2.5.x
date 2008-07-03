@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), Object.class) :
 				getApplicationContext().getBeanNamesForType(Object.class));
 
-		// Take any bean name or alias that begins with a slash.
+		// Take any bean name that we can determine URLs for.
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
 			String[] urls = determineUrlsForHandler(beanName);
