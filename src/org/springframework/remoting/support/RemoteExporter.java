@@ -17,6 +17,8 @@
 package org.springframework.remoting.support;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
+import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -36,7 +38,9 @@ public abstract class RemoteExporter extends RemotingSupport {
 
 	private Class serviceInterface;
 
-	private boolean registerTraceInterceptor = true;
+	private Boolean registerTraceInterceptor;
+
+	private Object[] interceptors;
 
 
 	/**
@@ -77,21 +81,27 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 * services. Only applied when a subclass uses <code>getProxyForService</code>
 	 * for creating the proxy to expose.
 	 * <p>Default is "true". RemoteInvocationTraceInterceptor's most important value
-	 * is that it logs exception stacktraces on the server, before propagating
-	 * an exception to the client.
+	 * is that it logs exception stacktraces on the server, before propagating an
+	 * exception to the client. Note that RemoteInvocationTraceInterceptor will <i>not</i>
+	 * be registered by default if the "interceptors" property has been specified.
+	 * @see #setInterceptors
 	 * @see #getProxyForService
 	 * @see RemoteInvocationTraceInterceptor
 	 */
 	public void setRegisterTraceInterceptor(boolean registerTraceInterceptor) {
-		this.registerTraceInterceptor = registerTraceInterceptor;
+		this.registerTraceInterceptor = Boolean.valueOf(registerTraceInterceptor);
 	}
 
 	/**
-	 * Return whether to register a RemoteInvocationTraceInterceptor for
-	 * exported services.
+	 * Set additional interceptors (or advisors) to be applied before the
+	 * remote endpoint, e.g. a PerformanceMonitorInterceptor.
+	 * <p>You may specify any AOP Alliance MethodInterceptors or other
+	 * Spring AOP Advices, as well as Spring AOP Advisors.
+	 * @see #getProxyForService
+	 * @see org.springframework.aop.interceptor.PerformanceMonitorInterceptor
 	 */
-	protected boolean isRegisterTraceInterceptor() {
-		return this.registerTraceInterceptor;
+	public void setInterceptors(Object[] interceptors) {
+		this.interceptors = interceptors;
 	}
 
 
@@ -145,8 +155,15 @@ public abstract class RemoteExporter extends RemotingSupport {
 		checkServiceInterface();
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.addInterface(getServiceInterface());
-		if (isRegisterTraceInterceptor()) {
+		if (this.registerTraceInterceptor != null ?
+				this.registerTraceInterceptor.booleanValue() : this.interceptors == null) {
 			proxyFactory.addAdvice(new RemoteInvocationTraceInterceptor(getExporterName()));
+		}
+		if (this.interceptors != null) {
+			AdvisorAdapterRegistry adapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
+			for (int i = 0; i < this.interceptors.length; i++) {
+				proxyFactory.addAdvisor(adapterRegistry.wrap(this.interceptors[i]));
+			}
 		}
 		proxyFactory.setTarget(getService());
 		return proxyFactory.getProxy(getBeanClassLoader());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,29 +47,36 @@ public class RemoteInvocationTraceInterceptor implements MethodInterceptor {
 
 	protected static final Log logger = LogFactory.getLog(RemoteInvocationTraceInterceptor.class);
 
-	private final String exporterName;
+	private final String exporterNameClause;
 
 
 	/**
 	 * Create a new RemoteInvocationTraceInterceptor.
-	 * @param protocolName the name of the remoting protocol
+	 */
+	public RemoteInvocationTraceInterceptor() {
+		this.exporterNameClause = "";
+	}
+
+	/**
+	 * Create a new RemoteInvocationTraceInterceptor.
+	 * @param exporterName the name of the remote exporter
 	 * (to be used as context information in log messages)
 	 */
-	public RemoteInvocationTraceInterceptor(String protocolName) {
-		this.exporterName = protocolName;
+	public RemoteInvocationTraceInterceptor(String exporterName) {
+		this.exporterNameClause = exporterName + " ";
 	}
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Incoming " + this.exporterName + " remote call: " +
+			logger.debug("Incoming " + this.exporterNameClause + "remote call: " +
 					ClassUtils.getQualifiedMethodName(method));
 		}
 		try {
 			Object retVal = invocation.proceed();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Finished processing of " + this.exporterName + " remote call: " +
+				logger.debug("Finished processing of " + this.exporterNameClause + "remote call: " +
 						ClassUtils.getQualifiedMethodName(method));
 			}
 			return retVal;
@@ -77,13 +84,13 @@ public class RemoteInvocationTraceInterceptor implements MethodInterceptor {
 		catch (Throwable ex) {
 			if (ex instanceof RuntimeException || ex instanceof Error) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Processing of " + this.exporterName + " remote call resulted in fatal exception: " +
+					logger.warn("Processing of " + this.exporterNameClause + "remote call resulted in fatal exception: " +
 							ClassUtils.getQualifiedMethodName(method), ex);
 				}
 			}
 			else {
 				if (logger.isInfoEnabled()) {
-					logger.info("Processing of " + this.exporterName + " remote call resulted in exception: " +
+					logger.info("Processing of " + this.exporterNameClause + "remote call resulted in exception: " +
 							ClassUtils.getQualifiedMethodName(method), ex);
 				}
 			}
