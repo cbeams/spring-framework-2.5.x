@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,17 @@ package org.springframework.web.multipart.support;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Custom PropertyEditor for converting MultipartFiles to byte arrays.
+ * Custom {@link java.beans.PropertyEditor} for converting
+ * {@link MultipartFile MultipartFiles} to byte arrays.
  *
  * @author Juergen Hoeller
  * @since 13.10.2003
  */
 public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
-
-	/** Static to avoid creating a new logger every time */
-	private static final Log logger = LogFactory.getLog(ByteArrayMultipartFileEditor.class);
-
 
 	public void setValue(Object value) {
 		if (value instanceof MultipartFile) {
@@ -43,8 +37,9 @@ public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 				super.setValue(multipartFile.getBytes());
 			}
 			catch (IOException ex) {
-				logger.warn("Cannot read contents of multipart file", ex);
-				throw new IllegalArgumentException("Cannot read contents of multipart file: " + ex.getMessage());
+				IllegalArgumentException iae = new IllegalArgumentException("Cannot read contents of multipart file");
+				iae.initCause(ex);
+				throw iae;
 			}
 		}
 		else if (value instanceof byte[]) {

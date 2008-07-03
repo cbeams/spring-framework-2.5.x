@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,11 @@ package org.springframework.web.multipart.support;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Custom {@link java.beans.PropertyEditor} for converting
- * {@link org.springframework.web.multipart.MultipartFile MultipartFiles}
- * to Strings.
+ * {@link MultipartFile MultipartFiles} to Strings.
  * 
  * <p>Allows one to specify the charset to use.
  *
@@ -35,9 +31,6 @@ import org.springframework.web.multipart.MultipartFile;
  * @since 13.10.2003
  */
 public class StringMultipartFileEditor extends PropertyEditorSupport {
-
-	/** Static to avoid creating a new logger every time */
-	private static final Log logger = LogFactory.getLog(StringMultipartFileEditor.class);
 
 	private final String charsetName;
 
@@ -72,8 +65,9 @@ public class StringMultipartFileEditor extends PropertyEditorSupport {
 						new String(multipartFile.getBytes()));
 			}
 			catch (IOException ex) {
-				logger.warn("Cannot read contents of multipart file", ex);
-				throw new IllegalArgumentException("Cannot read contents of multipart file: " + ex.getMessage());
+				IllegalArgumentException iae = new IllegalArgumentException("Cannot read contents of multipart file");
+				iae.initCause(ex);
+				throw iae;
 			}
 		}
 		else {
