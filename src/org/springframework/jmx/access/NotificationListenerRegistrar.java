@@ -19,6 +19,7 @@ package org.springframework.jmx.access;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Map;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -58,6 +59,8 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 
 	private JMXServiceURL serviceUrl;
 
+	private Map environment;
+
 	private String agentId;
 
 	private final ConnectorDelegate connector = new ConnectorDelegate();
@@ -71,6 +74,25 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	 */
 	public void setServer(MBeanServerConnection server) {
 		this.server = server;
+	}
+
+	/**
+	 * Specify the environment for the JMX connector.
+	 * @see javax.management.remote.JMXConnectorFactory#connect(javax.management.remote.JMXServiceURL, java.util.Map)
+	 */
+	public void setEnvironment(Map environment) {
+		this.environment = environment;
+	}
+
+	/**
+	 * Allow Map access to the environment to be set for the connector,
+	 * with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "environment[myKey]". This is particularly useful for
+	 * adding or overriding entries in child bean definitions.
+	 */
+	public Map getEnvironment() {
+		return this.environment;
 	}
 
 	/**
@@ -109,7 +131,7 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	 */
 	public void prepare() {
 		if (this.server == null) {
-			this.server = this.connector.connect(this.serviceUrl, this.agentId);
+			this.server = this.connector.connect(this.serviceUrl, this.environment, this.agentId);
 		}
 		try {
 			this.actualObjectNames = getResolvedObjectNames();

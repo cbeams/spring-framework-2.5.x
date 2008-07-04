@@ -17,6 +17,7 @@
 package org.springframework.jmx.access;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
@@ -46,15 +47,18 @@ class ConnectorDelegate {
 	 * Connects to the remote <code>MBeanServer</code> using the configured <code>JMXServiceURL</code>:
 	 * to the specified JMX service, or to a local MBeanServer if no service URL specified.
 	 * @param serviceUrl the JMX service URL to connect to (may be <code>null</code>)
+	 * @param environment the JMX environment for the connector (may be <code>null</code>)
 	 * @param agentId the local JMX MBeanServer's agent id (may be <code>null</code>)
 	 */
-	public MBeanServerConnection connect(JMXServiceURL serviceUrl, String agentId) throws MBeanServerNotFoundException {
+	public MBeanServerConnection connect(JMXServiceURL serviceUrl, Map environment, String agentId)
+			throws MBeanServerNotFoundException {
+
 		if (serviceUrl != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Connecting to remote MBeanServer at URL [" + serviceUrl + "]");
 			}
 			try {
-				this.connector = JMXConnectorFactory.connect(serviceUrl);
+				this.connector = JMXConnectorFactory.connect(serviceUrl, environment);
 				return this.connector.getMBeanServerConnection();
 			}
 			catch (IOException ex) {

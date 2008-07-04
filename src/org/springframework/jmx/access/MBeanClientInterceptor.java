@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,8 @@ public class MBeanClientInterceptor
 
 	private JMXServiceURL serviceUrl;
 
+	private Map environment;
+
 	private String agentId;
 
 	private boolean connectOnStartup = true;
@@ -133,6 +135,25 @@ public class MBeanClientInterceptor
 	 */
 	public void setServiceUrl(String url) throws MalformedURLException {
 		this.serviceUrl = new JMXServiceURL(url);
+	}
+
+	/**
+	 * Specify the environment for the JMX connector.
+	 * @see javax.management.remote.JMXConnectorFactory#connect(javax.management.remote.JMXServiceURL, java.util.Map)
+	 */
+	public void setEnvironment(Map environment) {
+		this.environment = environment;
+	}
+
+	/**
+	 * Allow Map access to the environment to be set for the connector,
+	 * with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "environment[myKey]". This is particularly useful for
+	 * adding or overriding entries in child bean definitions.
+	 */
+	public Map getEnvironment() {
+		return this.environment;
 	}
 
 	/**
@@ -213,7 +234,7 @@ public class MBeanClientInterceptor
 	public void prepare() {
 		synchronized (this.preparationMonitor) {
 			if (this.server == null) {
-				this.server = this.connector.connect(this.serviceUrl, this.agentId);
+				this.server = this.connector.connect(this.serviceUrl, this.environment, this.agentId);
 			}
 			this.invocationHandler = null;
 			if (this.useStrictCasing) {
@@ -229,7 +250,7 @@ public class MBeanClientInterceptor
 				}
 			}
 			else {
-				// Non-strict asing can only be achieved through custom
+				// Non-strict casing can only be achieved through custom
 				// invocation handling. Only partial MXBean support available!
 				retrieveMBeanInfo();
 			}
@@ -274,10 +295,9 @@ public class MBeanClientInterceptor
 			throw new MBeanInfoRetrievalException("Unable to read MBean info for bean [ " + this.objectName + "]", ex);
 		}
 		catch (IOException ex) {
-			throw new MBeanInfoRetrievalException(
-					"An IOException occurred when communicating with the MBeanServer. " +
-							"It is likely that you are communicating with a remote MBeanServer. " +
-							"Check the inner exception for exact details.", ex);
+			throw new MBeanInfoRetrievalException("An IOException occurred when communicating with the " +
+					"MBeanServer. It is likely that you are communicating with a remote MBeanServer. " +
+					"Check the inner exception for exact details.", ex);
 		}
 	}
 
