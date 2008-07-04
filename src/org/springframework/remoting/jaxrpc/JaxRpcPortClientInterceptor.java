@@ -48,7 +48,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a specific port
  * of a JAX-RPC service. Uses either {@link LocalJaxRpcServiceFactory}'s facilities
  * underneath or takes an explicit reference to an existing JAX-RPC Service instance
- * (e.g. obtained via {@link org.springframework.jndi.JndiObjectFactoryBean}).
+ * (e.g. obtained via a {@link org.springframework.jndi.JndiObjectFactoryBean}).
  *
  * <p>Allows to set JAX-RPC's standard stub properties directly, via the
  * "username", "password", "endpointAddress" and "maintainSession" properties.
@@ -735,7 +735,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			// Throw either a RemoteAccessException or the original RemoteException,
 			// depending on what the service interface declares.
 			return RmiClientInterceptorUtils.convertRmiAccessException(
-					method, ex, isConnectFailure, portQName.toString());
+					method, ex, isConnectFailure, this.portQName.toString());
 		}
 	}
 
