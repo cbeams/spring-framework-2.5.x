@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,6 +37,7 @@ import org.springframework.core.JdkVersion;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class JmxUtilsTests extends TestCase {
 
@@ -113,6 +114,17 @@ public class JmxUtilsTests extends TestCase {
 		}
 	}
 
+	public void testIsMBean() {
+		// Correctly returns true for a class
+		assertTrue(JmxUtils.isMBean(JmxClassTest.class));
+
+		// Correctly returns false since JmxUtils won't navigate to the extended interface
+		assertFalse(JmxUtils.isMBean(SpecializedJmxInterfaceTest.class));
+
+		// Incorrectly returns true since it doesn't detect that this is an interface
+		assertFalse(JmxUtils.isMBean(JmxInterfaceTest.class));
+	}
+
 
 	public static class AttributeTest {
 
@@ -181,6 +193,31 @@ public class JmxUtilsTests extends TestCase {
 
 
 	public static class Abc extends Bar {
+
+	}
+
+
+	private static interface JmxInterfaceTestMBean {
+
+	}
+
+
+	private static interface JmxInterfaceTest extends JmxInterfaceTestMBean {
+
+	}
+
+
+	private static interface SpecializedJmxInterfaceTest extends JmxInterfaceTest {
+
+	}
+
+
+	private static interface JmxClassTestMBean {
+
+	}
+
+
+	private static class JmxClassTest implements JmxClassTestMBean {
 
 	}
 
