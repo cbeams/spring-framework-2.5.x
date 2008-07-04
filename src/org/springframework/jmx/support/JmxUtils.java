@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,8 +280,8 @@ public abstract class JmxUtils {
 		if (clazz.getSuperclass() == null) {
 			return null;
 		}
-		Class[] implementedInterfaces = clazz.getInterfaces();
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
+		Class[] implementedInterfaces = clazz.getInterfaces();
 		for (int x = 0; x < implementedInterfaces.length; x++) {
 			Class iface = implementedInterfaces[x];
 			if (iface.getName().equals(mbeanInterfaceName)) {
