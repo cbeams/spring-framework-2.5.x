@@ -7,7 +7,8 @@ Changes in version 2.5.6 (2008-07-21)
 -------------------------------------
 
 General
-* updated to AspectJ 1.6.1
+* updated to AspectJ 1.6.1 (while retaining compatibility with AspectJ 1.5.x and 1.6.0)
+* updated to OpenJPA 1.1.0 (while retaining compatibility with OpenJPA 1.0.x)
 * removed outdated EAR support from sample applications
 
 Package org.springframework.beans
@@ -15,13 +16,25 @@ Package org.springframework.beans
 * AbstractFactoryBean's early singleton proxy handles equals, hashCode and toString calls locally (avoiding eager init)
 * ServiceLocatorFactoryBean handles equals and hashCode based on proxy object identity
 
+Package org.springframework.context
+* ClassPathBeanDefinitionScanner performs trace/debug logging during class resource introspection
+* component-scan preserves original source of scanned bean definitions, for silently ignoring already scanned classes
+
 Package org.springframework.jdbc
 * JdbcTemplate passes full Calendar argument to JDBC driver even in case of no SQL type specified
+
+Package org.springframework.remoting
+* added "interceptors" property to RemoteExporter, allowing for registering custom AOP interceptors before the endpoint
 
 Package org.springframework.scheduling
 * SchedulerFactoryBean populates scheduler context first before satisfying SchedulerContextAware on a given JobFactory
 
+Package org.springframework.transaction
+* AbstractPlatformTransactionManager resumes after any kind of inner begin failure (not just after TransactionException)
+
 Package org.springframework.web
+* DispatcherServlet removes error-view-driven servlet request attributes after rendering (for Tomcat compatibility)
+* ByteArray/StringMultipartFileEditor do not log warning but rather include root cause in IllegalArgumentException
 * made RedirectView's "renderMergedOutputModel" implementation non-final
 
 
