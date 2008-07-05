@@ -184,13 +184,9 @@
           <literal>RegexpMethodPointcutAdvisor</literal>, that allows us to
           also reference an Advice (remember that an Advice can be an
           interceptor, before advice, throws advice etc.). Behind the scenes,
-          Spring will use the <literal>JdkRegexpMethodPointcut</literal> on
-          J2SE 1.4 or above, and will fall back to
-          <literal>Perl5RegexpMethodPointcut</literal> on older VMs. The use
-          of <literal>Perl5RegexpMethodPointcut</literal> can be forced by
-          setting the <literal>perl5</literal> property to true. Using
-          <literal>RegexpMethodPointcutAdvisor</literal> simplifies wiring, as
-          the one bean encapsulates both pointcut and advice, as shown
+          Spring will use a <literal>JdkRegexpMethodPointcut</literal>. Using
+          <literal>RegexpMethodPointcutAdvisor</literal> simplifies wiring,
+          as the one bean encapsulates both pointcut and advice, as shown
           below:</para>
 
           <para><programlisting>&lt;bean id="settersAndAbsquatulateAdvisor" 
