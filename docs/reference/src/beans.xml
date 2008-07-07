@@ -4428,6 +4428,11 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         property of the <literal>foo</literal> bean is being set to the scalar
         value <literal>123</literal>.</para>
 
+        <para><emphasis>Note:</emphasis> Specified override values are always
+        <emphasis>literal</emphasis> values; they are not translated into bean
+        references. This also applies when the original value in the XML bean
+        definition specifies a bean reference</para>
+
         <para>With the <literal>context</literal> namespace introduced in
         Spring 2.5, it is possible to configure property overriding with a
         dedicated configuration element:</para>

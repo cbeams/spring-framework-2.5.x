@@ -44,6 +44,9 @@ import org.springframework.beans.factory.BeanInitializationException;
  *
  * <p>Note that the context definition <i>is not</i> aware of being overridden;
  * so this is not immediately obvious when looking at the XML definition file.
+ * Furthermore, note that specified override values are always <i>literal</i> values;
+ * they are not translated into bean references. This also applies when the original
+ * value in the XML bean definition specifies a bean reference.
  *
  * <p>In case of multiple PropertyOverrideConfigurers that define different values for
  * the same bean property, the <i>last</i> one will win (due to the overriding mechanism).
