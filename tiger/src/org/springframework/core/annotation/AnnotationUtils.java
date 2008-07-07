@@ -83,17 +83,17 @@ public abstract class AnnotationUtils {
 	 * supplied {@link Method}, traversing its super methods if no annotation
 	 * can be found on the given method itself.
 	 * <p>Annotations on methods are not inherited by default, so we need to handle
-	 * this explicitly.
+	 * this explicitly. Tge
 	 * @param method the method to look for annotations on
 	 * @param annotationType the annotation class to look for
-	 * @return the annotation of the given type, or <code>null</code> if none found
+	 * @return the annotation found, or <code>null</code> if none found
 	 */
 	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
 		A annotation = getAnnotation(method, annotationType);
 		Class<?> cl = method.getDeclaringClass();
 		while (annotation == null) {
 			cl = cl.getSuperclass();
-			if (cl == null || cl.equals(Object.class)) {
+			if (cl == null || cl == Object.class) {
 				break;
 			}
 			try {
@@ -111,12 +111,19 @@ public abstract class AnnotationUtils {
 	 * Find a single {@link Annotation} of <code>annotationType</code> from the
 	 * supplied {@link Class}, traversing its interfaces and super classes
 	 * if no annotation can be found on the given class itself.
-	 * <p>This method explicitly handles class-level annotations which are not
-	 * declared as {@link java.lang.annotation.Inherited inherited} as well as
-	 * annotations on interfaces.
+	 * <p>This method explicitly handles class-level annotations which are
+	 * not declared as {@link java.lang.annotation.Inherited inherited}
+	 * <i>as well as annotations on interfaces</i>.
+	 * <p>The algorithm operates as follows: Searches for an annotation on the given
+	 * class and returns it if found. Else searches all interfaces that the given
+	 * class declares, returning the annotation from the first matching candidate,
+	 * if any. Else proceeds with introspection of the superclass of the given class,
+	 * checking the superclass itself; if no annotation found there, proceeds with
+	 * the interfaces that the superclass declares. Recursing up through the entire
+	 * superclass hierarchy if no match is found.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the annotation class to look for
-	 * @return the annotation of the given type found, or <code>null</code>
+	 * @return the annotation found, or <code>null</code> if none found
 	 */
 	public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -130,10 +137,11 @@ public abstract class AnnotationUtils {
 				return annotation;
 			}
 		}
-		if (clazz.getSuperclass() == null || Object.class.equals(clazz.getSuperclass())) {
+		Class superClass = clazz.getSuperclass();
+		if (superClass == null || superClass == Object.class) {
 			return null;
 		}
-		return findAnnotation(clazz.getSuperclass(), annotationType);
+		return findAnnotation(superClass, annotationType);
 	}
 
 	/**
