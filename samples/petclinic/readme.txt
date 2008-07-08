@@ -94,7 +94,9 @@ The basic steps are:
  - If you're running on Tomcat 5.x, modify "TOMCAT_HOME/conf/server.xml"
    and add a new "<Context>" element for 'petclinic' (see below). You can 
    alternatively deploy the WAR including "META-INF/context.xml" from this 
-   sample application's "war" directory.
+   sample application's "war" directory, in which case you will need to
+   uncomment the Loader element in that file to enable the use of the
+   TomcatInstrumentableClassLoader.
 
 <Context path="/petclinic" docBase="/petclinic/location" ...>
   <!-- please note that useSystemClassLoaderAsParent is available since Tomcat 5.5.20; remove it if previous versions are being used -->
