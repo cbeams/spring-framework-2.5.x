@@ -650,6 +650,20 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	public void testPossibleMatches() {
+		TestBean tb = new TestBean();
+		try {
+			BeanWrapper bw = new BeanWrapperImpl(tb);
+			bw.setPropertyValue("ag", "foobar");
+			fail("Should throw exception on invalid property");
+		}
+		catch (NotWritablePropertyException ex) {
+			// expected
+			assertEquals(1, ex.getPossibleMatches().length);
+			assertEquals("age", ex.getPossibleMatches()[0]);
+		}
+	}
+
 	public void testTypeMismatch() {
 		TestBean t = new TestBean();
 		try {
@@ -659,9 +673,6 @@ public class BeanWrapperTests extends TestCase {
 		}
 		catch (TypeMismatchException ex) {
 			// expected
-		}
-		catch (Exception ex) {
-			fail("Shouldn't throw exception other than Type mismatch");
 		}
 	}
 

@@ -47,6 +47,9 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -517,6 +520,25 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("self", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean self = (TestBean) lbf.getBean("self");
 		assertEquals(self, self.getSpouse());
+	}
+
+	public void testPossibleMatches() {
+		try {
+			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+			MutablePropertyValues pvs = new MutablePropertyValues();
+			pvs.addPropertyValue("ag", "foobar");
+			lbf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+			lbf.getBean("tb");
+			fail("Should throw exception on invalid property");
+		}
+		catch (BeanCreationException ex) {
+			ex.printStackTrace();
+			assertTrue(ex.getCause() instanceof NotWritablePropertyException);
+			NotWritablePropertyException cause = (NotWritablePropertyException) ex.getCause();
+			// expected
+			assertEquals(1, cause.getPossibleMatches().length);
+			assertEquals("age", cause.getPossibleMatches()[0]);
+		}
 	}
 
 	public void testPrototype() {

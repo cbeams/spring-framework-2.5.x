@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 package org.springframework.beans;
 
 /**
- * Exception thrown on an attempt to set the value of a property
- * that isn't writable, because there's no setter method. In some
- * situations alternatives are presented.
+ * Exception thrown on an attempt to set the value of a property that
+ * is not writable (typically because there is no setter method).
  *
  * @author Rod Johnson
  * @author Alef Arendsen
@@ -81,7 +80,7 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	 * the invalid property name, if any.
 	 */
 	public String[] getPossibleMatches() {
-		return possibleMatches;
+		return this.possibleMatches;
 	}
 
 }
