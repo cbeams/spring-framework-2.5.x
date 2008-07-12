@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-06-30)
+Changes in version 2.0.9 (2008-07-22)
 -------------------------------------
 
 General
@@ -22,6 +22,7 @@ Package org.springframework.beans
 * StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory only invokes "predictBeanType" post-processor method for non-null bean Class
+* AbstractAutowireCapableBeanFactory preserves possible matches hint in property exception
 * XmlBeanDefinitionReader's "getValidationModeForResource" method is protected now in order to allow for overriding
 * marked BeanConfigurerSupport's instance fields as volatile (for guaranteed visibility in all scenarios)
 
@@ -47,6 +48,9 @@ Package org.springframework.jms
 * DefaultMessageListenerContainer propagates JMSExceptions thrown from a listener, potentially triggering recovery
 * DefaultMessageListenerContainer lets shutdown continue instead of 'busy' waiting in case of thread interruption
 
+Package org.springframework.jmx
+* revised MBeanExporter's bean introspection to only check MBean suffix convention for classes (not for interfaces)
+
 Package org.springframework.mail
 * added "text/csv" to MimeMessageHelper's default MIME mappings
 * removed overlapping "application/x-pointplus" MIME type for "css" extension from MimeMessageHelper's default mappings
@@ -70,6 +74,9 @@ Package org.springframework.scheduling
 
 Package org.springframework.scripting
 * GroovyScriptFactory also converts CompilationFailedException to ScriptCompilationException during type determination
+
+Package org.springframework.transaction
+* AbstractPlatformTransactionManager resumes after any kind of inner begin failure (not just after TransactionException)
 
 Package org.springframework.util
 * NumberUtils avoids overflow when converting from BigDecimal to BigInteger
