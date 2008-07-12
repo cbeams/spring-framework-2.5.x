@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,7 +276,6 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 	/**
 	 * Decorate the given Cache, if necessary.
-	 * <p>The default implementation simply returns the given cache object as-is.
 	 * @param cache the raw Cache object, based on the configuration of this FactoryBean
 	 * @return the (potentially decorated) cache object to be registered with the CacheManager
 	 */
