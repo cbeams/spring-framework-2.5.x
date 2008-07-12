@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,6 @@ import org.springframework.util.Assert;
  *
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
  * Cache instance will be retrieved from the CacheManager.
- *
- * <p>Note: As of Spring 2.0, this FactoryBean is based on EHCache 1.2's API (in particular
- * the Ehcache interface and the extended Cache constructor). It is not compatible with
- * EHCache 1.1 anymore; please upgrade to EHCache 1.2.4 or higher.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -256,12 +252,12 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 		// Fetch cache region: If none with the given name exists,
 		// create one on the fly.
-		Cache rawCache = null;
+		Ehcache rawCache = null;
 		if (this.cacheManager.cacheExists(this.cacheName)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using existing EHCache cache region '" + this.cacheName + "'");
 			}
-			rawCache = this.cacheManager.getCache(this.cacheName);
+			rawCache = this.cacheManager.getEhcache(this.cacheName);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -291,11 +287,10 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 	/**
 	 * Decorate the given Cache, if necessary.
-	 * <p>The default implementation simply returns the given cache object as-is.
 	 * @param cache the raw Cache object, based on the configuration of this FactoryBean
 	 * @return the (potentially decorated) cache object to be registered with the CacheManager
 	 */
-	protected Ehcache decorateCache(Cache cache) {
+	protected Ehcache decorateCache(Ehcache cache) {
 		if (this.cacheEntryFactory != null) {
 			if (this.cacheEntryFactory instanceof UpdatingCacheEntryFactory) {
 				return new UpdatingSelfPopulatingCache(cache, (UpdatingCacheEntryFactory) this.cacheEntryFactory);
