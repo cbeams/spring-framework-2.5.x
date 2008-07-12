@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NestedTestBean;
+import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -500,6 +501,25 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("self", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean self = (TestBean) lbf.getBean("self");
 		assertEquals(self, self.getSpouse());
+	}
+
+	public void testPossibleMatches() {
+		try {
+			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+			MutablePropertyValues pvs = new MutablePropertyValues();
+			pvs.addPropertyValue("ag", "foobar");
+			lbf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+			lbf.getBean("tb");
+			fail("Should throw exception on invalid property");
+		}
+		catch (BeanCreationException ex) {
+			ex.printStackTrace();
+			assertTrue(ex.getCause() instanceof NotWritablePropertyException);
+			NotWritablePropertyException cause = (NotWritablePropertyException) ex.getCause();
+			// expected
+			assertEquals(1, cause.getPossibleMatches().length);
+			assertEquals("age", cause.getPossibleMatches()[0]);
+		}
 	}
 
 	public void testPrototype() {

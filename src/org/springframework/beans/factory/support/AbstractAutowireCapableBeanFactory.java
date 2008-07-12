@@ -1114,13 +1114,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Possibly store converted value in merged bean definition,
 				// in order to avoid re-conversion for every created bean instance.
 				if (resolvedValue == originalValue) {
-					if (bwi != null && !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
+					if (bwi != null && bw.isWritableProperty(propertyName) &&
+							!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
 						pv.setConvertedValue(bwi.convertForProperty(resolvedValue, propertyName));
 					}
 					deepCopy.add(pv);
 				}
-				else if (originalValue instanceof TypedStringValue &&
-						bwi != null && !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
+				else if (originalValue instanceof TypedStringValue && bwi != null &&
+						bw.isWritableProperty(propertyName) &&!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
 					pv.setConvertedValue(bwi.convertForProperty(resolvedValue, propertyName));
 					deepCopy.add(pv);
 				}
