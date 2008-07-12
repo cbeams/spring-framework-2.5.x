@@ -23,9 +23,9 @@ import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
+import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.eclipse.persistence.config.TargetDatabase;
 import org.eclipse.persistence.jpa.JpaEntityManager;
-import org.eclipse.persistence.jpa.config.PersistenceUnitProperties;
-import org.eclipse.persistence.jpa.config.TargetDatabase;
 
 import org.springframework.orm.jpa.JpaDialect;
 
