@@ -9,12 +9,17 @@ Changes in version 2.5.6 (2008-07-21)
 General
 * updated to AspectJ 1.6.1 (while retaining compatibility with AspectJ 1.5.x and 1.6.0)
 * updated to OpenJPA 1.1.0 (while retaining compatibility with OpenJPA 1.0.x)
+* updated to EclipseLink 1.0 final
 * removed outdated EAR support from sample applications
 
 Package org.springframework.beans
 * containing bean definition is exposed to ParserContext for BeanDefinitionDecorators as well
 * AbstractFactoryBean's early singleton proxy handles equals, hashCode and toString calls locally (avoiding eager init)
+* AbstractAutowireCapableBeanFactory preserves possible matches hint in property exception
 * ServiceLocatorFactoryBean handles equals and hashCode based on proxy object identity
+
+Package org.springframework.cache
+* EhCacheFactoryBean obtains decorated Ehcache instead of raw Cache, honoring pre-configured cache decorators
 
 Package org.springframework.context
 * ClassPathBeanDefinitionScanner performs trace/debug logging during class resource introspection
@@ -22,6 +27,9 @@ Package org.springframework.context
 
 Package org.springframework.jdbc
 * JdbcTemplate passes full Calendar argument to JDBC driver even in case of no SQL type specified
+
+Package org.springframework.jmx
+* added "environment" property to MBeanClientInterceptor and NotificationListenerRegistar, allowing for JMX env entries
 
 Package org.springframework.remoting
 * added "interceptors" property to RemoteExporter, allowing for registering custom AOP interceptors before the endpoint
