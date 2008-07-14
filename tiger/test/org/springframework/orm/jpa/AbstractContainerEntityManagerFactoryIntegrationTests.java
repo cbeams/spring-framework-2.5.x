@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.test.annotation.ExpectedException;
@@ -37,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Uses an in-memory database.
  *
  * @author Rod Johnson
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		extends AbstractEntityManagerFactoryIntegrationTests {
@@ -140,7 +139,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		assertEquals(firstName, people.get(0).getFirstName());
 	}
 
-	private void insertPerson(String firstName) {
+	protected final void insertPerson(String firstName) {
 		String INSERT_PERSON = "INSERT INTO PERSON (ID, FIRST_NAME, LAST_NAME) VALUES (?, ?, ?)";
 		simpleJdbcTemplate.update(INSERT_PERSON, 1, firstName, "Blair");
 	}
@@ -178,8 +177,6 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		assertEquals("Should be no people from previous transactions",
 				0, countRowsInTable("person"));
 		Person p = new Person();
-//		System.out.println("Context loader=" + Thread.currentThread().getContextClassLoader());
-//		System.out.println("Person loader was " + p.getClass().getClassLoader());
 		p.setFirstName("Tony");
 		p.setLastName("Blair");
 		em.persist(p);
@@ -188,24 +185,11 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
 	}
 
-//	public void testEntityManagerProxyException() {
-//		try {
-//			entityManagerProxy.createQuery("select p from Person p where p.o=0").getResultList();
-//			fail("Semantic nonsense should be rejected");
-//		}
-//		catch (DataAccessException ex) {
-//			
-//		}
-//	}
-	
 	public void testQueryNoPersons() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		assertEquals(0, people.size());
-//		for (Person p : people) {
-//			System.out.println(p);
-//		}
 	}
 
 }

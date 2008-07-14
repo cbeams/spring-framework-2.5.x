@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package org.springframework.orm.jpa.hibernate;
 
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+import org.springframework.orm.jpa.domain.Person;
 
 /**
  * Hibernate-specific JPA tests.
@@ -30,6 +35,13 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
  */
 public class HibernateEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
+
+	private SessionFactory sessionFactory;
+
+
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
 
 	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
@@ -45,6 +57,18 @@ public class HibernateEntityManagerFactoryIntegrationTests extends
 		assertTrue(sharedEntityManager instanceof HibernateEntityManager);
 		HibernateEntityManager hibernateEntityManager = (HibernateEntityManager) sharedEntityManager;
 		assertNotNull(hibernateEntityManager.getSession());
+	}
+
+	public void testWithHibernateSessionFactory() {
+		// Add with JDBC
+		String firstName = "Tony";
+		insertPerson(firstName);
+
+		Query q = this.sessionFactory.getCurrentSession().createQuery("select p from Person as p");
+		List<Person> people = q.list();
+
+		assertEquals(1, people.size());
+		assertEquals(firstName, people.get(0).getFirstName());
 	}
 
 }
