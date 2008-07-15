@@ -208,7 +208,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 		// Eagerly check singleton cache for manually registered singletons.
 		Object sharedInstance = getSingleton(beanName);
-		if (sharedInstance != null) {
+		if (sharedInstance != null && args == null) {
 			if (logger.isDebugEnabled()) {
 				if (isSingletonCurrentlyInCreation(beanName)) {
 					logger.debug("Returning eagerly cached instance of singleton bean '" + beanName +

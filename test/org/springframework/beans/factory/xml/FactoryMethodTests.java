@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,7 +257,21 @@ public class FactoryMethodTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		try {
-			xbf.getBean("testBeanOnly", new Object[]{new TestBean()});
+			xbf.getBean("testBeanOnly", new Object[] {new TestBean()});
+			fail("Shouldn't allow args to be passed to a singleton");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// OK
+		}
+	}
+
+	public void testCannotSpecifyFactoryMethodArgumentsOnSingletonAfterCreation() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		xbf.getBean("testBeanOnly");
+		try {
+			xbf.getBean("testBeanOnly", new Object[] {new TestBean()});
 			fail("Shouldn't allow args to be passed to a singleton");
 		}
 		catch (BeanDefinitionStoreException ex) {
