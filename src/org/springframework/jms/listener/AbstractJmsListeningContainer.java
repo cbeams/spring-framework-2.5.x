@@ -176,6 +176,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		catch (JMSException ex) {
 			synchronized (this.sharedConnectionMonitor) {
 				ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), this.autoStartup);
+				this.sharedConnection = null;
 			}
 			throw convertJmsAccessException(ex);
 		}
@@ -384,6 +385,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		synchronized (this.sharedConnectionMonitor) {
 			ConnectionFactoryUtils.releaseConnection(
 					this.sharedConnection, getConnectionFactory(), this.sharedConnectionStarted);
+			this.sharedConnection = null;
 			this.sharedConnection = createSharedConnection();
 			if (this.sharedConnectionStarted) {
 				this.sharedConnection.start();
