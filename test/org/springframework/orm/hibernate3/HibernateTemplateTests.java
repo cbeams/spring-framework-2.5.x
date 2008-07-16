@@ -925,6 +925,8 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.createCriteria(TestBean.class);
 		sessionControl.setReturnValue(criteria, 1);
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteriaControl.setReturnValue(criteria);
 		criteria.list();
 		criteriaControl.setReturnValue(list, 1);
 		session.flush();
@@ -953,6 +955,8 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.createCriteria(TestBean.class);
 		sessionControl.setReturnValue(criteria, 1);
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteriaControl.setReturnValue(criteria);
 		criteria.setCacheable(true);
 		criteriaControl.setReturnValue(criteria, 1);
 		criteria.list();
@@ -984,6 +988,8 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.createCriteria(TestBean.class);
 		sessionControl.setReturnValue(criteria, 1);
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteriaControl.setReturnValue(criteria);
 		criteria.setCacheable(true);
 		criteriaControl.setReturnValue(criteria, 1);
 		criteria.setCacheRegion("myCacheRegion");

@@ -592,6 +592,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return (List) executeWithNativeSession(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria criteria = session.createCriteria(entityClass);
+				criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 				prepareCriteria(criteria);
 				return criteria.list();
 			}
