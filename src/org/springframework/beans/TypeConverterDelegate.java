@@ -216,11 +216,19 @@ class TypeConverterDelegate {
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
 				// Definitely doesn't match: throw IllegalArgumentException.
-				throw new IllegalArgumentException(
-						"Cannot convert value of type [" + ClassUtils.getDescriptiveType(newValue) +
-						"] to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" +
-						(propertyName != null ? " for property '" + propertyName + "'" : "") +
-						": no matching editors or conversion strategy found");
+				StringBuffer msg = new StringBuffer();
+				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
+				msg.append("] to required type [").append(ClassUtils.getQualifiedName(requiredType)).append("]");
+				if (propertyName != null) {
+					msg.append(" for property '" + propertyName + "'");
+				}
+				if (editor != null) {
+					msg.append(": PropertyEditor [" + editor.getClass().getName() + "] returned inappropriate value");
+				}
+				else {
+					msg.append(": no matching editors or conversion strategy found");
+				}
+				throw new IllegalArgumentException(msg.toString());
 			}
 		}
 
