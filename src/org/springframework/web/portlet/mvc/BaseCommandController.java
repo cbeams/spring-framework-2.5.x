@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,8 +140,8 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 public abstract class BaseCommandController extends AbstractController {
 
 	/**
-	 * Unlike the Servlet version of these classes, we have to deal with the
-	 * two-phase nature of the porlet request. To do this, we need to pass
+	 * Unlike the servlet version of these classes, we have to deal with the
+	 * two-phase nature of the portlet request. To do this, we need to pass
 	 * forward the command object and the bind/validation errors that occured
 	 * on the command object from the action phase to the render phase.
 	 * The only direct way to pass things forward and preserve them for each
@@ -262,7 +262,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to all data binders used by this controller.
-	 * <p>Default is null, i.e. using the default strategy of the data binder.
+	 * <p>Default is <code>null</code>, i.e. using the default strategy of the data binder.
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
 	 */
@@ -271,7 +271,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the strategy to use for resolving errors into message codes.
+	 * Return the strategy to use for resolving errors into message codes (if any).
 	 */
 	public final MessageCodesResolver getMessageCodesResolver() {
 		return this.messageCodesResolver;
@@ -290,7 +290,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the strategy to use for processing binding errors.
+	 * Return the strategy to use for processing binding errors (if any).
 	 */
 	public final BindingErrorProcessor getBindingErrorProcessor() {
 		return this.bindingErrorProcessor;
@@ -319,7 +319,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the PropertyEditorRegistrars to be applied
+	 * Return the PropertyEditorRegistrars (if any) to be applied
 	 * to every DataBinder that this controller uses.
 	 */
 	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
@@ -341,7 +341,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Retrieve a command object for the given request.
-	 * <p>Default implementation calls <code>createCommand</code>.
+	 * <p>The default implementation calls {@link #createCommand()}.
 	 * Subclasses can override this.
 	 * @param request current portlet request
 	 * @return object command to bind onto
@@ -409,9 +409,9 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress binding for the given request.
-	 * <p>Default implementation always returns "false". Can be overridden
-	 * in subclasses to suppress validation, for example, if a special
-	 * request parameter is set.
+	 * <p>The default implementation always returns <code>false</code>.
+	 * Can be overridden in subclasses to suppress validation:
+	 * for example, if a special request parameter is set.
 	 * @param request current portlet request
 	 * @return whether to suppress binding for the given request
 	 * @see #suppressValidation
@@ -475,7 +475,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Determine whether to use direct field access instead of bean property access.
 	 * Applied by <code>prepareBinder</code>.
-	 * <p>Default is "false". Can be overridden in subclasses.
+	 * <p>The default is <code>false</code>. Can be overridden in subclasses.
 	 * @see #prepareBinder
 	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
 	 */
@@ -490,7 +490,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
 	 * and still be able to set and display them in an HTML interface.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current portlet request
 	 * @param binder new binder instance
 	 * @throws Exception in case of invalid state or arguments
@@ -498,14 +498,13 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
-	protected void initBinder(PortletRequest request, PortletRequestDataBinder binder)
-			throws Exception {
+	protected void initBinder(PortletRequest request, PortletRequestDataBinder binder) throws Exception {
 	}
 
 	/**
 	 * Callback for custom post-processing in terms of binding.
 	 * Called on each submit, after standard binding but before validation.
-	 * <p>Default implementation delegates to <code>onBind(request, command)</code>.
+	 * <p>The default implementation delegates to <code>onBind(request, command)</code>.
 	 * @param request current portlet request
 	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
@@ -514,9 +513,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #bindAndValidate
 	 * @see #onBind(PortletRequest, Object)
 	 */
-	protected void onBind(PortletRequest request, Object command, BindException errors)
-			throws Exception {
-	    
+	protected void onBind(PortletRequest request, Object command, BindException errors) throws Exception {
 		onBind(request, command);
 	}
 
@@ -524,7 +521,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Callback for custom post-processing in terms of binding.
 	 * Called by the default implementation of the <code>onBind</code> version with
 	 * all parameters, after standard binding but before validation.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current portlet request
 	 * @param command the command object to perform further binding on
 	 * @throws Exception in case of invalid state or arguments
@@ -535,9 +532,9 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress validation for the given request.
-	 * <p>Default implementation always returns "false". Can be overridden
-	 * in subclasses to suppress validation, for example, if a special
-	 * request parameter is set.
+	 * <p>The default implementation always returns <code>false</code>.
+	 * Can be overridden in subclasses to suppress validation:
+	 * for example, if a special request parameter is set.
 	 * @param request current portlet request
 	 * @return whether to suppress validation for the given request
 	 */
@@ -549,7 +546,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Callback for custom post-processing in terms of binding and validation.
 	 * Called on each submit, after standard binding and validation,
 	 * but before error evaluation.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current portlet request
 	 * @param command the command object, still allowing for further binding
 	 * @param errors validation errors holder, allowing for additional

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,7 +279,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>Default implementation delegates to referenceData(HttpServletRequest, int).
+	 * <p>The default implementation delegates to {@link #referenceData(PortletRequest, int)}.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current portlet request
 	 * @param command form object with request parameters bound onto it
@@ -299,7 +299,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>Default implementation returns null.
+	 * <p>The default implementation returns <code>null</code>.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current portlet request
 	 * @param page current wizard page
@@ -368,8 +368,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the page count for this wizard form controller.
-	 * Default implementation delegates to <code>getPageCount()</code>.
-	 * <p>Can be overridden to dynamically adapt the page count.
+	 * <p>The default implementation delegates to {@link #getPageCount()}.
+	 * Can be overridden to dynamically adapt the page count.
 	 * @param request current portlet request
 	 * @param command the command object as returned by formBackingObject
 	 * @return the current page count
@@ -381,11 +381,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the name of the view for the specified page of this wizard form controller.
-	 * Default implementation takes the view name from the <code>getPages()</code> array.
-	 * <p>Can be overridden to dynamically switch the page view or to return view names
+	 * <p>The default implementation takes the view name from the {@link #getPages()} array.
+	 * Can be overridden to dynamically switch the page view or to return view names
 	 * for dynamically defined pages.
 	 * @param request current portlet request
-	 * @param command the command object as returned by formBackingObject
+	 * @param command the command object as returned by <code>formBackingObject</code>
 	 * @return the current page count
 	 * @see #getPageCount
 	 */
@@ -395,9 +395,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the initial page of the wizard, i.e. the page shown at wizard startup.
-	 * Default implementation delegates to <code>getInitialPage(PortletRequest)</code>.
+	 * <p>The default implementation delegates to {@link #getInitialPage(PortletRequest)}.
 	 * @param request current portlet request
-	 * @param command the command object as returned by formBackingObject
+	 * @param command the command object as returned by <code>formBackingObject</code>
 	 * @return the initial page number
 	 * @see #getInitialPage(PortletRequest)
 	 * @see #formBackingObject
@@ -408,7 +408,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the initial page of the wizard, i.e. the page shown at wizard startup.
-	 * Default implementation returns 0 for first page.
+	 * <p>The default implementation returns 0 for first page.
 	 * @param request current portlet request
 	 * @return the initial page number
 	 */
@@ -419,7 +419,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Return the name of the PortletSession attribute that holds the page object
 	 * for this wizard form controller.
-	 * <p>Default implementation delegates to the <code>getPageSessionAttributeName</code>
+	 * <p>The default implementation delegates to the <code>getPageSessionAttributeName</code>
 	 * version without arguments.
 	 * @param request current portlet request
 	 * @return the name of the form session attribute, or null if not in session form mode
@@ -548,7 +548,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
-	 * <p>Default implementation for wizard form controllers simply shows the initial page
+	 * <p>The default implementation for wizard form controllers simply shows the initial page
 	 * of a new wizard form. If you want to show some "invalid submit" message, you need
 	 * to override this method.
 	 * @param request current portlet render request
@@ -568,7 +568,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
-	 * <p>Default implementation for wizard form controllers simply shows the initial page
+	 * <p>The default implementation for wizard form controllers simply shows the initial page
 	 * of a new wizard form, so here in the action phase this method does nothing. If you
 	 * want to take some action on an invalid submit, you need to override this method.
 	 * @param request current portlet action request
@@ -751,8 +751,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the target page specified in the request.
-	 * <p>Default implementation delegates to
-	 * <code>getTargetPage(PortletRequest, int)</code>.
+	 * <p>The default implementation delegates to {@link #getTargetPage(PortletRequest, int)}.
 	 * Subclasses can override this for customized target page determination.
 	 * @param request current portlet request
 	 * @param command form object with request parameters bound onto it
@@ -768,7 +767,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the target page specified in the request.
-	 * <p>Default implementation examines "_target" parameter (e.g. "_target1").
+	 * <p>The default implementation examines "_target" parameter (e.g. "_target1").
 	 * Subclasses can override this for customized target page determination.
 	 * @param request current portlet request
 	 * @param currentPage the current page, to be returned as fallback
@@ -847,7 +846,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
-	 * Default implementation calls <code>validatePage(command, errors, page)</code>.
+	 * The default implementation calls <code>validatePage(command, errors, page)</code>.
 	 * <p>Implementations will typically call fine-granular <code>validateXXX</code>
 	 * methods of this instance's Validator, combining them to validation of the
 	 * corresponding pages. The Validator's default <code>validate</code> method
@@ -866,7 +865,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
-	 * Default implementation is empty.
+	 * The default implementation is empty.
 	 * <p>Implementations will typically call fine-granular validateXXX methods of this
 	 * instance's validator, combining them to validation of the corresponding pages.
 	 * The validator's default <code>validate</code> method will not be called by a
@@ -897,7 +896,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for the render phase of the finish action of this wizard.
-	 * <p>Default implementation throws a PortletException, saying that a finish
+	 * <p>The default implementation throws a PortletException, saying that a finish
 	 * render request is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not need to render after a finish.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
@@ -922,7 +921,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for the action phase of the finish action of this wizard.
-	 * <p>Default implementation throws a PortletException, saying that a finish
+	 * <p>The default implementation throws a PortletException, saying that a finish
 	 * action request is not supported by this controller. You will almost certainly
 	 * need to override this method.
 	 * @param request current portlet action request
@@ -943,7 +942,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for the render phase of the cancel action of this wizard.
-	 * <p>Default implementation throws a PortletException, saying that a cancel
+	 * <p>The default implementation throws a PortletException, saying that a cancel
 	 * render request is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not support a cancel operation.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
@@ -969,7 +968,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for the action phase of the cancel action of this wizard.
-	 * <p>Default implementation throws a PortletException, saying that a cancel
+	 * <p>The default implementation throws a PortletException, saying that a cancel
 	 * action request is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not support a cancel operation.
 	 * @param request current portlet action request

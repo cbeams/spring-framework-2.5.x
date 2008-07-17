@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -444,7 +444,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Determine if the given request represents a form submission.
-	 * <p>Default implementation checks to see if this is an ActionRequest
+	 * <p>The default implementation checks to see if this is an ActionRequest
 	 * and treats all action requests as form submission. During the action
 	 * phase it will pass forward a render parameter to indicate to the render
 	 * phase that this is a form submission. This method can check both
@@ -457,8 +457,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return if the request represents a form submission
 	 */
 	protected boolean isFormSubmission(PortletRequest request) {
-		return (request instanceof ActionRequest ? true :
-				TRUE.equals(request.getParameter(getFormSubmitParameterName())));
+		return (request instanceof ActionRequest || TRUE.equals(request.getParameter(getFormSubmitParameterName())));
 	}
 
 	/**
@@ -527,11 +526,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Return the name of the PortletSession attribute that holds the form object
 	 * for this form controller.
-	 * <p>Default implementation delegates to the <code>getFormSessionAttributeName</code>
-	 * version without arguments.
+	 * <p>The default implementation delegates to the
+	 * <code>getFormSessionAttributeName</code> version without arguments.
 	 * @param request current HTTP request
-	 * @return the name of the form session attribute, or null if not in session form mode
-	 * @see #getFormSessionAttributeName
+	 * @return the name of the form session attribute,
+	 * or <code>null</code> if not in session form mode
+	 * @see #getFormSessionAttributeName()
 	 * @see javax.portlet.PortletSession#getAttribute
 	 */
 	protected String getFormSessionAttributeName(PortletRequest request) {
@@ -661,7 +661,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Called by the default implementation of the <code>onBindOnNewForm</code> version
 	 * with all parameters, after standard binding when displaying the form view.
 	 * Only called if <code>bindOnNewForm</code> is set to <code>true</code>.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current render request
 	 * @param command the command object to perform further binding on
 	 * @throws Exception in case of invalid state or arguments
@@ -725,7 +725,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * object across the entire form workflow. Else, a new instance of the command
 	 * class will be created for each submission attempt, just using this backing
 	 * object as template for the initial form.
-	 * <p>Default implementation calls <code>BaseCommandController.createCommand</code>,
+	 * <p>The default implementation calls <code>BaseCommandController.createCommand</code>,
 	 * creating a new empty instance of the command class.
 	 * Subclasses can override this to provide a preinitialized backing object.
 	 * @param request current portlet request
@@ -837,7 +837,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>Default implementation returns null.
+	 * <p>The default implementation returns <code>null</code>.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current render request
 	 * @param command form object with request parameters bound onto it
@@ -899,19 +899,19 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
-	 * <p>Default implementation simply tries to resubmit the form with a new form object.
+	 * <p>The default implementation simply tries to resubmit the form with a new form object.
 	 * This should also work if the user hit the back button, changed some form data,
 	 * and resubmitted the form.
 	 * <p>Note: To avoid duplicate submissions, you need to override this method.
 	 * Either show some "invalid submit" message, or call <code>showNewForm</code> for
 	 * resetting the form (prepopulating it with the current values if "bindOnNewForm"
 	 * is true). In this case, the form object in the session serves as transaction token.
-	 * <pre>
+	 * <pre class="code">
 	 * protected ModelAndView handleInvalidSubmit(RenderRequest request, RenderResponse response) throws Exception {
 	 *   return showNewForm(request, response);
 	 * }</pre>
 	 * You can also show a new form but with special errors registered on it:
-	 * <pre>
+	 * <pre class="code">
 	 * protected ModelAndView handleInvalidSubmit(RenderRequest request, RenderResponse response) throws Exception {
 	 *   BindException errors = getErrorsForNewForm(request);
 	 *   errors.reject("duplicateFormSubmission", "Duplicate form submission");
@@ -935,13 +935,13 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
-	 * <p>Default implementation simply tries to resubmit the form with a new form object.
+	 * <p>The default implementation simply tries to resubmit the form with a new form object.
 	 * This should also work if the user hit the back button, changed some form data,
 	 * and resubmitted the form.
 	 * <p>Note: To avoid duplicate submissions, you need to override this method.
 	 * Most likely you will simply want it to do nothing here in the action phase
 	 * and diplay an appropriate error and a new form in the render phase.
-	 * <pre>
+	 * <pre class="code">
 	 * protected void handleInvalidSubmit(ActionRequest request, ActionResponse response) throws Exception {
 	 * }</pre>
 	 * <p>If you override this method but you do need a command object and bind errors
