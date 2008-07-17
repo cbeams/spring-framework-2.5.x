@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.portlet.RenderResponse;
 import org.springframework.validation.BindException;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * <p>Abstract base class for custom command controllers. Autopopulates a
@@ -109,7 +110,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 		Object command = null;
 		BindException errors = null;
 
-		// get the command and errors objects from the session, if they exist
+		// Get the command and errors objects from the session, if they exist.
 		if (isCommandInSession(request)) {
 			logger.debug("Render phase obtaining command and errors objects from session");
 			command = getRenderCommand(request);
@@ -117,15 +118,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 		}
 		else {
 			logger.debug("Render phase creating new command and errors objects");
-		}
-
-		// If no command object was in the session, create a new one.
-		if (command == null) {
 			command = getCommand(request);
-		}
-
-		// If no errors object was in the session, compute a new one.
-		if (errors == null) {
 			PortletRequestDataBinder binder = bindAndValidate(request, command);
 			errors = new BindException(binder.getBindingResult());
 		}
@@ -208,8 +201,9 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	 * @see #getCommandInSessionParameterName
 	 * @see #setCommandInSession
 	 */
-	protected final boolean isCommandInSession(RenderRequest request) {
-		return TRUE.equals(request.getParameter(getCommandInSessionParameterName()));
+	protected boolean isCommandInSession(RenderRequest request) {
+		return (TRUE.equals(request.getParameter(getCommandInSessionParameterName())) &&
+				PortletUtils.getSessionAttribute(request, getRenderCommandSessionAttributeName()) != null);
 	}
 
 }
