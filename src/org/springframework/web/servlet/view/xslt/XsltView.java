@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -340,8 +340,7 @@ public class XsltView extends AbstractUrlBasedView {
 	/**
 	 * Configure the indentation settings for the supplied {@link Transformer}.
 	 * @param transformer the target transformer
-	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
-	 * @see TransformerUtils#enableIndenting(javax.xml.transform.Transformer) 
+	 * @see TransformerUtils#enableIndenting(javax.xml.transform.Transformer)
 	 * @see TransformerUtils#disableIndenting(javax.xml.transform.Transformer)
 	 */
 	protected final void configureIndentation(Transformer transformer) {
@@ -453,9 +452,10 @@ public class XsltView extends AbstractUrlBasedView {
 			logger.debug("Loading XSLT stylesheet from '" + url + "'");
 		}
 		try {
-			Resource stylesheetResource = getApplicationContext().getResource(url);
-			String systemId = url.substring(0, url.lastIndexOf('/') + 1);
-			return new StreamSource(stylesheetResource.getInputStream(), systemId);
+			Resource resource = getApplicationContext().getResource(url);
+			String fullUrl = resource.getURL().toString();
+			String systemId = fullUrl.substring(0, fullUrl.lastIndexOf('/') + 1);
+			return new StreamSource(resource.getInputStream(), systemId);
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("Can't load XSLT stylesheet from '" + url + "'", ex);
