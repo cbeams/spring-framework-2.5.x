@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.xslt;
+package org.springframework.util.xml;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
-
-import javax.xml.transform.*;
 import java.util.Properties;
 
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+
+import junit.framework.TestCase;
+
+import org.springframework.test.AssertThrows;
+
 /**
- * Unit tests for the {@link TransformerUtils} class.
- *
  * @author Rick Evans
  */
-public final class TransformerUtilsTests extends TestCase {
+public class TransformerUtilsTests extends TestCase {
 
 	public void testEnableIndentingSunnyDay() throws Exception {
 		Transformer transformer = new StubTransformer();
@@ -93,7 +99,6 @@ public final class TransformerUtilsTests extends TestCase {
 
 		private Properties outputProperties = new Properties();
 
-
 		public void transform(Source xmlSource, Result outputTarget) throws TransformerException {
 			throw new UnsupportedOperationException();
 		}
@@ -141,7 +146,6 @@ public final class TransformerUtilsTests extends TestCase {
 		public ErrorListener getErrorListener() {
 			throw new UnsupportedOperationException();
 		}
-
 	}
 
 }

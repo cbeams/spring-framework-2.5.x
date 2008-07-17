@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,11 @@ public class SimpleTransformErrorListener implements ErrorListener {
 
 
 	public void warning(TransformerException ex) throws TransformerException {
-		logger.warn("Ignored XSLT transformation warning", ex);
+		logger.warn("XSLT transformation warning", ex);
 	}
 
 	public void error(TransformerException ex) throws TransformerException {
-		throw ex;
+		logger.error("XSLT transformation error", ex);
 	}
 
 	public void fatalError(TransformerException ex) throws TransformerException {

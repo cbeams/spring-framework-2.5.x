@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.xml.SimpleTransformErrorListener;
+import org.springframework.util.xml.TransformerUtils;
 import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.util.NestedServletException;
 
@@ -79,6 +80,8 @@ import org.springframework.web.util.NestedServletException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Darren Davison
+ * @deprecated since Spring 2.5; superseded by {@link XsltView} and its
+ * more flexible {@link XsltView#locateSource} mechanism
  */
 public abstract class AbstractXsltView extends AbstractView {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.xslt;
+package org.springframework.util.xml;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -22,10 +22,11 @@ import javax.xml.transform.Transformer;
 import org.springframework.util.Assert;
 
 /**
- * Contains common behavior relating to {@link Transformer Transformers}.
+ * Contains common behavior relating to {@link javax.xml.transform.Transformer Transformers}.
  *
  * @author Rick Evans
- * @since 2.0
+ * @author Juergen Hoeller
+ * @since 2.5.5
  */
 public abstract class TransformerUtils {
 
@@ -38,33 +39,30 @@ public abstract class TransformerUtils {
 
 
 	/**
-	 * Enable indenting for the supplied {@link Transformer}.
+	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}.
 	 * <p>If the underlying XSLT engine is Xalan, then the special output
 	 * key <code>indent-amount</code> will be also be set to a value
 	 * of {@link #DEFAULT_INDENT_AMOUNT} characters.
 	 * @param transformer the target transformer
-	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
-	 * @see Transformer#setOutputProperty(String, String)
-	 * @see OutputKeys#INDENT
+	 * @see javax.xml.transform.Transformer#setOutputProperty(String, String)
+	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
 	public static void enableIndenting(Transformer transformer) {
 		enableIndenting(transformer, DEFAULT_INDENT_AMOUNT);
 	}
 
 	/**
-	 * Enable indenting for the supplied {@link Transformer}.
+	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}.
 	 * <p>If the underlying XSLT engine is Xalan, then the special output
 	 * key <code>indent-amount</code> will be also be set to a value
 	 * of {@link #DEFAULT_INDENT_AMOUNT} characters.
 	 * @param transformer  the target transformer
 	 * @param indentAmount the size of the indent (2 characters, 3 characters, etc.)
-	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
-	 * or if the supplied indent amount is less than zero (that is, negative)
-	 * @see Transformer#setOutputProperty(String, String)
-	 * @see OutputKeys#INDENT
+	 * @see javax.xml.transform.Transformer#setOutputProperty(String, String)
+	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
 	public static void enableIndenting(Transformer transformer, int indentAmount) {
-		Assert.notNull(transformer);
+		Assert.notNull(transformer, "Transformer must not be null");
 		Assert.isTrue(indentAmount > -1, "The indent amount cannot be less than zero : got " + indentAmount);
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		try {
@@ -76,13 +74,12 @@ public abstract class TransformerUtils {
 	}
 
 	/**
-	 * Disable indenting for the supplied {@link Transformer}.
+	 * Disable indenting for the supplied {@link javax.xml.transform.Transformer}.
 	 * @param transformer the target transformer
-	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
-	 * @see OutputKeys#INDENT
+	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
 	public static void disableIndenting(Transformer transformer) {
-		Assert.notNull(transformer);
+		Assert.notNull(transformer, "Transformer must not be null");
 		transformer.setOutputProperty(OutputKeys.INDENT, "no");
 	}
 

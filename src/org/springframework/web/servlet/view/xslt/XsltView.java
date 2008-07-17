@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleTransformErrorListener;
+import org.springframework.util.xml.TransformerUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.util.WebUtils;
 
@@ -310,7 +311,8 @@ public class XsltView extends AbstractUrlBasedView {
 			return new StreamSource((InputStream) source);
 		}
 		else if (source instanceof Resource) {
-			return new StreamSource(((Resource) source).getInputStream());
+			Resource resource = (Resource) source;
+			return new StreamSource(resource.getInputStream(), resource.getURI().toASCIIString());
 		}
 		else {
 			throw new IllegalArgumentException("Value '" + source + "' cannot be converted to XSLT Source");
@@ -340,9 +342,8 @@ public class XsltView extends AbstractUrlBasedView {
 	/**
 	 * Configure the indentation settings for the supplied {@link Transformer}.
 	 * @param transformer the target transformer
-	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
-	 * @see TransformerUtils#enableIndenting(javax.xml.transform.Transformer) 
-	 * @see TransformerUtils#disableIndenting(javax.xml.transform.Transformer)
+	 * @see org.springframework.util.xml.TransformerUtils#enableIndenting(javax.xml.transform.Transformer)
+	 * @see org.springframework.util.xml.TransformerUtils#disableIndenting(javax.xml.transform.Transformer)
 	 */
 	protected final void configureIndentation(Transformer transformer) {
 		if (this.indent) {
@@ -453,9 +454,8 @@ public class XsltView extends AbstractUrlBasedView {
 			logger.debug("Loading XSLT stylesheet from '" + url + "'");
 		}
 		try {
-			Resource stylesheetResource = getApplicationContext().getResource(url);
-			String systemId = url.substring(0, url.lastIndexOf('/') + 1);
-			return new StreamSource(stylesheetResource.getInputStream(), systemId);
+			Resource resource = getApplicationContext().getResource(url);
+			return new StreamSource(resource.getInputStream(), resource.getURI().toASCIIString());
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("Can't load XSLT stylesheet from '" + url + "'", ex);
