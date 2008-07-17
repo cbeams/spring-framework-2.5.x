@@ -108,11 +108,11 @@ public abstract class JmsUtils {
 				session.close();
 			}
 			catch (JMSException ex) {
-				logger.debug("Could not close JMS Session", ex);
+				logger.trace("Could not close JMS Session", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JMS provider: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing JMS Session", ex);
+				logger.trace("Unexpected exception on closing JMS Session", ex);
 			}
 		}
 	}
@@ -128,11 +128,11 @@ public abstract class JmsUtils {
 				producer.close();
 			}
 			catch (JMSException ex) {
-				logger.debug("Could not close JMS MessageProducer", ex);
+				logger.trace("Could not close JMS MessageProducer", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JMS provider: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing JMS MessageProducer", ex);
+				logger.trace("Unexpected exception on closing JMS MessageProducer", ex);
 			}
 		}
 	}
@@ -151,11 +151,11 @@ public abstract class JmsUtils {
 				consumer.close();
 			}
 			catch (JMSException ex) {
-				logger.debug("Could not close JMS MessageConsumer", ex);
+				logger.trace("Could not close JMS MessageConsumer", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JMS provider: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing JMS MessageConsumer", ex);
+				logger.trace("Unexpected exception on closing JMS MessageConsumer", ex);
 			}
 			finally {
 				if (wasInterrupted) {
@@ -177,11 +177,11 @@ public abstract class JmsUtils {
 				browser.close();
 			}
 			catch (JMSException ex) {
-				logger.debug("Could not close JMS QueueBrowser", ex);
+				logger.trace("Could not close JMS QueueBrowser", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JMS provider: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing JMS QueueBrowser", ex);
+				logger.trace("Unexpected exception on closing JMS QueueBrowser", ex);
 			}
 		}
 	}
@@ -197,11 +197,11 @@ public abstract class JmsUtils {
 				requestor.close();
 			}
 			catch (JMSException ex) {
-				logger.debug("Could not close JMS QueueRequestor", ex);
+				logger.trace("Could not close JMS QueueRequestor", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JMS provider: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing JMS QueueRequestor", ex);
+				logger.trace("Unexpected exception on closing JMS QueueRequestor", ex);
 			}
 		}
 	}
@@ -240,6 +240,22 @@ public abstract class JmsUtils {
 		catch (javax.jms.IllegalStateException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
+	}
+
+	/**
+	 * Build a descriptive exception message for the given JMSException,
+	 * incorporating a linked exception's message if appropriate.
+	 * @param ex the JMSException to build a message for
+	 * @return the descriptive message String
+	 * @see javax.jms.JMSException#getLinkedException()
+	 */
+	public static String buildExceptionMessage(JMSException ex) {
+		String message = ex.getMessage();
+		Exception linkedEx = ex.getLinkedException();
+		if (linkedEx != null && message.indexOf(linkedEx.getMessage()) == -1) {
+			message = message + "; nested exception is " + linkedEx;
+		}
+		return message;
 	}
 
 	/**

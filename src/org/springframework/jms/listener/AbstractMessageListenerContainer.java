@@ -199,6 +199,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
+	 * Return a descriptive String for this container's JMS destination
+	 * (never <code>null</code>).
+	 */
+	protected String getDestinationDescription() {
+		return this.destination.toString();
+	}
+
+	/**
 	 * Set the JMS message selector expression (or <code>null</code> if none).
 	 * Default is none.
 	 * <p>See the JMS specification for a detailed definition of selector expressions.

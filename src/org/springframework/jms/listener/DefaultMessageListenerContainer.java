@@ -738,11 +738,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			if (alreadyRecovered) {
 				logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
 			}
-			else if (logger.isDebugEnabled()) {
-				logger.info("Setup of JMS message listener invoker failed - trying to recover", ex);
-			}
 			else {
-				logger.info("Setup of JMS message listener invoker failed - trying to recover: " + ex);
+				StringBuffer msg = new StringBuffer();
+				msg.append("Setup of JMS message listener invoker failed for destination '");
+				msg.append(getDestinationDescription()).append("' - trying to recover. Cause: ");
+				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
+				if (logger.isDebugEnabled()) {
+					logger.info(msg, ex);
+				}
+				else {
+					logger.info(msg);
+				}
 			}
 		}
 	}
@@ -786,11 +792,16 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
+				StringBuffer msg = new StringBuffer();
+				msg.append("Could not refresh JMS Connection for destination '");
+				msg.append(getDestinationDescription()).append("' - retrying in ");
+				msg.append(this.recoveryInterval).append(" ms. Cause: ");
+				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
-					logger.info("Could not refresh JMS Connection - retrying in " + this.recoveryInterval + " ms", ex);
+					logger.info(msg, ex);
 				}
 				else if (logger.isInfoEnabled()) {
-					logger.info("Could not refresh JMS Connection - retrying in " + this.recoveryInterval + " ms: " + ex);
+					logger.info(msg);
 				}
 			}
 			sleepInbetweenRecoveryAttempts();

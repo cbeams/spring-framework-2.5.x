@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public abstract class JmsException extends NestedRuntimeException {
 		super(cause != null ? cause.getMessage() : null, cause);
 	}
 
+
 	/**
 	 * Convenience method to get the vendor specific error code if
 	 * the root cause was an instance of JMSException.
@@ -66,23 +67,24 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * root cause is an instance of JMSException, or <code>null</code>
 	 */
 	public String getErrorCode() {
-		if (getCause() instanceof JMSException) {
-			return ((JMSException) getCause()).getErrorCode();
+		Throwable cause = getCause();
+		if (cause instanceof JMSException) {
+			return ((JMSException) cause).getErrorCode();
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Return the detail message, including the message from the linked exception
 	 * if there is one.
-	 * @see javax.jms.JMSException#getLinkedException
+	 * @see javax.jms.JMSException#getLinkedException()
 	 */
 	public String getMessage() {
 		String message = super.getMessage();
 		Throwable cause = getCause();
 		if (cause instanceof JMSException) {
 			Exception linkedEx = ((JMSException) cause).getLinkedException();
-			if (linkedEx != null) {
+			if (linkedEx != null && cause.getMessage().indexOf(linkedEx.getMessage()) == -1) {
 				message = message + "; nested exception is " + linkedEx;
 			}
 		}
