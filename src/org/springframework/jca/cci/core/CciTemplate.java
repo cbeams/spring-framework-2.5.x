@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -398,11 +398,11 @@ public class CciTemplate implements CciOperations {
 				interaction.close();
 			}
 			catch (ResourceException ex) {
-				logger.debug("Could not close CCI Interaction", ex);
+				logger.trace("Could not close CCI Interaction", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the CCI driver: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing CCI Interaction", ex);
+				logger.trace("Unexpected exception on closing CCI Interaction", ex);
 			}
 		}
 	}
@@ -419,11 +419,11 @@ public class CciTemplate implements CciOperations {
 				resultSet.close();
 			}
 			catch (SQLException ex) {
-				logger.debug("Could not close CCI ResultSet", ex);
+				logger.trace("Could not close CCI ResultSet", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the CCI driver: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing CCI ResultSet", ex);
+				logger.trace("Unexpected exception on closing CCI ResultSet", ex);
 			}
 		}
 	}

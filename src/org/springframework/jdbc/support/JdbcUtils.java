@@ -87,11 +87,11 @@ public abstract class JdbcUtils {
 				stmt.close();
 			}
 			catch (SQLException ex) {
-				logger.debug("Could not close JDBC Statement", ex);
+				logger.trace("Could not close JDBC Statement", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing JDBC Statement", ex);
+				logger.trace("Unexpected exception on closing JDBC Statement", ex);
 			}
 		}
 	}
@@ -107,11 +107,11 @@ public abstract class JdbcUtils {
 				rs.close();
 			}
 			catch (SQLException ex) {
-				logger.debug("Could not close JDBC ResultSet", ex);
+				logger.trace("Could not close JDBC ResultSet", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
-				logger.debug("Unexpected exception on closing JDBC ResultSet", ex);
+				logger.trace("Unexpected exception on closing JDBC ResultSet", ex);
 			}
 		}
 	}
