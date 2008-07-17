@@ -203,8 +203,7 @@ class PersistenceUnitReader {
 
 
 	/**
-	 * Parse the validated document and populates(add to) the given unit info
-	 * list.
+	 * Parse the validated document and add entries to the given unit info list.
 	 */
 	protected List<SpringPersistenceUnitInfo> parseDocument(
 			Resource resource, Document document, List<SpringPersistenceUnitInfo> infos) throws IOException {
