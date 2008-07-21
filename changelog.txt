@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.6 (2008-07-21)
+Changes in version 2.5.6 (2008-07-30)
 -------------------------------------
 
 General
@@ -13,8 +13,10 @@ General
 * removed outdated EAR support from sample applications
 
 Package org.springframework.beans
+* TypeMismatchException message differentiates between editor with inappropriate value returned versus no editor at all
 * containing bean definition is exposed to ParserContext for BeanDefinitionDecorators as well
 * AbstractFactoryBean's early singleton proxy handles equals, hashCode and toString calls locally (avoiding eager init)
+* AbstractBeanFactory rejects getBean request with arguments in case of a pre-existing singleton of same name as well
 * AbstractAutowireCapableBeanFactory preserves possible matches hint in property exception
 * ServiceLocatorFactoryBean handles equals and hashCode based on proxy object identity
 
@@ -25,14 +27,26 @@ Package org.springframework.context
 * ClassPathBeanDefinitionScanner performs trace/debug logging during class resource introspection
 * component-scan preserves original source of scanned bean definitions, for silently ignoring already scanned classes
 
+Package org.springframework.instrument
+* ShadowingClassLoader excludes "net.sf.cglib." package from shadowing by default
+
 Package org.springframework.jdbc
 * JdbcTemplate passes full Calendar argument to JDBC driver even in case of no SQL type specified
+
+Package org.springframework.jms
+* JmsException message and logged JMSException message explicitly includes linked exception now if not already contained
+* AbstractJmsListeningContainer eagerly clears shared JMS Connection after releasing, avoiding repeated close exceptions
 
 Package org.springframework.jmx
 * added "environment" property to MBeanClientInterceptor and NotificationListenerRegistar, allowing for JMX env entries
 
+Package org.springframework.orm
+* HibernateTemplate's "loadAll" operation selects distinct root entities (avoiding duplicate entries in result list)
+* added "packagesToScan" property to Hibernate AnnotationSessionFactoryBean, for autodetection of @Entity classes
+
 Package org.springframework.remoting
 * added "interceptors" property to RemoteExporter, allowing for registering custom AOP interceptors before the endpoint
+* RmiClientInterceptor always logs connect failure at warn level, even when debug logging (incl. stacktrace) is active
 
 Package org.springframework.scheduling
 * SchedulerFactoryBean populates scheduler context first before satisfying SchedulerContextAware on a given JobFactory
@@ -42,8 +56,13 @@ Package org.springframework.transaction
 
 Package org.springframework.web
 * DispatcherServlet removes error-view-driven servlet request attributes after rendering (for Tomcat compatibility)
+* Portlet AbstractCommandController falls back to lazy command creation if session timed out after action phase
 * ByteArray/StringMultipartFileEditor do not log warning but rather include root cause in IllegalArgumentException
 * made RedirectView's "renderMergedOutputModel" implementation non-final
+* revised XsltView to specify full resource URI as StreamSource system id, for properly resolving relative paths
+* officially deprecated AbstractXsltView in favor of XsltView and its more flexible "locateSource" mechanism
+* revised error logging during XSLT processing to properly log compilation errors before an eventual fatal exception
+* moved internal TransformerUtils helper class to generic "org.springframework.util.xml" package
 
 
 Changes in version 2.5.5 (2008-06-23)
