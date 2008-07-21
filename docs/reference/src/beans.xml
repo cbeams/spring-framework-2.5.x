@@ -4714,8 +4714,8 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       has a parent containing a bean with the same name. If so, it uses that
       bean as the <interfacename>MessageSource</interfacename>. If it can't
       find any source for messages, an empty
-      <classname>StaticMessageSource</classname> will be instantiated in order
-      to be able to accept calls to the methods defined above.</para>
+      <classname>DelegatingMessageSource</classname> will be instantiated
+      in order to be able to accept calls to the methods defined above.</para>
 
       <para>Spring currently provides two
       <interfacename>MessageSource</interfacename> implementations. These are
@@ -4784,14 +4784,14 @@ argument.required=The '{0}' argument is required.</programlisting>
 
       <para>Lets look at another example, and this time we will look at
       passing arguments to the message lookup; these arguments will be
-      converted into strings and inserted into placeholders in the lookup
+      converted into Strings and inserted into placeholders in the lookup
       message. This is perhaps best explained with an example:</para>
 
       <programlisting>&lt;beans&gt;
 
     <lineannotation>&lt;!-- this <interfacename>MessageSource</interfacename> is being used in a web application --&gt;</lineannotation>
     &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
-        &lt;property name="baseName" value="WEB-INF/test-messages"/&gt;
+        &lt;property name="basename" value="test-messages"/&gt;
     &lt;/bean&gt;
     
     <lineannotation>&lt;!-- let's inject the above <interfacename>MessageSource</interfacename> into this POJO --&gt;</lineannotation>
@@ -4860,6 +4860,15 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       be injected with the application context's
       <classname>MessageSource</classname> when it (the bean) is being created
       and configured.</para>
+
+      <para><emphasis>Note: As an alternative to <classname>ResourceBundleMessageSource</classname>,
+      Spring also provides a <classname>ReloadableResourceBundleMessageSource</classname> class.
+      This variant supports the same bundle file format but is more flexible than the standard
+      JDK based <classname>ResourceBundleMessageSource</classname> implementation.</emphasis>
+      In particular, it allows for reading files from any Spring resource location
+      (not just from the classpath) and supports hot reloading of bundle property files
+      (while efficiently caching them in between). Check out the
+      <classname>ReloadableResourceBundleMessageSource</classname> javadoc for details.</para>
     </section>
 
     <section id="context-functionality-events">
