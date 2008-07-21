@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.support.destination;
+package org.springframework.jms;
 
 import javax.jms.Topic;
 
 /**
  * Stub implementation of the {@link Topic} interface.
- * 
+ *
  * @author Rick Evans
  */
-final class StubTopic implements Topic {
+public class StubTopic implements Topic {
 
-    public static final String DEFAULT_TOPIC_NAME = "banjo";
-
-    
-    private String topicName = DEFAULT_TOPIC_NAME;
+	public static final String DEFAULT_TOPIC_NAME = "banjo";
 
 
-    public StubTopic() {
-    }
-
-    public StubTopic(String topicName) {
-        this.topicName = topicName;
-    }
+	private String topicName = DEFAULT_TOPIC_NAME;
 
 
-    public String getTopicName() {
-        return this.topicName;
-    }
+	public StubTopic() {
+	}
+
+	public StubTopic(String topicName) {
+		this.topicName = topicName;
+	}
+
+
+	public String getTopicName() {
+		return this.topicName;
+	}
 
 }
