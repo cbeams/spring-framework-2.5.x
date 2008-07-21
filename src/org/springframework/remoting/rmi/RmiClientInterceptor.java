@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,11 +292,12 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 */
 	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
 		if (this.refreshStubOnConnectFailure) {
+			String msg = "Could not connect to RMI service [" + getServiceUrl() + "] - retrying";
 			if (logger.isDebugEnabled()) {
-				logger.debug("Could not connect to RMI service [" + getServiceUrl() + "] - retrying", ex);
+				logger.warn(msg, ex);
 			}
 			else if (logger.isWarnEnabled()) {
-				logger.warn("Could not connect to RMI service [" + getServiceUrl() + "] - retrying");
+				logger.warn(msg);
 			}
 			return refreshAndRetry(invocation);
 		}
