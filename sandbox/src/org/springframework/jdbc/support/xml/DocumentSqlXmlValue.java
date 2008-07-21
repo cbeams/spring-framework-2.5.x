@@ -29,7 +29,7 @@ import java.sql.PreparedStatement;
  * an XML <code>Document</code>.
  *
  * @author Thomas Risberg
- * @since 2.5.5
+ * @since 2.5.6
  * @see org.springframework.jdbc.support.xml.SqlXmlHandler
  */
 public class DocumentSqlXmlValue implements SqlXmlValue {

@@ -27,7 +27,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * a <code>String</code>.
  *
  * @author Thomas Risberg
- * @since 2.5.5
+ * @since 2.5.6
  * @see org.springframework.jdbc.support.xml.SqlXmlHandler
  */
 public class StringSqlXmlValue implements SqlXmlValue {

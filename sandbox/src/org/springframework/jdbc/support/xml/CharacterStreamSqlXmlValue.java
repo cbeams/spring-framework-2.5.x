@@ -29,7 +29,7 @@ import java.io.IOException;
  * a character stream.
  *
  * @author Thomas Risberg
- * @since 2.5.5
+ * @since 2.5.6
  * @see org.springframework.jdbc.support.xml.SqlXmlHandler
  */
 public class CharacterStreamSqlXmlValue implements SqlXmlValue {
