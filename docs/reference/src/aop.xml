@@ -3183,7 +3183,7 @@ public class ProfilingAspect {
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"&gt;
 
-    <lineannotation>&lt;!-- a service object; we will be profiling it's methods --&gt;</lineannotation>
+    <lineannotation>&lt;!-- a service object; we will be profiling its methods --&gt;</lineannotation>
     &lt;bean id="entitlementCalculationService"
           class="foo.StubEntitlementCalculationService"/&gt;
 

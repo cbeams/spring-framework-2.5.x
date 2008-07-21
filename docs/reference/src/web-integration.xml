@@ -542,7 +542,7 @@
       One of the key enablers in WebWork's technology stack is
       <ulink url="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an IoC container</ulink>
       to manage Webwork Actions, handle the "wiring" of business objects, etc.
-      Previous to WebWork version 2.2, WebWork used it's own proprietary IoC container
+      Prior to WebWork version 2.2, WebWork used its own proprietary IoC container
       (and provided integration points so that one could integrate an IoC container
       such as Springs into the mix). However, as of WebWork version 2.2, the default
       IoC container that is used within WebWork <emphasis>is</emphasis> Spring. This

@@ -479,7 +479,7 @@ public class TaskExecutorExample {
 			<para>As you can see, rather than retrieving a thread from the
 			pool and executing yourself, you add your <classname>Runnable</classname>
 			to the queue and the <interfacename>TaskExecutor</interfacename>
-			uses it's internal rules to decide when the task gets executed.</para>
+			uses its internal rules to decide when the task gets executed.</para>
 			
 			<para>To configure the rules that the <interfacename>TaskExecutor</interfacename>
 			will use, simple bean properties have been exposed.</para>

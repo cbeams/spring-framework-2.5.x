@@ -706,7 +706,7 @@
 
         <para>As of Spring 2.0, support for Apache OJB was <emphasis>totally
         removed</emphasis> from the main Spring source tree. The Apache OJB
-        integration library is still available, but can be found in it's new
+        integration library is still available, but can be found in its new
         home in the <ulink url="https://springmodules.dev.java.net/">Spring
         Modules project</ulink>.</para>
       </section>

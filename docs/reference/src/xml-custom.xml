@@ -156,9 +156,9 @@ public class MyNamespaceHandler extends NamespaceHandlerSupport {
         parsing logic in this class. Indeed... the <classname>NamespaceHandlerSupport</classname>
         class has a built in notion of delegation. It supports the registration of any number
         of <interfacename>BeanDefinitionParser</interfacename> instances, to which it will delegate
-        to when it needs to parse an element in it's namespace. This clean separation of concerns
+        to when it needs to parse an element in its namespace. This clean separation of concerns
         allows a <interfacename>NamespaceHandler</interfacename> to handle the orchestration
-        of the parsing of <emphasis>all</emphasis> of the custom elements in it's namespace,
+        of the parsing of <emphasis>all</emphasis> of the custom elements in its namespace,
         while delegating to <literal>BeanDefinitionParsers</literal> to do the grunt work of the
         XML parsing; this means that each <interfacename>BeanDefinitionParser</interfacename> will
         contain just the logic for parsing a single custom element, as we can see in the next step</para>
@@ -170,7 +170,7 @@ public class MyNamespaceHandler extends NamespaceHandlerSupport {
 		that has been mapped to the specific bean definition parser (which is <literal>'dateformat'</literal>
 		in this case). In other words, the <interfacename>BeanDefinitionParser</interfacename> is
 		responsible for parsing <emphasis>one</emphasis> distinct top-level XML element defined in the
-		schema. In the parser, we'll have access to the XML element (and thus it's subelements too)
+		schema. In the parser, we'll have access to the XML element (and thus its subelements too)
 		so that we can parse our custom XML content, as can be seen in the following example:</para>
 		<programlisting><![CDATA[package org.springframework.samples.xml;
 

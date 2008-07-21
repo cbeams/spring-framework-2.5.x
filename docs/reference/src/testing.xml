@@ -2177,7 +2177,7 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       <listitem>
         <para>The <ulink url="http://www.easymock.org/">EasyMock
         homepage</ulink>. The Spring Framework uses EasyMock extensively in
-        it's test suite.</para>
+        its test suite.</para>
       </listitem>
 
       <listitem>

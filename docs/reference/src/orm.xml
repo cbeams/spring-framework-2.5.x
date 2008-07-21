@@ -656,8 +656,8 @@
       as a transaction strategy with multiple
       <classname>LocalSessionFactoryBean</classname> definitions. Each of your
       DAOs then gets one specific
-      <interfacename>SessionFactory</interfacename> reference passed into it's
-      respective bean property. If all underlying JDBC data sources are
+      <interfacename>SessionFactory</interfacename> reference passed into its
+      corresponding bean property. If all underlying JDBC data sources are
       transactional container ones, a business service can demarcate
       transactions across any number of DAOs and any number of session
       factories without special regard, as long as it is using

@@ -142,7 +142,7 @@
         typically supplied in a simple and intuitive XML format. When using
         XML-based configuration metadata, you write <emphasis>bean
         definitions</emphasis> for those beans that you want the Spring IoC
-        container to manage, and then let the container do it's stuff.</para>
+        container to manage, and then let the container do its stuff.</para>
 
         <note>
           <para>XML-based metadata is by far the most commonly used form of
@@ -4775,7 +4775,7 @@ argument.required=The '{0}' argument is required.</programlisting>
       defined in a file called <literal>'beans.xml'</literal> (this file
       exists at the root of your classpath). The
       <literal>'messageSource'</literal> bean definition refers to a number of
-      resource bundles via it's <literal>basenames</literal> property; the
+      resource bundles via its <literal>basenames</literal> property; the
       three files that are passed in the list to the
       <literal>basenames</literal> property exist as files at the root of your
       classpath (and are called <literal>format.properties</literal>,

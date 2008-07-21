@@ -235,7 +235,7 @@ public void echoException(Exception ex) throws Exception {
 			<para>
 				Here is the source code for the <interfacename>@Mandatory</interfacename>
 				annotation. You will need to ensure that your custom annotation type
-				is itself annotated with appropriate annotations for it's target
+				is itself annotated with appropriate annotations for its target
 				and runtime retention policy.
 			</para>
 			<programlisting><![CDATA[package your.company.package;
