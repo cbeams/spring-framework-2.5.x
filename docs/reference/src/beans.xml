@@ -3631,8 +3631,8 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
 				found, the <interfacename>ApplicationContext</interfacename> attempts to see if it has a parent
 				containing a bean with the same name. If so, it uses that bean as the
 				<interfacename>MessageSource</interfacename>. If it can't find any source for messages, an empty
-				<classname>StaticMessageSource</classname> will be instantiated in order to be able to accept calls
-				to the methods defined above.
+				<classname>DelegatingMessageSource</classname> will be instantiated in order to be able to
+				accept calls to the methods defined above.
 			</para>
             <para>
 				Spring currently provides two <interfacename>MessageSource</interfacename>
@@ -3686,14 +3686,14 @@ argument.required=The '{0}' argument is required.]]></programlisting>
         <literal>format.properties</literal>, <literal>exceptions.properties</literal>,
         and <literal>windows.properties</literal> respectively).</para>
             <para>Lets look at another example, and this time we will look at passing arguments
-        to the message lookup; these arguments will be converted into strings and inserted
+        to the message lookup; these arguments will be converted into Strings and inserted
         into placeholders in the lookup message. This is perhaps best explained with an
         example:</para>
             <programlisting><![CDATA[<beans>
 
     ]]><lineannotation>&lt;!-- this <interfacename>MessageSource</interfacename> is being used in a web application --&gt;</lineannotation><![CDATA[
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="baseName" value="WEB-INF/test-messages"/>
+        <property name="basename" value="test-messages"/>
     </bean>
     
     ]]><lineannotation>&lt;!-- let's inject the above <interfacename>MessageSource</interfacename> into this POJO --&gt;</lineannotation><![CDATA[
