@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
@@ -48,8 +49,14 @@ import org.springframework.util.Assert;
  * {@link #setSessionCacheSize "sessionCacheSize" value} in case of a
  * high-concurrency environment.
  *
- * <p><b>NOTE: This ConnectionFactory decorator requires JMS 1.1 or higher.</b>
- * For JMS 1.0.2, consider using {@link SingleConnectionFactory102} instead.
+ * <p><b>NOTE: For full flexibility, including mixed use of queues and topics,
+ * this ConnectionFactory decorator requires JMS 1.1 or higher.</b>
+ *
+ * <p>When using the JMS 1.0.2 API, this ConnectionFactory will switch
+ * into queue/topic mode according to the JMS API methods used at runtime:
+ * <code>createQueueConnection</code> and <code>createTopicConnection</code> will
+ * lead to queue/topic mode, respectively; generic <code>createConnection</code>
+ * calls will lead to a JMS 1.1 connection which is able to serve both modes.
  *
  * @author Juergen Hoeller
  * @since 2.5.3
@@ -63,7 +70,22 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	private final Map cachedSessions = new HashMap();
 
 
+	/**
+	 * Create a new CachingConnectionFactory for bean-style usage.
+	 * @see #setTargetConnectionFactory
+	 */
 	public CachingConnectionFactory() {
+		super();
+		setReconnectOnException(true);
+	}
+
+	/**
+	 * Create a new CachingConnectionFactory for the given target
+	 * ConnectionFactory.
+	 * @param targetConnectionFactory the target ConnectionFactory
+	 */
+	public CachingConnectionFactory(ConnectionFactory targetConnectionFactory) {
+		super(targetConnectionFactory);
 		setReconnectOnException(true);
 	}
 
@@ -144,9 +166,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			}
 		}
 		else {
-			boolean transacted = (mode.intValue() == Session.SESSION_TRANSACTED);
-			int ackMode = (transacted ? Session.AUTO_ACKNOWLEDGE : mode.intValue());
-			Session targetSession = con.createSession(transacted, ackMode);
+			Session targetSession = createSession(con, mode);
 			session = getCachedSessionProxy(targetSession, sessionList);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Created cached Session for mode " + mode + ": " + session);
@@ -217,10 +237,14 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 						return null;
 					}
 					else {
-						for (Iterator it = this.cachedProducers.values().iterator(); it.hasNext();) {
-							((MessageProducer) it.next()).close();
+						try {
+							for (Iterator it = this.cachedProducers.values().iterator(); it.hasNext();) {
+								((MessageProducer) it.next()).close();
+							}
 						}
-						this.target.close();
+						finally {
+							this.target.close();
+						}
 						if (logger.isDebugEnabled()) {
 							logger.debug("Closed cached Session: " + proxy);
 						}

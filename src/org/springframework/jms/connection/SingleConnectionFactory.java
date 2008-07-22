@@ -44,12 +44,19 @@ import org.springframework.util.Assert;
  * A JMS ConnectionFactory adapter that returns the same Connection
  * from all {@link #createConnection()} calls, and ignores calls to
  * {@link javax.jms.Connection#close()}. According to the JMS Connection
- * model, this is perfectly thread-safe (in contrast to e.g. JDBC).
+ * model, this is perfectly thread-safe (in contrast to e.g. JDBC). The
+ * shared Connection can be automatically recovered in case of an Exception.
  *
  * <p>You can either pass in a specific JMS Connection directly or let this
  * factory lazily create a Connection via a given target ConnectionFactory.
- * In the latter case, this factory just works with JMS 1.1; use
- * {@link SingleConnectionFactory102} for JMS 1.0.2.
+ * This factory generally works with JMS 1.1 as well as JMS 1.0.2; use
+ * {@link SingleConnectionFactory102} for strict JMS 1.0.2 only usage.
+ *
+ * <p>Note that when using the JMS 1.0.2 API, this ConnectionFactory will switch
+ * into queue/topic mode according to the JMS API methods used at runtime:
+ * <code>createQueueConnection</code> and <code>createTopicConnection</code> will
+ * lead to queue/topic mode, respectively; generic <code>createConnection</code>
+ * calls will lead to a JMS 1.1 connection which is able to serve both modes.
  *
  * <p>Useful for testing and standalone environments in order to keep using the
  * same Connection for multiple {@link org.springframework.jms.core.JmsTemplate}
@@ -88,6 +95,9 @@ public class SingleConnectionFactory
 	/** Proxy Connection */
 	private Connection connection;
 
+	/** A hint whether to create a queue or topic connection */
+	private Boolean pubSubMode;
+
 	/** Synchronization monitor for the shared Connection */
 	private final Object connectionMonitor = new Object();
 
@@ -100,8 +110,7 @@ public class SingleConnectionFactory
 	}
 
 	/**
-	 * Create a new SingleConnectionFactory that always returns the
-	 * given Connection. Works with both JMS 1.1 and 1.0.2.
+	 * Create a new SingleConnectionFactory that always returns the given Connection.
 	 * @param target the single Connection
 	 */
 	public SingleConnectionFactory(Connection target) {
@@ -224,7 +233,11 @@ public class SingleConnectionFactory
 	}
 
 	public QueueConnection createQueueConnection() throws JMSException {
-		Connection con = createConnection();
+		Connection con = null;
+		synchronized (this.connectionMonitor) {
+			this.pubSubMode = Boolean.FALSE;
+			con = createConnection();
+		}
 		if (!(con instanceof QueueConnection)) {
 			throw new javax.jms.IllegalStateException(
 					"This SingleConnectionFactory does not hold a QueueConnection but rather: " + con);
@@ -238,7 +251,11 @@ public class SingleConnectionFactory
 	}
 
 	public TopicConnection createTopicConnection() throws JMSException {
-		Connection con = createConnection();
+		Connection con = null;
+		synchronized (this.connectionMonitor) {
+			this.pubSubMode = Boolean.TRUE;
+			con = createConnection();
+		}
 		if (!(con instanceof TopicConnection)) {
 			throw new javax.jms.IllegalStateException(
 					"This SingleConnectionFactory does not hold a TopicConnection but rather: " + con);
@@ -308,12 +325,20 @@ public class SingleConnectionFactory
 
 	/**
 	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
 	 * @return the new JMS Connection
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	protected Connection doCreateConnection() throws JMSException {
-		return getTargetConnectionFactory().createConnection();
+		ConnectionFactory cf = getTargetConnectionFactory();
+		if (Boolean.FALSE.equals(this.pubSubMode) && cf instanceof QueueConnectionFactory) {
+			return ((QueueConnectionFactory) cf).createQueueConnection();
+		}
+		else if (Boolean.TRUE.equals(this.pubSubMode) && cf instanceof TopicConnectionFactory) {
+			return ((TopicConnectionFactory) cf).createTopicConnection();
+		}
+		else {
+			return getTargetConnectionFactory().createConnection();
+		}
 	}
 
 	/**
@@ -340,15 +365,44 @@ public class SingleConnectionFactory
 
 	/**
 	 * Template method for obtaining a (potentially cached) Session.
+	 * <p>The default implementation always returns <code>null</code>.
+	 * Subclasses may override this for exposing specific Session handles,
+	 * possibly delegating to {@link #createSession} for the creation of raw
+	 * Session objects that will then get wrapped and returned from here.
 	 * @param con the JMS Connection to operate on
 	 * @param mode the Session acknowledgement mode
 	 * (<code>Session.TRANSACTED</code> or one of the common modes)
 	 * @return the Session to use, or <code>null</code> to indicate
-	 * creation of a default Session
+	 * creation of a raw standard Session
 	 * @throws JMSException if thrown by the JMS API
 	 */
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
 		return null;
+	}
+
+	/**
+	 * Create a default Session for this ConnectionFactory,
+	 * adaptign to JMS 1.0.2 style queue/topic mode if necessary.
+	 * @param con the JMS Connection to operate on
+	 * @param mode the Session acknowledgement mode
+	 * (<code>Session.TRANSACTED</code> or one of the common modes)
+	 * @return the newly created Session
+	 * @throws JMSException if thrown by the JMS API
+	 */
+	protected Session createSession(Connection con, Integer mode) throws JMSException {
+		// Determine JMS API arguments...
+		boolean transacted = (mode.intValue() == Session.SESSION_TRANSACTED);
+		int ackMode = (transacted ? Session.AUTO_ACKNOWLEDGE : mode.intValue());
+		// Now actually call the appropriate JMS factory method...
+		if (Boolean.FALSE.equals(this.pubSubMode) && con instanceof QueueConnection) {
+			return ((QueueConnection) con).createQueueSession(transacted, ackMode);
+		}
+		else if (Boolean.TRUE.equals(this.pubSubMode) && con instanceof TopicConnection) {
+			return ((TopicConnection) con).createTopicSession(transacted, ackMode);
+		}
+		else {
+			return con.createSession(transacted, ackMode);
+		}
 	}
 
 	/**
@@ -459,8 +513,14 @@ public class SingleConnectionFactory
 				Session session = getSession(this.target, mode);
 				if (session != null) {
 					if (!method.getReturnType().isInstance(session)) {
-						throw new javax.jms.IllegalStateException(
-								"JMS Session does not implement specific domain: " + session);
+						String msg = "JMS Session does not implement specific domain: " + session;
+						try {
+							session.close();
+						}
+						catch (Throwable ex) {
+							logger.trace("Failed to close newly obtained JMS Session", ex);
+						}
+						throw new javax.jms.IllegalStateException(msg);
 					}
 					return session;
 				}
