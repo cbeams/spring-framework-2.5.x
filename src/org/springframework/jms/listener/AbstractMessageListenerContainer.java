@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		Assert.notNull(destination, "'destination' must not be null");
 		this.destination = destination;
 		if (destination instanceof Topic && !(destination instanceof Queue)) {
-			// Clearly a Topic: let's se the "pubSubDomain" flag.
+			// Clearly a Topic: let's set the "pubSubDomain" flag accordingly.
 			setPubSubDomain(true);
 		}
 	}
