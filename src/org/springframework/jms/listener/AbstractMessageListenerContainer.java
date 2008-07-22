@@ -157,7 +157,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		Assert.notNull(destination, "'destination' must not be null");
 		this.destination = destination;
 		if (destination instanceof Topic && !(destination instanceof Queue)) {
-			// Clearly a Topic: let's se the "pubSubDomain" flag.
+			// Clearly a Topic: let's set the "pubSubDomain" flag accordingly.
 			setPubSubDomain(true);
 		}
 	}
