@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -60,9 +59,7 @@ public abstract class BridgeMethodResolver {
 	 * @throws IllegalStateException if no bridged {@link Method} can be found
 	 */
 	public static Method findBridgedMethod(Method bridgeMethod) {
-		Assert.notNull(bridgeMethod, "Method must not be null");
-
-		if (!bridgeMethod.isBridge()) {
+		if (bridgeMethod == null || !bridgeMethod.isBridge()) {
 			return bridgeMethod;
 		}
 

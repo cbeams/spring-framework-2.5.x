@@ -419,7 +419,17 @@ public class BeanWrapperGenericsTests extends TestCase {
 	}
 
 
-	private static class NestedGenericCollectionBean {
+	private static abstract class BaseGenericCollectionBean {
+
+		public abstract Object getMapOfInteger();
+
+		public abstract Map getMapOfListOfInteger();
+
+		public abstract void setMapOfListOfInteger(Map<String, List<Integer>> mapOfListOfInteger);
+	}
+
+
+	private static class NestedGenericCollectionBean extends BaseGenericCollectionBean {
 
 		private Map<String, Integer> mapOfInteger;
 

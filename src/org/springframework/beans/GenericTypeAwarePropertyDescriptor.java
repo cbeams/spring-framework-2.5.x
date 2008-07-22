@@ -20,8 +20,11 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Extension of the standard JavaBeans PropertyDescriptor class,
@@ -52,8 +55,17 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 		super(propertyName, null, null);
 		this.beanClass = beanClass;
-		this.readMethod = readMethod;
-		this.writeMethod = writeMethod;
+		Method readMethodToUse = BridgeMethodResolver.findBridgedMethod(readMethod);
+		Method writeMethodToUse = BridgeMethodResolver.findBridgedMethod(writeMethod);
+		if (writeMethodToUse == null && readMethodToUse != null) {
+			// Fallback: Original JavaBeans introspection might not have found matching setter
+			// method due to lack of bridge method resolution, in case of the getter using a
+			// covariant return type whereas the setter is defined for the concrete property type.
+			writeMethodToUse = ClassUtils.getMethodIfAvailable(this.beanClass,
+					"set" + StringUtils.capitalize(getName()), new Class[] {readMethodToUse.getReturnType()});
+		}
+		this.readMethod = readMethodToUse;
+		this.writeMethod = writeMethodToUse;
 		this.propertyEditorClass = propertyEditorClass;
 	}
 
