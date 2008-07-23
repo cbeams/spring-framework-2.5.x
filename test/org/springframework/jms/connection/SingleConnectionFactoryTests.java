@@ -465,21 +465,29 @@ public class SingleConnectionFactoryTests extends TestCase {
 		ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session txSession = (Session) sessionControl.getMock();
-		MockControl session2Control = MockControl.createControl(Session.class);
-		Session nonTxSession = (Session) session2Control.getMock();
+		MockControl txSessionControl = MockControl.createControl(Session.class);
+		Session txSession = (Session) txSessionControl.getMock();
+		MockControl nonTxSessionControl = MockControl.createControl(Session.class);
+		Session nonTxSession = (Session) nonTxSessionControl.getMock();
 
 		cf.createConnection();
 		cfControl.setReturnValue(con, 1);
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
+		txSession.getTransacted();
+		txSessionControl.setReturnValue(true, 1);
+		txSession.rollback();
+		txSessionControl.setVoidCallable(1);
+		txSession.commit();
+		txSessionControl.setVoidCallable(1);
 		txSession.close();
-		sessionControl.setVoidCallable(1);
+		txSessionControl.setVoidCallable(1);
 		con.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 		conControl.setReturnValue(nonTxSession, 1);
+		nonTxSession.getTransacted();
+		nonTxSessionControl.setReturnValue(false, 2);
 		nonTxSession.close();
-		session2Control.setVoidCallable(1);
+		nonTxSessionControl.setVoidCallable(1);
 		con.start();
 		conControl.setVoidCallable(2);
 		con.stop();
@@ -489,6 +497,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		cfControl.replay();
 		conControl.replay();
+		txSessionControl.replay();
+		nonTxSessionControl.replay();
 
 		CachingConnectionFactory scf = new CachingConnectionFactory(cf);
 		scf.setReconnectOnException(false);
@@ -503,6 +513,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		Session session2 = con2.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 		session2.close();  // should be ignored
 		session2 = con2.createSession(true, Session.AUTO_ACKNOWLEDGE);
+		session2.commit();
 		session2.close();  // should be ignored
 		con2.start();
 		con2.close();  // should be ignored
@@ -510,6 +521,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		cfControl.verify();
 		conControl.verify();
+		txSessionControl.verify();
+		nonTxSessionControl.verify();
 	}
 
 	public void testCachingConnectionFactoryWithQueueConnectionFactoryAndJms102Usage() throws JMSException {
@@ -517,21 +530,27 @@ public class SingleConnectionFactoryTests extends TestCase {
 		QueueConnectionFactory cf = (QueueConnectionFactory) cfControl.getMock();
 		MockControl conControl = MockControl.createControl(QueueConnection.class);
 		QueueConnection con = (QueueConnection) conControl.getMock();
-		MockControl sessionControl = MockControl.createControl(QueueSession.class);
-		QueueSession txSession = (QueueSession) sessionControl.getMock();
-		MockControl session2Control = MockControl.createControl(QueueSession.class);
-		QueueSession nonTxSession = (QueueSession) session2Control.getMock();
+		MockControl txSessionControl = MockControl.createControl(QueueSession.class);
+		QueueSession txSession = (QueueSession) txSessionControl.getMock();
+		MockControl nonTxSessionControl = MockControl.createControl(QueueSession.class);
+		QueueSession nonTxSession = (QueueSession) nonTxSessionControl.getMock();
 
 		cf.createQueueConnection();
 		cfControl.setReturnValue(con, 1);
 		con.createQueueSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
+		txSession.getTransacted();
+		txSessionControl.setReturnValue(true, 1);
+		txSession.rollback();
+		txSessionControl.setVoidCallable(2);
 		txSession.close();
-		sessionControl.setVoidCallable(1);
+		txSessionControl.setVoidCallable(1);
 		con.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);
 		conControl.setReturnValue(nonTxSession, 1);
+		nonTxSession.getTransacted();
+		nonTxSessionControl.setReturnValue(false, 2);
 		nonTxSession.close();
-		session2Control.setVoidCallable(1);
+		nonTxSessionControl.setVoidCallable(1);
 		con.start();
 		conControl.setVoidCallable(2);
 		con.stop();
@@ -541,11 +560,14 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		cfControl.replay();
 		conControl.replay();
+		txSessionControl.replay();
+		nonTxSessionControl.replay();
 
 		CachingConnectionFactory scf = new CachingConnectionFactory(cf);
 		scf.setReconnectOnException(false);
 		Connection con1 = scf.createQueueConnection();
 		Session session1 = con1.createSession(true, Session.AUTO_ACKNOWLEDGE);
+		session1.rollback();
 		session1.close();  // should be ignored
 		session1 = con1.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 		session1.close();  // should be ignored
@@ -562,6 +584,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		cfControl.verify();
 		conControl.verify();
+		txSessionControl.verify();
+		nonTxSessionControl.verify();
 	}
 
 	public void testCachingConnectionFactoryWithTopicConnectionFactoryAndJms102Usage() throws JMSException {
@@ -569,21 +593,27 @@ public class SingleConnectionFactoryTests extends TestCase {
 		TopicConnectionFactory cf = (TopicConnectionFactory) cfControl.getMock();
 		MockControl conControl = MockControl.createControl(TopicConnection.class);
 		TopicConnection con = (TopicConnection) conControl.getMock();
-		MockControl sessionControl = MockControl.createControl(TopicSession.class);
-		TopicSession txSession = (TopicSession) sessionControl.getMock();
-		MockControl session2Control = MockControl.createControl(TopicSession.class);
-		TopicSession nonTxSession = (TopicSession) session2Control.getMock();
+		MockControl txSessionControl = MockControl.createControl(TopicSession.class);
+		TopicSession txSession = (TopicSession) txSessionControl.getMock();
+		MockControl nonTxSessionControl = MockControl.createControl(TopicSession.class);
+		TopicSession nonTxSession = (TopicSession) nonTxSessionControl.getMock();
 
 		cf.createTopicConnection();
 		cfControl.setReturnValue(con, 1);
 		con.createTopicSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
+		txSession.getTransacted();
+		txSessionControl.setReturnValue(true, 2);
+		txSession.rollback();
+		txSessionControl.setVoidCallable(2);
 		txSession.close();
-		sessionControl.setVoidCallable(1);
+		txSessionControl.setVoidCallable(1);
 		con.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
 		conControl.setReturnValue(nonTxSession, 1);
+		nonTxSession.getTransacted();
+		nonTxSessionControl.setReturnValue(false, 2);
 		nonTxSession.close();
-		session2Control.setVoidCallable(1);
+		nonTxSessionControl.setVoidCallable(1);
 		con.start();
 		conControl.setVoidCallable(2);
 		con.stop();
@@ -593,6 +623,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		cfControl.replay();
 		conControl.replay();
+		txSessionControl.replay();
+		nonTxSessionControl.replay();
 
 		CachingConnectionFactory scf = new CachingConnectionFactory(cf);
 		scf.setReconnectOnException(false);
@@ -614,6 +646,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		cfControl.verify();
 		conControl.verify();
+		txSessionControl.verify();
+		nonTxSessionControl.verify();
 	}
 
 }

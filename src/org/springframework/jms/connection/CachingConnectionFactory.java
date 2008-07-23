@@ -137,6 +137,18 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 */
 	public void resetConnection() {
 		synchronized (this.cachedSessions) {
+			for (Iterator it = this.cachedSessions.values().iterator(); it.hasNext();) {
+				LinkedList sessionList = (LinkedList) it.next();
+				for (Iterator it2 = sessionList.iterator(); it2.hasNext();) {
+					Session session = (Session) it2.next();
+					try {
+						session.close();
+					}
+					catch (Throwable ex) {
+						logger.debug("Could not close cached JMS Session", ex);
+					}
+				}
+			}
 			this.cachedSessions.clear();
 		}
 		super.resetConnection();
@@ -210,6 +222,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final Map cachedProducers = new HashMap();
 
+		private boolean transactionCompleted = false;
+
 		public CachedSessionInvocationHandler(Session target, LinkedList sessionList) {
 			this.target = target;
 			this.sessionList = sessionList;
@@ -228,6 +242,12 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				// Handle close method: don't pass the call on.
 				synchronized (this.sessionList) {
 					if (this.sessionList.size() < getSessionCacheSize()) {
+						// Preserve rollback-on-close semantics.
+						if (!this.transactionCompleted && this.target.getTransacted()) {
+							this.transactionCompleted = true;
+							this.target.rollback();
+						}
+						// Allow for multiple close calls...
 						if (!this.sessionList.contains(proxy)) {
 							this.sessionList.addLast(proxy);
 							if (logger.isDebugEnabled()) {
@@ -268,7 +288,14 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 						logger.debug("Created cached MessageProducer for destination [" + dest + "]: " + producer);
 					}
 				}
+				this.transactionCompleted = false;
 				return new CachedMessageProducer(producer);
+			}
+			else if (method.getName().equals("commit") || method.getName().equals("rollback")) {
+				this.transactionCompleted = true;
+			}
+			else {
+				this.transactionCompleted = false;
 			}
 			try {
 				return method.invoke(this.target, args);
