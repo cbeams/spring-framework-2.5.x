@@ -13,6 +13,7 @@ General
 * removed outdated EAR support from sample applications
 
 Package org.springframework.beans
+* BeanWrapper's introspection resolves bridge methods to find setter method for getter method with covariant return type
 * TypeMismatchException message differentiates between editor with inappropriate value returned versus no editor at all
 * containing bean definition is exposed to ParserContext for BeanDefinitionDecorators as well
 * AbstractFactoryBean's early singleton proxy handles equals, hashCode and toString calls locally (avoiding eager init)
@@ -35,6 +36,10 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * JmsException message and logged JMSException message explicitly includes linked exception now if not already contained
+* SingleConnectionFactory explicitly creates Queue/TopicConnection when first call is createQueue/TopicConnection method
+* CachingConnectionFactory explicitly creates Queue/TopicSession when first call is createQueue/TopicConnection method
+* CachingConnectionFactory rolls back cached transacted JMS Sessions on logical close if no commit/rollback was issued
+* CachingConnectionFactory explicitly closes cached JMS Sessions on Connection close
 * AbstractJmsListeningContainer eagerly clears shared JMS Connection after releasing, avoiding repeated close exceptions
 
 Package org.springframework.jmx
