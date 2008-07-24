@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.jmx.access;
 import org.springframework.jmx.JmxException;
 
 /**
- * Thrown when trying to invoke an operation on a proxy that is not exposed
- * by the proxied resource's management interface.
+ * Thrown when an invocation on an MBean resource failed with an exception (either
+ * a reflection exception or an exception thrown by the target method itself).
  *
  * @author Juergen Hoeller
  * @since 1.2

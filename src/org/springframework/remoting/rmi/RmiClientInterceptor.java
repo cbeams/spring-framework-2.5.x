@@ -288,7 +288,10 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @param invocation the invocation that failed
 	 * @param ex the exception raised on remote invocation
 	 * @return the result value of the new invocation, if succeeded
-	 * @throws Throwable an exception raised by the new invocation, if failed too.
+	 * @throws Throwable an exception raised by the new invocation,
+	 * if it failed as well
+	 * @see #setRefreshStubOnConnectFailure
+	 * @see #doInvoke
 	 */
 	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
 		if (this.refreshStubOnConnectFailure) {
