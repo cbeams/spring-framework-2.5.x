@@ -67,6 +67,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 	private boolean cacheProducers = true;
 
+	private volatile boolean active = true;
+
 	private final Map cachedSessions = new HashMap();
 
 
@@ -136,21 +138,27 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * Resets the Session cache as well.
 	 */
 	public void resetConnection() {
+		this.active = false;
 		synchronized (this.cachedSessions) {
 			for (Iterator it = this.cachedSessions.values().iterator(); it.hasNext();) {
 				LinkedList sessionList = (LinkedList) it.next();
-				for (Iterator it2 = sessionList.iterator(); it2.hasNext();) {
-					Session session = (Session) it2.next();
-					try {
-						session.close();
-					}
-					catch (Throwable ex) {
-						logger.debug("Could not close cached JMS Session", ex);
+				synchronized (sessionList) {
+					for (Iterator it2 = sessionList.iterator(); it2.hasNext();) {
+						Session session = (Session) it2.next();
+						try {
+							session.close();
+						}
+						catch (Throwable ex) {
+							logger.debug("Could not close cached JMS Session", ex);
+						}
 					}
 				}
 			}
 			this.cachedSessions.clear();
 		}
+		this.active = true;
+
+		// Now proceed with actual closing of the shared Connection...
 		super.resetConnection();
 	}
 
@@ -222,7 +230,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final Map cachedProducers = new HashMap();
 
-		private boolean transactionCompleted = false;
+		private boolean transactionOpen = false;
 
 		public CachedSessionInvocationHandler(Session target, LinkedList sessionList) {
 			this.target = target;
@@ -238,39 +246,34 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				// Use hashCode of Connection proxy.
 				return new Integer(System.identityHashCode(proxy));
 			}
+			else if (method.getName().equals("toString")) {
+				return "Cached JMS Session: " + this.target;
+			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: don't pass the call on.
-				synchronized (this.sessionList) {
-					if (this.sessionList.size() < getSessionCacheSize()) {
-						// Preserve rollback-on-close semantics.
-						if (!this.transactionCompleted && this.target.getTransacted()) {
-							this.transactionCompleted = true;
-							this.target.rollback();
-						}
-						// Allow for multiple close calls...
-						if (!this.sessionList.contains(proxy)) {
-							this.sessionList.addLast(proxy);
-							if (logger.isDebugEnabled()) {
-								logger.debug("Returned cached Session: " + proxy);
+				if (active) {
+					synchronized (this.sessionList) {
+						if (this.sessionList.size() < getSessionCacheSize()) {
+							// Preserve rollback-on-close semantics.
+							if (this.transactionOpen && this.target.getTransacted()) {
+								this.transactionOpen = false;
+								this.target.rollback();
 							}
-						}
-						return null;
-					}
-					else {
-						try {
-							for (Iterator it = this.cachedProducers.values().iterator(); it.hasNext();) {
-								((MessageProducer) it.next()).close();
+							// Allow for multiple close calls...
+							if (!this.sessionList.contains(proxy)) {
+								this.sessionList.addLast(proxy);
+								if (logger.isDebugEnabled()) {
+									logger.debug("Returned cached Session: " + this.target);
+								}
 							}
+							// Remain open in the session list.
+							return null;
 						}
-						finally {
-							this.target.close();
-						}
-						if (logger.isDebugEnabled()) {
-							logger.debug("Closed cached Session: " + proxy);
-						}
-						return null;
 					}
 				}
+				// If we get here, we're supposed to shut down.
+				physicalClose();
+				return null;
 			}
 			else if ((method.getName().equals("createProducer") || method.getName().equals("createSender") ||
 					method.getName().equals("createPublisher")) && isCacheProducers()) {
@@ -288,20 +291,34 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 						logger.debug("Created cached MessageProducer for destination [" + dest + "]: " + producer);
 					}
 				}
-				this.transactionCompleted = false;
+				this.transactionOpen = true;
 				return new CachedMessageProducer(producer);
 			}
 			else if (method.getName().equals("commit") || method.getName().equals("rollback")) {
-				this.transactionCompleted = true;
+				this.transactionOpen = false;
 			}
 			else {
-				this.transactionCompleted = false;
+				this.transactionOpen = true;
 			}
 			try {
 				return method.invoke(this.target, args);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
+			}
+		}
+
+		private void physicalClose() throws JMSException {
+			try {
+				for (Iterator it = this.cachedProducers.values().iterator(); it.hasNext();) {
+					((MessageProducer) it.next()).close();
+				}
+			}
+			finally {
+				this.target.close();
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Closed cached Session: " + this.target);
 			}
 		}
 	}
