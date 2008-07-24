@@ -2906,7 +2906,7 @@ public class Account {
         there is one aspect instance per classloader that defines the type.
         This means that if you define multiple application contexts within the
         same classloader hierarchy you need to consider where to define the
-        <literal>&lt;aop:spring-configured/&gt;</literal> bean and where to
+        <literal>&lt;context:spring-configured/&gt;</literal> bean and where to
         place <filename class="libraryfile">spring-aspects.jar</filename> on
         the classpath.</para>
 
@@ -2917,7 +2917,7 @@ public class Account {
         these contexts will co-exist within the same classloader hierarchy,
         and so the <literal>AnnotationBeanConfigurerAspect</literal> can only
         hold a reference to one of them. In this case we recommend defining
-        the <literal>&lt;aop:spring-configured/&gt;</literal> bean in the
+        the <literal>&lt;context:spring-configured/&gt;</literal> bean in the
         shared (parent) application context: this defines the services that
         you are likely to want to inject into domain objects. A consequence is
         that you cannot configure domain objects with references to beans
