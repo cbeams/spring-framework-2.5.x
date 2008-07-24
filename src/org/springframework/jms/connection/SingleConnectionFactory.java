@@ -470,6 +470,9 @@ public class SingleConnectionFactory
 				// Use hashCode of Connection proxy.
 				return new Integer(System.identityHashCode(proxy));
 			}
+			else if (method.getName().equals("toString")) {
+				return "Shared JMS Connection: " + this.target;
+			}
 			else if (method.getName().equals("setClientID")) {
 				// Handle setClientID method: throw exception if not compatible.
 				String currentClientId = this.target.getClientID();
