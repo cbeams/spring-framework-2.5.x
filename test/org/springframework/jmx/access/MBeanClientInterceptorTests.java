@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,6 +31,7 @@ import javax.management.remote.JMXServiceURL;
 
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.JmxException;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
@@ -189,9 +190,10 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		factory.setProxyInterface(IJmxTestBean.class);
 		factory.setObjectName(OBJECT_NAME);
 		factory.setConnectOnStartup(false);
-
+		factory.setRefreshOnConnectFailure(true);
 		// should skip connection to the server
 		factory.afterPropertiesSet();
+		IJmxTestBean bean = (IJmxTestBean) factory.getObject();
 
 		// now start the connector
 		try {
@@ -207,7 +209,25 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 		// should now be able to access data via the lazy proxy
 		try {
-			IJmxTestBean bean = (IJmxTestBean) factory.getObject();
+			assertEquals("Rob Harrop", bean.getName());
+			assertEquals(100, bean.getAge());
+		}
+		finally {
+			connector.stop();
+		}
+
+		try {
+			bean.getName();
+		}
+		catch (JmxException ex) {
+			// expected
+		}
+
+		connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());
+		connector.start();
+
+		// should now be able to access data via the lazy proxy
+		try {
 			assertEquals("Rob Harrop", bean.getName());
 			assertEquals(100, bean.getAge());
 		}

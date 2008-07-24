@@ -101,6 +101,8 @@ public class MBeanClientInterceptor
 
 	private boolean connectOnStartup = true;
 
+	private boolean refreshOnConnectFailure = false;
+
 	private ObjectName objectName;
 
 	private boolean useStrictCasing = true;
@@ -110,6 +112,8 @@ public class MBeanClientInterceptor
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private final ConnectorDelegate connector = new ConnectorDelegate();
+
+	private MBeanServerConnection serverToUse;
 
 	private MBeanServerInvocationHandler invocationHandler;
 
@@ -177,6 +181,16 @@ public class MBeanClientInterceptor
 	}
 
 	/**
+	 * Set whether to refresh the MBeanServer connection on connect failure.
+	 * Default is "false".
+	 * <p>Can be turned on to allow for hot restart of the JMX server,
+	 * automatically reconnecting and retrying in case of an IOException.
+	 */
+	public void setRefreshOnConnectFailure(boolean refreshOnConnectFailure) {
+		this.refreshOnConnectFailure = refreshOnConnectFailure;
+	}
+
+	/**
 	 * Set the <code>ObjectName</code> of the MBean which calls are routed to,
 	 * as <code>ObjectName</code> instance or as <code>String</code>.
 	 */
@@ -222,6 +236,10 @@ public class MBeanClientInterceptor
 	 * is turned on (which it is by default).
 	 */
 	public void afterPropertiesSet() {
+		if (this.server != null && this.refreshOnConnectFailure) {
+			throw new IllegalArgumentException("'refreshOnConnectFailure' does not work when setting " +
+					"a 'server' reference. Prefer 'serviceUrl' etc instead.");
+		}
 		if (this.connectOnStartup) {
 			prepare();
 		}
@@ -233,8 +251,12 @@ public class MBeanClientInterceptor
 	 */
 	public void prepare() {
 		synchronized (this.preparationMonitor) {
-			if (this.server == null) {
-				this.server = this.connector.connect(this.serviceUrl, this.environment, this.agentId);
+			if (this.server != null) {
+				this.serverToUse = this.server;
+			}
+			else {
+				this.serverToUse = null;
+				this.serverToUse = this.connector.connect(this.serviceUrl, this.environment, this.agentId);
 			}
 			this.invocationHandler = null;
 			if (this.useStrictCasing) {
@@ -242,11 +264,11 @@ public class MBeanClientInterceptor
 				// in particular for native MXBean support on Java 6.
 				if (JdkVersion.isAtLeastJava16()) {
 					this.invocationHandler =
-							new MBeanServerInvocationHandler(this.server, this.objectName,
+							new MBeanServerInvocationHandler(this.serverToUse, this.objectName,
 									(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
 				}
 				else {
-					this.invocationHandler = new MBeanServerInvocationHandler(this.server, this.objectName);
+					this.invocationHandler = new MBeanServerInvocationHandler(this.serverToUse, this.objectName);
 				}
 			}
 			else {
@@ -263,7 +285,7 @@ public class MBeanClientInterceptor
 	 */
 	private void retrieveMBeanInfo() throws MBeanInfoRetrievalException {
 		try {
-			MBeanInfo info = this.server.getMBeanInfo(this.objectName);
+			MBeanInfo info = this.serverToUse.getMBeanInfo(this.objectName);
 
 			MBeanAttributeInfo[] attributeInfo = info.getAttributes();
 			this.allowedAttributes = new HashMap(attributeInfo.length);
@@ -307,22 +329,18 @@ public class MBeanClientInterceptor
 	 */
 	protected boolean isPrepared() {
 		synchronized (this.preparationMonitor) {
-			return (this.invocationHandler != null || this.allowedAttributes != null);
+			return (this.serverToUse != null);
 		}
 	}
 
 
 	/**
-	 * Route the invocation to the configured managed resource. Correctly routes JavaBean property
-	 * access to <code>MBeanServerConnection.get/setAttribute</code> and method invocation to
-	 * <code>MBeanServerConnection.invoke</code>. Any attempt to invoke a method that does not
-	 * correspond to an attribute or operation defined in the management interface of the managed
-	 * resource results in an <code>InvalidInvocationException</code>.
-	 * @param invocation the <code>MethodInvocation</code> to re-route.
-	 * @return the value returned as a result of the re-routed invocation.
-	 * @throws InvocationFailureException if the invocation does not match an attribute or
-	 * operation on the management interface of the resource.
-	 * @throws Throwable typically as the result of an error during invocation
+	 * Route the invocation to the configured managed resource..
+	 * @param invocation the <code>MethodInvocation</code> to re-route
+	 * @return the value returned as a result of the re-routed invocation
+	 * @throws Throwable an invocation error propagated to the user
+	 * @see #doInvoke
+	 * @see #handleConnectFailure
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		// Lazily connect to MBeanServer if necessary.
@@ -331,6 +349,55 @@ public class MBeanClientInterceptor
 				prepare();
 			}
 		}
+		try {
+			return doInvoke(invocation);
+		}
+		catch (MBeanConnectFailureException ex) {
+			return handleConnectFailure(invocation, ex);
+		}
+		catch (IOException ex) {
+			return handleConnectFailure(invocation, ex);
+		}
+	}
+
+	/**
+	 * Refresh the connection and retry the MBean invocation if possible.
+	 * <p>If not configured to refresh on connect failure, this method
+	 * simply rethrows the original exception.
+	 * @param invocation the invocation that failed
+	 * @param ex the exception raised on remote invocation
+	 * @return the result value of the new invocation, if succeeded
+	 * @throws Throwable an exception raised by the new invocation,
+	 * if it failed as well
+	 * @see #setRefreshOnConnectFailure
+	 * @see #doInvoke
+	 */
+	protected Object handleConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
+		if (this.refreshOnConnectFailure) {
+			String msg = "Could not connect to JMX server - retrying";
+			if (logger.isDebugEnabled()) {
+				logger.warn(msg, ex);
+			}
+			else if (logger.isWarnEnabled()) {
+				logger.warn(msg);
+			}
+			prepare();
+			return doInvoke(invocation);
+		}
+		else {
+			throw ex;
+		}
+	}
+
+	/**
+	 * Route the invocation to the configured managed resource. Correctly routes JavaBean property
+	 * access to <code>MBeanServerConnection.get/setAttribute</code> and method invocation to
+	 * <code>MBeanServerConnection.invoke</code>.
+	 * @param invocation the <code>MethodInvocation</code> to re-route
+	 * @return the value returned as a result of the re-routed invocation
+	 * @throws Throwable an invocation error propagated to the user
+	 */
+	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 		try {
 			Object result = null;
@@ -391,7 +458,7 @@ public class MBeanClientInterceptor
 				throw ex;
 			}
 			else {
-				throw new InvocationFailureException("I/O failure during JMX access", ex);
+				throw new MBeanConnectFailureException("I/O failure during JMX access", ex);
 			}
 		}
 	}
@@ -409,7 +476,7 @@ public class MBeanClientInterceptor
 		}
 		if (invocation.getMethod().equals(pd.getReadMethod())) {
 			if (inf.isReadable()) {
-				return this.server.getAttribute(this.objectName, attributeName);
+				return this.serverToUse.getAttribute(this.objectName, attributeName);
 			}
 			else {
 				throw new InvalidInvocationException("Attribute '" + attributeName + "' is not readable");
@@ -417,7 +484,7 @@ public class MBeanClientInterceptor
 		}
 		else if (invocation.getMethod().equals(pd.getWriteMethod())) {
 			if (inf.isWritable()) {
-				this.server.setAttribute(this.objectName, new Attribute(attributeName, invocation.getArguments()[0]));
+				this.serverToUse.setAttribute(this.objectName, new Attribute(attributeName, invocation.getArguments()[0]));
 				return null;
 			}
 			else {
@@ -452,7 +519,7 @@ public class MBeanClientInterceptor
 				this.signatureCache.put(method, signature);
 			}
 		}
-		return this.server.invoke(this.objectName, method.getName(), args, signature);
+		return this.serverToUse.invoke(this.objectName, method.getName(), args, signature);
 	}
 
 	/**
