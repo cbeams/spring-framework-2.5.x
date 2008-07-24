@@ -764,8 +764,9 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query based on a given Hibernate criteria object.
-	 * @param criteria the detached Hibernate criteria object,
-	 * which can for example be held in an instance variable of a DAO
+	 * @param criteria the detached Hibernate criteria object.
+	 * <b>Note: Do not reuse criteria objects! They need to recreated per execution,
+	 * due to the suboptimal design of Hibernate's criteria facility.</b>
 	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
@@ -774,8 +775,9 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query based on the given Hibernate criteria object.
-	 * @param criteria the detached Hibernate criteria object,
-	 * which can for example be held in an instance variable of a DAO
+	 * @param criteria the detached Hibernate criteria object.
+	 * <b>Note: Do not reuse criteria objects! They need to recreated per execution,
+	 * due to the suboptimal design of Hibernate's criteria facility.</b>
 	 * @param firstResult the index of the first result object to be retrieved
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
