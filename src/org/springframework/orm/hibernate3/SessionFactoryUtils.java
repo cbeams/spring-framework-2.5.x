@@ -548,6 +548,21 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
+	 * Return whether there is a transactional Hibernate Session for the current thread,
+	 * that is, a Session bound to the current thread by Spring's transaction facilities.
+	 * @param sessionFactory Hibernate SessionFactory to check (may be <code>null</code>)
+	 * @return whether there is a transactional Session for current thread
+	 */
+	public static boolean hasTransactionalSession(SessionFactory sessionFactory) {
+		if (sessionFactory == null) {
+			return false;
+		}
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		return (sessionHolder != null && !sessionHolder.isEmpty());
+	}
+
+	/**
 	 * Return whether the given Hibernate Session is transactional, that is,
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param session the Hibernate Session to check

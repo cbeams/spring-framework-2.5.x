@@ -470,6 +470,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			return SessionFactoryUtils.getSession(
 					getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
 		}
+		else if (SessionFactoryUtils.hasTransactionalSession(getSessionFactory())) {
+			return SessionFactoryUtils.getSession(getSessionFactory(), false);
+		}
 		else {
 			try {
 				return getSessionFactory().getCurrentSession();

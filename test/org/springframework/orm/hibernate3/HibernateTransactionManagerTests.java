@@ -1444,7 +1444,9 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final Transaction tx2 = (Transaction) tx2Control.getMock();
 
 		sf.getCurrentSession();
-		sfControl.setReturnValue(session, 4);
+		sfControl.setReturnValue(session, 2);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
 		session.getTransaction();
 		sessionControl.setReturnValue(tx1, 1);
 		session.beginTransaction();
