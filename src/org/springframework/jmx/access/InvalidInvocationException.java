@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.management.JMRuntimeException;
 
 /**
  * Thrown when trying to invoke an operation on a proxy that is not exposed
- * by the proxied resource's management interface.
+ * by the proxied MBean resource's management interface.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
