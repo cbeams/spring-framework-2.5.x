@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,11 @@ import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
-import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -210,11 +208,14 @@ public class DataBinderTests extends TestCase {
 			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 			assertNull(tb.getTouchy());
 
-			BindingResult other = new BeanPropertyBindingResult(rod, "person");
-			assertTrue(!other.equals(ex));
-			other.rejectValue("age", TypeMismatchException.ERROR_CODE);
-			other.rejectValue("touchy", MethodInvocationException.ERROR_CODE);
-			assertEquals(other, ex);
+			rod = new TestBean();
+			binder = new DataBinder(rod, "person");
+			pvs = new MutablePropertyValues();
+			pvs.addPropertyValue("name", "Rod");
+			pvs.addPropertyValue("age", "32x");
+			pvs.addPropertyValue("touchy", "m.y");
+			binder.bind(pvs);
+			assertEquals(binder.getBindingResult(), ex.getBindingResult());
 		}
 	}
 

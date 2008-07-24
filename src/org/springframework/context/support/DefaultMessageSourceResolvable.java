@@ -147,11 +147,16 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 			return false;
 		}
 		MessageSourceResolvable otherResolvable = (MessageSourceResolvable) other;
-		return ObjectUtils.nullSafeEquals(getCodes(), otherResolvable.getCodes());
+		return ObjectUtils.nullSafeEquals(getCodes(), otherResolvable.getCodes()) &&
+				ObjectUtils.nullSafeEquals(getArguments(), otherResolvable.getArguments()) &&
+				ObjectUtils.nullSafeEquals(getDefaultMessage(), otherResolvable.getDefaultMessage());
 	}
 
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(getCodes());
+		int hashCode = ObjectUtils.nullSafeHashCode(getCodes());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getArguments());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getDefaultMessage());
+		return hashCode;
 	}
 
 }

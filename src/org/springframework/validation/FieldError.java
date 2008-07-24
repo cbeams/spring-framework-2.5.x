@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Encapsulates a field error, that is, a reason for rejecting a specific
@@ -108,11 +109,17 @@ public class FieldError extends ObjectError {
 			return false;
 		}
 		FieldError otherError = (FieldError) other;
-		return getField().equals(otherError.getField());
+		return getField().equals(otherError.getField()) &&
+				ObjectUtils.nullSafeEquals(getRejectedValue(), otherError.getRejectedValue()) &&
+				isBindingFailure() == otherError.isBindingFailure();
 	}
 
 	public int hashCode() {
-		return super.hashCode() * 29 + getField().hashCode();
+		int hashCode = super.hashCode();
+		hashCode = 29 * hashCode + getField().hashCode();
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getRejectedValue());
+		hashCode = 29 * hashCode + (isBindingFailure() ? 1 : 0);
+		return hashCode;
 	}
 
 }
