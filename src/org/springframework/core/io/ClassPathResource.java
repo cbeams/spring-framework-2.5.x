@@ -75,10 +75,11 @@ public class ClassPathResource extends AbstractResource {
 	 */
 	public ClassPathResource(String path, ClassLoader classLoader) {
 		Assert.notNull(path, "Path must not be null");
-		if (path.startsWith("/")) {
-			path = path.substring(1);
+		String pathToUse = StringUtils.cleanPath(path);
+		if (pathToUse.startsWith("/")) {
+			pathToUse = pathToUse.substring(1);
 		}
-		this.path = StringUtils.cleanPath(path);
+		this.path = pathToUse;
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
