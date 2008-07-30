@@ -338,10 +338,10 @@ public abstract class DataSourceUtils {
 	/**
 	 * Return the innermost target Connection of the given Connection. If the given
 	 * Connection is a proxy, it will be unwrapped until a non-proxy Connection is
-	 * found. Else, the passed-in Connection will be returned as-is.
+	 * found. Otherwise, the passed-in Connection will be returned as-is.
 	 * @param con the Connection proxy to unwrap
 	 * @return the innermost target Connection, or the passed-in one if no proxy
-	 * @see ConnectionProxy#getTargetConnection
+	 * @see ConnectionProxy#getTargetConnection()
 	 */
 	public static Connection getTargetConnection(Connection con) {
 		Connection conToUse = con;

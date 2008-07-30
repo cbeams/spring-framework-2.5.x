@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.sql.Connection;
  * @since 1.1
  * @see TransactionAwareDataSourceProxy
  * @see LazyConnectionDataSourceProxy
+ * @see DataSourceUtils#getTargetConnection(java.sql.Connection)
  */
 public interface ConnectionProxy extends Connection {
 
