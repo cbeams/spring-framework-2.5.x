@@ -90,7 +90,23 @@ class Hessian2SkeletonInvoker extends HessianSkeletonInvoker {
 			out.setSerializerFactory(this.serializerFactory);
 		}
 
-		this.skeleton.invoke(in, out);
+		try {
+			this.skeleton.invoke(in, out);
+		}
+		finally {
+			try {
+				in.close();
+				isToUse.close();
+			}
+			catch (IOException ex) {
+			}
+			try {
+				out.close();
+				osToUse.close();
+			}
+			catch (IOException ex) {
+			}
+		}
 	}
 
 

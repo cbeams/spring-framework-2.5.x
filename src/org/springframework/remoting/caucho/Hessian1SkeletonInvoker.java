@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.caucho;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -64,7 +65,24 @@ class Hessian1SkeletonInvoker extends HessianSkeletonInvoker {
 				out.setSerializerFactory(this.serializerFactory);
 			}
 		}
-		invokeMethod.invoke(this.skeleton, new Object[] {in, out});
+		try {
+			invokeMethod.invoke(this.skeleton, new Object[] {in, out});
+		}
+		finally {
+			try {
+				in.close();
+				inputStream.close();
+			}
+			catch (IOException ex) {
+			}
+			try {
+				out.close();
+				outputStream.close();
+			}
+			catch (IOException ex) {
+			}
+		}
+
 	}
 
 }

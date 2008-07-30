@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.caucho;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
@@ -92,6 +93,16 @@ public class BurlapExporter extends RemoteExporter implements InitializingBean {
 			this.skeleton.invoke(new BurlapInput(inputStream), new BurlapOutput(outputStream));
 		}
 		finally {
+			try {
+				inputStream.close();
+			}
+			catch (IOException ex) {
+			}
+			try {
+				outputStream.close();
+			}
+			catch (IOException ex) {
+			}
 			resetThreadContextClassLoader(originalClassLoader);
 		}
 	}
