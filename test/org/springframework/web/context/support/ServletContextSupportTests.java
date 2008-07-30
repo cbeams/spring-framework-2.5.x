@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -339,6 +339,15 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(98, inner2.getAge());
 		assertEquals("namemyvarmyvar${", inner2.getName());
 		assertEquals(System.getProperty("os.name"), inner2.getTouchy());
+	}
+
+	public void testServletContextResourceLoader() {
+		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context");
+		ServletContextResourceLoader rl = new ServletContextResourceLoader(sc);
+		assertTrue(rl.getResource("/WEB-INF/web.xml").exists());
+		assertTrue(rl.getResource("WEB-INF/web.xml").exists());
+		assertTrue(rl.getResource("../context/WEB-INF/web.xml").exists());
+		assertTrue(rl.getResource("/../context/WEB-INF/web.xml").exists());
 	}
 
 	public void testServletContextResourcePatternResolver() throws IOException {
