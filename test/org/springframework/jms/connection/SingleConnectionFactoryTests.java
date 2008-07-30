@@ -475,7 +475,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
 		txSession.getTransacted();
-		txSessionControl.setReturnValue(true, 1);
+		txSessionControl.setReturnValue(true, 2);
 		txSession.rollback();
 		txSessionControl.setVoidCallable(1);
 		txSession.commit();
@@ -484,8 +484,6 @@ public class SingleConnectionFactoryTests extends TestCase {
 		txSessionControl.setVoidCallable(1);
 		con.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 		conControl.setReturnValue(nonTxSession, 1);
-		nonTxSession.getTransacted();
-		nonTxSessionControl.setReturnValue(false, 2);
 		nonTxSession.close();
 		nonTxSessionControl.setVoidCallable(1);
 		con.start();
@@ -504,7 +502,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 		scf.setReconnectOnException(false);
 		Connection con1 = scf.createConnection();
 		Session session1 = con1.createSession(true, Session.AUTO_ACKNOWLEDGE);
-		session1.close();  // should be ignored
+		session1.getTransacted();
+		session1.close();  // should lead to rollback
 		session1 = con1.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 		session1.close();  // should be ignored
 		con1.start();
@@ -540,15 +539,13 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.createQueueSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
 		txSession.getTransacted();
-		txSessionControl.setReturnValue(true, 1);
+		txSessionControl.setReturnValue(true, 2);
 		txSession.rollback();
 		txSessionControl.setVoidCallable(2);
 		txSession.close();
 		txSessionControl.setVoidCallable(1);
 		con.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);
 		conControl.setReturnValue(nonTxSession, 1);
-		nonTxSession.getTransacted();
-		nonTxSessionControl.setReturnValue(false, 2);
 		nonTxSession.close();
 		nonTxSessionControl.setVoidCallable(1);
 		con.start();
@@ -577,7 +574,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 		Session session2 = con2.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);
 		session2.close();  // should be ignored
 		session2 = con2.createSession(true, Session.AUTO_ACKNOWLEDGE);
-		session2.close();  // should be ignored
+		session2.getTransacted();
+		session2.close();  // should lead to rollback
 		con2.start();
 		con2.close();  // should be ignored
 		scf.destroy();  // should trigger actual close
@@ -603,15 +601,13 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.createTopicSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
 		txSession.getTransacted();
-		txSessionControl.setReturnValue(true, 2);
+		txSessionControl.setReturnValue(true, 4);
 		txSession.rollback();
 		txSessionControl.setVoidCallable(2);
 		txSession.close();
 		txSessionControl.setVoidCallable(1);
 		con.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
 		conControl.setReturnValue(nonTxSession, 1);
-		nonTxSession.getTransacted();
-		nonTxSessionControl.setReturnValue(false, 2);
 		nonTxSession.close();
 		nonTxSessionControl.setVoidCallable(1);
 		con.start();
@@ -630,7 +626,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 		scf.setReconnectOnException(false);
 		Connection con1 = scf.createTopicConnection();
 		Session session1 = con1.createSession(true, Session.AUTO_ACKNOWLEDGE);
-		session1.close();  // should be ignored
+		session1.getTransacted();
+		session1.close();  // should lead to rollback
 		session1 = con1.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 		session1.close();  // should be ignored
 		con1.start();
@@ -639,6 +636,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		Session session2 = con2.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
 		session2.close();  // should be ignored
 		session2 = con2.createSession(true, Session.AUTO_ACKNOWLEDGE);
+		session2.getTransacted();
 		session2.close();  // should be ignored
 		con2.start();
 		con2.close();  // should be ignored

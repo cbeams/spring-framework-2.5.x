@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.jms.connection;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSession;
@@ -30,8 +33,10 @@ import javax.jms.TopicSession;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.jms.StubQueue;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.JmsTemplate102;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.core.SessionCallback;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -355,6 +360,60 @@ public class JmsTransactionManagerTests extends TestCase {
 		});
 		tm.commit(ts);
 
+		sessionControl.verify();
+		conControl.verify();
+		cfControl.verify();
+	}
+
+	public void testTransactionCommitWithMessageProducer() throws JMSException {
+		Destination dest = new StubQueue();
+
+		MockControl cfControl = MockControl.createControl(ConnectionFactory.class);
+		ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl producerControl = MockControl.createControl(MessageProducer.class);
+		MessageProducer producer = (MessageProducer) producerControl.getMock();
+		MockControl messageControl = MockControl.createControl(Message.class);
+		final Message message = (Message) messageControl.getMock();
+
+		cf.createConnection();
+		cfControl.setReturnValue(con, 1);
+		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
+		conControl.setReturnValue(session, 1);
+		session.createProducer(dest);
+		sessionControl.setReturnValue(producer, 1);
+		producer.send(message);
+		producerControl.setVoidCallable(1);
+		session.getTransacted();
+		sessionControl.setReturnValue(true, 1);
+		session.commit();
+		sessionControl.setVoidCallable(1);
+		producer.close();
+		producerControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setVoidCallable(1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		producerControl.replay();
+		sessionControl.replay();
+		conControl.replay();
+		cfControl.replay();
+
+		JmsTransactionManager tm = new JmsTransactionManager(cf);
+		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
+		JmsTemplate jt = new JmsTemplate(cf);
+		jt.send(dest, new MessageCreator() {
+			public Message createMessage(Session session) throws JMSException {
+				return message;
+			}
+		});
+		tm.commit(ts);
+
+		producerControl.verify();
 		sessionControl.verify();
 		conControl.verify();
 		cfControl.verify();
