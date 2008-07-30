@@ -98,6 +98,9 @@ public class SingleConnectionFactory
 	/** A hint whether to create a queue or topic connection */
 	private Boolean pubSubMode;
 
+	/** Whether the shared Connection has been started */
+	private boolean started = false;
+
 	/** Synchronization monitor for the shared Connection */
 	private final Object connectionMonitor = new Object();
 
@@ -410,9 +413,15 @@ public class SingleConnectionFactory
 	 * @param con the Connection to close
 	 */
 	protected void closeConnection(Connection con) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing shared JMS Connection: " + this.target);
+		}
 		try {
 			try {
-				con.stop();
+				if (this.started) {
+					this.started = false;
+					con.stop();
+				}
 			}
 			finally {
 				con.close();
@@ -499,6 +508,14 @@ public class SingleConnectionFactory
 							"Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, " +
 							"which will allow for registering further ExceptionListeners to the recovery chain.");
 				}
+			}
+			else if (method.getName().equals("start")) {
+				// Handle start method: track started state.
+				this.target.start();
+				synchronized (connectionMonitor) {
+					started = true;
+				}
+				return null;
 			}
 			else if (method.getName().equals("stop")) {
 				// Handle stop method: don't pass the call on.
