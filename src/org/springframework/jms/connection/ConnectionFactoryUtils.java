@@ -86,6 +86,24 @@ public abstract class ConnectionFactoryUtils {
 	}
 
 	/**
+	 * Return the innermost target Session of the given Session. If the given
+	 * Session is a proxy, it will be unwrapped until a non-proxy Session is
+	 * found. Otherwise, the passed-in Session will be returned as-is.
+	 * @param session the Session proxy to unwrap
+	 * @return the innermost target Session, or the passed-in one if no proxy
+	 * @see SessionProxy#getTargetSession()
+	 */
+	public static Session getTargetSession(Session session) {
+		Session sessionToUse = session;
+		while (sessionToUse instanceof SessionProxy) {
+			sessionToUse = ((SessionProxy) sessionToUse).getTargetSession();
+		}
+		return sessionToUse;
+	}
+
+
+
+	/**
 	 * Determine whether the given JMS Session is transactional, that is,
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param session the JMS Session to check
