@@ -447,20 +447,19 @@ public class BeanDefinitionParserDelegate {
 	public AbstractBeanDefinition parseBeanDefinitionElement(
 			Element ele, String beanName, BeanDefinition containingBean) {
 
+		this.parseState.push(new BeanEntry(beanName));
+
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
 		}
-		String parent = null;
-		if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
-			parent = ele.getAttribute(PARENT_ATTRIBUTE);
-		}
 
 		try {
-			this.parseState.push(new BeanEntry(beanName));
-
-			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					parent, className, this.readerContext.getBeanClassLoader());
+			String parent = null;
+			if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
+				parent = ele.getAttribute(PARENT_ATTRIBUTE);
+			}
+			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
 
 			if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
 				// Spring 2.x "scope" attribute
@@ -579,6 +578,20 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Create a bean definition for the given class name and parent name.
+	 * @param className the name of the bean class
+	 * @param parentName the name of the bean's parent bean
+	 * @return the newly created bean definition
+	 * @throws ClassNotFoundException if bean class resolution was attempted but failed
+	 */
+	protected AbstractBeanDefinition createBeanDefinition(String className, String parentName)
+			throws ClassNotFoundException {
+
+		return BeanDefinitionReaderUtils.createBeanDefinition(
+				parentName, className, this.readerContext.getBeanClassLoader());
 	}
 
 	public void parseMetaElements(Element ele, BeanMetadataAttributeAccessor attributeAccessor) {
