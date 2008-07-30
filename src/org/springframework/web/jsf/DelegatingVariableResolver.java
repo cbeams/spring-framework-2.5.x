@@ -28,9 +28,11 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * JSF 1.1 <code>VariableResolver</code> that first delegates to the Spring
- * root <code>WebApplicationContext</code>, then to the original resolver
- * of the underlying JSF implementation.
+ * JSF 1.1 <code>VariableResolver</code> that first delegates to the
+ * original resolver of the underlying JSF implementation (for resolving
+ * managed-bean objects as defined in <code>faces-config.xml</code>
+ * as well as well-known implicit EL attributes), then to the Spring
+ * root <code>WebApplicationContext</code> (for resolving Spring beans).
  *
  * <p>Configure this resolver in your <code>faces-config.xml</code> file as follows:
  *
