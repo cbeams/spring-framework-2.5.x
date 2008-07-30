@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,11 +64,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@link TransactionAwareConnectionFactoryProxy} for your target ConnectionFactory,
  * which will automatically participate in Spring-managed transactions.
  *
- * <p>This transaction strategy will typically be used in combination with
- * {@link SingleConnectionFactory}, which uses a single JMS Connection for all
- * JMS access in order to avoid the overhead of repeated Connection creation,
- * typically in a standalone application. Each transaction will then share the
- * same JMS Connection, while still using its own individual JMS Session.
+ * <p><b>The use of {@link CachingConnectionFactory} as a target for this
+ * transaction manager is strongly recommended.</b> CachingConnectionFactory
+ * uses a single JMS Connection for all JMS access in order to avoid the overhead
+ * of repeated Connection creation, as well as maintaining a cache of Sessions.
+ * Each transaction will then share the same JMS Connection, while still using
+ * its own individual JMS Session.
+ *
+ * <p>The use of a <i>raw</i> target ConnectionFactory would not only be inefficient
+ * because of the lack of resource reuse. It might also lead to strange effects
+ * when your JMS driver doesn't accept <code>MessageProducer.close()</code> calls
+ * and/or <code>MessageConsumer.close()</code> calls before <code>Session.commit()</code>,
+ * with the latter supposed to commit all the messages that have been sent through the
+ * producer handle and received through the consumer handle. As a safe general solution,
+ * always pass in a {@link CachingConnectionFactory} into this transaction manager's
+ * {@link #setConnectionFactory "connectionFactory"} property.
  *
  * <p>Transaction synchronization is turned off by default, as this manager might
  * be used alongside a datastore-based Spring transaction manager such as the
