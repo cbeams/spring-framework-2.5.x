@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.test.context.junit4;
 
+import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,29 +30,27 @@ import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
- * <p>
  * Verifies proper handling of JUnit's {@link org.junit.Ignore @Ignore} and
  * Spring's
  * {@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}
  * and {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
  * (with the <em>implicit, default {@link ProfileValueSource}</em>)
  * annotations in conjunction with the {@link SpringJUnit4ClassRunner}.
- * </p>
- * <p>
- * Note that {@link TestExecutionListeners @TestExecutionListeners} is
+ *
+ * <p>Note that {@link TestExecutionListeners @TestExecutionListeners} is
  * explicitly configured with an empty list, thus disabling all default
  * listeners.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
  * @see HardCodedProfileValueSourceSpringRunnerTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@TestExecutionListeners( {})
+@TestExecutionListeners({})
 public class EnabledAndIgnoredSpringRunnerTests {
 
 	protected static final String NAME = "EnabledAndIgnoredSpringRunnerTests.profile_value.name";
+
 	protected static final String VALUE = "enigma";
 
 	protected static int numTestsExecuted = 0;
@@ -100,4 +97,5 @@ public class EnabledAndIgnoredSpringRunnerTests {
 		numTestsExecuted++;
 		fail("The body of an ignored test should never be executed!");
 	}
+
 }

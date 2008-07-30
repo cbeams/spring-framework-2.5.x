@@ -56,7 +56,8 @@ public abstract class ProfileValueUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static ProfileValueSource retrieveProfileValueSource(Class<?> testClass) {
-		Assert.notNull(testClass, "Can not retrieve a ProfileValueSource for a NULL class.");
+		Assert.notNull(testClass, "testClass must not be null");
+
 		Class<ProfileValueSourceConfiguration> annotationType = ProfileValueSourceConfiguration.class;
 		ProfileValueSourceConfiguration config = testClass.getAnnotation(annotationType);
 		if (logger.isDebugEnabled()) {
@@ -99,8 +100,49 @@ public abstract class ProfileValueUtils {
 	/**
 	 * Determine if the supplied <code>testMethod</code> is <em>enabled</em>
 	 * in the current environment, as specified by the
+	 * {@link IfProfileValue @IfProfileValue} annotation at the class level.
+	 * <p>Defaults to <code>true</code> if no
+	 * {@link IfProfileValue @IfProfileValue} annotation is declared.
+	 * @param testClass the test class
+	 * @return <code>true</code> if the test is <em>enabled</em> in the current environment
+	 */
+	public static boolean isTestEnabledInThisEnvironment(Class<?> testClass) {
+		IfProfileValue ifProfileValue = testClass.getAnnotation(IfProfileValue.class);
+		if (ifProfileValue == null) {
+			return true;
+		}
+		ProfileValueSource profileValueSource = retrieveProfileValueSource(testClass);
+		return isTestEnabledInThisEnvironment(profileValueSource, ifProfileValue);
+	}
+
+	/**
+	 * Determine if the supplied <code>testMethod</code> is <em>enabled</em>
+	 * in the current environment, as specified by the
 	 * {@link IfProfileValue @IfProfileValue} annotation, which may be declared
-	 * on the test method itself or at the class-level.
+	 * on the test method itself or at the class level.
+	 * <p>Defaults to <code>true</code> if no
+	 * {@link IfProfileValue @IfProfileValue} annotation is declared.
+	 * @param testMethod the test method
+	 * @param testClass the test class
+	 * @return <code>true</code> if the test is <em>enabled</em> in the current environment
+	 */
+	public static boolean isTestEnabledInThisEnvironment(Method testMethod, Class<?> testClass) {
+		IfProfileValue ifProfileValue = testMethod.getAnnotation(IfProfileValue.class);
+		if (ifProfileValue == null) {
+			ifProfileValue = testClass.getAnnotation(IfProfileValue.class);
+			if (ifProfileValue == null) {
+				return true;
+			}
+		}
+		ProfileValueSource profileValueSource = retrieveProfileValueSource(testClass);
+		return isTestEnabledInThisEnvironment(profileValueSource, ifProfileValue);
+	}
+
+	/**
+	 * Determine if the supplied <code>testMethod</code> is <em>enabled</em>
+	 * in the current environment, as specified by the
+	 * {@link IfProfileValue @IfProfileValue} annotation, which may be declared
+	 * on the test method itself or at the class level.
 	 * <p>Defaults to <code>true</code> if no
 	 * {@link IfProfileValue @IfProfileValue} annotation is declared.
 	 * @param profileValueSource the ProfileValueSource to use to determine if
@@ -115,10 +157,24 @@ public abstract class ProfileValueUtils {
 		IfProfileValue ifProfileValue = testMethod.getAnnotation(IfProfileValue.class);
 		if (ifProfileValue == null) {
 			ifProfileValue = testClass.getAnnotation(IfProfileValue.class);
+			if (ifProfileValue == null) {
+				return true;
+			}
 		}
-		if (ifProfileValue == null) {
-			return true;
-		}
+		return isTestEnabledInThisEnvironment(profileValueSource, ifProfileValue);
+	}
+
+	/**
+	 * Determine if the supplied <code>testMethod</code> is <em>enabled</em>
+	 * in the current environment, as specified by the given
+	 * {@link IfProfileValue @IfProfileValue} annotation.
+	 * @param profileValueSource the ProfileValueSource to use to determine if
+	 * the test is enabled
+	 * @param ifProfileValue the annotation to introspect
+	 * @return <code>true</code> if the test is <em>enabled</em> in the current environment
+	 */
+	private static boolean isTestEnabledInThisEnvironment(
+			ProfileValueSource profileValueSource, IfProfileValue ifProfileValue) {
 
 		String environmentValue = profileValueSource.get(ifProfileValue.name());
 		String[] annotatedValues = ifProfileValue.values();

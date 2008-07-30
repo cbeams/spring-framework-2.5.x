@@ -53,8 +53,6 @@ class SpringTestMethod {
 
 	private final Method method;
 
-	private final ProfileValueSource profileValueSource;
-
 	private final TestClass testClass;
 
 
@@ -68,7 +66,6 @@ class SpringTestMethod {
 	public SpringTestMethod(Method method, TestClass testClass) {
 		this.method = method;
 		this.testClass = testClass;
-		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(testClass.getJavaClass());
 	}
 
 
@@ -170,8 +167,7 @@ class SpringTestMethod {
 	 */
 	public boolean isIgnored() {
 		return (getMethod().isAnnotationPresent(Ignore.class) ||
-				!ProfileValueUtils.isTestEnabledInThisEnvironment(
-						this.profileValueSource, this.method, this.testClass.getJavaClass()));
+				!ProfileValueUtils.isTestEnabledInThisEnvironment(this.method, this.testClass.getJavaClass()));
 	}
 
 	/**

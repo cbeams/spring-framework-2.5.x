@@ -26,6 +26,7 @@ import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 
+import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.context.TestContextManager;
 
 /**
@@ -77,6 +78,23 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "].");
 		}
 		this.testContextManager = createTestContextManager(clazz);
+	}
+
+
+	@Override
+	/**
+	 * Check whether the test is enabled in the first place. This prevents classes with
+	 * a non-matching <code>@IfProfileValue</code> annotation from running altogether,
+	 * even skipping the execution of <code>prepareTestInstance</code> listener methods.
+	 * @see org.springframework.test.annotation.IfProfileValue
+	 * @see org.springframework.test.context.TestExecutionListener
+	 */
+	public void run(RunNotifier notifier) {
+		if (!ProfileValueUtils.isTestEnabledInThisEnvironment(getTestClass().getJavaClass())) {
+			notifier.fireTestIgnored(getDescription());
+			return;
+		}
+		super.run(notifier);
 	}
 
 	/**
