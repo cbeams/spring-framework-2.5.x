@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.6 (2008-07-30)
+Changes in version 2.5.6 (2008-08-06)
 -------------------------------------
 
 General
@@ -20,11 +20,13 @@ Package org.springframework.beans
 * AbstractBeanFactory rejects getBean request with arguments in case of a pre-existing singleton of same name as well
 * AbstractAutowireCapableBeanFactory preserves possible matches hint in property exception
 * ServiceLocatorFactoryBean handles equals and hashCode based on proxy object identity
+* factored out "createBeanDefinition" template method in BeanDefinitionParserDelegate
 
 Package org.springframework.cache
 * EhCacheFactoryBean obtains decorated Ehcache instead of raw Cache, honoring pre-configured cache decorators
 
 Package org.springframework.context
+* DefaultMessageSourceResolvable and FieldError implement "equals" and "hashCode" such that all fields are respected
 * ClassPathBeanDefinitionScanner performs trace/debug logging during class resource introspection
 * component-scan preserves original source of scanned bean definitions, for silently ignoring already scanned classes
 
@@ -33,34 +35,51 @@ Package org.springframework.instrument
 
 Package org.springframework.jdbc
 * JdbcTemplate passes full Calendar argument to JDBC driver even in case of no SQL type specified
+* added "checkFullyPopulated" setting to BeanPropertyRowMapper, for validating that all bean properties have been mapped
 
 Package org.springframework.jms
 * JmsException message and logged JMSException message explicitly includes linked exception now if not already contained
+* SingleConnectionFactory only calls "Connection.stop()" on reset when the shared Connection has actually been started
 * SingleConnectionFactory explicitly creates Queue/TopicConnection when first call is createQueue/TopicConnection method
 * CachingConnectionFactory explicitly creates Queue/TopicSession when first call is createQueue/TopicConnection method
+* CachingConnectionFactory's JMS Session proxies implement SessionProxy interface, allowing for access to target Session
 * CachingConnectionFactory rolls back cached transacted JMS Sessions on logical close if no commit/rollback was issued
 * CachingConnectionFactory explicitly closes cached JMS Sessions on Connection close
+* CachingConnectionFactory's cached producers pass on "disableMessageID" and "disableMessageTimestamp" properties
+* CachingConnectionFactory also caches MessageConsumers (controlled through "cacheConsumers" property)
 * AbstractJmsListeningContainer eagerly clears shared JMS Connection after releasing, avoiding repeated close exceptions
 
 Package org.springframework.jmx
 * added "environment" property to MBeanClientInterceptor and NotificationListenerRegistar, allowing for JMX env entries
+* added "refreshOnConnectFailure" property to MBeanClientInterceptor, allowing for reconnect in case of I/O failure
 
 Package org.springframework.orm
+* HibernateTemplate detects Spring-managed transactional Session even with SessionFactory proxy and allowCreate=false
 * HibernateTemplate's "loadAll" operation selects distinct root entities (avoiding duplicate entries in result list)
 * added "packagesToScan" property to Hibernate AnnotationSessionFactoryBean, for autodetection of @Entity classes
 
 Package org.springframework.remoting
 * added "interceptors" property to RemoteExporter, allowing for registering custom AOP interceptors before the endpoint
 * RmiClientInterceptor always logs connect failure at warn level, even when debug logging (incl. stacktrace) is active
+* Hessian/Burlap service exporters explicitly close input and output streams now (not relying on servlet container)
 
 Package org.springframework.scheduling
 * SchedulerFactoryBean populates scheduler context first before satisfying SchedulerContextAware on a given JobFactory
 
+Package org.springframework.test
+* SpringJUnit4ClassRunner skips execution of test classes with non-matching @IfProfileValue annotation completely
+
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager resumes after any kind of inner begin failure (not just after TransactionException)
 
+Package org.springframework.util
+* "StringUtils.cleanPath" preserves leading slash if given in original path
+
 Package org.springframework.web
+* PortletContextResource cleans given path (analogous to ServletContextResource)
+* Servlet/PortletContextResource accept path with leading "/../" part as well (as accepted by most servlet containers)
 * DispatcherServlet removes error-view-driven servlet request attributes after rendering (for Tomcat compatibility)
+* added "cacheSecondsForSessionAttributeHandlers" property to AnnotationMethodHandlerAdapter
 * Portlet AbstractCommandController falls back to lazy command creation if session timed out after action phase
 * ByteArray/StringMultipartFileEditor do not log warning but rather include root cause in IllegalArgumentException
 * made RedirectView's "renderMergedOutputModel" implementation non-final
