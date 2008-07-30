@@ -21,10 +21,12 @@ import java.util.List;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.test.ConcretePerson;
+import org.springframework.jdbc.core.test.ExtendedPerson;
 import org.springframework.jdbc.core.test.Person;
 
 /**
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
@@ -58,6 +60,33 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		assertEquals(1, result.size());
 		ConcretePerson bean = (ConcretePerson) result.get(0);
 		verifyConcretePerson(bean);
+	}
+
+	public void testMappingWithNoUnpopulatedFieldsFound() throws SQLException {
+		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper(ConcretePerson.class, true));
+		assertEquals(1, result.size());
+		ConcretePerson bean = (ConcretePerson) result.get(0);
+		verifyConcretePerson(bean);
+	}
+
+	public void testMappingWithUnpopulatedFieldsNotChecked() throws SQLException {
+		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper(ExtendedPerson.class));
+		assertEquals(1, result.size());
+		ExtendedPerson bean = (ExtendedPerson) result.get(0);
+		verifyConcretePerson(bean);
+	}
+
+	public void testMappingWithUnpopulatedFieldsNotAccepted() throws SQLException {
+		try {
+			List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
+					new BeanPropertyRowMapper(ExtendedPerson.class, true));
+			fail("Should have thrown InvalidDataAccessApiUsageException because of missing field");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// expected
+		}
 	}
 
 }

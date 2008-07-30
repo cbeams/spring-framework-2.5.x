@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */	
+ */
 
 package org.springframework.jdbc.core;
 
@@ -21,7 +21,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,25 +67,44 @@ public class BeanPropertyRowMapper implements RowMapper {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** The class we are mapping to */
-	protected Class mappedClass;
+	private Class mappedClass;
+
+	/** Whether we're strictly validating */
+	private boolean checkFullyPopulated = false;
 
 	/** Map of the fields we provide mapping for */
 	private Map mappedFields;
 
+	/** Set of bean properties we provide mapping for */
+	private Set mappedProperties;
+
 
 	/**
-	 * Create a new BeanPropertyRowMapper.
+	 * Create a new BeanPropertyRowMapper for bean-style configuration.
 	 * @see #setMappedClass
+	 * @see #setCheckFullyPopulated
 	 */
 	public BeanPropertyRowMapper() {
 	}
 
 	/**
-	 * Create a new BeanPropertyRowMapper.
-	 * @param mappedClass the class that each row should be mapped to.
+	 * Create a new BeanPropertyRowMapper, accepting unpopulated properties
+	 * in the target bean.
+	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public BeanPropertyRowMapper(Class mappedClass) {
 		initialize(mappedClass);
+	}
+
+	/**
+	 * Create a new BeanPropertyRowMapper.
+	 * @param mappedClass the class that each row should be mapped to
+	 * @param checkFullyPopulated whether we're strictly validating that
+	 * all bean properties have been mapped from corresponding database fields
+	 */
+	public BeanPropertyRowMapper(Class mappedClass, boolean checkFullyPopulated) {
+		initialize(mappedClass);
+		this.checkFullyPopulated = checkFullyPopulated;
 	}
 
 
@@ -109,6 +130,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 	protected void initialize(Class mappedClass) {
 		this.mappedClass = mappedClass;
 		this.mappedFields = new HashMap();
+		this.mappedProperties = new HashSet();
 		PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
 		for (int i = 0; i < pds.length; i++) {
 			PropertyDescriptor pd = pds[i];
@@ -118,6 +140,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 				if (!pd.getName().toLowerCase().equals(underscoredName)) {
 					this.mappedFields.put(underscoredName, pd);
 				}
+				this.mappedProperties.add(pd.getName());
 			}
 		}
 	}
@@ -153,6 +176,24 @@ public class BeanPropertyRowMapper implements RowMapper {
 		return this.mappedClass;
 	}
 
+	/**
+	 * Set whether we're strictly validating that all bean properties have been
+	 * mapped from corresponding database fields.
+	 * <p>Default is <code>false</code>, accepting unpopulated properties in the
+	 * target bean.
+	 */
+	public void setCheckFullyPopulated(boolean checkFullyPopulated) {
+		this.checkFullyPopulated = checkFullyPopulated;
+	}
+
+	/**
+	 * Return whether we're strictly validating that all bean properties have been
+	 * mapped from corresponding database fields.
+	 */
+	public boolean isCheckFullyPopulated() {
+		return this.checkFullyPopulated;
+	}
+
 
 	/**
 	 * Extract the values for all columns in the current row.
@@ -167,6 +208,8 @@ public class BeanPropertyRowMapper implements RowMapper {
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
+		Set populatedProperties = (isCheckFullyPopulated() ? new HashSet() : null);
+
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index).toLowerCase();
 			PropertyDescriptor pd = (PropertyDescriptor) this.mappedFields.get(column);
@@ -178,12 +221,20 @@ public class BeanPropertyRowMapper implements RowMapper {
 								pd.getName() + "' of type " + pd.getPropertyType());
 					}
 					bw.setPropertyValue(pd.getName(), value);
+					if (populatedProperties != null) {
+						populatedProperties.add(pd.getName());
+					}
 				}
 				catch (NotWritablePropertyException ex) {
 					throw new DataRetrievalFailureException(
 							"Unable to map column " + column + " to property " + pd.getName(), ex);
 				}
 			}
+		}
+
+		if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
+			throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all fields " +
+					"necessary to populate object of class [" + this.mappedClass + "]: " + this.mappedProperties);
 		}
 
 		return mappedObject;

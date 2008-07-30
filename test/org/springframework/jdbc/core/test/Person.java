@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.core.test;
 
 import java.math.BigDecimal;
 
 /**
- * @author trisberg
+ * @author Thomas Risberg
  */
 public class Person {
+
 	private String name;
+
 	private long age;
+
 	private java.util.Date birth_date;
+
 	private BigDecimal balance;
 
 
@@ -58,4 +63,5 @@ public class Person {
 	public void setBalance(BigDecimal balanace) {
 		this.balance = balanace;
 	}
+
 }

@@ -16,22 +16,20 @@
 
 package org.springframework.jdbc.core.test;
 
-import java.math.BigDecimal;
-
 /**
- * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
-public class ConcretePerson extends AbstractPerson {
+public class ExtendedPerson extends ConcretePerson {
 
-	private BigDecimal balance;
+	private Object someField;
 
 
-	public BigDecimal getBalance() {
-		return balance;
+	public Object getSomeField() {
+		return someField;
 	}
 
-	public void setBalance(BigDecimal balance) {
-		this.balance = balance;
+	public void setSomeField(Object someField) {
+		this.someField = someField;
 	}
 
 }
