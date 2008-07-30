@@ -26,8 +26,8 @@ import javax.jms.Topic;
 import javax.jms.TopicPublisher;
 
 /**
- * JMS MessageProducer decorator that adapts specific settings
- * to a shared MessageProducer instance underneath.
+ * JMS MessageProducer decorator that adapts calls to a shared MessageProducer
+ * instance underneath, managing QoS settings locally within the decorator.
  *
  * @author Juergen Hoeller
  * @since 2.5.3
@@ -36,11 +36,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 
 	private final MessageProducer target;
 
-	private boolean disableMessageID;
-
 	private Boolean originalDisableMessageID;
-
-	private boolean disableMessageTimestamp;
 
 	private Boolean originalDisableMessageTimestamp;
 
@@ -59,26 +55,26 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	}
 
 
-	public void setDisableMessageID(boolean disableMessageID) {
+	public void setDisableMessageID(boolean disableMessageID) throws JMSException {
 		if (this.originalDisableMessageID == null) {
-			this.originalDisableMessageID = Boolean.valueOf(this.disableMessageID);
+			this.originalDisableMessageID = Boolean.valueOf(this.target.getDisableMessageID());
 		}
-		this.disableMessageID = disableMessageID;
+		this.target.setDisableMessageID(disableMessageID);
 	}
 
-	public boolean getDisableMessageID() {
-		return this.disableMessageID;
+	public boolean getDisableMessageID() throws JMSException {
+		return this.target.getDisableMessageID();
 	}
 
-	public void setDisableMessageTimestamp(boolean disableMessageTimestamp) {
+	public void setDisableMessageTimestamp(boolean disableMessageTimestamp) throws JMSException {
 		if (this.originalDisableMessageTimestamp == null) {
-			this.originalDisableMessageTimestamp = Boolean.valueOf(this.disableMessageTimestamp);
+			this.originalDisableMessageTimestamp = Boolean.valueOf(this.target.getDisableMessageTimestamp());
 		}
-		this.disableMessageTimestamp = disableMessageTimestamp;
+		this.target.setDisableMessageTimestamp(disableMessageTimestamp);
 	}
 
-	public boolean getDisableMessageTimestamp() {
-		return this.disableMessageTimestamp;
+	public boolean getDisableMessageTimestamp() throws JMSException {
+		return this.target.getDisableMessageTimestamp();
 	}
 
 	public void setDeliveryMode(int deliveryMode) {
@@ -167,6 +163,11 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 			this.target.setDisableMessageTimestamp(this.originalDisableMessageTimestamp.booleanValue());
 			this.originalDisableMessageTimestamp = null;
 		}
+	}
+
+
+	public String toString() {
+		return "Cached JMS MessageProducer: " + this.target;
 	}
 
 }
