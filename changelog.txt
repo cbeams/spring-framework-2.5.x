@@ -69,6 +69,7 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * RemoteAccessException explicitly declares serialVersionUID (for serialization compatibility on WebLogic)
 * fixed Hessian/BurlapServiceExporter to throw HttpRequestMethodNotSupportedException with correct method value
+* RmiClientInterceptor always logs connect failure at warn level, even when debug logging (incl. stacktrace) is active
 
 Package org.springframework.scheduling
 * MethodInvokingRunnable logs target exception directly at error level (instead of InvocationTargetException wrapper)
@@ -90,6 +91,8 @@ Package org.springframework.web
 * ServletRequestAttributes keeps hold onto the original session if a "request.getSession" call suddenly returns null
 * OncePerRequestFilter cleans up its marker attribute at the end of each outer request (for Portlet compatibility)
 * AbstractTemplateView catches "HttpServletResponse.getContentType()" exceptions (for JBoss Portal compatibility)
+* revised XsltView to specify full resource URI as StreamSource system id, for properly resolving relative paths
+* revised error logging during XSLT processing to properly log compilation errors before an eventual fatal exception
 * InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
 * fixed AbstractJasperReportsView to fully isolate a model-specified JDBC DataSource (not setting it as view DataSource)
 * fixed JSP form tags to properly return SKIP_BODY instead of the non-defined EVAL_PAGE (for WebLogic compatibility)
