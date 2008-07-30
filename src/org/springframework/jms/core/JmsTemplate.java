@@ -936,13 +936,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Create a JMS MessageProducer for the given Session and Destination,
 	 * configuring it to disable message ids and/or timestamps (if necessary).
-	 * <p>Delegates to <code>doCreateProducer</code> for creation of the raw
+	 * <p>Delegates to {@link #doCreateProducer} for creation of the raw
 	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
 	 * @param session the JMS Session to create a MessageProducer for
 	 * @param destination the JMS Destination to create a MessageProducer for
 	 * @return the new JMS MessageProducer
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see #doCreateProducer
 	 * @see #setMessageIdEnabled
 	 * @see #setMessageTimestampEnabled
 	 */
@@ -995,14 +994,13 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Create a JMS MessageProducer for the given Session and Destination,
 	 * configuring it to disable message ids and/or timestamps (if necessary).
-	 * <p>Delegates to <code>doCreateProducer</code> for creation of the raw
+	 * <p>Delegates to {@link #doCreateProducer} for creation of the raw
 	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
 	 * @param session the JMS Session to create a QueueBrowser for
 	 * @param queue the JMS Queue to create a QueueBrowser for
 	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
 	 * @return the new JMS QueueBrowser
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see #doCreateProducer
 	 * @see #setMessageIdEnabled
 	 * @see #setMessageTimestampEnabled
 	 */
