@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -79,6 +82,8 @@ import org.springframework.util.StringUtils;
  * @see #setPropertyPath
  */
 public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, BeanFactoryAware {
+
+	private static final Log logger = LogFactory.getLog(PropertyPathFactoryBean.class);
 
 	private BeanWrapper targetBeanWrapper;
 
@@ -187,7 +192,14 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 
 	public Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;
-		if (target == null) {
+		if (target != null) {
+			if (logger.isWarnEnabled() && this.beanFactory instanceof ConfigurableBeanFactory &&
+					((ConfigurableBeanFactory) this.beanFactory).isCurrentlyInCreation(this.targetBeanName)) {
+				logger.warn("Target bean '" + this.targetBeanName + "' is still in creation due to a circular " +
+						"reference - obtained value for property '" + this.propertyPath + "' may be outdated!");
+			}
+		}
+		else {
 			// Fetch prototype target bean...
 			Object bean = this.beanFactory.getBean(this.targetBeanName);
 			target = PropertyAccessorFactory.forBeanPropertyAccess(bean);
