@@ -341,23 +341,26 @@ public class HandlerMethodInvoker {
 			ExtendedModelMap implicitModel, NativeWebRequest webRequest, Object handler) throws Exception {
 
 		// Bind request parameter onto object...
-		if ("".equals(attrName)) {
-			attrName = Conventions.getVariableNameForParameter(methodParam);
+		String name = attrName;
+		if ("".equals(name)) {
+			name = Conventions.getVariableNameForParameter(methodParam);
 		}
 		Class paramType = methodParam.getParameterType();
-		if (!implicitModel.containsKey(attrName) && this.methodResolver.isSessionAttribute(attrName, paramType)) {
-			Object sessionAttr = this.sessionAttributeStore.retrieveAttribute(webRequest, attrName);
-			if (sessionAttr == null) {
-				raiseSessionRequiredException("Session attribute '" + attrName + "' required - not found in session");
-			}
-			implicitModel.addAttribute(attrName, sessionAttr);
+		Object bindObject = null;
+		if (implicitModel.containsKey(name)) {
+			bindObject = implicitModel.get(name);
 		}
-		Object bindObject = implicitModel.get(attrName);
-		if (bindObject == null) {
+		else if (this.methodResolver.isSessionAttribute(name, paramType)) {
+			bindObject = this.sessionAttributeStore.retrieveAttribute(webRequest, name);
+			if (bindObject == null) {
+				raiseSessionRequiredException("Session attribute '" + name + "' required - not found in session");
+			}
+		}
+		else {
 			bindObject = BeanUtils.instantiateClass(paramType);
 		}
-		WebDataBinder binder = createBinder(webRequest, bindObject, attrName);
-		initBinder(handler, attrName, binder, webRequest);
+		WebDataBinder binder = createBinder(webRequest, bindObject, name);
+		initBinder(handler, name, binder, webRequest);
 		return binder;
 	}
 
