@@ -150,6 +150,9 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/** The autodetect mode to use for this MBeanExporter */
 	private Integer autodetectMode;
 
+	/** Whether to eagerly init candidate beans when autodetecting MBeans */
+	private boolean allowEagerInit = false;
+
 	/** Indicates whether Spring should modify generated ObjectNames */
 	private boolean ensureUniqueRuntimeObjectNames = true;
 
@@ -217,7 +220,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Sets the autodetection mode to use.
+	 * Set the autodetection mode to use.
 	 * @exception IllegalArgumentException if the supplied value is not
 	 * one of the <code>AUTODETECT_</code> constants
 	 * @see #setAutodetectModeName(String)
@@ -234,7 +237,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Sets the autodetection mode to use by name.
+	 * Set the autodetection mode to use by name.
 	 * @exception IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the <code>AUTODETECT_</code> constants or is <code>null</code>
 	 * @see #setAutodetectMode(int)
@@ -248,6 +251,17 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			throw new IllegalArgumentException("Only autodetect constants allowed");
 		}
 		this.autodetectMode = (Integer) constants.asNumber(constantName);
+	}
+
+	/**
+	 * Specify whether to allow eager initialization of candidate beans
+	 * when autodetecting MBeans in the Spring application context.
+	 * <p>Default is "false", respecting lazy-init flags on bean definitions.
+	 * Switch this to "true" in order to search lazy-init beans as well,
+	 * including FactoryBean-produced objects that haven't been initialized yet.
+	 */
+	public void setAllowEagerInit(boolean allowEagerInit) {
+		this.allowEagerInit = allowEagerInit;
 	}
 
 	/**
@@ -874,7 +888,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * whether to include a bean or not
 	 */
 	private void autodetect(AutodetectCallback callback) {
-		String[] beanNames = this.beanFactory.getBeanNamesForType(Object.class, true, false);
+		String[] beanNames = this.beanFactory.getBeanNamesForType(Object.class, true, this.allowEagerInit);
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
 			if (!isExcluded(beanName)) {
