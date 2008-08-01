@@ -158,11 +158,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean synthetic = false;
 
+	private int role = BeanDefinition.ROLE_APPLICATION;
+
 	private String description;
 
 	private Resource resource;
-
-	private int role = BeanDefinition.ROLE_APPLICATION;
 
 
 	/**
@@ -204,10 +204,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setScope(original.getScope());
 		setAbstract(original.isAbstract());
 		setLazyInit(original.isLazyInit());
+		setRole(original.getRole());
 		setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
 		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
 		setSource(original.getSource());
-		setRole(original.getRole());
 		copyAttributesFrom(original);
 
 		if (original instanceof AbstractBeanDefinition) {
@@ -274,10 +274,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setScope(other.getScope());
 		setAbstract(other.isAbstract());
 		setLazyInit(other.isLazyInit());
+		setRole(other.getRole());
 		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
 		getPropertyValues().addPropertyValues(other.getPropertyValues());
 		setSource(other.getSource());
-		setRole(other.getRole());
 		copyAttributesFrom(other);
 
 		if (other instanceof AbstractBeanDefinition) {
@@ -791,6 +791,21 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
+	 * Set the role hint for this <code>BeanDefinition</code>.
+	 */
+	public void setRole(int role) {
+		this.role = role;
+	}
+
+	/**
+	 * Return the role hint for this <code>BeanDefinition</code>.
+	 */
+	public int getRole() {
+		return this.role;
+	}
+
+
+	/**
 	 * Set a human-readable description of this bean definition.
 	 */
 	public void setDescription(String description) {
@@ -839,21 +854,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		return (this.resource instanceof BeanDefinitionResource ?
 				((BeanDefinitionResource) this.resource).getBeanDefinition() : null);
 	}
-
-	/**
-	 * Set the role hint for this <code>BeanDefinition</code>.
-	 */
-	public void setRole(int role) {
-		this.role = role;
-	}
-
-	/**
-	 * Return the role hint for this <code>BeanDefinition</code>.
-	 */
-	public int getRole() {
-		return this.role;
-	}
-
 
 	/**
 	 * Validate this bean definition.
@@ -959,7 +959,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (this.enforceDestroyMethod != that.enforceDestroyMethod) return false;
 
 		if (this.synthetic != that.synthetic) return false;
-		if (!ObjectUtils.nullSafeEquals(this.resource, that.resource)) return false;
 		if (this.role != that.role) return false;
 
 		return super.equals(other);

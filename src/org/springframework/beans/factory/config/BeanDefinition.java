@@ -187,6 +187,16 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	boolean isLazyInit();
 
 	/**
+	 * Get the role hint for this <code>BeanDefinition</code>. The role hint
+	 * provides tools with an indication of the importance of a particular
+	 * <code>BeanDefinition</code>.
+	 * @see #ROLE_APPLICATION
+	 * @see #ROLE_INFRASTRUCTURE
+	 * @see #ROLE_SUPPORT
+	 */
+	int getRole();
+
+	/**
 	 * Return a human-readable description of this bean definition.
 	 */
 	String getDescription();
@@ -204,15 +214,5 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * originator chain to find the original BeanDefinition as defined by the user.
 	 */
 	BeanDefinition getOriginatingBeanDefinition();
-
-	/**
-	 * Get the role hint for this <code>BeanDefinition</code>. The role hint
-	 * provides tools with an indication of the importance of a particular
-	 * <code>BeanDefinition</code>.
-	 * @see #ROLE_APPLICATION
-	 * @see #ROLE_INFRASTRUCTURE
-	 * @see #ROLE_SUPPORT
-	 */
-	int getRole();
 
 }
