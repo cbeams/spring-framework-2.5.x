@@ -130,8 +130,7 @@ public abstract class NamedParameterUtils {
 	 * @param position current position of statement
 	 * @return next position to process after any comments or quotes are skipped
 	 */
-	private static int skipCommentsAndQuotes(final char[] statement, final int position) {
-
+	private static int skipCommentsAndQuotes(char[] statement, int position) {
 		for (int i = 0; i < START_SKIP.length; i++) {
 			if (statement[position] == START_SKIP[i].charAt(0)) {
 				boolean match = true;
@@ -149,7 +148,7 @@ public abstract class NamedParameterUtils {
 							int endPos = m;
 							for (int n = 1; n < STOP_SKIP[i].length(); n++) {
 								if (m + n >= statement.length) {
-									//last comment not closed properly
+									// last comment not closed properly
 									return statement.length;
 								}
 								if (!(statement[m + n] == STOP_SKIP[i].charAt(n))) {

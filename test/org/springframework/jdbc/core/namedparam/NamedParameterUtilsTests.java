@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -33,7 +33,6 @@ import org.springframework.test.AssertThrows;
 public class NamedParameterUtilsTests extends TestCase {
 
 	public void testParseSql() {
-
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals("xxx ? yyyy ? ? ? zzzzz", NamedParameterUtils.substituteNamedParameters(psql, null));
@@ -118,7 +117,6 @@ public class NamedParameterUtilsTests extends TestCase {
 	 * SPR-4789
 	 */
 	public void testParseSqlContainingComments() {
-
 		String sql1 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz -- :xx XX\n";
 		ParsedSql psql1 = NamedParameterUtils.parseSqlStatement(sql1);
 		assertEquals("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz -- :xx XX\n",
@@ -144,6 +142,11 @@ public class NamedParameterUtilsTests extends TestCase {
 		assertEquals("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz /* :xx XX*",
 				NamedParameterUtils.substituteNamedParameters(psql3, null));
 
+		String sql4 = "/*+ HINT */ xxx /* comment :a ? */ :a yyyy :b :c :a zzzzz /* :xx XX*";
+		ParsedSql psql4 = NamedParameterUtils.parseSqlStatement(sql4);
+		Map parameters = Collections.singletonMap("a", "0");
+		assertEquals("/*+ HINT */ xxx /* comment :a ? */ ? yyyy ? ? ? zzzzz /* :xx XX*",
+				NamedParameterUtils.substituteNamedParameters(psql4, new MapSqlParameterSource(parameters)));
 	}
 
 	/*
