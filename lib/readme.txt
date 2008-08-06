@@ -78,8 +78,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JPA support with EclipseLink as provider
 
-* ehcache/ehcache-1.4.1.jar
-- EHCache 1.4.1 (http://ehcache.sourceforge.net)
+* ehcache/ehcache-1.5.0.jar
+- EHCache 1.5.0 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
 - required for running PetClinic (by Hibernate)
@@ -93,37 +93,37 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - GlassFish ClassLoader API extract (http://glassfish.dev.java.net)
 - required for building the framework
 
-* groovy/groovy-1.5.5.jar
-- Groovy 1.5.5 (http://groovy.codehaus.org)
+* groovy/groovy-1.5.6.jar
+- Groovy 1.5.6 (http://groovy.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's Groovy support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.3.0 CR1 (http://www.hibernate.org)
+- Hibernate 3.3.0 CR2 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
 * hibernate/hibernate-annotations.jar, hibernate/hibernate-commons-annotations.jar
-- Hibernate Annotations 3.4.0 RC1 (http://www.hibernate.org)
+- Hibernate Annotations 3.4.0 RC2 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
 
 * hibernate/hibernate-entitymanager.jar
-- Hibernate EntityManager 3.4.0 RC1 (http://www.hibernate.org)
-- required for building the "tiger" part of the framework
+- Hibernate EntityManager 3.4.0 RC2 (http://www.hibernate.org)
+- required for building the "tiger" pgrart of the framework
 - required at runtime when using Spring's Hibernate-specific JPA support
 
 * hsqldb/hsqldb.jar
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
 - required for running JPetStore and PetClinic
 
-* ibatis/ibatis-2.3.2.715.jar
-- iBATIS SQL Maps 2.3.2 b715 (http://ibatis.apache.org)
+* ibatis/ibatis-2.3.3.720.jar
+- iBATIS SQL Maps 2.3.3 b720 (http://ibatis.apache.org)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.x support
 
-* itext/iText-2.1.2.jar
-- iText PDF 2.1.2 (http://www.lowagie.com/itext)
+* itext/iText-2.1.3.jar
+- iText PDF 2.1.3 (http://www.lowagie.com/itext)
 - required for building the framework
 - required at runtime when using Spring's AbstractPdfView
 
@@ -276,8 +276,12 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
+* javassist/javassist-3.4.GA.jar
+- Javassist 3.4 API (http://www.jboss.org/javassist)
+- required for running PetClinic (by Hibernate)
+
 * jaxws/jws-api.jar, jaxws/jaxws-api.jar, jaxws/jaxb-api.jar, jaxws/saaj-api.jar
-- JAX-WS 2.1.2 API (https://jax-ws.dev.java.net)
+- JAX-WS 2.1 API (https://jax-ws.dev.java.net)
 - required at runtime when running Spring's JAX-WS support tests on JDK < 1.6
 
 * jdo/jdo2-api.jar
@@ -286,7 +290,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JDO support (or jdo.jar for JDO 1.0)
 
 * jexcelapi/jxl.jar
-- JExcelApi 2.6.6 (http://jexcelapi.sourceforge.net)
+- JExcelApi 2.6.8 (http://jexcelapi.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's AbstractJExcelView
 
@@ -338,7 +342,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 * poi/poi-3.0.1.jar
 - Apache POI 3.0.1 (http://jakarta.apache.org/poi)
 - required for building the framework
-- required at runtime when using Spring's AbstractExcelView
+- required at runtime when using Spring's AbstractExcelView and JasperReportsXlsView
 
 * portlet/portlet-api.jar
 - Portlet API 1.0 (http://jcp.org/aboutJava/communityprocess/final/jsr168)
@@ -369,8 +373,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using the Struts 1.x support or Tiles 1.x TilesView
 - required for running JPetStore's Struts web tier
 
-* testng/testng-5.5-jdk15.jar
-- TestNG 5.5 (http://testng.org)
+* testng/testng-5.7-jdk15.jar
+- TestNG 5.7 (http://testng.org)
 - required for building and running the framework's test suite
 
 * tiles/tiles-api-2.0.5.jar, tiles/tiles-core-2.0.5.jar, tiles/tiles-jsp-2.0.5.jar

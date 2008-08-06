@@ -93,6 +93,9 @@
 			<include name="commons-lang.jar"/>
 			<include name="commons-pool.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/javassist">
+			<include name="javassist*.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/log4j">
 			<include name="log4j*.jar"/>
 		</fileset>
@@ -243,6 +246,9 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/javassist">
+				<include name="javassist*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/log4j">
 				<include name="log4j*.jar"/>

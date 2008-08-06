@@ -2128,6 +2128,7 @@
 				<include name="lib/jamon/**"/>
         <include name="lib/jarjar/**"/>
 				<include name="lib/jasperreports/**"/>
+				<include name="lib/javassist/**"/>
         <include name="lib/jaxws/**"/>
 				<include name="lib/jexcelapi/**"/>
 				<include name="lib/jdo/**"/>
