@@ -861,20 +861,15 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = ele.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
-			if (nl.item(i) instanceof Element) {
-				Element candidateEle = (Element) nl.item(i);
-				if (DomUtils.nodeNameEquals(candidateEle, DESCRIPTION_ELEMENT) ||
-						DomUtils.nodeNameEquals(candidateEle, META_ELEMENT)) {
-					// Keep going: we don't use these values for now.
+			Node node = nl.item(i);
+			if (node instanceof Element && !DomUtils.nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
+					!DomUtils.nodeNameEquals(node, META_ELEMENT)) {
+				// Child element is what we're looking for.
+				if (subElement != null) {
+					error(elementName + " must not contain more than one sub-element", ele);
 				}
 				else {
-					// Child element is what we're looking for.
-					if (subElement != null) {
-						error(elementName + " must not contain more than one sub-element", ele);
-					}
-					else {
-						subElement = candidateEle;
-					}
+					subElement = (Element) node;
 				}
 			}
 		}
@@ -1011,8 +1006,10 @@ public class BeanDefinitionParserDelegate {
 		else if (DomUtils.nodeNameEquals(ele, PROPS_ELEMENT)) {
 			return parsePropsElement(ele);
 		}
-		error("Unknown property sub-element: [" + ele.getNodeName() + "]", ele);
-		return null;
+		else {
+			error("Unknown property sub-element: [" + ele.getNodeName() + "]", ele);
+			return null;
+		}
 	}
 
 	/**
@@ -1048,9 +1045,9 @@ public class BeanDefinitionParserDelegate {
 		list.setSource(extractSource(collectionEle));
 		list.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
-			if (nl.item(i) instanceof Element) {
-				Element ele = (Element) nl.item(i);
-				list.add(parsePropertySubElement(ele, bd, defaultTypeClassName));
+			Node node = nl.item(i);
+			if (node instanceof Element && !DomUtils.nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
+				list.add(parsePropertySubElement((Element) node, bd, defaultTypeClassName));
 			}
 		}
 		return list;
@@ -1066,9 +1063,9 @@ public class BeanDefinitionParserDelegate {
 		set.setSource(extractSource(collectionEle));
 		set.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
-			if (nl.item(i) instanceof Element) {
-				Element ele = (Element) nl.item(i);
-				set.add(parsePropertySubElement(ele, bd, defaultTypeClassName));
+			Node node = nl.item(i);
+			if (node instanceof Element && !DomUtils.nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
+				set.add(parsePropertySubElement((Element) node, bd, defaultTypeClassName));
 			}
 		}
 		return set;
@@ -1095,8 +1092,9 @@ public class BeanDefinitionParserDelegate {
 			Element keyEle = null;
 			Element valueEle = null;
 			for (int j = 0; j < entrySubNodes.getLength(); j++) {
-				if (entrySubNodes.item(j) instanceof Element) {
-					Element candidateEle = (Element) entrySubNodes.item(j);
+				Node node = entrySubNodes.item(j);
+				if (node instanceof Element) {
+					Element candidateEle = (Element) node;
 					if (DomUtils.nodeNameEquals(candidateEle, KEY_ELEMENT)) {
 						if (keyEle != null) {
 							error("<entry> element is only allowed to contain one <key> sub-element", entryEle);
@@ -1203,14 +1201,14 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = keyEle.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
-			if (nl.item(i) instanceof Element) {
-				Element candidateEle = (Element) nl.item(i);
+			Node node = nl.item(i);
+			if (node instanceof Element) {
 				// Child element is what we're looking for.
 				if (subElement != null) {
 					error("<key> element must not contain more than one value sub-element", keyEle);
 				}
 				else {
-					subElement = candidateEle;
+					subElement = (Element) node;
 				}
 			}
 		}

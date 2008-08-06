@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
 	<bean id="jenny" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>Jenny</value></property>
@@ -68,6 +68,7 @@
 		<property name="age"><value>26</value></property>
 		<property name="friends">
 			<list>
+				<description>My List</description>
 				<ref local="david"/>
 			</list>
 		</property>
@@ -354,6 +355,7 @@
 	<bean id="setAndMap" class="org.springframework.beans.factory.xml.XmlBeanCollectionTests$MapAndSet">
 		<constructor-arg>
 			<map>
+				<description>My Map</description>
 				<entry key="key1" value="val1"/>
 				<entry key="key2" value="val2"/>
 				<entry key="key3" value="val3"/>
@@ -364,6 +366,7 @@
 	<bean id="enumSetFactory" class="org.springframework.beans.factory.config.SetFactoryBean">
 		<property name="sourceSet">
 			<set>
+				<description>My Set</description>
 				<value type="org.hibernate.FlushMode">NEVER</value>
 				<value type="org.hibernate.FlushMode">COMMIT</value>
 			</set>

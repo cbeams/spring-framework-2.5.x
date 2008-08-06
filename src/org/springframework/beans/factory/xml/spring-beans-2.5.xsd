@@ -873,6 +873,7 @@
 	<!-- Collection Elements -->
 	<xsd:group name="collectionElements">
 		<xsd:sequence>
+			<xsd:element ref="description" minOccurs="0"/>
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
 				<xsd:element ref="bean"/>
 				<xsd:element ref="ref"/>
@@ -1082,6 +1083,7 @@
 		<xsd:complexContent>
 			<xsd:extension base="collectionType">
 				<xsd:sequence>
+					<xsd:element ref="description" minOccurs="0"/>
 					<xsd:choice minOccurs="0" maxOccurs="unbounded">
 						<xsd:element ref="entry"/>
 					</xsd:choice>
