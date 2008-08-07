@@ -48,7 +48,6 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	 */
 	public DirectFieldBindingResult(Object target, String objectName) {
 		super(objectName);
-		Assert.notNull(target, "Target bean must not be null");
 		this.target = target;
 	}
 
@@ -75,7 +74,8 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	 * @see #getTarget()
 	 */
 	protected ConfigurablePropertyAccessor createDirectFieldAccessor() {
-		return PropertyAccessorFactory.forDirectFieldAccess(getTarget());
+		Assert.state(this.target != null, "Cannot access fields on null target instance '" + getObjectName() + "'!");
+		return PropertyAccessorFactory.forDirectFieldAccess(this.target);
 	}
 
 }

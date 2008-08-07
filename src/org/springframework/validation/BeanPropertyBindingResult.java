@@ -51,13 +51,12 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * Creates a new instance of the {@link BeanPropertyBindingResult} class.
 	 * @param target the target bean to bind onto
 	 * @param objectName the name of the target object
-	 * @throws IllegalArgumentException if the supplied <code>target</code> is <code>null</code> 
 	 */
 	public BeanPropertyBindingResult(Object target, String objectName) {
 		super(objectName);
-		Assert.notNull(target, "Target bean must not be null");
 		this.target = target;
 	}
+
 
 	public final Object getTarget() {
 		return this.target;
@@ -81,7 +80,8 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * @see #getTarget()
 	 */
 	protected BeanWrapper createBeanWrapper() {
-		return PropertyAccessorFactory.forBeanPropertyAccess(getTarget());
+		Assert.state(this.target != null, "Cannot access properties on null bean instance '" + getObjectName() + "'!");
+		return PropertyAccessorFactory.forBeanPropertyAccess(this.target);
 	}
 
 }

@@ -199,15 +199,14 @@ public class HandlerMethodInvoker {
 			}
 			else if (attrName != null) {
 				WebDataBinder binder = resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
-				if (args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1])) {
-					doBind(webRequest, binder, false);
-					args[i] = binder.getTarget();
+				boolean assignBindingResult = (args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+				if (binder.getTarget() != null) {
+					doBind(webRequest, binder, !assignBindingResult);
+				}
+				args[i] = binder.getTarget();
+				if (assignBindingResult) {
 					args[i + 1] = binder.getBindingResult();
 					i++;
-				}
-				else {
-					doBind(webRequest, binder, true);
-					args[i] = binder.getTarget();
 				}
 				implicitModel.putAll(binder.getBindingResult().getModel());
 			}
