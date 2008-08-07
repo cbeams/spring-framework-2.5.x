@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,13 +51,13 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * Creates a new instance of the {@link BeanPropertyBindingResult} class.
 	 * @param target the target bean to bind onto
 	 * @param objectName the name of the target object
-	 * @throws IllegalArgumentException if the supplied <code>target</code> is <code>null</code> 
 	 */
 	public BeanPropertyBindingResult(Object target, String objectName) {
 		super(objectName);
 		Assert.notNull(target, "Target bean must not be null");
 		this.target = target;
 	}
+
 
 	public final Object getTarget() {
 		return this.target;
@@ -81,7 +81,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * @see #getTarget()
 	 */
 	protected BeanWrapper createBeanWrapper() {
-		return new BeanWrapperImpl(getTarget());
+		return new BeanWrapperImpl(this.target);
 	}
 
 }
