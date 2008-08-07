@@ -106,6 +106,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
+	private int cacheSecondsForSessionAttributeHandlers = 0;
+
 	private boolean synchronizeOnSession = false;
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
@@ -133,6 +135,19 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
 		Assert.notNull(sessionAttributeStore, "SessionAttributeStore must not be null");
 		this.sessionAttributeStore = sessionAttributeStore;
+	}
+
+	/**
+	 * Cache content produced by <code>@SessionAttributes</code> annotated handlers
+	 * for the given number of seconds. Default is 0, preventing caching completely.
+	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
+	 * handlers (but not to <code>@SessionAttributes</code> annotated handlers), this
+	 * setting will apply to <code>@SessionAttributes</code> annotated handlers only.
+	 * @see #setCacheSeconds
+	 * @see org.springframework.web.bind.annotation.SessionAttributes
+	 */
+	public void setCacheSecondsForSessionAttributeHandlers(int cacheSecondsForSessionAttributeHandlers) {
+		this.cacheSecondsForSessionAttributeHandlers = cacheSecondsForSessionAttributeHandlers;
 	}
 
 	/**
@@ -217,7 +232,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 			if (handler.getClass().getAnnotation(SessionAttributes.class) != null) {
 				// Always prevent caching in case of session attribute management.
-				checkAndPrepare(renderRequest, renderResponse, 0);
+				checkAndPrepare(renderRequest, renderResponse, this.cacheSecondsForSessionAttributeHandlers);
 			}
 			else {
 				// Uses configured default cacheSeconds setting.
