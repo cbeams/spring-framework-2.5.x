@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,10 +17,13 @@
 package org.springframework.jmx.export.annotation;
 
 import org.springframework.jmx.IJmxTestBean;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
+@Service("testBean")
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
