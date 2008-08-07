@@ -515,8 +515,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		private boolean isBetterPathMatch(String mappedPath, String mappedPathToCompare, String lookupPath) {
-			return (mappedPath != null && (mappedPathToCompare == null ||
-					mappedPath.equals(lookupPath) || mappedPathToCompare.length() < mappedPath.length()));
+			return (mappedPath != null &&
+					(mappedPathToCompare == null || mappedPathToCompare.length() < mappedPath.length() ||
+							(mappedPath.equals(lookupPath) && !mappedPathToCompare.equals(lookupPath))));
 		}
 
 		private boolean isBetterMethodMatch(RequestMappingInfo mapping, RequestMappingInfo mappingToCompare) {
