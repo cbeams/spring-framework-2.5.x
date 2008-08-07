@@ -71,6 +71,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
+import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
 
@@ -425,7 +426,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyMethodNameDispatchingController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
 				wac.refresh();
 				return wac;
 			}
@@ -458,7 +459,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyMethodNameDispatchingController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
 				InternalPathMethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 				methodNameResolver.setSuffix("Handle");
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
@@ -486,6 +487,42 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("myLangView", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/mySurprise.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("mySurpriseView", response.getContentAsString());
+	}
+
+	public void testControllerClassNamePlusMethodNameDispatchingController() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				RootBeanDefinition mapping = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
+				mapping.getPropertyValues().addPropertyValue("excludedPackages", null);
+				wac.registerBeanDefinition("handlerMapping", mapping);
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/methodnamedispatching/myHandle");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/methodnamedispatching/myOtherHandle.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myOtherView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/methodnamedispatching/myLangHandle.x");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myLangView", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/methodnamedispatching/mySurpriseHandle.y");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("mySurpriseView", response.getContentAsString());
@@ -868,34 +905,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 
 	@Controller
-	@RequestMapping("/*.do")
-	private static class MyMethodNameDispatchingController {
-
-		@RequestMapping
-		public void myHandle(HttpServletResponse response) throws IOException {
-			response.getWriter().write("myView");
-		}
-
-		@RequestMapping
-		public void myOtherHandle(HttpServletResponse response) throws IOException {
-			response.getWriter().write("myOtherView");
-		}
-
-		@RequestMapping(method = RequestMethod.POST)
-		public void myLangHandle(HttpServletResponse response) throws IOException {
-			response.getWriter().write("myLangView");
-		}
-
-		@RequestMapping(method = RequestMethod.POST)
-		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
-			response.getWriter().write("mySurpriseView");
-		}
-	}
-
-
-	@Controller
 	@RequestMapping(value = "/*.do", method = RequestMethod.POST, params = "myParam=myValue")
-	private static class MyPostMethodNameDispatchingController extends MyMethodNameDispatchingController {
+	private static class MyPostMethodNameDispatchingController extends MethodNameDispatchingController {
 
 	}
 
