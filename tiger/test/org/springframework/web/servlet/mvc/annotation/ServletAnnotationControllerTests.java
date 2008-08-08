@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -609,6 +610,24 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("mySurpriseView", response.getContentAsString());
 	}
 
+	public void testNullCommandController() throws Exception {
+		@SuppressWarnings("serial")
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyNullCommandController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView", response.getContentAsString());
+	}
+
 	public void testEquivalentMappingsWithSameMethodName() throws Exception {
 		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
@@ -814,6 +833,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		@SuppressWarnings("unused")
 		@InitBinder
 		private void initBinder(WebDataBinder binder) {
+			binder.initBeanPropertyAccess();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
@@ -933,6 +953,24 @@ public class ServletAnnotationControllerTests extends TestCase {
 		@RequestMapping("surprise")
 		public void mySurpriseHandle(HttpServletResponse response) throws IOException {
 			response.getWriter().write("mySurpriseView");
+		}
+	}
+
+
+	@Controller
+	private static class MyNullCommandController {
+
+		@ModelAttribute
+		public TestBean getTestBean() {
+			return null;
+		}
+
+		@RequestMapping("/myPath")
+		public void handle(@ModelAttribute TestBean testBean, Errors errors, Writer writer) throws IOException {
+			assertNull(testBean);
+			assertFalse(errors.hasErrors());
+			errors.reject("myCode");
+			writer.write("myView");
 		}
 	}
 
