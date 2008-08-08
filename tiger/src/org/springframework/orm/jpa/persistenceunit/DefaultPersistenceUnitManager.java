@@ -48,7 +48,7 @@ import org.springframework.util.ObjectUtils;
  * <p>Supports standard JPA scanning for <code>persistence.xml</code> files,
  * with configurable file locations, JDBC DataSource lookup and load-time weaving.
  *
- * <p>The default XML file location is <code>classpath:META-INF/persistence.xml</code>,
+ * <p>The default XML file location is <code>classpath:*META-INF/persistence.xml</code>,
  * scanning for all matching files in the class path (as defined in the JPA specification).
  * DataSource names are by default interpreted as JNDI names, and no load time weaving
  * is available (which requires weaving to be turned off in the persistence provider).
