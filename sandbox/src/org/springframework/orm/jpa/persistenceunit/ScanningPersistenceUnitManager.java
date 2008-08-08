@@ -49,17 +49,8 @@ import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Default implementation of the {@link org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager} interface.
- * Used as internal default by
- * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}.
- *
- * <p>Supports standard JPA scanning for <code>persistence.xml</code> files,
- * with configurable file locations, JDBC DataSource lookup and load-time weaving.
- *
- * <p>The default XML file location is <code>classpath:META-INF/persistence.xml</code>,
- * scanning for all matching files in the class path (as defined in the JPA specification).
- * DataSource names are by default interpreted as JNDI names, and no load time weaving
- * is available (which requires weaving to be turned off in the persistence provider).
+ * Implementation of the {@link PersistenceUnitManager} interface
+ * that includes Spring-based JPA entity scanning.
  *
  * @author Juergen Hoeller
  * @since 2.0
