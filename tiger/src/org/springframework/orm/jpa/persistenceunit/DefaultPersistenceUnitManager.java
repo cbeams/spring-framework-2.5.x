@@ -100,7 +100,16 @@ public class DefaultPersistenceUnitManager
 
 
 	/**
-	 * Set the locations of the <code>persistence.xml</code> files to load.
+	 * Specify the location of the <code>persistence.xml</code> files to load.
+	 * These can be specified as Spring resource locations and/or location patterns.
+	 * <p>Default is "classpath*:META-INF/persistence.xml".
+	 */
+	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
+		this.persistenceXmlLocations = new String[] {persistenceXmlLocation};
+	}
+
+	/**
+	 * Specify multiple locations of <code>persistence.xml</code> files to load.
 	 * These can be specified as Spring resource locations and/or location patterns.
 	 * <p>Default is "classpath*:META-INF/persistence.xml".
 	 * @param persistenceXmlLocations an array of Spring resource Strings
@@ -320,8 +329,7 @@ public class DefaultPersistenceUnitManager
 	 * <p>This can be used in {@link #postProcessPersistenceUnitInfo} implementations,
 	 * detecting existing persistence units of the same name and potentially merging them.
 	 * @param persistenceUnitName the name of the desired persistence unit
-	 * @return the PersistenceUnitInfo in mutable form,
-	 * or <code>null</code> if not available
+	 * @return the PersistenceUnitInfo in mutable form, or <code>null</code> if not available
 	 */
 	protected final MutablePersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
 		return this.persistenceUnitInfos.get(persistenceUnitName);
@@ -339,8 +347,8 @@ public class DefaultPersistenceUnitManager
 	protected void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {
 		PersistenceUnitPostProcessor[] postProcessors = getPersistenceUnitPostProcessors();
 		if (postProcessors != null) {
-			for (int i = 0; i < postProcessors.length; i++) {
-				postProcessors[i].postProcessPersistenceUnitInfo(pui);
+			for (PersistenceUnitPostProcessor postProcessor : postProcessors) {
+				postProcessor.postProcessPersistenceUnitInfo(pui);
 			}
 		}
 	}
