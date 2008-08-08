@@ -147,6 +147,7 @@ public class NotificationListenerHolder {
 		int i = 0;
 		for (Iterator it = this.mappedObjectNames.iterator(); it.hasNext();) {
 			resolved[i] = ObjectNameManager.getInstance(it.next());
+			i++;
 		}
 		return resolved;
 	}

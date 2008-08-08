@@ -383,6 +383,42 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		assertEquals("Listener notified after destruction", 1, listener.getCount(attributeName));
 	}
 
+	public void testNotificationListenerRegistrarWithMultipleNames() throws Exception {
+		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
+		ObjectName objectName2 = ObjectName.getInstance("spring:name=Test2");
+		JmxTestBean bean = new JmxTestBean();
+		JmxTestBean bean2 = new JmxTestBean();
+
+		Map beans = new HashMap();
+		beans.put(objectName, bean);
+		beans.put(objectName2, bean2);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.afterPropertiesSet();
+
+		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
+
+		NotificationListenerRegistrar registrar = new NotificationListenerRegistrar();
+		registrar.setServer(server);
+		registrar.setNotificationListener(listener);
+		//registrar.setMappedObjectNames(new Object[] {objectName, objectName2});
+		registrar.setMappedObjectNames(new String[] {"spring:name=Test", "spring:name=Test2"});
+		registrar.afterPropertiesSet();
+
+		// update the attribute
+		String attributeName = "Name";
+		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
+		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
+
+		registrar.destroy();
+
+		// try to update the attribute again
+		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
+		assertEquals("Listener notified after destruction", 1, listener.getCount(attributeName));
+	}
+
 
 	private static class CountingAttributeChangeNotificationListener implements NotificationListener {
 
