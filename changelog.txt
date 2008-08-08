@@ -3,24 +3,29 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.6 (2008-08-06)
+Changes in version 2.5.6 (2008-08-19)
 -------------------------------------
 
 General
 * updated to AspectJ 1.6.1 (while retaining compatibility with AspectJ 1.5.x and 1.6.0)
-* updated to OpenJPA 1.1.0 (while retaining compatibility with OpenJPA 1.0.x)
+* updated to EHCache 1.5.0 (while retaining compatibility with EHCache 1.2 and higher)
+* updated to OpenJPA 1.1.0 (while retaining compatibility with OpenJPA 1.0)
 * updated to EclipseLink 1.0 final
+* updated to TestNG 5.7
 * removed outdated EAR support from sample applications
 
 Package org.springframework.beans
 * BeanWrapper's introspection resolves bridge methods to find setter method for getter method with covariant return type
 * TypeMismatchException message differentiates between editor with inappropriate value returned versus no editor at all
 * containing bean definition is exposed to ParserContext for BeanDefinitionDecorators as well
+* BeanDefinition objects are considered equal even if their originating resource objects are different
 * AbstractFactoryBean's early singleton proxy handles equals, hashCode and toString calls locally (avoiding eager init)
+* PropertyPathFactoryBean logs a warning if the target bean is still in creation at the time of obtaining the property
 * AbstractBeanFactory rejects getBean request with arguments in case of a pre-existing singleton of same name as well
 * AbstractAutowireCapableBeanFactory preserves possible matches hint in property exception
 * ServiceLocatorFactoryBean handles equals and hashCode based on proxy object identity
 * factored out "createBeanDefinition" template method in BeanDefinitionParserDelegate
+* XML list/set/map elements (in both the beans and the util namespace) support nested description element
 
 Package org.springframework.cache
 * EhCacheFactoryBean obtains decorated Ehcache instead of raw Cache, honoring pre-configured cache decorators
@@ -28,6 +33,7 @@ Package org.springframework.cache
 Package org.springframework.context
 * DefaultMessageSourceResolvable and FieldError implement "equals" and "hashCode" such that all fields are respected
 * ClassPathBeanDefinitionScanner performs trace/debug logging during class resource introspection
+* ClassPathBeanDefinitionScanner ignores same class found multiple times in the classpath (i.e. equal bean definition)
 * component-scan preserves original source of scanned bean definitions, for silently ignoring already scanned classes
 
 Package org.springframework.instrument
@@ -50,6 +56,8 @@ Package org.springframework.jms
 * AbstractJmsListeningContainer eagerly clears shared JMS Connection after releasing, avoiding repeated close exceptions
 
 Package org.springframework.jmx
+* fixed NotificationListenerHolder to correctly handle multiple specified object names
+* added "allowEagerInit" property to MBeanExporter, for autodetecting lazy-init beans and FactoryBean-produced objects
 * added "environment" property to MBeanClientInterceptor and NotificationListenerRegistar, allowing for JMX env entries
 * added "refreshOnConnectFailure" property to MBeanClientInterceptor, allowing for reconnect in case of I/O failure
 
@@ -57,6 +65,7 @@ Package org.springframework.orm
 * HibernateTemplate detects Spring-managed transactional Session even with SessionFactory proxy and allowCreate=false
 * HibernateTemplate's "loadAll" operation selects distinct root entities (avoiding duplicate entries in result list)
 * added "packagesToScan" property to Hibernate AnnotationSessionFactoryBean, for autodetection of @Entity classes
+* added "persistenceXmlLocation" property to DefaultPersistenceUnitManager, as alternative to "persistenceXmlLocations"
 
 Package org.springframework.remoting
 * added "interceptors" property to RemoteExporter, allowing for registering custom AOP interceptors before the endpoint
@@ -79,7 +88,9 @@ Package org.springframework.web
 * PortletContextResource cleans given path (analogous to ServletContextResource)
 * Servlet/PortletContextResource accept path with leading "/../" part as well (as accepted by most servlet containers)
 * DispatcherServlet removes error-view-driven servlet request attributes after rendering (for Tomcat compatibility)
-* added "cacheSecondsForSessionAttributeHandlers" property to AnnotationMethodHandlerAdapter
+* added "cacheSecondsForSessionAttributeHandlers" property to Servlet/Portlet AnnotationMethodHandlerAdapter
+* Servlet AnnotationMethodHandlerAdapter always takes first exact @RequestMapping path match as best path match
+* @ModelAttribute annotated handler method arguments can resolve to a null value as well (when contained in the model)
 * Portlet AbstractCommandController falls back to lazy command creation if session timed out after action phase
 * ByteArray/StringMultipartFileEditor do not log warning but rather include root cause in IllegalArgumentException
 * made RedirectView's "renderMergedOutputModel" implementation non-final
