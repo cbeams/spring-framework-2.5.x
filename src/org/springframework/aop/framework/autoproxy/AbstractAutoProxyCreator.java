@@ -280,7 +280,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (this.targetSourcedBeans.contains(beanName)) {
+		if (bean == null || this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
