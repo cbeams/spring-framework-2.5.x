@@ -35,6 +35,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -110,26 +111,32 @@ public class HandlerMethodInvoker {
 			Method handlerMethod, Object handler, NativeWebRequest webRequest, ExtendedModelMap implicitModel)
 			throws Exception {
 
-		boolean debug = logger.isDebugEnabled();
-		for (Method attributeMethod : this.methodResolver.getModelAttributeMethods()) {
-			Object[] args = resolveHandlerArguments(attributeMethod, handler, webRequest, implicitModel);
-			if (debug) {
-				logger.debug("Invoking model attribute method: " + attributeMethod);
+		try {
+			boolean debug = logger.isDebugEnabled();
+			for (Method attributeMethod : this.methodResolver.getModelAttributeMethods()) {
+				Object[] args = resolveHandlerArguments(attributeMethod, handler, webRequest, implicitModel);
+				if (debug) {
+					logger.debug("Invoking model attribute method: " + attributeMethod);
+				}
+				Object attrValue = doInvokeMethod(attributeMethod, handler, args);
+				String attrName = AnnotationUtils.findAnnotation(attributeMethod, ModelAttribute.class).value();
+				if ("".equals(attrName)) {
+					Class resolvedType = GenericTypeResolver.resolveReturnType(attributeMethod, handler.getClass());
+					attrName = Conventions.getVariableNameForReturnType(attributeMethod, resolvedType, attrValue);
+				}
+				implicitModel.addAttribute(attrName, attrValue);
 			}
-			Object attrValue = doInvokeMethod(attributeMethod, handler, args);
-			String attrName = AnnotationUtils.findAnnotation(attributeMethod, ModelAttribute.class).value();
-			if ("".equals(attrName)) {
-				Class resolvedType = GenericTypeResolver.resolveReturnType(attributeMethod, handler.getClass());
-				attrName = Conventions.getVariableNameForReturnType(attributeMethod, resolvedType, attrValue);
-			}
-			implicitModel.addAttribute(attrName, attrValue);
-		}
 
-		Object[] args = resolveHandlerArguments(handlerMethod, handler, webRequest, implicitModel);
-		if (debug) {
-			logger.debug("Invoking request handler method: " + handlerMethod);
+			Object[] args = resolveHandlerArguments(handlerMethod, handler, webRequest, implicitModel);
+			if (debug) {
+				logger.debug("Invoking request handler method: " + handlerMethod);
+			}
+			return doInvokeMethod(handlerMethod, handler, args);
 		}
-		return doInvokeMethod(handlerMethod, handler, args);
+		catch (IllegalStateException ex) {
+			// Throw exception with full handler method context...
+			throw new HandlerMethodInvocationException(handlerMethod, ex);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -444,6 +451,7 @@ public class HandlerMethodInvoker {
 	protected Object resolveCommonArgument(MethodParameter methodParameter, NativeWebRequest webRequest)
 			throws Exception {
 
+		// Invoke custom argument resolvers if present...
 		if (this.customArgumentResolvers != null) {
 			for (WebArgumentResolver argumentResolver : this.customArgumentResolvers) {
 				Object value = argumentResolver.resolveArgument(methodParameter, webRequest);
@@ -452,7 +460,16 @@ public class HandlerMethodInvoker {
 				}
 			}
 		}
-		return resolveStandardArgument(methodParameter.getParameterType(), webRequest);
+
+		// Resolution of standard parameter types...
+		Class paramType = methodParameter.getParameterType();
+		Object value = resolveStandardArgument(paramType, webRequest);
+		if (value != WebArgumentResolver.UNRESOLVED && !ClassUtils.isAssignableValue(paramType, value)) {
+			throw new IllegalStateException("Standard argument type [" + paramType.getName() +
+					"] resolved to incompatible value of type [" + (value != null ? value.getClass() : null) +
+					"]. Consider declaring the argument type in a less specific fashion.");
+		}
+		return value;
 	}
 
 	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest)

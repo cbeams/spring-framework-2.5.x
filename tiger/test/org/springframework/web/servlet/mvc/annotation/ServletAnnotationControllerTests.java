@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -623,6 +624,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		servlet.init(new MockServletConfig());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath");
+		request.setUserPrincipal(new OtherPrincipal());
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("myView", response.getContentAsString());
@@ -965,12 +967,36 @@ public class ServletAnnotationControllerTests extends TestCase {
 			return null;
 		}
 
+		@ModelAttribute
+		public Principal getPrincipal() {
+			return new TestPrincipal();
+		}
+
 		@RequestMapping("/myPath")
-		public void handle(@ModelAttribute TestBean testBean, Errors errors, Writer writer) throws IOException {
+		public void handle(@ModelAttribute TestBean testBean, Errors errors,
+				@ModelAttribute TestPrincipal modelPrinc, OtherPrincipal requestPrinc, Writer writer) throws IOException {
 			assertNull(testBean);
+			assertNotNull(modelPrinc);
+			assertNotNull(requestPrinc);
 			assertFalse(errors.hasErrors());
 			errors.reject("myCode");
 			writer.write("myView");
+		}
+	}
+
+
+	private static class TestPrincipal implements Principal {
+
+		public String getName() {
+			return "test";
+		}
+	}
+
+
+	private static class OtherPrincipal implements Principal {
+
+		public String getName() {
+			return "other";
 		}
 	}
 
