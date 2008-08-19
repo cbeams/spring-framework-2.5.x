@@ -6,7 +6,7 @@
 	   		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
 	<aop:config>
-		<aop:aspect id="testAspect" ref="introduction">
+		<aop:aspect id="testAspect">
 			<aop:declare-parents
 				types-matching="org.springframework.aop.aspectj.DeclareParentsDelegateRefTests.NoMethodsBean+"
 				implement-interface="org.springframework.aop.aspectj.DeclareParentsDelegateRefTests$Counter"
@@ -14,7 +14,6 @@
 			/>
 		</aop:aspect>		
 	</aop:config>
-
 
 	<bean id="noMethodsBean" class="org.springframework.aop.aspectj.DeclareParentsDelegateRefTests$NoMethodsBeanImpl"/>
 	

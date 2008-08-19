@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,16 @@ package org.springframework.aop.aspectj;
 
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
-
 /**
  * @author Ramnivas Laddad
  */
 public class DeclareParentsDelegateRefTests extends AbstractDependencyInjectionSpringContextTests {
+
 	protected NoMethodsBean noMethodsBean;
+
 	protected CounterImpl counter;
 	
+
 	public DeclareParentsDelegateRefTests() {
 		setPopulateProtectedVariables(true);
 	}
@@ -37,6 +39,7 @@ public class DeclareParentsDelegateRefTests extends AbstractDependencyInjectionS
 	protected String getConfigPath() {
 		return "declare-parents-delegate-ref-tests.xml";
 	}
+
 
 	public void testIntroductionWasMade() {
 		assertTrue("Introduction must have been made", noMethodsBean instanceof Counter);
@@ -57,7 +60,9 @@ public class DeclareParentsDelegateRefTests extends AbstractDependencyInjectionS
 		public void increment();
 	}
 	
+
 	public static class CounterImpl implements Counter {
+
 		int count;
 		
 		public void increment() {
@@ -68,4 +73,5 @@ public class DeclareParentsDelegateRefTests extends AbstractDependencyInjectionS
 			count = 0;
 		}
 	}
+
 }

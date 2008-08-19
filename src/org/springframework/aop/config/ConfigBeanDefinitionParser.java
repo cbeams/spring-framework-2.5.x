@@ -230,19 +230,11 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		String aspectId = aspectElement.getAttribute(ID);
 		String aspectName = aspectElement.getAttribute(REF);
 
-		if (!StringUtils.hasText(aspectName)) {
-			parserContext.getReaderContext().error(
-					"<aspect> tag needs aspect bean reference via 'ref' attribute.",
-					aspectElement, this.parseState.snapshot());
-			return;
-		}
-
 		try {
 			this.parseState.push(new AspectEntry(aspectId, aspectName));
 			List beanDefinitions = new ArrayList();
 			List beanReferences = new ArrayList();
-			beanReferences.add(new RuntimeBeanReference(aspectName));
-	
+
 			List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
 			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
 				Element declareParentsElement = (Element) declareParents.get(i);
@@ -252,9 +244,20 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			// We have to parse "advice" and all the advice kinds in one loop, to get the
 			// ordering semantics right.
 			NodeList nodeList = aspectElement.getChildNodes();
+			boolean adviceFoundAlready = false;
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Node node = nodeList.item(i);
 				if (isAdviceNode(node)) {
+					if (!adviceFoundAlready) {
+						adviceFoundAlready = true;
+						if (!StringUtils.hasText(aspectName)) {
+							parserContext.getReaderContext().error(
+									"<aspect> tag needs aspect bean reference via 'ref' attribute when declaring advices.",
+									aspectElement, this.parseState.snapshot());
+							return;
+						}
+						beanReferences.add(new RuntimeBeanReference(aspectName));
+					}
 					AbstractBeanDefinition advisorDefinition = parseAdvice(
 							aspectName, i, aspectElement, (Element) node, parserContext, beanDefinitions, beanReferences);
 					beanDefinitions.add(advisorDefinition);
