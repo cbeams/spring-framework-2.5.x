@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,17 @@ package org.springframework.context.annotation;
 
 /**
  * Enumeration of the valid type filters to be added for annotation-driven configuration.
- * 
+ *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public enum FilterType {
 
 	ANNOTATION,
-	ASPECTJ_PATTERN,
 	ASSIGNABLE_TYPE,
-	REGEX_PATTERN
+	ASPECTJ_PATTERN,
+	REGEX_PATTERN,
+	CUSTOM
 
 }
