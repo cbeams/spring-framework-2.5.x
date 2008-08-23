@@ -64,12 +64,6 @@ import org.springframework.util.Assert;
  * The exact behavior might vary according to the concrete listener container
  * and JMS provider used.
  *
- * <b>NOTE:</b> The default behavior of this message listener container is to
- * <b>never</b> propagate an exception thrown by a message listener up to the
- * JMS provider. Instead, it will log any such exception at the error level and
- * rollback the active transaction if there is one. This means that from the
- * perspective of the attendant JMS provider no listener will ever fail.
- *
  * <p>There are two solutions to the duplicate processing problem:
  * <ul>
  * <li>Either add <i>duplicate message detection</i> to your listener, in the
