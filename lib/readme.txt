@@ -99,17 +99,17 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Groovy support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.3.0 GA (http://www.hibernate.org)
+- Hibernate 3.3.0 SP1 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
 * hibernate/hibernate-annotations.jar, hibernate/hibernate-commons-annotations.jar
-- Hibernate Annotations 3.4.0 RC2 (http://www.hibernate.org)
+- Hibernate Annotations 3.4.0 GA (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
 
 * hibernate/hibernate-entitymanager.jar
-- Hibernate EntityManager 3.4.0 RC2 (http://www.hibernate.org)
+- Hibernate EntityManager 3.4.0 GA (http://www.hibernate.org)
 - required for building the "tiger" pgrart of the framework
 - required at runtime when using Spring's Hibernate-specific JPA support
 
