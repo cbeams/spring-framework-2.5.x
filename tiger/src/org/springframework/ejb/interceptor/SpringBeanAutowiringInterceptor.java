@@ -93,8 +93,16 @@ public class SpringBeanAutowiringInterceptor {
 	 */
 	@PostConstruct
 	@PostActivate
-	public void autowireBean(InvocationContext invocationContext) {
-		Object target = invocationContext.getTarget();
+	public void autowireBean(InvocationContext invocationContext) throws Exception {
+		doAutowireBean(invocationContext.getTarget());
+		invocationContext.proceed();
+	}
+
+	/**
+	 * Actually autowire the target bean after construction/passivation.
+	 * @param target the target bean to autowire
+	 */
+	protected void doAutowireBean(Object target) {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		configureBeanPostProcessor(bpp, target);
 		bpp.setBeanFactory(getBeanFactory(target));
@@ -175,8 +183,9 @@ public class SpringBeanAutowiringInterceptor {
 	 */
 	@PreDestroy
 	@PrePassivate
-	public void releaseBean(InvocationContext invocationContext) {
+	public void releaseBean(InvocationContext invocationContext) throws Exception {
 		doReleaseBean(invocationContext.getTarget());
+		invocationContext.proceed();
 	}
 
 	/**
