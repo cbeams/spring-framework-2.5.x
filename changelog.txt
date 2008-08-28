@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.6 (2008-08-19)
+Changes in version 2.5.6 (2008-09-05)
 -------------------------------------
 
 General
@@ -13,6 +13,10 @@ General
 * updated to EclipseLink 1.0 final
 * updated to TestNG 5.7
 * removed outdated EAR support from sample applications
+
+Package org.springframework.aop
+* AbstractAutoProxyCreator (as used by "aop:config") correctly ignores null bean instances
+* "aop:aspect" doesn't insist on aspect bean reference to be specified when just containing declare-parents elements
 
 Package org.springframework.beans
 * BeanWrapper's introspection resolves bridge methods to find setter method for getter method with covariant return type
@@ -35,6 +39,13 @@ Package org.springframework.context
 * ClassPathBeanDefinitionScanner performs trace/debug logging during class resource introspection
 * ClassPathBeanDefinitionScanner ignores same class found multiple times in the classpath (i.e. equal bean definition)
 * component-scan preserves original source of scanned bean definitions, for silently ignoring already scanned classes
+* added CUSTOM value to FilterType enumeration
+
+Package org.springframework.core
+* PathMatchingResourcePatternResolver considers URL protocol "vfszip" as jar file (to search JBoss-managed jars)
+
+Package org.springframework.ejb
+* SpringBeanAutowiringInterceptor calls "InvocationContext.proceed()" in order to invoke subsequent interceptors as well
 
 Package org.springframework.instrument
 * ShadowingClassLoader excludes "net.sf.cglib." package from shadowing by default
@@ -91,6 +102,7 @@ Package org.springframework.web
 * added "cacheSecondsForSessionAttributeHandlers" property to Servlet/Portlet AnnotationMethodHandlerAdapter
 * Servlet AnnotationMethodHandlerAdapter always takes first exact @RequestMapping path match as best path match
 * @ModelAttribute annotated handler method arguments can resolve to a null value as well (when contained in the model)
+* standard method argument subtypes (such as a Principal subclass) fail with a descriptive exception if incompatible
 * Portlet AbstractCommandController falls back to lazy command creation if session timed out after action phase
 * ByteArray/StringMultipartFileEditor do not log warning but rather include root cause in IllegalArgumentException
 * made RedirectView's "renderMergedOutputModel" implementation non-final
