@@ -2537,7 +2537,7 @@ public class FileUploadBean {
     </table>
 </form:form>]]></programlisting>
 
-    <para>If we submit a form with empty values in the <literal>firstHame</literal> and
+    <para>If we submit a form with empty values in the <literal>firstName</literal> and
     <literal>lastName</literal> fields, this is what the HTML would look like:</para>
 
     <programlisting><![CDATA[<form method="POST">
