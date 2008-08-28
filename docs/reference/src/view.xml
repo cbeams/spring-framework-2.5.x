@@ -627,7 +627,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
   &lt;/form:form&gt;</programlisting>
 
         <para>If we submit a form with empty values in the
-        <literal>firstHame</literal> and <literal>lastName</literal> fields,
+        <literal>firstName</literal> and <literal>lastName</literal> fields,
         this is what the HTML would look like:</para>
 
         <programlisting>&lt;form method="POST"&gt;
