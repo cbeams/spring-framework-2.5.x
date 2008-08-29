@@ -105,7 +105,7 @@ public class ClassPathResource extends AbstractResource {
 	 * @param clazz the class to load resources with, if any
 	 */
 	protected ClassPathResource(String path, ClassLoader classLoader, Class clazz) {
-		this.path = path;
+		this.path = StringUtils.cleanPath(path);
 		this.classLoader = classLoader;
 		this.clazz = clazz;
 	}

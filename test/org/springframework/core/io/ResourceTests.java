@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,9 @@ public class ResourceTests extends TestCase {
 		doTestResource(resource);
 		Resource resource2 = new ClassPathResource("org/springframework/core/../core/io/./Resource.class");
 		assertEquals(resource, resource2);
+		Resource resource3 = new ClassPathResource("org/springframework/core/").createRelative("../core/io/./Resource.class");
+		assertEquals(resource, resource3);
+
 		// Check whether equal/hashCode works in a HashSet.
 		HashSet resources = new HashSet();
 		resources.add(resource);
