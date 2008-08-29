@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceRef;
@@ -75,6 +76,9 @@ public class JaxWsSupportTests extends TestCase {
 			ac.refresh();
 
 			OrderService orderService = (OrderService) ac.getBean("client", OrderService.class);
+			assertTrue(orderService instanceof BindingProvider);
+			((BindingProvider) orderService).getRequestContext();
+
 			String order = orderService.getOrder(1000);
 			assertEquals("order 1000", order);
 			try {
