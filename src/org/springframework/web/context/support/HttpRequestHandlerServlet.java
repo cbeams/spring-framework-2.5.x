@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -59,6 +60,7 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		LocaleContextHolder.setLocale(request.getLocale());
 		try {
 			this.target.handleRequest(request, response);
 		}
@@ -68,6 +70,9 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 				response.setHeader("Allow", StringUtils.arrayToDelimitedString(supportedMethods, ", "));
 			}
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, ex.getMessage());
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
 		}
 	}
 
