@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.util.StringUtils;
 
 /**
  * HttpInvokerRequestExecutor implementation that uses standard J2SE facilities
@@ -97,6 +100,10 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 		con.setRequestMethod(HTTP_METHOD_POST);
 		con.setRequestProperty(HTTP_HEADER_CONTENT_TYPE, getContentType());
 		con.setRequestProperty(HTTP_HEADER_CONTENT_LENGTH, Integer.toString(contentLength));
+		LocaleContext locale = LocaleContextHolder.getLocaleContext();
+		if (locale != null) {
+			con.setRequestProperty(HTTP_HEADER_ACCEPT_LANGUAGE, StringUtils.toLanguageTag(locale.getLocale()));
+		}
 		if (isAcceptGzipEncoding()) {
 			con.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
 		}

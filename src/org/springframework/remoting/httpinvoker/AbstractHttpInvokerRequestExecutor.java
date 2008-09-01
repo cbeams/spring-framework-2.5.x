@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,13 +54,15 @@ public abstract class AbstractHttpInvokerRequestExecutor
 
 	protected static final String HTTP_METHOD_POST = "POST";
 
-	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-
-	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
+	protected static final String HTTP_HEADER_ACCEPT_LANGUAGE = "Accept-Language";
 
 	protected static final String HTTP_HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 
 	protected static final String HTTP_HEADER_CONTENT_ENCODING = "Content-Encoding";
+
+	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
+
+	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 
 	protected static final String ENCODING_GZIP = "gzip";
 
@@ -279,6 +281,8 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	 * @param ois the ObjectInputStream to read from
 	 * @return the RemoteInvocationResult object
 	 * @throws IOException if thrown by I/O methods
+	 * @throws ClassNotFoundException if the class name of a serialized object
+	 * couldn't get resolved
 	 * @see java.io.ObjectOutputStream#writeObject
 	 */
 	protected RemoteInvocationResult doReadRemoteInvocationResult(ObjectInputStream ois)
