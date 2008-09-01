@@ -104,7 +104,14 @@ public class AnnotationConfigUtils {
 		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
-			def.setBeanClassName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME);
+			try {
+				ClassLoader cl = AnnotationConfigUtils.class.getClassLoader();
+				def.setBeanClass(cl.loadClass(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME));
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException(
+						"Cannot load optional framework class: " + PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, ex);
+			}
 			def.setSource(source);
 			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanDefinitions.add(registerBeanPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
