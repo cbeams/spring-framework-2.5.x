@@ -36,11 +36,13 @@ public abstract class FileSystemUtils {
 	 * otherwise <code>false</code>
 	 */
 	public static boolean deleteRecursively(File root) {
-		if (root.exists()) {
+		if (root != null && root.exists()) {
 			if (root.isDirectory()) {
 				File[] children = root.listFiles();
-				for (int i = 0; i < children.length; i++) {
-					deleteRecursively(children[i]);
+				if (children != null) {
+					for (int i = 0; i < children.length; i++) {
+						deleteRecursively(children[i]);
+					}
 				}
 			}
 			return root.delete();
@@ -49,24 +51,51 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
-	 * Recursively copy the contents of <code>src</code> to <code>dest</code>.
-	 * @param src the source file
-	 * @param dest the destination file
+	 * Recursively copy the contents of the <code>src</code> file/directory
+	 * to the <code>dest</code> file/directory.
+	 * @param src the source directory
+	 * @param dest the destination directory
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static void copyRecursively(File src, File dest) throws IOException {
-		dest.mkdir();
-		File[] entries = src.listFiles();
-		for (int i = 0; i < entries.length; i++) {
-			File file = entries[i];
-			File newFile = new File(dest, file.getName());
-			if (file.isFile()) {
-				newFile.createNewFile();
-				FileCopyUtils.copy(file, newFile);
+		Assert.isTrue(src != null && (src.isDirectory() || src.isFile()), "Source File must denote a directory or file");
+		Assert.notNull(dest, "Destination File must not be null");
+		doCopyRecursively(src, dest);
+	}
+
+	/**
+	 * Actually copy the contents of the <code>src</code> file/directory
+	 * to the <code>dest</code> file/directory.
+	 * @param src the source directory
+	 * @param dest the destination directory
+	 * @throws IOException in the case of I/O errors
+	 */
+	private static void doCopyRecursively(File src, File dest) throws IOException {
+		if (src.isDirectory()) {
+			dest.mkdir();
+			File[] entries = src.listFiles();
+			if (entries == null) {
+				throw new IOException("Could not list files in directory: " + src);
 			}
-			else {
-				copyRecursively(file, newFile);
+			for (int i = 0; i < entries.length; i++) {
+				File file = entries[i];
+				doCopyRecursively(file, new File(dest, file.getName()));
 			}
+		}
+		else if (src.isFile()) {
+			try {
+				dest.createNewFile();
+			}
+			catch (IOException ex) {
+				IOException ioex = new IOException("Failed to create file: " + dest);
+				ioex.initCause(ex);
+				throw ioex;
+			}
+			FileCopyUtils.copy(src, dest);
+		}
+		else {
+			// Special File handle: neither a file not a directory.
+			// Simply skip it when contained in nested directory...
 		}
 	}
 
