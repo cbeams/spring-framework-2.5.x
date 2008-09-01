@@ -213,7 +213,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	protected Object lookupStub() throws RemoteLookupFailureException {
 		try {
 			Object stub = lookup();
-			if (getServiceInterface() != null) {
+			if (getServiceInterface() != null && !(stub instanceof RmiInvocationHandler)) {
 				try {
 					stub = PortableRemoteObject.narrow(stub, getServiceInterface());
 				}
