@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 
 /**
  * Convenient superclass for RMI-based remote exporters. Provides a facility
- * to automatically wrap a given plain Java service object with am
- * RmiInvocationWrapper, exposing the RmiInvocationHandler interface.
+ * to automatically wrap a given plain Java service object with an
+ * RmiInvocationWrapper, exposing the {@link RmiInvocationHandler} remote interface.
  *
- * <p>With an RMI invoker, RMI communication works on the RmiInvocationHandler
- * level, needing only one stub for any service. Service interfaces do not have to
- * extend <code>java.rmi.Remote</code> or throw <code>java.rmi.RemoteException</code>
- * on all methods, but in and out parameters have to be serializable.
+ * <p>Using the RMI invoker mechanism, RMI communication operates at the {@link RmiInvocationHandler}
+ * level, sharing a common invoker stub for any number of services. Service interfaces are <i>not</i>
+ * required to extend <code>java.rmi.Remote</code> or declare <code>java.rmi.RemoteException</code>
+ * on all service methods. However, in and out parameters still have to be serializable.
  *
  * @author Juergen Hoeller
  * @since 1.2.5
@@ -49,7 +49,7 @@ public abstract class RmiBasedExporter extends RemoteInvocationBasedExporter {
 	protected Remote getObjectToExport() {
 		// determine remote object
 		if (getService() instanceof Remote &&
-				((getServiceInterface() == null) || Remote.class.isAssignableFrom(getServiceInterface()))) {
+				(getServiceInterface() == null || Remote.class.isAssignableFrom(getServiceInterface()))) {
 			// conventional RMI service
 			return (Remote) getService();
 		}
