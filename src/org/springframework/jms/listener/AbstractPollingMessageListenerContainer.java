@@ -27,6 +27,7 @@ import javax.jms.Topic;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
+import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -493,7 +494,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 		public Connection createConnection() throws JMSException {
 			if (AbstractPollingMessageListenerContainer.this.sharedConnectionEnabled()) {
-				return AbstractPollingMessageListenerContainer.this.getSharedConnection();
+				Connection sharedCon = AbstractPollingMessageListenerContainer.this.getSharedConnection();
+				return new SingleConnectionFactory(sharedCon).createConnection();
 			}
 			else {
 				return AbstractPollingMessageListenerContainer.this.createConnection();
