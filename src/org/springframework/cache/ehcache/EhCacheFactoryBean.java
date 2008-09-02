@@ -152,14 +152,6 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	}
 
 	/**
-	 * Set the location of temporary files for the disk store of this cache.
-	 * Default is the CacheManager's disk store path.
-	 */
-	public void setDiskStorePath(String diskStorePath) {
-		this.diskStorePath = diskStorePath;
-	}
-
-	/**
 	 * Set whether elements are considered as eternal. If "true", timeouts
 	 * are ignored and the element is never expired. Default is "false".
 	 */
@@ -281,7 +273,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	private Cache createCache() {
 		return new Cache(
 				this.cacheName, this.maxElementsInMemory, this.memoryStoreEvictionPolicy,
-				this.overflowToDisk, this.diskStorePath, this.eternal, this.timeToLive, this.timeToIdle,
+				this.overflowToDisk, null, this.eternal, this.timeToLive, this.timeToIdle,
 				this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null, null, this.maxElementsOnDisk);
 	}
 
