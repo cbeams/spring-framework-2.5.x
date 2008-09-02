@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.apache.log4j.NDC;
  * nested diagnostic context (NDC) before the request is processed,
  * removing it again after the request is processed.
  *
- * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.2.5
  * @see #setIncludeQueryString
  * @see #setBeforeMessagePrefix
@@ -71,6 +71,9 @@ public class Log4jNestedDiagnosticContextFilter extends AbstractRequestLoggingFi
 	 */
 	protected void afterRequest(HttpServletRequest request, String message) {
 		NDC.pop();
+		if (NDC.getDepth() == 0) {
+			NDC.remove();
+		}
 		if (log4jLogger.isDebugEnabled()) {
 			log4jLogger.debug(message);
 		}
