@@ -545,6 +545,17 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
         generates the same standard HTML, but allows you to explicitly specify a
         value in the JSP that is for display only (where it belongs) such as the
         default string in the example: "-- Please Select".</para>
+
+        <para>The <literal>items</literal> attribute is typically populated with a
+        collection or array of item objects. <literal>itemValue</literal> and
+        <literal>itemLabel</literal> simply refer to bean properties of those
+        item objects, if specified; otherwise, the item objects themselves will
+        be stringified. Alternatively, you may specify a <literal>Map</literal>
+        of items, in which case the map keys are interpreted as option values and
+        the map values correspond to option labels. If <literal>itemValue</literal>
+        and/or <literal>itemLabel</literal> happen to be specified as well,
+        the item value property will apply to the map key and the item label
+        property will apply to the map value.</para>
       </section>
 
       <section id="view-jsp-formtaglib-textAreatag">
