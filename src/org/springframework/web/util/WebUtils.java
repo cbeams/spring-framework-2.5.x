@@ -660,7 +660,6 @@ public abstract class WebUtils {
 	 * @return the extracted URI filename (e.g. "index")
 	 */
 	public static String extractFilenameFromUrlPath(String urlPath) {
-		int begin = urlPath.lastIndexOf('/') + 1;
 		int end = urlPath.indexOf(';');
 		if (end == -1) {
 			end = urlPath.indexOf('?');
@@ -668,6 +667,7 @@ public abstract class WebUtils {
 				end = urlPath.length();
 			}
 		}
+		int begin = urlPath.lastIndexOf('/', end) + 1;
 		String filename = urlPath.substring(begin, end);
 		int dotIndex = filename.lastIndexOf('.');
 		if (dotIndex != -1) {

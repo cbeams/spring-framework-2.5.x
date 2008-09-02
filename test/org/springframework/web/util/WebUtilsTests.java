@@ -40,4 +40,13 @@ public class WebUtilsTests extends TestCase {
 		assertEquals("myValue4", WebUtils.findParameterValue(params, "myKey4"));
 	}
 
+	public void testExtractFilenameFromUrlPath() {
+		assertEquals("index", WebUtils.extractFilenameFromUrlPath("index.html"));
+		assertEquals("index", WebUtils.extractFilenameFromUrlPath("/index.html"));
+		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html"));
+		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=a"));
+		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a"));
+		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
+	}
+
 }
