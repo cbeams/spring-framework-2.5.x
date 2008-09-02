@@ -64,7 +64,6 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * <p>Required when wishing to render '<code>option</code>' tags from an
 	 * array, {@link java.util.Collection} or {@link java.util.Map}.
 	 * <p>Typically a runtime expression.
-	 * @param items said items
 	 */
 	public void setItems(Object items) {
 		this.items = items;
