@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
  * set of parameter declarations.
  *
  * @author Rod Johnson
+ * @author Thomas Risberg
  * @author Juergen Hoeller
  */
 public class PreparedStatementCreatorFactory {
@@ -63,8 +64,8 @@ public class PreparedStatementCreatorFactory {
 
 
 	/**
-	 * Create a new factory. Will need to add parameters
-	 * via the addParameter() method or have no parameters.
+	 * Create a new factory. Will need to add parameters via the
+	 * {@link #addParameter} method or have no parameters.
 	 */
 	public PreparedStatementCreatorFactory(String sql) {
 		this.sql = sql;
@@ -84,7 +85,7 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * Create a new factory with the given SQL and parameters.
 	 * @param sql SQL
-	 * @param declaredParameters list of SqlParameter objects
+	 * @param declaredParameters list of {@link SqlParameter} objects
 	 * @see SqlParameter
 	 */
 	public PreparedStatementCreatorFactory(String sql, List declaredParameters) {
@@ -96,15 +97,14 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * Add a new declared parameter.
 	 * <p>Order of parameter addition is significant.
-	 * @param param the parameter to add to the list of declared parameters.
+	 * @param param the parameter to add to the list of declared parameters
 	 */
 	public void addParameter(SqlParameter param) {
 		this.declaredParameters.add(param);
 	}
 
 	/**
-	 * Set whether to use prepared statements that return a
-	 * specific type of ResultSet.
+	 * Set whether to use prepared statements that return a specific type of ResultSet.
 	 * @param resultSetType the ResultSet type
 	 * @see java.sql.ResultSet#TYPE_FORWARD_ONLY
 	 * @see java.sql.ResultSet#TYPE_SCROLL_INSENSITIVE
@@ -115,16 +115,14 @@ public class PreparedStatementCreatorFactory {
 	}
 
 	/**
-	 * Set whether to use prepared statements capable of returning
-	 * updatable ResultSets.
+	 * Set whether to use prepared statements capable of returning updatable ResultSets.
 	 */
 	public void setUpdatableResults(boolean updatableResults) {
 		this.updatableResults = updatableResults;
 	}
 
 	/**
-	 * Set whether prepared statements should be capable of returning
-	 * auto-generated keys.
+	 * Set whether prepared statements should be capable of returning auto-generated keys.
 	 */
 	public void setReturnGeneratedKeys(boolean returnGeneratedKeys) {
 		this.returnGeneratedKeys = returnGeneratedKeys;
@@ -138,8 +136,7 @@ public class PreparedStatementCreatorFactory {
 	}
 
 	/**
-	 * Specify the NativeJdbcExtractor to use for unwrapping
-	 * PreparedStatements, if any.
+	 * Specify the NativeJdbcExtractor to use for unwrapping PreparedStatements, if any.
 	 */
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
@@ -148,7 +145,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
-	 * @param params List of parameters (may be <code>null</code>)
+	 * @param params list of parameters (may be <code>null</code>)
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
@@ -164,7 +161,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params List of parameters (may be <code>null</code>)
+	 * @param params list of parameters (may be <code>null</code>)
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);

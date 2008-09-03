@@ -29,7 +29,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
- * Helper class that can efficiently create multiple CallableStatementCreator
+ * Helper class that efficiently creates multiple {@link CallableStatementCreator}
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  *
@@ -53,8 +53,8 @@ public class CallableStatementCreatorFactory {
 
 
 	/**
-	 * Create a new factory. Will need to add parameters
-	 * via the addParameter() method or have no parameters.
+	 * Create a new factory. Will need to add parameters via the
+	 * {@link #addParameter} method or have no parameters.
 	 */
 	public CallableStatementCreatorFactory(String callString) {
 		this.callString = callString;
@@ -62,25 +62,27 @@ public class CallableStatementCreatorFactory {
 	}
 
 	/**
-	 * Create a new factory with sql and the given parameters.
+	 * Create a new factory with the given SQL and the given parameters.
 	 * @param callString the SQL call string
-	 * @param declaredParameters list of SqlParameter objects
+	 * @param declaredParameters list of {@link SqlParameter} objects
 	 */
 	public CallableStatementCreatorFactory(String callString, List declaredParameters) {
 		this.callString = callString;
 		this.declaredParameters = declaredParameters;
 	}
 
+
 	/**
 	 * Add a new declared parameter.
-	 * Order of parameter addition is significant.
+	 * <p>Order of parameter addition is significant.
+	 * @param param the parameter to add to the list of declared parameters
 	 */
 	public void addParameter(SqlParameter param) {
 		this.declaredParameters.add(param);
 	}
-		
+
 	/**
-	 * Set whether to use prepared statements that return a
+	 * Set whether to use prepared statements that return a specific type of ResultSet.
 	 * specific type of ResultSet.
 	 * @param resultSetType the ResultSet type
 	 * @see java.sql.ResultSet#TYPE_FORWARD_ONLY
@@ -92,16 +94,14 @@ public class CallableStatementCreatorFactory {
 	}
 
 	/**
-	 * Set whether to use prepared statements capable of returning
-	 * updatable ResultSets.
+	 * Set whether to use prepared statements capable of returning updatable ResultSets.
 	 */
 	public void setUpdatableResults(boolean updatableResults) {
 		this.updatableResults = updatableResults;
 	}
 
 	/**
-	 * Specify the NativeJdbcExtractor to use for unwrapping
-	 * CallableStatements, if any.
+	 * Specify the NativeJdbcExtractor to use for unwrapping CallableStatements, if any.
 	 */
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
@@ -110,15 +110,15 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
-	 * @param inParams List of parameters. May be <code>null</code>.
+	 * @param params list of parameters (may be <code>null</code>)
 	 */
-	public CallableStatementCreator newCallableStatementCreator(Map inParams) {
-		return new CallableStatementCreatorImpl(inParams != null ? inParams : new HashMap());
+	public CallableStatementCreator newCallableStatementCreator(Map params) {
+		return new CallableStatementCreatorImpl(params != null ? params : new HashMap());
 	}
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameter mapper.
-	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters. May not be <code>null</code>.
+	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters
 	 */
 	public CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return new CallableStatementCreatorImpl(inParamMapper);
@@ -128,8 +128,7 @@ public class CallableStatementCreatorFactory {
 	/**
 	 * CallableStatementCreator implementation returned by this class.
 	 */
-	private class CallableStatementCreatorImpl
-			implements CallableStatementCreator, SqlProvider, ParameterDisposer {
+	private class CallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider, ParameterDisposer {
 
 		private ParameterMapper inParameterMapper;
 
@@ -137,8 +136,7 @@ public class CallableStatementCreatorFactory {
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParamMapper ParameterMapper implementation for mapping input parameters.
-		 * May not be <code>null</code>.
+		 * @param inParamMapper ParameterMapper implementation for mapping input parameters
 		 */
 		public CallableStatementCreatorImpl(ParameterMapper inParamMapper) {
 			this.inParameterMapper = inParamMapper;
@@ -146,14 +144,14 @@ public class CallableStatementCreatorFactory {
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParams list of SqlParameter objects. May not be <code>null</code>.
+		 * @param inParams list of SqlParameter objects
 		 */
 		public CallableStatementCreatorImpl(Map inParams) {
 			this.inParameters = inParams;
 		}
 
 		public CallableStatement createCallableStatement(Connection con) throws SQLException {
-			// If we were given a ParameterMapper - we must let the mapper do its thing to create the Map.
+			// If we were given a ParameterMapper, we must let the mapper do its thing to create the Map.
 			if (this.inParameterMapper != null) {
 				this.inParameters = this.inParameterMapper.createMap(con);
 			}
@@ -207,7 +205,7 @@ public class CallableStatementCreatorFactory {
 						}
 					}
 					else {
-						// It's an input parameter- must be supplied by the caller.
+						// It's an input parameter; must be supplied by the caller.
 						if (!this.inParameters.containsKey(declaredParam.getName())) {
 							throw new InvalidDataAccessApiUsageException(
 									"Required input parameter '" + declaredParam.getName() + "' is missing");
