@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 /**
- * Support class for resolving web annotations in a handler type.
+ * Support class for resolving web method annotations in a handler type.
  * Processes <code>@RequestMapping</code>, <code>@InitBinder</code>,
  * <code>@ModelAttribute</code> and <code>@SessionAttributes</code>.
  *
@@ -57,7 +57,7 @@ public class HandlerMethodResolver {
 
 	private final boolean sessionAttributesFound;
 
-	private final Set<String> sessionAttributeNames = new HashSet<String>();;
+	private final Set<String> sessionAttributeNames = new HashSet<String>();
 
 	private final Set<Class> sessionAttributeTypes = new HashSet<Class>();
 
