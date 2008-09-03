@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,38 +181,38 @@ public class CallableStatementCreatorFactory {
 
 			int sqlColIndx = 1;
 			for (int i = 0; i < declaredParameters.size(); i++) {
-				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
-				if (!declaredParameter.isResultsParameter()) {
+				SqlParameter declaredParam = (SqlParameter) declaredParameters.get(i);
+				if (!declaredParam.isResultsParameter()) {
 					// So, it's a call parameter - part of the call string.
 					// Get the value - it may still be null.
-					Object inValue = this.inParameters.get(declaredParameter.getName());
-					if (declaredParameter instanceof ResultSetSupportingSqlParameter) {
+					Object inValue = this.inParameters.get(declaredParam.getName());
+					if (declaredParam instanceof ResultSetSupportingSqlParameter) {
 						// It's an output parameter: SqlReturnResultSet parameters already excluded.
 						// It need not (but may be) supplied by the caller.
-						if (declaredParameter instanceof SqlOutParameter) {
-							if (declaredParameter.getTypeName() != null) {
-								cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
+						if (declaredParam instanceof SqlOutParameter) {
+							if (declaredParam.getTypeName() != null) {
+								cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType(), declaredParam.getTypeName());
 							}
 							else {
-								if (declaredParameter.getScale() != null) {
-									cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getScale().intValue());
+								if (declaredParam.getScale() != null) {
+									cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType(), declaredParam.getScale().intValue());
 								}
 								else {
-									cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType());
+									cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType());
 								}
 							}
-							if ((declaredParameter).isInputValueProvided() || inValue != null) {
-								StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
+							if (declaredParam.isInputValueProvided()) {
+								StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParam, inValue);
 							}
 						}
 					}
 					else {
 						// It's an input parameter- must be supplied by the caller.
-						if (!this.inParameters.containsKey(declaredParameter.getName())) {
+						if (!this.inParameters.containsKey(declaredParam.getName())) {
 							throw new InvalidDataAccessApiUsageException(
-									"Required input parameter '" + declaredParameter.getName() + "' is missing");
+									"Required input parameter '" + declaredParam.getName() + "' is missing");
 						}
-						StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
+						StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParam, inValue);
 					}
 					sqlColIndx++;
 				}
