@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,13 @@ import org.springframework.util.ObjectUtils;
  * {@link edu.emory.mathcs.backport.java.util.concurrent.ScheduledExecutorService}
  * uses a {@link Runnable} instance that is shared between repeated executions,
  * in contrast to Quartz which instantiates a new Job for each execution.
+ *
+ * <p><b>WARNING:</b> {@link Runnable Runnables} submitted via a native
+ * {@link java.util.concurrent.ScheduledExecutorService} are removed from
+ * the execution schedule once they throw an exception. If you would prefer
+ * to continue execution after such an exception, switch this FactoryBean's
+ * {@link #setContinueScheduledExecutionAfterException "continueScheduledExecutionAfterException"}
+ * property to "true".
  *
  * <p>This class is analogous to the
  * {@link org.springframework.scheduling.timer.TimerFactoryBean}
@@ -239,12 +246,8 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	 * @return the actual Runnable to schedule (may be a decorator)
 	 */
 	protected Runnable getRunnableToSchedule(ScheduledExecutorTask task) {
-		if (this.continueScheduledExecutionAfterException) {
-			return new DelegatingExceptionProofRunnable(task.getRunnable());
-		}
-		else {
-			return task.getRunnable();
-		}
+		boolean propagateException = !this.continueScheduledExecutionAfterException;
+		return new DelegatingExceptionProofRunnable(task.getRunnable(), propagateException);
 	}
 
 
