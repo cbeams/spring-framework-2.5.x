@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import java.lang.annotation.Target;
 
 /**
  * Test annotation to indicate that a test method should be invoked repeatedly.
+ * <p />
+ * Note that the scope of execution to be repeated includes execution of the
+ * test method itself as well as any set up or tear down of the test fixture.
  *
  * @author Rod Johnson
  * @author Sam Brannen
