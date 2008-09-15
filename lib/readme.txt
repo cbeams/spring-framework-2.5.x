@@ -99,7 +99,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Groovy support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.3.0 SP1 (http://www.hibernate.org)
+- Hibernate 3.3.1 GA (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
