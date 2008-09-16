@@ -49,11 +49,14 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 			AnnotationDrivenBeanDefinitionParser.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
 
 
-	private static final boolean weblogicPresent = ClassUtils.isPresent("weblogic.transaction.UserTransaction");
+	private static final boolean weblogicPresent = ClassUtils.isPresent(
+			"weblogic.transaction.UserTransaction", JtaTransactionManagerBeanDefinitionParser.class.getClassLoader());
 
-	private static final boolean webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager");
+	private static final boolean webspherePresent = ClassUtils.isPresent(
+			"com.ibm.wsspi.uow.UOWManager", JtaTransactionManagerBeanDefinitionParser.class.getClassLoader());
 
-	private static final boolean oc4jPresent = ClassUtils.isPresent("oracle.j2ee.transaction.OC4JTransactionManager");
+	private static final boolean oc4jPresent = ClassUtils.isPresent(
+			"oracle.j2ee.transaction.OC4JTransactionManager", JtaTransactionManagerBeanDefinitionParser.class.getClassLoader());
 
 
 	protected String getBeanClassName(Element element) {

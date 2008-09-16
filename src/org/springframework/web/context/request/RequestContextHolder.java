@@ -43,7 +43,8 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class RequestContextHolder  {
 	
-	private static final boolean jsfPresent = ClassUtils.isPresent("javax.faces.context.FacesContext");
+	private static final boolean jsfPresent =
+			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
 
 	private static final ThreadLocal requestAttributesHolder = new NamedThreadLocal("Request attributes");
 
