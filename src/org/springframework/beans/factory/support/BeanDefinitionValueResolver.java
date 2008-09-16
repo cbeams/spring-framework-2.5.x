@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ class BeanDefinitionValueResolver {
 				}
 			}
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
-			this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
+			this.beanFactory.registerContainedBean(actualInnerBeanName, this.beanName);
 			if (innerBean instanceof FactoryBean) {
 				boolean synthetic = (mbd != null && mbd.isSynthetic());
 				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, !synthetic);

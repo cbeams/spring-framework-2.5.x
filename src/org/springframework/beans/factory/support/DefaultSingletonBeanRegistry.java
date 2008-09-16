@@ -22,8 +22,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -107,6 +105,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/** Disposable bean instances: bean name --> disposable instance */
 	private final Map disposableBeans = new LinkedHashMap(16);
+
+	/** Map between containing bean names: bean name --> Set of bean names that the bean contains */
+	private final Map containedBeanMap = CollectionFactory.createConcurrentMapIfPossible(16);
 
 	/** Map between dependent bean names: bean name --> Set of dependent bean names */
 	private final Map dependentBeanMap = CollectionFactory.createConcurrentMapIfPossible(16);
@@ -335,6 +336,27 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * Register a containment relationship between two beans,
+	 * e.g. between an inner bean and its containing outer bean.
+	 * <p>Also registers the containing bean as dependent on the contained bean
+	 * in terms of destruction order.
+	 * @param containedBeanName the name of the contained (inner) bean
+	 * @param containingBeanName the name of the containing (outer) bean
+	 * @see #registerDependentBean
+	 */
+	public void registerContainedBean(String containedBeanName, String containingBeanName) {
+		synchronized (this.containedBeanMap) {
+			Set containedBeans = (Set) this.containedBeanMap.get(containingBeanName);
+			if (containedBeans == null) {
+				containedBeans = new LinkedHashSet(8);
+				this.containedBeanMap.put(containingBeanName, containedBeans);
+			}
+			containedBeans.add(containedBeanName);
+		}
+		registerDependentBean(containedBeanName, containingBeanName);
+	}
+
+	/**
 	 * Register a dependent bean for the given bean,
 	 * to be destroyed before the given bean is destroyed.
 	 * @param beanName the name of the bean
@@ -360,8 +382,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
-	 * Determine whether a dependent bean has been registered under the given name.
-	 * @param beanName the name of the bean
+	 * Determine whether a dependent bean has been registered for the given name.
+	 * @param beanName the name of the bean to check
 	 */
 	protected boolean hasDependentBean(String beanName) {
 		return this.dependentBeanMap.containsKey(beanName);
@@ -401,12 +423,18 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.singletonObjects) {
 			this.singletonsCurrentlyInDestruction = true;
 		}
+
 		synchronized (this.disposableBeans) {
 			String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
 			for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
 				destroySingleton(disposableBeanNames[i]);
 			}
 		}
+
+		this.containedBeanMap.clear();
+		this.dependentBeanMap.clear();
+		this.dependenciesForBeanMap.clear();
+
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.clear();
 			this.singletonFactories.clear();
@@ -441,6 +469,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param bean the bean instance to destroy
 	 */
 	protected void destroyBean(String beanName, DisposableBean bean) {
+		// Trigger destruction of dependent beans first...
 		Set dependencies = (Set) this.dependentBeanMap.remove(beanName);
 		if (dependencies != null) {
 			if (logger.isDebugEnabled()) {
@@ -451,6 +480,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				destroySingleton(dependentBeanName);
 			}
 		}
+
+		// Actually destroy the bean now...
 		if (bean != null) {
 			try {
 				bean.destroy();
@@ -459,6 +490,30 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				logger.error("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
 			}
 		}
+
+		// Trigger destruction of contained beans...
+		Set containedBeans = (Set) this.containedBeanMap.remove(beanName);
+		if (containedBeans != null) {
+			for (Iterator it = containedBeans.iterator(); it.hasNext();) {
+				String containedBeanName = (String) it.next();
+				destroySingleton(containedBeanName);
+			}
+		}
+
+		// Remove destroyed bean from other beans' dependencies.
+		synchronized (this.dependentBeanMap) {
+			for (Iterator it = this.dependentBeanMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				Set dependenciesToClean = (Set) entry.getValue();
+				dependenciesToClean.remove(beanName);
+				if (dependenciesToClean.isEmpty()) {
+					it.remove();
+				}
+			}
+		}
+
+		// Remove destroyed bean's prepared dependency information.
+		this.dependenciesForBeanMap.remove(beanName);
 	}
 
 	/**
