@@ -63,4 +63,8 @@
     </property>
   </bean>
 
+  <bean id="setBean" class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$UrlSet">
+    <property name="urlNames" value="http://www.springframework.org"/>
+  </bean>
+
 </beans>

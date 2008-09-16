@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -544,6 +545,13 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals(new Integer(30), gb.getGenericListProperty().get(1).iterator().next());
 	}
 
+	public void testSetBean() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
+		UrlSet us = (UrlSet) bf.getBean("setBean");
+		assertEquals(1, us.size());
+		assertEquals(new URL("http://www.springframework.org"), us.iterator().next());
+	}
+
 
 	public static class NamedUrlList extends LinkedList<URL> {
 	}
@@ -563,6 +571,24 @@ public class BeanFactoryGenericsTests extends TestCase {
 			assertEquals(1, list.size());
 			assertEquals(1, set.size());
 			assertEquals(1, map.size());
+		}
+	}
+
+
+	public static class UrlSet extends HashSet<URL> {
+
+		public UrlSet() {
+			super();
+		}
+
+		public UrlSet(Set<? extends URL> urls) {
+			super();
+		}
+
+		public void setUrlNames(Set<URI> urlNames) throws MalformedURLException {
+			for (URI urlName : urlNames) {
+				add(urlName.toURL());
+			}
 		}
 	}
 

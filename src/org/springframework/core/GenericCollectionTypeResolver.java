@@ -34,13 +34,12 @@ import java.util.Map;
  * target type of values to be added to a collection or map
  * (to be able to attempt type conversion if appropriate).
  *
- * <p>Only usable on Java 5. Use an appropriate JdkVersion check before
- * calling this class, if a fallback for JDK 1.4 is desirable.
+ * <p>Only usable on Java 5. Use an appropriate {@link JdkVersion} check
+ * before calling this class, if a fallback for JDK 1.4 is desirable.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.beans.BeanWrapperImpl
- * @see JdkVersion
+ * @see org.springframework.beans.BeanWrapper
  */
 public abstract class GenericCollectionTypeResolver {
 
@@ -392,6 +391,9 @@ public abstract class GenericCollectionTypeResolver {
 	private static Class extractTypeFromClass(
 			MethodParameter methodParam, Class clazz, Class source, int typeIndex, int nestingLevel, int currentLevel) {
 
+		if (clazz.getName().startsWith("java.util.")) {
+			return null;
+		}
 		if (clazz.getSuperclass() != null && isIntrospectionCandidate(clazz.getSuperclass())) {
 			return extractType(methodParam, clazz.getGenericSuperclass(), source, typeIndex, nestingLevel, currentLevel);
 		}
@@ -415,7 +417,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * Determine whether the given class is a potential candidate
 	 * that defines generic collection or map types.
 	 * @param clazz the class to check
-	 * @return whethe the given class is assignable to Collection or Map
+	 * @return whether the given class is assignable to Collection or Map
 	 */
 	private static boolean isIntrospectionCandidate(Class clazz) {
 		return (Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz));
