@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,16 +16,15 @@
 
 package org.springframework.mock.jndi;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.naming.NamingException;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.jndi.JndiTemplate;
 
 /**
- * Simple implementation of JndiTemplate interface that always returns
+ * Simple extension of the JndiTemplate class that always returns
  * a given object. Very useful for testing. Effectively a mock object.
  *
  * @author Rod Johnson
@@ -33,7 +32,7 @@ import org.springframework.jndi.JndiTemplate;
  */
 public class ExpectedLookupTemplate extends JndiTemplate {
 
-	private final Map jndiObjects = Collections.synchronizedMap(new HashMap());
+	private final Map jndiObjects = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	/**
@@ -53,6 +52,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	public ExpectedLookupTemplate(String name, Object object) {
 		addObject(name, object);
 	}
+
 
 	/**
 	 * Add the given object to the list of JNDI objects that this
