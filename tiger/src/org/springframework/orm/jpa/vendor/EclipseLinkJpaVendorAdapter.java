@@ -30,9 +30,8 @@ import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
- * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
- * Eclipse Persistence Services (EclipseLink). Developed and tested against
- * EclipseLink 1.0 M4.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Eclipse
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 1.0.
  *
  * <p>Exposes EclipseLink's persistence provider and EntityManager extension interface,
  * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.

@@ -34,9 +34,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Eclipse Persistence Services (EclipseLink). Developed and tested
- * against EclipseLink 1.0 M4.
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for Eclipse
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 1.0.
  *
  * <p>By default, this class acquires a EclipseLink transaction to get the JDBC Connection
  * early. This allows mixing JDBC and JPA/EclipseLink operations in the same transaction.
