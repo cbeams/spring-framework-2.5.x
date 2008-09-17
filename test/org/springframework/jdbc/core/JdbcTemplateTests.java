@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.easymock.MockControl;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -58,6 +59,9 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter;
  */
 public class JdbcTemplateTests extends AbstractJdbcTests {
 
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+
+
 	public void testBeanProperties() throws Exception {
 		replay();
 
@@ -81,8 +85,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
 		ctrlPreparedStatement.setReturnValue(1);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -263,8 +269,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			mockStatement.executeQuery(sql);
 		}
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -323,8 +331,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -404,8 +414,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -442,8 +454,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -479,8 +493,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
 		mockStatement.executeUpdate(sql);
 		ctrlStatement.setReturnValue(rowsAffected);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -510,8 +526,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement.setVoidCallable();
 		mockStatement.executeUpdate();
 		ctrlStatement.setReturnValue(33);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -563,8 +581,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
 		mockStatement.executeUpdate(sql);
 		ctrlStatement.setReturnValue(rowsAffected);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -598,8 +618,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement.setVoidCallable();
 		mockStatement.executeBatch();
 		ctrlStatement.setReturnValue(new int[] {1, 1});
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -644,8 +666,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement.setReturnValue(false);
 		mockStatement.getUpdateCount();
 		ctrlStatement.setReturnValue(1);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -741,8 +765,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
 		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -803,8 +829,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
 		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -869,8 +897,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
 		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -931,8 +961,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
 		ctrlPreparedStatement.setReturnValue(rowsAffected[1]);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -993,8 +1025,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
 		ctrlPreparedStatement.setReturnValue(rowsAffected[1]);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -1283,8 +1317,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
 		ctrlPreparedStatement.setReturnValue(expectedRowsUpdated);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -1361,8 +1397,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		SQLException sex = new SQLException("bar");
 		mockResultSet.close();
 		ctrlResultSet.setThrowable(sex);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setThrowable(sex);
 		mockConnection.close();
@@ -1448,8 +1486,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			(PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(warnings);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -1655,8 +1695,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
 		final Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 		MockControl ctrlStatement2 = MockControl.createControl(Statement.class);
@@ -1666,8 +1708,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		MockControl ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
 		final PreparedStatement mockPreparedStatement =	(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 		MockControl ctrlPreparedStatement2 =	MockControl.createControl(PreparedStatement.class);
@@ -1684,8 +1728,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		MockControl ctrlCallableStatement =	MockControl.createControl(CallableStatement.class);
 		final CallableStatement mockCallableStatement =	(CallableStatement) ctrlCallableStatement.getMock();
-		mockCallableStatement.getWarnings();
-		ctrlCallableStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallableStatement.getWarnings();
+			ctrlCallableStatement.setReturnValue(null);
+		}
 		mockCallableStatement.close();
 		ctrlCallableStatement.setVoidCallable();
 		MockControl ctrlCallableStatement2 = MockControl.createControl(CallableStatement.class);
@@ -1936,8 +1982,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(1);
 		ctrlCallable.setReturnValue("X");
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 

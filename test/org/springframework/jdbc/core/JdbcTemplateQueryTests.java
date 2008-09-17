@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.easymock.MockControl;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.AbstractJdbcTests;
@@ -36,6 +37,8 @@ import org.springframework.jdbc.AbstractJdbcTests;
  * @since 19.12.2004
  */
 public class JdbcTemplateQueryTests extends AbstractJdbcTests {
+
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
 
 	private MockControl ctrlStatement;
 	private Statement mockStatement;
@@ -102,8 +105,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -130,8 +135,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -166,8 +173,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -204,8 +213,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -242,8 +253,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -285,8 +298,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -319,8 +334,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -358,8 +375,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -391,8 +410,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -424,8 +445,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -459,8 +482,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -494,8 +519,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -529,8 +556,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -565,8 +594,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockStatement.getWarnings();
+			ctrlStatement.setReturnValue(null);
+		}
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -613,8 +644,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -645,8 +678,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -684,8 +719,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -724,8 +761,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -764,8 +803,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -796,8 +837,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -839,8 +882,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -878,8 +923,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -916,8 +963,10 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 

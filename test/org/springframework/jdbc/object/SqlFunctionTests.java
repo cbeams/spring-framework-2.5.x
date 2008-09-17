@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2008 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.apache.commons.logging.LogFactory;
 import org.easymock.MockControl;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.AbstractJdbcTests;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Trevor Cook
@@ -38,12 +40,15 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 	private static final String FUNCTION_MIXED =
 		"select count(id) from mytable where myparam = ? and mystring = ?";
 
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+
 	private MockControl ctrlPreparedStatement;
 	private PreparedStatement mockPreparedStatement;
 	private MockControl ctrlResultSet;
 	private ResultSet mockResultSet;
 	private MockControl ctrlResultSetMetaData;
 	private ResultSetMetaData mockResultSetMetaData;
+
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -56,13 +61,6 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 	}
 
-	protected void replay() {
-		super.replay();
-		ctrlPreparedStatement.replay();
-		ctrlResultSet.replay();
-		ctrlResultSetMetaData.replay();
-	}
-
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
@@ -71,6 +69,14 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 			ctrlResultSetMetaData.verify();
 		}
 	}
+
+	protected void replay() {
+		super.replay();
+		ctrlPreparedStatement.replay();
+		ctrlResultSet.replay();
+		ctrlResultSetMetaData.replay();
+	}
+
 
 	public void testFunction() throws SQLException {
 		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
@@ -91,8 +97,10 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -133,8 +141,10 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -176,8 +186,10 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -217,8 +229,10 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -258,8 +272,10 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -299,8 +315,10 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 

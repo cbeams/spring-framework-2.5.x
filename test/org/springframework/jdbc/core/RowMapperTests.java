@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.TestBean;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -37,16 +38,13 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
  */
 public class RowMapperTests extends TestCase {
 
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+
 	private MockControl conControl;
-
 	private Connection con;
-
 	private MockControl rsControl;
-
 	private ResultSet rs;
-
 	private JdbcTemplate jdbcTemplate;
-
 	private List result;
 
 	protected void setUp() throws SQLException {
@@ -89,8 +87,10 @@ public class RowMapperTests extends TestCase {
 		conControl.setReturnValue(stmt, 1);
 		stmt.executeQuery("some SQL");
 		stmtControl.setReturnValue(rs, 1);
-		stmt.getWarnings();
-		stmtControl.setReturnValue(null, 1);
+		if (debugEnabled) {
+			stmt.getWarnings();
+			stmtControl.setReturnValue(null, 1);
+		}
 		stmt.close();
 		stmtControl.setVoidCallable(1);
 
@@ -109,8 +109,10 @@ public class RowMapperTests extends TestCase {
 
 		ps.executeQuery();
 		psControl.setReturnValue(rs, 1);
-		ps.getWarnings();
-		psControl.setReturnValue(null, 1);
+		if (debugEnabled) {
+			ps.getWarnings();
+			psControl.setReturnValue(null, 1);
+		}
 		ps.close();
 		psControl.setVoidCallable(1);
 
@@ -138,8 +140,10 @@ public class RowMapperTests extends TestCase {
 		psControl.setVoidCallable(1);
 		ps.executeQuery();
 		psControl.setReturnValue(rs, 1);
-		ps.getWarnings();
-		psControl.setReturnValue(null, 1);
+		if (debugEnabled) {
+			ps.getWarnings();
+			psControl.setReturnValue(null, 1);
+		}
 		ps.close();
 		psControl.setVoidCallable(1);
 
@@ -169,8 +173,10 @@ public class RowMapperTests extends TestCase {
 		psControl.setVoidCallable(1);
 		ps.executeQuery();
 		psControl.setReturnValue(rs, 1);
-		ps.getWarnings();
-		psControl.setReturnValue(null, 1);
+		if (debugEnabled) {
+			ps.getWarnings();
+			psControl.setReturnValue(null, 1);
+		}
 		ps.close();
 		psControl.setVoidCallable(1);
 
@@ -197,8 +203,10 @@ public class RowMapperTests extends TestCase {
 		psControl.setVoidCallable(1);
 		ps.executeQuery();
 		psControl.setReturnValue(rs, 1);
-		ps.getWarnings();
-		psControl.setReturnValue(null, 1);
+		if (debugEnabled) {
+			ps.getWarnings();
+			psControl.setReturnValue(null, 1);
+		}
 		ps.close();
 		psControl.setVoidCallable(1);
 

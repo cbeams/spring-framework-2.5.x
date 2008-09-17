@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import javax.sql.DataSource;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.easymock.internal.ArrayMatcher;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -48,6 +49,9 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * @author Thomas Risberg
  */
 public class SimpleJdbcTemplateTests extends TestCase {
+
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+
 
 	public void testQueryForIntWithoutArgs() {
 		String sql = "SELECT COUNT(0) FROM BAR";
@@ -557,8 +561,10 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
 		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -631,8 +637,10 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
 		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 

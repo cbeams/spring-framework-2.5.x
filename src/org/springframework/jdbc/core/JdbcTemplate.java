@@ -394,7 +394,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
 			}
 			Object result = action.doInStatement(stmtToUse);
-			handleWarnings(stmt.getWarnings());
+			handleWarnings(stmt);
 			return result;
 		}
 		catch (SQLException ex) {
@@ -589,7 +589,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
 			}
 			Object result = action.doInPreparedStatement(psToUse);
-			handleWarnings(ps.getWarnings());
+			handleWarnings(ps);
 			return result;
 		}
 		catch (SQLException ex) {
@@ -934,7 +934,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				csToUse = this.nativeJdbcExtractor.getNativeCallableStatement(cs);
 			}
 			Object result = action.doInCallableStatement(csToUse);
-			handleWarnings(cs.getWarnings());
+			handleWarnings(cs);
 			return result;
 		}
 		catch (SQLException ex) {
@@ -1206,26 +1206,35 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Throw an SQLWarningException if we're not ignoring warnings,
 	 * else log the warnings (at debug level).
-	 * @param warning the warnings object from the current statement.
-	 * May be <code>null</code>, in which case this method does nothing.
+	 * @param stmt the current JDBC statement
 	 * @throws SQLWarningException if not ignoring warnings
 	 * @see org.springframework.jdbc.SQLWarningException
 	 */
-	protected void handleWarnings(SQLWarning warning) throws SQLWarningException {
-		if (warning != null) {
-			if (isIgnoreWarnings()) {
-				if (logger.isDebugEnabled()) {
-					SQLWarning warningToLog = warning;
-					while (warningToLog != null) {
-						logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '" +
-								warningToLog.getErrorCode() + "', message [" + warningToLog.getMessage() + "]");
-						warningToLog = warningToLog.getNextWarning();
-					}
+	protected void handleWarnings(Statement stmt) throws SQLException {
+		if (isIgnoreWarnings()) {
+			if (logger.isDebugEnabled()) {
+				SQLWarning warningToLog = stmt.getWarnings();
+				while (warningToLog != null) {
+					logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '" +
+							warningToLog.getErrorCode() + "', message [" + warningToLog.getMessage() + "]");
+					warningToLog = warningToLog.getNextWarning();
 				}
 			}
-			else {
-				throw new SQLWarningException("Warning not ignored", warning);
-			}
+		}
+		else {
+			handleWarnings(stmt.getWarnings());
+		}
+	}
+
+	/**
+	 * Throw an SQLWarningException if encountering an actual warning.
+	 * @param warning the warnings object from the current statement.
+	 * May be <code>null</code>, in which case this method does nothing.
+	 * @throws SQLWarningException in case of an actual warning to be raised
+	 */
+	protected void handleWarnings(SQLWarning warning) throws SQLWarningException {
+		if (warning != null) {
+			throw new SQLWarningException("Warning not ignored", warning);
 		}
 	}
 

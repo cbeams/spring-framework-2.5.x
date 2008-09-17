@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,15 +21,20 @@ import java.sql.PreparedStatement;
 import java.sql.Types;
 
 import org.easymock.MockControl;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Juergen Hoeller
  * @since 22.02.2005
  */
 public class BatchSqlUpdateTests extends AbstractJdbcTests {
+
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+
 
 	public void testBatchUpdateWithExplicitFlush() throws Exception {
 		doTestBatchUpdate(false);
@@ -58,8 +63,10 @@ public class BatchSqlUpdateTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
 		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 

@@ -27,6 +27,7 @@ import java.sql.Types;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.Person;
@@ -41,22 +42,16 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
  */
 public abstract class AbstractRowMapperTests extends TestCase {
 
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+
 	protected MockControl conControl;
-
 	protected Connection con;
-
 	protected MockControl rsmdControl;
-
 	protected ResultSetMetaData rsmd;
-
 	protected MockControl rsControl;
-
 	protected ResultSet rs;
-
 	protected MockControl stmtControl;
-
 	protected Statement stmt;
-
 	protected JdbcTemplate jdbcTemplate;
 
 	protected void setUp() throws SQLException {
@@ -108,8 +103,10 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		conControl.setReturnValue(stmt, 1);
 		stmt.executeQuery("select name, age, birth_date, balance from people");
 		stmtControl.setReturnValue(rs, 1);
-		stmt.getWarnings();
-		stmtControl.setReturnValue(null, 1);
+		if (debugEnabled) {
+			stmt.getWarnings();
+			stmtControl.setReturnValue(null, 1);
+		}
 		stmt.close();
 		stmtControl.setVoidCallable(1);
 

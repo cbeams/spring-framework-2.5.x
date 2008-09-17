@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.jdbc.core.simple;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -35,6 +38,8 @@ import java.sql.*;
  */
 public class SimpleJdbcCallTests extends TestCase {
 
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+
 	private MockControl ctrlDataSource;
 	private DataSource mockDataSource;
 	private MockControl ctrlConnection;
@@ -45,8 +50,6 @@ public class SimpleJdbcCallTests extends TestCase {
 	private CallableStatement mockCallable;
 
 	protected void setUp() throws Exception {
-		super.setUp();
-
 		ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 
@@ -64,11 +67,9 @@ public class SimpleJdbcCallTests extends TestCase {
 
 		ctrlCallable = MockControl.createControl(CallableStatement.class);
 		mockCallable = (CallableStatement) ctrlCallable.getMock();
-
 	}
 
 	protected void tearDown() throws Exception {
-		super.tearDown();
 		ctrlDatabaseMetaData.verify();
 		ctrlDataSource.verify();
 		ctrlCallable.verify();
@@ -166,8 +167,10 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Long(4));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -276,8 +279,10 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Long(4));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -326,8 +331,10 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(1);
 		ctrlCallable.setReturnValue(new Long(4));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -436,8 +443,10 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(1);
 		ctrlCallable.setReturnValue(new Long(4));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -456,4 +465,5 @@ public class SimpleJdbcCallTests extends TestCase {
 
 		ctrlResultSet.verify();
 	}
+
 }

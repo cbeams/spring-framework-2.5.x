@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import javax.sql.DataSource;
 
 import org.easymock.MockControl;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -55,6 +56,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Rod Johnson
  */
 public class StoredProcedureTests extends AbstractJdbcTests {
+
+	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
 
 	private MockControl ctrlCallable;
 	private CallableStatement mockCallable;
@@ -123,8 +126,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -149,8 +154,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -188,8 +195,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue(new Integer(5), 1);
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable(1);
 		// Must call this here as we're not using setUp()/tearDown() mechanism
@@ -247,8 +256,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue(new Integer(4));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -275,8 +286,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getUpdateCount();
 		ctrlCallable.setReturnValue(-1);
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -349,8 +362,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
@@ -406,8 +421,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getUpdateCount();
 		ctrlCallable.setReturnValue(-1);
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -489,8 +506,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getUpdateCount();
 		ctrlCallable.setReturnValue(-1);
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -525,17 +544,17 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 		Number n = (Number) res.get("#update-count-1");
 		assertEquals("wrong update count", 0, n.intValue());
-
 	}
 
 	public void testStoredProcedureSkippingResultsProcessing() throws Exception {
-
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(true);
 		mockCallable.getUpdateCount();
 		ctrlCallable.setReturnValue(-1);
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -550,7 +569,6 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		Map res = sproc.execute();
 
 		assertEquals("incorrect number of returns", 0, res.size());
-
 	}
 
 	public void testStoredProcedureSkippingUndeclaredResults() throws Exception {
@@ -583,8 +601,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getUpdateCount();
 		ctrlCallable.setReturnValue(-1);
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -607,7 +627,6 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		assertEquals(2, rs1.size());
 		assertEquals("Foo", rs1.get(0));
 		assertEquals("Bar", rs1.get(1));
-
 	}
 
 	public void testParameterMapper() throws Exception {
@@ -621,8 +640,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue("OK");
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -650,8 +671,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue("OK");
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -676,8 +699,10 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlCallable.setReturnValue(-1);
 		mockCallable.getObject(1);
 		ctrlCallable.setReturnValue(new BigDecimal("12345.6789"));
-		mockCallable.getWarnings();
-		ctrlCallable.setReturnValue(null);
+		if (debugEnabled) {
+			mockCallable.getWarnings();
+			ctrlCallable.setReturnValue(null);
+		}
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
