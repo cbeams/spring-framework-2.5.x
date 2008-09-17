@@ -74,7 +74,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building and running the framework's test suite
 
 * eclipselink/eclipselink.jar
-- Eclipse Persistence Services 1.0 (http://www.eclipse.org/eclipselink)
+- Eclipse Persistence Services 1.0.1 (http://www.eclipse.org/eclipselink)
 - required for building the framework
 - required at runtime when using Spring's JPA support with EclipseLink as provider
 
@@ -354,8 +354,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - used by Commons Attributes 2.2 to parse source-level metadata in the build process
 - required for building the framework and the attributes version of JPetStore
 
-* quartz/quartz-all-1.6.1-RC1.jar
-- Quartz 1.6.1 RC1 (http://www.opensymphony.com/quartz)
+* quartz/quartz-all-1.6.1-RC3.jar
+- Quartz 1.6.1 RC3 (http://www.opensymphony.com/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
