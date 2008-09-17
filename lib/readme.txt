@@ -373,12 +373,12 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using the Struts 1.x support or Tiles 1.x TilesView
 - required for running JPetStore's Struts web tier
 
-* testng/testng-5.7-jdk15.jar
-- TestNG 5.7 (http://testng.org)
+* testng/testng-5.8-jdk15.jar
+- TestNG 5.8 (http://testng.org)
 - required for building and running the framework's test suite
 
-* tiles/tiles-api-2.0.5.jar, tiles/tiles-core-2.0.5.jar, tiles/tiles-jsp-2.0.5.jar
-- Apache Tiles 2.0.5 (http://tiles.apache.org)
+* tiles/tiles-api-2.0.6.jar, tiles/tiles-core-2.0.6.jar, tiles/tiles-jsp-2.0.6.jar
+- Apache Tiles 2.0.6 (http://tiles.apache.org)
 - required for building the framework
 - required at runtime when using the Tiles2 TilesView
 
