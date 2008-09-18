@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.mail.javamail;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
@@ -79,7 +80,7 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 
 	/**
 	 * Specify the <code>Resource</code> from which mappings are loaded.
-	 * Needs to follow the <code>mime.types<code> file format, as specified
+	 * <p>Needs to follow the <code>mime.types<code> file format, as specified
 	 * by the Java Activation Framework, containing lines such as:<br>
 	 * <code>text/html  html htm HTML HTM</code>
 	 */
@@ -122,13 +123,13 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 						"Could not load specified MIME type mapping file: " + this.mappingLocation);
 			}
 		}
-		return fileTypeMap;
+		return this.fileTypeMap;
 	}
 
 	/**
-	 * Compile a FileTypeMap from the mappings in the given mapping file and the
-	 * given mapping entries.
-	 * <p>Default implementation creates an Activation Framework MimetypesFileTypeMap,
+	 * Compile a {@link FileTypeMap} from the mappings in the given mapping file
+	 * and the given mapping entries.
+	 * <p>The default implementation creates an Activation Framework {@link MimetypesFileTypeMap},
 	 * passing in an InputStream from the mapping resource (if any) and registering
 	 * the mapping lines programmatically.
 	 * @param mappingLocation a <code>mime.types</code> mapping resource (can be <code>null</code>)
@@ -139,8 +140,19 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	 * @see javax.activation.MimetypesFileTypeMap#addMimeTypes(String)
 	 */
 	protected FileTypeMap createFileTypeMap(Resource mappingLocation, String[] mappings) throws IOException {
-		MimetypesFileTypeMap fileTypeMap = (mappingLocation != null) ?
-				new MimetypesFileTypeMap(mappingLocation.getInputStream()) : new MimetypesFileTypeMap();
+		MimetypesFileTypeMap fileTypeMap = null;
+		if (mappingLocation != null) {
+			InputStream is = mappingLocation.getInputStream();
+			try {
+				fileTypeMap = new MimetypesFileTypeMap(is);
+			}
+			finally {
+				is.close();
+			}
+		}
+		else {
+			fileTypeMap = new MimetypesFileTypeMap();
+		}
 		if (mappings != null) {
 			for (int i = 0; i < mappings.length; i++) {
 				fileTypeMap.addMimeTypes(mappings[i]);
