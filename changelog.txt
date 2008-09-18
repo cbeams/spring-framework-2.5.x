@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-07-31)
+Changes in version 2.0.9 (2008-09-29)
 -------------------------------------
 
 General
@@ -12,6 +12,7 @@ General
 
 Package org.springframework.aop
 * Cglib2AopProxy properly detects overridden "finalize()" methods, never dispatching them to the interceptor chain
+* AbstractAutoProxyCreator (as used by "aop:config") correctly ignores null bean instances
 * CustomizableTraceInterceptor properly escapes method names and exception messages for regex parsing (wrt "$" signs)
 * CustomizableTraceInterceptor properly escapes all "\" and "$" symbols in replacement values
 * marked AbstractRefreshableTargetSource's status accessors as synchronized
