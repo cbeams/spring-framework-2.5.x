@@ -212,12 +212,12 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
-	 * Set a value that should be treated as <code>null</value> when
+	 * Set a value that should be treated as <code>null</code> when
 	 * resolved as a placeholder value: e.g. "" (empty String) or "null".
 	 * <p>Note that this will only apply to full property values,
 	 * not to parts of concatenated values.
 	 * <p>By default, no such null value is defined. This means that
-	 * there is no way to express <code>null</value> as a property
+	 * there is no way to express <code>null</code> as a property
 	 * value unless you explictly map a corresponding value here.
 	 */
 	public void setNullValue(String nullValue) {
