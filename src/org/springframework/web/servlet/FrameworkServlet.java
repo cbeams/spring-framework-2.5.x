@@ -191,7 +191,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * no custom namespace was set: e.g. "test-servlet" for a servlet named "test".
 	 */
 	public String getNamespace() {
-		return (this.namespace != null) ? this.namespace : getServletName() + DEFAULT_NAMESPACE_SUFFIX;
+		return (this.namespace != null ? this.namespace : getServletName() + DEFAULT_NAMESPACE_SUFFIX);
 	}
 
 	/**
