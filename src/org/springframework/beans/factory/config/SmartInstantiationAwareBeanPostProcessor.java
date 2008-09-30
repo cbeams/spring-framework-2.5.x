@@ -48,7 +48,7 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 
 	/**
 	 * Determine the candidate constructors to use for the given bean.
-	 * @param beanClass the raw class of the bean
+	 * @param beanClass the raw class of the bean (never <code>null</code>)
 	 * @param beanName the name of the bean
 	 * @return the candidate constructors, or <code>null</code> if none specified
 	 * @throws org.springframework.beans.BeansException in case of errors

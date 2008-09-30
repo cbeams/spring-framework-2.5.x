@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
@@ -42,6 +43,20 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * @author Sam Brannen
  */
 public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
+
+	public void testIncompleteBeanDefinition() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("testBean", new GenericBeanDefinition());
+		try {
+			bf.getBean("testBean");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getRootCause() instanceof IllegalStateException);
+		}
+	}
 
 	public void testResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();

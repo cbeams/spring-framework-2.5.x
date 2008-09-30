@@ -851,7 +851,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Constructor[] determineConstructorsFromBeanPostProcessors(Class beanClass, String beanName)
 			throws BeansException {
 
-		if (hasInstantiationAwareBeanPostProcessors()) {
+		if (beanClass != null && hasInstantiationAwareBeanPostProcessors()) {
 			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 				BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 				if (beanProcessor instanceof SmartInstantiationAwareBeanPostProcessor) {
