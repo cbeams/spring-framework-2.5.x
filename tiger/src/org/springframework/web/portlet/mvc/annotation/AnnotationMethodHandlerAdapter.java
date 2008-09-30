@@ -54,6 +54,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.validation.support.BindingAwareModelMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -241,7 +242,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		if (implicitModel == null) {
-			implicitModel = new ExtendedModelMap();
+			implicitModel = new BindingAwareModelMap();
 		}
 
 		// Execute invokeHandlerMethod in synchronized block if required.

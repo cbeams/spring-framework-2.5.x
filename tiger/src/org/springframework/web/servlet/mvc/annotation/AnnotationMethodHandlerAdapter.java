@@ -51,6 +51,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.validation.support.BindingAwareModelMap;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -320,7 +321,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			Method handlerMethod = methodResolver.resolveHandlerMethod(request);
 			ServletHandlerMethodInvoker methodInvoker = new ServletHandlerMethodInvoker(methodResolver);
 			ServletWebRequest webRequest = new ServletWebRequest(request, response);
-			ExtendedModelMap implicitModel = new ExtendedModelMap();
+			ExtendedModelMap implicitModel = new BindingAwareModelMap();
 
 			Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
 			ModelAndView mav =

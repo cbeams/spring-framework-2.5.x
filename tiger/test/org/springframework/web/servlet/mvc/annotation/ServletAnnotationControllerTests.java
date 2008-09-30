@@ -317,6 +317,14 @@ public class ServletAnnotationControllerTests extends TestCase {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("myView-myName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/myThirdPath.do");
+		request.addParameter("defaultName", "10");
+		request.addParameter("age", "100");
+		request.addParameter("date", "2007-10-02");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView-special-99-special-99", response.getContentAsString());
 	}
 
 	public void testBinderInitializingCommandProvidingFormController() throws Exception {
@@ -809,6 +817,12 @@ public class ServletAnnotationControllerTests extends TestCase {
 			return super.myHandle(tbReal, errors, model);
 		}
 
+		@RequestMapping("/myThirdPath.do")
+		public String myThirdHandle(TB tb, Model model) {
+			model.addAttribute("testBean", new TestBean("special", 99));
+			return "myView";
+		}
+
 		@ModelAttribute
 		protected TB2 getModelAttr() {
 			return (TB2) new DerivedTestBean();
@@ -1028,8 +1042,14 @@ public class ServletAnnotationControllerTests extends TestCase {
 						assertTrue(model.get(BindingResult.MODEL_KEY_PREFIX + "ITestBean") instanceof Errors);
 					}
 					List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
-					response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
-							"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
+					if (errors.hasFieldErrors("age")) {
+						response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
+								"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
+					}
+					else {
+						response.getWriter().write(viewName + "-" + tb.getName() + "-" + tb.getAge() + "-" +
+								errors.getFieldValue("name") + "-" + errors.getFieldValue("age"));
+					}
 				}
 			};
 		}
