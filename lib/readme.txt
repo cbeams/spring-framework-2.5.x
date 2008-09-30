@@ -85,7 +85,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.13 (http://www.freemarker.org)
+- FreeMarker 2.3.14 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -117,8 +117,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
 - required for running JPetStore and PetClinic
 
-* ibatis/ibatis-2.3.3.720.jar
-- iBATIS SQL Maps 2.3.3 b720 (http://ibatis.apache.org)
+* ibatis/ibatis-2.3.4.726.jar
+- iBATIS SQL Maps 2.3.4 b726 (http://ibatis.apache.org)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.x support
 
