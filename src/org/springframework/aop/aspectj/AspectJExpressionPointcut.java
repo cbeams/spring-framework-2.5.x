@@ -50,6 +50,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -456,8 +457,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * Matcher class for the BeanNamePointcutDesignatorHandler.
-	 * 
-	 * Dynamic match tests for this matcher always return true, 
+	 *
+	 * <p>Dynamic match tests for this matcher always return true,
 	 * since the matching decision is made at the proxy creation time.
 	 * For static match tests, this matcher abstains to allow the overall
 	 * pointcut to match even when negation is used with the bean() poitncut.
@@ -471,11 +472,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		public boolean couldMatchJoinPointsInType(Class someClass) {
-			return true;
+			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}
 
 		public boolean couldMatchJoinPointsInType(Class someClass, MatchingContext context) {
-			return contextMatch() == FuzzyBoolean.YES ? true : false;
+			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}
 
 		public boolean matchesDynamically(MatchingContext context) {
@@ -483,34 +484,46 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		public FuzzyBoolean matchesStatically(MatchingContext context) {
-			return contextMatch();
+			return contextMatch(null);
 		}
 
 		public boolean mayNeedDynamicTest() {
 			return false;
 		}
 
-		private FuzzyBoolean contextMatch() {
+		private FuzzyBoolean contextMatch(Class targetType) {
 			String advisedBeanName = getCurrentProxiedBeanName();
-			if (advisedBeanName == null) { // no proxy creation in progress
+			if (advisedBeanName == null) {  // no proxy creation in progress
 				// abstain; can't return YES, since that will make pointcut with negation fail
 				return FuzzyBoolean.MAYBE; 
 			}
 			if (BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
 				return FuzzyBoolean.NO;
 			}
+			if (targetType != null) {
+				boolean isFactory = FactoryBean.class.isAssignableFrom(targetType);
+				return FuzzyBoolean.fromBoolean(
+						matchesBeanName(isFactory ? BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName : advisedBeanName));
+			}
+			else {
+				return FuzzyBoolean.fromBoolean(matchesBeanName(advisedBeanName) ||
+						matchesBeanName(BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName));
+			}
+		}
+
+		private boolean matchesBeanName(String advisedBeanName) {
 			if (this.expressionPattern.matches(advisedBeanName)) {
-				return FuzzyBoolean.YES;
+				return true;
 			}
 			if (beanFactory != null) {
 				String[] aliases = beanFactory.getAliases(advisedBeanName);
 				for (int i = 0; i < aliases.length; i++) {
 					if (this.expressionPattern.matches(aliases[i])) {
-						return FuzzyBoolean.YES;
+						return true;
 					}
 				}
 			}
-			return FuzzyBoolean.NO;
+			return false;
 		}
 	}
 

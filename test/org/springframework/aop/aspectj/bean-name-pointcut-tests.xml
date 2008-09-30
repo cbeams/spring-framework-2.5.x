@@ -12,6 +12,12 @@
 
 			<aop:pointcut id="nestedBeanOperation" expression="execution(* getCompany(..)) and bean(testBean*)"/>
 			<aop:before pointcut-ref="nestedBeanOperation" method="increment()"/>
+
+			<aop:pointcut id="factoryBean1Operation" expression="bean(testFactoryBean1)"/>
+			<aop:before pointcut-ref="factoryBean1Operation" method="increment()"/>
+
+			<aop:pointcut id="factoryBean2Operation" expression="bean(&amp;testFactoryBean2)"/>
+			<aop:before pointcut-ref="factoryBean2Operation" method="increment()"/>
 		</aop:aspect>
 	</aop:config>
 
@@ -25,13 +31,30 @@
 		</property>
 	</bean>
 
+	<bean id="testFactoryBean1" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="myKey" value="myValue"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="testFactoryBean2" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="myKey" value="myValue"/>
+			</map>
+		</property>
+	</bean>
+
 	<bean id="counterAspect" class="org.springframework.aop.aspectj.Counter"/>
  
 	<aop:config>
-	     <aop:advisor pointcut="bean(*This) and !bean(dont*)" advice-ref="testInterceptor"/>
+     <aop:advisor pointcut="bean(*This) and !bean(dont*)" advice-ref="testInterceptor"/>
 	</aop:config> 
 
 	<bean id="interceptThis" class="org.springframework.beans.TestBean"/>
+
 	<bean id="dontInterceptThis" class="org.springframework.beans.TestBean"/>
 	
 	<bean id="testInterceptor" class="org.springframework.aop.aspectj.BeanNamePointcutTests$TestInterceptor"/>

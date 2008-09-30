@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,34 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * Test for correct application of the bean() PCD for XML-based AspectJ aspects.
  *
  * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  */
 public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringContextTests {
 
 	protected ITestBean testBean1;
 	protected ITestBean testBean2;
 	protected ITestBean testBeanContainingNestedBean;
+	protected Map testFactoryBean1;
+	protected Map testFactoryBean2;
 	protected Counter counterAspect;
-	
+
 	protected ITestBean interceptThis;
 	protected ITestBean dontInterceptThis;
 	protected TestInterceptor testInterceptor;
-	
+
+
 	public BeanNamePointcutTests() {
 		setPopulateProtectedVariables(true);
 	}
@@ -73,7 +79,24 @@ public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringCont
 		assertFalse("Non-matching bean must *not* be advised (proxied)", this.testBeanContainingNestedBean.getDoctor() instanceof Advised);
 	}
 	
-	
+	public void testMatchingFactoryBeanObject() {
+		assertTrue("Matching bean must be advised (proxied)", this.testFactoryBean1 instanceof Advised);
+		assertEquals("myValue", this.testFactoryBean1.get("myKey"));
+		assertEquals("myValue", this.testFactoryBean1.get("myKey"));
+		assertEquals("Advice not executed: must have been", 2, this.counterAspect.getCount());
+		FactoryBean fb = (FactoryBean) getApplicationContext().getBean("&testFactoryBean1");
+		assertTrue("FactoryBean itself must *not* be advised", !(fb instanceof Advised));
+	}
+
+	public void testMatchingFactoryBeanItself() {
+		assertTrue("Matching bean must *not* be advised (proxied)", !(this.testFactoryBean2 instanceof Advised));
+		FactoryBean fb = (FactoryBean) getApplicationContext().getBean("&testFactoryBean2");
+		assertTrue("FactoryBean itself must be advised", fb instanceof Advised);
+		assertTrue(Map.class.isAssignableFrom(fb.getObjectType()));
+		assertTrue(Map.class.isAssignableFrom(fb.getObjectType()));
+		assertEquals("Advice not executed: must have been", 2, this.counterAspect.getCount());
+	}
+
 	public void testPointcutAdvisorCombination() {
 		assertTrue("Matching bean must be advised (proxied)", this.interceptThis instanceof Advised);
 		assertFalse("Non-matching bean must *not* be advised (proxied)", this.dontInterceptThis instanceof Advised);
@@ -83,11 +106,14 @@ public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringCont
 		assertEquals(1, testInterceptor.interceptionCount);
 	}
 
+
 	public static class TestInterceptor implements MethodBeforeAdvice {
+
 		private int interceptionCount;
 		
 		public void before(Method method, Object[] args, Object target) throws Throwable {
 			interceptionCount++;
 		}
 	}
+
 }
