@@ -3,12 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.6 (2008-09-22)
+Changes in version 2.5.6 (2008-10-13)
 -------------------------------------
 
 General
 * removed outdated EAR support from sample applications
-* upgraded to AspectJ 1.6.1 (retaining compatibility with AspectJ 1.5.x and 1.6.0)
+* upgraded to AspectJ 1.6.2 (retaining compatibility with AspectJ 1.5.x and 1.6.x)
 * upgraded to EHCache 1.5.0 (retaining compatibility with EHCache 1.2 and higher)
 * upgraded to TestNG 5.8 (retaining compatibility with TestNG 5.5 and higher)
 * upgraded to OpenJPA 1.1.0 (retaining compatibility with OpenJPA 1.0.x as well as 1.2.0)
@@ -17,6 +17,7 @@ General
 Package org.springframework.aop
 * AbstractAutoProxyCreator (as used by "aop:config") correctly ignores null bean instances
 * "aop:aspect" doesn't insist on aspect bean reference to be specified when just containing declare-parents elements
+* "bean" pointcut matches exposed FactoryBean products only; "&..." syntax supported for matching FactoryBean itself
 
 Package org.springframework.beans
 * BeanWrapper's introspection resolves bridge methods to find setter method for getter method with covariant return type
@@ -28,6 +29,7 @@ Package org.springframework.beans
 * DefaultSingletonBeanRegistry eagerly cleans up cached dependency information when destroying a bean
 * AbstractBeanFactory rejects getBean request with arguments in case of a pre-existing singleton of same name as well
 * AbstractAutowireCapableBeanFactory preserves possible matches hint in property exception
+* SmartInstantiationAwareBeanPostProcessor's "determineCandidateConstructors" is only invoked for non-null bean Class
 * ServiceLocatorFactoryBean handles equals and hashCode based on proxy object identity
 * factored out "createBeanDefinition" template method in BeanDefinitionParserDelegate
 * XML list/set/map elements (in both the beans and the util namespace) support nested description element
@@ -81,6 +83,9 @@ Package org.springframework.jmx
 * added "environment" property to MBeanClientInterceptor and NotificationListenerRegistar, allowing for JMX env entries
 * added "refreshOnConnectFailure" property to MBeanClientInterceptor, allowing for reconnect in case of I/O failure
 
+Package org.springframework.mail
+* ConfigurableMimeFileTypeMap explicitly closes the InputStream that it uses for "mime.types" resource reading
+
 Package org.springframework.mock
 * SimpleNamingContextBuilder supports "deactivate()"+"activate()", with the standard JNDI provider exposed inbetween
 
@@ -120,7 +125,9 @@ Package org.springframework.web
 * Servlet/PortletContextResource accept path with leading "/../" part as well (as accepted by most servlet containers)
 * DispatcherServlet removes error-view-driven servlet request attributes after rendering (for Tomcat compatibility)
 * added "cacheSecondsForSessionAttributeHandlers" property to Servlet/Portlet AnnotationMethodHandlerAdapter
+* AnnotationMethodHandlerAdapter exposes special ModelMap that removes BindingResult if target attribute gets replaced
 * Servlet AnnotationMethodHandlerAdapter always takes first exact @RequestMapping path match as best path match
+* @MVC handler methods, model attribute methods and init binder methods allow for overriding a generic superclass method
 * @ModelAttribute annotated handler method arguments can resolve to a null value as well (when contained in the model)
 * standard method argument subtypes (such as a Principal subclass) fail with a descriptive exception if incompatible
 * Portlet AbstractCommandController falls back to lazy command creation if session timed out after action phase
