@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,15 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
 		javax.ejb.TransactionAttribute ann = ae.getAnnotation(javax.ejb.TransactionAttribute.class);
 		if (ann != null) {
-			return new Ejb3TransactionAttribute(ann.value());
+			return parseTransactionAnnotation(ann);
 		}
 		else {
 			return null;
 		}
+	}
+
+	public TransactionAttribute parseTransactionAnnotation(javax.ejb.TransactionAttribute ann) {
+		return new Ejb3TransactionAttribute(ann.value());
 	}
 
 

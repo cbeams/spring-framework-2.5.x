@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,38 +36,42 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
 		Transactional ann = ae.getAnnotation(Transactional.class);
 		if (ann != null) {
-			RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-			rbta.setPropagationBehavior(ann.propagation().value());
-			rbta.setIsolationLevel(ann.isolation().value());
-			rbta.setTimeout(ann.timeout());
-			rbta.setReadOnly(ann.readOnly());
-			ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
-			Class[] rbf = ann.rollbackFor();
-			for (int i = 0; i < rbf.length; ++i) {
-				RollbackRuleAttribute rule = new RollbackRuleAttribute(rbf[i]);
-				rollBackRules.add(rule);
-			}
-			String[] rbfc = ann.rollbackForClassName();
-			for (int i = 0; i < rbfc.length; ++i) {
-				RollbackRuleAttribute rule = new RollbackRuleAttribute(rbfc[i]);
-				rollBackRules.add(rule);
-			}
-			Class[] nrbf = ann.noRollbackFor();
-			for (int i = 0; i < nrbf.length; ++i) {
-				NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(nrbf[i]);
-				rollBackRules.add(rule);
-			}
-			String[] nrbfc = ann.noRollbackForClassName();
-			for (int i = 0; i < nrbfc.length; ++i) {
-				NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(nrbfc[i]);
-				rollBackRules.add(rule);
-			}
-			rbta.getRollbackRules().addAll(rollBackRules);
-			return rbta;
+			return parseTransactionAnnotation(ann);
 		}
 		else {
 			return null;
 		}
+	}
+
+	public TransactionAttribute parseTransactionAnnotation(Transactional ann) {
+		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		rbta.setPropagationBehavior(ann.propagation().value());
+		rbta.setIsolationLevel(ann.isolation().value());
+		rbta.setTimeout(ann.timeout());
+		rbta.setReadOnly(ann.readOnly());
+		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
+		Class[] rbf = ann.rollbackFor();
+		for (int i = 0; i < rbf.length; ++i) {
+			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbf[i]);
+			rollBackRules.add(rule);
+		}
+		String[] rbfc = ann.rollbackForClassName();
+		for (int i = 0; i < rbfc.length; ++i) {
+			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbfc[i]);
+			rollBackRules.add(rule);
+		}
+		Class[] nrbf = ann.noRollbackFor();
+		for (int i = 0; i < nrbf.length; ++i) {
+			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(nrbf[i]);
+			rollBackRules.add(rule);
+		}
+		String[] nrbfc = ann.noRollbackForClassName();
+		for (int i = 0; i < nrbfc.length; ++i) {
+			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(nrbfc[i]);
+			rollBackRules.add(rule);
+		}
+		rbta.getRollbackRules().addAll(rollBackRules);
+		return rbta;
 	}
 
 }
