@@ -155,6 +155,10 @@ public class ServletAnnotationControllerTests extends TestCase {
 		doTestAdaptedHandleMethods(MyAdaptedController2.class);
 	}
 
+	public void testAdaptedHandleMethods3() throws Exception {
+		doTestAdaptedHandleMethods(MyAdaptedController3.class);
+	}
+
 	private void doTestAdaptedHandleMethods(final Class<?> controllerClass) throws Exception {
 		@SuppressWarnings("serial")
 		DispatcherServlet servlet = new DispatcherServlet() {
@@ -169,6 +173,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath1.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "2");
 		servlet.service(request, response);
 		assertEquals("test", response.getContentAsString());
 
@@ -180,6 +186,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("test-value1-2", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/myPath3.do");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "2");
 		request.addParameter("name", "name1");
 		request.addParameter("age", "2");
 		response = new MockHttpServletResponse();
@@ -187,6 +195,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 		assertEquals("test-name1-2", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/myPath4.do");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "2");
 		request.addParameter("name", "name1");
 		request.addParameter("age", "value2");
 		response = new MockHttpServletResponse();
@@ -729,6 +739,57 @@ public class ServletAnnotationControllerTests extends TestCase {
 		@RequestMapping("/myPath4.*")
 		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
+		}
+	}
+
+
+	@Controller
+	private static class MyAdaptedControllerBase<T> {
+
+		@RequestMapping("/myPath2.do")
+		public void myHandle(@RequestParam("param1") T p1, int param2, HttpServletResponse response) throws IOException  {
+			response.getWriter().write("test-" + p1 + "-" + param2);
+		}
+
+		@InitBinder
+		public void initBinder(@RequestParam("param1") T p1, int param2) {
+		}
+
+		@ModelAttribute
+		public void modelAttribute(@RequestParam("param1") T p1, int param2) {
+		}
+	}
+
+
+	@RequestMapping("/*.do")
+	private static class MyAdaptedController3 extends MyAdaptedControllerBase<String> {
+
+		@RequestMapping
+		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+			response.getWriter().write("test");
+		}
+
+		@Override
+		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException  {
+			response.getWriter().write("test-" + p1 + "-" + param2);
+		}
+
+		@RequestMapping("/myPath3")
+		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
+			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
+		}
+
+		@RequestMapping("/myPath4.*")
+		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
+			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
+		}
+
+		@InitBinder
+		public void initBinder(@RequestParam("param1") String p1, int param2) {
+		}
+
+		@ModelAttribute
+		public void modelAttribute(@RequestParam("param1") String p1, int param2) {
 		}
 	}
 

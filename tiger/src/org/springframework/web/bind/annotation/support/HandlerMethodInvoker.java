@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Conventions;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -111,31 +112,32 @@ public class HandlerMethodInvoker {
 			Method handlerMethod, Object handler, NativeWebRequest webRequest, ExtendedModelMap implicitModel)
 			throws Exception {
 
+		Method handlerMethodToInvoke = BridgeMethodResolver.findBridgedMethod(handlerMethod);
 		try {
 			boolean debug = logger.isDebugEnabled();
 			for (Method attributeMethod : this.methodResolver.getModelAttributeMethods()) {
-				Object[] args = resolveHandlerArguments(attributeMethod, handler, webRequest, implicitModel);
+				Method attributeMethodToInvoke = BridgeMethodResolver.findBridgedMethod(attributeMethod);
+				Object[] args = resolveHandlerArguments(attributeMethodToInvoke, handler, webRequest, implicitModel);
 				if (debug) {
-					logger.debug("Invoking model attribute method: " + attributeMethod);
+					logger.debug("Invoking model attribute method: " + attributeMethodToInvoke);
 				}
-				Object attrValue = doInvokeMethod(attributeMethod, handler, args);
-				String attrName = AnnotationUtils.findAnnotation(attributeMethod, ModelAttribute.class).value();
+				Object attrValue = doInvokeMethod(attributeMethodToInvoke, handler, args);
+				String attrName = AnnotationUtils.findAnnotation(attributeMethodToInvoke, ModelAttribute.class).value();
 				if ("".equals(attrName)) {
-					Class resolvedType = GenericTypeResolver.resolveReturnType(attributeMethod, handler.getClass());
-					attrName = Conventions.getVariableNameForReturnType(attributeMethod, resolvedType, attrValue);
+					Class resolvedType = GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
+					attrName = Conventions.getVariableNameForReturnType(attributeMethodToInvoke, resolvedType, attrValue);
 				}
 				implicitModel.addAttribute(attrName, attrValue);
 			}
-
-			Object[] args = resolveHandlerArguments(handlerMethod, handler, webRequest, implicitModel);
+			Object[] args = resolveHandlerArguments(handlerMethodToInvoke, handler, webRequest, implicitModel);
 			if (debug) {
-				logger.debug("Invoking request handler method: " + handlerMethod);
+				logger.debug("Invoking request handler method: " + handlerMethodToInvoke);
 			}
-			return doInvokeMethod(handlerMethod, handler, args);
+			return doInvokeMethod(handlerMethodToInvoke, handler, args);
 		}
 		catch (IllegalStateException ex) {
 			// Throw exception with full handler method context...
-			throw new HandlerMethodInvocationException(handlerMethod, ex);
+			throw new HandlerMethodInvocationException(handlerMethodToInvoke, ex);
 		}
 	}
 
@@ -233,16 +235,17 @@ public class HandlerMethodInvoker {
 			if (!initBinderMethods.isEmpty()) {
 				boolean debug = logger.isDebugEnabled();
 				for (Method initBinderMethod : initBinderMethods) {
-					String[] targetNames = AnnotationUtils.findAnnotation(initBinderMethod, InitBinder.class).value();
+					Method methodToInvoke = BridgeMethodResolver.findBridgedMethod(initBinderMethod);
+					String[] targetNames = AnnotationUtils.findAnnotation(methodToInvoke, InitBinder.class).value();
 					if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
-						Object[] initBinderArgs = resolveInitBinderArguments(handler, initBinderMethod, binder, webRequest);
+						Object[] initBinderArgs = resolveInitBinderArguments(handler, methodToInvoke, binder, webRequest);
 						if (debug) {
-							logger.debug("Invoking init-binder method: " + initBinderMethod);
+							logger.debug("Invoking init-binder method: " + methodToInvoke);
 						}
-						Object returnValue = doInvokeMethod(initBinderMethod, handler, initBinderArgs);
+						Object returnValue = doInvokeMethod(methodToInvoke, handler, initBinderArgs);
 						if (returnValue != null) {
 							throw new IllegalStateException(
-									"InitBinder methods must not have a return value: " + initBinderMethod);
+									"InitBinder methods must not have a return value: " + methodToInvoke);
 						}
 					}
 				}
