@@ -1,12 +1,8 @@
 <?xml version="1.0" ?>
 <!-- 
-    This is the XSL HTML configuration file for the Spring Reference Documentation.
+    Adds HTML tracking codes to the Spring Reference Documentation.
+    Imported from html.xsl and html_chunk.xsl.
 -->
-<!DOCTYPE xsl:stylesheet [
-    <!ENTITY db_xsl_path        "../lib/docbook-xsl/">
-    <!ENTITY callout_gfx_path   "../images/callouts/">
-    <!ENTITY admon_gfx_path     "../images/admons/">
-]>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns="http://www.w3.org/TR/xhtml1/transitional">
     <!-- Google Analytics -->
     <xsl:template name="user.head.content">
