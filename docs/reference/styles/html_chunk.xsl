@@ -10,6 +10,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns="http://www.w3.org/TR/xhtml1/transitional"
     exclude-result-prefixes="#default">
     <xsl:import href="&db_xsl_path;/html/chunk.xsl" />
+    <xsl:import href="tracking.xsl"/>
     <!--###################################################
                      HTML Settings
     ################################################### -->
