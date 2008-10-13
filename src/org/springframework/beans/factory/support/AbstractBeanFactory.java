@@ -604,6 +604,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		this.customEditors.put(requiredType, propertyEditor);
 	}
 
+	public void copyRegisteredEditorsTo(PropertyEditorRegistry registry) {
+		registerCustomEditors(registry);
+	}
+
 	/**
 	 * Return the map of custom editors, with Classes as keys
 	 * and PropertyEditor instances or PropertyEditor classes as values.
@@ -876,10 +880,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Initialize the given BeanWrapper with the custom editors registered
 	 * with this factory. To be called for BeanWrappers that will create
 	 * and populate bean instances.
-	 * <p>The default implementation delegates to <code>registerCustomEditors</code>.
+	 * <p>The default implementation delegates to {@link #registerCustomEditors}.
 	 * Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize
-	 * @see #registerCustomEditors
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
 		registerCustomEditors(bw);
@@ -887,7 +890,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Initialize the given PropertyEditorRegistry with the custom editors
-	 * registered with this BeanFactory.
+	 * that have been registered with this BeanFactory.
 	 * <p>To be called for BeanWrappers that will create and populate bean
 	 * instances, and for SimpleTypeConverter used for constructor argument
 	 * and factory method type conversion.

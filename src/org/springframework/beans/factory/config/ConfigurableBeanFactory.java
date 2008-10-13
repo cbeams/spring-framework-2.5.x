@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import java.beans.PropertyEditor;
 
 import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -155,6 +156,13 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * and {@link #registerCustomEditor(Class, Class)}
 	 */
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
+
+	/**
+	 * Initialize the given PropertyEditorRegistry with the custom editors
+	 * that have been registered with this BeanFactory.
+	 * @param registry the PropertyEditorRegistry to initialize
+	 */
+	void copyRegisteredEditorsTo(PropertyEditorRegistry registry);
 
 	/**
 	 * Set a custom type converter that this BeanFactory should use for converting
