@@ -1516,6 +1516,11 @@ public class ExampleBean {
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
+        <note><para>The nested element style used this initial
+        example tends to become quite verbose. Fortunately, there are
+        attribute shortcuts for most elements, which you can read about in 
+        <xref linkend="xml-config-shortcuts"/>.</para></note>
+
         <para><emphasis>Note that the value of a map key or value, or a set
         value, can also again be any of the following
         elements:</emphasis></para>
