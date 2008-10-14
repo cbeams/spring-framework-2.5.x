@@ -1203,7 +1203,7 @@ public class DefaultFooService implements FooService {
         </table>
       </para>
 
-			<note>
+  	  <note>
         <para>The "<literal>proxy-target-class</literal>" attribute on the
         <literal>&lt;tx:annotation-driven/&gt;</literal> element controls
         what type of transactional proxies are created for classes annotated
@@ -1214,6 +1214,14 @@ public class DefaultFooService implements FooService {
         or if the attribute is omitted, then standard JDK interface-based proxies
         will be created. (See the section entitled <xref linkend="aop-proxying"/>
         for a detailed examination of the different proxy types.)</para>
+      </note>
+      <note>
+        <para>Note that <literal>&lt;tx:annotation-driven/&gt;</literal> is a only looks for
+        <interfacename>@Transactional</interfacename> on beans in the same application context it is defined in.
+        This means that, if you put <literal>&lt;tx:annotation-driven/&gt;</literal> in a
+        <interfacename>WebApplicationContext</interfacename> for a <classname>DispatcherServlet</classname>, it only
+        checks for <interfacename>@Transactional</interfacename> beans in your controllers, and not your services.
+        See <xref linkend="mvc-servlet"/> for more information.</para>
       </note>
       <para>The most derived location takes precedence when evaluating the transactional
       settings for a method. In the case of the following example, the
