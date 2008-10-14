@@ -3342,7 +3342,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </section>
 
     <note>
-      <para>Note that, when placing a &lt;aop:scoped-proxy/&gt; in a <interfacename>FactoyBean</interfacename>
+      <para>Note that, when placing a &lt;aop:scoped-proxy/&gt; in a <interfacename>FactoryBean</interfacename>
       implementation, it is the factory bean itself that is scoped, not the object returned from
       <methodname>getObject()</methodname>.</para>
     </note>
