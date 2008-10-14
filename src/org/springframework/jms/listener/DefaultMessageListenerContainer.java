@@ -873,12 +873,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			boolean messageReceived = false;
 			try {
 				if (maxMessagesPerTask < 0) {
-					while (isActive()) {
-						waitWhileNotRunning();
-						if (isActive()) {
-							messageReceived = invokeListener();
-						}
-					}
+					messageReceived = executeOngoingLoop();
 				}
 				else {
 					int messageCount = 0;
@@ -912,11 +907,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 			}
 			synchronized (lifecycleMonitor) {
-				activeInvokerCount--;
-				if (stopCallback != null && activeInvokerCount == 0) {
-					stopCallback.run();
-					stopCallback = null;
-				}
+				decreaseActiveInvokerCount();
 				lifecycleMonitor.notifyAll();
 			}
 			if (!messageReceived) {
@@ -950,11 +941,55 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 		}
 
+		private boolean executeOngoingLoop() throws JMSException {
+			boolean messageReceived = false;
+			boolean active = true;
+			while (active) {
+				synchronized (lifecycleMonitor) {
+					boolean interrupted = false;
+					boolean wasWaiting = false;
+					while ((active = isActive()) && !isRunning()) {
+						if (interrupted) {
+							throw new IllegalStateException("Thread was interrupted while waiting for " +
+									"a restart of the listener container, but container is still stopped");
+						}
+						if (!wasWaiting) {
+							decreaseActiveInvokerCount();
+						}
+						wasWaiting = true;
+						try {
+							lifecycleMonitor.wait();
+						}
+						catch (InterruptedException ex) {
+							// Re-interrupt current thread, to allow other threads to react.
+							Thread.currentThread().interrupt();
+							interrupted = true;
+						}
+					}
+					if (wasWaiting) {
+						activeInvokerCount++;
+					}
+				}
+				if (active) {
+					messageReceived = (invokeListener() || messageReceived);
+				}
+			}
+			return messageReceived;
+		}
+
 		private boolean invokeListener() throws JMSException {
 			initResourcesIfNecessary();
 			boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
 			this.lastMessageSucceeded = true;
 			return messageReceived;
+		}
+
+		private void decreaseActiveInvokerCount() {
+			activeInvokerCount--;
+			if (stopCallback != null && activeInvokerCount == 0) {
+				stopCallback.run();
+				stopCallback = null;
+			}
 		}
 
 		private void initResourcesIfNecessary() throws JMSException {

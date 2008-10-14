@@ -30,7 +30,6 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -328,31 +327,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		return true;
 	}
 
-	/**
-	 * Wait while this container is not running.
-	 * <p>To be called by asynchronous tasks that want to block
-	 * while the container is in stopped state.
-	 */
-	protected final void waitWhileNotRunning() {
-		synchronized (this.lifecycleMonitor) {
-			boolean interrupted = false;
-			while (this.active && !isRunning()) {
-				if (interrupted) {
-					throw new IllegalStateException("Thread was interrupted while waiting for " +
-							"a restart of the listener container, but container is still stopped");
-				}
-				try {
-					this.lifecycleMonitor.wait();
-				}
-				catch (InterruptedException ex) {
-					// Re-interrupt current thread, to allow other threads to react.
-					Thread.currentThread().interrupt();
-					interrupted = true;
-				}
-			}
-		}
-	}
-
 
 	//-------------------------------------------------------------------------
 	// Management of a shared JMS Connection
@@ -505,7 +479,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see #doRescheduleTask
 	 */
 	protected final boolean rescheduleTaskIfNecessary(Object task) {
-		Assert.notNull(task, "Task object must not be null");
 		if (this.running) {
 			try {
 				doRescheduleTask(task);
