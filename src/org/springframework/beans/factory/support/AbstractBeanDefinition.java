@@ -278,19 +278,21 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 	/**
-	 * Return the class of the wrapped bean.
+	 * Return the class of the wrapped bean, if already resolved.
+	 * @return the bean class, or <code>null</code> if none defined
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class
 	 */
 	public Class getBeanClass() throws IllegalStateException {
-		if (this.beanClass == null) {
+		Object beanClassObject = this.beanClass;
+		if (beanClassObject == null) {
 			throw new IllegalStateException("No bean class specified on bean definition");
 		}
-		if (!(this.beanClass instanceof Class)) {
+		if (!(beanClassObject instanceof Class)) {
 			throw new IllegalStateException(
-					"Bean class name [" + this.beanClass + "] has not been resolved into an actual Class");
+					"Bean class name [" + beanClassObject + "] has not been resolved into an actual Class");
 		}
-		return (Class) this.beanClass;
+		return (Class) beanClassObject;
 	}
 
 	/**
@@ -304,11 +306,12 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Return the class name of the wrapped bean.
 	 */
 	public String getBeanClassName() {
-		if (this.beanClass instanceof Class) {
-			return ((Class) this.beanClass).getName();
+		Object beanClassObject = this.beanClass;
+		if (beanClassObject instanceof Class) {
+			return ((Class) beanClassObject).getName();
 		}
 		else {
-			return (String) this.beanClass;
+			return (String) beanClassObject;
 		}
 	}
 
@@ -321,10 +324,11 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * @throws ClassNotFoundException if the class name could be resolved
 	 */
 	public Class resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
-		if (this.beanClass == null) {
+		String className = getBeanClassName();
+		if (className == null) {
 			return null;
 		}
-		Class resolvedClass = ClassUtils.forName(getBeanClassName(), classLoader);
+		Class resolvedClass = ClassUtils.forName(className, classLoader);
 		this.beanClass = resolvedClass;
 		return resolvedClass;
 	}
