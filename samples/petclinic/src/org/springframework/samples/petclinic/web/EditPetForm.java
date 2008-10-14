@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.bind.WebDataBinder;
 
 /**
  * JavaBean Form controller that is used to edit an existing <code>Pet</code>.
@@ -39,6 +41,11 @@ public class EditPetForm {
 	public Collection<PetType> populatePetTypes() {
 		return this.clinic.getPetTypes();
 	}
+
+    @InitBinder
+    public void setAllowedFields(WebDataBinder dataBinder) {
+        dataBinder.setDisallowedFields(new String[] {"id"});
+    }
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String setupForm(@RequestParam("petId") int petId, Model model) {

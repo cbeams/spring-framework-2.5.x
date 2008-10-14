@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.bind.WebDataBinder;
 
 /**
  * JavaBean form controller that is used to add a new <code>Owner</code> to
@@ -32,7 +34,12 @@ public class AddOwnerForm {
 		this.clinic = clinic;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+    @InitBinder
+    public void setAllowedFields(WebDataBinder dataBinder) {
+        dataBinder.setDisallowedFields(new String[] {"id"});
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
 	public String setupForm(Model model) {
 		Owner owner = new Owner();
 		model.addAttribute(owner);
