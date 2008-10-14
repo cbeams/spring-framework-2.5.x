@@ -344,14 +344,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * or a specified bean class name has not been resolved into an actual Class
 	 */
 	public Class getBeanClass() throws IllegalStateException {
-		if (this.beanClass == null) {
+		Object beanClassObject = this.beanClass;
+		if (beanClassObject == null) {
 			throw new IllegalStateException("No bean class specified on bean definition");
 		}
-		if (!(this.beanClass instanceof Class)) {
+		if (!(beanClassObject instanceof Class)) {
 			throw new IllegalStateException(
-					"Bean class name [" + this.beanClass + "] has not been resolved into an actual Class");
+					"Bean class name [" + beanClassObject + "] has not been resolved into an actual Class");
 		}
-		return (Class) this.beanClass;
+		return (Class) beanClassObject;
 	}
 
 	public void setBeanClassName(String beanClassName) {
@@ -359,11 +360,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	public String getBeanClassName() {
-		if (this.beanClass instanceof Class) {
-			return ((Class) this.beanClass).getName();
+		Object beanClassObject = this.beanClass;
+		if (beanClassObject instanceof Class) {
+			return ((Class) beanClassObject).getName();
 		}
 		else {
-			return (String) this.beanClass;
+			return (String) beanClassObject;
 		}
 	}
 
