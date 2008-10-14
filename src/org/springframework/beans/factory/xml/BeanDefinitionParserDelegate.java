@@ -423,7 +423,10 @@ public class BeanDefinitionParserDelegate {
 		return null;
 	}
 
-	private void checkNameUniqueness(String beanName, List aliases, Element beanElement) {
+	/**
+	 * Validate that the specified bean name and aliases have not been used already.
+	 */
+	protected void checkNameUniqueness(String beanName, List aliases, Element beanElement) {
 		String foundName = null;
 
 		if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
