@@ -1179,17 +1179,41 @@
 		<mkdir dir="${javadoc.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework API 2.5"
-				source="1.5" access="protected" author="true" version="true" use="true"
+            source="1.5" access="protected" author="true" version="true" use="true" splitindex="true"
 				defaultexcludes="true" stylesheetfile="${doc.dir}/stylesheet.css"
-				overview="${doc.dir}/overview.html"
-				header='&lt;a href=\"http://www.springframework.org/\" target=\"_top\"&gt;The Spring Framework&lt;/a&gt;'>
+				overview="${doc.dir}/overview.html">
 			<arg value="-breakiterator"/>
 			<arg value="-J-Xmx256m"/>
 			<arg value="-J-XX:MaxPermSize=128m"/>
 			<arg value="-J-Dhttp.proxyHost=${javadoc.proxyhost}"/>
 			<arg value="-J-Dhttp.proxyPort=${javadoc.proxyport}"/>
 			<doctitle><![CDATA[<h1>Spring Framework API 2.5</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright &copy; 2002-2008 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>]]></bottom>
+            <header><![CDATA[
+    <a href=\"http://www.springframework.org/\" target=\"_top\">The Spring Framework</a>
+    <!-- Begin Google Analytics code -->
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        var pageTracker = _gat._getTracker("UA-2728886-3");
+        pageTracker._setDomainName("none");
+        pageTracker._setAllowLinker(true);
+        pageTracker._trackPageview();
+    </script>
+    <!-- End Google Analytics code -->
+            ]]></header>
+            <bottom><![CDATA[
+    <i>Copyright &copy; 2002-2008 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>
+    <!-- Begin LoopFuse code -->
+    <script src="http://loopfuse.net/webrecorder/js/listen.js" type="text/javascript">
+    </script>
+    <script type="text/javascript"> 
+        _lf_cid = "LF_48be82fa";
+        _lf_remora();
+    </script>
+    <!-- End LoopFuse code -->
+            ]]></bottom>
 			<classpath refid="all-libs"/>
 			<classpath location="${junit4.jar}"/>
 			<packageset dir="${src.dir}">
