@@ -22,7 +22,7 @@
 	<xsd:element name="property-placeholder">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Activates replacement of ${...} placeholders, resolved against the specified properties file
+	Activates replacement of ${...} placeholders, resolved against the specified properties file or Properties object
 	(if any). Falls back to resolving placeholders against JVM system properties.
 	Alternatively, define a parameterized PropertyPlaceholderConfigurer bean in the context.
 			]]></xsd:documentation>
@@ -38,8 +38,16 @@
 					<xsd:documentation><![CDATA[
 	The location of the properties file to resolve placeholders against, as a Spring
 	resource location: a URL, a "classpath:" pseudo URL, or a relative file path.
-	Multiple locations may be specified, separated by commas. If no location is
+	Multiple locations may be specified, separated by commas. If neither location nor properties-ref is
 	specified, placeholders will be resolved against system properties.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="properties-ref" type="xsd:string">
+				<xsd:annotation>
+                    <xsd:documentation source="java:java.util.Properties"><![CDATA[
+	The bean name of a Java Properties object that will be used for property substitution.
+	If neither location nor properties-ref is specified, placeholders will be resolved against system properties.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -68,6 +76,13 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+            <xsd:attribute name="properties-ref" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation source="java:java.util.Properties"><![CDATA[
+    The bean name of a Java Properties object that will be used for property overrides.
+                    ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 

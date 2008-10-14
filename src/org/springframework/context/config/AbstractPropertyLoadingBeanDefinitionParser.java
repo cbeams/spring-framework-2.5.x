@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
  * Abstract parser for &lt;context:property-.../&gt; elements.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 2.5.2
  */
 abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
@@ -41,7 +42,11 @@ abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingl
 			String[] locations = StringUtils.commaDelimitedListToStringArray(location);
 			builder.addPropertyValue("locations", locations);
 		}
-		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        String propertiesRef = element.getAttribute("properties-ref");
+        if (StringUtils.hasLength(propertiesRef)) {
+            builder.addPropertyReference("properties", propertiesRef);
+        }
+        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 	}
 
 }
