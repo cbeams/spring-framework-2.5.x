@@ -3341,6 +3341,12 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     </section>
   </section>
 
+    <note>
+      <para>Note that, when placing a &lt;aop:scoped-proxy/&gt; in a <interfacename>FactoyBean</interfacename>
+      implementation, it is the factory bean itself that is scoped, not the object returned from
+      <methodname>getObject()</methodname>.</para>
+    </note>
+
   <section id="beans-factory-nature">
     <title>Customizing the nature of a bean</title>
 
