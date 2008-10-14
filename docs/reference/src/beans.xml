@@ -5336,7 +5336,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"><classname>RequiredAnnotationBeanPostProcessor</classname></ulink>.)</para>
 
     <note>
-        <para>Note that <literal>&lt;context:annotation-config/&gt;</literal> is a only looks for
+        <para>Note that <literal>&lt;context:annotation-config/&gt;</literal> only looks for
         annotations  on beans in the same application context it is defined in.
         This means that, if you put <literal>&lt;context:annotation-config/&gt;</literal> in a
         <interfacename>WebApplicationContext</interfacename> for a <classname>DispatcherServlet</classname>, it only

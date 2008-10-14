@@ -1216,7 +1216,7 @@ public class DefaultFooService implements FooService {
         for a detailed examination of the different proxy types.)</para>
       </note>
       <note>
-        <para>Note that <literal>&lt;tx:annotation-driven/&gt;</literal> is a only looks for
+        <para>Note that <literal>&lt;tx:annotation-driven/&gt;</literal> only looks for
         <interfacename>@Transactional</interfacename> on beans in the same application context it is defined in.
         This means that, if you put <literal>&lt;tx:annotation-driven/&gt;</literal> in a
         <interfacename>WebApplicationContext</interfacename> for a <classname>DispatcherServlet</classname>, it only
