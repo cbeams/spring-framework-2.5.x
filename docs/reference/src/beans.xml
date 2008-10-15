@@ -1608,13 +1608,14 @@ support=support@somecompany.co.uk]]></programlisting>
 <bean id="manager" class="ManagerBean" />
 <bean id="accountDao" class="x.y.jdbc.JdbcAccountDao" />]]></programlisting>
 			<note>
-				<para>The '<literal>depends-on</literal>' attribute and property is used not only to
-				specify an initialization time dependency, but also to specify
-				the corresponding destroy time dependency (in the case of
-				<link linkend="beans-factory-scopes-singleton">singleton</link> beans only). Dependant beans that are defined in the
-				'<literal>depends-on</literal>' attribute will be destroyed
-				first prior to the relevant bean itself being destroyed. This thus
-				allows you to control shutdown order too.</para>	
+				<para>The '<literal>depends-on</literal>' attribute at the bean definition
+				level is used not only to specify an initialization time dependency, but
+				also to specify the corresponding destroy time dependency (in the case of
+				<link linkend="beans-factory-scopes-singleton">singleton</link> beans
+				only). Dependent beans that define a '<literal>depends-on</literal>'
+				relationship with a given bean will be destroyed first - prior to the given
+				bean itself being destroyed. As a consequence, '<literal>depends-on</literal>'
+				may be used to control shutdown order too.</para>
 			</note>
 		</section>
         <section id="beans-factory-lazy-init">
