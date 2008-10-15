@@ -344,8 +344,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				return true;
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Consumer [" + consumerToUse + "] of " + (transactional ? "transactional " : "") +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Consumer [" + consumerToUse + "] of " + (transactional ? "transactional " : "") +
 							"session [" + sessionToUse + "] did not receive a message");
 				}
 				noMessageReceived(invoker, sessionToUse);
