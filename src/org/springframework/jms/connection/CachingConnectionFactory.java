@@ -218,8 +218,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			}
 		}
 		if (session != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found cached JMS Session for mode " + mode + ": " +
+			if (logger.isTraceEnabled()) {
+				logger.trace("Found cached JMS Session for mode " + mode + ": " +
 						(session instanceof SessionProxy ? ((SessionProxy) session).getTargetSession() : session));
 			}
 		}
@@ -339,8 +339,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		private MessageProducer getCachedProducer(Destination dest) throws JMSException {
 			MessageProducer producer = (MessageProducer) this.cachedProducers.get(dest);
 			if (producer != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found cached JMS MessageProducer for destination [" + dest + "]: " + producer);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Found cached JMS MessageProducer for destination [" + dest + "]: " + producer);
 				}
 			}
 			else {
@@ -359,8 +359,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			Object cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription);
 			MessageConsumer consumer = (MessageConsumer) this.cachedConsumers.get(cacheKey);
 			if (consumer != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found cached JMS MessageConsumer for destination [" + dest + "]: " + consumer);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Found cached JMS MessageConsumer for destination [" + dest + "]: " + consumer);
 				}
 			}
 			else {
@@ -397,8 +397,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			}
 			// Allow for multiple close calls...
 			if (!this.sessionList.contains(proxy)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Returning cached Session: " + this.target);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Returning cached Session: " + this.target);
 				}
 				this.sessionList.addLast(proxy);
 			}
