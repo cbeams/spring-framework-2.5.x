@@ -138,8 +138,8 @@ public abstract class TransactionSynchronizationManager {
 	public static Object getResource(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doGetResource(actualKey);
-		if (value != null && logger.isDebugEnabled()) {
-			logger.debug("Retrieved value [" + value + "] for key [" + actualKey + "] bound to thread [" +
+		if (value != null && logger.isTraceEnabled()) {
+			logger.trace("Retrieved value [" + value + "] for key [" + actualKey + "] bound to thread [" +
 					Thread.currentThread().getName() + "]");
 		}
 		return value;
@@ -182,8 +182,8 @@ public abstract class TransactionSynchronizationManager {
 			throw new IllegalStateException("Already value [" + map.get(actualKey) + "] for key [" +
 					actualKey + "] bound to thread [" + Thread.currentThread().getName() + "]");
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound value [" + value + "] for key [" + actualKey + "] to thread [" +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Bound value [" + value + "] for key [" + actualKey + "] to thread [" +
 					Thread.currentThread().getName() + "]");
 		}
 	}
@@ -228,8 +228,8 @@ public abstract class TransactionSynchronizationManager {
 		if (map.isEmpty()) {
 			resources.set(null);
 		}
-		if (value != null && logger.isDebugEnabled()) {
-			logger.debug("Removed value [" + value + "] for key [" + actualKey + "] from thread [" +
+		if (value != null && logger.isTraceEnabled()) {
+			logger.trace("Removed value [" + value + "] for key [" + actualKey + "] from thread [" +
 					Thread.currentThread().getName() + "]");
 		}
 		return value;
@@ -258,7 +258,7 @@ public abstract class TransactionSynchronizationManager {
 		if (isSynchronizationActive()) {
 			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
 		}
-		logger.debug("Initializing transaction synchronization");
+		logger.trace("Initializing transaction synchronization");
 		synchronizations.set(new LinkedList());
 	}
 
@@ -312,7 +312,7 @@ public abstract class TransactionSynchronizationManager {
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Cannot deactivate transaction synchronization - not active");
 		}
-		logger.debug("Clearing transaction synchronization");
+		logger.trace("Clearing transaction synchronization");
 		synchronizations.set(null);
 	}
 

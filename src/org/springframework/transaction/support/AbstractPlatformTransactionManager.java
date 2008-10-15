@@ -342,9 +342,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		// Cache debug flag to avoid repeated checks.
 		boolean debugEnabled = logger.isDebugEnabled();
-		if (debugEnabled) {
-			logger.debug("Using transaction object [" + transaction + "]");
-		}
 
 		if (definition == null) {
 			// Use defaults if no transaction definition given.
@@ -903,7 +900,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	protected final void triggerBeforeCommit(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
 			if (status.isDebug()) {
-				logger.debug("Triggering beforeCommit synchronization");
+				logger.trace("Triggering beforeCommit synchronization");
 			}
 			TransactionSynchronizationUtils.triggerBeforeCommit(status.isReadOnly());
 		}
@@ -916,7 +913,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	protected final void triggerBeforeCompletion(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
 			if (status.isDebug()) {
-				logger.debug("Triggering beforeCompletion synchronization");
+				logger.trace("Triggering beforeCompletion synchronization");
 			}
 			TransactionSynchronizationUtils.triggerBeforeCompletion();
 		}
@@ -929,7 +926,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void triggerAfterCommit(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
 			if (status.isDebug()) {
-				logger.debug("Triggering afterCommit synchronization");
+				logger.trace("Triggering afterCommit synchronization");
 			}
 			TransactionSynchronizationUtils.triggerAfterCommit();
 		}
@@ -945,7 +942,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			List synchronizations = TransactionSynchronizationManager.getSynchronizations();
 			if (!status.hasTransaction() || status.isNewTransaction()) {
 				if (status.isDebug()) {
-					logger.debug("Triggering afterCompletion synchronization");
+					logger.trace("Triggering afterCompletion synchronization");
 				}
 				// No transaction or new transaction for the current scope ->
 				// invoke the afterCompletion callbacks immediately
