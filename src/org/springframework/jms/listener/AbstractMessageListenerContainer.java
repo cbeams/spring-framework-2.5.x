@@ -238,9 +238,15 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		checkMessageListener(messageListener);
 		this.messageListener = messageListener;
 		if (this.durableSubscriptionName == null) {
-			// Use message listener class name as default name for a durable subscription.
-			this.durableSubscriptionName = messageListener.getClass().getName();
+			this.durableSubscriptionName = getDefaultSubscriptionName(messageListener);
 		}
+	}
+
+	/**
+	 * Return the message listener object to register.
+	 */
+	public Object getMessageListener() {
+		return this.messageListener;
 	}
 
 	/**
@@ -264,10 +270,18 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Return the message listener object to register.
+	 * Determine the default subscription name for the given message listener.
+	 * @param messageListener the message listener object to check
+	 * @return the default subscription name
+	 * @see SubscriptionNameProvider
 	 */
-	public Object getMessageListener() {
-		return this.messageListener;
+	protected String getDefaultSubscriptionName(Object messageListener) {
+		if (messageListener instanceof SubscriptionNameProvider) {
+			return ((SubscriptionNameProvider) messageListener).getSubscriptionName();
+		}
+		else {
+			return messageListener.getClass().getName();
+		}
 	}
 
 	/**
@@ -501,10 +515,6 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 				sessionToUse = sessionToClose;
 			}
 			// Actually invoke the message listener...
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking listener with message of type [" + message.getClass() +
-						"] and session [" + sessionToUse + "]");
-			}
 			listener.onMessage(message, sessionToUse);
 			// Clean up specially exposed Session, if any.
 			if (sessionToUse != session) {

@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jms.listener.SessionAwareMessageListener;
+import org.springframework.jms.listener.SubscriptionNameProvider;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -133,7 +134,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.jms.listener.SessionAwareMessageListener
  * @see org.springframework.jms.listener.AbstractMessageListenerContainer#setMessageListener
  */
-public class MessageListenerAdapter implements MessageListener, SessionAwareMessageListener {
+public class MessageListenerAdapter implements MessageListener, SessionAwareMessageListener, SubscriptionNameProvider {
 
 	/**
 	 * Out-of-the-box value for the default listener method: "handleMessage".
@@ -360,12 +361,21 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 			handleResult(result, message, session);
 		}
 		else {
-			logger.debug("No result object given - no result to handle");
+			logger.trace("No result object given - no result to handle");
+		}
+	}
+
+	public String getSubscriptionName() {
+		if (this.delegate instanceof SubscriptionNameProvider) {
+			return ((SubscriptionNameProvider) this.delegate).getSubscriptionName();
+		}
+		else {
+			return this.delegate.getClass().getName();
 		}
 	}
 
 
-    /**
+	/**
 	 * Initialize the default implementations for the adapter's strategies.
 	 * @see #setMessageConverter
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
