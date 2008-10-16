@@ -2300,21 +2300,6 @@ public class HibernateTemplateTests extends TestCase {
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
-		final DataException dex = new DataException("mymsg", sqlEx);
-		try {
-			createTemplate().execute(new HibernateCallback() {
-				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw dex;
-				}
-			});
-			fail("Should have thrown InvalidDataAccessResourceUsageException");
-		}
-		catch (InvalidDataAccessResourceUsageException ex) {
-			// expected
-			assertEquals(dex, ex.getCause());
-			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
-		}
-
 		final LockAcquisitionException laex = new LockAcquisitionException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
@@ -2342,6 +2327,21 @@ public class HibernateTemplateTests extends TestCase {
 		catch (DataIntegrityViolationException ex) {
 			// expected
 			assertEquals(cvex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+		}
+
+		final DataException dex = new DataException("mymsg", sqlEx);
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw dex;
+				}
+			});
+			fail("Should have thrown DataIntegrityViolationException");
+		}
+		catch (DataIntegrityViolationException ex) {
+			// expected
+			assertEquals(dex, ex.getCause());
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 

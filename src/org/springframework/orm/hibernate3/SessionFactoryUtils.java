@@ -629,13 +629,13 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof SQLGrammarException) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof DataException) {
-			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
-		}
 		if (ex instanceof LockAcquisitionException) {
 			return new CannotAcquireLockException(ex.getMessage(), ex);
 		}
 		if (ex instanceof ConstraintViolationException) {
+			return new DataIntegrityViolationException(ex.getMessage(), ex);
+		}
+		if (ex instanceof DataException) {
 			return new DataIntegrityViolationException(ex.getMessage(), ex);
 		}
 		if (ex instanceof JDBCException) {
