@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.9 (2008-09-29)
+Changes in version 2.0.9 (2008-10-27)
 -------------------------------------
 
 General
@@ -21,6 +21,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * BeanWrapperImpl trims an enum candidate value before matching it against the available enum values
 * StringArrayPropertyEditor (for comma-delimited splitting of array elements) registered for short[], int[], long[] too
+* fixed corner case in AbstractBeanDefinition where a ClassCastException could arise in "getBeanClass(Name)"
 * AbstractBeanFactory rejects getBean request with arguments in case of a pre-existing singleton of same name as well
 * AbstractAutowireCapableBeanFactory removes singleton if created for type check in case of circular reference issues
 * AbstractAutowireCapableBeanFactory only invokes "predictBeanType" post-processor method for non-null bean Class
@@ -40,6 +41,7 @@ Package org.springframework.jdbc
 * added "defaultTransactionIsolationName" property to LazyConnectionDataSourceProxy
 * JndiDataSourceLookup uses "resourceRef"=true by default (being able to resolve J2EE "jdbc/myDb" ENC names by default)
 * NativeJdbcExtractorAdapter only processes DatabaseMetaData Connection if non-null (for WebLogic cluster compatibility)
+* SQLErrorCodeSQLExceptionTranslator is able to work without fallback SQLState translation as well
 * SQLStateSQLExceptionTranslator translates "01*" data truncation codes into DataIntegrityViolationException
 * SQLStateSQLExceptionTranslator translates "61*" deadlock codes into ConcurrencyFailureException
 * added further default "sql-error-codes.xml" mappings for DB2, MS SQL Server, MySQL, Oracle, PostgreSQL
@@ -58,6 +60,7 @@ Package org.springframework.jmx
 Package org.springframework.mail
 * added "text/csv" to MimeMessageHelper's default MIME mappings
 * removed overlapping "application/x-pointplus" MIME type for "css" extension from MimeMessageHelper's default mappings
+* ConfigurableMimeFileTypeMap explicitly closes the InputStream that it uses for "mime.types" resource reading
 
 Package org.springframework.mock
 * SimpleNamingContext's "createSubcontext" works correctly for given subcontext names without trailing slash as well
@@ -95,6 +98,7 @@ Package org.springframework.web
 * revised XsltView to specify full resource URI as StreamSource system id, for properly resolving relative paths
 * revised error logging during XSLT processing to properly log compilation errors before an eventual fatal exception
 * InternalResourceView only exposes forward attributes when running on Servlet <2.5 (for GlassFish compatibility)
+* VelocityConfigurer exposes ServletContext as VelocityEngine attribute (analogous to the standard VelocityViewServlet)
 * fixed AbstractJasperReportsView to fully isolate a model-specified JDBC DataSource (not setting it as view DataSource)
 * fixed JSP form tags to properly return SKIP_BODY instead of the non-defined EVAL_PAGE (for WebLogic compatibility)
 * JSP OptionsTag and SelectTag compare raw Map key for selection check as well
