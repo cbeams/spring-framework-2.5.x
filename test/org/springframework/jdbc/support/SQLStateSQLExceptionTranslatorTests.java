@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package org.springframework.jdbc.support;
 
+import java.sql.SQLException;
+
 import junit.framework.TestCase;
+
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.test.AssertThrows;
 
-import java.sql.SQLException;
-
 /**
- * Unit tests for the {@link SQLStateSQLExceptionTranslator} class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class SQLStateSQLExceptionTranslatorTests extends TestCase {
+public class SQLStateSQLExceptionTranslatorTests extends TestCase {
 
 	private static final String REASON = "The game is afoot!";
 
@@ -49,24 +50,28 @@ public final class SQLStateSQLExceptionTranslatorTests extends TestCase {
 		}.runTest();
 	}
 
-	public void testTranslateBadSql() throws Exception {
+	public void testTranslateBadSqlGrammar() throws Exception {
 		doTest("07", BadSqlGrammarException.class);
 	}
 
-	public void testTranslateIntegrityViolation() throws Exception {
-		doTest("22", DataIntegrityViolationException.class);
+	public void testTranslateDataIntegrityViolation() throws Exception {
+		doTest("23", DataIntegrityViolationException.class);
 	}
 
-	public void testTranslateUncategorized() throws Exception {
-		doTest("00000000", UncategorizedSQLException.class);
+	public void testTranslateDataAccessResourceFailure() throws Exception {
+		doTest("53", DataAccessResourceFailureException.class);
+	}
+
+	public void testTranslateTransientDataAccessResourceFailure() throws Exception {
+		doTest("S1", TransientDataAccessResourceException.class);
 	}
 
 	public void testTranslateConcurrencyFailure() throws Exception {
 		doTest("40", ConcurrencyFailureException.class);
 	}
 
-	public void testTranslateDataAccessResourceFailure() throws Exception {
-		doTest("53", DataAccessResourceFailureException.class);
+	public void testTranslateUncategorized() throws Exception {
+		doTest("00000000", UncategorizedSQLException.class);
 	}
 
 

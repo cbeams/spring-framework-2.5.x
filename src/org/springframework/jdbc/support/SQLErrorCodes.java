@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,14 @@ public class SQLErrorCodes {
 
 	private String[] invalidResultSetAccessCodes = new String[0];
 
-	private String[] dataAccessResourceFailureCodes = new String[0];
+	private String[] dataIntegrityViolationCodes = new String[0];
 
 	private String[] permissionDeniedCodes = new String[0];
 
-	private String[] dataIntegrityViolationCodes = new String[0];
-	
+	private String[] dataAccessResourceFailureCodes = new String[0];
+
+	private String[] transientDataAccessResourceCodes = new String[0];
+
 	private String[] cannotAcquireLockCodes = new String[0];
 
 	private String[] deadlockLoserCodes = new String[0];
@@ -110,12 +112,12 @@ public class SQLErrorCodes {
 		return this.invalidResultSetAccessCodes;
 	}
 
-	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
-		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
+	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
+		this.dataIntegrityViolationCodes = StringUtils.sortStringArray(dataIntegrityViolationCodes);
 	}
 
-	public String[] getDataAccessResourceFailureCodes() {
-		return this.dataAccessResourceFailureCodes;
+	public String[] getDataIntegrityViolationCodes() {
+		return this.dataIntegrityViolationCodes;
 	}
 
 	public void setPermissionDeniedCodes(String[] permissionDeniedCodes) {
@@ -126,12 +128,20 @@ public class SQLErrorCodes {
 		return this.permissionDeniedCodes;
 	}
 
-	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
-		this.dataIntegrityViolationCodes = StringUtils.sortStringArray(dataIntegrityViolationCodes);
+	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
+		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
 	}
 
-	public String[] getDataIntegrityViolationCodes() {
-		return this.dataIntegrityViolationCodes;
+	public String[] getDataAccessResourceFailureCodes() {
+		return this.dataAccessResourceFailureCodes;
+	}
+
+	public void setTransientDataAccessResourceCodes(String[] transientDataAccessResourceCodes) {
+		this.transientDataAccessResourceCodes = transientDataAccessResourceCodes;
+	}
+
+	public String[] getTransientDataAccessResourceCodes() {
+		return this.transientDataAccessResourceCodes;
 	}
 
 	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {

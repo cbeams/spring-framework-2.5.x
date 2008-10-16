@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,19 @@
 
 package org.springframework.jdbc.support;
 
-import junit.framework.TestCase;
-
 import java.sql.SQLException;
 
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.dao.*;
+import junit.framework.TestCase;
+
 import org.springframework.core.JdkVersion;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 /**
  * @author Thomas Risberg
@@ -30,77 +36,77 @@ import org.springframework.core.JdkVersion;
 public class SQLExceptionSubclassTranslatorTests extends TestCase {
 
 	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
+
 	static {
 		ERROR_CODES.setBadSqlGrammarCodes(new String[] { "1" });
 	}
 
+
 	public void testErrorCodeTranslation() {
-		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
-
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_16) {
-
-			SQLException dataIntegrityViolationEx = SQLExceptionSubclassFactory.newSQLDataException("", "", 0);
-			DataIntegrityViolationException divex = (DataIntegrityViolationException) sext.translate("task", "SQL", dataIntegrityViolationEx);
-			assertEquals(dataIntegrityViolationEx, divex.getCause());
-
-			SQLException badSqlEx = SQLExceptionSubclassFactory.newSQLFeatureNotSupportedException("", "", 0);
-			BadSqlGrammarException bsgex = (BadSqlGrammarException) sext.translate("task", "SQL", badSqlEx);
-			assertEquals("SQL", bsgex.getSql());
-			assertEquals(badSqlEx, bsgex.getSQLException());
-
-			SQLException dataIntegrityViolationEx2 = SQLExceptionSubclassFactory.newSQLIntegrityConstraintViolationException("", "", 0);
-			DataIntegrityViolationException divex2 = (DataIntegrityViolationException) sext.translate("task", "SQL", dataIntegrityViolationEx2);
-			assertEquals(dataIntegrityViolationEx2, divex2.getCause());
-
-			SQLException permissionDeniedEx = SQLExceptionSubclassFactory.newSQLInvalidAuthorizationSpecException("", "", 0);
-			PermissionDeniedDataAccessException pdaex = (PermissionDeniedDataAccessException) sext.translate("task", "SQL", permissionDeniedEx);
-			assertEquals(permissionDeniedEx, pdaex.getCause());
-
-			SQLException dataAccesResourceEx = SQLExceptionSubclassFactory.newSQLNonTransientConnectionException("", "", 0);
-			DataAccessResourceFailureException darex = (DataAccessResourceFailureException) sext.translate("task", "SQL", dataAccesResourceEx);
-			assertEquals(dataAccesResourceEx, darex.getCause());
-
-			SQLException badSqlEx2 = SQLExceptionSubclassFactory.newSQLSyntaxErrorException("", "", 0);
-			BadSqlGrammarException bsgex2 = (BadSqlGrammarException) sext.translate("task", "SQL2", badSqlEx2);
-			assertEquals("SQL2", bsgex2.getSql());
-			assertEquals(badSqlEx2, bsgex2.getSQLException());
-
-			SQLException tranRollbackEx = SQLExceptionSubclassFactory.newSQLTransactionRollbackException("", "", 0);
-			ConcurrencyFailureException cfex = (ConcurrencyFailureException) sext.translate("task", "SQL", tranRollbackEx);
-			assertEquals(tranRollbackEx, cfex.getCause());
-
-			SQLException transientConnEx = SQLExceptionSubclassFactory.newSQLTransientConnectionException("", "", 0);
-			TransientDataAccessResourceException tdarex = (TransientDataAccessResourceException) sext.translate("task", "SQL", transientConnEx);
-			assertEquals(transientConnEx, tdarex.getCause());
-
-			SQLException transientConnEx2 = SQLExceptionSubclassFactory.newSQLTimeoutException("", "", 0);
-			TransientDataAccessResourceException tdarex2 = (TransientDataAccessResourceException) sext.translate("task", "SQL", transientConnEx2);
-			assertEquals(transientConnEx2, tdarex2.getCause());
-
-			SQLException recoverableEx = SQLExceptionSubclassFactory.newSQLRecoverableException("", "", 0);
-			RecoverableDataAccessException rdaex2 = (RecoverableDataAccessException) sext.translate("task", "SQL", recoverableEx);
-			assertEquals(recoverableEx, rdaex2.getCause());
-
-			// Test classic error code translation. We should move there next if the exception we pass in is not one
-			// of the new sub-classes.
-			SQLException sexEct = new SQLException("", "", 1);
-			BadSqlGrammarException bsgEct = (BadSqlGrammarException) sext.translate("task", "SQL-ECT", sexEct);
-			assertEquals("SQL-ECT", bsgEct.getSql());
-			assertEquals(sexEct, bsgEct.getSQLException());
-
-			// Test fallback. We assume that no database will ever return this error code,
-			// but 07xxx will be bad grammar picked up by the fallback SQLState translator
-			SQLException sexFbt = new SQLException("", "07xxx", 666666666);
-			BadSqlGrammarException bsgFbt = (BadSqlGrammarException) sext.translate("task", "SQL-FBT", sexFbt);
-			assertEquals("SQL-FBT", bsgFbt.getSql());
-			assertEquals(sexFbt, bsgFbt.getSQLException());
-			// and 08xxx will be data resource failure (non-transient) picked up by the fallback SQLState translator
-			SQLException sexFbt2 = new SQLException("", "08xxx", 666666666);
-			DataAccessResourceFailureException darfFbt = (DataAccessResourceFailureException) sext.translate("task", "SQL-FBT2", sexFbt2);
-			assertEquals(sexFbt2, darfFbt.getCause());
-
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
+			return;
 		}
 
+		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
+
+		SQLException dataIntegrityViolationEx = SQLExceptionSubclassFactory.newSQLDataException("", "", 0);
+		DataIntegrityViolationException divex = (DataIntegrityViolationException) sext.translate("task", "SQL", dataIntegrityViolationEx);
+		assertEquals(dataIntegrityViolationEx, divex.getCause());
+
+		SQLException featureNotSupEx = SQLExceptionSubclassFactory.newSQLFeatureNotSupportedException("", "", 0);
+		InvalidDataAccessApiUsageException idaex = (InvalidDataAccessApiUsageException) sext.translate("task", "SQL", featureNotSupEx);
+		assertEquals(featureNotSupEx, idaex.getCause());
+
+		SQLException dataIntegrityViolationEx2 = SQLExceptionSubclassFactory.newSQLIntegrityConstraintViolationException("", "", 0);
+		DataIntegrityViolationException divex2 = (DataIntegrityViolationException) sext.translate("task", "SQL", dataIntegrityViolationEx2);
+		assertEquals(dataIntegrityViolationEx2, divex2.getCause());
+
+		SQLException permissionDeniedEx = SQLExceptionSubclassFactory.newSQLInvalidAuthorizationSpecException("", "", 0);
+		PermissionDeniedDataAccessException pdaex = (PermissionDeniedDataAccessException) sext.translate("task", "SQL", permissionDeniedEx);
+		assertEquals(permissionDeniedEx, pdaex.getCause());
+
+		SQLException dataAccessResourceEx = SQLExceptionSubclassFactory.newSQLNonTransientConnectionException("", "", 0);
+		DataAccessResourceFailureException darex = (DataAccessResourceFailureException) sext.translate("task", "SQL", dataAccessResourceEx);
+		assertEquals(dataAccessResourceEx, darex.getCause());
+
+		SQLException badSqlEx2 = SQLExceptionSubclassFactory.newSQLSyntaxErrorException("", "", 0);
+		BadSqlGrammarException bsgex2 = (BadSqlGrammarException) sext.translate("task", "SQL2", badSqlEx2);
+		assertEquals("SQL2", bsgex2.getSql());
+		assertEquals(badSqlEx2, bsgex2.getSQLException());
+
+		SQLException tranRollbackEx = SQLExceptionSubclassFactory.newSQLTransactionRollbackException("", "", 0);
+		ConcurrencyFailureException cfex = (ConcurrencyFailureException) sext.translate("task", "SQL", tranRollbackEx);
+		assertEquals(tranRollbackEx, cfex.getCause());
+
+		SQLException transientConnEx = SQLExceptionSubclassFactory.newSQLTransientConnectionException("", "", 0);
+		TransientDataAccessResourceException tdarex = (TransientDataAccessResourceException) sext.translate("task", "SQL", transientConnEx);
+		assertEquals(transientConnEx, tdarex.getCause());
+
+		SQLException transientConnEx2 = SQLExceptionSubclassFactory.newSQLTimeoutException("", "", 0);
+		TransientDataAccessResourceException tdarex2 = (TransientDataAccessResourceException) sext.translate("task", "SQL", transientConnEx2);
+		assertEquals(transientConnEx2, tdarex2.getCause());
+
+		SQLException recoverableEx = SQLExceptionSubclassFactory.newSQLRecoverableException("", "", 0);
+		RecoverableDataAccessException rdaex2 = (RecoverableDataAccessException) sext.translate("task", "SQL", recoverableEx);
+		assertEquals(recoverableEx, rdaex2.getCause());
+
+		// Test classic error code translation. We should move there next if the exception we pass in is not one
+		// of the new sub-classes.
+		SQLException sexEct = new SQLException("", "", 1);
+		BadSqlGrammarException bsgEct = (BadSqlGrammarException) sext.translate("task", "SQL-ECT", sexEct);
+		assertEquals("SQL-ECT", bsgEct.getSql());
+		assertEquals(sexEct, bsgEct.getSQLException());
+
+		// Test fallback. We assume that no database will ever return this error code,
+		// but 07xxx will be bad grammar picked up by the fallback SQLState translator
+		SQLException sexFbt = new SQLException("", "07xxx", 666666666);
+		BadSqlGrammarException bsgFbt = (BadSqlGrammarException) sext.translate("task", "SQL-FBT", sexFbt);
+		assertEquals("SQL-FBT", bsgFbt.getSql());
+		assertEquals(sexFbt, bsgFbt.getSQLException());
+		// and 08xxx will be data resource failure (non-transient) picked up by the fallback SQLState translator
+		SQLException sexFbt2 = new SQLException("", "08xxx", 666666666);
+		DataAccessResourceFailureException darfFbt = (DataAccessResourceFailureException) sext.translate("task", "SQL-FBT2", sexFbt2);
+		assertEquals(sexFbt2, darfFbt.getCause());
 	}
 
 }
