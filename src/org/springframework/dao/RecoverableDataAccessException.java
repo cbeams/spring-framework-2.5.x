@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package org.springframework.dao;
 
 /**
- * Data access exception thrown when a previously failed operation might be able to succeed if the
- * application performs some recovery steps and retries the entire transaction or in the case of a distributed
- * transaction, the transaction branch. At a minimum, the recovery operation must include closing the current
- * connection and getting a new connection.
+ * Data access exception thrown when a previously failed operation might be able
+ * to succeed if the application performs some recovery steps and retries the entire
+ * transaction or in the case of a distributed transaction, the transaction branch.
+ * At a minimum, the recovery operation must include closing the current connection
+ * and getting a new connection.
  *
  * @author Thomas Risberg
  * @since 2.5

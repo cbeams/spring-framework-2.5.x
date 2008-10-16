@@ -17,9 +17,9 @@
 package org.springframework.dao;
 
 /**
- * Root of the hierarchy of data access exceptions that are considered transient - where a previoulsy
- * failed operation might be able to succeed when the operation is retried without any intervention by
- * application-level functionality.
+ * Root of the hierarchy of data access exceptions that are considered transient -
+ * where a previously failed operation might be able to succeed when the operation
+ * is retried without any intervention by application-level functionality.
  *
  * @author Thomas Risberg
  * @since 2.5
