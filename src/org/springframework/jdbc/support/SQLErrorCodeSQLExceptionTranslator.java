@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.jdbc.UncategorizedSQLException;
 
 /**
  * Implementation of SQLExceptionTranslator that analyzes vendor-specific error codes.
@@ -159,13 +160,11 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	 * @see #setDataSource
 	 */
 	public SQLErrorCodes getSqlErrorCodes() {
-		return sqlErrorCodes;
+		return this.sqlErrorCodes;
 	}
 
 	/**
 	 * Override the default SQL state fallback translator.
-	 * @param fallback custom fallback exception translator to use if error code
-	 * translation fails
 	 * @see SQLStateSQLExceptionTranslator
 	 */
 	public void setFallbackTranslator(SQLExceptionTranslator fallback) {
@@ -176,7 +175,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	 * Return the fallback exception translator.
 	 */
 	public SQLExceptionTranslator getFallbackTranslator() {
-		return fallbackTranslator;
+		return this.fallbackTranslator;
 	}
 
 
@@ -273,7 +272,13 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 			logger.debug("Unable to translate SQLException with " + codes +
 					", will now try the fallback translator");
 		}
-		return this.fallbackTranslator.translate(task, sql, sqlEx);
+
+		if (this.fallbackTranslator != null) {
+			return this.fallbackTranslator.translate(task, sql, sqlEx);
+		}
+		else {
+			return new UncategorizedSQLException(task, sql, sqlEx);
+		}
 	}
 
 	/**
