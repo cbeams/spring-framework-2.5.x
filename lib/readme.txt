@@ -65,7 +65,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's backport-concurrent support
 
-* dom4j/dom4j-1.6.1, dom4j/jaxen-1.1-beta-7.jar
+* dom4j/dom4j-1.6.1
 - DOM4J 1.6.1 XML parser (http://www.dom4j.org)
 - required for running PetClinic (by Hibernate)
 
@@ -354,8 +354,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - used by Commons Attributes 2.2 to parse source-level metadata in the build process
 - required for building the framework and the attributes version of JPetStore
 
-* quartz/quartz-all-1.6.1-RC3.jar
-- Quartz 1.6.1 RC3 (http://www.opensymphony.com/quartz)
+* quartz/quartz-all-1.6.1.jar
+- Quartz 1.6.1 (http://www.opensymphony.com/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
