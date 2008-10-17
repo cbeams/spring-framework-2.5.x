@@ -45,7 +45,7 @@
 			</xsd:attribute>
 			<xsd:attribute name="properties-ref" type="xsd:string">
 				<xsd:annotation>
-                    <xsd:documentation source="java:java.util.Properties"><![CDATA[
+					<xsd:documentation source="java:java.util.Properties"><![CDATA[
 	The bean name of a Java Properties object that will be used for property substitution.
 	If neither location nor properties-ref is specified, placeholders will be resolved against system properties.
 					]]></xsd:documentation>
@@ -76,13 +76,13 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-            <xsd:attribute name="properties-ref" type="xsd:string">
-                <xsd:annotation>
-                    <xsd:documentation source="java:java.util.Properties"><![CDATA[
-    The bean name of a Java Properties object that will be used for property overrides.
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
+			<xsd:attribute name="properties-ref" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:java.util.Properties"><![CDATA[
+	The bean name of a Java Properties object that will be used for property overrides.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -126,84 +126,84 @@
 		<xsd:complexType>
 			<xsd:sequence>
 				<xsd:element name="include-filter" type="filterType" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:annotation>
-                        <xsd:documentation><![CDATA[
-    Controls which eligible types to include for component scanning.
-                        ]]></xsd:documentation>
-                    </xsd:annotation>
-                </xsd:element>
-                <xsd:element name="exclude-filter" type="filterType" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:annotation>
-                        <xsd:documentation><![CDATA[
-    Controls which eligible types to exclude for component scanning.
-                        ]]></xsd:documentation>
-                    </xsd:annotation>
-                </xsd:element>
-            </xsd:sequence>
+					<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Controls which eligible types to include for component scanning.
+							]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="exclude-filter" type="filterType" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Controls which eligible types to exclude for component scanning.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
 			<xsd:attribute name="base-package" type="xsd:string" use="required">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-     The comma-separated list of packages to scan for annotated components.                    
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="resource-pattern" type="xsd:string">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-     Controls the class files eligible for component detection. Defaults to "**/*.class", the recommended value.
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="use-default-filters" type="xsd:boolean" default="true">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-     Indicates whether automatic detection of classes annotated with @Component, @Repository, @Service, or @Controller
-     should be enabled. Default is "true".
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="annotation-config" type="xsd:boolean" default="true">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-     Indicates whether the implicit AutowiredAnnotationBeanPostProcessor and CommonAnnotationBeanPostProcessor should
-     be enabled. Default is "true".
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="name-generator" type="xsd:string">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The comma-separated list of packages to scan for annotated components.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="resource-pattern" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Controls the class files eligible for component detection. Defaults to "**/*.class", the recommended value.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="use-default-filters" type="xsd:boolean" default="true">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Indicates whether automatic detection of classes annotated with @Component, @Repository, @Service, or @Controller
+	should be enabled. Default is "true".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="annotation-config" type="xsd:boolean" default="true">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Indicates whether the implicit AutowiredAnnotationBeanPostProcessor and CommonAnnotationBeanPostProcessor should
+	 be enabled. Default is "true".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="name-generator" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
 	The fully-qualified classname of the BeanNameGenerator to be used for naming detected components.
-                    ]]></xsd:documentation>
-                    <xsd:appinfo>
-                        <tool:annotation>
-                            <tool:expected-type type="java.lang.Class"/>
-                            <tool:assignable-to type="org.springframework.beans.factory.support.BeanNameGenerator"/>
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="scope-resolver" type="xsd:string">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-	The fully-qualified classname of the ScopeMetadataResolver to be used for resolving the scope of detected components.
-                    ]]></xsd:documentation>
-                    <xsd:appinfo>
-                        <tool:annotation>
-                            <tool:expected-type type="java.lang.Class"/>
-                            <tool:assignable-to type="org.springframework.context.annotation.ScopeMetadataResolver"/>
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="scoped-proxy" default="no">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[
-     Indicates whether proxies should be generated for detected components, which may be necessary when using certain
-     non-singleton scopes.  The default is "no".
-                    ]]></xsd:documentation>
-                </xsd:annotation>
-                <xsd:simpleType>
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation>
+							<tool:expected-type type="java.lang.Class"/>
+							<tool:assignable-to type="org.springframework.beans.factory.support.BeanNameGenerator"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="scope-resolver" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The fully-qualified class name of the ScopeMetadataResolver to be used for resolving the scope of detected components.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation>
+							<tool:expected-type type="java.lang.Class"/>
+							<tool:assignable-to type="org.springframework.context.annotation.ScopeMetadataResolver"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="scoped-proxy">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Indicates whether proxies should be generated for detected components, which may be necessary when using certain
+	non-singleton scopes in a proxy-style fashion. Default is to generate no such proxies.
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
 					<xsd:restriction base="xsd:string">
 						<xsd:enumeration value="no"/>
 						<xsd:enumeration value="interfaces"/>
