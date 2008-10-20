@@ -39,6 +39,7 @@ import org.quartz.SchedulerListener;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
+import org.quartz.impl.SchedulerRepository;
 import org.quartz.spi.JobFactory;
 
 import org.springframework.beans.TestBean;
@@ -890,7 +891,8 @@ public class QuartzSupportTests extends TestCase {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
 			assertNotSame(scheduler1, scheduler2);
-			assertFalse(scheduler1.getSchedulerName().equals(scheduler2.getSchedulerName()));
+			assertEquals("quartz1", scheduler1.getSchedulerName());
+			assertEquals("quartz2", scheduler2.getSchedulerName());
 		}
 		finally {
 			ctx.close();
@@ -913,6 +915,31 @@ public class QuartzSupportTests extends TestCase {
 		finally {
 			ctx.close();
 		}
+	}
+
+	public void testSchedulerAccessorBean() throws InterruptedException {
+		ClassPathXmlApplicationContext ctx =
+				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerAccessorBean.xml");
+		Thread.sleep(3000);
+		try {
+			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
+			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
+
+			assertEquals("doImport called exportService", 0, exportService.getImportCount());
+			assertEquals("doExport not called on exportService", 2, exportService.getExportCount());
+			assertEquals("doImport not called on importService", 2, importService.getImportCount());
+			assertEquals("doExport called on importService", 0, importService.getExportCount());
+		}
+		finally {
+			ctx.close();
+		}
+	}
+
+	public void testSchedulerRepositoryExposure() throws InterruptedException {
+		ClassPathXmlApplicationContext ctx =
+				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerRepositoryExposure.xml");
+		assertSame(SchedulerRepository.getInstance().lookup("myScheduler"), ctx.getBean("scheduler"));
+		ctx.close();
 	}
 
 

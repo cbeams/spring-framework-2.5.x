@@ -17,58 +17,39 @@
 package org.springframework.scheduling.quartz;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.quartz.Calendar;
-import org.quartz.JobDetail;
-import org.quartz.JobListener;
-import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
-import org.quartz.SchedulerListener;
-import org.quartz.Trigger;
-import org.quartz.TriggerListener;
 import org.quartz.impl.RemoteScheduler;
+import org.quartz.impl.SchedulerRepository;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
-import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobFactory;
-import org.quartz.xml.JobSchedulingDataProcessor;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.Lifecycle;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.SchedulingException;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 
 /**
- * FactoryBean that sets up a Quartz {@link org.quartz.Scheduler},
- * manages its lifecycle as part of the Spring application context,
- * and exposes the Scheduler reference for dependency injection.
+ * {@link FactoryBean} that creates and configures a Quartz {@link org.quartz.Scheduler},
+ * manages its lifecycle as part of the Spring application context, and exposes the
+ * Scheduler as bean reference for dependency injection.
  *
  * <p>Allows registration of JobDetails, Calendars and Triggers, automatically
  * starting the scheduler on initialization and shutting it down on destruction.
@@ -106,8 +87,8 @@ import org.springframework.util.CollectionUtils;
  * @see org.quartz.impl.StdSchedulerFactory
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public class SchedulerFactoryBean
-    implements FactoryBean, ResourceLoaderAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
+public class SchedulerFactoryBean extends SchedulerAccessor
+    implements FactoryBean, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
@@ -175,9 +156,6 @@ public class SchedulerFactoryBean
 	}
 
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-
 	private Class schedulerFactoryClass = StdSchedulerFactory.class;
 
 	private String schedulerName;
@@ -193,12 +171,8 @@ public class SchedulerFactoryBean
 
 	private DataSource nonTransactionalDataSource;
 
-	private PlatformTransactionManager transactionManager;
-
 
 	private Map schedulerContextMap;
-
-	private ResourceLoader resourceLoader;
 
 	private ApplicationContext applicationContext;
 
@@ -209,31 +183,11 @@ public class SchedulerFactoryBean
 	private boolean jobFactorySet = false;
 
 
-	private boolean overwriteExistingJobs = false;
-
-	private String[] jobSchedulingDataLocations;
-
-	private List jobDetails;
-
-	private Map calendars;
-
-	private List triggers;
-
-
-	private SchedulerListener[] schedulerListeners;
-
-	private JobListener[] globalJobListeners;
-
-	private JobListener[] jobListeners;
-
-	private TriggerListener[] globalTriggerListeners;
-
-	private TriggerListener[] triggerListeners;
-
-
 	private boolean autoStartup = true;
 
 	private int startupDelay = 0;
+
+	private boolean exposeSchedulerInRepository = false;
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
 
@@ -244,8 +198,9 @@ public class SchedulerFactoryBean
 	/**
 	 * Set the Quartz SchedulerFactory implementation to use.
 	 * <p>Default is StdSchedulerFactory, reading in the standard
-	 * quartz.properties from quartz.jar. To use custom Quartz
-	 * properties, specify "configLocation" or "quartzProperties".
+	 * <code>quartz.properties</code> from <code>quartz.jar</code>.
+	 * To use custom Quartz properties, specify the "configLocation"
+	 * or "quartzProperties" bean property on this FactoryBean.
 	 * @see org.quartz.impl.StdSchedulerFactory
 	 * @see #setConfigLocation
 	 * @see #setQuartzProperties
@@ -258,10 +213,11 @@ public class SchedulerFactoryBean
 	}
 
 	/**
-	 * Set the name of the Scheduler to fetch from the SchedulerFactory.
-	 * If not specified, the default Scheduler will be used.
+	 * Set the name of the Scheduler to create via the SchedulerFactory.
+	 * <p>If not specified, the bean name will be used as default scheduler name.
+	 * @see #setBeanName
+	 * @see org.quartz.SchedulerFactory#getScheduler()
 	 * @see org.quartz.SchedulerFactory#getScheduler(String)
-	 * @see org.quartz.SchedulerFactory#getScheduler
 	 */
 	public void setSchedulerName(String schedulerName) {
 		this.schedulerName = schedulerName;
@@ -343,16 +299,6 @@ public class SchedulerFactoryBean
 		this.nonTransactionalDataSource = nonTransactionalDataSource;
 	}
 
-	/**
-	 * Set the transaction manager to be used for registering jobs and triggers
-	 * that are defined by this SchedulerFactoryBean. Default is none; setting
-	 * this only makes sense when specifying a DataSource for the Scheduler.
-	 * @see #setDataSource
-	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
-		this.transactionManager = transactionManager;
-	}
-
 
 	/**
 	 * Register objects in the Scheduler context via a given Map.
@@ -408,134 +354,6 @@ public class SchedulerFactoryBean
 
 
 	/**
-	 * Set whether any jobs defined on this SchedulerFactoryBean should overwrite
-	 * existing job definitions. Default is "false", to not overwrite already
-	 * registered jobs that have been read in from a persistent job store.
-	 */
-	public void setOverwriteExistingJobs(boolean overwriteExistingJobs) {
-		this.overwriteExistingJobs = overwriteExistingJobs;
-	}
-
-	/**
-	 * Set the location of a Quartz job definition XML file that follows the
-	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
-	 * register jobs that are defined in such a file, possibly in addition
-	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see org.quartz.xml.JobSchedulingDataProcessor
-	 */
-	public void setJobSchedulingDataLocation(String jobSchedulingDataLocation) {
-		this.jobSchedulingDataLocations = new String[] {jobSchedulingDataLocation};
-	}
-
-	/**
-	 * Set the locations of Quartz job definition XML files that follow the
-	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
-	 * register jobs that are defined in such files, possibly in addition
-	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see org.quartz.xml.JobSchedulingDataProcessor
-	 */
-	public void setJobSchedulingDataLocations(String[] jobSchedulingDataLocations) {
-		this.jobSchedulingDataLocations = jobSchedulingDataLocations;
-	}
-
-	/**
-	 * Register a list of JobDetail objects with the Scheduler that
-	 * this FactoryBean creates, to be referenced by Triggers.
-	 * <p>This is not necessary when a Trigger determines the JobDetail
-	 * itself: In this case, the JobDetail will be implicitly registered
-	 * in combination with the Trigger.
-	 * @see #setTriggers
-	 * @see org.quartz.JobDetail
-	 * @see JobDetailBean
-	 * @see JobDetailAwareTrigger
-	 * @see org.quartz.Trigger#setJobName
-	 */
-	public void setJobDetails(JobDetail[] jobDetails) {
-		// Use modifiable ArrayList here, to allow for further adding of
-		// JobDetail objects during autodetection of JobDetailAwareTriggers.
-		this.jobDetails = new ArrayList(Arrays.asList(jobDetails));
-	}
-
-	/**
-	 * Register a list of Quartz Calendar objects with the Scheduler
-	 * that this FactoryBean creates, to be referenced by Triggers.
-	 * @param calendars Map with calendar names as keys as Calendar
-	 * objects as values
-	 * @see org.quartz.Calendar
-	 * @see org.quartz.Trigger#setCalendarName
-	 */
-	public void setCalendars(Map calendars) {
-		this.calendars = calendars;
-	}
-
-	/**
-	 * Register a list of Trigger objects with the Scheduler that
-	 * this FactoryBean creates.
-	 * <p>If the Trigger determines the corresponding JobDetail itself,
-	 * the job will be automatically registered with the Scheduler.
-	 * Else, the respective JobDetail needs to be registered via the
-	 * "jobDetails" property of this FactoryBean.
-	 * @see #setJobDetails
-	 * @see org.quartz.JobDetail
-	 * @see JobDetailAwareTrigger
-	 * @see CronTriggerBean
-	 * @see SimpleTriggerBean
-	 */
-	public void setTriggers(Trigger[] triggers) {
-		this.triggers = Arrays.asList(triggers);
-	}
-
-
-	/**
-	 * Specify Quartz SchedulerListeners to be registered with the Scheduler.
-	 */
-	public void setSchedulerListeners(SchedulerListener[] schedulerListeners) {
-		this.schedulerListeners = schedulerListeners;
-	}
-
-	/**
-	 * Specify global Quartz JobListeners to be registered with the Scheduler.
-	 * Such JobListeners will apply to all Jobs in the Scheduler.
-	 */
-	public void setGlobalJobListeners(JobListener[] globalJobListeners) {
-		this.globalJobListeners = globalJobListeners;
-	}
-
-	/**
-	 * Specify named Quartz JobListeners to be registered with the Scheduler.
-	 * Such JobListeners will only apply to Jobs that explicitly activate
-	 * them via their name.
-	 * @see org.quartz.JobListener#getName
-	 * @see org.quartz.JobDetail#addJobListener
-	 * @see JobDetailBean#setJobListenerNames
-	 */
-	public void setJobListeners(JobListener[] jobListeners) {
-		this.jobListeners = jobListeners;
-	}
-
-	/**
-	 * Specify global Quartz TriggerListeners to be registered with the Scheduler.
-	 * Such TriggerListeners will apply to all Triggers in the Scheduler.
-	 */
-	public void setGlobalTriggerListeners(TriggerListener[] globalTriggerListeners) {
-		this.globalTriggerListeners = globalTriggerListeners;
-	}
-
-	/**
-	 * Specify named Quartz TriggerListeners to be registered with the Scheduler.
-	 * Such TriggerListeners will only apply to Triggers that explicitly activate
-	 * them via their name.
-	 * @see org.quartz.TriggerListener#getName
-	 * @see org.quartz.Trigger#addTriggerListener
-	 * @see CronTriggerBean#setTriggerListenerNames
-	 * @see SimpleTriggerBean#setTriggerListenerNames
-	 */
-	public void setTriggerListeners(TriggerListener[] triggerListeners) {
-		this.triggerListeners = triggerListeners;
-	}
-
-
-	/**
 	 * Set whether to automatically start the scheduler after initialization.
 	 * <p>Default is "true"; set this to "false" to allow for manual startup.
 	 */
@@ -555,6 +373,19 @@ public class SchedulerFactoryBean
 	}
 
 	/**
+	 * Set whether to expose the Spring-managed {@link Scheduler} instance in the
+	 * Quartz {@link SchedulerRepository}. Default is "false", since the Spring-managed
+	 * Scheduler is usually exclusively intended for access within the Spring context.
+	 * <p>Switch this flag to "true" in order to expose the Scheduler globally.
+	 * This is not recommended unless you have an existing Spring application that
+	 * relies on this behavior. Note that such global exposure was the accidental
+	 * default in earlier Spring versions; this has been fixed as of Spring 2.5.6.
+	 */
+	public void setExposeSchedulerInRepository(boolean exposeSchedulerInRepository) {
+		this.exposeSchedulerInRepository = exposeSchedulerInRepository;
+	}
+
+	/**
 	 * Set whether to wait for running jobs to complete on shutdown.
 	 * <p>Default is "false". Switch this to "true" if you prefer
 	 * fully completed jobs at the expense of a longer shutdown phase.
@@ -565,8 +396,10 @@ public class SchedulerFactoryBean
 	}
 
 
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
+	public void setBeanName(String name) {
+		if (this.schedulerName == null) {
+			this.schedulerName = name;
+		}
 	}
 
 	public void setApplicationContext(ApplicationContext applicationContext) {
@@ -588,8 +421,7 @@ public class SchedulerFactoryBean
 		}
 
 		// Create SchedulerFactory instance.
-		SchedulerFactory schedulerFactory = (SchedulerFactory)
-				BeanUtils.instantiateClass(this.schedulerFactoryClass);
+		SchedulerFactory schedulerFactory = (SchedulerFactory) BeanUtils.instantiateClass(this.schedulerFactoryClass);
 
 		initSchedulerFactory(schedulerFactory);
 
@@ -614,7 +446,6 @@ public class SchedulerFactoryBean
 		// Get Scheduler instance from SchedulerFactory.
 		try {
 			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
-
 			populateSchedulerContext();
 
 			if (!this.jobFactorySet && !(this.scheduler instanceof RemoteScheduler)) {
@@ -646,7 +477,6 @@ public class SchedulerFactoryBean
 		}
 
 		registerListeners();
-
 		registerJobsAndTriggers();
 
 		// Start Scheduler immediately, if demanded.
@@ -663,10 +493,14 @@ public class SchedulerFactoryBean
 	private void initSchedulerFactory(SchedulerFactory schedulerFactory)
 			throws SchedulerException, IOException {
 
-		if (!(schedulerFactory instanceof StdSchedulerFactory) &&
-			(this.configLocation != null || this.quartzProperties != null ||
-					this.taskExecutor != null || this.dataSource != null)) {
-			throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
+		if (!(schedulerFactory instanceof StdSchedulerFactory)) {
+			if (this.configLocation != null || this.quartzProperties != null ||
+					this.taskExecutor != null || this.dataSource != null) {
+				throw new IllegalArgumentException(
+						"StdSchedulerFactory required for applying Quartz properties: " + schedulerFactory);
+			}
+			// Otherwise assume that no initialization is necessary...
+			return;
 		}
 
 		Properties mergedProps = new Properties();
@@ -710,8 +544,8 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Create the Scheduler instance for the given factory and scheduler name.
-	 * Called by afterPropertiesSet.
-	 * <p>Default implementation invokes SchedulerFactory's <code>getScheduler</code>
+	 * Called by {@link #afterPropertiesSet}.
+	 * <p>The default implementation invokes SchedulerFactory's <code>getScheduler</code>
 	 * method. Can be overridden for custom Scheduler creation.
 	 * @param schedulerFactory the factory to create the Scheduler with
 	 * @param schedulerName the name of the scheduler to create
@@ -732,7 +566,20 @@ public class SchedulerFactoryBean
 			currentThread.setContextClassLoader(this.resourceLoader.getClassLoader());
 		}
 		try {
-			return schedulerFactory.getScheduler();
+			SchedulerRepository repository = SchedulerRepository.getInstance();
+			synchronized (repository) {
+				Scheduler existingScheduler = (schedulerName != null ? repository.lookup(schedulerName) : null);
+				Scheduler newScheduler = schedulerFactory.getScheduler();
+				if (newScheduler == existingScheduler) {
+					throw new IllegalStateException("Active Scheduler of name '" + schedulerName + "' already registered " +
+							"in Quartz SchedulerRepository. Cannot create a new Spring-managed Scheduler of the same name!");
+				}
+				if (!this.exposeSchedulerInRepository) {
+					// Need to remove it in this case, since Quartz shares the Scheduler instance by default!
+					SchedulerRepository.getInstance().remove(newScheduler.getSchedulerName());
+				}
+				return newScheduler;
+			}
 		}
 		finally {
 			if (overrideClassLoader) {
@@ -760,175 +607,6 @@ public class SchedulerFactoryBean
 				    "to be able to handle an 'applicationContextSchedulerContextKey'");
 			}
 			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
-		}
-	}
-
-
-	/**
-	 * Register all specified listeners with the Scheduler.
-	 */
-	private void registerListeners() throws SchedulerException {
-		if (this.schedulerListeners != null) {
-			for (int i = 0; i < this.schedulerListeners.length; i++) {
-				this.scheduler.addSchedulerListener(this.schedulerListeners[i]);
-			}
-		}
-		if (this.globalJobListeners != null) {
-			for (int i = 0; i < this.globalJobListeners.length; i++) {
-				this.scheduler.addGlobalJobListener(this.globalJobListeners[i]);
-			}
-		}
-		if (this.jobListeners != null) {
-			for (int i = 0; i < this.jobListeners.length; i++) {
-				this.scheduler.addJobListener(this.jobListeners[i]);
-			}
-		}
-		if (this.globalTriggerListeners != null) {
-			for (int i = 0; i < this.globalTriggerListeners.length; i++) {
-				this.scheduler.addGlobalTriggerListener(this.globalTriggerListeners[i]);
-			}
-		}
-		if (this.triggerListeners != null) {
-			for (int i = 0; i < this.triggerListeners.length; i++) {
-				this.scheduler.addTriggerListener(this.triggerListeners[i]);
-			}
-		}
-	}
-
-	/**
-	 * Register jobs and triggers (within a transaction, if possible).
-	 */
-	private void registerJobsAndTriggers() throws SchedulerException {
-		TransactionStatus transactionStatus = null;
-		if (this.transactionManager != null) {
-			transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
-		}
-		try {
-
-			if (this.jobSchedulingDataLocations != null) {
-				ClassLoadHelper clh = new ResourceLoaderClassLoadHelper(this.resourceLoader);
-				clh.initialize();
-				JobSchedulingDataProcessor dataProcessor = new JobSchedulingDataProcessor(clh, true, true);
-				for (int i = 0; i < this.jobSchedulingDataLocations.length; i++) {
-					dataProcessor.processFileAndScheduleJobs(
-					    this.jobSchedulingDataLocations[i], this.scheduler, this.overwriteExistingJobs);
-				}
-			}
-
-			// Register JobDetails.
-			if (this.jobDetails != null) {
-				for (Iterator it = this.jobDetails.iterator(); it.hasNext();) {
-					JobDetail jobDetail = (JobDetail) it.next();
-					addJobToScheduler(jobDetail);
-				}
-			}
-			else {
-				// Create empty list for easier checks when registering triggers.
-				this.jobDetails = new LinkedList();
-			}
-
-			// Register Calendars.
-			if (this.calendars != null) {
-				for (Iterator it = this.calendars.keySet().iterator(); it.hasNext();) {
-					String calendarName = (String) it.next();
-					Calendar calendar = (Calendar) this.calendars.get(calendarName);
-					this.scheduler.addCalendar(calendarName, calendar, true, true);
-				}
-			}
-
-			// Register Triggers.
-			if (this.triggers != null) {
-				for (Iterator it = this.triggers.iterator(); it.hasNext();) {
-					Trigger trigger = (Trigger) it.next();
-					addTriggerToScheduler(trigger);
-				}
-			}
-		}
-
-		catch (Throwable ex) {
-			if (transactionStatus != null) {
-				try {
-					this.transactionManager.rollback(transactionStatus);
-				}
-				catch (TransactionException tex) {
-					logger.error("Job registration exception overridden by rollback exception", ex);
-					throw tex;
-				}
-			}
-			if (ex instanceof SchedulerException) {
-				throw (SchedulerException) ex;
-			}
-			if (ex instanceof Exception) {
-				throw new SchedulerException(
-						"Registration of jobs and triggers failed: " + ex.getMessage(), (Exception) ex);
-			}
-			throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage());
-		}
-
-		if (transactionStatus != null) {
-			this.transactionManager.commit(transactionStatus);
-		}
-	}
-
-	/**
-	 * Add the given job to the Scheduler, if it doesn't already exist.
-	 * Overwrites the job in any case if "overwriteExistingJobs" is set.
-	 * @param jobDetail the job to add
-	 * @return <code>true</code> if the job was actually added,
-	 * <code>false</code> if it already existed before
-	 * @see #setOverwriteExistingJobs
-	 */
-	private boolean addJobToScheduler(JobDetail jobDetail) throws SchedulerException {
-		if (this.overwriteExistingJobs ||
-		    this.scheduler.getJobDetail(jobDetail.getName(), jobDetail.getGroup()) == null) {
-			this.scheduler.addJob(jobDetail, true);
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	/**
-	 * Add the given trigger to the Scheduler, if it doesn't already exist.
-	 * Overwrites the trigger in any case if "overwriteExistingJobs" is set.
-	 * @param trigger the trigger to add
-	 * @return <code>true</code> if the trigger was actually added,
-	 * <code>false</code> if it already existed before
-	 * @see #setOverwriteExistingJobs
-	 */
-	private boolean addTriggerToScheduler(Trigger trigger) throws SchedulerException {
-		boolean triggerExists = (this.scheduler.getTrigger(trigger.getName(), trigger.getGroup()) != null);
-		if (!triggerExists || this.overwriteExistingJobs) {
-			// Check if the Trigger is aware of an associated JobDetail.
-			if (trigger instanceof JobDetailAwareTrigger) {
-				JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
-				// Automatically register the JobDetail too.
-				if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
-					this.jobDetails.add(jobDetail);
-				}
-			}
-			if (!triggerExists) {
-				try {
-					this.scheduler.scheduleJob(trigger);
-				}
-				catch (ObjectAlreadyExistsException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
-								ex.getMessage() + " - can safely be ignored");
-					}
-					if (this.overwriteExistingJobs) {
-						this.scheduler.rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
-					}
-				}
-			}
-			else {
-				this.scheduler.rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
-			}
-			return true;
-		}
-		else {
-			return false;
 		}
 	}
 
@@ -977,6 +655,10 @@ public class SchedulerFactoryBean
 	//---------------------------------------------------------------------
 	// Implementation of FactoryBean interface
 	//---------------------------------------------------------------------
+
+	public Scheduler getScheduler() {
+		return this.scheduler;
+	}
 
 	public Object getObject() {
 		return this.scheduler;

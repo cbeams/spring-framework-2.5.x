@@ -4,11 +4,11 @@
 <beans>
 
 	<bean id="scheduler1" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-		<property name="schedulerName"><value>quartz1</value></property>
+		<property name="schedulerName" value="quartz1"/>
 	</bean>
 
 	<bean id="scheduler2" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-		<property name="schedulerName"><value>quartz2</value></property>
+		<property name="schedulerName" value="quartz2"/>
 	</bean>
 
 </beans>
