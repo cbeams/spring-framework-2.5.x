@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.transaction.jta;
 
 import javax.naming.NamingException;
+import javax.transaction.SystemException;
 
 import org.objectweb.jotm.Current;
 import org.objectweb.jotm.Jotm;
@@ -25,8 +26,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * FactoryBean that retrieves the JTA UserTransaction/TransactionManager for
- * ObjectWeb's <a href="http://jotm.objectweb.org">JOTM</a>. Will retrieve
+ * {@link FactoryBean} that retrieves the JTA UserTransaction/TransactionManager
+ * for ObjectWeb's <a href="http://jotm.objectweb.org">JOTM</a>. Will retrieve
  * an already active JOTM instance if found (e.g. if running in JOnAS),
  * else create a new local JOTM instance.
  *
@@ -104,7 +105,16 @@ public class JotmFactoryBean implements FactoryBean, DisposableBean {
 	 */
 	public void setDefaultTimeout(int defaultTimeout) {
 		this.jotmCurrent.setDefaultTimeout(defaultTimeout);
+		// The following is a JOTM oddity: should be used for demarcation transaction only,
+		// but is required here in order to actually get rid of JOTM's default (60 seconds).
+		try {
+			this.jotmCurrent.setTransactionTimeout(defaultTimeout);
+		}
+		catch (SystemException ex) {
+			// should never happen
+		}
 	}
+
 
 	/**
 	 * Return the JOTM instance created by this factory bean, if any.
@@ -114,7 +124,6 @@ public class JotmFactoryBean implements FactoryBean, DisposableBean {
 	public Jotm getJotm() {
 		return this.jotm;
 	}
-
 
 	public Object getObject() {
 		return this.jotmCurrent;
