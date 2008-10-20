@@ -49,9 +49,15 @@ import org.springframework.web.util.WebUtils;
  * URLs starting with "/" are considered relative to the web server root, while
  * with the flag on, they are considered relative to the web application root.
  * Since most web applications will never know or care what their context path
- * actually is, they are much better off setting this flag to true, and
- * submitting paths which are to be considered relative to the web application
- * root.
+ * actually is, they are much better off setting this flag to true, and submitting
+ * paths which are to be considered relative to the web application root.
+ *
+ * <p><b>NOTE when using this redirect view in a Portlet environment:</b> Make sure
+ * that your controller respects the Portlet <code>sendRedirect</code> constraints.
+ * When e.g. using {@link org.springframework.web.portlet.mvc.SimpleFormController},
+ * make sure to set your controller's
+ * {@link org.springframework.web.portlet.mvc.AbstractFormController#setRedirectAction "redirectAction"}
+ * property to "true", in order to make the controller base class behave accordingly.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

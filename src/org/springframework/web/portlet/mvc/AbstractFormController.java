@@ -324,7 +324,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * before {@link ActionResponse#sendRedirect}, e.g.
 	 * {@link ActionResponse#setRenderParameter} and
 	 * {@link ActionResponse#setRenderParameters}.
-	 * @param redirectAction true if ActionResponse#sendRedirect is expected to be called
+	 * <p><b>NOTE:</b> Call this at initialization time of your controller:
+	 * either in the constructor or in the bean definition for your controller.
 	 * @see ActionResponse#sendRedirect
 	 */
 	public void setRedirectAction(boolean redirectAction) {
@@ -342,7 +343,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Specify the list of parameters that should be passed forward
 	 * from the action phase to the render phase whenever the form is
-	 * rerendered or when {@link #passRenderParameters} is called.
+	 * re-rendered or when {@link #passRenderParameters} is called.
 	 * @see #passRenderParameters
 	 */
 	public void setRenderParameters(String[] parameters) {
