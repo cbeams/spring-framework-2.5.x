@@ -16,15 +16,21 @@
 
 package org.springframework.transaction.annotation;
 
+import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Map;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CallCountingTransactionManager;
 
@@ -34,11 +40,15 @@ import org.springframework.transaction.CallCountingTransactionManager;
  */
 public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
-	private ApplicationContext context;
+	private ConfigurableApplicationContext context;
 
 	public void setUp() {
 		this.context = new ClassPathXmlApplicationContext(
 				"org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
+	}
+
+	protected void tearDown() {
+		this.context.close();
 	}
 
 	public void testIsProxy() throws Exception {
@@ -83,12 +93,19 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		assertEquals("Should not have any started transactions", 0, ptm.begun);		
 	}
 
+	public void testMBeanExportAlsoWorks() throws Exception {
+		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+		assertEquals("done",
+				server.invoke(ObjectName.getInstance("test:type=TestBean"), "doSomething", new Object[0], new String[0]));
+	}
+
 	private TransactionalTestBean getTestBean() {
 		return (TransactionalTestBean) context.getBean("testBean");
 	}
 
 
 	@Service
+	@ManagedResource("test:type=TestBean")
 	public static class TransactionalTestBean {
 
 		@Transactional(readOnly = true)
@@ -98,7 +115,6 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 		@Transactional
 		public void saveFoo() {
-
 		}
 
 		@Transactional
@@ -106,7 +122,9 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 			throw t;
 		}
 
-		public void doSomething() {
+		@ManagedOperation
+		public String doSomething() {
+			return "done";
 		}
 		
 		@Transactional
