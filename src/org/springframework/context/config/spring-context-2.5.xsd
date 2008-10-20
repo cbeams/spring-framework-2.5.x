@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xsd:schema xmlns="http://www.springframework.org/schema/context"
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-		xmlns:beans="http://www.springframework.org/schema/beans"
-		xmlns:tool="http://www.springframework.org/schema/tool"
-		targetNamespace="http://www.springframework.org/schema/context"
-		elementFormDefault="qualified"
-		attributeFormDefault="unqualified">
+<xsd:schema xmlns="http://www.springframework.org/schema/context" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:beans="http://www.springframework.org/schema/beans"
+			xmlns:tool="http://www.springframework.org/schema/tool"
+			targetNamespace="http://www.springframework.org/schema/context" elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
@@ -67,7 +65,7 @@
 			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:attribute name="location" type="xsd:string" use="required">
+			<xsd:attribute name="location" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The location of the properties file to read property overrides from, as a Spring
@@ -127,7 +125,7 @@
 			<xsd:sequence>
 				<xsd:element name="include-filter" type="filterType" minOccurs="0" maxOccurs="unbounded">
 					<xsd:annotation>
-							<xsd:documentation><![CDATA[
+						<xsd:documentation><![CDATA[
 	Controls which eligible types to include for component scanning.
 							]]></xsd:documentation>
 					</xsd:annotation>
@@ -292,7 +290,8 @@
 
 	<xsd:element name="spring-configured">
 		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
+			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect">
+				<![CDATA[
 	Signals the current application context to apply dependency injection
 	to non-managed classes that are instantiated outside of the Spring bean
 	factory (typically classes annotated with the @Configurable annotation).
@@ -388,8 +387,8 @@
 
 	<xsd:complexType name="filterType">
 		<xsd:attribute name="type" use="required">
-            <xsd:annotation>
-                <xsd:documentation><![CDATA[
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
     Controls the type of filtering to apply to the expression.
 
     "annotation" indicates an annotation to be present at the type level in target components;
@@ -401,24 +400,24 @@
     Note: This attribute will not be inherited by child bean definitions.
     Hence, it needs to be specified per concrete bean definition.
                 ]]></xsd:documentation>
-            </xsd:annotation>
-            <xsd:simpleType>
+			</xsd:annotation>
+			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-                    <xsd:enumeration value="annotation"/>
-                    <xsd:enumeration value="assignable"/>
-                    <xsd:enumeration value="aspectj"/>
-                    <xsd:enumeration value="regex"/>
-                    <xsd:enumeration value="custom"/>
+					<xsd:enumeration value="annotation"/>
+					<xsd:enumeration value="assignable"/>
+					<xsd:enumeration value="aspectj"/>
+					<xsd:enumeration value="regex"/>
+					<xsd:enumeration value="custom"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
 		<xsd:attribute name="expression" type="xsd:string" use="required">
-            <xsd:annotation>
-                <xsd:documentation><![CDATA[
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
     Indicates the filter expression, the type of which is indicated by "type".
                 ]]></xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-    </xsd:complexType>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
 
 </xsd:schema>
