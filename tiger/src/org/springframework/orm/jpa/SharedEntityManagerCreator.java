@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -194,7 +195,13 @@ public abstract class SharedEntityManagerCreator {
 
 			// Invoke method on current EntityManager.
 			try {
-				return method.invoke(target, args);
+				Object result = method.invoke(target, args);
+				if (isNewEm && result instanceof Query) {
+					result = Proxy.newProxyInstance(Query.class.getClassLoader(), new Class[] {Query.class},
+							new DeferredQueryInvocationHandler((Query) result, target));
+					isNewEm = false;
+				}
+				return result;
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
@@ -202,6 +209,50 @@ public abstract class SharedEntityManagerCreator {
 			finally {
 				if (isNewEm) {
 					EntityManagerFactoryUtils.closeEntityManager(target);
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Invocation handler that handles deferred Query objects created by
+	 * non-transactional createQuery invocations on a shared EntityManager.
+	 */
+	private static class DeferredQueryInvocationHandler implements InvocationHandler {
+
+		private final Query target;
+
+		private final EntityManager em;
+
+		private DeferredQueryInvocationHandler(Query target, EntityManager em) {
+			this.target = target;
+			this.em = em;
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Invocation on Query interface coming in...
+
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0]);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of EntityManager proxy.
+				return hashCode();
+			}
+
+			// Invoke method on actual Query object.
+			try {
+				return method.invoke(this.target, args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+			finally {
+				if (method.getName().equals("getResultList") || method.getName().equals("getSingleResult") ||
+						method.getName().equals("executeUpdate")) {
+					EntityManagerFactoryUtils.closeEntityManager(this.em);
 				}
 			}
 		}

@@ -21,6 +21,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.FlushModeType;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.springframework.orm.jpa.domain.DriversLicense;
@@ -29,7 +31,6 @@ import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration tests for LocalContainerEntityManagerFactoryBean.
@@ -40,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		extends AbstractEntityManagerFactoryIntegrationTests {
-	
+
 	@NotTransactional
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		assertTrue(Proxy.isProxyClass(entityManagerFactory.getClass()));
@@ -56,12 +57,12 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		assertEquals("Should be no people from previous transactions",
 				0, countRowsInTable("person"));
 	}
-	
+
 	@Repeat(5)
 	public void testJdbcTx1() throws Exception {
 		testJdbcTx2();
 	}
-	
+
 	@Timed(millis=273)
 	public void testJdbcTx2() throws InterruptedException {
 		//Thread.sleep(2000);
@@ -69,8 +70,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		//insertPerson("foo");
 		executeSqlScript("/sql/insertPerson.sql", false);
 	}
-	
-	@Transactional(readOnly=true)
+
+	//@NotTransactional
 	public void testEntityManagerProxyIsProxy() {
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
@@ -87,7 +88,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		// required in OpenJPA case
 		query.executeUpdate();
 	}
-	
+
 	@ExpectedException(EntityNotFoundException.class)
 	public void testGetReferenceWhenNoRow() {
 		// Fails here with TopLink
@@ -190,6 +191,68 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		assertEquals(0, people.size());
+		try {
+			assertNull(q.getSingleResult());
+			fail("Should have thrown NoResultException");
+		}
+		catch (NoResultException ex) {
+			// expected
+		}
+	}
+
+	@NotTransactional
+	public void testQueryNoPersonsNotTransactional() {
+		EntityManager em = entityManagerFactory.createEntityManager();
+		Query q = em.createQuery("select p from Person as p");
+		List<Person> people = q.getResultList();
+		assertEquals(0, people.size());
+		try {
+			assertNull(q.getSingleResult());
+			fail("Should have thrown NoResultException");
+		}
+		catch (NoResultException ex) {
+			// expected
+		}
+	}
+
+	public void testQueryNoPersonsShared() {
+		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
+		Query q = em.createQuery("select p from Person as p");
+		q.setFlushMode(FlushModeType.AUTO);
+		List<Person> people = q.getResultList();
+		try {
+			assertNull(q.getSingleResult());
+			fail("Should have thrown NoResultException");
+		}
+		catch (NoResultException ex) {
+			// expected
+		}
+	}
+
+	@NotTransactional
+	public void testQueryNoPersonsSharedNotTransactional() {
+		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
+		Query q = em.createQuery("select p from Person as p");
+		q.setFlushMode(FlushModeType.AUTO);
+		List<Person> people = q.getResultList();
+		assertEquals(0, people.size());
+		try {
+			assertNull(q.getSingleResult());
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (Exception ex) {
+			// IllegalStateException expected, but PersistenceException thrown by Hibernate
+			assertTrue(ex.getMessage().indexOf("closed") != -1);
+		}
+		q = em.createQuery("select p from Person as p");
+		q.setFlushMode(FlushModeType.AUTO);
+		try {
+			assertNull(q.getSingleResult());
+			fail("Should have thrown NoResultException");
+		}
+		catch (NoResultException ex) {
+			// expected
+		}
 	}
 
 }
