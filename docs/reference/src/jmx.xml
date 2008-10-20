@@ -642,11 +642,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 }]]></programlisting>
 
       <para>As you can see little has changed, other than the basic syntax of
-      the metadata definitions. Behind the scenes this approach is a little
-      slower at startup because the JDK 5.0 annotations are converted into the
-      classes used by Commons Attributes. However, this is only a one-off cost
-      and JDK 5.0 annotations give you the added (and valuable) benefit of
-      compile-time checking.</para>
+      the metadata definitions.</para>
 
       <programlisting><![CDATA[<beans>
     <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -960,7 +956,7 @@ public class AnnotationTestBean implements IJmxTestBean {
     </section>
 
     <section id="jmx-interface-java">
-      <title>Defining Management interfaces using Java interfaces</title>
+      <title>Defining management interfaces using Java interfaces</title>
 
       <para>In addition to the
       <classname>MetadataMBeanInfoAssembler</classname>, Spring also includes
@@ -1242,6 +1238,15 @@ public class AnnotationTestBean implements IJmxTestBean {
       </para>
 
       <programlisting><![CDATA[<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>]]></programlisting>.
+
+      <note>
+        <para>Do not use interface-based AOP proxies in combination with autodetection of
+        JMX annotations in your bean classes. Interface-based proxies 'hide' the target class,
+        which also hides the JMX managed resource annotations. Hence, use target-class proxies
+        in that case: through setting the 'proxy-target-class' flag on <literal>&lt;aop:config/&gt;</literal>,
+        <literal>&lt;tx:annotation-driven/&gt;</literal>, etc. Otherwise, your JMX beans
+        might be silently ignored at startup...</para>
+      </note>
 
     </section>
   </section>
