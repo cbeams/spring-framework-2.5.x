@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.6 (2008-10-20)
+Changes in version 2.5.6 (2008-10-22)
 -------------------------------------
 
 General
@@ -118,6 +118,11 @@ Package org.springframework.remoting
 
 Package org.springframework.scheduling
 * SchedulerFactoryBean populates scheduler context first before satisfying SchedulerContextAware on a given JobFactory
+* SchedulerFactoryBean uses bean name as default scheduler name (when "schedulerName" property not explicitly specified)
+* SchedulerFactoryBean does not accept a pre-registered Scheduler instance in the Quartz SchedulerRepository anymore
+* SchedulerFactoryBean does not expose the Spring-created/managed Scheduler to the Quartz SchedulerRepository anymore
+* added "exposeSchedulerInRepository" flag to SchedulerFactoryBean, for explicit exposure to the SchedulerRepository
+* introduced SchedulerAccessorBean for registering jobs/triggers/listeners on an existing Quartz Scheduler instance
 * ScheduledExecutorFactoryBean uses Runnable decorator for logging exceptions that lead to termination of execution
 
 Package org.springframework.test
@@ -138,6 +143,7 @@ Package org.springframework.web
 * PortletContextResource cleans given path (analogous to ServletContextResource)
 * Servlet/PortletContextResource accept path with leading "/../" part as well (as accepted by most servlet containers)
 * DispatcherServlet removes error-view-driven servlet request attributes after rendering (for Tomcat compatibility)
+* exposed "getParamName()" method on LocaleChangeInterceptor and ThemeChangeInterceptor
 * added "cacheSecondsForSessionAttributeHandlers" property to Servlet/Portlet AnnotationMethodHandlerAdapter
 * AnnotationMethodHandlerAdapter exposes special ModelMap that removes BindingResult if target attribute gets replaced
 * Servlet AnnotationMethodHandlerAdapter always takes first exact @RequestMapping path match as best path match
