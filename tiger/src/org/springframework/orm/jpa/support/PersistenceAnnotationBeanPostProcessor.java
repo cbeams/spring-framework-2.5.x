@@ -500,18 +500,19 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	protected EntityManagerFactory findDefaultEntityManagerFactory(String requestingBeanName)
 			throws NoSuchBeanDefinitionException{
 
-		Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
-		if (matchingBeans.size() == 1) {
-			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
-			String unitName = (String) entry.getKey();
+		String[] beanNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
+		if (beanNames.length == 1) {
+			String unitName = beanNames[0];
+			EntityManagerFactory emf = (EntityManagerFactory) this.beanFactory.getBean(unitName);
 			if (this.beanFactory instanceof ConfigurableBeanFactory) {
 				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
 			}
-			return (EntityManagerFactory) entry.getValue();
+			return emf;
 		}
 		else {
 			throw new NoSuchBeanDefinitionException(
-					EntityManagerFactory.class, "expected single bean but found " + matchingBeans.size());
+					EntityManagerFactory.class, "expected single bean but found " + beanNames.length);
 		}
 	}
 

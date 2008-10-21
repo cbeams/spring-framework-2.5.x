@@ -19,27 +19,26 @@ package org.springframework.orm.jpa.domain;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.annotation.Configurable;
 
 /**
- * Simple JavaBean domain object representing an person.
- *
- * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 @Entity
 @Configurable
-public class Person {
+public class ContextualPerson {
 
-	@Id 
+	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 
@@ -55,6 +54,9 @@ public class Person {
 
 	@Basic(fetch=FetchType.LAZY)
 	private String last_name;
+
+	@PersistenceContext
+	public transient EntityManager entityManager;
 
 
 	public Integer getId() {

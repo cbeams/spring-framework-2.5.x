@@ -25,6 +25,7 @@ import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+import org.springframework.orm.jpa.domain.ContextualPerson;
 import org.springframework.orm.jpa.domain.Person;
 
 /**
@@ -69,6 +70,12 @@ public class HibernateEntityManagerFactoryIntegrationTests extends
 
 		assertEquals(1, people.size());
 		assertEquals(firstName, people.get(0).getFirstName());
+	}
+
+	public void testConfigurablePerson() {
+		Query q = this.sessionFactory.getCurrentSession().createQuery("select p from ContextualPerson as p");
+		assertEquals(0, q.list().size());
+		assertNotNull(new ContextualPerson().entityManager);
 	}
 
 }
