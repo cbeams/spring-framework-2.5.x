@@ -30,7 +30,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -269,8 +268,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	public void publishEvent(ApplicationEvent event) {
 		Assert.notNull(event, "Event must not be null");
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event in context [" + getId() + "]: " + event);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Publishing event in context [" + getId() + "]: " + event);
 		}
 		getApplicationEventMulticaster().multicastEvent(event);
 		if (this.parent != null) {

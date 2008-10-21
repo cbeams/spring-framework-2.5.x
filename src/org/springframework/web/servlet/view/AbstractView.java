@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -237,8 +236,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @see #renderMergedOutputModel
 	 */
 	public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Rendering view with name '" + this.beanName + "' with model " + model +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
 				" and static attributes " + this.staticAttributes);
 		}
 

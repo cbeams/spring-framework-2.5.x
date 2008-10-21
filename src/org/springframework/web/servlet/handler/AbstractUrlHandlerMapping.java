@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -157,9 +156,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking up handler for [" + lookupPath + "]");
-		}
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
@@ -175,6 +171,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath);
 			}
+		}
+		if (handler != null && logger.isDebugEnabled()) {
+			logger.debug("Mapping [" + lookupPath + "] to handler '" + handler + "'");
+		}
+		else if (handler == null && logger.isTraceEnabled()) {
+			logger.trace("No handler mapping found for [" + lookupPath + "]");
 		}
 		return handler;
 	}

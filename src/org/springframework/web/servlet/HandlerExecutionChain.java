@@ -113,4 +113,10 @@ public class HandlerExecutionChain {
 		return this.interceptors;
 	}
 
+	/**
+	 * Delegates to the handler's <code>toString()</code>.
+	 */
+	public String toString() {
+		return String.valueOf(handler);
+	}
 }

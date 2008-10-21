@@ -77,8 +77,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 					// Ask the subclass to create the View object.
 					view = createView(viewName, locale);
 					this.viewCache.put(cacheKey, view);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Cached view [" + cacheKey + "]");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Cached view [" + cacheKey + "]");
 					}
 				}
 				return view;

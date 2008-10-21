@@ -28,14 +28,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -780,8 +778,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
 			String requestUri = new UrlPathHelper().getRequestUri(request);
-			logger.debug(
-					"DispatcherServlet with name '" + getServletName() + "' received request for [" + requestUri + "]");
+			logger.debug("DispatcherServlet with name '" + getServletName() +
+					"' processing request for [" + requestUri + "]");
 		}
 
 		// Keep a snapshot of the request attributes in case of an include,
@@ -841,8 +839,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound request context to thread: " + request);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Bound request context to thread: " + request);
 		}
 		
 		try {
@@ -941,8 +939,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 			// Clear request attributes.
 			requestAttributes.requestCompleted();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound request context: " + request);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Cleared thread-bound request context: " + request);
 			}
 		}
 	}
@@ -952,6 +950,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * the Last-Modified value of the mapped handler.
 	 */
 	protected long getLastModified(HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			String requestUri = new UrlPathHelper().getRequestUri(request);
+			logger.debug("DispatcherServlet with name '" + getServletName() +
+					"' determining Last-Modified value for [" + requestUri + "]");
+		}
 		try {
 			HandlerExecutionChain mappedHandler = getHandler(request, true);
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
@@ -1047,8 +1050,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		Iterator it = this.handlerMappings.iterator();
 		while (it.hasNext()) {
 			HandlerMapping hm = (HandlerMapping) it.next();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Testing handler map [" + hm  + "] in DispatcherServlet with name '" +
+			if (logger.isTraceEnabled()) {
+				logger.trace("Testing handler map [" + hm  + "] in DispatcherServlet with name '" +
 						getServletName() + "'");
 			}
 			handler = hm.getHandler(request);
@@ -1087,8 +1090,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		Iterator it = this.handlerAdapters.iterator();
 		while (it.hasNext()) {
 			HandlerAdapter ha = (HandlerAdapter) it.next();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Testing handler adapter [" + ha + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Testing handler adapter [" + ha + "]");
 			}
 			if (ha.supports(handler)) {
 				return ha;
