@@ -18,7 +18,6 @@ package org.springframework.jdbc.support.xml;
 
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -27,27 +26,33 @@ import javax.xml.transform.Source;
 import org.w3c.dom.Document;
 
 /**
- * Abstraction for handling XML fields in specific databases.
+ * Abstraction for handling XML fields in specific databases. Its main purpose
+ * is to isolate database-specific handling of XML stored in the database.
  *
- * <p>Its main purpose is to isolate database specific handling of XML stored in the
- * database. JDBC 4.0 introduces the new data type <code>java.sql.SQLXML</code> but
- * most databases and their drivers currently rely on database specific data types
- * and features.
+ * <p>JDBC 4.0 introduces the new data type <code>java.sql.SQLXML</code>
+ * but most databases and their drivers currently rely on database-specific
+ * data types and features.
  *
- * <p>Provides accessor methods for XML fields, and acts as factory for
+ * <p>Provides accessor methods for XML fields and acts as factory for
  * {@link SqlXmlValue} instances.
  *
  * @author Thomas Risberg
  * @since 2.5.5
- * @see java.sql.ResultSet#getSQLXML
+ * @see Jdbc4SqlXmlHandler
  * @see java.sql.SQLXML
+ * @see java.sql.ResultSet#getSQLXML
+ * @see java.sql.PreparedStatement#setSQLXML
  */
 public interface SqlXmlHandler {
 
+	//-------------------------------------------------------------------------
+	// Convenience methods for accessing XML content
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Retrieve the given column as String from the given ResultSet.
-	 * Might simply invoke <code>ResultSet.getString</code> or work with
-	 * <code>SQLXML</code> or database specific classes depending on the
+	 * <p>Might simply invoke <code>ResultSet.getString</code> or work with
+	 * <code>SQLXML</code> or database-specific classes depending on the
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
@@ -60,8 +65,8 @@ public interface SqlXmlHandler {
 
 	/**
 	 * Retrieve the given column as String from the given ResultSet.
-	 * Might simply invoke <code>ResultSet.getString</code> or work with
-	 * <code>SQLXML</code> or database specific classes depending on the
+	 * <p>Might simply invoke <code>ResultSet.getString</code> or work with
+	 * <code>SQLXML</code> or database-specific classes depending on the
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
@@ -74,8 +79,8 @@ public interface SqlXmlHandler {
 
 	/**
 	 * Retrieve the given column as binary stream from the given ResultSet.
-	 * Might simply invoke <code>ResultSet.getAsciiStream</code> or work with
-	 * <code>SQLXML</code> or database specific classes depending on the
+	 * <p>Might simply invoke <code>ResultSet.getAsciiStream</code> or work with
+	 * <code>SQLXML</code> or database-specific classes depending on the
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
@@ -88,8 +93,8 @@ public interface SqlXmlHandler {
 
 	/**
 	 * Retrieve the given column as binary stream from the given ResultSet.
-	 * Might simply invoke <code>ResultSet.getAsciiStream</code> or work with
-	 * <code>SQLXML</code> or database specific classes depending on the
+	 * <p>Might simply invoke <code>ResultSet.getAsciiStream</code> or work with
+	 * <code>SQLXML</code> or database-specific classes depending on the
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
@@ -102,8 +107,8 @@ public interface SqlXmlHandler {
 
 	/**
 	 * Retrieve the given column as character stream from the given ResultSet.
-	 * Might simply invoke <code>ResultSet.getCharacterStream</code> or work with
-	 * <code>SQLXML</code> or database specific classes depending on the
+	 * <p>Might simply invoke <code>ResultSet.getCharacterStream</code> or work with
+	 * <code>SQLXML</code> or database-specific classes depending on the
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
@@ -116,8 +121,8 @@ public interface SqlXmlHandler {
 
 	/**
 	 * Retrieve the given column as character stream from the given ResultSet.
-	 * Might simply invoke <code>ResultSet.getCharacterStream</code> or work with
-	 * <code>SQLXML</code> or database specific classes depending on the
+	 * <p>Might simply invoke <code>ResultSet.getCharacterStream</code> or work with
+	 * <code>SQLXML</code> or database-specific classes depending on the
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
@@ -131,8 +136,8 @@ public interface SqlXmlHandler {
 	/**
 	 * Retrieve the given column as Source implemented using the specified source class
 	 * from the given ResultSet.
-	 * Might work with <code>SQLXML</code> or database specific classes depending on the
-	 * database and driver.
+	 * <p>Might work with <code>SQLXML</code> or database-specific classes depending
+	 * on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
 	 * @param sourceClass the implementation class to be used
@@ -146,8 +151,8 @@ public interface SqlXmlHandler {
 	/**
 	 * Retrieve the given column as Source implemented using the specified source class
 	 * from the given ResultSet.
-	 * Might work with <code>SQLXML</code> or database specific classes depending on the
-	 * database and driver.
+	 * <p>Might work with <code>SQLXML</code> or database-specific classes depending
+	 * on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
 	 * @param sourceClass the implementation class to be used
@@ -158,9 +163,14 @@ public interface SqlXmlHandler {
 	 */
 	Source getXmlAsSource(ResultSet rs, int columnIndex, Class sourceClass) throws SQLException;
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for building XML content
+	//-------------------------------------------------------------------------
+
 	/**
-	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
-	 * the database specific implementation of this <code>SqlXmlHandler</code>.
+	 * Create a <code>SqlXmlValue</code> instance for the given XML data,
+	 * as supported by the underlying JDBC driver.
 	 * @param value the XML String value providing XML data
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue
@@ -169,8 +179,8 @@ public interface SqlXmlHandler {
 	SqlXmlValue newSqlXmlValue(String value);
 
 	/**
-	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
-	 * the database specific implementation of this <code>SqlXmlHandler</code>.
+	 * Create a <code>SqlXmlValue</code> instance for the given XML data,
+	 * as supported by the underlying JDBC driver.
 	 * @param provider the <code>XmlBinaryStreamProvider</code> providing XML data
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue
@@ -179,8 +189,8 @@ public interface SqlXmlHandler {
 	SqlXmlValue newSqlXmlValue(XmlBinaryStreamProvider provider);
 
 	/**
-	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
-	 * the database specific implementation of this <code>SqlXmlHandler</code>.
+	 * Create a <code>SqlXmlValue</code> instance for the given XML data,
+	 * as supported by the underlying JDBC driver.
 	 * @param provider the <code>XmlCharacterStreamProvider</code> providing XML data
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue
@@ -189,8 +199,8 @@ public interface SqlXmlHandler {
 	SqlXmlValue newSqlXmlValue(XmlCharacterStreamProvider provider);
 
 	/**
-	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
-	 * the database specific implementation of this <code>SqlXmlHandler</code>.
+	 * Create a <code>SqlXmlValue</code> instance for the given XML data,
+	 * as supported by the underlying JDBC driver.
 	 * @param resultClass the Result implementation class to be used
 	 * @param provider the <code>XmlResultProvider</code> that will provide the XML data
 	 * @return the implementation specific instance
@@ -200,8 +210,8 @@ public interface SqlXmlHandler {
 	SqlXmlValue newSqlXmlValue(Class resultClass, XmlResultProvider provider);
 
 	/**
-	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together with
-	 * the database specific implementation of this <code>SqlXmlHandler</code>.
+	 * Create a <code>SqlXmlValue</code> instance for the given XML data,
+	 * as supported by the underlying JDBC driver.
 	 * @param doc the XML Document to be used
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue

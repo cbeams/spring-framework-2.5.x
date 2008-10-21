@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import java.sql.SQLException;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Interface to be implemented for setting values for more complex database specific
- * types not supported by the standard setObject method.
+ * Interface to be implemented for setting values for more complex database-specific
+ * types not supported by the standard <code>setObject</code> method. This is
+ * effectively an extended variant of {@link org.springframework.jdbc.support.SqlValue}.
  *
  * <p>Implementations perform the actual work of setting the actual values. They must
  * implement the callback method <code>setTypeValue</code> which can throw SQLExceptions
@@ -37,6 +38,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @see java.sql.Types
  * @see java.sql.PreparedStatement#setObject
  * @see JdbcOperations#update(String, Object[], int[])
+ * @see org.springframework.jdbc.support.SqlValue
  */
 public interface SqlTypeValue {
 
@@ -56,8 +58,7 @@ public interface SqlTypeValue {
 	 * @param paramIndex the index of the parameter for which we need to set the value
 	 * @param sqlType SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter (optional)
-	 * @throws SQLException if a SQLException is encountered setting parameter values
-	 * (that is, there's no need to catch SQLException)
+	 * @throws SQLException if a SQLException is encountered while setting parameter values
 	 * @see java.sql.Types
 	 * @see java.sql.PreparedStatement#setObject
 	 */

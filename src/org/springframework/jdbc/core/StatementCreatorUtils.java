@@ -35,6 +35,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.jdbc.support.SqlValue;
+
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
  * implementations, providing sophisticated parameter management (including support
@@ -186,7 +188,7 @@ public abstract class StatementCreatorUtils {
 
 		// override type info?
 		if (inValue instanceof SqlParameterValue) {
-			SqlParameterValue parameterValue = (SqlParameterValue)inValue;
+			SqlParameterValue parameterValue = (SqlParameterValue) inValue;
 			if (logger.isDebugEnabled()) {
 				logger.debug("Overriding typeinfo with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() +
@@ -201,140 +203,152 @@ public abstract class StatementCreatorUtils {
 			inValueToUse = parameterValue.getValue();
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Setting SQL statement parameter value: column index " + paramIndex +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Setting SQL statement parameter value: column index " + paramIndex +
 					", parameter value [" + inValueToUse +
 					"], value class [" + (inValueToUse != null ? inValueToUse.getClass().getName() : "null") +
 					"], SQL type " + (sqlTypeToUse == SqlTypeValue.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlTypeToUse)));
 		}
 
 		if (inValueToUse == null) {
-			if (sqlTypeToUse == SqlTypeValue.TYPE_UNKNOWN) {
-				boolean useSetObject = false;
-				sqlTypeToUse = Types.NULL;
-				try {
-					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
-					String databaseProductName = dbmd.getDatabaseProductName();
-					String jdbcDriverName = dbmd.getDriverName();
-					if (databaseProductName.startsWith("Informix") ||
-							jdbcDriverName.startsWith("Microsoft SQL Server")) {
-						useSetObject = true;
-					}
-					else if (databaseProductName.startsWith("DB2") ||
-							jdbcDriverName.startsWith("jConnect") ||
-							jdbcDriverName.startsWith("SQLServer")||
-							jdbcDriverName.startsWith("Apache Derby Embedded")) {
-						sqlTypeToUse = Types.VARCHAR;
-					}
+			setNull(ps, paramIndex, sqlTypeToUse, typeNameToUse);
+		}
+		else {
+			setValue(ps, paramIndex, sqlTypeToUse, typeNameToUse, scale, inValueToUse);
+		}
+	}
+
+	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
+		if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
+			boolean useSetObject = false;
+			sqlType = Types.NULL;
+			try {
+				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
+				String databaseProductName = dbmd.getDatabaseProductName();
+				String jdbcDriverName = dbmd.getDriverName();
+				if (databaseProductName.startsWith("Informix") ||
+						jdbcDriverName.startsWith("Microsoft SQL Server")) {
+					useSetObject = true;
 				}
-				catch (Throwable ex) {
-					logger.debug("Could not check database or driver name", ex);
-				}
-				if (useSetObject) {
-					ps.setObject(paramIndex, null);
-				}
-				else {
-					ps.setNull(paramIndex, sqlTypeToUse);
+				else if (databaseProductName.startsWith("DB2") ||
+						jdbcDriverName.startsWith("jConnect") ||
+						jdbcDriverName.startsWith("SQLServer")||
+						jdbcDriverName.startsWith("Apache Derby Embedded")) {
+					sqlType = Types.VARCHAR;
 				}
 			}
-			else if (typeNameToUse != null) {
-				ps.setNull(paramIndex, sqlTypeToUse, typeNameToUse);
+			catch (Throwable ex) {
+				logger.debug("Could not check database or driver name", ex);
+			}
+			if (useSetObject) {
+				ps.setObject(paramIndex, null);
 			}
 			else {
-				ps.setNull(paramIndex, sqlTypeToUse);
+				ps.setNull(paramIndex, sqlType);
 			}
 		}
+		else if (typeName != null) {
+			ps.setNull(paramIndex, sqlType, typeName);
+		}
+		else {
+			ps.setNull(paramIndex, sqlType);
+		}
+	}
 
-		else {  // inValue != null
-			if (inValueToUse instanceof SqlTypeValue) {
-				((SqlTypeValue) inValueToUse).setTypeValue(ps, paramIndex, sqlTypeToUse, typeNameToUse);
+	private static void setValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
+			Integer scale, Object inValue) throws SQLException {
+
+		if (inValue instanceof SqlTypeValue) {
+			((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);
+		}
+		else if (inValue instanceof SqlValue) {
+			((SqlValue) inValue).setValue(ps, paramIndex);
+		}
+		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ||
+				(sqlType == Types.CLOB && isStringValue(inValue.getClass()))) {
+			ps.setString(paramIndex, inValue.toString());
+		}
+		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
+			if (inValue instanceof BigDecimal) {
+				ps.setBigDecimal(paramIndex, (BigDecimal) inValue);
 			}
-			else if (sqlTypeToUse == Types.VARCHAR || sqlTypeToUse == Types.LONGVARCHAR ||
-					(sqlTypeToUse == Types.CLOB && isStringValue(inValueToUse.getClass()))) {
-				ps.setString(paramIndex, inValueToUse.toString());
-			}
-			else if (sqlTypeToUse == Types.DECIMAL || sqlTypeToUse == Types.NUMERIC) {
-				if (inValueToUse instanceof BigDecimal) {
-					ps.setBigDecimal(paramIndex, (BigDecimal) inValueToUse);
-				}
-				else if (scale != null) {
-					ps.setObject(paramIndex, inValueToUse, sqlTypeToUse, scale.intValue());
-				}
-				else {
-					ps.setObject(paramIndex, inValueToUse, sqlTypeToUse);
-				}
-			}
-			else if (sqlTypeToUse == Types.DATE) {
-				if (inValueToUse instanceof java.util.Date) {
-					if (inValueToUse instanceof java.sql.Date) {
-						ps.setDate(paramIndex, (java.sql.Date) inValueToUse);
-					}
-					else {
-						ps.setDate(paramIndex, new java.sql.Date(((java.util.Date) inValueToUse).getTime()));
-					}
-				}
-				else if (inValueToUse instanceof Calendar) {
-					Calendar cal = (Calendar) inValueToUse;
-					ps.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
-				}
-				else {
-					ps.setObject(paramIndex, inValueToUse, Types.DATE);
-				}
-			}
-			else if (sqlTypeToUse == Types.TIME) {
-				if (inValueToUse instanceof java.util.Date) {
-					if (inValueToUse instanceof java.sql.Time) {
-						ps.setTime(paramIndex, (java.sql.Time) inValueToUse);
-					}
-					else {
-						ps.setTime(paramIndex, new java.sql.Time(((java.util.Date) inValueToUse).getTime()));
-					}
-				}
-				else if (inValueToUse instanceof Calendar) {
-					Calendar cal = (Calendar) inValueToUse;
-					ps.setTime(paramIndex, new java.sql.Time(cal.getTime().getTime()), cal);
-				}
-				else {
-					ps.setObject(paramIndex, inValueToUse, Types.TIME);
-				}
-			}
-			else if (sqlTypeToUse == Types.TIMESTAMP) {
-				if (inValueToUse instanceof java.util.Date) {
-					if (inValueToUse instanceof java.sql.Timestamp) {
-						ps.setTimestamp(paramIndex, (java.sql.Timestamp) inValueToUse);
-					}
-					else {
-						ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValueToUse).getTime()));
-					}
-				}
-				else if (inValueToUse instanceof Calendar) {
-					Calendar cal = (Calendar) inValueToUse;
-					ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
-				}
-				else {
-					ps.setObject(paramIndex, inValueToUse, Types.TIMESTAMP);
-				}
-			}
-			else if (sqlTypeToUse == SqlTypeValue.TYPE_UNKNOWN) {
-				if (isStringValue(inValueToUse.getClass())) {
-					ps.setString(paramIndex, inValueToUse.toString());
-				}
-				else if (isDateValue(inValueToUse.getClass())) {
-					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValueToUse).getTime()));
-				}
-				else if (inValueToUse instanceof Calendar) {
-					Calendar cal = (Calendar) inValueToUse;
-					ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
-				}
-				else {
-					// Fall back to generic setObject call without SQL type specified.
-					ps.setObject(paramIndex, inValueToUse);
-				}
+			else if (scale != null) {
+				ps.setObject(paramIndex, inValue, sqlType, scale.intValue());
 			}
 			else {
-				// Fall back to generic setObject call with SQL type specified.
-				ps.setObject(paramIndex, inValueToUse, sqlTypeToUse);
+				ps.setObject(paramIndex, inValue, sqlType);
 			}
+		}
+		else if (sqlType == Types.DATE) {
+			if (inValue instanceof java.util.Date) {
+				if (inValue instanceof java.sql.Date) {
+					ps.setDate(paramIndex, (java.sql.Date) inValue);
+				}
+				else {
+					ps.setDate(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
+				}
+			}
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
+				ps.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
+			}
+			else {
+				ps.setObject(paramIndex, inValue, Types.DATE);
+			}
+		}
+		else if (sqlType == Types.TIME) {
+			if (inValue instanceof java.util.Date) {
+				if (inValue instanceof java.sql.Time) {
+					ps.setTime(paramIndex, (java.sql.Time) inValue);
+				}
+				else {
+					ps.setTime(paramIndex, new java.sql.Time(((java.util.Date) inValue).getTime()));
+				}
+			}
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
+				ps.setTime(paramIndex, new java.sql.Time(cal.getTime().getTime()), cal);
+			}
+			else {
+				ps.setObject(paramIndex, inValue, Types.TIME);
+			}
+		}
+		else if (sqlType == Types.TIMESTAMP) {
+			if (inValue instanceof java.util.Date) {
+				if (inValue instanceof java.sql.Timestamp) {
+					ps.setTimestamp(paramIndex, (java.sql.Timestamp) inValue);
+				}
+				else {
+					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
+				}
+			}
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
+				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+			}
+			else {
+				ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
+			}
+		}
+		else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
+			if (isStringValue(inValue.getClass())) {
+				ps.setString(paramIndex, inValue.toString());
+			}
+			else if (isDateValue(inValue.getClass())) {
+				ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
+			}
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
+				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+			}
+			else {
+				// Fall back to generic setObject call without SQL type specified.
+				ps.setObject(paramIndex, inValue);
+			}
+		}
+		else {
+			// Fall back to generic setObject call with SQL type specified.
+			ps.setObject(paramIndex, inValue, sqlType);
 		}
 	}
 
@@ -384,6 +398,9 @@ public abstract class StatementCreatorUtils {
 				Object inValue = it.next();
 				if (inValue instanceof DisposableSqlTypeValue) {
 					((DisposableSqlTypeValue) inValue).cleanup();
+				}
+				else if (inValue instanceof SqlValue) {
+					((SqlValue) inValue).cleanup();
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.jdbc.core;
 
 /**
- * Subinterface of SqlTypeValue that adds a cleanup callback,
+ * Subinterface of {@link SqlTypeValue} that adds a cleanup callback,
  * to be invoked after the value has been set and the corresponding
  * statement has been executed.
  *
@@ -30,7 +30,8 @@ public interface DisposableSqlTypeValue extends SqlTypeValue {
 	/**
 	 * Clean up resources held by this type value,
 	 * for example the LobCreator in case of a SqlLobValue.
-	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup
+	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
+	 * @see org.springframework.jdbc.support.SqlValue#cleanup()
 	 */
 	void cleanup();
 
