@@ -61,6 +61,8 @@ Package org.springframework.instrument
 * ShadowingClassLoader excludes "net.sf.cglib." package from shadowing by default
 
 Package org.springframework.jdbc
+* provided Jdbc4SqlXmlHandler as default implementation of the SqlXmlHandler interface
+* added SqlValue class to "jdbc.support" package, with SqlXmlValue derived from SqlValue instead of SqlTypeValue
 * SQLErrorCodesFactory always loads its "sql-error-codes.xml" files from Spring's class loader (-> static singleton)
 * added "transientDataAccessResourceCodes" category to "sql-error-codes.xml", with default codes for DB2 and Sybase
 * SQLErrorCodeSQLExceptionTranslator applies default SQLExceptionSubclassTranslator after error code translation only
@@ -107,6 +109,8 @@ Package org.springframework.orm
 * HibernateTemplate translates Hibernate's DataException into a Spring DataIntegrityViolationException (for consistency)
 * added "packagesToScan" property to Hibernate AnnotationSessionFactoryBean, for autodetection of @Entity classes
 * added "persistenceXmlLocation" property to DefaultPersistenceUnitManager, as alternative to "persistenceXmlLocations"
+* @PersistenceContext of type TRANSACTION allows returned Query objects to be parameterized and executed as well
+* @PersistenceContext for default EntityManagerFactory lookup works even in an @Configurable Hibernate entity
 
 Package org.springframework.remoting
 * added "interceptors" property to RemoteExporter, allowing for registering custom AOP interceptors before the endpoint
@@ -131,6 +135,7 @@ Package org.springframework.test
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager resumes after any kind of inner begin failure (not just after TransactionException)
 * TransactionSynchronizationManager interaction gets logged at trace level only (minimizing debug log per transaction)
+* JotmFactoryBean sets "defaultTimeout" value as actual JOTM default (even if no transaction timeout specified at all)
 
 Package org.springframework.util
 * "StringUtils.cleanPath" preserves leading slash if given in original path
