@@ -299,13 +299,9 @@ public abstract class StringUtils {
 	 * @return a String with the replacements
 	 */
 	public static String replace(String inString, String oldPattern, String newPattern) {
-		if (inString == null) {
-			return null;
-		}
-		if (oldPattern == null || newPattern == null) {
+		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
 			return inString;
 		}
-
 		StringBuffer sbuf = new StringBuffer();
 		// output StringBuffer we'll build up
 		int pos = 0; // our position in the old string
@@ -319,7 +315,6 @@ public abstract class StringUtils {
 			index = inString.indexOf(oldPattern, pos);
 		}
 		sbuf.append(inString.substring(pos));
-
 		// remember to append any characters to the right of a match
 		return sbuf.toString();
 	}
@@ -511,6 +506,9 @@ public abstract class StringUtils {
 	 * @return the normalized path
 	 */
 	public static String cleanPath(String path) {
+		if (path == null) {
+			return null;
+		}
 		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
 
 		// Strip prefix from path to analyze, to not treat it as part of the
@@ -523,27 +521,32 @@ public abstract class StringUtils {
 			prefix = pathToUse.substring(0, prefixIndex + 1);
 			pathToUse = pathToUse.substring(prefixIndex + 1);
 		}
+		if (pathToUse.startsWith(FOLDER_SEPARATOR)) {
+			prefix = prefix + FOLDER_SEPARATOR;
+			pathToUse = pathToUse.substring(1);
+		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
 		List pathElements = new LinkedList();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
-			if (CURRENT_PATH.equals(pathArray[i])) {
+			String element = pathArray[i];
+			if (CURRENT_PATH.equals(element)) {
 				// Points to current directory - drop it.
 			}
-			else if (TOP_PATH.equals(pathArray[i])) {
+			else if (TOP_PATH.equals(element)) {
 				// Registering top path found.
 				tops++;
 			}
 			else {
 				if (tops > 0) {
-					// Merging path element with corresponding to top path.
+					// Merging path element with element corresponding to top path.
 					tops--;
 				}
 				else {
 					// Normal path element found.
-					pathElements.add(0, pathArray[i]);
+					pathElements.add(0, element);
 				}
 			}
 		}
