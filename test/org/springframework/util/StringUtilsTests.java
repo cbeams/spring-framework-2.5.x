@@ -195,24 +195,24 @@ public class StringUtilsTests extends TestCase {
 
 		String mismatch = StringUtils.delete(inString, "dxxcxcxog");
 		assertTrue("Result is unchanged", mismatch.equals(inString));
+
+		String nochange = StringUtils.delete(inString, "");
+		assertTrue("Result is unchanged", nochange.equals(inString));
 	}
 
 	public void testDeleteAny() throws Exception {
 		String inString = "Able was I ere I saw Elba";
 
 		String res = StringUtils.deleteAny(inString, "I");
-		assertTrue("Result has no Is [" + res + "]",
-				res.equals("Able was  ere  saw Elba"));
+		assertTrue("Result has no Is [" + res + "]", res.equals("Able was  ere  saw Elba"));
 
 		res = StringUtils.deleteAny(inString, "AeEba!");
-		assertTrue("Result has no Is [" + res + "]",
-				res.equals("l ws I r I sw l"));
+		assertTrue("Result has no Is [" + res + "]", res.equals("l ws I r I sw l"));
 
 		String mismatch = StringUtils.deleteAny(inString, "#@$#$^");
 		assertTrue("Result is unchanged", mismatch.equals(inString));
 
-		String whitespace =
-				"This is\n\n\n    \t   a messagy string with whitespace\n";
+		String whitespace = "This is\n\n\n    \t   a messagy string with whitespace\n";
 		assertTrue("Has CR", whitespace.indexOf("\n") != -1);
 		assertTrue("Has tab", whitespace.indexOf("\t") != -1);
 		assertTrue("Has  sp", whitespace.indexOf(" ") != -1);

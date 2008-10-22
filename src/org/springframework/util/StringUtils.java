@@ -370,13 +370,9 @@ public abstract class StringUtils {
 	 * @return a String with the replacements
 	 */
 	public static String replace(String inString, String oldPattern, String newPattern) {
-		if (inString == null) {
-			return null;
-		}
-		if (oldPattern == null || newPattern == null) {
+		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
 			return inString;
 		}
-
 		StringBuffer sbuf = new StringBuffer();
 		// output StringBuffer we'll build up
 		int pos = 0; // our position in the old string
@@ -390,7 +386,6 @@ public abstract class StringUtils {
 			index = inString.indexOf(oldPattern, pos);
 		}
 		sbuf.append(inString.substring(pos));
-
 		// remember to append any characters to the right of a match
 		return sbuf.toString();
 	}
