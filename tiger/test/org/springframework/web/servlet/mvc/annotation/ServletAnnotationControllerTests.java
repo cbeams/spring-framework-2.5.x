@@ -686,7 +686,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	private static class BaseController {
 
 		@RequestMapping(method = RequestMethod.GET)
-		public void myPath2(HttpServletResponse response) throws IOException  {
+		public void myPath2(HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 	}
@@ -696,22 +696,22 @@ public class ServletAnnotationControllerTests extends TestCase {
 	private static class MyAdaptedController {
 
 		@RequestMapping("/myPath1.do")
-		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2);
 		}
 
 		@RequestMapping("/myPath3")
-		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("/myPath4.do")
-		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}
@@ -722,22 +722,22 @@ public class ServletAnnotationControllerTests extends TestCase {
 	private static class MyAdaptedController2 {
 
 		@RequestMapping
-		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("/myPath3")
-		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("/myPath4.*")
-		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}
@@ -747,7 +747,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 	private static class MyAdaptedControllerBase<T> {
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") T p1, int param2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1") T p1, int param2, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
@@ -765,22 +765,22 @@ public class ServletAnnotationControllerTests extends TestCase {
 	private static class MyAdaptedController3 extends MyAdaptedControllerBase<String> {
 
 		@RequestMapping
-		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+		public void myHandle(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
 
 		@Override
-		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException  {
+		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2);
 		}
 
 		@RequestMapping("/myPath3")
-		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
 		@RequestMapping("/myPath4.*")
-		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
+		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 
