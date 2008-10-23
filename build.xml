@@ -201,10 +201,6 @@
 		<include name="org/springframework/instrument/classloading/tomcat/**"/>
 	</patternset>
 
-
-	<!-- BND tool taskdef (required for the OSGi manifest entries) -->
-	<taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${lib.dir}/bnd/bnd.jar"/>
-
 	<!-- Jar Jar Links taskdef (required for repackaging ASM) -->
 	<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${lib.dir}/jarjar/jarjar.jar"/>
 
@@ -454,12 +450,6 @@
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jarjar>
-
-		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}">
-			<fileset dir="${dist.dir}" includes="spring.jar"/>
-		</bndwrap>
-		<move file="${dist.dir}/spring.bar" tofile="${dist.dir}/spring.jar"/>
-
 	</target>
 
 
@@ -495,7 +485,7 @@
 			</fileset>
 		</delete>
 
-		<jar jarfile="${dist.dir}/modules/spring-aop.jar">
+		<jar jarfile="${dist.dir}/modules/spring-aop.jar" manifest="${basedir}/osgi/manifest/spring-aop.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.aop.packages"/>
 			</fileset>
@@ -508,7 +498,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-beans.jar">
+		<jar jarfile="${dist.dir}/modules/spring-beans.jar" manifest="${basedir}/osgi/manifest/spring-beans.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.beans.packages"/>
 			</fileset>
@@ -521,7 +511,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-context.jar">
+		<jar jarfile="${dist.dir}/modules/spring-context.jar" manifest="${basedir}/osgi/manifest/spring-context.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.context.packages"/>
 			</fileset>
@@ -534,7 +524,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-context-support.jar">
+		<jar jarfile="${dist.dir}/modules/spring-context-support.jar" manifest="${basedir}/osgi/manifest/spring-context-support.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.context.support.packages"/>
 			</fileset>
@@ -546,7 +536,7 @@
 			</manifest>
 		</jar>
 
-		<jarjar jarfile="${dist.dir}/modules/spring-core.jar">
+		<jarjar jarfile="${dist.dir}/modules/spring-core.jar" manifest="${basedir}/osgi/manifest/spring-core.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.core.packages"/>
 			</fileset>
@@ -561,7 +551,7 @@
 			</manifest>
 		</jarjar>
 
-		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar" manifest="${basedir}/osgi/manifest/spring-jdbc.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.jdbc.packages"/>
 			</fileset>
@@ -573,7 +563,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-jms.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jms.jar" manifest="${basedir}/osgi/manifest/spring-jms.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.jms.packages"/>
 			</fileset>
@@ -586,7 +576,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-orm.jar">
+		<jar jarfile="${dist.dir}/modules/spring-orm.jar" manifest="${basedir}/osgi/manifest/spring-orm.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.orm.packages"/>
 			</fileset>
@@ -598,7 +588,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-test.jar">
+		<jar jarfile="${dist.dir}/modules/spring-test.jar" manifest="${basedir}/osgi/manifest/spring-test.mf">
 			<fileset dir="${target.mockclasses.dir}">
 				<patternset refid="spring.test.packages"/>
 			</fileset>
@@ -610,7 +600,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-tx.jar">
+		<jar jarfile="${dist.dir}/modules/spring-tx.jar" manifest="${basedir}/osgi/manifest/spring-tx.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.tx.packages"/>
 			</fileset>
@@ -623,7 +613,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-web.jar">
+		<jar jarfile="${dist.dir}/modules/spring-web.jar" manifest="${basedir}/osgi/manifest/spring-web.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.web.packages"/>
 			</fileset>
@@ -635,7 +625,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-webmvc.jar">
+		<jar jarfile="${dist.dir}/modules/spring-webmvc.jar" manifest="${basedir}/osgi/manifest/spring-webmvc.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.webmvc.packages"/>
 			</fileset>
@@ -647,7 +637,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-webmvc-portlet.jar">
+		<jar jarfile="${dist.dir}/modules/spring-webmvc-portlet.jar" manifest="${basedir}/osgi/manifest/spring-webmvc-portlet.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.webmvc.portlet.packages"/>
 			</fileset>
@@ -659,7 +649,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-webmvc-struts.jar">
+		<jar jarfile="${dist.dir}/modules/spring-webmvc-struts.jar" manifest="${basedir}/osgi/manifest/spring-webmvc-struts.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.webmvc.struts.packages"/>
 			</fileset>
@@ -670,18 +660,6 @@
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
-
-		<!-- osgi wrapper -->
-		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}/modules">
-			<fileset dir="${dist.dir}/modules" includes="*.jar"/>
-		</bndwrap>
-		<move todir="${dist.dir}/modules">
-			<fileset dir="${dist.dir}/modules">
-		      <include name="*.bar"/>
-		    </fileset>
-			<mapper type="glob" from="*.bar" to="*.jar"/>
-		</move>
-
 	</target>
 
 
@@ -918,7 +896,7 @@
 			</fileset>
 		</delete>
 
-		<jar jarfile="${dist.dir}/weaving/spring-agent.jar">
+		<jar jarfile="${dist.dir}/weaving/spring-agent.jar" manifest="${basedir}/osgi/manifest/spring-agent.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.agent.packages"/>
 			</fileset>
@@ -931,7 +909,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/weaving/spring-aspects.jar">
+		<jar jarfile="${dist.dir}/weaving/spring-aspects.jar" manifest="${basedir}/osgi/manifest/spring-aspects.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.aspects.packages"/>
 			</fileset>
@@ -943,7 +921,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/weaving/spring-tomcat-weaver.jar">
+		<jar jarfile="${dist.dir}/weaving/spring-tomcat-weaver.jar" manifest="${basedir}/osgi/manifest/spring-tomcat-weaver.mf">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.tomcat.weaver.packages"/>
 			</fileset>
@@ -954,19 +932,6 @@
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
-
-		<!-- osgi wrappers -->
-		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}/weaving">
-			<fileset dir="${dist.dir}/weaving" includes="spring-aspects.jar"/>
-		</bndwrap>
-
-		<move todir="${dist.dir}/weaving">
-			<fileset dir="${dist.dir}/weaving">
-		      <include name="*.bar"/>
-		    </fileset>
-			<mapper type="glob" from="*.bar" to="*.jar"/>
-		</move>
-
 	</target>
 
 
