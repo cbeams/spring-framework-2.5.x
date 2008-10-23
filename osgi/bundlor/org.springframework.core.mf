@@ -13,8 +13,3 @@ Unversioned-Imports:
  javax.xml.transform.*,
  org.w3c.dom.*,
  org.xml.sax.*
-Ignored-Existing-Headers: 
- Bnd-LastModified,
- Import-Package,
- Export-Package,
- Tool

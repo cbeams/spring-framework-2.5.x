@@ -9,19 +9,14 @@ Import-Template:
  javax.transaction.*;version="[1.0.1, 2.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.enhydra.jdbc.*;version="[1.5.0, 2.0.0)";resolution:=optional,
- org.springframework.beans.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.core.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.dao.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.jndi.*;version="[2.5.5.A, 2.5.5.A]";resolution:=optional,
- org.springframework.transaction.*;version="[2.5.5.A, 2.5.5.A]",
- org.springframework.util;version="[2.5.5.A, 2.5.5.A]"
+ org.springframework.beans.*;version="[2.5.6, 2.5.6]",
+ org.springframework.core.*;version="[2.5.6, 2.5.6]",
+ org.springframework.dao.*;version="[2.5.6, 2.5.6]",
+ org.springframework.jndi.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.transaction.*;version="[2.5.6, 2.5.6]",
+ org.springframework.util;version="[2.5.6, 2.5.6]"
 Unversioned-Imports: 
  javax.naming.*,
  javax.sql,
  javax.xml.transform.*,
  org.w3c.dom.*
-Ignored-Existing-Headers: 
- Bnd-LastModified,
- Import-Package,
- Export-Package,
- Tool
