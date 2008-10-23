@@ -14,7 +14,9 @@
 	is to put xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
 -->
 
-<project name="spring-core" default="usage" basedir="." xmlns:maven="antlib:org.apache.maven.artifact.ant">
+<project name="spring-core" default="usage" basedir="." xmlns:maven="antlib:org.apache.maven.artifact.ant" 
+	xmlns:bundlor="antlib:com.springsource.bundlor.ant">
+
 
 	<property file="build.properties"/>
 	<property file="project.properties"/>
@@ -40,12 +42,20 @@
 		</and>
 	</condition>
 
+	<condition property="bundlor.available">
+		<and>
+			<istrue value="${tiger.available}"/>
+			<available file="${lib.dir}/bundlor" type="dir"/>
+		</and>
+	</condition>
+
 
 	<path id="all-libs">
 
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
 			<exclude name="aspectj/aspectjtools.jar"/>
+			<exclude name="bundlor/*.jar"/>
 			<exclude name="junit/*.jar"/>
 		</fileset>
 
@@ -663,6 +673,81 @@
 	</target>
 
 
+	<target name="bundlor" depends="modulejars,weavingjars" description="Run jars through Bundlor" if="bundlor.available">
+		<path id="bundlor-classpath">
+
+			<fileset dir="${lib.dir}/bundlor">
+				<include name="**/*.jar"/>
+			</fileset>
+
+		</path>
+		
+		<taskdef resource="com/springsource/bundlor/ant/antlib.xml" uri="antlib:com.springsource.bundlor.ant"
+				classpathref="bundlor-classpath"/>
+		
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-aop.jar" outputPath="${dist.dir}/modules/spring-aop.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.aop.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/weaving/spring-aspects.jar" outputPath="${dist.dir}/weaving/spring-aspects.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.aspects.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-beans.jar" outputPath="${dist.dir}/modules/spring-beans.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.beans.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-context.jar" outputPath="${dist.dir}/modules/spring-context.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.context.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-context-support.jar" outputPath="${dist.dir}/modules/spring-context-support.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.context.support.mf"/>
+				
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-core.jar" outputPath="${dist.dir}/modules/spring-core.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.core.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-jdbc.jar" outputPath="${dist.dir}/modules/spring-jdbc.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.jdbc.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-jms.jar" outputPath="${dist.dir}/modules/spring-jms.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.jms.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-orm.jar" outputPath="${dist.dir}/modules/spring-orm.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.orm.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-test.jar" outputPath="${dist.dir}/modules/spring-test.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.test.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-tx.jar" outputPath="${dist.dir}/modules/spring-tx.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.transaction.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-web.jar" outputPath="${dist.dir}/modules/spring-web.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-webmvc-portlet.jar" outputPath="${dist.dir}/modules/spring-webmvc-portlet.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.portlet.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-webmvc.jar" outputPath="${dist.dir}/modules/spring-webmvc.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.servlet.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-webmvc-struts.jar" outputPath="${dist.dir}/modules/spring-webmvc-struts.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.struts.mf"/>
+
+	</target>
+
+
 	<target name="modulesources" depends="initdist" description="Create module-specific source JAR files">
 		<delete>
 			<fileset dir="${dist.dir}">
@@ -1014,7 +1099,7 @@
 	</target>
 
 
-	<target name="alljars" depends="fulljar,fullsources,modulejars,modulesources,weavingjars,weavingsources"
+	<target name="alljars" depends="fulljar,fullsources,modulejars,modulesources,weavingjars,weavingsources,bundlor"
 			description="Create all JAR files"/>
 
 
