@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.5.6 (July 2008)
------------------------------------------------
+THE SPRING FRAMEWORK, release 2.5.6 (October 2008)
+--------------------------------------------------
 http://www.springframework.org
 
 
@@ -112,7 +112,7 @@ MODULE JARS (dist/modules):
 - Contents: AOP framework
 - Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-beans" (~475 KB)
+* "spring-beans" (~480 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
@@ -128,15 +128,15 @@ MODULE JARS (dist/modules):
 - Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
 - Dependencies: Commons Logging, (Commons Attributes)
 
-* "spring-jdbc" (~320 KB)
+* "spring-jdbc" (~330 KB)
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
-* "spring-jms" (~185 KB)
+* "spring-jms" (~190 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-tx, JMS API
 
-* "spring-orm" (~365 KB)
+* "spring-orm" (~370 KB)
 - Contents: JDO support, JPA support, Hibernate support, TopLink support, iBATIS support
 - Dependencies: spring-jdbc, (spring-web)
 
@@ -160,7 +160,7 @@ MODULE JARS (dist/modules):
 - Contents: framework portlets, portlet MVC framework, portlet controllers
 - Dependencies: spring-web, Portlet API, (spring-webmvc)
 
-* "spring-webmvc-struts" (~40 KB)
+* "spring-webmvc-struts" (~35 KB)
 - Contents: Struts 1.x action support, Tiles 1.x view support
 - Dependencies: spring-web, Struts API, (spring-webmvc)
 
