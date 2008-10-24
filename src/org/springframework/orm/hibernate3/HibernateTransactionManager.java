@@ -298,16 +298,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Set whether to perform an early flush before proceeding with a commit.
 	 * <p>Default is "false", performing an implicit flush as part of the actual
-	 * commit step. Switch this to "true" in order to enforce an explicit flush
-	 * at the end of each successfully passed transaction boundary.
-	 * <p>This can be used to automatically make Hibernate-driven database changes
-	 * visible at the end of inner transactions, e.g. in order to have JDBC access
-	 * code operating on the flushed data later on in the same transaction.
+	 * commit step. Switch this to "true" in order to enforce an explicit early
+	 * flush right <i>before</i> the actual commit step.
 	 * <p>An early flush happens before the before-commit synchronization phase,
 	 * making flushed state visible to <code>beforeCommit</code> callbacks of registered
 	 * {@link org.springframework.transaction.support.TransactionSynchronization}
 	 * objects. Such explicit flush behavior is consistent with Spring-driven
-	 * flushing in a JTA transaction environment, so may also be enforced for
+	 * flushing in a JTA transaction environment, so may also get enforced for
 	 * consistency with JTA transaction behavior.
 	 * @see #prepareForCommit
 	 */
@@ -630,7 +627,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	protected void prepareForCommit(DefaultTransactionStatus status) {
-		if (this.earlyFlushBeforeCommit) {
+		if (this.earlyFlushBeforeCommit && status.isNewTransaction()) {
 			HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 			Session session = txObject.getSessionHolder().getSession();
 			if (!session.getFlushMode().lessThan(FlushMode.COMMIT)) {
@@ -642,9 +639,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					throw convertHibernateAccessException(ex);
 				}
 				finally {
-					if (status.isNewTransaction()) {
-						session.setFlushMode(FlushMode.NEVER);
-					}
+					session.setFlushMode(FlushMode.NEVER);
 				}
 			}
 		}
