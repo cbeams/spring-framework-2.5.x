@@ -32,7 +32,7 @@ import org.springframework.validation.BindingResult;
  *
  * @author Juergen Hoeller
  * @since 2.5.6
- * @see
+ * @see org.springframework.validation.BindingResult
  */
 public class BindingAwareModelMap extends ExtendedModelMap {
 
