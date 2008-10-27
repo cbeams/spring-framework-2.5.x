@@ -67,8 +67,8 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>When using persistent jobs, it is strongly recommended to perform all
  * operations on the Scheduler within Spring-managed (or plain JTA) transactions.
- * Else, database locking will not properly work and might even break.
- * (See {@link #setDataSource setDataSource} javadoc for details.)
+ * Otherwise, database locking will not properly work and might even break.
+ * (See the {@link #setDataSource setDataSource} javadoc for details.)
  *
  * <p>The preferred way to achieve transactional execution is to demarcate
  * declarative transactions at the business facade level, which will
@@ -81,11 +81,14 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
+ * @see #setConfigLocation
+ * @see #setQuartzProperties
  * @see #setDataSource
+ * @see #setJobFactory
  * @see org.quartz.Scheduler
  * @see org.quartz.SchedulerFactory
  * @see org.quartz.impl.StdSchedulerFactory
- * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
+ * @see org.quartz.Job
  */
 public class SchedulerFactoryBean extends SchedulerAccessor
     implements FactoryBean, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
@@ -575,7 +578,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 							"in Quartz SchedulerRepository. Cannot create a new Spring-managed Scheduler of the same name!");
 				}
 				if (!this.exposeSchedulerInRepository) {
-					// Need to remove it in this case, since Quartz shares the Scheduler instance by default!
+					// Need to explicitly remove it if not intended for exposure,
+					// since Quartz shares the Scheduler instance by default!
 					SchedulerRepository.getInstance().remove(newScheduler.getSchedulerName());
 				}
 				return newScheduler;

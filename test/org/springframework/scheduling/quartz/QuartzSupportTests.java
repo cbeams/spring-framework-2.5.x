@@ -893,6 +893,21 @@ public class QuartzSupportTests extends TestCase {
 			assertNotSame(scheduler1, scheduler2);
 			assertEquals("quartz1", scheduler1.getSchedulerName());
 			assertEquals("quartz2", scheduler2.getSchedulerName());
+
+			ClassPathXmlApplicationContext ctx2 =
+					new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
+			try {
+				Scheduler scheduler1a = (Scheduler) ctx2.getBean("scheduler1");
+				Scheduler scheduler2a = (Scheduler) ctx2.getBean("scheduler2");
+				assertNotSame(scheduler1a, scheduler2a);
+				assertNotSame(scheduler1a, scheduler1);
+				assertNotSame(scheduler2a, scheduler2);
+				assertEquals("quartz1", scheduler1a.getSchedulerName());
+				assertEquals("quartz2", scheduler2a.getSchedulerName());
+			}
+			finally {
+				ctx2.close();
+			}
 		}
 		finally {
 			ctx.close();
