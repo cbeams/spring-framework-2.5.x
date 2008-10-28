@@ -3,4 +3,4 @@ Bundle-Name: Spring Instrument Classloading
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Template: 
- org.apache.catalina.*;version="[6.0.16, 7.0.0)"
+ org.apache.catalina.*;version="[5.5.23, 7.0.0)"

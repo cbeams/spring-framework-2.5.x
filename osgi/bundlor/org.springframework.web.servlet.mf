@@ -3,7 +3,7 @@ Bundle-Name: Spring Web Servlet
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Package: 
- org.springframework.stereotype;version="[2.5.6, 2.5.6]",
+ org.springframework.stereotype;version="[2.5.6, 2.5.6]";resolution:=optional,
  org.apache.tiles.definition;version="[2.0.5.osgi, 3.0.0)";resolution:=optional,
  org.apache.tiles.jsp.context;version="[2.0.5, 3.0.0)";resolution:=optional
 Import-Template: 
@@ -11,14 +11,16 @@ Import-Template:
  freemarker.*;version="[2.3.12, 3.0.0)";resolution:=optional,
  javax.servlet;version="[2.4.0, 3.0.0)",
  javax.servlet.http;version="[2.4.0, 3.0.0)",
- javax.servlet.jsp;version="[2.1.0, 3.0.0)",
- javax.servlet.jsp.jstl.*;version="[1.1.2, 2.0.0)",
- javax.servlet.jsp.tagext;version="[2.1.0, 3.0.0)",
+ javax.servlet.jsp;version="[2.1.0, 3.0.0)";resolution:=optional,
+ javax.servlet.jsp.jstl.*;version="[1.1.2, 2.0.0)";resolution:=optional,
+ javax.servlet.jsp.tagext;version="[2.1.0, 3.0.0)";resolution:=optional,
+ javax.sql.*;resolution:=optional,
+ javax.xml.transform.*;resolution:=optional,
  jxl.*;version="[2.6.6, 3.0.0)";resolution:=optional,
  net.sf.jasperreports.*;version="[2.0.5, 3.0.0)";resolution:=optional,
  org.apache.commons.attributes.*;version="[2.2.0, 3.0.0)";resolution:=optional,
  org.apache.commons.fileupload.*;version="[1.2.0, 2.0.0)";resolution:=optional,
- org.apache.commons.logging.*;version="[1.1.1, 2.0.0)";resolution:=optional,
+ org.apache.commons.logging.*;version="[1.0.4, 2.0.0)",
  org.apache.poi.*;version="[3.0.2.FINAL, 4.0.0)";resolution:=optional,
  org.apache.tiles;version="[2.0.5, 3.0.0)";resolution:=optional,
  org.apache.tiles.access;version="[2.0.5, 3.0.0)";resolution:=optional,
@@ -35,13 +37,15 @@ Import-Template:
  org.apache.velocity.runtime.*;version="[1.5.0, 2.0.0)";resolution:=optional,
  org.apache.velocity.tools.generic;version="[1.4.0, 2.0.0)";resolution:=optional,
  org.apache.velocity.tools.view.*;version="[1.4.0, 2.0.0)";resolution:=optional,
- org.springframework.beans.*;version="[2.5.6, 2.5.6]",
- org.springframework.context.*;version="[2.5.6, 2.5.6]",
- org.springframework.core.*;version="[2.5.6, 2.5.6]",
- org.springframework.ui.*;version="[2.5.6, 2.5.6]",
- org.springframework.util.*;version="[2.5.6, 2.5.6]",
- org.springframework.validation.*;version="[2.5.6, 2.5.6]",
- org.springframework.web.*;version="[2.5.6, 2.5.6]"
+ org.springframework.beans.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.context.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.core.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.ui.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.util.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.validation.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.web.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.w3c.dom.*;resolution:=optional,
+ org.xml.sax.*;resolution:=optional
 Unversioned-Imports: 
  javax.sql.*,
  javax.xml.transform.*,
