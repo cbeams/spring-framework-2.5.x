@@ -10,7 +10,7 @@
 
 	<context:annotation-config/>
 
-	<context:spring-configured/>
+	<!-- <context:spring-configured/> TODO -->
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
 				depends-on="org.springframework.context.config.internalBeanConfigurerAspect">
