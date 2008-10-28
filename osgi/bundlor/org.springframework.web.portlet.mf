@@ -15,6 +15,6 @@ Import-Template:
  org.springframework.util.*;version="[2.5.6, 2.5.6]";resolution:=optional,
  org.springframework.validation.*;version="[2.5.6, 2.5.6]";resolution:=optional,
  org.springframework.web.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.xml.sax.*;resolution:=optional
+ *;resolution:=optional
 Unversioned-Imports: 
- org.xml.sax.*
+ *

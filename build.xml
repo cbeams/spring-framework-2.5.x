@@ -753,6 +753,10 @@
 				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
 				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.struts.mf"/>
 
+		<bundlor:bundlor bundlePath="${dist.dir}/spring.jar" outputPath="${dist.dir}/spring.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.mf"/>
+
 	</target>
 
 
