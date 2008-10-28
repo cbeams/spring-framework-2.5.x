@@ -185,7 +185,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
-	 * @param beanPostProcessor the bean processor to register
+	 * <p>Note: Post-processors submitted here will be applied in the order of
+	 * registration; any ordering semantics expressed through implementing the
+	 * {@link org.springframework.core.Ordered} interface will be ignored. Note
+	 * that autodetected post-processors (e.g. as beans in an ApplicationContext)
+	 * will always be applied after programmatically registered ones.
+	 * @param beanPostProcessor the post-processor to register
 	 */
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 
