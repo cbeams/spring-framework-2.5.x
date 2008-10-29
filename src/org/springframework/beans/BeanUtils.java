@@ -360,7 +360,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding editor, or <code>null</code> if none found
 	 */
 	public static PropertyEditor findEditorByConvention(Class targetType) {
-		if (targetType == null || unknownEditorTypes.containsKey(targetType)) {
+		if (targetType == null || targetType.isArray() || unknownEditorTypes.containsKey(targetType)) {
 			return null;
 		}
 		ClassLoader cl = targetType.getClassLoader();
