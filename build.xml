@@ -685,7 +685,7 @@
 		<taskdef resource="com/springsource/bundlor/ant/antlib.xml" uri="antlib:com.springsource.bundlor.ant"
 				classpathref="bundlor-classpath"/>
 		
-		<bundlor:bundlor bundlePath="${dist.dir}/weaving/spring-agent.jar" outputPath="${dist.dir}/modules/spring-agent.jar"
+		<bundlor:bundlor bundlePath="${dist.dir}/weaving/spring-agent.jar" outputPath="${dist.dir}/weaving/spring-agent.jar"
 				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
 				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.instrument.mf"/>
 
