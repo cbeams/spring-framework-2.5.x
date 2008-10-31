@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5.6 (2008-10-27)
+Changes in version 2.5.6 (2008-10-31)
 -------------------------------------
 
 General
@@ -20,6 +20,7 @@ Package org.springframework.aop
 * "bean" pointcut matches exposed FactoryBean products only; "&..." syntax supported for matching FactoryBean itself
 
 Package org.springframework.beans
+* BeanUtils skips conventional editor check for array classes (in order to not break AspectJ weaving)
 * BeanWrapper's introspection resolves bridge methods to find setter method for getter method with covariant return type
 * TypeMismatchException message differentiates between editor with inappropriate value returned versus no editor at all
 * containing bean definition is exposed to ParserContext for BeanDefinitionDecorators as well
@@ -107,7 +108,7 @@ Package org.springframework.orm
 * HibernateTemplate detects Spring-managed transactional Session even with SessionFactory proxy and allowCreate=false
 * HibernateTemplate's "loadAll" operation selects distinct root entities (avoiding duplicate entries in result list)
 * HibernateTemplate translates Hibernate's DataException into a Spring DataIntegrityViolationException (for consistency)
-* fixed HibernateTransactionManager's "earlyFlushBeforeCommit" feature to not switch to FlushMode.NEVER too early
+* fixed HibernateTransactionManager's "earlyFlushBeforeCommit" feature to apply to the outermost transaction only
 * added "packagesToScan" property to Hibernate AnnotationSessionFactoryBean, for autodetection of @Entity classes
 * HibernateJpaDialect checks "EntityManager.getDelegate()" as well to find Hibernate Session (for Seam compatibility)
 * added "persistenceXmlLocation" property to DefaultPersistenceUnitManager, as alternative to "persistenceXmlLocations"
