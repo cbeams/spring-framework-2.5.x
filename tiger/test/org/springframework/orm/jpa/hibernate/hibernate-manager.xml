@@ -12,8 +12,7 @@
 
 	<!-- <context:spring-configured/> TODO -->
 
-	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-				depends-on="org.springframework.context.config.internalBeanConfigurerAspect">
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="persistenceXmlLocation" value="org/springframework/orm/jpa/domain/persistence-context.xml"/>
 		<property name="dataSource" ref="dataSource"/>
 		<property name="jpaVendorAdapter">
