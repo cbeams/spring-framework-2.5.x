@@ -61,7 +61,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	public Map getParameterMap() {
-		return getExternalContext().getRequestParameterMap();
+		return getExternalContext().getRequestParameterValuesMap();
 	}
 
 	public Locale getLocale() {
