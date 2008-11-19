@@ -113,7 +113,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	}
 
 	public String[] getAttributeNames(int scope) {
-		return StringUtils.toStringArray(getAttributeMap(scope).entrySet());
+		return StringUtils.toStringArray(getAttributeMap(scope).keySet());
 	}
 
 	public void registerDestructionCallback(String name, Runnable callback, int scope) {
