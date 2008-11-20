@@ -562,9 +562,13 @@ public abstract class WebUtils {
 	 */
 	public static String findParameterValue(Map parameters, String name) {
 		// First try to get it as a normal name=value parameter
-		String value = (String) parameters.get(name);
-		if (value != null) {
-			return value;
+		Object value = parameters.get(name);
+		if (value instanceof String[]) {
+			String[] values = (String[]) value;
+			return (values.length > 0 ? values[0] : null);
+		}
+		else if (value != null) {
+			return value.toString();
 		}
 		// If no value yet, try to get it as a name_value=xyz parameter
 		String prefix = name + "_";
