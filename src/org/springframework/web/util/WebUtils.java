@@ -469,6 +469,7 @@ public abstract class WebUtils {
 	 */
 	public static void exposeRequestAttributes(ServletRequest request, Map attributes) {
 		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(attributes, "Attributes Map must not be null");
 		Iterator it = attributes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -347,16 +347,17 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 				}
 			}
 		}
-		catch (SQLException se) {
-			logger.warn("Error while retreiving metadata for procedure columns: " + se.getMessage());
+		catch (SQLException ex) {
+			logger.warn("Error while retrieving metadata for procedure columns: " + ex);
 		}
 		finally {
 			try {
-				if (procs != null)
+				if (procs != null) {
 					procs.close();
+				}
 			}
-			catch (SQLException se) {
-				logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());
+			catch (SQLException ex) {
+				logger.warn("Problem closing ResultSet for procedure column metadata: " + ex);
 			}
 		}
 	}

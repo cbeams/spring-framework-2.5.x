@@ -198,6 +198,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 		}
 		return null;
 	}
+
 	/**
 	 * Check whether the given FieldError matches the given field.
 	 * @param field the field that we are looking up FieldErrors for

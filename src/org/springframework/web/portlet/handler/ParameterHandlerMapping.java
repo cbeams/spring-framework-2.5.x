@@ -94,7 +94,7 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 	}
 
 	/**
-	 * Register all handlers specified in the Portlet mode map for the corresponding modes.
+	 * Register all handlers for the specified parameters.
 	 * @param parameterMap Map with parameter names as keys and handler beans or bean names as values
 	 * @throws BeansException if the handler couldn't be registered
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ public class JdbcTestUtils {
 
 	/**
 	 * Read a script from the LineNumberReaded and build a String containing the lines.
-	 * 
 	 * @param lineNumberReader the <code>LineNumberReader</> containing the script to be processed
 	 * @return <code>String</code> containing the script lines
 	 * @throws IOException
@@ -62,10 +61,9 @@ public class JdbcTestUtils {
 	public static boolean containsSqlScriptDelimiters(String script, char delim) {
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
-
 		for (int i = 0; i < script.length(); i++) {
 			if (content[i] == '\'') {
-				inLiteral = inLiteral ? false : true;
+				inLiteral = !inLiteral;
 			}
 			if (content[i] == delim && !inLiteral) {
 				return true;
@@ -85,10 +83,9 @@ public class JdbcTestUtils {
 		StringBuffer sb = new StringBuffer();
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
-
 		for (int i = 0; i < script.length(); i++) {
 			if (content[i] == '\'') {
-				inLiteral = inLiteral ? false : true;
+				inLiteral = !inLiteral;
 			}
 			if (content[i] == delim && !inLiteral) {
 				if (sb.length() > 0) {

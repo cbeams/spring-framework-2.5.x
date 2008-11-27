@@ -278,7 +278,7 @@ public abstract class PortletUtils {
 	 */
 	public static void exposeRequestAttributes(PortletRequest request, Map attributes) {
 		Assert.notNull(request, "Request must not be null");
-		Assert.notNull(attributes, "attributes Map must not be null");
+		Assert.notNull(attributes, "Attributes Map must not be null");
 		Iterator it = attributes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,10 @@ public class MockPortalContext implements PortalContext {
 
 	public String getPortalInfo() {
 		return "MockPortal/1.0";
+	}
+
+	public void setProperty(String name, String value) {
+		this.properties.setProperty(name, value);
 	}
 
 	public String getProperty(String name) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,12 @@ import java.util.Set;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * <p>
  * A collection of assertions intended to simplify testing scenarios
  * dealing with Spring Web MVC
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.
- * Intended for use with JUnit 4 and TestNG.
- * </p>
- * <p>
+ *
+ * <p>Intended for use with JUnit 4 and TestNG.
  * All <code>assert*()</code> methods throw {@link AssertionError}s.
- * </p>
  *
  * @author Sam Brannen
  * @author Alef Arendsen
@@ -49,7 +46,6 @@ public abstract class ModelAndViewAssert {
 	 * Checks whether the model value under the given <code>modelName</code>
 	 * exists and checks it type, based on the <code>expectedType</code>. If
 	 * the model entry exists and the type matches, the model value is returned.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -61,17 +57,16 @@ public abstract class ModelAndViewAssert {
 
 		assertCondition(mav != null, "ModelAndView is null");
 		assertCondition(mav.getModel() != null, "Model is null");
-		final Object obj = mav.getModel().get(modelName);
+		Object obj = mav.getModel().get(modelName);
 		assertCondition(obj != null, "Model attribute with name '" + modelName + "' is null");
 
-		assertCondition(expectedType.isAssignableFrom(obj.getClass()), "Model attribute is not of expected type '"
-				+ expectedType.getName() + "' but rather of type '" + obj.getClass().getName() + "'");
+		assertCondition(expectedType.isAssignableFrom(obj.getClass()), "Model attribute is not of expected type '" +
+				expectedType.getName() + "' but rather of type '" + obj.getClass().getName() + "'");
 		return obj;
 	}
 
 	/**
 	 * Compare each individual entry in a list, without first sorting the lists.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -90,13 +85,11 @@ public abstract class ModelAndViewAssert {
 
 	/**
 	 * Assert whether or not a model attribute is available.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
 	 */
 	public static void assertModelAttributeAvailable(ModelAndView mav, Object modelName) throws AssertionError {
-
 		assertCondition(mav != null, "ModelAndView is null");
 		assertCondition(mav.getModel() != null, "Model is null");
 		assertCondition(mav.getModel().containsKey(modelName), "Model attribute with name '" + modelName
@@ -106,7 +99,6 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Compare a given <code>expectedValue</code> to the value from the model
 	 * bound under the given <code>modelName</code>.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -124,12 +116,10 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Inspect the <code>expectedModel</code> to see if all elements in the
 	 * model appear and are equal.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedModel the expected model
 	 */
 	public static void assertModelAttributeValues(ModelAndView mav, Map expectedModel) throws AssertionError {
-
 		assertCondition(mav != null, "ModelAndView is null");
 		assertCondition(mav.getModel() != null, "Model is null");
 
@@ -160,7 +150,6 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Compare each individual entry in a list after having sorted both lists
 	 * (optionally using a comparator).
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -194,12 +183,10 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Check to see if the view name in the ModelAndView matches the given
 	 * <code>expectedName</code>.
-	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedName the name of the model value
 	 */
 	public static void assertViewName(ModelAndView mav, String expectedName) throws AssertionError {
-
 		assertCondition(mav != null, "ModelAndView is null");
 		assertCondition(expectedName.equals(mav.getViewName()), "View name is not equal to '" + expectedName
 				+ "' but was '" + mav.getViewName() + "'");
@@ -209,12 +196,10 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Fails by throwing an <code>AssertionError</code> with the supplied
 	 * <code>message</code>.
-	 *
 	 * @param message the exception message to use
 	 * @see #assertCondition(boolean,String)
 	 */
 	private static void fail(String message) throws AssertionError {
-
 		throw new AssertionError(message);
 	}
 
@@ -222,21 +207,18 @@ public abstract class ModelAndViewAssert {
 	 * Assert the provided boolean <code>condition</code>, throwing
 	 * <code>AssertionError</code> with the supplied <code>message</code> if
 	 * the test result is <code>false</code>.
-	 *
 	 * @param condition a boolean expression
 	 * @param message the exception message to use if the assertion fails
 	 * @throws AssertionError if condition is <code>false</code>
 	 * @see #fail(String)
 	 */
 	private static void assertCondition(boolean condition, String message) throws AssertionError {
-
 		if (!condition) {
 			fail(message);
 		}
 	}
 
 	private static void appendNonMatchingSetsErrorMessage(Set assertionSet, Set incorrectSet, StringBuffer buf) {
-
 		Set tempSet = new HashSet();
 		tempSet.addAll(incorrectSet);
 		tempSet.removeAll(assertionSet);

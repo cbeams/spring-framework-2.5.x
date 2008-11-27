@@ -277,7 +277,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	protected static final Log logger = LogFactory.getLog(SingletonBeanFactoryLocator.class);
 
 	/** The keyed BeanFactory instances */
-	private static Map instances = new HashMap();
+	private static final Map instances = new HashMap();
 
 
 	/**

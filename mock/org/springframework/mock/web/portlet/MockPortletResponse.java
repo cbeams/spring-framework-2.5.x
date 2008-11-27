@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class MockPortletResponse implements PortletResponse {
 
 	private final PortalContext portalContext;
 
-	private final Map properties = new LinkedHashMap(16);
+	private final Map properties = new LinkedHashMap();
 
 
 	/**
@@ -61,7 +61,7 @@ public class MockPortletResponse implements PortletResponse {
 	 * defining the supported PortletModes and WindowStates.
 	 */
 	public PortalContext getPortalContext() {
-		return portalContext;
+		return this.portalContext;
 	}
 
 

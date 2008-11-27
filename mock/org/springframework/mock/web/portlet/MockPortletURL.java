@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class MockPortletURL implements PortletURL {
 
 	private PortletMode portletMode;
 
-	private final Map parameters = new LinkedHashMap(16);
+	private final Map parameters = new LinkedHashMap();
 
 	private boolean secure = false;
 
@@ -142,26 +142,7 @@ public class MockPortletURL implements PortletURL {
 	}
 
 	public boolean isSecure() {
-		return secure;
-	}
-
-	public String toString() {
-		StringBuffer query = new StringBuffer();
-		query.append(encodeParameter("urlType", this.urlType));
-		if (this.windowState != null) {
-			query.append(";" + encodeParameter("windowState", this.windowState.toString()));
-		}
-		if (this.portletMode != null) {
-			query.append(";" + encodeParameter("portletMode", this.portletMode.toString()));
-		}
-		for (Iterator it = this.parameters.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String name = (String) entry.getKey();
-			String[] values = (String[]) entry.getValue();
-			query.append(";" + encodeParameter("param_" + name, values));
-		}
-		return (this.secure ? "https:" : "http:") +
-				"//localhost/mockportlet?" + query.toString();
+		return this.secure;
 	}
 
 
@@ -177,17 +158,37 @@ public class MockPortletURL implements PortletURL {
 
 	private String encodeParameter(String name, String[] values) {
 		try {
-			StringBuffer buf = new StringBuffer();
+			StringBuffer sb = new StringBuffer();
 			for (int i = 0, n = values.length; i < n; i++) {
-				buf.append((i > 0 ? ";" : "") +
+				sb.append((i > 0 ? ";" : "") +
 						URLEncoder.encode(name, ENCODING) + "=" +
 						URLEncoder.encode(values[i], ENCODING));
 			}
-			return buf.toString();
+			return sb.toString();
 		}
 		catch (UnsupportedEncodingException ex) {
 			return null;
 		}
+	}
+
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(encodeParameter("urlType", this.urlType));
+		if (this.windowState != null) {
+			sb.append(";" + encodeParameter("windowState", this.windowState.toString()));
+		}
+		if (this.portletMode != null) {
+			sb.append(";" + encodeParameter("portletMode", this.portletMode.toString()));
+		}
+		for (Iterator it = this.parameters.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String name = (String) entry.getKey();
+			String[] values = (String[]) entry.getValue();
+			sb.append(";" + encodeParameter("param_" + name, values));
+		}
+		return (this.secure ? "https:" : "http:") +
+				"//localhost/mockportlet?" + sb.toString();
 	}
 
 }

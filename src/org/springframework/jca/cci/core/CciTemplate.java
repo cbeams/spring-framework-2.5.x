@@ -378,7 +378,7 @@ public class CciTemplate implements CciOperations {
 	 */
 	protected RecordFactory getRecordFactory(ConnectionFactory connectionFactory) throws ResourceException {
 		try {
-			return getConnectionFactory().getRecordFactory();
+			return connectionFactory.getRecordFactory();
 		}
 		catch (NotSupportedException ex) {
 			return new NotSupportedRecordFactory();
