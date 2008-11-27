@@ -11,7 +11,7 @@ Import-Template:
  freemarker.*;version="[2.3.12, 3.0.0)";resolution:=optional,
  javax.servlet;version="[2.4.0, 3.0.0)",
  javax.servlet.http;version="[2.4.0, 3.0.0)",
- javax.servlet.jsp;version="[2.1.0, 3.0.0)";resolution:=optional,
+ javax.servlet.jsp;version="[2.0.0, 3.0.0)";resolution:=optional,
  javax.servlet.jsp.jstl.*;version="[1.1.2, 2.0.0)";resolution:=optional,
  javax.servlet.jsp.tagext;version="[2.1.0, 3.0.0)";resolution:=optional,
  jxl.*;version="[2.6.6, 3.0.0)";resolution:=optional,
