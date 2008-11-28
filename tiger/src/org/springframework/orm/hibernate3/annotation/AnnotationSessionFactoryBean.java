@@ -78,7 +78,7 @@ import org.springframework.util.ClassUtils;
  */
 public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implements ResourceLoaderAware {
 
-	private static final String RESOURCE_PATTERN = "**/*.class";
+	private static final String RESOURCE_PATTERN = "/**/*.class";
 
 
 	private Class[] annotatedClasses;
