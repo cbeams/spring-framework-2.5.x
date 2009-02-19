@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in 2.5.x maintenance branch
+-----------------------------------
+
+Package org.springframework.jdbc
+* added sort to all error code categories for SQLErrorCodes (SPR-5272)
+
+
 Changes in version 2.5.6 (2008-10-31)
 -------------------------------------
 
