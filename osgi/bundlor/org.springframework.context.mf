@@ -4,7 +4,7 @@ Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Package: 
  javax.persistence;version="[1.0.0, 2.0.0)";resolution:=optional,
- org.springframework.orm.jpa.support;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.orm.jpa.support;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
  com.ibm.websphere.management;resolution:=optional
 Import-Template: 
  bsh.*;version="[2.0.0.b4, 3.0.0)";resolution:=optional,
@@ -24,12 +24,12 @@ Import-Template:
  org.aspectj.weaver.*;version="[1.5.4, 2.0.0)";resolution:=optional,
  org.codehaus.groovy.*;version="[1.5.1, 2.0.0)";resolution:=optional,
  org.jruby.*;version="[1.1.0, 2.0.0)";resolution:=optional,
- org.springframework.aop.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.beans.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.core.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.instrument.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.metadata.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.util.*;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.aop.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.beans.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.core.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.instrument.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.metadata.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.util.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
  *;resolution:=optional,
 Unversioned-Imports: 
  *

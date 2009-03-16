@@ -15,12 +15,12 @@ Import-Template:
  javax.transaction.*;version="[1.0.1, 2.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.0.4, 2.0.0)",
  org.enhydra.jdbc.*;version="[1.5.0, 2.0.0)";resolution:=optional,
- org.springframework.beans.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.core.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.dao.*;version="[2.5.6, 2.5.6]",
- org.springframework.jndi.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.transaction.*;version="[2.5.6, 2.5.6]";resolution:=optional,
- org.springframework.util;version="[2.5.6, 2.5.6]";resolution:=optional,
+ org.springframework.beans.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.core.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.dao.*;version="[2.5.6, 2.5.6.PR01]",
+ org.springframework.jndi.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.transaction.*;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
+ org.springframework.util;version="[2.5.6, 2.5.6.PR01]";resolution:=optional,
  *;resolution:=optional
 Unversioned-Imports: 
  *
