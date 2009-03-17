@@ -17,6 +17,7 @@
 package org.springframework.jdbc.support;
 
 import org.springframework.util.StringUtils;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
  * JavaBean for holding JDBC error codes for a particular database.
@@ -41,6 +42,8 @@ public class SQLErrorCodes {
 
 	private String[] invalidResultSetAccessCodes = new String[0];
 
+	private String[] duplicateKeyCodes = new String[0];
+
 	private String[] dataIntegrityViolationCodes = new String[0];
 
 	private String[] permissionDeniedCodes = new String[0];
@@ -56,7 +59,6 @@ public class SQLErrorCodes {
 	private String[] cannotSerializeTransactionCodes = new String[0];
 
 	private CustomSQLErrorCodesTranslation[] customTranslations;
-
 
 	/**
 	 * Set this property if the database name contains spaces,
@@ -95,7 +97,6 @@ public class SQLErrorCodes {
 		return this.useSqlStateForTranslation;
 	}
 
-
 	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
 		this.badSqlGrammarCodes = StringUtils.sortStringArray(badSqlGrammarCodes);
 	}
@@ -110,6 +111,14 @@ public class SQLErrorCodes {
 
 	public String[] getInvalidResultSetAccessCodes() {
 		return this.invalidResultSetAccessCodes;
+	}
+
+	public String[] getDuplicateKeyCodes() {
+		return duplicateKeyCodes;
+	}
+
+	public void setDuplicateKeyCodes(String[] duplicateKeyCodes) {
+		this.duplicateKeyCodes = duplicateKeyCodes;
 	}
 
 	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
