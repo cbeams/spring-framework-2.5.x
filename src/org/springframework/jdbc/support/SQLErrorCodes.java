@@ -38,6 +38,8 @@ public class SQLErrorCodes {
 
 	private boolean useSqlStateForTranslation = false;
 
+	private SQLExceptionTranslator customSqlExceptionTranslator = null;
+
 	private String[] badSqlGrammarCodes = new String[0];
 
 	private String[] invalidResultSetAccessCodes = new String[0];
@@ -95,6 +97,27 @@ public class SQLErrorCodes {
 
 	public boolean isUseSqlStateForTranslation() {
 		return this.useSqlStateForTranslation;
+	}
+
+	public SQLExceptionTranslator getCustomSqlExceptionTranslator() {
+		return customSqlExceptionTranslator;
+	}
+
+	public void setCustomSqlExceptionTranslatorClass(Class customSqlExceptionTranslatorClass) {
+		if (customSqlExceptionTranslatorClass != null) {
+			try {
+				this.customSqlExceptionTranslator =
+						(SQLExceptionTranslator) customSqlExceptionTranslatorClass.newInstance();
+			}
+			catch (InstantiationException e) {
+				throw new InvalidDataAccessResourceUsageException(
+						"Unable to instantiate " + customSqlExceptionTranslatorClass.getName(), e);
+			}
+			catch (IllegalAccessException e) {
+				throw new InvalidDataAccessResourceUsageException(
+						"Unable to instantiate " + customSqlExceptionTranslatorClass.getName(), e);
+			}
+		}
 	}
 
 	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
