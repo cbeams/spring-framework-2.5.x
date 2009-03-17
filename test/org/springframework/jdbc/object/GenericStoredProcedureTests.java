@@ -100,8 +100,8 @@ public class GenericStoredProcedureTests extends AbstractJdbcTests {
 
 		StoredProcedure adder = (StoredProcedure) bf.getBean("genericProcedure");
 		Map in = new HashMap(2);
-		in.put("amount", amount);
-		in.put("custid", custid);
+		in.put("amount", new Integer(amount));
+		in.put("custid", new Integer(custid));
 		Map out = adder.execute(in);
 		Integer id = (Integer) out.get("newid");
 		assertEquals(4, id.intValue());
