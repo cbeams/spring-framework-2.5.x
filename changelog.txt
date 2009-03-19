@@ -8,6 +8,23 @@ Changes in 2.5.x maintenance branch
 
 Package org.springframework.jdbc
 * added sort to all error code categories for SQLErrorCodes (SPR-5272)
+* added custom SQLExceptionTranslator to provide customized translation for any SQLException (SPR-4899 backport)
+* added a DuplicatKeyException catagory for SQLException translation (SPR-5125 backport)
+* added a concrete GenericSqlQuery class to make it possible to configure in application context (SPR-3986 backport)
+* added a concrete GenericStoredProcedure class to make it possible to configure using application context (SPR-3987 backport)
+
+Package org.springframework.jms
+* fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
+* fixed MessageListenerAdapter's "getSubscriptionName()" to work without delegate as well (SPR-5309 backport)
+
+Package org.springframework.orm
+* AnnotationSessionFactoryBean now properly scans subpackages as well (SPR-5324)
+
+Package org.springframework.remoting
+* fixed HTTP invoker to support resolution of multi-level primitive array classes again (SPR-5473 backport)
+
+Package org.springframework.transaction
+* WebSphereUowTransactionManager preserves original exception in case of rollback (SPR-5270 backport)
 
 
 Changes in version 2.5.6 (2008-10-31)
