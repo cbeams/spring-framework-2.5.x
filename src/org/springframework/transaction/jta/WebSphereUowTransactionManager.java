@@ -37,6 +37,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * WebSphere-specific PlatformTransactionManager implementation that delegates
@@ -288,6 +289,8 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 		private Object result;
 
+		private Throwable exception;
+
 		public UOWActionAdapter(TransactionDefinition definition, TransactionCallback callback,
 				boolean actualTransaction, boolean newTransaction, boolean newSynchronization, boolean debug) {
 			this.definition = definition;
@@ -306,6 +309,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 				this.result = this.callback.doInTransaction(status);
 				triggerBeforeCommit(status);
 			}
+			catch (Throwable ex) {
+				this.exception = ex;
+			}
 			finally {
 				if (status.isLocalRollbackOnly()) {
 					if (status.isDebug()) {
@@ -323,6 +329,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 		}
 
 		public Object getResult() {
+			if (this.exception != null) {
+				ReflectionUtils.rethrowRuntimeException(this.exception);
+			}
 			return this.result;
 		}
 	}
