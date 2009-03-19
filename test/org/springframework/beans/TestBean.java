@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	private String[] stringArray;
 
 	private Integer[] someIntegerArray;
+
+	private Integer[][] nestedIntegerArray;
+
+	private int[] someIntArray;
+
+	private int[][] nestedIntArray;
 
 	private Date date = new Date();
 
@@ -246,6 +252,30 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someIntegerArray = someIntegerArray;
 	}
 
+	public Integer[][] getNestedIntegerArray() {
+		return nestedIntegerArray;
+	}
+
+	public void setNestedIntegerArray(Integer[][] nestedIntegerArray) {
+		this.nestedIntegerArray = nestedIntegerArray;
+	}
+
+	public int[] getSomeIntArray() {
+		return someIntArray;
+	}
+
+	public void setSomeIntArray(int[] someIntArray) {
+		this.someIntArray = someIntArray;
+	}
+
+	public int[][] getNestedIntArray() {
+		return nestedIntArray;
+	}
+
+	public void setNestedIntArray(int[][] nestedIntArray) {
+		this.nestedIntArray = nestedIntArray;
+	}
+
 	public Date getDate() {
 		return date;
 	}
@@ -367,9 +397,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 
-	/**
-	 * @see ITestBean#exceptional(Throwable)
-	 */
 	public void exceptional(Throwable t) throws Throwable {
 		if (t != null) {
 			throw t;
@@ -379,16 +406,11 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	public void unreliableFileOperation() throws IOException {
 		throw new IOException();
 	}
-	/**
-	 * @see ITestBean#returnsThis()
-	 */
+
 	public Object returnsThis() {
 		return this;
 	}
 
-	/**
-	 * @see IOther#absquatulate()
-	 */
 	public void absquatulate() {
 	}
 

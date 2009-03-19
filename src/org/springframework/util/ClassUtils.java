@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,11 @@ public abstract class ClassUtils {
 	/** Suffix for array class names: "[]" */
 	public static final String ARRAY_SUFFIX = "[]";
 
-	/** Prefix for internal array class names: "[L" */
-	private static final String INTERNAL_ARRAY_PREFIX = "[L";
+	/** Prefix for internal array class names: "[" */
+	private static final String INTERNAL_ARRAY_PREFIX = "[";
+
+	/** Prefix for internal non-primitive array class names: "[L" */
+	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
@@ -191,16 +194,16 @@ public abstract class ClassUtils {
 		}
 
 		// "[Ljava.lang.String;" style arrays
-		int internalArrayMarker = name.indexOf(INTERNAL_ARRAY_PREFIX);
-		if (internalArrayMarker != -1 && name.endsWith(";")) {
-			String elementClassName = null;
-			if (internalArrayMarker == 0) {
-				elementClassName = name.substring(INTERNAL_ARRAY_PREFIX.length(), name.length() - 1);
-			}
-			else if (name.startsWith("[")) {
-				elementClassName = name.substring(1);
-			}
-			Class elementClass = forName(elementClassName, classLoader);
+		if (name.startsWith(NON_PRIMITIVE_ARRAY_PREFIX) && name.endsWith(";")) {
+			String elementName = name.substring(NON_PRIMITIVE_ARRAY_PREFIX.length(), name.length() - 1);
+			Class elementClass = forName(elementName, classLoader);
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+
+		// "[[I" or "[[Ljava.lang.String;" style arrays
+		if (name.startsWith(INTERNAL_ARRAY_PREFIX)) {
+			String elementName = name.substring(INTERNAL_ARRAY_PREFIX.length());
+			Class elementClass = forName(elementName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 
