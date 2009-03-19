@@ -97,12 +97,14 @@ public class HttpInvokerTests extends TestCase {
 		assertEquals(50, proxy.getAge());
 		proxy.setStringArray(new String[] {"str1", "str2"});
 		assertTrue(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray()));
-		proxy.setSomeIntegerArray(new Integer[] {1, 2, 3});
-		assertTrue(Arrays.equals(new Integer[] {1, 2, 3}, proxy.getSomeIntegerArray()));
-		proxy.setNestedIntegerArray(new Integer[][] {{1, 2, 3}, {4, 5, 6}});
+		proxy.setSomeIntegerArray(new Integer[] {new Integer(1), new Integer(2), new Integer(3)});
+		assertTrue(Arrays.equals(new Integer[] {new Integer(1), new Integer(2), new Integer(3)},
+				proxy.getSomeIntegerArray()));
+		proxy.setNestedIntegerArray(new Integer[][] {{new Integer(1), new Integer(2), new Integer(3)},
+				{new Integer(4), new Integer(5), new Integer(6)}});
 		Integer[][] integerArray = proxy.getNestedIntegerArray();
-		assertTrue(Arrays.equals(new Integer[] {1, 2, 3}, integerArray[0]));
-		assertTrue(Arrays.equals(new Integer[] {4, 5, 6}, integerArray[1]));
+		assertTrue(Arrays.equals(new Integer[] {new Integer(1), new Integer(2), new Integer(3)}, integerArray[0]));
+		assertTrue(Arrays.equals(new Integer[] {new Integer(4), new Integer(5), new Integer(6)}, integerArray[1]));
 		proxy.setSomeIntArray(new int[] {1, 2, 3});
 		assertTrue(Arrays.equals(new int[] {1, 2, 3}, proxy.getSomeIntArray()));
 		proxy.setNestedIntArray(new int[][] {{1, 2, 3}, {4, 5, 6}});
