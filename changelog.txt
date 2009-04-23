@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5.6.SEC01 (2009-04-22)
+-------------------------------------
+
+Package org.springframework.aop
+* changed serialization behavior of AbstractRegexpMethodPointcut and JdkRegexpMethodPointcut to avoid recompilation
+
+Package org.springframework.core
+* fixed issue with GenericTypeResolver where garbage collection was prevented under certain circumstances
+
+
 Changes in version 2.5.6 (2008-10-31)
 -------------------------------------
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,14 +155,22 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	/**
 	 * Subclasses must implement this to initialize regexp pointcuts.
 	 * Can be invoked multiple times.
-	 * <p>This method will be invoked from the setPatterns method,
+	 * <p>This method will be invoked from the {@link #setPatterns} method,
 	 * and also on deserialization.
 	 * @param patterns the patterns to initialize
 	 * @throws IllegalArgumentException in case of an invalid pattern
 	 */
 	protected abstract void initPatternRepresentation(String[] patterns) throws IllegalArgumentException;
 
-	protected abstract void initExcludedPatternRepresentation(String[] excludedPatterns) throws IllegalArgumentException;
+	/**
+	 * Subclasses must implement this to initialize regexp pointcuts.
+	 * Can be invoked multiple times.
+	 * <p>This method will be invoked from the {@link #setExcludedPatterns} method,
+	 * and also on deserialization.
+	 * @param patterns the patterns to initialize
+	 * @throws IllegalArgumentException in case of an invalid pattern
+	 */
+	protected abstract void initExcludedPatternRepresentation(String[] patterns) throws IllegalArgumentException;
 
 	/**
 	 * Does the pattern at the given index match this string?
@@ -209,20 +217,6 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	public String toString() {
 		return getClass().getName() + ": patterns " + ObjectUtils.nullSafeToString(this.patterns) +
 				", excluded patterns " + ObjectUtils.nullSafeToString(this.excludedPatterns);
-	}
-
-
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization; just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Ask subclass to reinitialize.
-		initPatternRepresentation(this.patterns);
-		initExcludedPatternRepresentation(this.excludedPatterns);
 	}
 
 }
