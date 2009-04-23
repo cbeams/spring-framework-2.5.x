@@ -27,6 +27,16 @@ Package org.springframework.transaction
 * WebSphereUowTransactionManager preserves original exception in case of rollback (SPR-5270 backport)
 
 
+Changes in version 2.5.6.SEC01 (2009-04-22)
+-------------------------------------
+
+Package org.springframework.aop
+* changed serialization behavior of AbstractRegexpMethodPointcut and JdkRegexpMethodPointcut to avoid recompilation
+
+Package org.springframework.core
+* fixed issue with GenericTypeResolver where garbage collection was prevented under certain circumstances
+
+
 Changes in version 2.5.6 (2008-10-31)
 -------------------------------------
 
