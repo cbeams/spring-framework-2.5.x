@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.ref.WeakReference;
+import java.lang.ref.Reference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,7 +144,8 @@ public abstract class GenericTypeResolver {
 	 * enclosing types and interfaces.
 	 */
 	static Map getTypeVariableMap(Class clazz) {
-		Map typeVariableMap = (Map) typeVariableCache.get(clazz);
+		Reference ref = (Reference) typeVariableCache.get(clazz);
+		Map typeVariableMap = (Map) (ref != null ? ref.get() : null);
 
 		if (typeVariableMap == null) {
 			typeVariableMap = new HashMap();
@@ -174,7 +177,7 @@ public abstract class GenericTypeResolver {
 				type = type.getEnclosingClass();
 			}
 
-			typeVariableCache.put(clazz, typeVariableMap);
+			typeVariableCache.put(clazz, new WeakReference(typeVariableMap));
 		}
 
 		return typeVariableMap;
