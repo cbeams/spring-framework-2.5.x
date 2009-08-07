@@ -828,7 +828,7 @@ public class SampleController extends AbstractController {
       signature:</para>
 
       <programlisting><lineannotation>// '<literal>anyMeaningfulName</literal>' can be replaced by any method name</lineannotation>
-public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpServletResponse [,HttpSession] [,AnyObject])</programlisting>
+public [ModelAndView | Map | String | void] anyMeaningfulName(HttpServletRequest, HttpServletResponse [,HttpSession] [,AnyObject])</programlisting>
 
       <para>The full details of this method signature are covered in the
       <ulink
