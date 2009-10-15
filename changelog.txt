@@ -16,6 +16,7 @@ Package org.springframework.jdbc
 Package org.springframework.jms
 * fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
 * fixed JmsException/JmsUtils to fully avoid NPEs in case of cause messages being null
+* JMS SingleConnectionFactory performs start call within connection monitor and only when not started already (SPR-5987 backport)
 * fixed MessageListenerAdapter's "getSubscriptionName()" to work without delegate as well (SPR-5309 backport)
 
 Package org.springframework.orm
