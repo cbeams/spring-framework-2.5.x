@@ -12,6 +12,7 @@ Package org.springframework.jdbc
 * added a DuplicatKeyException catagory for SQLException translation (SPR-5125 backport)
 * added a concrete GenericSqlQuery class to make it possible to configure in application context (SPR-3986 backport)
 * added a concrete GenericStoredProcedure class to make it possible to configure using application context (SPR-3987 backport)
+* added synchronized to compile of AbstractJdbcCall and AbstractJdbcInsert (SPR-6001 backport)
 
 Package org.springframework.jms
 * fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
