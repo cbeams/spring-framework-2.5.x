@@ -17,6 +17,7 @@ Package org.springframework.jdbc
 * added a concrete GenericStoredProcedure class to make it possible to configure using application context (SPR-3987 backport)
 * added synchronized to compile of AbstractJdbcCall and AbstractJdbcInsert (SPR-6001 backport)
 * added -1218 to the transientDataAccessResourceCodes for DB2 (SPR-5296 backport)
+* added 4060 as DataAccessResourceFailure code for MS-SQL (SPR-5788 backport) 
 * added override for supportsGetGeneratedKeys for Derby; driver reports this is unsupported, but it seems to work OK (SPR-5306 backport)
 * fixed problem retrieving out parameter for function call with MS SQL Server (SPR-5435 backport)
 * fixed SimpleJdbcInsert/AbstractJdbcInsert to use SQL type info for all insert operations (SPR-5635 backport)
