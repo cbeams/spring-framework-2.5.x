@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in 2.5.x maintenance branch
 -----------------------------------
 
+Package org.springframework.beans
+* avoid potential NPE (SPR-5930 backport)
+
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource correctly calculates filenames for locales with variant but without country now (SPR-5716 backport)
 
