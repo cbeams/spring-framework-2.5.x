@@ -14,6 +14,7 @@ Package org.springframework.jdbc
 * added a concrete GenericStoredProcedure class to make it possible to configure using application context (SPR-3987 backport)
 * added synchronized to compile of AbstractJdbcCall and AbstractJdbcInsert (SPR-6001 backport)
 * added -1218 to the transientDataAccessResourceCodes for DB2 (SPR-5296 backport)
+* added override for supportsGetGeneratedKeys for Derby; driver reports this is unsupported, but it seems to work OK (SPR-5306 backport)
 
 Package org.springframework.jms
 * fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
