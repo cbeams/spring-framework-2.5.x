@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in 2.5.x maintenance branch
 -----------------------------------
 
+Package org.springframework.context
+* ReloadableResourceBundleMessageSource correctly calculates filenames for locales with variant but without country now (SPR-5716 backport)
+
 Package org.springframework.jdbc
 * added sort to all error code categories for SQLErrorCodes (SPR-5272)
 * added custom SQLExceptionTranslator to provide customized translation for any SQLException (SPR-4899 backport)
