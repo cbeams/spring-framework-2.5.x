@@ -236,7 +236,7 @@ public class SingleConnectionFactory
 	}
 
 	public QueueConnection createQueueConnection() throws JMSException {
-		Connection con = null;
+		Connection con;
 		synchronized (this.connectionMonitor) {
 			this.pubSubMode = Boolean.FALSE;
 			con = createConnection();
@@ -254,7 +254,7 @@ public class SingleConnectionFactory
 	}
 
 	public TopicConnection createTopicConnection() throws JMSException {
-		Connection con = null;
+		Connection con;
 		synchronized (this.connectionMonitor) {
 			this.pubSubMode = Boolean.TRUE;
 			con = createConnection();
@@ -300,6 +300,7 @@ public class SingleConnectionFactory
 	 * Exception listener callback that renews the underlying single Connection.
 	 */
 	public void onException(JMSException ex) {
+		logger.warn("Encountered a JMSException - resetting the underlying JMS Connection", ex);
 		resetConnection();
 	}
 
