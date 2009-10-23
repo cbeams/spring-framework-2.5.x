@@ -271,7 +271,7 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 	public void testReloadableResourceBundleMessageSourceFileNameCalculation() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 
-		List<String> filenames = ms.calculateFilenamesForLocale("messages", Locale.ENGLISH);
+		List filenames = ms.calculateFilenamesForLocale("messages", Locale.ENGLISH);
 		assertEquals(1, filenames.size());
 		assertEquals("messages_en", filenames.get(0));
 
