@@ -12,6 +12,9 @@ Package org.springframework.beans
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource correctly calculates filenames for locales with variant but without country now (SPR-5716 backport)
 
+Package org.springframework.core
+* revised Java 6 checks to test for the presence of specific Java 6 interfaces/classes only (SPR-5786)
+
 Package org.springframework.jdbc
 * added sort to all error code categories for SQLErrorCodes (SPR-5272)
 * added custom SQLExceptionTranslator to provide customized translation for any SQLException (SPR-4899 backport)
@@ -24,12 +27,15 @@ Package org.springframework.jdbc
 * added override for supportsGetGeneratedKeys for Derby; driver reports this is unsupported, but it seems to work OK (SPR-5306 backport)
 * fixed problem retrieving out parameter for function call with MS SQL Server (SPR-5435 backport)
 * fixed SimpleJdbcInsert/AbstractJdbcInsert to use SQL type info for all insert operations (SPR-5635 backport)
+* added a config property to control defaulting of primitive property when receiving null value from result (SPR-5588 backport)
 
 Package org.springframework.jms
 * fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
 * fixed JmsException/JmsUtils to fully avoid NPEs in case of cause messages being null
 * JMS SingleConnectionFactory performs start call within connection monitor and only when not started already (SPR-5987 backport)
 * fixed MessageListenerAdapter's "getSubscriptionName()" to work without delegate as well (SPR-5309 backport)
+* refined logging in JMS SingleConnectionFactory and DefaultMessageListenerContainer
+* handle "Class not found" error during deserialization (SPR-5880)
 
 Package org.springframework.orm
 * AnnotationSessionFactoryBean now properly scans subpackages as well (SPR-5324)
