@@ -114,7 +114,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
 	 */
-	<T> T executeFunction(Class<T> returnType, MapSqlParameterSource args);
+	<T> T executeFunction(Class<T> returnType, SqlParameterSource args);
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
@@ -132,7 +132,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
 	 */
-	<T> T executeObject(Class<T> returnType, MapSqlParameterSource args);
+	<T> T executeObject(Class<T> returnType, SqlParameterSource args);
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name as in parameter declarations..
