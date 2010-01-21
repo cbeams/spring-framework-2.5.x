@@ -244,7 +244,8 @@ public abstract class SharedEntityManagerCreator {
 
 			// Invoke method on actual Query object.
 			try {
-				return method.invoke(this.target, args);
+				Object retVal = method.invoke(this.target, args);
+				return (retVal == this.target ? proxy : retVal);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
