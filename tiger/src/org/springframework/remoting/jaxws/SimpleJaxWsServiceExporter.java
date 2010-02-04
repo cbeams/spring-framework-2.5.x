@@ -64,6 +64,10 @@ public class SimpleJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 
 	protected void publishEndpoint(Endpoint endpoint, WebService annotation) {
 		String fullAddress = this.baseAddress + annotation.serviceName();
+		if (endpoint.getClass().getName().startsWith("weblogic.")) {
+			// Workaround for WebLogic 10.3 
+			fullAddress = fullAddress + "/";
+		}
 		endpoint.publish(fullAddress);
 	}
 
