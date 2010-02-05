@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,6 +167,7 @@ class ConstructorResolver {
 					(chosenCtors != null ? chosenCtors : mbd.getBeanClass().getDeclaredConstructors());
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
+			List causes = null;
 
 			for (int i = 0; i < candidates.length; i++) {
 				Constructor candidate = candidates[i];
@@ -185,7 +186,6 @@ class ConstructorResolver {
 				}
 
 				ArgumentsHolder args = null;
-				List causes = null;
 
 				if (resolvedValues != null) {
 					// Try to resolve arguments for current constructor.
@@ -216,7 +216,6 @@ class ConstructorResolver {
 						}
 					}
 				}
-
 				else {
 					// Explicit arguments given -> arguments length must match exactly.
 					if (paramTypes.length != explicitArgs.length) {
