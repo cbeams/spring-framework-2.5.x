@@ -1276,17 +1276,17 @@ public class DispatcherServlet extends FrameworkServlet {
 		for (Iterator it = attrsToCheck.iterator(); it.hasNext();) {
 			String attrName = (String) it.next();
 			Object attrValue = attributesSnapshot.get(attrName);
-			if (attrValue != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Restoring original value of attribute [" + attrName + "] after include");
-				}
-				request.setAttribute(attrName, attrValue);
-			}
-			else {
+			if (attrValue == null){
 				if (logger.isDebugEnabled()) {
 					logger.debug("Removing attribute [" + attrName + "] after include");
 				}
 				request.removeAttribute(attrName);
+			}
+			else if (attrValue != request.getAttribute(attrName)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Restoring original value of attribute [" + attrName + "] after include");
+				}
+				request.setAttribute(attrName, attrValue);
 			}
 		}
 	}
