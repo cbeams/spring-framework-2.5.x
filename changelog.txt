@@ -6,8 +6,13 @@ http://www.springframework.org
 Changes in 2.5.x maintenance branch
 -----------------------------------
 
+General
+* updated to AspectJ 1.6.6 to solve transaction management failures when using AspectJ and load-time weaving (SPR-6392)
+
 Package org.springframework.beans
 * avoid potential NPE (SPR-5930 backport)
+* fixed inconsistent getBean(String name, Object [] args) behavior (SPR-5790 backport)
+* collect exceptions across all constructors that have been tried (SPR-6720 backport)
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource correctly calculates filenames for locales with variant but without country now (SPR-5716 backport)
@@ -28,6 +33,8 @@ Package org.springframework.jdbc
 * fixed problem retrieving out parameter for function call with MS SQL Server (SPR-5435 backport)
 * fixed SimpleJdbcInsert/AbstractJdbcInsert to use SQL type info for all insert operations (SPR-5635 backport)
 * added a config property to control defaulting of primitive property when receiving null value from result (SPR-5588 backport)
+* changed MapSqlParameterSource to SqlParameterSource in executeFunction and executeObject methods for SimpleJdbcCall (SPR-5570 backport)
+* fixed toString handling for the TransactionAwareDataSourceProxy (SPR-5582 backport)
 
 Package org.springframework.jms
 * fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
@@ -37,14 +44,22 @@ Package org.springframework.jms
 * refined logging in JMS SingleConnectionFactory and DefaultMessageListenerContainer
 * handle "Class not found" error during deserialization (SPR-5880)
 
+Package org.springframework.mail
+* MimeMessageHelper encodes from, to, cc, bcc String addresses with given encoding as well (SPR-6530 backport)
+
 Package org.springframework.orm
 * AnnotationSessionFactoryBean now properly scans subpackages as well (SPR-5324)
+* Query call chaining works with shared EntityManager proxy outside of transaction as well (SPR-6726 backport)
 
 Package org.springframework.remoting
 * fixed HTTP invoker to support resolution of multi-level primitive array classes again (SPR-5473 backport)
+* added JAX-WS workaround for WebLogic 10.3 (SPR-5771 backport)
 
 Package org.springframework.transaction
 * WebSphereUowTransactionManager preserves original exception in case of rollback (SPR-5270 backport)
+
+Package org.springframework.web
+* only try to restore attribute if the value differs (ignoring Portlet spec attributes) (SPR-6712 backport)
 
 
 Changes in version 2.5.6.SEC01 (2009-04-22)
