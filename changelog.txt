@@ -16,6 +16,7 @@ Package org.springframework.beans
 * avoid potential NPE (SPR-5930 backport)
 * fixed inconsistent getBean(String name, Object [] args) behavior (SPR-5790 backport)
 * collect exceptions across all constructors that have been tried (SPR-6720 backport)
+* improved "no matching factory method found" exception message (SPR-6837 backport)
 
 Package org.springframework.context
 * ReloadableResourceBundleMessageSource correctly calculates filenames for locales with variant but without country now (SPR-5716 backport)

@@ -417,7 +417,9 @@ class ConstructorResolver {
 						"No matching factory method found: " +
 						(mbd.getFactoryBeanName() != null ?
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
-						"factory method '" + mbd.getFactoryMethodName() + "'");
+						"factory method '" + mbd.getFactoryMethodName() + "'. " +
+						"Check that a method of the specified name exists and that it is " +
+						(isStatic ? "static" : "non-static") + ".");
 			}
 			if (void.class.equals(factoryMethodToUse.getReturnType())) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
