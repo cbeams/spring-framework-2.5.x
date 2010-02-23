@@ -63,6 +63,7 @@ Package org.springframework.transaction
 
 Package org.springframework.web
 * only try to restore attribute if the value differs (ignoring Portlet spec attributes) (SPR-6712 backport)
+* avoid rendering invalid ids (SPR-6840 backport)
 
 
 Changes in version 2.5.6.SEC01 (2009-04-22)
