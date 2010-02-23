@@ -9,6 +9,9 @@ Changes in 2.5.x maintenance branch
 General
 * updated to AspectJ 1.6.6 to solve transaction management failures when using AspectJ and load-time weaving (SPR-6392)
 
+Package org.springframework.aop
+* fixed isProxyFactoryBeanDefinition check (SPR-6842 backport) 
+
 Package org.springframework.beans
 * avoid potential NPE (SPR-5930 backport)
 * fixed inconsistent getBean(String name, Object [] args) behavior (SPR-5790 backport)
