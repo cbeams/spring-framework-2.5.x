@@ -48,6 +48,9 @@ Package org.springframework.jms
 * refined logging in JMS SingleConnectionFactory and DefaultMessageListenerContainer
 * handle "Class not found" error during deserialization (SPR-5880)
 
+Package org.springframework.jmx
+* MBeanClientInterceptor understands CompositeData/TabularData arrays (SPR-6548 backport) 
+
 Package org.springframework.mail
 * MimeMessageHelper encodes from, to, cc, bcc String addresses with given encoding as well (SPR-6530 backport)
 

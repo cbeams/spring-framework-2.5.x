@@ -18,9 +18,11 @@ package org.springframework.jmx.access;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +57,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.CollectionFactory;
+import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
+import org.springframework.core.MethodParameter;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
@@ -413,7 +418,7 @@ public class MBeanClientInterceptor
 					result = invokeOperation(method, invocation.getArguments());
 				}
 			}
-			return convertResultValueIfNecessary(result, method.getReturnType());
+			return convertResultValueIfNecessary(result, new MethodParameter(method, -1));
 		}
 		catch (MBeanException ex) {
 			throw ex.getTargetException();
@@ -530,7 +535,8 @@ public class MBeanClientInterceptor
 	 * @return the converted result object, or the passed-in object if no conversion
 	 * is necessary
 	 */
-	protected Object convertResultValueIfNecessary(Object result, Class targetClass) {
+	protected Object convertResultValueIfNecessary(Object result, MethodParameter parameter) {
+		Class targetClass = parameter.getParameterType();
 		try {
 			if (result == null) {
 				return null;
@@ -542,20 +548,62 @@ public class MBeanClientInterceptor
 				Method fromMethod = targetClass.getMethod("from", new Class[] {CompositeData.class});
 				return ReflectionUtils.invokeMethod(fromMethod, null, new Object[] {result});
 			}
+			else if (result instanceof CompositeData[]) {
+				CompositeData[] array = (CompositeData[]) result;
+				if (targetClass.isArray()) {
+					return convertDataArrayToTargetArray(array, targetClass);
+				}
+				else if (Collection.class.isAssignableFrom(targetClass)) {
+					Class elementType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+					if (elementType != null) {
+						return convertDataArrayToTargetCollection(array, targetClass, elementType);
+					}
+				}
+			}
 			else if (result instanceof TabularData) {
 				Method fromMethod = targetClass.getMethod("from", new Class[] {TabularData.class});
 				return ReflectionUtils.invokeMethod(fromMethod, null, new Object[] {result});
 			}
-			else {
-				throw new InvocationFailureException(
-						"Incompatible result value [" + result + "] for target type [" + targetClass.getName() + "]");
+			else if (result instanceof TabularData[]) {
+				TabularData[] array = (TabularData[]) result;
+				if (targetClass.isArray()) {
+					return convertDataArrayToTargetArray(array, targetClass);
+				}
+				else if (Collection.class.isAssignableFrom(targetClass)) {
+					Class elementType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+					if (elementType != null) {
+						return convertDataArrayToTargetCollection(array, targetClass, elementType);
+					}
+				}
 			}
+			throw new InvocationFailureException(
+					"Incompatible result value [" + result + "] for target type [" + targetClass.getName() + "]");
 		}
 		catch (NoSuchMethodException ex) {
 			throw new InvocationFailureException(
 					"Could not obtain 'find(CompositeData)' / 'find(TabularData)' method on target type [" +
 							targetClass.getName() + "] for conversion of MXBean data structure [" + result + "]");
 		}
+	}
+
+ 	private Object convertDataArrayToTargetArray(Object[] array, Class targetClass) throws NoSuchMethodException {
+		Class targetType = targetClass.getComponentType();
+		Method fromMethod = targetType.getMethod("from", new Class[] {array.getClass().getComponentType()});
+		Object resultArray = Array.newInstance(targetType, array.length);
+		for (int i = 0; i < array.length; i++) {
+			Array.set(resultArray, i, ReflectionUtils.invokeMethod(fromMethod, null, new Object[] {array[i]}));
+		}
+		return resultArray;
+	}
+
+	private Collection convertDataArrayToTargetCollection(Object[] array, Class collectionType, Class elementType)
+			throws NoSuchMethodException {
+		Method fromMethod = elementType.getMethod("from", new Class[] {array.getClass().getComponentType()});
+		Collection resultColl = CollectionFactory.createCollection(collectionType, Array.getLength(array));
+		for (int i = 0; i < array.length; i++) {
+			resultColl.add(ReflectionUtils.invokeMethod(fromMethod, null, new Object[] {array[i]}));
+		}
+		return resultColl;
 	}
 
 	public void destroy() {

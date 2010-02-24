@@ -284,6 +284,46 @@ public abstract class CollectionFactory {
 	}
 
 	/**
+	 * Create the most appropriate collection for the given collection type.
+	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
+	 * or Set, respectively.
+	 * @param collectionType the desired type of the target Collection
+	 * @param initialCapacity the initial capacity
+	 * @return the new Collection instance
+	 * @see java.util.ArrayList
+	 * @see java.util.TreeSet
+	 * @see java.util.LinkedHashSet
+	 */
+	public static Collection createCollection(Class collectionType, int initialCapacity) {
+		if (collectionType.isInterface()) {
+			if (List.class.equals(collectionType)) {
+				return new ArrayList(initialCapacity);
+			}
+			//else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSetClass)) {
+			else if (SortedSet.class.equals(collectionType)) {
+				return new TreeSet();
+			}
+			else if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
+				return new LinkedHashSet(initialCapacity);
+			}
+			else {
+				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
+			}
+		}
+		else {
+			if (!Collection.class.isAssignableFrom(collectionType)) {
+				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
+			}
+			try {
+				return (Collection) collectionType.newInstance();
+			}
+			catch (Exception ex) {
+				throw new IllegalArgumentException("Could not instantiate Collection type: " + collectionType.getName());
+			}
+		}
+	}
+
+	/**
 	 * Determine whether the given map type is an approximable type,
 	 * i.e. a type that {@link #createApproximateMap} can approximate.
 	 * @param mapType the map type to check

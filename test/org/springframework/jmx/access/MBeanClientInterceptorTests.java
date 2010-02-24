@@ -239,28 +239,42 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 	// Commented out because of a side effect with the the started platform MBeanServer.
 	/*
 	public void testMXBeanAttributeAccess() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+		if (org.springframework.core.JdkVersion.getMajorJavaVersion() < org.springframework.core.JdkVersion.JAVA_15) {
 			return;
 		}
 
 		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
-		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
+		interceptor.setServer(java.lang.management.ManagementFactory.getPlatformMBeanServer());
 		interceptor.setObjectName("java.lang:type=Memory");
-		interceptor.setManagementInterface(MemoryMXBean.class);
-		MemoryMXBean proxy = (MemoryMXBean) ProxyFactory.getProxy(MemoryMXBean.class, interceptor);
+		interceptor.setManagementInterface(java.lang.management.MemoryMXBean.class);
+		java.lang.management.MemoryMXBean proxy = 
+			(java.lang.management.MemoryMXBean) org.springframework.aop.framework.ProxyFactory.getProxy(java.lang.management.MemoryMXBean.class, interceptor);
 		assertTrue(proxy.getHeapMemoryUsage().getMax() > 0);
 	}
 
 	public void testMXBeanOperationAccess() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+		if (org.springframework.core.JdkVersion.getMajorJavaVersion() < org.springframework.core.JdkVersion.JAVA_15) {
 			return;
 		}
 
 		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
-		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
+		interceptor.setServer(java.lang.management.ManagementFactory.getPlatformMBeanServer());
 		interceptor.setObjectName("java.lang:type=Threading");
-		ThreadMXBean proxy = (ThreadMXBean) ProxyFactory.getProxy(ThreadMXBean.class, interceptor);
+		java.lang.management.ThreadMXBean proxy = 
+			(java.lang.management.ThreadMXBean) org.springframework.aop.framework.ProxyFactory.getProxy(java.lang.management.ThreadMXBean.class, interceptor);
 		assertTrue(proxy.getThreadInfo(Thread.currentThread().getId()).getStackTrace() != null);
+	}
+	
+	// This test passes under Windows with JDK 1.6.0_18
+	// It fails on Mac OS X with JDK 1.6.0_17 (most recent as of Feb 24, 2010)
+	// with a "java.lang.InternalError: Unsupported VMGlobal Type 0" exception
+	public void testMXBeanAttributeListAccess() throws Exception {
+		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
+		interceptor.setServer(java.lang.management.ManagementFactory.getPlatformMBeanServer());
+		interceptor.setObjectName("com.sun.management:type=HotSpotDiagnostic");
+		com.sun.management.HotSpotDiagnosticMXBean proxy = 
+			(com.sun.management.HotSpotDiagnosticMXBean) org.springframework.aop.framework.ProxyFactory.getProxy(com.sun.management.HotSpotDiagnosticMXBean.class, interceptor);
+		assertFalse(proxy.getDiagnosticOptions().isEmpty());
 	}
 	*/
 
