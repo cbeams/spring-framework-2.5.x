@@ -74,9 +74,9 @@ public abstract class CollectionFactory {
 					CollectionFactory.class.getClassLoader());
 
 
-	private static final String NAVIGABLE_SET_CLASS_NAME = "java.util.NavigableSet";
+	private static Class navigableSetClass = null;
 
-	private static final String NAVIGABLE_MAP_CLASS_NAME = "java.util.NavigableMap";
+	private static Class navigableMapClass = null;
 
 	private static final Set approximableCollectionTypes = new HashSet(10);
 
@@ -90,15 +90,16 @@ public abstract class CollectionFactory {
 		approximableCollectionTypes.add(SortedSet.class);
 		approximableMapTypes.add(Map.class);
 		approximableMapTypes.add(SortedMap.class);
+
 		// New Java 6 collection interfaces
+		ClassLoader cl = CollectionFactory.class.getClassLoader();
 		try {
-			approximableCollectionTypes.add(ClassUtils.forName(
-					NAVIGABLE_SET_CLASS_NAME, CollectionFactory.class
-							.getClassLoader()));
-			approximableMapTypes.add(ClassUtils.forName(
-					NAVIGABLE_MAP_CLASS_NAME, CollectionFactory.class
-							.getClassLoader()));
-		} catch (ClassNotFoundException ex) {
+			navigableSetClass = cl.loadClass("java.util.NavigableSet");
+			navigableMapClass = cl.loadClass("java.util.NavigableMap");
+			approximableCollectionTypes.add(navigableSetClass);
+			approximableMapTypes.add(navigableMapClass);
+		}
+		catch (ClassNotFoundException ex) {
 			// not running on Java 6 or above...
 		}
 
@@ -299,8 +300,7 @@ public abstract class CollectionFactory {
 			if (List.class.equals(collectionType)) {
 				return new ArrayList(initialCapacity);
 			}
-			//else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSetClass)) {
-			else if (SortedSet.class.equals(collectionType)) {
+			else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSetClass)) {
 				return new TreeSet();
 			}
 			else if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
