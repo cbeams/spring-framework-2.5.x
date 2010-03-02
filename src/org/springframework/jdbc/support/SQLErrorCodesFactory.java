@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.jdbc.support;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import javax.sql.DataSource;
 
@@ -88,7 +88,7 @@ public class SQLErrorCodesFactory {
 	 * Map to cache the SQLErrorCodes instance per DataSource.
 	 * Key is the DataSource, value is the SQLErrorCodes instance.
 	 */
-	private final Map dataSourceCache = new HashMap(16);
+	private final Map dataSourceCache = new WeakHashMap(16);
 
 
 	/**

@@ -39,6 +39,7 @@ Package org.springframework.jdbc
 * added a config property to control defaulting of primitive property when receiving null value from result (SPR-5588 backport)
 * changed MapSqlParameterSource to SqlParameterSource in executeFunction and executeObject methods for SimpleJdbcCall (SPR-5570 backport)
 * fixed toString handling for the TransactionAwareDataSourceProxy (SPR-5582 backport)
+* use WeakHashMap for DataSource-keyed cache (SPR-6887 backport)
 
 Package org.springframework.jms
 * fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
