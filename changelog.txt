@@ -40,6 +40,7 @@ Package org.springframework.jdbc
 * changed MapSqlParameterSource to SqlParameterSource in executeFunction and executeObject methods for SimpleJdbcCall (SPR-5570 backport)
 * fixed toString handling for the TransactionAwareDataSourceProxy (SPR-5582 backport)
 * use WeakHashMap for DataSource-keyed cache (SPR-6887 backport)
+* revised the detection of Sybase (SPR-6053 backport)
 
 Package org.springframework.jms
 * fixed JmsUtils.buildExceptionMessage to avoid potential NPE (SPR-5275)
@@ -48,6 +49,7 @@ Package org.springframework.jms
 * fixed MessageListenerAdapter's "getSubscriptionName()" to work without delegate as well (SPR-5309 backport)
 * refined logging in JMS SingleConnectionFactory and DefaultMessageListenerContainer
 * handle "Class not found" error during deserialization (SPR-5880)
+* added "idleConsumerLimit" bean property to DefaultMessageListenerContainer (SPR-7189 backport)
 
 Package org.springframework.jmx
 * MBeanClientInterceptor understands CompositeData/TabularData arrays (SPR-6548 backport) 
