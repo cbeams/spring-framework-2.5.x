@@ -68,6 +68,7 @@ Package org.springframework.remoting
 Package org.springframework.transaction
 * WebSphereUowTransactionManager preserves original exception in case of rollback (SPR-5270 backport)
 * fixed WebSphereUowTransactionManager regression: correctly roll back in case of exception (SPR-6695 backport)
+* WebSphereUowTransactionManager suspends synchronizations even without existing transaction (SPR-6167 backport)
 
 Package org.springframework.web
 * only try to restore attribute if the value differs (ignoring Portlet spec attributes) (SPR-6712 backport)
