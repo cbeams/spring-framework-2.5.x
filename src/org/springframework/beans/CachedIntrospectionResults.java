@@ -239,6 +239,10 @@ public class CachedIntrospectionResults {
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
 				PropertyDescriptor pd = pds[i];
+				if (Class.class.equals(beanClass) && "classLoader".equals(pd.getName())) {
+					// Ignore Class.getClassLoader() method - nobody needs to bind to that
+					continue;
+				}
 				if (logger.isTraceEnabled()) {
 					logger.trace("Found bean property '" + pd.getName() + "'" +
 							(pd.getPropertyType() != null ?
