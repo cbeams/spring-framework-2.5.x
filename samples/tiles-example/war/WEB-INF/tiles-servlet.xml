@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+  - DispatcherServlet application context for the Tiles Example web tier.
+  -->
+<beans>
+
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="messages"/>
+	</bean>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
+	</bean>
+
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/defs/definitions.xml</value>
+			</list>
+		</property>
+		<property name="preparerFactoryClass"
+				value="org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory"/>
+	</bean>
+
+	<bean id="feedPreparer" class="org.springframework.samples.tiles.NewsFeedController">
+		<property name="configurer" ref="feedConfigurer"/>
+	</bean>
+
+	<bean id="feedConfigurer" class="org.springframework.samples.tiles.NewsFeedConfigurer">
+		<property name="feeds">
+			<props>
+				<prop key="theserverside">http://www.theserverside.com/rss/theserverside-1.0.rdf</prop>
+				<prop key="slashdot">http://slashdot.org/slashdot.rss</prop>				
+				<prop key="javablogs">http://www.javablogs.com/ViewDaysBlogs.action?view=rss</prop>								
+			</props>
+		</property>
+	</bean>
+
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/*.html">viewController</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="viewController" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+
+</beans>

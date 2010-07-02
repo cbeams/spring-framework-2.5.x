@@ -1,0 +1,723 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="part4">
+  <title>Developing the Web Interface</title>
+
+  <para>This is Part 4 of a step-by-step account of how to develop a web
+  application from scratch using the Spring Framework. In <link
+  linkend="part1">Part 1</link> we configured the environment and set up a
+  basic application. In <link linkend="part2">Part 2</link> we refined the
+  application that we will build upon. <link linkend="part3">Part 3</link>
+  added all the business logic and unit tests. It's now time to build the
+  actual web interface for the application.</para>
+
+  <section id="step4.1">
+    <title>Add reference to business logic in the controller</title>
+
+    <para>First of all, let's rename our
+    <classname>HelloController</classname> to something more meaningful. How
+    about <classname>InventoryController</classname> since we are building an
+    inventory system. This is where an IDE with refactoring support is
+    invaluable. We rename <classname>HelloController</classname> to
+    <classname>InventoryController</classname> and the
+    <classname>HelloControllerTests</classname> to
+    <classname>InventoryControllerTests</classname>. Next, We modify the
+    <classname>InventoryController</classname> to hold a reference to the
+    <classname>ProductManager</classname> class. We also add code to have the
+    controller pass some product information to the view. The
+    <methodname>getModelAndView()</methodname> method now returns a
+    <interfacename>Map</interfacename> with both the date and time and the
+    products list obtained from the manager reference.</para>
+
+    <para><filename>'springapp/src/springapp/web/InventoryController.java'</filename>:</para>
+
+    <programlisting>package springapp.web;
+
+import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+<emphasis role="bold">import java.util.Map;
+import java.util.HashMap;
+</emphasis>
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+<emphasis role="bold">import springapp.service.ProductManager;
+</emphasis>
+public class <emphasis role="bold">InventoryController</emphasis> implements Controller {
+
+    protected final Log logger = LogFactory.getLog(getClass());
+
+<emphasis role="bold">    private ProductManager productManager;
+</emphasis>
+    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String now = (new java.util.Date()).toString();
+        logger.info("returning hello view with " + now);
+
+<emphasis role="bold">        Map&lt;String, Object&gt; myModel = new HashMap&lt;String, Object&gt;();
+        myModel.put("now", now);
+        myModel.put("products", this.productManager.getProducts());
+</emphasis>
+<emphasis role="bold">        return new ModelAndView("hello", "model", myModel);
+</emphasis>    }
+
+
+<emphasis role="bold">    public void setProductManager(ProductManager productManager) {
+        this.productManager = productManager;
+    }
+</emphasis>
+}</programlisting>
+
+    <para>We will also need to modify the InventoryControllerTests to supply a
+    ProductManager and extract the value for <literal>'now'</literal> from the
+    model Map before the tests will pass again.</para>
+
+    <para><filename>'springapp/test/springapp/web/InventoryControllerTests.java'</filename>:</para>
+
+    <programlisting>package springapp.web;
+
+<emphasis role="bold">import java.util.Map;
+</emphasis>
+import org.springframework.web.servlet.ModelAndView;
+
+<emphasis role="bold">import springapp.service.SimpleProductManager;
+</emphasis>import springapp.web.InventoryController;
+
+import junit.framework.TestCase;
+
+public class <emphasis role="bold">InventoryControllerTests</emphasis> extends TestCase {
+
+    public void testHandleRequestView() throws Exception{
+        InventoryController controller = new InventoryController();
+<emphasis role="bold">        controller.setProductManager(new SimpleProductManager());
+</emphasis>        ModelAndView modelAndView = controller.handleRequest(null, null);
+        assertEquals("hello", modelAndView.getViewName());
+        assertNotNull(modelAndView.getModel());
+<emphasis role="bold">        Map modelMap = (Map) modelAndView.getModel().get("model");
+        String nowValue = (String) modelMap.get("now");
+</emphasis>        assertNotNull(nowValue);
+    }
+}</programlisting>
+  </section>
+
+  <section id="step4.2">
+    <title>Modify the view to display business data and add support for
+    message bundle</title>
+
+    <para>Using the JSTL <literal>&lt;c:forEach/&gt;</literal> tag, we add a
+    section that displays product information. We have also replaced the
+    title, heading and greeting text with a JSTL
+    <literal>&lt;fmt:message/&gt;</literal> tag that pulls the text to display
+    from a provided <literal>'message'</literal> source – we will show this
+    source in a later step.</para>
+
+    <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
+
+    <programlisting>&lt;%@ include file="/WEB-INF/jsp/include.jsp" %&gt;
+
+&lt;html&gt;
+<emphasis role="bold">  &lt;head&gt;&lt;title&gt;&lt;fmt:message key="title"/&gt;&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;&lt;fmt:message key="heading"/&gt;&lt;/h1&gt;
+    &lt;p&gt;&lt;fmt:message key="greeting"/&gt; &lt;c:out value="${model.now}"/&gt;&lt;/p&gt;
+    &lt;h3&gt;Products&lt;/h3&gt;
+    &lt;c:forEach items="${model.products}" var="prod"&gt;
+      &lt;c:out value="${prod.description}"/&gt; &lt;i&gt;$&lt;c:out value="${prod.price}"/&gt;&lt;/i&gt;&lt;br&gt;&lt;br&gt;
+    &lt;/c:forEach&gt;
+</emphasis>  &lt;/body&gt;
+&lt;/html&gt;</programlisting>
+  </section>
+
+  <section id="step4.3">
+    <title>Add some test data to automatically populate some business
+    objects</title>
+
+    <para>It's time to add a <classname>SimpleProductManager</classname> to
+    our configuration file and to pass that into the setter of the
+    <classname>InventoryController</classname>. We are not going to add any
+    code to load the business objects from a database just yet. Instead, we
+    can stub a couple of <classname>Product</classname> instances using
+    Spring's bean and application context support. We will simply put the data
+    we need as a couple of bean entries in
+    <filename>'springapp-servlet.xml'</filename>. We will also add the
+    <literal>'messageSource'</literal> bean entry that will pull in the
+    messages resource bundle (<filename>'messages.properties'</filename>) that
+    we will create in the next step. Also remember to rename the reference to
+    <classname>HelloController</classname> to
+    <classname>InventoryController</classname> since we renamed it.</para>
+
+    <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+<lineannotation>
+    &lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation>
+<emphasis role="bold">
+    &lt;bean id="productManager" class="springapp.service.SimpleProductManager"&gt;
+        &lt;property name="products"&gt;
+            &lt;list&gt;
+                &lt;ref bean="product1"/&gt;
+                &lt;ref bean="product2"/&gt;
+                &lt;ref bean="product3"/&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="product1" class="springapp.domain.Product"&gt;
+        &lt;property name="description" value="Lamp"/&gt;
+        &lt;property name="price" value="5.75"/&gt;
+    &lt;/bean&gt;
+        
+    &lt;bean id="product2" class="springapp.domain.Product"&gt;
+        &lt;property name="description" value="Table"/&gt;
+        &lt;property name="price" value="75.25"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="product3" class="springapp.domain.Product"&gt;
+        &lt;property name="description" value="Chair"/&gt;
+        &lt;property name="price" value="22.79"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
+        &lt;property name="basename" value="messages"/&gt;
+    &lt;/bean&gt;
+
+</emphasis>    &lt;bean name="/hello.htm" class="springapp.web.<emphasis
+        role="bold">InventoryController</emphasis>"&gt;
+<emphasis role="bold"><emphasis role="bold">        &lt;property name="productManager" ref="productManager"/&gt;
+</emphasis>    &lt;/bean&gt;</emphasis>
+
+    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+        &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
+        &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+        &lt;property name="suffix" value=".jsp"/&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+  </section>
+
+  <section id="step4.4">
+    <title>Add the message bundle and a <literal>'clean'</literal> target to
+    <filename>'build.xml'</filename></title>
+
+    <para>We create a <filename>'messages.properties'</filename> file in the
+    <filename class="directory">'war/WEB-INF/classes'</filename> directory.
+    This properties bundle so far has three entries matching the keys
+    specified in the <literal>&lt;fmt:message/&gt;</literal> tags that we
+    added to <filename>'hello.jsp'</filename>.</para>
+
+    <para><filename>'springapp/war/WEB-INF/classes/messages.properties'</filename>:</para>
+
+    <programlisting>title=SpringApp
+heading=Hello :: SpringApp
+greeting=Greetings, it is now</programlisting>
+
+    <para>Since we moved some source files around, it makes sense to add a
+    <literal>'clean'</literal> and an <literal>'undeploy'</literal> target to
+    the build script. We add the following entries to the
+    <filename>'build.xml'</filename> file.</para>
+
+    <para><filename>'build.xml'</filename>:</para>
+
+    <programlisting>    &lt;target name="clean" description="Clean output directories"&gt;
+        &lt;delete&gt;
+            &lt;fileset dir="${build.dir}"&gt;
+                &lt;include name="**/*.class"/&gt;
+            &lt;/fileset&gt;
+        &lt;/delete&gt;
+    &lt;/target&gt;
+
+    &lt;target name="undeploy" description="Un-Deploy application"&gt;
+        &lt;delete&gt;
+            &lt;fileset dir="${deploy.path}/${name}"&gt;
+                &lt;include name="**/*.*"/&gt;
+            &lt;/fileset&gt;
+        &lt;/delete&gt;
+    &lt;/target&gt;</programlisting>
+
+    <para>Now stop the Tomcat server, run the <literal>'clean'</literal>,
+    <literal>'undeploy'</literal> and <literal>'deploy'</literal> targets.
+    This will remove all old class files, re-build the application and deploy
+    it. Start up Tomcat again and you should see the following:</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/screen4.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/screen4.png" format="PNG" />
+        </imageobject>
+
+        <caption><para>The updated application</para></caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section id="step4.5">
+    <title>Adding a form</title>
+
+    <para>To provide an interface in the web application to expose the price
+    increase functionality, we add a form that will allow the user to enter a
+    percentage value. This form uses a tag library named
+    <literal>'spring-form.tld'</literal> that is provided with the Spring
+    Framework. We have to copy this file from the Spring distribution
+    (<filename>'spring-framework-2.5/dist/resources/spring-form.tld'</filename>)
+    to the <filename class="directory">'springapp/war/WEB-INF/tld'</filename>
+    directory that we also need to create. Next we must also add a
+    <literal>&lt;taglib/&gt;</literal> entry to the
+    <filename>'web.xml'</filename> file.</para>
+
+    <para><filename>'springapp/war/WEB-INF/web.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" &gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.htm&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;
+      index.jsp
+    &lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
+
+<emphasis role="bold">  &lt;jsp-config&gt;
+    &lt;taglib&gt;
+      &lt;taglib-uri&gt;/spring&lt;/taglib-uri&gt;
+      &lt;taglib-location&gt;/WEB-INF/tld/spring-form.tld&lt;/taglib-location&gt;
+    &lt;/taglib&gt;
+  &lt;/jsp-config&gt;
+</emphasis>
+&lt;/web-app&gt;</programlisting>
+
+    <para>We also have to declare this taglib in a page directive in the jsp
+    file, and then start using the tags we have thus imported. Add the JSP
+    page <filename>'priceincrease.jsp'</filename> to the
+    <filename>'war/WEB-INF/jsp'</filename> directory.</para>
+
+    <para><filename>'springapp/war/WEB-INF/jsp/priceincrease.jsp'</filename>:</para>
+
+    <programlisting>&lt;%@ include file="/WEB-INF/jsp/include.jsp" %&gt;
+&lt;%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %&gt;
+
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;&lt;fmt:message key="title"/&gt;&lt;/title&gt;
+  &lt;style&gt;
+    .error { color: red; }
+  &lt;/style&gt;  
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;&lt;fmt:message key="priceincrease.heading"/&gt;&lt;/h1&gt;
+&lt;form:form method="post" commandName="priceIncrease"&gt;
+  &lt;table width="95%" bgcolor="f8f8ff" border="0" cellspacing="0" cellpadding="5"&gt;
+    &lt;tr&gt;
+      &lt;td align="right" width="20%"&gt;Increase (%):&lt;/td&gt;
+        &lt;td width="20%"&gt;
+          &lt;form:input path="percentage"/&gt;
+        &lt;/td&gt;
+        &lt;td width="60%"&gt;
+          &lt;form:errors path="percentage" cssClass="error"/&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+  &lt;br&gt;
+  &lt;input type="submit" align="center" value="Execute"&gt;
+&lt;/form:form&gt;
+&lt;a href="&lt;c:url value="hello.htm"/&gt;"&gt;Home&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</programlisting>
+
+    <para>This next class is a very simple JavaBean class, and in our case
+    there is a single property with a getter and setter. This is the object
+    that the form will populate and that our business logic will extract the
+    price increase percentage from.</para>
+
+    <para><filename>'springapp/src/springapp/service/PriceIncrease.java'</filename>:</para>
+
+    <programlisting>package springapp.service;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class PriceIncrease {
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+    private int percentage;
+
+    public void setPercentage(int i) {
+        percentage = i;
+        logger.info("Percentage set to " + i);
+    }
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+}</programlisting>
+
+    <para>The following validator class gets control after the user presses
+    submit. The values entered in the form will be set on the command object
+    by the framework. The <methodname>validate(..)</methodname> method is
+    called and the command object (<classname>PriceIncrease</classname>) and a
+    contextual object to hold any errors are passed in.</para>
+
+    <para><filename>'springapp/src/springapp/service/PriceIncreaseValidator.java'</filename>:</para>
+
+    <programlisting>package springapp.service;
+
+import org.springframework.validation.Validator;
+import org.springframework.validation.Errors;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class PriceIncreaseValidator implements Validator {
+    private int DEFAULT_MIN_PERCENTAGE = 0;
+    private int DEFAULT_MAX_PERCENTAGE = 50;
+    private int minPercentage = DEFAULT_MIN_PERCENTAGE;
+    private int maxPercentage = DEFAULT_MAX_PERCENTAGE;
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+    public boolean supports(Class clazz) {
+        return PriceIncrease.class.equals(clazz);
+    }
+
+    public void validate(Object obj, Errors errors) {
+        PriceIncrease pi = (PriceIncrease) obj;
+        if (pi == null) {
+            errors.rejectValue("percentage", "error.not-specified", null, "Value required.");
+        }
+        else {
+            logger.info("Validating with " + pi + ": " + pi.getPercentage());
+            if (pi.getPercentage() &gt; maxPercentage) {
+                errors.rejectValue("percentage", "error.too-high",
+                    new Object[] {new Integer(maxPercentage)}, "Value too high.");
+            }
+            if (pi.getPercentage() &lt;= minPercentage) {
+                errors.rejectValue("percentage", "error.too-low",
+                    new Object[] {new Integer(minPercentage)}, "Value too low.");
+            }
+        }
+    }
+
+    public void setMinPercentage(int i) {
+        minPercentage = i;
+    }
+
+    public int getMinPercentage() {
+        return minPercentage;
+    }
+
+    public void setMaxPercentage(int i) {
+        maxPercentage = i;
+    }
+
+    public int getMaxPercentage() {
+        return maxPercentage;
+    }
+
+}</programlisting>
+  </section>
+
+  <section id="step4.6">
+    <title>Adding a form controller</title>
+
+    <para>Now we need to add an entry in the
+    <filename>'springapp-servlet.xml'</filename> file to define the new form
+    and controller. We define objects to inject into properties for
+    <literal>commandClass</literal> and <literal>validator</literal>. We also
+    specify two views, a <literal>formView</literal> that is used for the form
+    and a <literal>successView</literal> that we will go to after successful
+    form processing. The latter can be of two types. It can be a regular view
+    reference that is forwarded to one of our JSP pages. One disadvantage with
+    this approach is, that if the user refreshes the page, the form data is
+    submitted again, and you would end up with a double price increase. An
+    alternative way is to use a redirect, where a response is sent back to the
+    users browser instructing it to redirect to a new URL. The URL we use in
+    this case can't be one of our JSP pages, since they are hidden from direct
+    access. It has to be a URL that is externally reachable. We have chosen to
+    use <filename>'hello.htm'</filename> as my redirect URL. This URL maps to
+    the <filename>'hello.jsp'</filename> page, so this should work
+    nicely.</para>
+
+    <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
+
+<lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation>
+
+&lt;beans&gt;
+
+    &lt;bean id="productManager" class="springapp.service.SimpleProductManager"&gt;
+        &lt;property name="products"&gt;
+            &lt;list&gt;
+                &lt;ref bean="product1"/&gt;
+                &lt;ref bean="product2"/&gt;
+                &lt;ref bean="product3"/&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="product1" class="springapp.domain.Product"&gt;
+        &lt;property name="description" value="Lamp"/&gt;
+        &lt;property name="price" value="5.75"/&gt;
+    &lt;/bean&gt;
+        
+    &lt;bean id="product2" class="springapp.domain.Product"&gt;
+        &lt;property name="description" value="Table"/&gt;
+        &lt;property name="price" value="75.25"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="product3" class="springapp.domain.Product"&gt;
+        &lt;property name="description" value="Chair"/&gt;
+        &lt;property name="price" value="22.79"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
+        &lt;property name="basename" value="messages"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean name="/hello.htm" class="springapp.web.InventoryController"&gt;
+        &lt;property name="productManager" ref="productManager"/&gt;
+    &lt;/bean&gt;
+
+<emphasis role="bold">    &lt;bean name="/priceincrease.htm" class="springapp.web.PriceIncreaseFormController"&gt;
+        &lt;property name="sessionForm" value="true"/&gt;
+        &lt;property name="commandName" value="priceIncrease"/&gt;
+        &lt;property name="commandClass" value="springapp.service.PriceIncrease"/&gt;
+        &lt;property name="validator"&gt;
+            &lt;bean class="springapp.service.PriceIncreaseValidator"/&gt;
+        &lt;/property&gt;
+        &lt;property name="formView" value="priceincrease"/&gt;
+        &lt;property name="successView" value="hello.htm"/&gt;
+        &lt;property name="productManager" ref="productManager"/&gt;
+    &lt;/bean&gt;
+
+</emphasis>    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+        &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
+        &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+        &lt;property name="suffix" value=".jsp"/&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+    <para>Next, let's take a look at the controller for this form. The
+    <methodname>onSubmit(..)</methodname> method gets control and does some
+    logging before it calls the <methodname>increasePrice(..)</methodname>
+    method on the <classname>ProductManager</classname> object. It then
+    returns a <classname>ModelAndView</classname> passing in a new instance of
+    a <classname>RedirectView</classname> created using the URL for the
+    success view.</para>
+
+    <para><filename>'springapp/src/web/PriceIncreaseFormController.java'</filename>:</para>
+
+    <programlisting>package springapp.web;
+
+import org.springframework.web.servlet.mvc.SimpleFormController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import springapp.service.ProductManager;
+import springapp.service.PriceIncrease;
+
+public class PriceIncreaseFormController extends SimpleFormController {
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+    private ProductManager productManager;
+
+    public ModelAndView onSubmit(Object command)
+            throws ServletException {
+
+        int increase = ((PriceIncrease) command).getPercentage();
+        logger.info("Increasing prices by " + increase + "%.");
+
+        productManager.increasePrice(increase);
+
+        logger.info("returning from PriceIncreaseForm view to " + getSuccessView());
+
+        return new ModelAndView(new RedirectView(getSuccessView()));
+    }
+
+    protected Object formBackingObject(HttpServletRequest request) throws ServletException {
+        PriceIncrease priceIncrease = new PriceIncrease();
+        priceIncrease.setPercentage(20);
+        return priceIncrease;
+    }
+
+    public void setProductManager(ProductManager productManager) {
+        this.productManager = productManager;
+    }
+
+    public ProductManager getProductManager() {
+        return productManager;
+    }
+
+}</programlisting>
+
+    <para>We are also adding some messages to the
+    <filename>'messages.properties'</filename> resource file.</para>
+
+    <para><filename>'springapp/war/WEB-INF/classes/messages.properties'</filename>:</para>
+
+    <programlisting>title=SpringApp
+heading=Hello :: SpringApp
+greeting=Greetings, it is now
+<emphasis role="bold">priceincrease.heading=Price Increase :: SpringApp
+error.not-specified=Percentage not specified!!!
+error.too-low=You have to specify a percentage higher than {0}!
+error.too-high=Don''t be greedy - you can''t raise prices by more than {0}%!
+required=Entry required.
+typeMismatch=Invalid data.
+typeMismatch.percentage=That is not a number!!!</emphasis></programlisting>
+
+    <para>Compile and deploy all this and after reloading the application we
+    can test it. This is what the form looks like with errors
+    displayed.</para>
+
+    <para>Finally, we will add a link to the price increase page from the
+    <filename>'hello.jsp'</filename>.</para>
+
+    <programlisting>&lt;%@ include file="/WEB-INF/jsp/include.jsp" %&gt;
+
+&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;&lt;fmt:message key="title"/&gt;&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;&lt;fmt:message key="heading"/&gt;&lt;/h1&gt;
+    &lt;p&gt;&lt;fmt:message key="greeting"/&gt; &lt;c:out value="${model.now}"/&gt;&lt;/p&gt;
+    &lt;h3&gt;Products&lt;/h3&gt;
+    &lt;c:forEach items="${model.products}" var="prod"&gt;
+      &lt;c:out value="${prod.description}"/&gt; &lt;i&gt;$&lt;c:out value="${prod.price}"/&gt;&lt;/i&gt;&lt;br&gt;&lt;br&gt;
+    &lt;/c:forEach&gt;
+<emphasis role="bold">    &lt;br&gt;
+    &lt;a href="&lt;c:url value="priceincrease.htm"/&gt;"&gt;Increase Prices&lt;/a&gt;
+    &lt;br&gt;
+</emphasis>  &lt;/body&gt;
+&lt;/html&gt;</programlisting>
+
+    <para>Now, run the 'deploy' and 'reload' targets and try the new price
+    increase feature.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/screen5.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/screen5.png" format="PNG" />
+        </imageobject>
+
+        <caption><para>The updated application</para></caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section id="step4.summary">
+    <title>Summary</title>
+
+    <para>Let's look at what we did in Part 4.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>We renamed our controller to
+        <classname>InventoryController</classname> and gave it a reference to
+        a <classname>ProductManager</classname> so we could retrieve a list of
+        products to display.</para>
+      </listitem>
+
+      <listitem>
+        <para>Next we modified the JSP page to use a message bundle for static
+        text and also added a forEach loop to show the dynamic list of
+        products.</para>
+      </listitem>
+
+      <listitem>
+        <para>Then we defined some test data to populate business objects we
+        modified the JSP page to use a message bundle for static text and also
+        added a forEach loop to show the dynamic list of products.</para>
+      </listitem>
+
+      <listitem>
+        <para>Next we modified the JSP page to use a message bundle for static
+        text and also added a forEach loop to show the dynamic list of
+        products.</para>
+      </listitem>
+
+      <listitem>
+        <para>After this worked we created a form to provide the ability to
+        increase the prices. Next we modified the JSP page to use a message
+        bundle for static text and also added a forEach loop to show the
+        dynamic list of products.</para>
+      </listitem>
+
+      <listitem>
+        <para>Finally we created the form controller and a validator and
+        deployed and tested the new features.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>Find below a screen shot of what your project directory structure
+    must look like after following the above instructions.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/dir-structure-endp4.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/dir-structure-endp4.png"
+                     format="PNG" />
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para></para>
+
+    <para></para>
+  </section>
+</chapter>

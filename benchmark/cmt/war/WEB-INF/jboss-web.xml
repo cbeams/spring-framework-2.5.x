@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jboss-web>
+
+<ejb-ref>
+        <ejb-ref-name>benchmark</ejb-ref-name>
+        <jndi-name>benchmark</jndi-name>
+    </ejb-ref>
+
+	
+    <resource-ref>
+        <res-ref-name>oracle</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <jndi-name>java:/oracle</jndi-name>
+    </resource-ref>
+	
+
+</jboss-web>

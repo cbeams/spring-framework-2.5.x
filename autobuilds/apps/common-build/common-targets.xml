@@ -1,0 +1,891 @@
+<?xml version="1.0"?>
+
+<!--
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/common-build/common-targets.xml,v 1.3 2005-11-26 17:37:59 colins Exp $"
+-->
+
+<project name="common-targets">
+
+  <!-- load constants pointing to various libs in the static repo -->
+  <property file="${basedef.dir}/library-refs.properties"/>
+
+  <!--
+        targets:  displays all targets suitable for developer use
+  -->
+  <target name="targets">
+    <echo>
+
+    ANT build for ${project.name} ${project.version}.
+
+    Please execute
+      build -projecthelp
+
+    to see a list of all relevant targets.
+
+    Please note that the default deployment target is 'dev' (development).
+    To build for staging or production, add the targets DEPTARGET.stag or
+    deptarget.prod before any other targets when doing a build.
+    </echo>
+  </target>
+  
+  <!--
+        init:  initializes some common settings
+  -->
+  <target name="init" depends="force.env.load,
+                               init.cl.external.props,
+                               init.env.external.props,
+                               init_pre,
+                               init_post,
+                               set.deployment.filters-pre,
+                               set.deployment.filters,
+                               init-deps,
+                               init_post2">
+
+  </target>
+
+  <target name="init_pre" >
+
+    <!-- set our deployment target to 'dev' here, since it is the default. It
+         may already have been set to something else, by using a target like
+	 deptarget.prod or deptarget.stag before all others, in which case
+	 that value will be used instead -->
+    <property name="deptarget" value="dev"/>
+
+    <tstamp>
+      <format property="TSTAMPCOL" pattern="hh:mm"/>
+    </tstamp>
+    <echo message='project.name = "${project.name}"' />
+    <echo message='ant.file = "${ant.file}"' />
+    <echo message='user.dir = "${user.dir}"' />
+    <echo message='ant.java.version = "${ant.java.version}"' />
+    <echo message='debug = "${debug}"' />
+    <echo message='optimize = "${optimize}"' />
+    <echo message='static.repo="${static.repo}"' />
+    <echo message='target.appserver = "${target.appserver}"' />
+
+    <property environment="myenv"/>
+    
+    <!-- vm to use for unit tests, will not override if already set -->
+    <!-- set to a dummy default val which will be ignored if already set -->
+    <property name="unitvm" value="-DzzzDummyVal"/>
+    <echo message='unit test vm: vm arg="${unitvm}"' />
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+      <classpath location="${PATH_TO_FILESET_JAR}"/>
+    </taskdef>
+
+  </target>
+  
+  <target name="init_post" depends="configure.eclipse">
+
+	<!-- set target appserver, default to jboss -->
+    <property name="target.appserver" value="jboss"/>
+    <condition property="target.appserver.jboss">
+      <equals arg1="${target.appserver}" arg2="jboss"/>
+    </condition>
+	<condition property="target.appserver.wl6">
+      <equals arg1="${target.appserver}" arg2="wl6"/>
+    </condition>
+
+    <patternset id="std.files.to.filter">
+      <include name="**/*.xml"/>
+      <include name="**/*.properties"/>
+      <include name="**/*.conf"/>
+      <include name="**/*.txt"/>
+      <include name="**/*.email"/>
+      <include name="**/*.html"/>
+      <include name="**/*.htm"/>
+    </patternset>
+    <patternset id="std.files.not.to.filter">
+      <exclude name="**/*.xml"/>
+      <exclude name="**/*.properties"/>
+      <exclude name="**/*.conf"/>
+      <exclude name="**/*.txt"/>
+      <exclude name="**/*.email"/>
+      <exclude name="**/*.html"/>
+      <exclude name="**/*.htm"/>
+    </patternset>
+	
+	<!-- directory definitions: these should not normally have to be changed -->
+
+    <!-- root of any bin files needed during build -->
+    <property name="bin.dir" value="bin"/>
+    <!-- libs needed for build process, some are copied for dist -->
+    <property name="lib.dir" value="lib"/>
+    
+    <!-- root of sources hierarchy -->
+    <property name="src.dir" value="${basedir}/src"/>
+
+    <!-- main sources -->
+    <property name="src.java.main.dir" value="${src.dir}/java"/>
+    <!-- test sources -->
+    <property name="src.java.test.dir" value="${src.dir}/test"/>
+
+	<!-- root of web-apps sources -->
+    <property name="src.web.dir" value="${basedir}/src/webapp"/>
+	<!-- root of source doc files -->
+    <property name="src.doc.dir" value="${basedir}/src/doc"/>
+    <!-- root of etc hierarchy, typically used for templated sources and config files -->
+    <property name="src.etc.dir" value="${basedir}/src/etc"/>
+    <!-- contents of this dir get added to unit test classpaths -->
+    <property name="etc.addtounitcp.dir" value="src/etc/add-to-unittest-cp"/>
+
+    <property name="src.resources.dir" value="${src.etc.dir}/resources"/>
+    <property name="src.dtd.dir" value="${src.etc.dir}/dtd"/>
+    <property name="src.tld.dir" value="${src.etc.dir}/tld"/>
+
+    <!-- set a default webapp name -->
+	<property name="primary.webapp.name" value="${name}"/>
+
+    <!-- root of build hierarchy -->
+    <property name="target.dir" value="${basedir}/target"/>
+    <!-- any generated java sources go here -->
+	<property name="target.gen.java.dir" value="${target.dir}/gen-java-src" />
+    <property name="target.gen.java.test.dir" value="${target.dir}/gen-java-test-src" />
+	<!-- contents of this dir get added to unit test classpaths -->
+    <property name="target.addtounitcp.dir" value="${target.dir}/add-to-unittest-cp"/>
+    <!-- where raw class files go -->
+    <property name="target.classes.dir" value="${target.dir}/classes"/>
+    <property name="target.testclasses.dir" value="${target.dir}/test-classes"/>
+	<!-- where JavaDoc generate files go -->
+    <property name="target.javadocs.dir" value="${target.dir}/javadocs"/>
+    <!-- where J2SE/J2EE modules (.jar, .war, .ear) go -->
+    <property name="target.modules.dir" value="${target.dir}/modules"/>
+    <!-- where test results end up -->
+    <property name="target.testresults.dir" value="${target.dir}/test-reports"/>
+	<!-- where target libs go -->
+    <property name="target.lib.dir" value="${target.modules.dir}/lib"/>
+    <!-- where any exploded ejbs go -->
+	<property name="target.expejb.primary.dir" value="${target.modules.dir}/exp-ejb/primary"/>
+    <!-- where deployment descriptors go -->
+    <property name="target.expejb.primary.dd.dir" value="${target.expejb.primary.dir}/META-INF"/>
+	<!-- where ejbs go -->
+    <property name="target.ejb.dir" value="${target.modules.dir}/ejb"/>
+	<!-- where any exploded web-app goes -->
+    <property name="target.web.dir" value="${target.modules.dir}/exp-war"/>
+    <!-- where any exploded EAR goes -->
+    <property name="target.expear.dir" value="${target.modules.dir}/exp-ear"/>
+    <!-- where EAR goes -->
+	<property name="target.modules.ear.dir" value="${target.modules.dir}/ear"/>
+
+	<property name="docs.dir" value="docs"/>
+
+    <!-- where the dist target is saved -->
+    <property name="dist.dir" value="${target.dir}/dist"/>
+
+    <!-- create an empty path for webapp libdir. It can be overriden -->
+	<path id="deps.webapp.libdir"/>
+
+    <!-- sample: set proper packages here, for javadocs -->
+    <property name="packages" value="stub.*"/>
+
+    <!-- convert appserver specific properties to final property names -->
+	<echoproperties destfile="properties.tmp">
+      <propertyset id="appserver.specific.properties">
+        <propertyref prefix="${target.appserver}"/>
+        <mapper type="glob" from="${target.appserver}.*" to="*"/>
+      </propertyset>
+    </echoproperties>
+    <loadproperties srcFile="properties.tmp"/>
+    <delete file="properties.tmp"/>
+
+    <fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
+      <include name="**/*" />
+    </fileset>
+
+  </target>
+
+  <target name="init_post2">
+	
+	<!-- set up paths that we need, as well as a property that mirrors it. We use
+         the latter in most targets, not path with refid, to get around an antcall issue -->
+
+    <path id="weblogic6.classpath">
+      <pathelement path="${weblogic6.home}/lib/weblogic.jar"/>
+    </path>
+    <property name="weblogic6.classpath" refid="weblogic6.classpath"/>
+    
+    <path id="jboss3.classpath">
+      <pathelement path="${jboss3.home}/client/jbossall-client.jar"/>
+    </path>
+
+    <!-- fold previously defined appserver libs classpath into main one -->
+    <!-- needed for EJB related code, and JDBC drivers -->
+    <path refid="weblogic6.classpath"/>
+    <path refid="jboss3.classpath"/>
+
+	<path id="project.classpath">
+	  <path refid="deps.normal"/>
+	  <path refid="deps.compileonly"/>
+	  <path refid="deps.testonly"/>
+	  <path refid="deps.webapp.libdir"/>
+    </path>
+    <property name="project.classpath" refid="project.classpath"/>
+    <!--echo>project.classpath=${project.classpath}</echo-->
+
+    <!--<property name="xdoclet.lib.dir" value="../../shared/lib/xdoclet/xdoclet-1.2"/> -->
+    <property name="xdoclet.lib.dir" value="${basedef.dir}/../../shared/lib/xdoclet/xdoclet-1.2"/>
+	<path id="xdoclet.classpath">
+	  <path location="${EJB_JAR}"/>
+	  <path location="${SERVLET_JAR}"/>
+	  <path location="${LOG4J_JAR}"/>
+      <fileset dir="${xdoclet.lib.dir}">
+        <include name="commons-collections.jar"/>
+        <include name="commons-logging.jar"/>
+		<include name="velocity-1.4.jar"/>
+		<include name="xdoclet.jar"/>
+        <include name="xdoclet-bea-module.jar"/>
+        <include name="xdoclet-ejb-module.jar"/>
+        <include name="xdoclet-hibernate-module.jar"/>
+        <include name="xdoclet-jboss-module.jar"/>
+        <include name="xdoclet-jmx-module.jar"/>
+        <include name="xdoclet-mvcsoft-module.jar"/>
+        <include name="xdoclet-web-module.jar"/>
+        <include name="xdoclet-xdoclet-module.jar"/>
+		<include name="xjavadoc.jar"/>
+	  </fileset>
+    </path>
+  </target>
+  
+  <!-- used to assist loading of properties from environment -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <target name="force.env.load">
+    <property environment="myenv"/>
+  </target>
+
+  <!-- targets which allow loading a command line or env specified external properties file -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <target name="init.cl.external.props" if="build.prop.file">
+    <property environment="myenv"/>
+    <echo message='loading external prop file: ${build.prop.file}'/>
+    <property file="${build.prop.file}"/>
+  </target>
+  <target name="init.env.external.props" if="myenv.STUB.BUILD.PROP.FILE">
+    <property environment="myenv"/>
+    <property file="${myenv.STUB.BUILD.PROP.FILE}"/>
+    <echo message='loading external prop file: ${myenv.STUB.BUILD.PROP.FILE}'/>
+  </target>
+
+  <!-- check_for_optional_packages:                                        -->
+  <!-- Check to see what optional dependencies are available               -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <target name="check_for_optional_packages">
+    <available property="jdk1.2+" classname="java.lang.ThreadLocal" />
+    <available property="jdk1.3+" classname="java.lang.StrictMath" />
+    <available property="xalan.present"
+               classname="org.apache.xalan.xslt.XSLTProcessorFactory" />
+    <available property="junit.present" classname="junit.framework.TestCase" />
+
+    <!-- compiler value may be 'modern', 'classic', or 'jikes' -->
+    <!-- will do nothing if it has already been set for eclipse -->
+    <property name="build.compiler" value="modern"/>
+
+  </target>
+  
+  <!-- needed so this build can be run properly from Eclipse -->
+  <target name="configure.eclipse" if="eclipse.running">
+    <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+    <echo message="Configuring compiler for Eclipse..."/>
+  </target>  
+
+  <!-- deployment targets allow us to have properties specified to a particular
+       deployment target (i.e. dev, stag, prod for dev, staging, production)
+	   ignore if not needed.
+	   do some work here to set the right deployment target ('dev' is default) -->
+  <!--
+	Sets properties and filter tokens properly to match the deployment
+	target we are building from. This target is meant to be called from
+	the init target.
+  -->
+  <target name="set.deployment.filters-pre">
+  </target>
+  <target name="set.deployment.filters"
+          depends="set.deptarget.is.property">
+
+    <echo>set.deployment.filters: deptarget=${deptarget}</echo>
+    <property file="${basedir}/proj/deptarget.${deptarget}.properties"/>
+  </target>
+
+  <target name="set.deptarget.is.property">
+    <property name="deptarget.is.${deptarget}" value="true"/>
+  </target>
+
+  <!-- some 'convenience targets to set the deployment target -->
+  <!-- deptarget.dev: force deployment target to 'dev' (devlopment) -->
+  <target name="deptarget.dev"
+          description="target deployment to 'dev' (default). Same as -Ddeptarget=dev">
+    <property name="deptarget" value="dev"/>
+  </target>
+  <!-- deptarget.dev: force deployment target to 'stag' (staging) -->
+  <target name="deptarget.stag"
+          description="target deployment to 'stag'. Same as -Ddeptarget=stag">
+    <property name="deptarget" value="stag"/>
+  </target>
+  <!-- deptarget.dev: force deployment target to 'prod' (production) -->
+  <target name="deptarget.prod"
+          description="target deployment to 'prod'. Same as -Ddeptarget=prod">
+    <property name="deptarget" value="prod"/>
+  </target>
+
+  <!--
+        clean:  Cleans up generated stuff
+  -->
+  <target name="clean" depends="init"
+      description="scrubs build, distribution, and test results directories">
+
+    <delete dir="${target.dir}"/>
+    <!-- also clean up dist.dir, in case it is not under target.dir -->
+    <delete dir="${dist.dir}"/>
+  </target>
+
+  <!--
+        total-clean: Total cleanup
+  -->
+  <target name="total-clean" depends="clean">
+  </target>
+
+  <!--
+        build-prepare:  Prepares the build directory
+  -->
+  <target name="build-prepare" depends="init, check_for_optional_packages">
+    <tstamp />
+	<mkdir dir="${target.dir}"/>
+	<mkdir dir="${target.gen.java.dir}"/>
+    <mkdir dir="${target.testresults.dir}"/>
+    <mkdir dir="${target.classes.dir}"/>
+    <mkdir dir="${target.testclasses.dir}"/>
+
+  </target>
+
+  <!--
+    statics: copies static files before compiles
+  -->
+  <target name="statics-pre" depends="build-prepare">
+  </target>
+
+  <!--
+    statics: reg subtarget
+  -->
+  <target name="statics-reg" depends="statics-pre">
+
+    <mkdir dir="${target.modules.dir}"/>
+    <mkdir dir="${target.addtounitcp.dir}"/>
+
+    <!-- copy everything from the source dir, except java files. Do not filter. Files
+	     that need filtering should go in resources. -->
+	<copy todir="${target.classes.dir}">
+      <fileset dir="${src.java.main.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+	
+    <!-- resource files, filtering for non-binary types -->
+    <copy todir="${target.classes.dir}" filtering="on">
+      <fileset dir="${src.resources.dir}">
+        <patternset refid="std.files.to.filter"/>
+      </fileset>
+	  <filterchain>
+        <expandproperties/>
+      </filterchain>
+    </copy>
+    <copy todir="${target.classes.dir}">
+      <fileset dir="${src.resources.dir}">
+        <patternset refid="std.files.not.to.filter"/>
+      </fileset>
+    </copy>
+
+	<!-- copy log4j.properties file, replacing tokens as needed -->
+    <copy file="${src.etc.dir}/log4j.properties.${deptarget}.txt"
+          tofile="${target.dir}/log4j.properties" filtering="on"/>
+
+  </target>
+
+  <target name="statics-web" depends="statics-reg" if="build.web">
+
+	<!-- copy static files for exploded webapps.
+	     This is useful to do here since somebody can potentially just use this target
+		 to update a deployed webapp, if it is deployed by itself (as opposed to in an
+		 ear, and all that has changed is a static file -->
+
+	<property name="target.web.primary.dir" value="${target.web.dir}"/>
+	<mkdir dir="${target.web.primary.dir}"/>
+    <copy todir="${target.web.primary.dir}" filtering="on">
+      <fileset dir="${src.web.dir}">
+        <patternset refid="std.files.to.filter"/>
+      </fileset>
+      <filterchain>
+        <expandproperties/>
+      </filterchain>
+    </copy>
+
+    <!--make no filtering on image and pdf files!!! -->
+    <copy todir="${target.web.primary.dir}">
+      <fileset dir="${src.web.dir}">
+        <patternset refid="std.files.not.to.filter"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <!--
+    statics: test subtarget
+  -->
+  <target name="statics-test" depends="statics-web">
+
+    <mkdir dir="${target.addtounitcp.dir}"/>
+
+	<!-- copy everything from the source dir, except java files. Do not filter. Files
+	     that need filtering should go in addtounitcp -->
+	<copy todir="${target.testclasses.dir}">
+      <fileset dir="${src.java.test.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+
+	<!-- test resources -->
+    <filter token="TESTOUTPUT_DESTINATION" value="${target.testresults.dir}/" />
+    <copy todir="${target.addtounitcp.dir}" filtering="on">
+      <fileset dir="${etc.addtounitcp.dir}">
+        <patternset refid="std.files.to.filter"/>
+      </fileset>
+      <filterchain>
+        <expandproperties/>
+      </filterchain>
+    </copy>
+    <copy todir="${target.addtounitcp.dir}">
+      <fileset dir="${etc.addtounitcp.dir}">
+        <patternset refid="std.files.not.to.filter"/>
+      </fileset>
+    </copy>
+	
+	<!-- write out a test.properties file with common properties -->
+    <propertyfile file="${target.addtounitcp.dir}/test.properties"
+                  comment="Common unit/integration test properties">
+      <entry  key="lastupate" type="date" value="now"/>
+    </propertyfile>
+
+    <!-- copy log4j.properties file so it can be seen by unit tests -->
+    <copy file="${target.dir}/log4j.properties"
+          todir="${target.addtounitcp.dir}"/>
+  </target>
+
+  <!--
+    statics: main target
+  -->
+  <target name="statics" depends="statics-test"
+          description="copies static files before compile, replacing tokens as needed">
+  </target>
+
+  <!--
+        compile:  Compiles the source code
+  -->
+  <target name="compile" depends="statics"
+          description="compiles all source code">
+
+    <pathtofileset2 name="deps.normal.fileset"
+                   pathrefid="deps.normal"
+				   ignoreNonExistent="false"/>
+    <pathtofileset2 name="deps.runtimeonly.fileset"
+                   pathrefid="deps.runtimeonly"
+				   ignoreNonExistent="false"/>
+    <pathtofileset2 name="deps.webapp.libdir.fileset"
+                   pathrefid="deps.webapp.libdir"
+				   ignoreNonExistent="false"/>
+	
+	<echo>main sources</echo>
+    <javac destdir="${target.classes.dir}"
+           debug="${debug}"
+           deprecation="${deprecation}"
+           optimize="${optimize}" >
+      <src path="${src.java.main.dir}" />
+      <src path="${target.gen.java.dir}" />
+	  <classpath path="${project.classpath}" />
+    </javac>
+
+    <!-- copy any non-java files form the generated java source dir -->
+	<copy todir="${target.classes.dir}">
+      <fileset dir="${target.gen.java.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+
+	<echo>.
+    </echo>
+
+    <echo>test sources</echo>
+    <javac srcdir="${src.java.test.dir}"
+           destdir="${target.testclasses.dir}"
+           debug="${debug}"
+           deprecation="${deprecation}"
+           optimize="${optimize}" >
+	  <classpath >
+		<pathelement location="${target.classes.dir}" />
+        <pathelement path="${project.classpath}"/>
+      </classpath>
+    </javac>
+
+    <!-- we also redo this when we actually produce a distribution -->
+    <filter token="VERSION" value="${project.version}" />
+    <filter token="DATE" value="${DSTAMP}" />
+    <filter token="TIME" value="${TSTAMPCOL}" />
+    <copy    todir="${target.classes.dir}"
+             overwrite="false"
+             filtering="on">
+      <fileset dir="${src.java.main.dir}">
+        <include name="**/version.txt" />
+        <include name="**/defaultManifest.mf" />
+      </fileset>
+      <filterchain>
+        <expandproperties/>
+      </filterchain>
+    </copy>
+
+    <!-- put the log4j.properties file in a jar so other jars can load it via a 
+	     manifest classpath reference, or due to the fact this jar is dropped into
+		 something like a web-apps's lib dir -->
+    <mkdir dir="${target.lib.dir}"/>
+    <jar jarfile="${target.lib.dir}/log4j-properties.jar">
+      <fileset dir="${target.dir}" >
+        <include name="log4j.properties" />
+      </fileset>
+    </jar>
+
+  </target>
+
+  <target name="jar-pre" depends="compile">
+	<mkdir dir="${target.lib.dir}"/>
+  </target>
+
+  <!--
+        main-jar:  Creates main jar containing utility and other classes
+  -->
+  <target name="main-jar" depends="jar-pre"
+          description="creates main jar containing utility and other classes">
+
+    <property name="jar.manifest.file" value="${src.etc.dir}/manifest/empty.mf"/>
+	<jar jarfile="${target.lib.dir}/${name}.jar"
+         manifest="${jar.manifest.file}">
+      <!-- todo, make this more selective, we don't really want to include everything here -->
+      <fileset dir="${target.classes.dir}" >
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="jar-post" depends="main-jar">
+  </target>
+
+  <!--
+        main:  Creates the binary structure
+  -->
+  <target name="main" depends="jar-post"
+          description="main target, currently a synonym for 'main-jar'">
+  </target>
+  
+  <target name="web-pre" depends="jar-post">
+  </target>
+
+  <!--
+        web-primary:  Creates primary web-app in exploded format
+  -->
+  <target name="web-primary" depends="web-pre" if="build.web"
+          description="creates the primary web-app in exploded format">
+    <antcall target="web.copy.classes" inheritRefs="true"/>
+    <antcall target="web.copy.libs" inheritRefs="true"/>
+  </target>
+
+  <!-- broken out so derived build can override which classes and libs get copied -->
+  <target name="web.copy.classes">
+    <!-- by default copy all classes -->
+    <copy todir="${target.web.dir}/WEB-INF/classes">
+      <fileset refid="classes.for.web.inf.classes.fileset"/>
+    </copy>
+  </target>
+  <target name="web.copy.libs">
+	<copy todir="${target.web.primary.dir}/WEB-INF/lib" flatten="true">
+      <fileset dir="${target.lib.dir}">
+        <include name="log4j-properties.jar" />
+      </fileset>
+      <fileset refid="deps.webapp.libdir.fileset"/>
+	</copy>
+  </target>
+
+  <target name="web-post" depends="web-primary" if="build.web">
+  </target>
+  
+  <target name="war-pre" depends="web-post" if="build.web">
+  </target>
+  
+  <!--
+        war-primary: Creates primary web-app in war format
+  -->
+  <target name="war-primary" depends="war-pre" if="build.web"
+      description="creates the principal web-app in .war format">
+
+    <mkdir dir="${target.modules.dir}/war"/>
+    <jar jarfile="${target.modules.dir}/war/${primary.webapp.name}.war">
+      <fileset dir="${target.web.primary.dir}" >
+        <exclude name="**/*.dependency" />
+      </fileset>
+    </jar>
+
+  </target>
+  
+  <target name="war-post" depends="war-primary" if="build.web">
+  </target>
+
+  <!--
+        exp-ear:  Creates an enterprise application (EAR) in exploded format
+  -->
+  <target name="exp-ear" depends="war-post" if="build.j2eeapp"
+          description="creates enterprise application (.ear) in exploded format)">
+
+    <property name="primary.expear.dir" value="${target.expear.dir}/primary"/>
+	<mkdir dir="${primary.expear.dir}"/>
+
+	<!-- copy ear application.xml, replacing tokens as needed -->
+    <copy file="${src.dir}/application/META-INF/application.xml"
+          tofile="${primary.expear.dir}/META-INF/application.xml" filtering="on"/>
+	
+	<!-- copy ejb modules -->
+	<mkdir dir="${target.ejb.dir}"/>
+    <copy todir="${primary.expear.dir}">
+      <fileset dir="${target.ejb.dir}">
+        <include name="*.jar" />
+      </fileset>
+	</copy>
+
+    <!-- copy web-apps -->
+	<mkdir dir="${target.modules.dir}/war"/>
+    <copy todir="${primary.expear.dir}">
+      <fileset dir="${target.modules.dir}/war">
+        <include name="${primary.webapp.name}.war" />
+      </fileset>
+	</copy>
+
+    <!-- copy special log4j properties jar -->
+    <copy todir="${primary.expear.dir}">
+      <fileset dir="${target.lib.dir}">
+        <include name="log4j-properties.jar" />
+      </fileset>
+	</copy>
+
+    <!-- copy support libs -->
+    <pathtofileset2 name="deps.ear.modules.fileset"
+                   pathrefid="deps.ear.modules"
+				   ignoreNonExistent="false"/>
+	<copy todir="${primary.expear.dir}" flatten="yes">
+      <fileset dir="${target.lib.dir}">
+        <include name="${name}.jar" />
+      </fileset>
+      <fileset refid="deps.ear.modules.fileset"/>
+    </copy>
+
+  </target>
+
+  <!--
+        ear:  Creates an enterprise application (EAR in exploded format)
+  -->
+  <target name="ear" depends="exp-ear" if="build.j2eeapp"
+          description="creates enterprise application archive (.ear)">
+
+	<mkdir dir="${target.modules.ear.dir}"/>
+
+	<ear earfile="${target.modules.ear.dir}/${name}.ear" 
+          appxml="${primary.expear.dir}/META-INF/application.xml">
+      <fileset dir="${primary.expear.dir}">
+        <exclude name="**/application.xml" />
+      </fileset>
+    </ear>
+  </target>
+ 
+  <!--
+        dist:  Construct the project distributables
+  -->
+  <target name="dist" depends="ear"
+          description="creates project distributables">
+  </target>
+  
+  <!--
+        javadocs:  Creates the API documentation
+  -->
+  <target name="javadocs" depends="build-prepare"
+          description="Creates the API documentation">
+    <mkdir dir="${target.javadocs.dir}"/>
+    <javadoc destdir="${target.javadocs.dir}"
+             author="true"
+             version="true"
+             windowtitle="${Name} API"
+             doctitle="${Name}"
+             bottom="Copyright &#169; 2001 Whoever. All Rights Reserved.">
+      <classpath>
+        <pathelement location="${target.classes.dir}" />
+        <pathelement location="${target.testclasses.dir}" />
+        <pathelement path="${project.classpath}"/>
+      </classpath>
+      <sourcepath>
+        <pathelement location="${src.java.main.dir}" />
+      </sourcepath>
+      <packageset dir="${src.java.main.dir}">
+        <include name="**/*"/>
+      </packageset>
+    </javadoc>
+  </target>
+  
+  <!--
+        run: allows arbitrary java code to be run
+  -->
+  <target name="run" depends="init"
+          description="allows arbitrary java code to be run">
+    <java classname="${run.class}" fork="true">
+      <classpath >
+        <pathelement location="${target.classes.dir}" />
+		<pathelement location="${target.testclasses.dir}" />
+        <pathelement location="${target.addtounitcp.dir}" />
+        <pathelement path="${project.classpath}"/>
+      </classpath>
+    </java>
+  </target>
+
+  <!--
+        runp: allows arbitrary java code to be run, prompting for arguments
+  -->
+  <target name="runp" depends="init"
+          description="allows arbitrary java code to be run">
+
+    <input
+      message="Please enter parameters:"
+      addproperty="runp.params"
+    />
+	
+	<java classname="${run.class}" fork="true">
+      <arg line="${runp.params}"/>
+	  <classpath >
+		<pathelement location="${src.java.main.dir}" />
+		<pathelement location="${target.classes.dir}" />
+		<pathelement location="${target.testclasses.dir}" />
+        <pathelement location="${target.addtounitcp.dir}" />
+        <pathelement path="${project.classpath}"/>
+      </classpath>
+    </java>
+  </target>
+
+  <!-- classicvm:  call before any other targets if you want to run unit tests with classic vm  -->
+  <target name="classicvm"
+          description="use before any other targets to force unit tests to run with classic vm">
+    <property name="unitvm" value="-classic"/>
+  </target>
+
+  <!-- properties we want tacked on to all unit tests -->
+  <!-- set fake default value, will not override existing setting -->
+  <property name="unittests.props.always" value="-Dzzz456zzz"/>
+  
+  <!--
+        classpath used for unit tests, no configuration
+  -->
+  <path id="test.nocfg.classpath">
+    <pathelement location="${target.classes.dir}" />
+    <pathelement location="${target.testclasses.dir}" />
+    <pathelement location="${target.genclasses.dir}" />
+    <pathelement location="${target.addtounitcp.dir}" />
+    <pathelement path="${project.classpath}"/>
+  </path>
+  <property name="test.nocfg.classpath" refid="test.nocfg.classpath"/>
+
+  <target name="testprepare" depends="build-prepare" unless="testprepare-done">
+    <mkdir dir="${target.testresults.dir}"/>
+    <delete>
+      <fileset dir="${target.testresults.dir}"
+          includes="**/*.txt,**/*.log"/>
+    </delete>
+    <property name="testprepare-done" value="true"/>
+  </target>
+
+  <!--
+    automatically runs all the junit tests.
+  -->
+  <target name="run-tests" depends="run-ltests"
+          description="runs all unit tests, first local then server (if any)">
+
+    <!-- add code here to run server unit tests if there are any -->
+    <!-- this usually involves starting up the server, and in parallel running tests against it -->
+
+  </target>
+
+  <!--
+    automatically runs all the junit tests, with compile dependencies.
+  -->
+  <target name="run-tests-dep" depends="dist"
+          description="same as run-tests-dep, but does 'dist' first">
+  </target>
+
+  <!--
+    runs the local unit tests.
+  -->
+  <target name="run-ltests" depends="testprepare"
+          description="runs all local unit tests">
+    <!-- for the time being we just halt on failure, since these are
+         local tests and there is no server to shut down, etc. But if
+         we want to optionally run all tests and report on the whole
+         batch, then we need to set a failure property as in the server
+         tests. -->
+    <junit fork="yes" printsummary="yes" haltonfailure="yes">
+      <jvmarg value="${unitvm}"/>
+      <jvmarg value="${unittests.props.always}"/>
+      <jvmarg value="-Djava.security.auth.login.config=${target.addtounitcp.dir}/auth.conf"/>
+      <classpath>
+        <pathelement location="${target.classes.dir}" />
+        <pathelement location="${target.testclasses.dir}" />
+        <pathelement location="${target.genclasses.dir}" />
+        <pathelement location="${target.addtounitcp.dir}" />
+        <pathelement path="${project.classpath}"/>
+        <path refid="deps.runtimeonly"/>
+      </classpath>
+
+      <formatter type="plain" />
+
+      <!-- don't forget you can put in compound tests (test suites) here, etc. -->
+      <!-- you could also use a batchtest element! -->
+
+      <test name="stub.StubTest" todir="${target.testresults.dir}" unless="junit.failure"/>
+    </junit>
+
+  </target>
+
+  <!--
+    runs one local unit test
+  -->
+  <target name="run-ltest" depends="testprepare"
+          description="runs one local unit test">
+    <junit fork="yes" printsummary="yes" haltonfailure="yes">
+      <jvmarg value="${unitvm}"/>
+      <jvmarg value="${unittests.props.always}"/>
+      <jvmarg value="-Djava.security.auth.login.config=${target.addtounitcp.dir}/auth.conf"/>  <classpath>
+        <pathelement location="${target.classes.dir}" />
+        <pathelement location="${target.testclasses.dir}" />
+        <pathelement location="${target.genclasses.dir}" />
+        <pathelement location="${target.addtounitcp.dir}" />
+        <pathelement path="${project.classpath}"/>
+        <path refid="deps.runtimeonly"/>
+      </classpath>
+
+      <formatter type="plain" />
+
+      <!-- the test case -->
+      <test name="${test.class}" todir="${target.testresults.dir}"/>
+
+    </junit>
+  </target>
+
+  <!--
+        test-unit-stub - a sample unit test
+        shows how to make a target to run just one specific unit test instead
+        of having to specify the class
+	It can get a lot more elaborate than this, with various properties being
+	set up, etc. Property files can be written out, etc.
+  -->
+  <target name="test-unit-stub" depends="init">
+    <antcall target="run-ltest">
+      <param name="test.class" value="stub.StubTest"/>
+    </antcall>
+  </target>
+
+</project>

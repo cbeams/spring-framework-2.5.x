@@ -1,0 +1,20 @@
+# in build.properties you may override any values from project.properties
+# just rename this file and add properties as needed
+#
+# $Id: build.properties.sample,v 1.2 2004-11-14 17:19:14 colins Exp $
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# Optional properties
+# -----------------------------------------------------------------------------
+
+# project is cactified by default, override that here if needed
+#cactify.project=true
+
+# The port to use for starting the servers during unit testing. If not
+# specified, it defaults to port 8080.
+#cactus.port = 8081
+
+# J2EE containers for the tests
+
+cactus.home.jboss3x = c:/dev/jboss-3.2.5

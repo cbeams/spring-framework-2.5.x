@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+
+<!--
+	Author:  Darren Davison
+	Version: $Id: build.xml,v 1.2 2005-08-14 00:26:30 aarendsen Exp $
+-->
+
+<project name="buildtest" basedir="." default="usage">
+
+	<property file="build.properties"/>
+
+
+	<path id="master-classpath">
+
+		<fileset dir="${spring.dir}/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		
+		<fileset dir="${spring.dir}/dist">
+			<include name="spring.jar"/>
+		</fileset>
+
+	</path>
+
+
+	<target name="usage">
+		<echo message="build test app.  Run from autobuilds directory instead."/>
+	</target>
+
+
+	<target name="clean" description="Clean output dirs (build, dist, testbuild, weblib)">
+
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+		<delete dir="${lib.dir}"/>		
+
+	</target>
+
+
+	<target name="build" description="Compile main source tree java files into class files, generate jar files">
+
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${lib.dir}"/>
+		
+		<copy todir="${lib.dir}" file="${spring.dir}/dist/spring.jar" />
+		<copy todir="${lib.dir}" file="${spring.dir}/lib/jakarta-commons/commons-logging.jar" />
+		
+		<javac destdir="${build.dir}" target="1.5" debug="true"
+			deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+
+	</target>
+
+
+
+	<target name="dist" depends="build" description="Build the web application archive">
+
+		<mkdir dir="${dist.dir}"/>
+
+		<war warfile="${dist.dir}/${name}.war" 
+				webxml="${war.dir}/WEB-INF/web.xml">
+			
+			<!-- Include the JSPs and other documents -->
+			<fileset dir="war" excludes="WEB-INF/**"/>
+			
+			<!-- Include the compiled classes -->
+			<classes dir="${build.dir}"/>
+						
+			<!-- Bring in Spring-specific XML configuration files -->
+			<webinf dir="${war.dir}/WEB-INF">
+				<!-- We've already included this -->
+				<exclude name="web.xml"/>
+			</webinf>
+			
+			<lib dir="${lib.dir}" />
+		</war>
+
+	</target>
+
+
+</project>

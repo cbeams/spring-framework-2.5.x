@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+
+<!--
+	autobuilds-tomcat4 project build file
+	
+	Targets to compile and build the sample apps and test server
+	environments and run various HttpUnit tests against them.
+	
+	$Id: tomcat4-build.xml,v 1.8 2004-06-07 23:35:18 davison Exp $
+-->
+<project name="autobuilds-tomcat4" basedir="." default="usage">
+
+	
+	<property name="appserver.distname" value="jakarta-tomcat-${tomcat4.version}" />
+	<property name="deploy.dir" value="webapps" />
+	
+	
+
+	<path id="server-classpath">
+		<fileset dir="${servers.install.dir}/${appserver.distname}/server/lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${servers.install.dir}/${appserver.distname}/common/lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${spring.lib.dir}/hsqldb">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${servers.install.dir}/${appserver.distname}/bin/bootstrap.jar" />
+	</path>
+	
+
+
+	<!--
+		usage
+	-->
+	<target name="usage">        
+        <echo>
+Spring Framework
+=============================================================================
+
+${ant.file} 
+
+This file should not be called directly.  See the documentation in the
+autobuilds directory for information.
+=============================================================================
+        </echo>
+
+	</target>
+	
+	
+	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server" unless="server.binary.present">
+		<echo message="Downloading ${tomcat4.url} to ${tarballs.dir}/${tomcat4.tarball}" />
+		<get
+			src="${tomcat4.url}"
+			dest="${tarballs.dir}/${tomcat4.tarball}" />	
+	</target>
+		
+		
+		
+	<!--
+		extract-server
+		
+		extract server to installs area and configure from
+		local config files
+	-->
+	<target name="extract-server">
+		<!-- check latest d/l available -->
+		<available file="${tarballs.dir}/${tomcat4.tarball}" property="server.binary.present"/>
+		<antcall target="get-server"/>
+		
+		<untar 
+			compression="gzip" 
+			src="${tarballs.dir}/${tomcat4.tarball}"
+			dest="${servers.install.dir}" />
+			
+		<copy todir="${servers.install.dir}/${appserver.distname}" overwrite="true">
+			<fileset dir="${servers.conf.dir}/${target.server}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		
+		<!-- copy hsqldb.jar to common lib -->
+		<copy 
+			todir="${servers.install.dir}/${appserver.distname}/common/lib" 
+			file="${spring.lib.dir}/hsqldb/hsqldb.jar" 
+		/>
+			
+		<!-- tools.jar required for the application server -->
+		<copy 
+			todir="${servers.install.dir}/${appserver.distname}/common/lib"
+			file="${java.home}/../lib/tools.jar"
+			overwrite="true"
+		/>
+	</target>
+	
+	
+	<!--
+		deploy
+		
+		based on a system or other property (often set in the batch file / shell script
+		calling this target) deploy to the target server
+	-->
+	<target name="deploy" depends="extract-server">
+		<copy todir="${servers.install.dir}/${appserver.distname}/${deploy.dir}">
+			<fileset dir="${autobuilds.samples.dir}/${target.app}/dist">
+				<include name="*" />
+				<exclude name="**/autobuild*" />
+			</fileset>
+		</copy>
+		<mkdir dir="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}"/>
+		<unwar src="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}.war"
+			   dest="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}" />
+	</target>
+	
+	
+	<!--
+		start-server
+		
+		start the tomcat server if it's a current target appserver
+	-->
+	<target name="start-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Starting server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<java 
+			classname="org.apache.catalina.startup.Bootstrap"
+			output="${reports.dir}/${target.server}_server.log"
+			fork="true">
+		
+			<arg value="start"/>
+
+    	  	<jvmarg value="-Dcatalina.base=${servers.install.dir}/${appserver.distname}" />
+    	  	<jvmarg value="-Dcatalina.home=${servers.install.dir}/${appserver.distname}" />
+      		<jvmarg value="-Djava.io.tmpdir=${servers.install.dir}/${appserver.distname}/temp" />
+      		
+      		<classpath refid="server-classpath" />
+      		
+      	</java>
+	</target>
+	
+	
+	<!--
+		stop-server
+		
+		stop the target server
+	-->
+	<target name="stop-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Stopping server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<java 
+			classname="org.apache.catalina.startup.Bootstrap"
+			fork="true">
+		
+			<arg value="stop"/>
+			
+    	  	<jvmarg value="-Dcatalina.base=${servers.install.dir}/${appserver.distname}" />
+    	  	<jvmarg value="-Dcatalina.home=${servers.install.dir}/${appserver.distname}" />
+      		<jvmarg value="-Djava.io.tmpdir=${servers.install.dir}/${appserver.distname}/temp" />
+      		
+      		<classpath refid="server-classpath" />
+      		
+      	</java>
+	</target>
+	
+</project>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!--
+  - Application context definition for "example" DispatcherServlet.
+  -->
+
+<beans>
+
+
+
+<!-- ALSO NEED LOW OVERHEAD POJO FACTORY THAT USES TRANSACTION INTERCEPTOR OR SIMILAR -->
+
+	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
+	<bean id="transactionManager" class="org.springframework.benchmark.invokers.DummyTransactionManager">
+	</bean>
+		
+	
+	<bean id="singletonTarget" 
+		class="org.springframework.benchmark.invokers.ServiceImpl"
+		singleton="true"
+	/>
+	
+	<bean id="prototypeTarget" 
+		class="org.springframework.benchmark.invokers.ServiceImpl"
+		singleton="false"
+	/>
+	
+	<bean id="synchTarget" 
+		 class="org.springframework.benchmark.invokers.SynchService"
+		singleton="true"
+	/>
+	
+	<bean id="synchIncTarget" 
+		 class="org.springframework.benchmark.invokers.SynchIncrementer"
+		singleton="true"
+	/>
+	
+	<!--
+	<bean id="prototypeInvokerInterceptor" 
+		class="org.springframework.aop.interceptor.PrototypeInvokerInterceptor">	
+		<property name="targetBeanName"><value>prototypeTarget</value></property>
+	</bean>
+	
+	
+	<bean id="apartmentInvokerInterceptor" 
+		class="org.springframework.aop.interceptor.ThreadLocalInvokerInterceptor">	
+		<property name="targetBeanName"><value>prototypeTarget</value></property>
+	</bean>
+	-->
+	
+	<bean id="poolingTargetSource" 
+		class="org.springframework.aop.target.CommonsPoolTargetSource">	
+		<property name="targetBeanName"><value>prototypeTarget</value></property>
+		<property name="maxSize"><value>80</value></property>
+	</bean>
+	
+	<!--
+	<bean id="prototype" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="prototypeInvokerInterceptor"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	-->
+	
+	<!--
+		The most important definition:
+		the recommended model
+	-->
+	<bean id="singleton" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		
+
+		<property name="target"><ref local="singletonTarget"/></property>
+
+
+		<!-- Force the use of CGLIB -->
+		<property name="proxyTargetClass"><value>false</value></property>
+		<property name="optimize"><value>false</value></property> 
+	
+		<property name="transactionAttributes">
+			<props>
+			<!-- Faster to have exact match -->
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="singletonCglib" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		<property name="target"><ref local="singletonTarget"/></property>
+
+		<!-- Force the use of CGLIB -->
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="optimize"><value>false</value></property> 
+	
+		<property name="transactionAttributes">
+			<props>
+			<!-- Faster to have exact match -->
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="singletonOptimizedCglib" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		<property name="target"><ref local="singletonTarget"/></property>
+
+		<!-- Force the use of CGLIB -->
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="optimize"><value>true</value></property> 
+	
+		<property name="transactionAttributes">
+			<props>
+			<!-- Faster to have exact match -->
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+<!--
+	<bean id="apartment" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		<property name="target"><ref local="apartmentInvokerInterceptor"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="pooling" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		<property name="target"><ref local="poolingInvokerInterceptor"/></property>
+		<property name="transactionAttributes">
+			
+			<props>
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="synch" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="synchTarget"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	-->
+	
+	<bean id="synchInc" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="synchIncTarget"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="takeUpToMillis">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

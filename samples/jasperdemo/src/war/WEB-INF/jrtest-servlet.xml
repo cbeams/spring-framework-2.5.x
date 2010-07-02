@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<!-- ResourceBundleViewResolver is the ideal way in which to configure a whole set of JasperReports
+			 views that require nothing more than the URL for configuration. -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+		<property name="basename">
+			<value>views</value>
+		</property>
+	</bean>
+
+	<!-- If a JasperReports view requires more complex configuration then use the BeanNameViewResolver to
+			 map a given view name to a given view bean -->
+	<bean id="nameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
+
+	<!-- Here you can see that we have configured the JasperReportsPdfView class with a Map containing the
+			 path to the sub-report file. The key used in the Map corresponds to the key used for the
+			 sub-report inside the master report file. -->
+	<bean id="subReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView">
+		<property name="url">
+			<value>/WEB-INF/reports/subReportParent.jasper</value>
+		</property>
+		<property name="subReportUrls">
+			<map>
+				<entry key="ProductsSubReport">
+					<value>/WEB-INF/reports/subReportChild.jasper</value>
+				</entry>
+			</map>
+		</property>
+		<property name="subReportDataKeys">
+			<value>SubReportData</value>
+		</property>
+		<property name="reportDataKey">
+			<value>dataSource</value>
+		</property>
+	</bean>
+
+	<bean id="htmlReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView">
+		<property name="url">
+			<value>/WEB-INF/reports/simpleReport.jasper</value>
+		</property>
+		<property name="exporterParameters">
+			<map>
+				<entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.HTML_FOOTER">
+					<value>Footer by Spring!&lt;/td&gt;&lt;td width="50%"&gt;&amp;nbsp; &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/*.*">controller</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="controller" class="org.springframework.samples.jasperdemo.web.ReportController">
+		<property name="methodNameResolver">
+			<ref local="resolver"/>
+		</property>
+	</bean>
+
+	<bean id="resolver" class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
+		<property name="mappings">
+			<props>
+				<prop key="/simpleReport.pdf">handleSimpleReport</prop>
+				<prop key="/simpleReportPost.pdf">handleSimpleReportPost</prop>
+				<prop key="/simpleReportPost.action">handleSimpleReportPost</prop>
+				<prop key="/simpleReportCompile.pdf">handleSimpleReportCompile</prop>
+				<prop key="/simpleReportHtml.html">handleSimpleReportHtml</prop>
+				<prop key="/simpleReportCsv.csv">handleSimpleReportCsv</prop>
+				<prop key="/simpleReportExcel.xls">handleSimpleReportExcel</prop>
+				<prop key="/simpleReportMulti.*">handleSimpleReportMulti</prop>
+				<prop key="/subReport.pdf">handleSubReport</prop>
+				<prop key="/exporterParameters.html">handleExporterParameters</prop>
+			</props>
+		</property>
+	</bean>
+</beans>

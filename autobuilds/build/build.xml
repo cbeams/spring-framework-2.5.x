@@ -1,0 +1,452 @@
+<?xml version="1.0"?>
+
+<!--
+    autobuilds project build file
+    
+    Targets to compile and build the sample apps and test server
+    environments and run various HttpUnit tests against them.
+    
+    This script should normally be managed from a shell script or 
+    batch file (supplied).
+    
+    $Id: build.xml,v 1.14 2005-08-14 00:26:29 aarendsen Exp $
+-->
+<project name="autobuilds" basedir="." default="usage">
+
+    
+    <!-- autobuilds properties - these should not need amending -->
+    <property name="autobuilds.dir" value=".." />
+    <property name="spring.root.dir" value="../.." />
+    <property name="spring.lib.dir" value="${spring.root.dir}/lib"/>
+    <property name="spring.dist.dir" value="${spring.root.dir}/dist"/>
+    <property name="target.root.dir" value="${spring.root.dir}/target/autobuilds" />    
+    <property name="autobuilds.samples.dir" value="${autobuilds.dir}/apps"/>
+    <property name="servers.conf.dir" value="${autobuilds.dir}/conf/servers" />
+    <property name="servers.install.dir" value="${target.root.dir}/server-installs" />
+    <property name="src.dir" value="${autobuilds.dir}/src" />
+    <property name="bin.dir" value="${target.root.dir}/classes" />
+    <property name="reports.dir" value="${target.root.dir}/reports" />
+    <property name="dev.mail.list" value="springframework-developer@lists.sourceforge.net" />
+    <property name="autobuilds.mail.from" value="autobuilds@springframework.org"/>
+    <property name="autobuilds.mail.failure.subject" value="Spring Autobuilds Failure Report"/>
+    
+    
+    <!-- build.properties is local per user -->
+    <property file="build.properties"/>
+    
+    <!-- server properties file with version numbers and download locations -->
+    <property file="servers.properties"/>
+    
+    
+    <!--
+    **************************************************************************
+    
+    the following properties may all be in a local build.properties in
+    the same directory as this file where their values will take precedence.
+    
+    **************************************************************************
+    -->
+
+    <!-- 
+        rsh program to use when accessing Spring's CVS repository - usually ssh 
+    -->
+    <property name="cvs.rsh" value="ssh" />
+    
+    <!-- 
+        how long to give the app server after starting it before running the tests (seconds)
+        
+        tomcat, resin, jetty are ok with about 15s on my 2.4Ghz P4
+        jboss needs about 60 on the same machine.
+    -->
+    <property name="autobuilds.server.timewait" value="180" />
+    
+    <!-- 
+        directory where the server tarballs are stored locally.  If the relevant 
+        server is not found in this directory, it will be downloaded from it's
+        http location
+    -->
+    <property name="tarballs.dir" value="${java.io.tmpdir}" />
+    
+        
+    <!--
+        server ports
+    -->
+    <property name="autobuilds.server.http.port" value="13084" />
+    <property name="autobuilds.server.hsql.port" value="9001"/>
+    
+    <!--
+        jdbc properties.  The driver must be in Ant's classpath ($ANT_HOME/lib)
+    -->
+    <property name="autobuilds.jdbc.driver" value="org.hsqldb.jdbcDriver"/>
+    <property name="autobuilds.jdbc.url" value="jdbc:hsqldb:hsql://localhost:9001"/>
+    <property name="autobuilds.jdbc.username" value="sa"/>
+    <property name="autobuilds.jdbc.password" value=""/>
+    
+    <!--
+        mail properties for sending failure/success summaries.
+    -->
+    <property name="autobuilds.mail.sendto" value="${dev.mail.list}"/>
+    <property name="autobuilds.mail.host" value=""/>
+    
+    
+    <!--
+    **************************************************************************
+    -->
+    
+    
+    
+    <!--
+        test-classpath
+        
+        classpath for test code
+    -->
+    <path id="test-classpath">
+        <!-- spring.jar will be built as part of any autobuilds build -->
+        <fileset dir="${spring.dist.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${spring.lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+    
+    
+    <!--
+        init
+    -->
+    <target name="init">
+
+        <mkdir dir="${target.root.dir}" />
+        <mkdir dir="${bin.dir}" />
+        <mkdir dir="${reports.dir}" />
+        <mkdir dir="${servers.install.dir}" />
+        
+        <tstamp>        
+            <format property="TODAY_UK" pattern="yyyy-MM-dd" locale="en"/>
+        </tstamp>
+        
+        <property name="autobuilds.unittest.outfile" value="${target.app}_${target.server}_unittests_${TODAY_UK}"/>
+        <property name="autobuilds.buildlog" value="${target.app}_${target.server}_build_${TODAY_UK}.log"/>
+    </target>
+    
+    
+    <!--
+        usage
+        
+        output the available targets in this build file
+    -->
+    <target name="usage" depends="init">        
+        <echo>
+Spring Framework
+-----------------------------------------------------------------------------
+
+${ant.file}
+    
+autobuilds build file - automatic deployment and testing of Spring sample 
+applications.
+
+This build file should be called from a shell script that sets the correct
+command line parameters (properties) for this build to operate as designed.
+See the script 'autobuild' or 'autobuild.bat' for info.
+
+-----------------------------------------------------------------------------
+            
+Usage (targets that can be run outside of the scripts):
+                    
+spring-update   --> do a CVS update of the Spring source tree (only).  This 
+                    target expects that a CVS checkout has already been 
+                    performed of the Spring project and a property called
+                    cvs.update must be set.
+                    
+clean           --> remove all build products and server installs, but leave
+                    logs and test reports intact.
+                    
+realclean       --> delete ALL build products and sandbox.
+
+=============================================================================
+        </echo>
+
+    </target>
+    
+    
+    
+
+    
+    <!--
+        main
+        
+        workflow task for autobuilds
+    -->
+    <target name="main" depends="setup,taskdefs,init">
+
+        <!--<record name="${reports.dir}/${autobuilds.buildlog}"/>-->
+        
+        <echo message="     #  ----------------------------------------------------------------" />
+        <echo message="     #" />
+        <echo message="     #  Spring Autobuilds - automatic application deployment and testing" />         
+        <echo message="     # " />
+        <echo message="     #  target application: ${target.app}" />
+        <echo message="     #  target server: ${target.server}" />
+        <echo message="     # " />
+        <echo message="     #  this output is recorded in the file:" />
+        <echo message="     #  ${reports.dir}/${autobuilds.buildlog}" />
+        <echo message="     #  ----------------------------------------------------------------" />
+        
+        <antcall target="spring-update" />
+        <ant dir="${autobuilds.samples.dir}/${target.app}" target="dist" inheritall="false" />
+        
+        <ant dir="." antfile="${target.server}-build.xml" target="deploy" />
+        
+        <ant dir="${autobuilds.samples.dir}/${target.app}" target="clean" inheritall="false" /> 
+        
+        <parallel>
+            <antcall target="start-hsql" />
+            <ant dir="." antfile="${target.server}-build.xml" target="start-server" />
+            <sequential>
+                <echo message="waiting ${autobuilds.server.timewait} seconds for server to warmup..."/>
+                <sleep seconds="${autobuilds.server.timewait}"/>
+                
+                <antcall target="tests"/>
+                                
+                <!-- keep alive? -->
+                <antcall target="check-stopserver"/>
+                <antcall target="stop-hsql"/>
+                <ant dir="." antfile="${target.server}-build.xml" target="stop-server" />   
+            </sequential>
+        </parallel>
+        
+        <!-- see if the junit tests failed -->
+        <antcall target="testchecks" />
+    </target>
+    
+    
+    
+    <!--
+        setup
+        
+        create required environment
+    -->
+    <target name="setup" depends="clean">
+        <condition property="hsql.required">
+            <or>
+                <equals arg1="petclinic" arg2="${target.app}" />
+                <equals arg1="jpetstore" arg2="${target.app}" />
+            </or>
+        </condition>
+    </target>
+    
+    
+    
+    <!--
+        spring-update
+        
+        run a  CVS update on the Spring source tree
+    -->
+    <target name="spring-update" if="cvs.update">
+        <echo message="#  ----------------------------------------------------------------" />
+        <echo message="#  Performing CVS update" />
+        <echo message="#  ----------------------------------------------------------------" />
+        <cvs failonerror="false" cvsrsh="${cvs.rsh}" command="update" dest="${spring.root.dir}/src" />
+    </target>
+    
+    
+    
+    <!--
+        spring-build
+        
+        build the spring.jar file from source
+        
+        spring.nobuild indicated no build will occur (this is especially useful
+        for automated building where the cvs updating and the building is done by somebody or
+        something else.
+    -->
+    <target name="spring-build" unless="autobuild.nospringbuild">
+        <echo message="#  ----------------------------------------------------------------" />
+        <echo message="#  Performing build of spring.jar" />
+        <echo message="#  ----------------------------------------------------------------" />
+        <ant dir="${spring.root.dir}" target="clean" inheritall="false" />
+        <ant dir="${spring.root.dir}" target="build" inheritall="false" />
+        <ant dir="${spring.root.dir}" target="fulljar" inheritall="false" />        
+    </target>
+    
+    
+    
+    <!--
+        build
+        
+        compile classes used in the deployment and testing
+    -->
+    <target name="build">
+        <mkdir dir="${bin.dir}"/>
+        <javac  srcdir="${src.dir}" destdir="${bin.dir}">
+            <classpath refid="test-classpath"/>
+        </javac>
+    </target>
+                
+    
+    
+    <!--
+        taskdefs
+        
+        declare the custom tasks
+    -->
+    <target name="taskdefs" depends="build">
+        <taskdef 
+            name="spring-killhsql" 
+            classname="org.springframework.autobuilds.ant.HsqlShutdown">
+            
+            <classpath refid="test-classpath"/>
+            <classpath path="${bin.dir}" />
+        </taskdef>
+    </target>
+    
+    
+    
+    <!--
+        start-hsql
+        
+        start hsql with the relevant database
+    -->
+    <target name="start-hsql" if="hsql.required">
+        <echo message="#  ----------------------------------------------------------------" />
+        <echo message="#  Starting HSQLDB" />
+        <echo message="#  ----------------------------------------------------------------" />      
+        <copy todir="${target.root.dir}" overwrite="true">
+            <fileset dir="${autobuilds.samples.dir}/${target.app}/db">
+                <include name="**/${target.app}.*" />
+            </fileset>
+        </copy>
+                
+        <java 
+            classname="org.hsqldb.Server"
+            output="${reports.dir}/hsqldb.log"
+            fork="true"
+            dir="${target.root.dir}/hsqldb">
+        
+            <arg value="-database"/>
+            <arg value="${target.app}"/>
+            
+            <classpath>
+                <fileset dir="${spring.lib.dir}/hsqldb">
+                    <include name="**/*.jar" />
+                </fileset>
+            </classpath>            
+        </java>
+    </target>
+    
+    
+    
+    <!--
+        tests
+        
+        run httpunit tests
+    -->
+    <target name="tests" depends="taskdefs">
+        <echo message="#  ----------------------------------------------------------------" />
+        <echo message="#  Starting unit tests for ${target.app}" />
+        <echo message="#  ----------------------------------------------------------------" />
+        <junit 
+            failureproperty="junit.failure"
+            printsummary="true"
+            errorproperty="junit.failure"
+        >
+            <formatter type="xml" />
+            <test 
+                name="org.springframework.apptests.${target.app}.AllTests"
+                todir="${reports.dir}"
+                outfile="${autobuilds.unittest.outfile}"
+            />
+            <classpath refid="test-classpath"/>
+            <classpath path="${bin.dir}" />
+        </junit>
+        
+        <delete dir="${reports.dir}/html" />
+        <mkdir dir="${reports.dir}/html" />
+        <junitreport todir="${reports.dir}/html">
+            <fileset dir="${reports.dir}">
+                <include name="${target.app}_${target.server}_unittests_*.xml"/>
+            </fileset>
+            <report format="frames" todir="${reports.dir}/html"/>
+        </junitreport>
+                
+    </target>
+    
+    
+    
+    <!--
+        stop-hsql
+        
+        stop hsql gracefully
+    -->
+    <target name="stop-hsql" if="hsql.required" depends="taskdefs">
+        <echo message="#  ----------------------------------------------------------------" />
+        <echo message="#  Stopping HSQLDB" />
+        <echo message="#  ----------------------------------------------------------------" />  
+        <spring-killhsql
+            url="${autobuilds.jdbc.url}"
+            user="${autobuilds.jdbc.username}"
+            password="${autobuilds.jdbc.password}"  
+        />
+    </target>
+    
+    
+    
+    <!--
+        check-stopserver
+        
+        close all servers
+    -->
+    <target name="check-stopserver" if="autobuilds.keepalive">
+        <input>
+        Servers have been left running for manual examination.
+        Press [Return] to quit the server(s) when ready...
+        </input>
+    </target>
+    
+    
+    
+    <!--
+        testchecks
+        
+        see if the unit tests failed or errored and take appropriate action
+    -->
+    <target name="testchecks" if="junit.failure" unless="autobuild.nomail">
+        <mail 
+            from="${autobuilds.mail.from}"
+            tolist="${autobuilds.mail.sendto}"
+            mailhost="${autobuilds.mail.host}"
+            subject="${autobuilds.mail.failure.subject}"
+            message="Please see attached reports"
+            encoding="plain"
+            messagemimetype="text/plain"
+        >
+            <fileset dir="${reports.dir}">
+                <include name="**/${autobuilds.unittest.outfile}*"/>
+            </fileset>
+        </mail>
+    </target>
+    
+    <!--
+        clean
+        
+        empties all classes, server installs
+    -->
+    <target name="clean">
+        <delete dir="${bin.dir}" />
+        <delete dir="${servers.install.dir}" />
+        <delete dir="${target.root.dir}/hsqldb" />
+    </target>   
+    
+    
+    
+    <!--
+        realclean
+        
+        removes autobuilds sandbox entirely
+    -->
+    <target name="realclean">
+        <delete dir="${target.root.dir}" />
+    </target>
+
+    
+</project>

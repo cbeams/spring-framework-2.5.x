@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!--
+  - Application context definition
+ -->
+ 
+<beans>
+	
+    <!-- can't have an empty context, so add an unused bean in here -->
+    <bean id="bogusBean" class="java.lang.String">
+    </bean>
+	
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+  
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+
+</beans>

@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+
+<project name="web" default="usage" basedir=".">
+	<import id="toplevel" file="../build.xml" />
+
+	<patternset id="webroot.config.files">
+		<include name="**/*.xml" />
+	</patternset>
+
+	<patternset id="classes.config.files">
+		<include name="**/*.properties" />
+	</patternset>
+
+	<patternset id="web.public.content.files">
+		<patternset refid="config.files" />
+		<patternset refid="image.files" />
+		<patternset refid="html.files" />
+		<include name="**/logoff.jsp" />
+		<include name="**/index.jsp" />
+		<include name="**/*.js" />
+		<exclude name="WEB-INF/**" />
+	</patternset>
+
+	<patternset id="web.protected.content.files">
+		<patternset refid="scriptlet.files" />
+		<patternset refid="config.files" />
+	</patternset>
+
+	<target name="build.prepare" depends="toplevel.build.prepare" description="Create web application archive (war) directories">
+		<mkdir dir="${target.war.dir}" />
+		<mkdir dir="${target.webinf.dir}" />
+		<mkdir dir="${target.webclasses.dir}" />
+		<mkdir dir="${target.weblib.dir}" />
+	</target>
+
+	<target name="build.static" depends="build.prepare, toplevel.build.static" description="Copy static files (property files, xml files, etc.) to target conf directories.">
+		<!-- Copy public web content: html, etc -->
+		<copy todir="${target.war.dir}">
+			<fileset dir="${web.dir}">
+				<patternset refid="web.public.content.files" />
+			</fileset>
+		</copy>
+
+		<!-- Copy protected web content: jsps, etc -->
+		<copy todir="${target.webinf.dir}">
+			<fileset dir="${webinf.dir}">
+				<patternset refid="web.protected.content.files" />
+			</fileset>
+		</copy>
+
+		<copy todir="${target.webclasses.dir}" file="${templates.dir}/log4j/log4j.properties" filtering="on" failonerror="false" />
+
+		<available file="${conf.dir}" property="conf.exists" />
+		<antcall target="build.conf" />
+
+		<antcall target="build.webapp.libs" />
+	</target>
+
+	<!-- copy business/persistence layer configuration files -->
+	<target name="build.conf" depends="build.prepare, toplevel.build.conf" if="conf.exists" description="Copy configuration files to WEB-INF if they exist.">
+		<copy todir="${target.webinf.dir}/classes" filtering="on">
+			<fileset dir="${target.conf.dir}">
+				<patternset refid="webroot.config.files" />
+			</fileset>
+		</copy>
+		<copy todir="${target.webinf.dir}/classes" filtering="on">
+			<fileset dir="${target.conf.dir}">
+				<patternset refid="classes.config.files" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build.webapp.libs">
+		<!-- copy web-app specific jar file dependencies, projects may override -->
+	</target>
+
+	<target name="create.distfile" depends="compile,dist.prepare" description="Create project jar file.">
+		<antcall target="toplevel.create.distfile" />
+
+		<!-- create a JAR file for the compiled project code, placing it in the WEB-INF/lib directory -->
+		<jar jarfile="${target.weblib.dir}/${project.name}.jar" compress="true" basedir="${target.classes.dir}" />
+
+		<!-- create a deployable WAR file for the entire application -->
+		<war warfile="${project.war}" basedir="${target.war.dir}" webxml="${target.webinf.dir}/web.xml" duplicate="fail">
+			<exclude name="WEB-INF/web.xml" />
+			<include name="**/*" />
+		</war>
+	</target>
+
+	<target name="wls.war" depends="dist" description="Install application to WebLogic">
+		<copy todir="${wls.dir}/applications">
+			<fileset dir="${dist.dir}" includes="*.war" />
+		</copy>
+	</target>
+
+	<target name="deploy.webcontent" depends="build.static" description="Copy web content (html files, jsps) to webapp deployment directory for quick testing">
+		<copy todir="${webapps.deploy.dir}/${project.name}/WEB-INF">
+			<fileset dir="${target.webinf.dir}" includes="**/*" />
+		</copy>
+		<copy todir="${webapps.deploy.dir}/${project.name}">
+			<fileset dir="${target.war.dir}" includes="**/*.html" />
+			<fileset dir="${target.war.dir}" includes="**/*.css" />
+		</copy>
+		<available file="${target.war.dir}/images" property="images.exists" />
+		<antcall target="deploy.webcontent.images" />
+	</target>
+
+	<target name="deploy.webcontent.images" if="images.exists">
+		<copy todir="${webapps.deploy.dir}/${project.name}/images">
+			<fileset dir="${target.war.dir}/images" includes="**/*" />
+		</copy>
+	</target>
+
+	<target name="deploy.common.libs">
+		<!-- Copy dependencies shared between web apps and servlet container to common lib directory, projects may override -->
+	</target>
+
+	<target name="deploy.shared.libs">
+		<!-- Copy default dependencies shared between web apps to shared lib directory, projects may extend/override -->
+	</target>
+
+	<target name="copy.war" depends="dist" description="Manually copy .war file to deploy dir">
+		<copy file="${project.war}" todir="${webapps.deploy.dir}" />
+	</target>
+
+	<target name="copy.webcontent" description="Copy web content (html files, jsps) to webapp deployment directory for quick testing">
+		<antcall target="deploy.webcontent" />
+	</target>
+
+	<target name="refresh.war" depends="clean.war,copy.war" />
+
+	<target name="clean.war">
+		<antcall target="clean.webapp" />
+	</target>
+
+	<target name="clean.webapp" description="Delete the deployed .war file and expanded war directory">
+		<delete file="${webapps.deploy.dir}/${project.name}.war" />
+		<delete failonerror="false" dir="${webapps.deploy.dir}/${project.name}" />
+	</target>
+
+	<target name="clean.shared.libs">
+		<delete>
+			<fileset dir="${shared.weblib.deploy.dir}" includes="*.jar" />
+		</delete>
+	</target>
+
+	<!-- tomcat related taskdefs & targets (optional) -->
+
+	<taskdef resource="org/apache/catalina/ant/catalina.tasks" onerror="ignore">
+		<classpath>
+			<filelist dir="${tomcat.dir}/server/lib">
+				<file name="catalina.jar"/>
+				<file name="catalina-ant.jar"/>
+			</filelist>
+		</classpath>
+	</taskdef>
+
+	<target name="tomcat.deploy" depends="dist,deploy.common.libs,deploy.shared.libs" description="Install application to tomcat">
+		<deploy url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" path="/${project.name}" war="${project.war}" />
+	</target>
+
+	<target name="tomcat.undeploy" description="Remove application from tomcat">
+		<undeploy url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" path="/${project.name}" failonerror="false" />
+	</target>
+
+	<target name="tomcat.redeploy" depends="tomcat.undeploy,tomcat.deploy" description="Redeploy the webapp" />
+
+	<target name="tomcat.reload" description="Reload application in tomcat">
+		<reload url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" path="/${project.name}" />
+	</target>
+
+	<target name="tomcat.server.start" depends="refresh.war" description="Copy in a updated war and start the tomcat server">
+		<exec dir="${tomcat.dir}/bin" executable="startup.bat" spawn="true" vmlauncher="false" />
+	</target>
+
+	<target name="tomcat.start" description="Start web application in tomcat">
+		<start url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" path="/${project.name}" />
+	</target>
+
+	<target name="tomcat.stop" description="Stop web application in tomcat">
+		<stop url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" path="/${project.name}" />
+	</target>
+
+	<target name="tomcat.list.webapps" description="List installed tomcat applications">
+		<list url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" />
+	</target>
+
+</project>

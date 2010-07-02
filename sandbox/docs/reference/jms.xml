@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter>
+    <title>JMS</title>
+    <sect1>
+        <title>Introduction</title>
+        <para>The JMS abstraction framework provided by spring consists of two different packages, jms and support.
+        The org.springframework.jms package provides the core funtionality with implementations 
+        of the JmsTemplate.  The support package contains utility classes for to obtain JMS destinations
+        from JNDI and to create dynamic destinations.  
+        </para>
+        <para>
+        There are two major releases of the JMS specification, 1.0.2 and 1.1.  JMS 1.0.2 defined two
+        types of messaging domains, point-to-point and publish/subscribe.  The 1.0.2 API reflected these two
+        messaging domains by providing a parallel class hierarcy for each domain.   Consequentially, a client 
+        application was domain specific.  JMS 1.1 introduced the concept of domain unification that 
+        minimized both the functional differences and client API differences between the two domains.        
+        The JMS 1.1 specification is part of J2EE 1.4 and is required by EJB 2.1.  The JmsTemplate inteface
+        was designed with domain unification in mind, so that it will be easy to transition from
+        a JMS 1.0.2 to a 1.1 provider.        
+        </para>
+        <para>
+        JMS functionality can be roughly divided into two areas, producing and consuming of messages.  In an
+        J2EE environment, the ability to consume messages is provided for by MessageDriven beans while in a 
+        stand-alone application this ability is provided for by the creation of MessageListeners or ConnectionConsumers.
+        With a few small caveats, producing messages is similar in both a J2EE and stand-alone environment.
+        </para>
+        <!-- stand alone not good word to use.... -->
+    </sect1>
+    <sect1>
+        <title>Using the JmsTemplate</title>
+        <para>
+            Producing messgaes...Exception handling... other callbacks.
+        </para>
+        
+        <para>
+            Message <-> Bean converters.
+        </para>
+        
+        <sect2>
+          <title>Inside EJBs</title>
+          <para>
+          </para>
+        </sect2>
+        
+        <sect2>
+          <title>Outside EJBs</title>
+          <para>
+              The jms factory classes....  Standalone simple connectionfactory wrapper.
+          </para>
+        </sect2>
+    </sect1>
+    
+    <sect1>
+        <title>Consuming messages</title>
+        <para>
+        </para>
+        
+        <sect2>
+            <title>Message Driven Beans</title>
+            <para>
+                Getting the application context...
+            </para>
+        </sect2>
+        
+        <sect2>
+            <title>MessageConsumers</title>
+            <para>
+                Factory classes....
+            </para>
+        </sect2>
+    </sect1>
+
+</chapter>

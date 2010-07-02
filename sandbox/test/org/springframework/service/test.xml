@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+  <bean id="serviceManager" singleton="true" class="org.springframework.service.DefaultServiceManager">
+    <property name="serviceBeans">
+      <list>
+        <ref bean="myFirstService"/>
+        <ref bean="mySecondService"/>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="myFirstService" singleton="true" class="org.springframework.service.FirstService">
+  </bean>
+
+  <bean id="mySecondService" singleton="true" class="org.springframework.service.SecondService">
+  </bean>
+
+</beans>

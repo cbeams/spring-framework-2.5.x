@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!--
+  - Application context definition for "example" DispatcherServlet.
+  -->
+
+<beans>
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName"><value>oracle.jdbc.driver.OracleDriver</value></property>
+		<property name="url"><value>jdbc:oracle:thin:@ 192.168.0.233:1521:rj</value></property>
+		<property name="username"><value>SYSTEM</value></property> <!--  Change this! -->
+		<property name="password"><value>MANAGER</value></property> <!-- TODO Change this! -->
+		<property name="maxActive"><value>50</value></property>
+		
+	
+		<property name="defaultAutoCommit"><value>false</value></property>
+		<property name="poolPreparedStatements"><value>true</value></property>
+	</bean>
+
+
+
+	<!-- Transaction manager for a single JDBC DataSource (alternative to JTA) -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource"><ref local="dataSource"/></property>
+	</bean>
+	
+	
+	
+	<!-- Transactional proxy for the Petclinic primary business object -->
+	<bean id="benchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="bmTarget"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="dao" class="org.springframework.benchmark.cmt.server.dao.JdbcBenchmarkDao"
+    				autowire="constructor">
+    </bean>
+	
+
+	<!-- Petclinic primary business object: HSQL JDBC implementation -->
+	<bean id="bmTarget" autowire="constructor" class="org.springframework.benchmark.cmt.server.pojo.PojoBenchmark">
+	</bean>
+	
+	
+	<bean id="programmaticBenchmark" 
+		autowire="constructor" 
+		class="org.springframework.benchmark.cmt.server.pojo.TxDecoratorPojoBenchmark">
+	</bean>
+	
+	
+	
+	<bean id="pojo"
+		class="org.springframework.benchmark.cmt.client.SingletonBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="benchmark"/></constructor-arg>
+	</bean>
+	
+	<bean id="progSingletonFactory"
+		class="org.springframework.benchmark.cmt.client.SingletonBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="programmaticBenchmark"/></constructor-arg>
+	</bean>
+	
+	<bean id="config" class="org.springframework.benchmark.cmt.web.Config">
+		<property name="mode"><value>pojo</value></property>
+	</bean>
+	
+	<bean id="testController" name="/test.cgi" class="org.springframework.benchmark.cmt.web.TestController"/>
+	
+	
+	
+	<bean id="orderController" name="/order.htm" class="org.springframework.benchmark.cmt.web.OrderBenchmarkController"
+		autowire="byType">
+		
+	</bean>
+	
+	
+	
+	<bean id="orders" name="/orders.htm" class="org.springframework.benchmark.cmt.web.GetOrdersBenchmarkController"
+		autowire="byType">
+		
+	</bean>
+
+	
+	<bean id="nopController" name="/nop.htm" class="org.springframework.benchmark.cmt.web.NopBenchmarkController"
+		autowire="byType">
+		
+		<property name="invocations"><value>20</value></property>
+	</bean>
+	
+	
+	
+</beans>

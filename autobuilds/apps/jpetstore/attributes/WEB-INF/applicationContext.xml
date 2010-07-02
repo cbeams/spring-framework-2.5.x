@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<beans>
+
+	<description>
+		This file illustrates reliance on declarative transaction management
+		provided by the autoproxy definitions in declarativeServices.xml.
+		There's no need to use a TransactionFactoryProxyBean: Any bean with
+		source-level transaction attributes will automatically benefit from
+		declarative transaction management.
+		
+		The application context must define a bean of type PlatformTransactionManager
+		for this to work (see dataAccessContext-local/jta.xml).
+	</description>
+
+
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+
+	<!-- Generic validator for Account objects, to be used for example by the Spring web tier -->
+	<bean id="accountValidator" class="org.springframework.autobuilds.jpetstore.domain.logic.AccountValidator"/>
+
+	<!-- Generic validator for Order objects, to be used for example by the Spring web tier -->
+	<bean id="orderValidator" class="org.springframework.autobuilds.jpetstore.domain.logic.OrderValidator"/>
+
+	<!-- 
+		JPetStore primary business object: default implementation,
+		Note that this is just a POJO definition in this file:
+		there's no need to use a TransactionFactoryProxyBean if the class has
+		source-level transaction attributes; the inherited autoproxy
+		bean definition will apply transaction advice automatically.
+	-->
+	<bean id="petStore" class="org.springframework.autobuilds.jpetstore.domain.logic.PetStoreImpl">
+		<property name="accountDao"><ref bean="accountDao"/></property>
+		<property name="categoryDao"><ref bean="categoryDao"/></property>
+		<property name="productDao"><ref bean="productDao"/></property>
+		<property name="itemDao"><ref bean="itemDao"/></property>
+		<property name="orderDao"><ref bean="orderDao"/></property>
+	</bean>
+
+
+	<!-- ========================= REMOTE EXPORTER DEFINITIONS ========================= -->
+
+	<!-- RMI exporter for the JPetStore OrderService -->
+	<!-- Commented out by default to avoid conflicts with EJB containers -->
+	<!--
+	<bean id="order-rmi" class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="service"><ref bean="petStore"/></property>
+		<property name="serviceInterface">
+			<value>org.springframework.autobuilds.jpetstore.domain.logic.OrderService</value>
+		</property>
+		<property name="serviceName"><value>order</value></property>
+		<property name="registryPort"><value>1099</value></property>
+	</bean>
+	-->
+
+</beans>

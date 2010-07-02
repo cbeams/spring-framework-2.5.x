@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<!-- DEFAULT MAIN TEMPLATE -->
+	<definition name="template" template="/WEB-INF/jsp/main.jsp">
+		<put-attribute name="newsOne" value="worldpress" type="definition"/>
+		<put-attribute name="newsTwo" value="slashdot" type="definition"/>
+	</definition>
+
+	<definition name="index" extends="template">
+		<put-attribute name="content" value="/WEB-INF/jsp/index.jsp" type="template"/>
+		<put-attribute name="newsOne" value="theserverside" type="definition"/>
+		<put-attribute name="newsTwo" value="slashdot" type="definition"/>
+	</definition>
+
+	<definition name="about" extends="template">
+		<put-attribute name="content" value="/WEB-INF/jsp/about.jsp" type="template"/>
+		<put-attribute name="newsOne" value="javablogs" type="definition"/>
+		<put-attribute name="newsTwo" value="slashdot" type="definition"/>
+	</definition>
+
+	<definition name="contact" extends="template">
+		<put-attribute name="content" value="/WEB-INF/jsp/contact.jsp" type="template"/>
+		<put-attribute name="newsOne" value="theserverside" type="definition"/>
+		<put-attribute name="newsTwo" value="javablogs" type="definition"/>
+	</definition>
+
+	<definition name="news" template="/WEB-INF/jsp/news.jsp" preparer="feedPreparer">
+		<put-attribute name="size" value="5"/>
+	</definition>
+
+	<definition name="theserverside" extends="news">
+		<put-attribute name="sourceName" value="theserverside"/>
+	</definition>
+
+	<definition name="javablogs" extends="news">
+		<put-attribute name="sourceName" value="javablogs"/>
+	</definition>
+
+	<definition name="slashdot" extends="news">
+		<put-attribute name="sourceName" value="slashdot"/>
+	</definition>
+
+</tiles-definitions>

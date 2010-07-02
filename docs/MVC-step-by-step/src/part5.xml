@@ -1,0 +1,684 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="part5">
+  <title>Implementing Database Persistence</title>
+
+  <para>This is Part 5 of a step-by-step account of how to develop a web
+  application from scratch using the Spring Framework. In <link
+  linkend="part1">Part 1</link> we configured the environment and set up a
+  basic application. In <link linkend="part2">Part 2</link> we refined the
+  application that we will build upon. <link linkend="part3">Part 3</link>
+  added all the business logic and unit tests and <link linkend="part4">Part
+  4</link> developed the web interface. It is now time to introduce database
+  persistence. We saw in the earlier parts how we loaded some business objects
+  using bean definitions in a configuration file. It is obvious that this
+  would never work in real life – whenever we re-start the server we are back
+  to the original prices. We need to add code to actually persist these
+  changes to a database.</para>
+
+  <section id="step5.1">
+    <title>Create database startup script</title>
+
+    <para>Before we can start developing the persistence code, we need a
+    database. We are planning on using HSQL, which is a good open source
+    database written in Java. This database is distributed with Spring, so we
+    can just copy the jar file to the web application's lib directory. Copy
+    <filename class="libraryfile">hsqldb.jar</filename> from the <filename
+    class="directory">'spring-framework-2.5/lib/hsqldb'</filename> directory
+    to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
+    directory. We will use HSQL in standalone server mode. That means we will
+    have to start up a separate database server instead of relying on an
+    embedded database, but it gives us easier access to see changes made to
+    the database when running the web application.</para>
+
+    <para>We need a script or batch file to start the database. Create a
+    <filename class="directory">'db'</filename> directory under the main
+    <filename class="directory">'springapp'</filename> directory. This new
+    directory will contain the database files. Now, let's and add a startup
+    script:</para>
+
+    <para>For Linux/Mac OS X add:</para>
+
+    <para><filename>'springapp/db/server.sh'</filename>:</para>
+
+    <programlisting>java -classpath ../war/WEB-INF/lib/hsqldb.jar org.hsqldb.Server -database test</programlisting>
+
+    <para>Don't forget to change the execute permission by running
+    <command>'chmod +x server.sh'</command>.</para>
+
+    <para>For Windows add:</para>
+
+    <para><filename>'springapp/db/server.bat'</filename>:</para>
+
+    <programlisting>java -classpath ..\war\WEB-INF\lib\hsqldb.jar org.hsqldb.Server -database test</programlisting>
+
+    <para>Now you can open a command window, change to the
+    <filename class="directory">'springapp/db'</filename> directory and start the database by
+    running one of these startup scripts.</para>
+  </section>
+
+  <section id="step5.2">
+    <title>Create table and test data scripts</title>
+
+    <para>First, lets review the SQL statement needed to create the table. We
+    create the file 'create_products.sql' in the db directory.</para>
+
+    <para><filename>'springapp/db/create_products.sql'</filename>:</para>
+
+    <programlisting>CREATE TABLE products (
+  id INTEGER NOT NULL PRIMARY KEY,
+  description varchar(255),
+  price decimal(15,2)
+);
+CREATE INDEX products_description ON products(description);</programlisting>
+
+    <para>Now we need to add our test data. Create the file 'load_data.sql' in
+    the db directory.</para>
+
+    <para><filename>'springapp/db/load_data.sql'</filename>:</para>
+
+    <programlisting>INSERT INTO products (id, description, price) values(1, 'Lamp', 5.78);
+INSERT INTO products (id, description, price) values(2, 'Table', 75.29);
+INSERT INTO products (id, description, price) values(3, 'Chair', 22.81);</programlisting>
+
+    <para>In the following section we will add some Ant targets to the build
+    script so that we can run these SQL scripts.</para>
+  </section>
+
+  <section id="step5.3">
+    <title>Add Ant tasks to run scripts and load test data</title>
+
+    <para>We will create tables and populate them with test data using Ant's
+    built-in "sql" task. To use this we need to add some database connection
+    properties to the build properties file.</para>
+
+    <para><filename>'springapp/build.properties'</filename>:</para>
+
+    <programlisting># Ant properties for building the springapp
+
+appserver.home=${user.home}/apache-tomcat-6.0.14
+# for Tomcat 5 use $appserver.home}/server/lib
+# for Tomcat 6 use $appserver.home}/lib
+appserver.lib=${appserver.home}/lib
+
+deploy.path=${appserver.home}/webapps
+
+tomcat.manager.url=http://localhost:8080/manager
+tomcat.manager.username=tomcat
+tomcat.manager.password=s3cret
+
+<emphasis role="bold">db.driver=org.hsqldb.jdbcDriver
+db.url=jdbc:hsqldb:hsql://localhost
+db.user=sa
+db.pw=</emphasis></programlisting>
+
+    <para>Next we add the targets we need to the build script. There are
+    targets to create and delete tables and to load and delete test
+    data.</para>
+
+    <para>Add the following targets to
+    <filename>'springapp/build.xml'</filename>:</para>
+
+    <programlisting><emphasis role="bold">
+    &lt;target name="createTables"&gt;
+        &lt;echo message="CREATE TABLES USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"
+             src="db/create_products.sql"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="dropTables"&gt;
+        &lt;echo message="DROP TABLES USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        DROP TABLE products;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="loadData"&gt;
+        &lt;echo message="LOAD DATA USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"
+             src="db/load_data.sql"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="printData"&gt;
+        &lt;echo message="PRINT DATA USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"
+             print="true"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        SELECT * FROM products;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="clearData"&gt;
+        &lt;echo message="CLEAR DATA USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        DELETE FROM products;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+    &lt;target name="shutdownDb"&gt;
+        &lt;echo message="SHUT DOWN DATABASE USING: ${db.driver} ${db.url}"/&gt;
+        &lt;sql driver="${db.driver}"
+             url="${db.url}"
+             userid="${db.user}"
+             password="${db.pw}"
+             onerror="continue"&gt;  
+            &lt;classpath refid="master-classpath"/&gt;
+
+        SHUTDOWN;
+
+        &lt;/sql&gt; 
+    &lt;/target&gt;
+
+</emphasis></programlisting>
+
+    <para>Now you can execute <command>'ant createTables loadData
+    printData'</command> to prepare the test data we will use later.</para>
+  </section>
+
+  <section id="step5.4">
+    <title>Create a Data Access Object (DAO) implementation for JDBC</title>
+
+    <para>Begin with creating a new
+    <filename class="directory">'springapp/src/repository'</filename> directory to contain any
+    classes that are used for database access. In this directory we create a
+    new interface called <classname>ProductDao</classname>. This will
+    be the interface that defines the functionality that the DAO
+    implementation classes will provide – we could choose to have more than
+    one implementation some day.</para>
+
+    <para><filename>'springapp/src/springapp/repository/ProductDao.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.util.List;
+
+import springapp.domain.Product;
+
+public interface ProductDao {
+
+    public List&lt;Product&gt; getProductList();
+
+    public void saveProduct(Product prod);
+
+}</programlisting>
+
+    <para>We'll follow this with a class called
+    <classname>JdbcProductDao</classname> that will be the JDBC
+    implementation of this interface. Spring provides a JDBC abstraction
+    framework that we will make use of. The biggest difference between using
+    straight JDBC and Spring's JDBC framework is that you don't have to worry
+    about opening and closing the connection or any statements. It is all
+    handled for you. Another advantage is that you won't have to catch any
+    exceptions, unless you want to. Spring wraps all SQLExceptions in it's own
+    unchecked exception hierarchy inheriting from DataAccessException. If you
+    want to, you can catch this exception, but since most database exceptions
+    are impossible to recover from anyway, you might as well just let the
+    exception propagate up to a higher level. The class
+    <classname>SimpleJdbcDaoSupport</classname> provides convenient access to
+    an already configured <classname>SimpleJdbcTemplate</classname>, so we
+    extend this class. All we will have to provide in the application context
+    is a configured <classname>DataSource</classname>.</para>
+
+    <para><filename>'springapp/src/springapp/repository/JdbcProductDao.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
+
+import springapp.domain.Product;
+
+public class JdbcProductDao extends SimpleJdbcDaoSupport implements ProductDao {
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+
+    public List&lt;Product&gt; getProductList() {
+        logger.info("Getting products!");
+        List&lt;Product&gt; products = getSimpleJdbcTemplate().query(
+                "select id, description, price from products", 
+                new ProductMapper());
+        return products;
+    }
+
+    public void saveProduct(Product prod) {
+        logger.info("Saving product: " + prod.getDescription());
+        int count = getSimpleJdbcTemplate().update(
+            "update products set description = :description, price = :price where id = :id",
+            new MapSqlParameterSource().addValue("description", prod.getDescription())
+                .addValue("price", prod.getPrice())
+                .addValue("id", prod.getId()));
+        logger.info("Rows affected: " + count);
+    }
+    
+    private static class ProductMapper implements ParameterizedRowMapper&lt;Product&gt; {
+
+        public Product mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Product prod = new Product();
+            prod.setId(rs.getInt("id"));
+            prod.setDescription(rs.getString("description"));
+            prod.setPrice(new Double(rs.getDouble("price")));
+            return prod;
+        }
+
+    }
+
+}</programlisting>
+
+    <para>Let's go over the two DAO methods in this class. Since we are
+    extending <classname>SimpleJdbcSupport</classname> we get a
+    <classname>SimpleJdbcTemplate</classname> prepared and ready to use. This
+    is accessed by calling the <classname>getSimpleJdbcTemplate()</classname>
+    method.</para>
+
+    <para>The first method, <classname>getProductList()</classname> executes a
+    query using the <classname>SimpleJdbcTemplate</classname>. We simply
+    provide the SQL statement and a class that can handle the mapping between
+    the <classname>ResultSet</classname> and the
+    <classname>Product</classname> class. In our case the row mapper is a
+    class named <classname>ProductMapper</classname> that we define as an
+    inner class of the DAO. This class will so far not be used outside of the
+    DAO so making it an inner class works well.</para>
+
+    <para>The ProductMapper implements the
+    <classname>ParameterizedRowMapper</classname> interface that defines a
+    single method named <classname>mapRow</classname> that must be
+    implemented. This method will map the data from each row into a class that
+    represents the entity you are retrieving in your query. Since the
+    <classname>RowMapper</classname> is parameterized, the
+    <classname>mapRow</classname> method returns the actual type that is
+    created.</para>
+
+    <para>The second method saveProduct is also using the
+    <classname>SimplJdbcTemplate</classname>. This time we are calling the
+    <classname>update</classname> method passing in an SQL statement together
+    with the parameter values in the form of a
+    <classname>MapSqlParameterSource</classname>. Using a
+    <classname>MapSqlParameterSource</classname> allows us to use named
+    parameters instead of the typical "?" place holders that you are used to
+    from writing plain JDBC. The named parameters makes your code more
+    explicit and you avoid problems caused by parameters being set out of
+    order etc. The update method returns the count of rows affected.</para>
+
+    <para>We need to store the value of the primary key for each product in
+    the Product class. This key will be used when we persist any changes to
+    the object back to the database. To hold this key we add a private field
+    named 'id' complete with setters and getters to Product.java.</para>
+
+    <para><filename>'springapp/src/springapp/domain/Product.java'</filename>:</para>
+
+    <programlisting>package springapp.domain;
+
+import java.io.Serializable;
+
+public class Product implements Serializable {
+
+<emphasis role="bold">    private int id;
+</emphasis>    private String description;
+    private Double price;
+    
+<emphasis role="bold">    public void setId(int i) {
+        id = i;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+</emphasis>    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public Double getPrice() {
+        return price;
+    }
+    
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+    
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Description: " + description + ";");
+        buffer.append("Price: " + price);
+        return buffer.toString();
+    }
+}</programlisting>
+
+    <para>This completes the Simple JDBC implementation of our
+    persistence layer.</para>
+  </section>
+
+  <section id="step5.5">
+    <title>Implement tests for JDBC DAO implementation</title>
+
+    <para>Time to add tests for the JDBC DAO implementation. Spring provides
+    an extensive testing framework that supports JUnit 3.8 and 4 as well as
+    TestNG. We can't cover all of that in this guide but we will show a simple
+    implementation of the JUnit 3.8 specific support. We need to add the jar
+    file containing the Spring test framework to our project. Copy <filename
+    class="libraryfile">spring-test.jar</filename> from the <filename
+    class="directory">'spring-framework-2.5/dist/modules'</filename> directory
+    to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
+    directory.</para>
+
+    <para>Now we can create our test class. By extending
+    <classname>AbstractTransactionalDataSourceSpringContextTests</classname>
+    we get a lot of nice features for free. We get dependency injection of any
+    public setter from an application context. This application context is
+    loaded by the test framework. All we need to do is specify the name for it
+    in the <classname>getConfigLocations</classname> method. We also get an
+    opportunity to prepare our database with the appropriate test data in the
+    <classname>onSetUpInTransaction</classname> method. This is important,
+    since we don't know the state of the database when we run our tests. As
+    long as the table exists we will clear it and load what we need for our
+    tests. Since we are extending a "Transactional" test, any changes we make
+    will be automatically rolled back once the test finishes. The
+    <classname>deleteFromTables</classname> and
+    <classname>executeSqlScript</classname> methods are defined in the super
+    class, so we don't have to implement them for each test. Just pass in the
+    table names to be cleared and the name of the script that contains the
+    test data.</para>
+
+    <para><filename>'springapp/test/springapp/domain/JdbcProductDaoTests.java'</filename>:</para>
+
+    <programlisting>package springapp.repository;
+
+import java.util.List;
+import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
+import springapp.domain.Product;
+
+public class JdbcProductDaoTests extends AbstractTransactionalDataSourceSpringContextTests {
+
+    private ProductDao productDao;
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    @Override
+    protected String[] getConfigLocations() {
+        return new String[] {"classpath:test-context.xml"};
+    }
+
+    @Override
+    protected void onSetUpInTransaction() throws Exception {
+        super.deleteFromTables(new String[] {"products"});
+        super.executeSqlScript("file:db/load_data.sql", true);
+    }
+
+    public void testGetProductList() {
+        List&lt;Product&gt; products = productDao.getProductList();
+        assertEquals("wrong number of products?", 3, products.size());
+    }
+    
+    public void testSaveProduct() {
+        List&lt;Product&gt; products = productDao.getProductList();
+        for (Product p : products) {
+            p.setPrice(200.12);
+            productDao.saveProduct(p);
+        }
+        List&lt;Product&gt; updatedProducts = productDao.getProductList();
+        for (Product p : updatedProducts) {
+            assertEquals("wrong price of product?", 200.12, p.getPrice());
+        }
+    }
+}</programlisting>
+
+    <para>We don't have the application context file that is loaded for this
+    test yet, so let's create this file in the
+    <filename class="directory">'springapp/test'</filename> directory:</para>
+
+    <para><filename>'springapp/test/test-context.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt; 
+
+    &lt;!-- the test application context definition for the jdbc based tests --&gt; 
+
+    &lt;bean id="productDao" class="springapp.repository.JdbcProductDao"&gt;
+        &lt;property name="dataSource" ref="dataSource" /&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+      &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+      &lt;property name="url" value="${jdbc.url}"/&gt;
+      &lt;property name="username"  value="${jdbc.username}"/&gt;
+      &lt;property name="password" value="${jdbc.password}"/&gt;
+    &lt;/bean&gt;
+    &lt;bean id="propertyConfigurer" 
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+        &lt;property name="locations"&gt;
+            &lt;list&gt;
+                &lt;value&gt;classpath:jdbc.properties&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+    
+    &lt;bean id="transactionManager" 
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+        &lt;property name="dataSource" ref="dataSource" /&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+    <para>We have defined a <classname>productDao</classname> which is the
+    class we are testing. We have also defined a
+    <classname>DataSource</classname> with place holders for the configuration
+    values. These values are provided via a separate property file and at
+    runtime, the <classname>PropertyPlaceholderConfigurer</classname> that we
+    have defined will read this property file and substitute the place holders
+    with the actual values. This is convenient since this isolates the
+    connection values into their own file. These values often need to be
+    changed during application deployment. We put this new file in the
+    <filename class="directory">'war/WEB-INF/classes'</filename> directory so it will be
+    available when we run the application and also later when we deploy the
+    web application. The content of this property file is:</para>
+
+    <para><filename>'springapp/war/WEB-INF/classes/jdbc.properties'</filename>:</para>
+
+    <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
+jdbc.url=jdbc:hsqldb:hsql://localhost
+jdbc.username=sa
+jdbc.password=
+</programlisting>
+
+    <para>Since we added a configuration file to the
+    <filename class="directory">'test'</filename>" directory and a jdbc.properties file to the
+    <filename class="directory">'WEB-INF/classes'</filename> directory, let's add a new
+    classpath entry for our tests. It shoud go after the definition of the
+    <literal>'test.dir'</literal> property:</para>
+
+    <para><filename>'springapp/build.xml'</filename>:</para>
+
+    <programlisting>...
+    &lt;property name="test.dir" value="test"/&gt;
+
+
+<emphasis role="bold">    &lt;path id="test-classpath"&gt;
+        &lt;fileset dir="${web.dir}/WEB-INF/lib"&gt;
+            &lt;include name="*.jar"/&gt;
+        &lt;/fileset&gt;
+        &lt;pathelement path="${build.dir}"/&gt;
+        &lt;pathelement path="${test.dir}"/&gt;
+        &lt;pathelement path="${web.dir}/WEB-INF/classes"/&gt;
+    &lt;/path&gt;
+</emphasis>
+...
+</programlisting>
+
+    <para>We should now have enough for our tests to run and pass but we want
+    to make one additional change to the build script. It's a good practice to
+    separate any integration tests that depend on a live database from the
+    rest of the tests. So we add a separate "dbTests" target to our build
+    script and exclude the database tests from the "tests" target.</para>
+
+    <para><filename>'springapp/build.xml'</filename>:</para>
+
+    <programlisting>...
+
+    &lt;target name="tests" depends="build, buildtests" description="Run tests"&gt;
+        &lt;junit printsummary="on"
+            fork="false"
+            haltonfailure="false"
+            failureproperty="tests.failed"
+            showoutput="true"&gt;
+<emphasis role="bold">            &lt;classpath refid="test-classpath"/&gt;
+</emphasis>            &lt;formatter type="brief" usefile="false"/&gt;
+            
+            &lt;batchtest&gt;
+                &lt;fileset dir="${build.dir}"&gt;
+                    &lt;include name="**/*Tests.*"/&gt;
+<emphasis role="bold">                    &lt;exclude name="**/Jdbc*Tests.*"/&gt;
+</emphasis>                &lt;/fileset&gt;
+            &lt;/batchtest&gt;
+            
+        &lt;/junit&gt;
+        
+        &lt;fail if="tests.failed"&gt;
+            tests.failed=${tests.failed}
+            ***********************************************************
+            ***********************************************************
+            ****  One or more tests failed!  Check the output ...  ****
+            ***********************************************************
+            ***********************************************************
+        &lt;/fail&gt;
+    &lt;/target&gt;
+
+<emphasis role="bold">    &lt;target name="dbTests" depends="build, buildtests,dropTables,createTables,loadData" 
+            description="Run db tests"&gt;
+        &lt;junit printsummary="on"
+            fork="false"
+            haltonfailure="false"
+            failureproperty="tests.failed"
+            showoutput="true"&gt;
+            &lt;classpath refid="test-classpath"/&gt;
+            &lt;formatter type="brief" usefile="false"/&gt;
+            
+            &lt;batchtest&gt;
+                &lt;fileset dir="${build.dir}"&gt;
+                    &lt;include name="**/Jdbc*Tests.*"/&gt;
+                &lt;/fileset&gt;
+            &lt;/batchtest&gt;
+            
+        &lt;/junit&gt;
+        
+        &lt;fail if="tests.failed"&gt;
+            tests.failed=${tests.failed}
+            ***********************************************************
+            ***********************************************************
+            ****  One or more tests failed!  Check the output ...  ****
+            ***********************************************************
+            ***********************************************************
+        &lt;/fail&gt;
+    &lt;/target&gt;
+</emphasis>
+...
+</programlisting>
+
+    <para>Time to run this test, execute <command>'ant dbTests'</command>
+    to see if the tests pass.</para>
+  </section>
+
+  <section>
+    <title>Summary</title>
+
+    <para>We have now completed the persistence layer and in the next part we
+    will integrate it with our web application. But first, lets quickly
+    summarize hat we accomplished in this part.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>First we configured our database and created start-up
+        scripts.</para>
+      </listitem>
+
+      <listitem>
+        <para>We created scripts to use when creating the table and also to
+        load some test data.</para>
+      </listitem>
+
+      <listitem>
+        <para>Next we added some tasks to our build script to run when we
+        needed to create or delete the table and also when we needed to add
+        test data or delete the data.</para>
+      </listitem>
+
+      <listitem>
+        <para>We created the actual DAO class that will handle the persistence
+        work using Spring's <classname>SimpeJdbcTemplate</classname>.</para>
+      </listitem>
+
+      <listitem>
+        <para>Finally we created unit or more accurately integration tests and
+        corresponding ant targets to run these tests.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>Below is a screen shot of what your project directory structure
+    should look like after following the above instructions.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/dir-structure-endp5.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/dir-structure-endp5.png"
+                     format="PNG" />
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para></para>
+  </section>
+</chapter>

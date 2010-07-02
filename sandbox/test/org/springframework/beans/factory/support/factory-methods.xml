@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+    <bean id="matchManager" class="org.springframework.beans.factory.support.MatchManager">
+        <replaced-method name="createMatch" replacer="methodReplacer"/>
+    </bean>
+
+    <bean id="methodReplacer" class="org.springframework.beans.factory.support.FactoryMethodReplacer">
+        <lookup-method name="getBean" bean="match"/>
+    </bean>
+
+    <bean id="match" class="org.springframework.beans.factory.support.Match" singleton="true">
+        <constructor-arg>
+            <bean class="org.springframework.beans.factory.support.FactoryMethodArguments" factory-method="getFirstArgument"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.beans.factory.support.FactoryMethodArguments" factory-method="getSecondArgument"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.beans.factory.support.FactoryMethodArguments" factory-method="getThirdArgument"/>
+        </constructor-arg>
+    </bean>
+</beans>

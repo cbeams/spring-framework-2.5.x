@@ -1,0 +1,2469 @@
+<?xml version="1.0"?>
+
+<!--
+  Build file for the Spring Framework.
+
+  This script requires a "lib" directory containing the necessary third party JAR files.
+  See "project.properties" for the definitions of the properties used in this file.
+
+  Building Spring requires JDK 1.6; the releases are built with Sun's JDK 1.6.0.
+	The test suite is able to run on JDK 1.5.0 and JDK 1.4.2 as well.
+
+  Note: To successfully run the tests on JDK < 1.5.0, you need to use Xerces or any
+	other JAXP parser that properly supports XML includes. A simple way to achieve this
+	is to put xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
+-->
+
+<project name="spring-core" default="usage" basedir="." xmlns:maven="antlib:org.apache.maven.artifact.ant"
+		xmlns:bundlor="antlib:com.springsource.bundlor.ant">
+
+	<property file="build.properties"/>
+	<property file="project.properties"/>
+	<property name="test.fork.mode" value="perBatch"/>
+
+
+	<!--
+		Set up properties that indicate whether we're building on JDK 1.5.
+		Currently simply checks whether the Java version is not 1.4,
+		due to the lack of a greater-than comparator in Ant.
+	-->
+
+	<condition property="tiger.available">
+		<not>
+			<equals arg1="${ant.java.version}" arg2="1.4"/>
+		</not>
+	</condition>
+
+	<condition property="aspectj.available">
+		<and>
+			<istrue value="${tiger.available}"/>
+			<available file="${lib.dir}/aspectj/aspectjtools.jar"/>
+		</and>
+	</condition>
+
+	<condition property="bundlor.available">
+		<and>
+			<istrue value="${tiger.available}"/>
+			<available file="${lib.dir}/bundlor" type="dir"/>
+		</and>
+	</condition>
+
+
+	<path id="all-libs">
+
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+			<exclude name="aspectj/aspectjtools.jar"/>
+			<exclude name="bundlor/*.jar"/>
+			<exclude name="junit/*.jar"/>
+		</fileset>
+
+	</path>
+
+	<path id="attribute-compiler-classpath">
+
+		<fileset dir="lib/jakarta-commons">
+			<include name="commons-attributes-compiler.jar"/>
+			<include name="commons-collections.jar"/>
+		</fileset>
+		<fileset dir="lib/qdox">
+			<include name="qdox-1.5.jar"/>
+		</fileset>
+
+	</path>
+
+
+	<patternset id="spring.full.packages">
+		<include name="META-INF/*.handlers"/>
+		<include name="META-INF/*.schemas"/>
+		<include name="org/springframework/**"/>
+		<!-- exclude content of spring-aspects.jar -->
+		<exclude name="org/springframework/beans/factory/aspectj/**"/>
+		<exclude name="org/springframework/transaction/aspectj/**"/>
+		<!-- exclude content of spring-agent.jar -->
+		<exclude name="org/springframework/instrument/InstrumentationSavingAgent.*"/>
+		<!-- exclude content of spring-webmvc-*.jar -->
+    <exclude name="org/springframework/web/bind/**"/>
+    <exclude name="org/springframework/web/multipart/**"/>
+		<exclude name="org/springframework/web/portlet/**"/>
+		<exclude name="org/springframework/web/servlet/**"/>
+		<exclude name="org/springframework/web/struts/**"/>
+	</patternset>
+
+	<patternset id="spring.aop.packages">
+		<include name="org/springframework/aop/**"/>
+	</patternset>
+
+	<patternset id="spring.beans.packages">
+		<include name="org/springframework/beans/**"/>
+		<!-- exclude content of spring-aspects.jar -->
+		<exclude name="org/springframework/beans/factory/aspectj/**"/>
+	</patternset>
+
+	<patternset id="spring.context.packages">
+		<include name="org/springframework/context/**"/>
+		<include name="org/springframework/ejb/**"/>
+		<include name="org/springframework/instrument/classloading/**"/>
+		<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
+		<include name="org/springframework/jmx/**"/>
+		<include name="org/springframework/jndi/**"/>
+		<include name="org/springframework/remoting/**"/>
+		<exclude name="org/springframework/remoting/caucho/**"/>
+		<exclude name="org/springframework/remoting/httpinvoker/**"/>
+		<exclude name="org/springframework/remoting/jaxrpc/**"/>
+		<exclude name="org/springframework/remoting/jaxws/**"/>
+		<include name="org/springframework/scheduling/**"/>
+		<exclude name="org/springframework/scheduling/commonj/**"/>
+		<exclude name="org/springframework/scheduling/quartz/**"/>
+		<include name="org/springframework/scripting/**"/>
+		<include name="org/springframework/stereotype/**"/>
+		<include name="org/springframework/ui/**"/>
+		<exclude name="org/springframework/ui/velocity/**"/>
+		<exclude name="org/springframework/ui/freemarker/**"/>
+		<exclude name="org/springframework/ui/jasperreports/**"/>
+		<include name="org/springframework/validation/**"/>
+	</patternset>
+
+	<patternset id="spring.context.support.packages">
+		<include name="org/springframework/cache/**"/>
+		<include name="org/springframework/mail/**"/>
+		<include name="org/springframework/scheduling/commonj/**"/>
+		<include name="org/springframework/scheduling/quartz/**"/>
+		<include name="org/springframework/ui/velocity/**"/>
+		<include name="org/springframework/ui/freemarker/**"/>
+		<include name="org/springframework/ui/jasperreports/**"/>
+	</patternset>
+
+	<patternset id="spring.core.packages">
+		<include name="org/springframework/core/**"/>
+		<include name="org/springframework/metadata/**"/>
+		<include name="org/springframework/util/**"/>
+	</patternset>
+
+	<patternset id="spring.jdbc.packages">
+		<include name="org/springframework/jdbc/**"/>
+	</patternset>
+
+	<patternset id="spring.jms.packages">
+		<include name="org/springframework/jms/**"/>
+	</patternset>
+
+	<patternset id="spring.orm.packages">
+		<include name="org/springframework/orm/**"/>
+	</patternset>
+
+	<patternset id="spring.test.packages">
+		<include name="org/springframework/mock/**"/>
+		<include name="org/springframework/test/**"/>
+	</patternset>
+
+	<patternset id="spring.tx.packages">
+		<include name="org/springframework/dao/**"/>
+		<include name="org/springframework/jca/**"/>
+		<include name="org/springframework/transaction/**"/>
+		<!-- exclude content of spring-aspects.jar -->
+		<exclude name="org/springframework/transaction/aspectj/**"/>
+	</patternset>
+
+	<patternset id="spring.web.packages">
+		<include name="org/springframework/web/**"/>
+    <exclude name="org/springframework/web/bind/**"/>
+    <exclude name="org/springframework/web/multipart/**"/>
+    <exclude name="org/springframework/web/portlet/**"/>
+		<exclude name="org/springframework/web/servlet/**"/>
+		<exclude name="org/springframework/web/struts/**"/>
+		<include name="org/springframework/remoting/caucho/**"/>
+		<include name="org/springframework/remoting/httpinvoker/**"/>
+		<include name="org/springframework/remoting/jaxrpc/**"/>
+		<include name="org/springframework/remoting/jaxws/**"/>
+	</patternset>
+
+	<patternset id="spring.webmvc.packages">
+		<include name="META-INF/*.tld"/>
+    <include name="org/springframework/web/bind/**"/>
+    <include name="org/springframework/web/multipart/**"/>
+		<include name="org/springframework/web/servlet/**"/>
+		<exclude name="org/springframework/web/servlet/view/tiles/**"/>
+	</patternset>
+
+	<patternset id="spring.webmvc.portlet.packages">
+		<include name="org/springframework/web/portlet/**"/>
+	</patternset>
+
+	<patternset id="spring.webmvc.struts.packages">
+		<include name="org/springframework/web/struts/**"/>
+		<include name="org/springframework/web/servlet/view/tiles/**"/>
+	</patternset>
+
+	<patternset id="spring.aspects.packages">
+		<include name="META-INF/aop.xml"/>
+		<include name="org/springframework/beans/factory/aspectj/**"/>
+		<include name="org/springframework/transaction/aspectj/**"/>
+	</patternset>
+
+	<patternset id="spring.agent.packages">
+		<include name="org/springframework/instrument/InstrumentationSavingAgent.*"/>
+	</patternset>
+
+	<patternset id="spring.tomcat.weaver.packages">
+		<include name="org/springframework/instrument/classloading/WeavingTransformer.*"/>
+		<include name="org/springframework/instrument/classloading/tomcat/**"/>
+	</patternset>
+
+
+	<!-- Jar Jar Links taskdef (required for repackaging ASM) -->
+	<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${lib.dir}/jarjar/jarjar.jar"/>
+
+
+	<target name="usage">
+
+		<echo message=""/>
+		<echo message="Spring Framework build script"/>
+		<echo message="-----------------------------------------"/>
+		<echo message=""/>
+		<echo message="Among the available targets are:"/>
+		<echo message=""/>
+		<echo message="build    --> build all; don't create JARs"/>
+		<echo message="alljars  --> create all JAR files"/>
+		<echo message="tests    --> run tests"/>
+		<echo message=""/>
+
+	</target>
+
+
+	<target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc)">
+
+		<delete dir="${target.classes.dir}"/>
+		<delete dir="${target.mockclasses.dir}"/>
+		<delete dir="${target.testclasses.dir}"/>
+		<delete dir="${target.tigertestclasses.dir}"/>
+		<delete dir="${target.clover.dir}"/>
+		<delete dir="${target.junit.reports.dir}"/>
+		<delete dir="${target.junit.summary.dir}"/>
+		<delete dir="${target.testng.reports.dir}"/>
+		<delete dir="${target.release.dir}"/>
+		<delete dir="${target.otherclasses.dir}"/>
+
+		<!-- Just kill target dir (it's safer). No need at this point to keep it. -->
+		<delete dir="${target.dir}"/>
+
+		<delete dir="${dist.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+
+		<delete dir="${basedir}/${dist.ref.dir}/pdf"/>
+		<delete dir="${basedir}/${dist.ref.dir}/html_single"/>
+		<delete dir="${basedir}/${dist.ref.dir}/html"/>
+
+		<delete dir="${basedir}/${dist.mvcstep.dir}/pdf"/>
+		<delete dir="${basedir}/${dist.mvcstep.dir}/html_single"/>
+		<delete dir="${basedir}/${dist.mvcstep.dir}/html"/>
+
+	</target>
+
+
+	<target name="compileattr" description="Apply Commons Attributes compiler to main source files">
+
+		<!-- Bring in Jakarta Commons attribute compilation -->
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
+			<classpath refid="attribute-compiler-classpath"/>
+		</taskdef>
+
+		<!-- Compile to a temp directory: Commons Attributes will place Java sources here -->
+		<attribute-compiler destdir="${commons.attributes.tempdir.src}">
+		<!--
+	 	 	Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
+	 	 	package currently needs to be shipped with an attribute, to support indexing.
+	 	  -->
+			<fileset dir="${src.dir}" includes="**/metadata/*.java"/>
+		</attribute-compiler>
+
+	</target>
+
+
+	<!--
+		Compile the main source tree.
+		This task depends on the Commons Attributes compile step,
+		as some classes must ship with attributes.
+	-->
+	<target name="buildmain" depends="compileattr" description="Compile main source files">
+
+		<mkdir dir="${target.classes.dir}"/>
+		<mkdir dir="${target.classes.dir}/META-INF"/>
+
+		<javac destdir="${target.classes.dir}" source="1.3" target="1.4" debug="${debug}"
+				fork="true" memoryinitialsize="256m" memorymaximumsize="256m"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<!-- Include Commons Attributes generated Java sources -->
+			<src path="${commons.attributes.tempdir.src}"/>
+			<classpath refid="all-libs"/>
+		</javac>
+
+		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper"/>
+
+		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper" iiop="true">
+			<classpath refid="all-libs"/>
+		</rmic>
+
+		<copy todir="${target.classes.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.handlers"/>
+				<include name="**/*.schemas"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+				<include name="**/*.xsd"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.ftl"/>
+				<include name="**/*.types"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${target.classes.dir}/META-INF" preservelastmodified="true">
+			<fileset dir="${src.dir}/org/springframework/web/servlet/tags">
+				<include name="*.tld"/>
+			</fileset>
+			<fileset dir="${src.dir}/org/springframework/web/servlet/tags/form">
+				<include name="*.tld"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<!--
+		Compile the JDK 1.5 source tree.
+	-->
+	<target name="buildtiger" depends="buildmain" description="Compile JDK 1.5 source files">
+
+		<javac destdir="${target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${tiger.src.dir}"/>
+			<classpath refid="all-libs"/>
+		</javac>
+
+	</target>
+
+
+	<!--
+		Compile the AspectJ source tree.
+	-->
+	<target name="buildaspects" depends="buildmain" if="aspectj.available" description="Compile AspectJ source files">
+
+	  <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+	    <classpath>
+	      <pathelement location="${lib.dir}/aspectj/aspectjtools.jar"/>
+	    </classpath>
+	  </taskdef>
+
+	  <iajc sourceroots="${aspectj.src.dir}" source="1.5" target="1.5" destDir="${target.classes.dir}">
+	  	<classpath>
+	  		<path refid="all-libs"/>
+  			<path location="${target.classes.dir}"/>
+	  	</classpath>
+	  </iajc>
+
+	  <copy todir="${target.classes.dir}/META-INF" preservelastmodified="true">
+			<fileset dir="${aspectj.src.dir}/META-INF">
+				<include name="aop.xml"/>
+			</fileset>
+	  </copy>
+
+	</target>
+
+
+	<target name="buildmainmock" depends="buildmain" description="Compile mock source files">
+
+		<mkdir dir="${target.mockclasses.dir}"/>
+
+		<javac destdir="${target.mockclasses.dir}" source="1.3" target="1.4" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${mock.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit38.jar}"/>
+			<classpath location="${target.classes.dir}"/>
+		</javac>
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${target.mockclasses.dir}" preservelastmodified="true">
+			<fileset dir="${mock.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="buildtigermock" depends="buildmainmock,buildtiger" description="Compile tiger mock source files">
+
+		<mkdir dir="${target.mockclasses.dir}"/>
+
+		<javac destdir="${target.mockclasses.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${tiger.mock.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+			<classpath location="${target.classes.dir}"/>
+		</javac>
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${target.mockclasses.dir}" preservelastmodified="true">
+			<fileset dir="${tiger.mock.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="buildmock" depends="buildmainmock,buildtigermock" description="Compile all mock source files"/>
+
+
+	<!--
+		Compile the main, JDK 1.5, and AspectJ source trees.
+	-->
+	<target name="build" depends="buildmain,buildtiger,buildaspects,buildmock"
+			description="Compile all Spring source files"/>
+
+
+	<target name="initdist" description="Initialize the distribution directory">
+
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.dir}/maven"/>
+		<mkdir dir="${dist.dir}/modules"/>
+		<mkdir dir="${dist.dir}/module-sources"/>
+		<mkdir dir="${dist.dir}/resources"/>
+		<mkdir dir="${dist.dir}/weaving"/>
+		<mkdir dir="${dist.dir}/weaving-sources"/>
+
+	</target>
+
+
+	<target name="fulljar" depends="build,initdist" description="Create JAR file with all core Spring classes">
+
+		<delete file="${dist.dir}/spring.jar"/>
+
+		<jarjar jarfile="${dist.dir}/spring.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.full.packages"/>
+			</fileset>
+			<zipfileset src="${lib.dir}/aopalliance/aopalliance.jar"/>
+			<zipfileset src="${lib.dir}/asm/asm-2.2.3.jar"/>
+			<zipfileset src="${lib.dir}/asm/asm-commons-2.2.3.jar"/>
+			<rule pattern="org.objectweb.asm.**" result="org.springframework.asm.@1"/>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jarjar>
+	</target>
+
+
+	<target name="fullsources" depends="initdist" description="Create source JAR file with all core Spring classes">
+
+		<delete file="${dist.dir}/spring-sources.jar"/>
+
+		<jar jarfile="${dist.dir}/spring-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.full.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.full.packages"/>
+			</fileset>
+			<fileset dir="${aspectj.src.dir}">
+				<patternset refid="spring.full.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+	</target>
+
+
+	<target name="modulejars" depends="build,initdist" description="Create module-specific JAR files">
+
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="modules/*.jar"/>
+			</fileset>
+		</delete>
+
+		<jar jarfile="${dist.dir}/modules/spring-aop.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.aop.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-aop"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-beans.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.beans.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-beans"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-context.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.context.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-context"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-context-support.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.context.support.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jarjar jarfile="${dist.dir}/modules/spring-core.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.core.packages"/>
+			</fileset>
+			<zipfileset src="${lib.dir}/asm/asm-2.2.3.jar"/>
+			<zipfileset src="${lib.dir}/asm/asm-commons-2.2.3.jar"/>
+			<rule pattern="org.objectweb.asm.**" result="org.springframework.asm.@1"/>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jarjar>
+
+		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.jdbc.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-jms.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.jms.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-jms"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-orm.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.orm.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-test.jar">
+			<fileset dir="${target.mockclasses.dir}">
+				<patternset refid="spring.test.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-tx.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.tx.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-tx"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-web.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.web.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-webmvc.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.webmvc.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-webmvc-portlet.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.webmvc.portlet.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-webmvc-struts.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.webmvc.struts.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+	</target>
+
+
+	<target name="bundlor" depends="modulejars,weavingjars" description="Run jars through Bundlor" if="bundlor.available">
+		<path id="bundlor-classpath">
+
+			<fileset dir="${lib.dir}/bundlor">
+				<include name="**/*.jar"/>
+			</fileset>
+
+		</path>
+		
+		<taskdef resource="com/springsource/bundlor/ant/antlib.xml" uri="antlib:com.springsource.bundlor.ant"
+				classpathref="bundlor-classpath"/>
+		
+		<bundlor:bundlor bundlePath="${dist.dir}/weaving/spring-agent.jar" outputPath="${dist.dir}/weaving/spring-agent.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.instrument.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-aop.jar" outputPath="${dist.dir}/modules/spring-aop.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.aop.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/weaving/spring-aspects.jar" outputPath="${dist.dir}/weaving/spring-aspects.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.aspects.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-beans.jar" outputPath="${dist.dir}/modules/spring-beans.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.beans.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-context.jar" outputPath="${dist.dir}/modules/spring-context.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.context.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-context-support.jar" outputPath="${dist.dir}/modules/spring-context-support.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.context.support.mf"/>
+				
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-core.jar" outputPath="${dist.dir}/modules/spring-core.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.core.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-jdbc.jar" outputPath="${dist.dir}/modules/spring-jdbc.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.jdbc.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-jms.jar" outputPath="${dist.dir}/modules/spring-jms.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.jms.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-orm.jar" outputPath="${dist.dir}/modules/spring-orm.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.orm.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-test.jar" outputPath="${dist.dir}/modules/spring-test.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.test.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/weaving/spring-tomcat-weaver.jar" outputPath="${dist.dir}/weaving/spring-tomcat-weaver.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.instrument.classloading.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-tx.jar" outputPath="${dist.dir}/modules/spring-tx.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.transaction.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-web.jar" outputPath="${dist.dir}/modules/spring-web.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-webmvc-portlet.jar" outputPath="${dist.dir}/modules/spring-webmvc-portlet.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.portlet.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-webmvc.jar" outputPath="${dist.dir}/modules/spring-webmvc.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.servlet.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/modules/spring-webmvc-struts.jar" outputPath="${dist.dir}/modules/spring-webmvc-struts.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.web.struts.mf"/>
+
+		<bundlor:bundlor bundlePath="${dist.dir}/spring.jar" outputPath="${dist.dir}/spring.jar"
+				mergeExistingHeaders="true" bundleVersion="${spring-version-osgi}"
+				manifestTemplatePath="${bundlor.mf.dir}/org.springframework.mf"/>
+
+	</target>
+
+
+	<target name="modulesources" depends="initdist" description="Create module-specific source JAR files">
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="module-sources/*.jar"/>
+			</fileset>
+		</delete>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-aop-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.aop.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.aop.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-aop"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-beans-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.beans.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.beans.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-beans"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-context-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.context.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.context.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-context"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-context-support-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.context.support.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.context.support.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-core-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.core.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.core.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-jdbc-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.jdbc.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.jdbc.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-jms-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.jms.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.jms.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-jms"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-orm-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.orm.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.orm.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-test-sources.jar">
+			<fileset dir="${mock.dir}">
+				<patternset refid="spring.test.packages"/>
+			</fileset>
+			<fileset dir="${tiger.mock.dir}">
+				<patternset refid="spring.test.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-tx-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.tx.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.tx.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<metainf dir="${jarcontent.dir}/spring-tx"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-web-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.web.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.web.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-webmvc-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.webmvc.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.webmvc.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.webmvc.portlet.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.webmvc.portlet.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-webmvc-struts-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.webmvc.struts.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.webmvc.struts.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="weavingjars" depends="build,initdist" description="Create weaver JAR files (for specific platforms)">
+
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="weaving/*.jar"/>
+			</fileset>
+		</delete>
+
+		<jar jarfile="${dist.dir}/weaving/spring-agent.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.agent.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+				<attribute name="Premain-Class" value="org.springframework.instrument.InstrumentationSavingAgent"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/weaving/spring-aspects.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.aspects.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/weaving/spring-tomcat-weaver.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.tomcat.weaver.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="weavingsources" depends="initdist" description="Create weaver source JAR files (for specific platforms)">
+
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="weaving-sources/*.jar"/>
+			</fileset>
+		</delete>
+
+		<jar jarfile="${dist.dir}/weaving-sources/spring-aspects-sources.jar">
+			<fileset dir="${aspectj.src.dir}">
+				<patternset refid="spring.aspects.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/weaving-sources/spring-agent-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.agent.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.agent.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/weaving-sources/spring-tomcat-weaver-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.tomcat.weaver.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.tomcat.weaver.packages"/>
+			</fileset>
+			<metainf file="license.txt"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="distfiles" depends="initdist" description="Copy dtd, xsd, tld, etc files to the dist directory">
+
+		<copy todir="${dist.dir}/resources" flatten="true" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.dtd"/>
+				<include name="**/*.ftl"/>
+				<include name="**/*.tld"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.xsd"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="distpoms" depends="initdist" description="Copy all maven POMs to the dist directory">
+
+		<copy todir="${dist.dir}/maven">
+			<fileset dir="${pom.src.dir}">
+				<include name="*.pom"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="alljars" depends="fulljar,fullsources,modulejars,modulesources,weavingjars,weavingsources,bundlor"
+			description="Create all JAR files"/>
+
+
+	<!--
+		Convenience targets, needed for the automated build process. Convenience targets are
+		made up of the individual targets called, separated by an underscore.
+	-->
+	<target name="clean_alljars" depends="clean,alljars"/>
+
+
+	<target name="maventasks">
+
+		<path id="maven.lib.path">
+			<fileset dir="${basedir}/lib">
+				<include name="maven/maven-ant-tasks.jar"/>
+			</fileset>
+		</path>
+
+		<taskdef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant"
+				classpathref="maven.lib.path"/>
+
+	</target>
+
+
+	<target name="maveninstall" depends="distpoms,maventasks"
+			description="Uploads all jars, sources, and POMs to a local m2 repository">
+
+		<maven:install file="${dist.dir}/spring.jar">
+			<pom file="${dist.dir}/maven/spring.pom"/>
+			<attach file="${dist.dir}/spring-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-aop.jar">
+			<pom file="${dist.dir}/maven/spring-aop.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-aop-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-beans.jar">
+			<pom file="${dist.dir}/maven/spring-beans.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-beans-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-context-support.jar">
+			<pom file="${dist.dir}/maven/spring-context-support.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-context-support-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-context.jar">
+			<pom file="${dist.dir}/maven/spring-context.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-context-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-core.jar">
+			<pom file="${dist.dir}/maven/spring-core.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-core-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-jdbc.jar">
+			<pom file="${dist.dir}/maven/spring-jdbc.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-jdbc-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-jms.jar">
+			<pom file="${dist.dir}/maven/spring-jms.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-jms-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-orm.jar">
+			<pom file="${dist.dir}/maven/spring-orm.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-orm-sources.jar" classifier="sources"/>
+		</maven:install>
+
+    <maven:install file="${dist.dir}/modules/spring-test.jar">
+      <pom file="${dist.dir}/maven/spring-test.pom"/>
+      <attach file="${dist.dir}/module-sources/spring-test-sources.jar" classifier="sources"/>
+    </maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-tx.jar">
+			<pom file="${dist.dir}/maven/spring-tx.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-tx-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-web.jar">
+			<pom file="${dist.dir}/maven/spring-web.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-web-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-webmvc.jar">
+			<pom file="${dist.dir}/maven/spring-webmvc.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-webmvc-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-webmvc-portlet.jar">
+			<pom file="${dist.dir}/maven/spring-webmvc-portlet.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-webmvc-struts.jar">
+			<pom file="${dist.dir}/maven/spring-webmvc-struts.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-webmvc-struts-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/weaving/spring-agent.jar">
+			<pom file="${dist.dir}/maven/spring-agent.pom"/>
+			<attach file="${dist.dir}/weaving-sources/spring-agent-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/weaving/spring-aspects.jar">
+			<pom file="${dist.dir}/maven/spring-aspects.pom"/>
+			<attach file="${dist.dir}/weaving-sources/spring-aspects-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/weaving/spring-tomcat-weaver.jar">
+			<pom file="${dist.dir}/maven/spring-tomcat-weaver.pom"/>
+			<attach file="${dist.dir}/weaving-sources/spring-tomcat-weaver-sources.jar" classifier="sources"/>
+		</maven:install>
+
+	</target>
+
+
+	<!--
+		Generate javadoc for the main and JDK 1.5 sources.
+	-->
+	<target name="javadoc" description="Generate framework Javadocs">
+
+		<delete dir="${javadoc.dir}" failonerror="false"/>
+		<mkdir dir="${javadoc.dir}"/>
+
+		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework API 2.5"
+				source="1.5" access="protected" author="true" version="true" use="true" splitindex="true"
+				defaultexcludes="true" stylesheetfile="${doc.dir}/stylesheet.css"
+				overview="${doc.dir}/overview.html">
+			<arg value="-breakiterator"/>
+			<arg value="-J-Xmx256m"/>
+			<arg value="-J-XX:MaxPermSize=128m"/>
+			<arg value="-J-Dhttp.proxyHost=${javadoc.proxyhost}"/>
+			<arg value="-J-Dhttp.proxyPort=${javadoc.proxyport}"/>
+			<doctitle><![CDATA[<h1>Spring Framework API 2.5</h1>]]></doctitle>
+			<bottom><![CDATA[
+<i>Copyright &copy; 2002-2008 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>
+<!-- Begin LoopFuse code -->
+<script src="http://loopfuse.net/webrecorder/js/listen.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+		_lf_cid = "LF_48be82fa";
+		_lf_remora();
+</script>
+<!-- End LoopFuse code -->
+]]></bottom>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+			<packageset dir="${src.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<packageset dir="${mock.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<packageset dir="${tiger.src.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<packageset dir="${tiger.mock.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<link href="http://java.sun.com/javase/6/docs/api"/>
+			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
+			<link href="http://aopalliance.sourceforge.net/doc"/>
+			<!-- Caucho Burlap/Hessian -->
+			<link href="http://cglib.sourceforge.net/apidocs"/>
+			<!-- EasyMock -->
+			<link href="http://ehcache.sourceforge.net/apidocs"/>
+			<link href="http://freemarker.sourceforge.net/docs/api/"/>
+			<link href="http://www.hibernate.org/hib_docs/v3/api"/>
+			<!-- iBATIS -->
+			<!-- iText -->
+			<!-- Commons Attributes -->
+			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
+			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/fileupload/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/logging/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
+			<!-- JasperReports -->
+			<!-- JDO -->
+			<!-- JMX -->
+			<!-- JOTM -->
+			<!-- JPA -->
+			<!-- JSF -->
+			<link href="http://junit.sourceforge.net/javadoc_40/"/>
+			<link href="http://logging.apache.org/log4j/docs/api/"/>
+			<link href="http://jakarta.apache.org/regexp/apidocs/"/>
+			<link href="http://jakarta.apache.org/poi/apidocs/"/>
+			<link href="http://portals.apache.org/pluto/multiproject/portlet-api/apidocs/"/>
+			<link href="http://www.opensymphony.com/quartz/api/"/>
+			<link href="http://struts.apache.org/struts-doc-1.2.9/api/"/>
+      <link href="http://java.sun.com/javase/6/docs/jre/api/net/httpserver/spec/"/>
+      <link href="http://tiles.apache.org/framework/apidocs/"/>
+			<link href="http://velocity.apache.org/engine/devel/apidocs/"/>
+		</javadoc>
+
+	</target>
+
+
+	<!--
+		Work in progress: see SPR-2513
+	-->
+	<target name="ajdoc" depends="javadoc" description="Generate Ajdoc documentation for aspects">
+
+		<delete dir="${aj-javadoc.dir}" failonerror="false"/>
+		<mkdir dir="${aj-javadoc.dir}"/>
+
+		<java classname="org.aspectj.tools.ajdoc.Main" fork="true">
+			<classpath>
+				<pathelement location="${lib.dir}/aspectj/aspectjtools.jar"/>
+				<pathelement location="${java.home}/lib/tools.jar"/>
+				<path refid="all-libs"/>
+				<path location="${target.classes.dir}"/>
+			</classpath>
+			<jvmarg line="-Xmx256m"/>
+			<jvmarg line="-XX:MaxPermSize=128m"/>
+			<arg line="-d ${aj-javadoc.dir}"/>
+			<arg line="-source 1.5"/>
+			<arg line="-package"/>
+			<arg line="-author"/>
+			<arg line="-version"/>
+			<arg line="-sourcepath ${src.dir};${tiger.src.dir};${aspectj.src.dir}"/>
+			<!-- we just use the package listing file generated by the plain Javadoc task, hence the dependency -->
+			<arg line="${javadoc.dir}/@package-list"/>
+			<arg line="org.springframework.beans.factory.aspectj"/>
+			<arg line="org.springframework.transaction.aspectj"/>
+		</java>
+
+		<!-- ajdoc creates temp working dir; delete it -->
+		<delete dir="${basedir}/ajdocworkingdir" failonerror="false"/>
+
+	</target>
+
+
+	<target name="compiletestattr" description="Apply Commons Attributes compiler to test source files">
+
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
+			<classpath refid="attribute-compiler-classpath"/>
+		</taskdef>
+
+		<!-- Compile to a temp directory: Commons Attributes will place Java sources here -->
+		<attribute-compiler destdir="${commons.attributes.tempdir.test}">
+			<fileset dir="${test.dir}" includes="org/springframework/aop/**/*.java"/>
+			<fileset dir="${test.dir}" includes="org/springframework/jmx/**/*.java"/>
+		</attribute-compiler>
+
+	</target>
+
+
+	<target name="compileallattrs" depends="compileattr,compiletestattr"/>
+
+
+	<!--
+		Compile the main test tree.
+		This task depends on the Commons Attributes compile step,
+		as some tests require source-level attribute support.
+	-->
+	<target name="buildmaintests" depends="buildmainmock,compiletestattr"
+			description="Compile main test source files">
+
+		<mkdir dir="${target.testclasses.dir}"/>
+
+		<javac destdir="${target.testclasses.dir}" source="1.3" target="1.4" debug="${debug}"
+				fork="true" memoryinitialsize="256m" memorymaximumsize="256m"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${test.dir}"/>
+			<!-- Include Commons Attributes generated Java sources -->
+			<src path="${commons.attributes.tempdir.test}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit38.jar}"/>
+			<classpath location="${target.classes.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+		</javac>
+
+		<!-- Pick up config files from test directory -->
+		<copy todir="${target.testclasses.dir}" preservelastmodified="true">
+			<fileset dir="${test.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.types"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="buildtigertests" depends="buildmaintests,buildtigermock"
+			description="Compile JDK 1.5 test source files">
+
+		<mkdir dir="${target.tigertestclasses.dir}"/>
+
+		<javac destdir="${target.tigertestclasses.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${tiger.test.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+			<classpath location="${target.classes.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+		</javac>
+
+		<!-- Pick up config files from test directory -->
+		<copy todir="${target.tigertestclasses.dir}" preservelastmodified="true">
+			<fileset dir="${tiger.test.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.jar"/>
+				<include name="**/*.sql"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="buildaspecttests" depends="buildmaintests" if="aspectj.available"
+			description="Compile AspectJ test source files">
+
+		<mkdir dir="${target.tigertestclasses.dir}"/>
+
+	  <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+	    <classpath>
+	      <pathelement location="${lib.dir}/aspectj/aspectjtools.jar"/>
+	    </classpath>
+	  </taskdef>
+
+	  <!-- Note that this actually recompiles the aspects in the
+	       aspectj source tree too, so that the test classes get
+	       woven. It would be nicer to depend on a pre-built jar,
+	       but that's a bigger change and there aren't many aspects
+	       so the overhead here is negligible.
+	       TODO: create spring-aspects.jar as an independent target.
+	       Have this task depend on it (and also modulejars).
+	       Then we can switch to just putting spring-aspects.jar
+	       on the aspectpath and avoid the recompilation -->
+	  <iajc sourceroots="${aspectj.test.dir}:${aspectj.src.dir}"
+				source="1.5" target="1.5" destDir="${target.tigertestclasses.dir}">
+	  	<classpath>
+	  		<path refid="all-libs"/>
+				<path location="${junit4.jar}"/>
+  			<path location="${target.classes.dir}"/>
+	  		<path location="${target.mockclasses.dir}"/>
+				<path location="${target.testclasses.dir}"/>
+				<path location="${target.tigertestclasses.dir}"/>
+	  	</classpath>
+	  </iajc>
+
+		<!-- Pick up config files from test directory -->
+		<copy todir="${target.tigertestclasses.dir}" preservelastmodified="true">
+			<fileset dir="${aspectj.test.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="buildtests" depends="buildmaintests,buildtigertests,buildaspecttests"
+			description="Compile main, JDK 1.5, and AspectJ test sources"/>
+
+
+	<target name="maintests" description="Run main tests">
+
+		<mkdir dir="${target.junit.reports.dir}"/>
+
+		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+			<classpath location="${junit38.jar}"/>
+
+			<formatter type="plain" usefile="false"/>
+
+			<batchtest fork="yes" todir="${target.junit.reports.dir}">
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+
+	<target name="tigertests" if="tiger.available" description="Run JDK 1.5 tests">
+
+		<mkdir dir="${target.junit.reports.dir}"/>
+
+		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.tigertestclasses.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+
+			<formatter type="plain" usefile="false"/>
+
+			<batchtest fork="yes" todir="${target.junit.reports.dir}">
+				<fileset dir="${target.tigertestclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+		<antcall target="testngtests"/>
+
+	</target>
+
+
+	<target name="testngtests" if="tiger.available" description="Run TestNG tests">
+
+		<taskdef name="testng" classpath="${testng.jar}" classname="org.testng.TestNGAntTask" />
+
+		<mkdir dir="${target.testng.reports.dir}"/>
+
+		<testng outputdir="${target.testng.reports.dir}" haltonfailure="true" haltonskipped="true" verbose="2">
+
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.tigertestclasses.dir}" />
+			<classpath location="${target.testclasses.dir}" />
+			<classpath location="${target.mockclasses.dir}" />
+			<classpath location="${target.classes.dir}" />
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}" />
+			<classpath refid="all-libs" />
+
+			<classfileset dir="${target.tigertestclasses.dir}" includes="${test.testng.includes}" excludes="${test.testng.excludes}" />
+
+		</testng>
+
+	</target>
+
+
+	<!--
+		Run test suite. This and clover.tests take their includes and excludes from
+		"build.properties". However it's possible to run specific tests by passing in
+		the "test.includes" and (optionally) "test.excludes" properties through the
+		command line, as below:
+			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
+	-->
+	<target name="tests" depends="buildtests,maintests,tigertests" description="Run tests"/>
+
+
+	<!--
+		Run test suite and generate test summary, for both main and tiger tests.
+		Does not halt on failure or error, in contrast to the "tests" target above.
+	-->
+	<target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
+
+		<mkdir dir="${target.junit.reports.dir}"/>
+		<mkdir dir="${target.junit.summary.dir}"/>
+
+		<echo message="Using forkmode: ${test.fork.mode}"/>
+
+		<junit dir="${basedir}" forkmode="${test.fork.mode}" printsummary="yes" haltonfailure="no" haltonerror="no">
+
+			<jvmarg line="-Djava.awt.headless=true"/>
+			<jvmarg line="-XX:MaxPermSize=128m"/>
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.tigertestclasses.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${target.junit.reports.dir}">
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+				<fileset dir="${target.tigertestclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+		<junitreport todir="${target.junit.reports.dir}">
+			<fileset dir="${target.junit.reports.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report todir="${target.junit.summary.dir}"/>
+		</junitreport>
+
+	</target>
+
+
+	<target name="clean_tests" depends="clean,tests"/>
+
+
+	<target name="clover.build" description="Compile main source files WITH CLOVER">
+
+		<!-- switch on Clover by specifying it as the compiler to use -->
+		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
+
+		<mkdir dir="${target.clover.dir}"/>
+
+		<javac destdir="${target.clover.dir}" source="1.3" target="1.4" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true"
+				compiler="modern" fork="yes" memorymaximumsize="256M">
+			<src path="${src.dir}"/>
+			<classpath refid="all-libs"/>
+		</javac>
+
+		<copy todir="${target.clover.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.handlers"/>
+				<include name="**/*.schemas"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+				<include name="**/*.xsd"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.ftl"/>
+				<include name="**/*.types"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="clover.buildtiger" description="Compile the tiger source files WITH CLOVER">
+
+		<!-- switch on Clover by specifying it as the compiler to use -->
+		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
+
+		<mkdir dir="${target.clover.dir}"/>
+
+		<javac destdir="${target.clover.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true"
+				compiler="modern" fork="yes" memorymaximumsize="256M">
+			<src path="${tiger.src.dir}"/>
+			<classpath refid="all-libs"/>
+		</javac>
+
+		<copy todir="${target.clover.dir}" preservelastmodified="true">
+			<fileset dir="${tiger.src.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.handlers"/>
+				<include name="**/*.schemas"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+				<include name="**/*.xsd"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.ftl"/>
+				<include name="**/*.types"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="clover.tests" depends="buildtests,clover.build,clover.buildtiger" description="Run Clover tests">
+
+		<property name="reports.dir" value="${target.junit.reports.dir}"/>
+
+		<mkdir dir="${reports.dir}"/>
+
+		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
+
+			<!-- Must go first to ensure the jndi.properties takes precedence  -->
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.tigertestclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.clover.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+				<!-- one of the test methods in AspectJAutoProxyCreatorTests always fails when Cloverised -->
+				<fileset dir="${target.tigertestclasses.dir}" includes="${test.includes}"
+						excludes="${test.excludes},**/AspectJAutoProxyCreatorTests.class"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+
+	<!--
+		Run test suite under Clover coverage analysis,
+		and bring up Clover's Swing browser to display the results.
+	-->
+	<target name="clover.swing" description="Run Clover tests and launch Swing coverage viewer">
+
+		<echo>Launching Clover coverage viewer</echo>
+
+		<java classname="com.cenqua.clover.reporters.jfc.Viewer" fork="yes">
+			<arg value="${clover.initstring}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+		</java>
+
+	</target>
+
+
+	<!--
+		Run test suite under Clover coverage analysis, and use Clover
+		to generate Javadoc/style HTML results that may be browsed later.
+	-->
+	<target name="clover.html" depends="clover.tests" description="Run Clover tests and generate HTML coverage reports">
+
+		<java classname="com.cenqua.clover.reporters.html.HtmlReporter" fork="yes">
+			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework - Clover Code Coverage Report'"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+		</java>
+
+	</target>
+
+
+	<target name="doc.prepare" description="Extra preparation for the documentation">
+
+		<fail message="XSLT supporting lib not installed. Please see '${doc.ref.dir}/readme.txt' for instructions.">
+			<condition>
+				<not>
+					<available file="${basedir}/${doc.ref.dir}/lib"/>
+				</not>
+			</condition>
+		</fail>
+
+		<antcall target="tld.to.docbook"/>
+
+	</target>
+
+
+	<target name="doc.pdf" depends="doc.prepare" description="Compile reference documentation to pdf">
+
+		<mkdir dir="${basedir}/${dist.ref.dir}/pdf/images"/>
+
+		<copy todir="${basedir}/${dist.ref.dir}/pdf/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
+			<!-- controls the double sided pagination style -->
+			<arg value="double.sided=${double.sided}"/>
+		</java>
+
+		<java classname="org.apache.fop.apps.Fop" fork="true" maxmemory="256m" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/spring-reference.pdf"/>
+		</java>
+
+		<delete file="${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+
+	</target>
+
+
+	<!-- Start of TLD => DocBook targets -->
+
+	<target name="tld.to.docbook" depends="original.tld.to.docbook,forms.tld.to.docbook"/>
+
+
+	<target name="original.tld.to.docbook">
+
+		<antcall target="hack.DOCTYPE">
+			<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/spring.tld"/>
+			<param name="doctype.scrubbed.file" value="${doc.ref.dir}/src/spring.tld"/>
+		</antcall>
+
+		<antcall target="private.tld.to.docbook">
+			<param name="input.tld" value="spring.tld"/>
+			<param name="input.tld.file" value="${doc.ref.dir}/src/spring.tld"/>
+		</antcall>
+
+	</target>
+
+
+	<target name="forms.tld.to.docbook">
+
+		<antcall target="hack.DOCTYPE">
+			<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/form/spring-form.tld"/>
+			<param name="doctype.scrubbed.file" value="${doc.ref.dir}/src/spring-form.tld"/>
+		</antcall>
+
+		<antcall target="private.tld.to.docbook">
+			<param name="input.tld" value="spring-form.tld"/>
+			<param name="input.tld.file" value="${doc.ref.dir}/src/spring-form.tld"/>
+		</antcall>
+
+	</target>
+
+
+	<target name="private.tld.to.docbook" if="input.tld">
+
+		<property name="out.file" value="${doc.ref.dir}/src/${input.tld}.xml"/>
+
+		<xslt processor="trax" in="${input.tld.file}" out="${out.file}"
+					style="${doc.ref.dir}/styles/tld.to.docbook.xsl">
+			<param name="title" expression="${input.tld}"/>
+		</xslt>
+
+		<antcall target="hack.CDATA">
+			<param name="target.file" value="${out.file}"/>
+		</antcall>
+
+		<delete file="${input.tld.file}"/>
+
+	</target>
+
+
+	<target name="hack.CDATA" if="target.file">
+
+		<replace file="${target.file}">
+			<replacetoken><![CDATA[&lt;]]></replacetoken>
+			<replacevalue><![CDATA[<]]></replacevalue>
+		</replace>
+
+		<replace file="${target.file}">
+			<replacetoken><![CDATA[&gt;]]></replacetoken>
+			<replacevalue><![CDATA[>]]></replacevalue>
+		</replace>
+
+	</target>
+
+
+	<target name="hack.DOCTYPE" if="doctype.input.file">
+
+		<!--
+		Removes the TLD DTD decl. from the TLD files as this messes
+		up the transform (feel free to fix this more elegantly)
+		-->
+		<copy file="${doctype.input.file}" tofile="${doctype.scrubbed.file}" overwrite="true"/>
+
+		<replace file="${doctype.scrubbed.file}" value="">
+			<replacetoken><![CDATA[<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">]]></replacetoken>
+		</replace>
+
+	</target>
+
+	<!-- End of TLD => DocBook targets -->
+
+
+	<target name="doc.html" depends="doc.prepare"
+			description="Compile reference documentation to chunked html">
+
+		<mkdir dir="${dist.ref.dir}/html/images"/>
+
+		<copy todir="${basedir}/${dist.ref.dir}/html/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${basedir}/${dist.ref.dir}/html/" failonerror="false">
+			<fileset dir="${basedir}/${doc.ref.dir}/styles/">
+				<include name="*.css"/>
+				<include name="*.js"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.ref.dir}/html/">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
+		</java>
+
+	</target>
+
+
+	<target name="doc.htmlsingle" depends="doc.prepare" description="Compile reference documentation to single html">
+
+		<mkdir dir="${dist.ref.dir}/html_single/images"/>
+
+		<copy todir="${basedir}/${dist.ref.dir}/html_single/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+		<copy todir="${basedir}/${dist.ref.dir}/html_single/" file="${basedir}/${doc.ref.dir}/styles/html.css" failonerror="false"/>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.dir}/reference/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/html_single/index.html"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
+		</java>
+
+	</target>
+
+
+	<target name="doc.all" depends="doc.html,doc.htmlsingle,doc.pdf" description="Generate reference documentation"/>
+
+
+	<target name="mvcstep.prepare" description="Extra preparation for the MVC step-by-step guide">
+
+		<fail message="XSLT supporting lib not installed. Please see '${doc.ref.dir}/readme.txt' for instructions.">
+			<condition>
+				<not>
+					<available file="${basedir}/${doc.ref.dir}/lib"/>
+				</not>
+			</condition>
+		</fail>
+
+	</target>
+
+
+	<target name="mvcstep.pdf" depends="mvcstep.prepare" description="Compile MVC step-by-step guide to pdf">
+
+		<mkdir dir="${basedir}/${dist.mvcstep.dir}/pdf/images"/>
+
+		<copy todir="${basedir}/${dist.mvcstep.dir}/pdf/images">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.mvcstep.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
+			<!-- controls the double sided pagination style -->
+			<arg value="double.sided=${double.sided}"/>
+		</java>
+
+		<java classname="org.apache.fop.apps.Fop" fork="true" maxmemory="256m" dir="${doc.mvcstep.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${dist.mvcstep.dir}/pdf/spring-mvc-step-by-step.pdf"/>
+		</java>
+
+		<delete file="${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
+
+	</target>
+
+
+	<target name="mvcstep.html" depends="mvcstep.prepare" description="Compile MVC step-by-step guide to chunked html">
+
+		<mkdir dir="${dist.mvcstep.dir}/html/images"/>
+
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html/images">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html/" failonerror="false">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/styles/">
+				<include name="*.css"/>
+				<include name="*.js"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.mvcstep.dir}/html/">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
+		</java>
+
+	</target>
+
+
+	<target name="mvcstep.htmlsingle" description="Compile MVC step-by-step guide to single html">
+
+		<mkdir dir="${dist.mvcstep.dir}/html_single/images"/>
+
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html_single/images">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html_single/" file="${basedir}/${doc.mvcstep.dir}/styles/html.css" failonerror="false"/>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.mvcstep.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.mvcstep.dir}/html_single/index.html"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
+		</java>
+
+	</target>
+
+
+	<target name="mvcstep.all" depends="mvcstep.html,mvcstep.htmlsingle,mvcstep.pdf"
+			description="Generate MVC step-by-step guide"/>
+
+
+	<target name="releasezips" description="Generate release zips based on present artifacts">
+
+		<mkdir dir="${target.release.dir}"/>
+
+		<delete file="${target.release.dir}/${release.zip}"/>
+		<delete file="${target.release.dir}/${release-with-docs.zip}"/>
+		<delete file="${target.release.dir}/${release-with-dependencies.zip}"/>
+
+		<fileset id="main" dir=".">
+			<include name="dist/spring.jar"/>
+			<include name="dist/modules/*.*"/>
+			<include name="dist/resources/*.*"/>
+			<include name="dist/weaving/*.*"/>
+			<include name="*.txt"/>
+			<exclude name="build-number.txt"/>
+		</fileset>
+
+		<fileset id="docs" dir=".">
+			<include name="dist/spring-sources.jar"/>
+			<include name="dist/module-sources/*.*"/>
+			<include name="dist/weaving-sources/*.*"/>
+			<include name="docs/api/**"/>
+			<include name="docs/taglib/**"/>
+			<include name="docs/reference/html_single/**"/>
+			<include name="docs/reference/images/admons/*.png"/>
+			<include name="docs/reference/images/admons/*.gif"/>
+			<include name="docs/reference/images/admons/*.tif"/>
+			<include name="docs/reference/pdf/*.pdf"/>
+			<include name="docs/reference/styles/html.css"/>
+			<include name="docs/reference/readme.txt"/>
+			<include name="docs/MVC-step-by-step/html_single/**"/>
+			<include name="docs/MVC-step-by-step/images/admons/*.png"/>
+			<include name="docs/MVC-step-by-step/images/admons/*.gif"/>
+			<include name="docs/MVC-step-by-step/images/admons/*.tif"/>
+			<include name="docs/MVC-step-by-step/pdf/*.pdf"/>
+			<include name="docs/MVC-step-by-step/styles/html.css"/>
+			<include name="docs/MVC-step-by-step/readme.txt"/>
+			<include name="samples/imagedb/**"/>
+			<include name="samples/jpetstore/**"/>
+			<include name="samples/petclinic/**"/>
+			<include name="samples/petportal/**"/>
+		</fileset>
+
+		<zip zipfile="${target.release.dir}/${release.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+		</zip>
+
+		<zip zipfile="${target.release.dir}/${release-with-docs.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+			<zipfileset refid="docs" prefix="${release.path}"/>
+		</zip>
+
+		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+			<zipfileset refid="docs" prefix="${release.path}"/>
+			<zipfileset dir="." prefix="${release.path}">
+				<include name="*.bat"/>
+				<include name="*.xml"/>
+				<include name="*.properties"/>
+				<exclude name="junit*.properties"/>
+				<include name="dist/maven/*.*"/>
+				<include name="src/**"/>
+				<include name="mock/**"/>
+				<include name="test/**"/>
+				<include name="tiger/**"/>
+				<include name="aspectj/**"/>
+				<include name="jarcontent/**"/>
+				<include name="lib/*.txt"/>
+				<include name="lib/ant/**"/>
+				<include name="lib/antlr/**"/>
+        <include name="lib/asm/**"/>
+				<include name="lib/aspectj/**"/>
+				<!-- Do not include 8 MB aspectjtools.jar: Users need to download it separately -->
+				<exclude name="lib/aspectj/aspectjtools.jar"/>
+				<include name="lib/axis/**"/>
+				<include name="lib/aopalliance/**"/>
+				<include name="lib/bsh/**"/>
+				<include name="lib/c3p0/**"/>
+				<include name="lib/caucho/**"/>
+				<include name="lib/cglib/**"/>
+				<include name="lib/commonj/**"/>
+				<include name="lib/concurrent/**"/>
+				<include name="lib/dom4j/**"/>
+				<include name="lib/easymock/**"/>
+        <include name="lib/eclipselink/**"/>
+				<include name="lib/ehcache/**"/>
+				<include name="lib/freemarker/**"/>
+				<include name="lib/glassfish/**"/>
+				<include name="lib/groovy/**"/>
+				<include name="lib/hibernate/**"/>
+				<include name="lib/hsqldb/**"/>
+				<include name="lib/ibatis/**"/>
+				<include name="lib/itext/**"/>
+				<include name="lib/j2ee/**"/>
+				<include name="lib/jakarta-commons/**"/>
+				<include name="lib/jakarta-taglibs/**"/>
+				<include name="lib/jamon/**"/>
+        <include name="lib/jarjar/**"/>
+				<include name="lib/jasperreports/**"/>
+				<include name="lib/javassist/**"/>
+        <include name="lib/jaxws/**"/>
+				<include name="lib/jexcelapi/**"/>
+				<include name="lib/jdo/**"/>
+				<include name="lib/jmx/**"/>
+				<include name="lib/jotm/**"/>
+				<include name="lib/jruby/**"/>
+				<include name="lib/junit/**"/>
+				<include name="lib/log4j/**"/>
+				<include name="lib/maven/**"/>
+				<include name="lib/oc4j/**"/>
+				<include name="lib/openjpa/**"/>
+				<include name="lib/oro/**"/>
+				<include name="lib/poi/**"/>
+				<include name="lib/portlet/**"/>
+				<include name="lib/qdox/**"/>
+				<include name="lib/quartz/**"/>
+				<include name="lib/serp/**"/>
+				<include name="lib/slf4j/**"/>
+				<include name="lib/struts/**"/>
+        <include name="lib/testng/**"/>
+				<include name="lib/tiles/**"/>
+				<include name="lib/tomcat/**"/>
+				<include name="lib/toplink/**"/>
+				<include name="lib/velocity/**"/>
+				<include name="lib/websphere/**"/>
+			</zipfileset>
+		</zip>
+
+	</target>
+
+
+	<target name="release" depends="clean,alljars,distfiles,distpoms,javadoc,doc.all,mvcstep.all,releasezips"
+			description="Build release distributions from scratch"/>
+
+
+	<target name="sandbox.clean" description="Clean sandbox output dirs">
+
+		<delete dir="${sandbox.target.classes.dir}"/>
+		<delete dir="${sandbox.target.testclasses.dir}"/>
+		<delete dir="${sandbox.target.junit.reports.dir}"/>
+		<delete dir="${sandbox.target.junit.summary.dir}"/>
+
+		<!-- Just kill target dir (it's safer). No need at this point to keep it. -->
+		<delete dir="${sandbox.target.dir}"/>
+
+	</target>
+
+
+	<target name="sandbox.build" description="Compile sandbox source files">
+
+		<echo message="WARNING: To keep things speedy, there's no Ant dependency on the build target"/>
+
+		<mkdir dir="${sandbox.target.classes.dir}"/>
+		<mkdir dir="${sandbox.target.classes.dir}/META-INF"/>
+
+		<javac destdir="${sandbox.target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${sandbox.src.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+		</javac>
+
+		<copy todir="${sandbox.target.classes.dir}" preservelastmodified="true">
+			<fileset dir="${sandbox.src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="sandbox.jar" depends="sandbox.build,initdist" description="Create jar with sandbox classes">
+
+		<delete file="${dist.dir}/spring-sandbox.jar"/>
+
+		<jar jarfile="${dist.dir}/spring-sandbox.jar">
+			<fileset dir="${sandbox.target.classes.dir}">
+				<include name="META-INF/**"/>
+				<include name="org/springframework/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="sandbox.srczip" depends="initdist" description="Create sandbox source ZIP (containing Java sources)">
+
+		<delete file="${dist.dir}/spring-sandbox-src.zip"/>
+
+		<zip zipfile="${dist.dir}/spring-sandbox-src.zip">
+			<fileset dir="${sandbox.src.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
+		</zip>
+
+	</target>
+
+
+	<target name="sandbox.buildtests" description="Compile sandbox test source files">
+
+		<mkdir dir="${sandbox.target.testclasses.dir}"/>
+
+		<javac destdir="${sandbox.target.testclasses.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${sandbox.test.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+			<classpath location="${target.classes.dir}"/>
+			<classpath location="${sandbox.target.classes.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+		</javac>
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${sandbox.target.testclasses.dir}" preservelastmodified="true">
+			<fileset dir="${sandbox.test.dir}">
+				<include name="**/*.properties"/>
+			</fileset>
+			<fileset dir="${sandbox.test.dir}">
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<!--
+		Run test suite. This and Clover test target take their includes and excludes
+		from build.properties. However it's possible to run specific tests by passing in
+		the test.includes and (optionally) test.excludes properties through the command line, as below:
+			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
+	-->
+	<target name="sandbox.tests" depends="sandbox.build,sandbox.buildtests" description="Run tests">
+
+		<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
+
+		<mkdir dir="${sandbox.reports.dir}"/>
+
+		<junit dir="${basedir}" printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${sandbox.target.testclasses.dir}"/>
+			<classpath location="${sandbox.target.classes.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${sandbox.test.dir}"/>
+
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${sandbox.reports.dir}">
+				<fileset dir="${sandbox.target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+
+	<target name="sandbox.testsummary" depends="sandbox.build,sandbox.buildtests"
+			description="Run tests and generate test summary">
+
+		<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
+
+		<mkdir dir="${sandbox.reports.dir}"/>
+
+		<property name="reports.dir" value="${sandbox.reports.dir}"/>
+		<property name="summary.dir" value="${sandbox.reports.dir}/reports"/>
+
+		<mkdir dir="${reports.dir}"/>
+		<mkdir dir="${summary.dir}"/>
+
+		<junit dir="${basedir}" printsummary="yes" haltonfailure="no" haltonerror="no">
+			<jvmarg line="-Djava.awt.headless=true"/>
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${sandbox.target.testclasses.dir}"/>
+			<classpath location="${sandbox.target.classes.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<!-- Need files loaded as resources -->
+			<classpath location="${sandbox.test.dir}"/>
+
+			<classpath refid="all-libs"/>
+			<classpath location="${junit4.jar}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${sandbox.target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+		<junitreport todir="${reports.dir}">
+
+			<fileset dir="${reports.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report todir="${summary.dir}"/>
+
+		</junitreport>
+
+	</target>
+
+
+	<target name="sandbox.clean_tests" depends="sandbox.clean,sandbox.tests"/>
+
+
+	<target name="sandbox.javadoc" description="Generate sandbox Javadocs">
+
+		<mkdir dir="${sandbox.javadoc.dir}"/>
+
+		<javadoc sourcepath="${sandbox.src.dir}" destdir="${sandbox.javadoc.dir}" windowtitle="Spring Framework"
+				additionalparam="-breakiterator" source="1.3" access="protected" author="true" version="true" use="true"
+				defaultexcludes="true" stylesheetfile="${doc.dir}/stylesheet.css">
+			<doctitle><![CDATA[<h1>Spring Framework Sandbox</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright (c) 2003-2008 The Spring Framework Project.</i>]]></bottom>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+			<packageset dir="${sandbox.src.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
+		</javadoc>
+
+	</target>
+
+
+	<target name="jasperreports-compile" description="Compile JasperReports test files in Spring test suite">
+		<delete>
+			<fileset dir="${test.dir}">
+				<include name="**/*.jasper"/>
+			</fileset>
+		</delete>
+		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar"/>
+					<exclude name="**/aspectjtools.jar"/>
+				</fileset>
+			</classpath>
+		</taskdef>
+		<jrc>
+			<src location="${test.dir}/org/springframework/ui/jasperreports/DataSourceReport.jrxml"/>
+			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportParent.jrxml"/>
+			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportChild.jrxml"/>
+		</jrc>
+	</target>
+
+</project>

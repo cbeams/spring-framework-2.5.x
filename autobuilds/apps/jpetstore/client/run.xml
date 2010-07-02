@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<project name="jpetstore-client" basedir="." default="run">
+
+	<target name="run">
+		<java classname="org.springframework.autobuilds.jpetstore.service.client.OrderServiceClient" >
+			<classpath>
+				<fileset dir="../../../lib/axis">
+					<include name="axis.jar"/>
+					<include name="saaj.jar"/>
+					<include name="wsdl4j.jar"/>
+				</fileset>
+				<fileset dir="../../../lib/aopalliance">
+					<include name="aopalliance.jar"/>
+				</fileset>
+				<fileset dir="../../../lib/caucho">
+					<include name="burlap-2.1.7.jar"/>
+					<include name="hessian-2.1.7.jar"/>
+				</fileset>
+				<fileset dir="../../../lib/jakarta-commons">
+					<include name="commons-collections.jar"/>
+					<include name="commons-discovery.jar"/>
+					<include name="commons-logging.jar"/>
+				</fileset>
+				<fileset dir="../../../lib/j2ee">
+					<include name="jaxrpc.jar"/>
+				</fileset>
+				<fileset dir="../../../dist">
+					<include name="spring.jar"/>
+				</fileset>
+				<fileset dir="">
+					<include name="jpetstore.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${orderId}"/>
+			<arg value="${nrOfCalls}"/>
+		</java>
+	</target>
+
+</project>

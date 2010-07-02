@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!--
+  - Service layer ApplicationContext definition for jbossintegration project. Defines beans
+  - belonging to service layer. This context will normally be shared by all code that wants to
+  - use a shared context, as opposd to a beanfactory or context specific to a test. It will be
+  - made the parent of the web-app's ApplicationContext, in a demand-load fashion.
+ -->
+	
+<beans>
+
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+	</bean>
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+  
+	<!-- JNDI DataSource for J2EE environments -->
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName"><value>java:integrationDS</value></property>
+	</bean>
+
+	<!-- Hibernate SessionFactory -->
+	<bean id="hibSessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="mappingResources">
+      <list>
+  			<value>integration.hbm.xml</value>
+		  </list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.transaction.manager_lookup_class">net.sf.hibernate.transaction.JBossTransactionManagerLookup</prop>
+        <prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+
+</beans>

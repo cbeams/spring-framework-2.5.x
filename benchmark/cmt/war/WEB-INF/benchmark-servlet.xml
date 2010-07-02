@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!--
+  - Application context definition for "example" DispatcherServlet.
+  -->
+
+<beans>
+
+	<!-- prototype stuff -->
+	
+	<!--
+	Type 3 is less efficient
+	<bean id="bmPrototype" 
+		autowire="constructor" class="org.springframework.benchmark.cmt.server.pojo.PojoBenchmark"
+		singleton="false"
+	/>
+	-->
+	
+	<bean id="bmPrototype" 
+		class="org.springframework.benchmark.cmt.server.pojo.PojoBenchmark"
+		singleton="false"
+	>
+	<property name="dao"><ref local="dao"/></property>
+	</bean>
+	
+	<bean id="prototypeBmInvokerInterceptor" 
+		class="org.springframework.aop.target.PrototypeTargetSource">	
+		<property name="targetBeanName"><value>bmPrototype</value></property>
+	</bean>
+	
+	
+	<bean id="prototypeBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="prototypeBmInvokerInterceptor"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.cmt.server.Benchmark</value></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+
+
+
+
+	<bean id="threadLocalTargetSource" 
+		class="org.springframework.aop.target.ThreadLocalTargetSource">	
+		<property name="targetBeanName"><value>bmPrototype</value></property>
+	</bean>
+	
+	<bean id="poolingTargetSource" 
+		class="org.springframework.aop.target.CommonsPoolTargetSource">	
+		<property name="targetBeanName"><value>bmPrototype</value></property>
+		<property name="maxSize"><value>80</value></property>
+	</bean>
+	
+	
+	<bean id="apartmentBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="threadLocalTargetSource"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.cmt.server.Benchmark</value></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="poolingBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="poolingTargetSource"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.benchmark.cmt.server.Benchmark</value></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+
+
+
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+	  	<property name="jndiName"><value>oracle</value></property>
+	</bean>
+
+
+
+	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+		
+	<!-- The bean to speak to the TokenDB -->
+    <bean id="dao" class="org.springframework.benchmark.cmt.server.dao.JdbcBenchmarkDao"
+    				autowire="constructor">
+    </bean>
+
+	
+	<!-- 
+		THE MOST IMPORTANT DEFINITION: recommended shared instance model
+	-->
+	<bean id="benchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="bmTarget"/></property>
+		
+		<!-- Force the use of CGLIB -->
+		<property name="proxyTargetClass"><value>true</value></property>
+		
+		<property name="enableCglibSubclassOptimizations"><value>false</value></property>
+		
+		<property name="transactionAttributes">
+			<props>
+				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- Petclinic primary business object: HSQL JDBC implementation -->
+	<bean id="bmTarget" autowire="constructor" class="org.springframework.benchmark.cmt.server.pojo.PojoBenchmark">
+	</bean>
+	
+	
+	<bean id="programmaticBenchmark" 
+		autowire="constructor" 
+		class="org.springframework.benchmark.cmt.server.pojo.TxDecoratorPojoBenchmark">
+	</bean>
+	
+	
+	<!-- Can use these names -->
+
+	<bean id="ejb"
+		class="org.springframework.benchmark.cmt.client.EjbBenchmarkFactory">
+	</bean>
+	
+	<bean id="pojo"
+		class="org.springframework.benchmark.cmt.client.SingletonBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="benchmark"/></constructor-arg>
+	</bean>
+	
+	<bean id="progSingleton"
+		class="org.springframework.benchmark.cmt.client.SingletonBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="programmaticBenchmark"/></constructor-arg>
+	</bean>
+	
+	
+	<bean id="apartment"
+		class="org.springframework.benchmark.cmt.client.SingletonBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="apartmentBenchmark"/></constructor-arg>
+	</bean>
+	
+	<bean id="pooled"
+		class="org.springframework.benchmark.cmt.client.SingletonBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="poolingBenchmark"/></constructor-arg>
+	</bean>
+	
+	<!-- TODO more efficient also -->
+	<bean id="prototype"
+		class="org.springframework.benchmark.cmt.client.SingletonBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="prototypeBenchmark"/></constructor-arg>
+	</bean>
+	
+	<!-- just use new -->
+	<bean id="prototypeNew"
+		class="org.springframework.benchmark.cmt.client.PrototypeBenchmarkFactory">
+			<constructor-arg index="0"><ref bean="dao"/></constructor-arg>
+	</bean>    
+  
+	
+	
+	
+	<!-- Sanity check -->
+	<bean id="testController" name="/test.cgi" class="org.springframework.benchmark.cmt.web.TestController"/>
+	
+	<bean name="/mode.cgi" class="org.springframework.benchmark.cmt.web.ChangeModeController"
+		autowire="constructor"/>
+	
+	
+	<bean id="config" class="org.springframework.benchmark.cmt.web.Config">
+		<property name="mode"><value>pojo</value></property>
+	</bean>
+	
+	
+	
+	<bean id="orderController" name="/order.cgi" class="org.springframework.benchmark.cmt.web.OrderBenchmarkController" autowire="byType">
+		
+	</bean>
+	
+
+	
+	<bean name="/orders.cgi" class="org.springframework.benchmark.cmt.web.GetOrdersBenchmarkController"
+		autowire="byType">
+		
+	</bean>
+	
+
+	<bean name="/nop.cgi" class="org.springframework.benchmark.cmt.web.NopBenchmarkController" autowire="byType">
+		<property name="invocations"><value>20</value></property>
+	</bean>
+	
+	<bean name="/wait.cgi" class="org.springframework.benchmark.cmt.web.RandomWaitBenchmarkController" autowire="byType">
+		<property name="maxMillis"><value>40</value></property>
+	</bean>
+	
+	
+</beans>

@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+
+<!--
+	autobuilds-jetty4 project build file
+	
+	Targets to compile and build the sample apps and test server
+	environments and run various HttpUnit tests against them.
+	
+	$Id: jetty4-build.xml,v 1.6 2004-06-30 22:37:24 aarendsen Exp $
+-->
+<project name="autobuilds-jetty4" basedir="." default="usage">
+
+	
+	<property name="appserver.distname" value="jetty-${jetty4.version}" />
+	<property name="deploy.dir" value="webapps" />
+	
+
+	<!--
+		usage
+	-->
+	<target name="usage">        
+        <echo>
+Spring Framework
+=============================================================================
+
+${ant.file} 
+
+This file should not be called directly.  See the documentation in the
+autobuilds directory for information.
+=============================================================================
+        </echo>
+
+	</target>
+			
+	
+	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server" unless="server.binary.present">
+		<echo message="Downloading ${jetty4.url} to ${tarballs.dir}/${jetty4.tarball}" />
+		<get
+			src="${jetty4.url}"
+			dest="${tarballs.dir}/${jetty4.tarball}" />	
+	</target>
+		
+		
+		
+	<!--
+		extract-server
+		
+		extract server to installs area and configure from
+		local config files
+	-->
+	<target name="extract-server">
+		<!-- check latest d/l available -->
+		<available file="${tarballs.dir}/${jetty4.tarball}" property="server.binary.present"/>
+		<antcall target="get-server"/>
+		
+		<untar 
+			compression="gzip" 
+			src="${tarballs.dir}/${jetty4.tarball}"
+			dest="${servers.install.dir}" />
+			
+		<copy todir="${servers.install.dir}/${appserver.distname}" overwrite="true">
+			<fileset dir="${servers.conf.dir}/${target.server}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+	
+	
+	<!--
+		deploy
+		
+		based on a system or other property (often set in the batch file / shell script
+		calling this target) deploy to the target server
+	-->
+	<target name="deploy" depends="extract-server">
+		<copy todir="${servers.install.dir}/${appserver.distname}/${deploy.dir}">
+			<fileset dir="${autobuilds.samples.dir}/${target.app}/dist">
+				<include name="*" />
+				<exclude name="**/autobuild*" />
+			</fileset>
+		</copy>
+		<!--
+		<mkdir dir="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}"/>
+		<unwar src="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}.war"
+			   dest="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}" />
+		-->
+	</target>
+	
+	
+	<!--
+		start-server
+		
+		start the target server
+	-->
+	<target name="start-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Starting server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<java 
+			jar="${servers.install.dir}/${appserver.distname}/start.jar"
+			output="${reports.dir}/${target.server}_server.log"
+			dir="${servers.install.dir}/${appserver.distname}"
+			fork="true">
+				
+			<jvmarg value="-Djetty.port=${autobuilds.server.http.port}" />
+    	  	<jvmarg value="-Djetty.home=${servers.install.dir}/${appserver.distname}" />
+    	  	<arg value="etc/${target.app}.xml" />
+
+      	</java>
+	</target>
+	
+	
+	<!--
+		stop-server
+		
+		stop the target server
+	-->
+	<target name="stop-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Stopping server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<java 
+			jar="${servers.install.dir}/${appserver.distname}/stop.jar"
+			dir="${servers.install.dir}/${appserver.distname}"
+			fork="true">			
+      		
+      	</java>
+	</target>
+	
+</project>

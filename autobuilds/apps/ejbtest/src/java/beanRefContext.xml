@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: beanRefContext.xml,v 1.2 2006-08-18 17:58:38 colins Exp $ -->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!-- load a hierarchy of contexts, although there is just one here -->
+
+<beans>
+
+  <bean id="servicelayer-context"
+  	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
+    <constructor-arg>
+      <list>
+        <value>conf/services-applicationContext.xml</value>
+      </list>
+   	</constructor-arg>
+  </bean>
+
+</beans>

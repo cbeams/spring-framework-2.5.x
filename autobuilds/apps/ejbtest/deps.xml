@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<!--
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/deps.xml,v 1.3 2005-11-26 04:05:31 colins Exp $"
+-->
+
+<project name="ejbtest-deps">
+
+  <target name="ejbtest.init-deps">
+
+	<dirname property="ejbtest-deps.dir" file="${ant.file.ejbtest-deps}"/>
+
+    <path id="ejbtest.deps.normal">
+      <pathelement location="${AOPALLIANCE_JAR}"/>
+      <pathelement location="${CGLIB2_JAR}"/>
+      <pathelement location="${COMMONS_CODEC_JAR}"/>
+      <pathelement location="${COMMONS_COLLECTIONS_JAR}"/>
+      <pathelement location="${COMMONS_DBCP_JAR}"/>
+      <pathelement location="${COMMONS_LOGGING_JAR}"/>
+      <pathelement location="${COMMONS_POOL_JAR}"/>
+      <pathelement location="${DOM4J_JAR}"/>
+      <pathelement location="${EHCACHE_JAR}"/>
+      <pathelement location="${EJB_JAR}"/>
+      <pathelement location="${HIBERNATE3_JAR}"/>
+      <pathelement location="${JUNIT_JAR}"/>
+      <pathelement location="${JUNIT_ADDONS_JAR}"/>
+      <pathelement location="${SPRING_JAR}"/>
+      <pathelement location="${SPRING_HIBERNATE_JAR}"/>
+    </path>
+
+	<path id="ejbtest.deps.compileonly">
+      <pathelement location="${SERVLET_JAR}"/>
+    </path>
+
+	<path id="ejbtest.deps.testonly">
+    </path>
+
+    <path id="ejbtest.deps.runtimeonly">
+    </path>
+
+    <!-- webapp lib dir deps does not automatically use normal deps since in
+	     some deployments (ear for example) they might be shared elsewhere -->
+    <!-- and in this particular project, that is indeed the case. make sure
+	     to keep application.xml up to date to include all needed jars -->
+	<path id="ejbtest.deps.webapp.libdir">
+    </path>
+
+	<path id="ejbtest.deps.ear.modules">
+	  <path refid="ejbtest.deps.normal"/>
+	  <path refid="ejbtest.deps.runtimeonly"/>
+    </path>
+
+  </target>
+
+  <target name="init-deps" depends="ejbtest.init-deps">
+    <path id="deps.normal" refid="ejbtest.deps.normal"/>
+    <path id="deps.compileonly" refid="ejbtest.deps.compileonly"/>
+    <path id="deps.testonly" refid="ejbtest.deps.testonly"/>
+    <path id="deps.runtimeonly" refid="ejbtest.deps.runtimeonly"/>
+    <path id="deps.webapp.libdir" refid="ejbtest.deps.webapp.libdir"/>
+    <path id="deps.ear.modules" refid="ejbtest.deps.ear.modules"/>
+  </target>
+  
+</project>

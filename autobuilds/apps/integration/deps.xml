@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<!--
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/integration/deps.xml,v 1.2 2005-11-26 18:27:09 colins Exp $"
+-->
+
+<project name="integration-deps">
+
+  <target name="integration.init-deps">
+
+	<dirname property="integration-deps.dir" file="${ant.file.integration-deps}"/>
+
+    <path id="integration.deps.normal">
+      <pathelement location="${AOPALLIANCE_JAR}"/>
+      <pathelement location="${CGLIB2_JAR}"/>
+      <pathelement location="${COMMONS_CODEC_JAR}"/>
+      <pathelement location="${COMMONS_COLLECTIONS_JAR}"/>
+      <pathelement location="${COMMONS_DBCP_JAR}"/>
+      <pathelement location="${COMMONS_LOGGING_JAR}"/>
+      <pathelement location="${COMMONS_POOL_JAR}"/>
+      <pathelement location="${DOM4J_JAR}"/>
+      <pathelement location="${EHCACHE_JAR}"/>
+      <pathelement location="${HIBERNATE3_JAR}"/>
+      <pathelement location="${JUNIT_JAR}"/>
+      <pathelement location="${JUNIT_ADDONS_JAR}"/>
+      <pathelement location="${SPRING_JAR}"/>
+      <pathelement location="${SPRING_HIBERNATE_JAR}"/>
+    </path>
+
+	<path id="integration.deps.compileonly">
+      <pathelement location="${SERVLET_JAR}"/>
+    </path>
+
+	<path id="integration.deps.testonly">
+    </path>
+
+    <path id="integration.deps.runtimeonly">
+    </path>
+
+    <!-- webapp lib dir deps does not automatically use normal deps since in
+	     some deployments (ear for example) they might be shared elsewhere -->
+	<path id="integration.deps.webapp.libdir">
+      <!-- just bring in all the other ones -->
+	  <path refid="integration.deps.normal"/>
+	  <path refid="integration.deps.runtimeonly"/>
+    </path>
+
+  </target>
+
+  <target name="init-deps" depends="integration.init-deps">
+    <path id="deps.normal" refid="integration.deps.normal"/>
+    <path id="deps.compileonly" refid="integration.deps.compileonly"/>
+    <path id="deps.testonly" refid="integration.deps.testonly"/>
+    <path id="deps.runtimeonly" refid="integration.deps.runtimeonly"/>
+    <path id="deps.webapp.libdir" refid="integration.deps.webapp.libdir"/>
+  </target>
+  
+</project>

@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+
+<project name="standalone" default="usage" basedir=".">
+	<import id="toplevel" file="../build.xml" />
+
+	<!-- Construct the runtime dist. classpath -->
+	<path id="run.classpath">
+		<fileset dir="${dist.dir}" file="${project.name}.jar"/>
+		<fileset dir="${dist.lib.dir}" includes="*.jar" />
+		<dirset dir="${dist.dir}/conf" />
+	</path>
+
+	<target name="build.static" depends="toplevel.build.static"
+			description="Copy static files (property files, etc.) to target conf directory.">
+		<available file="${images.dir}" property="images.exists" />
+		<antcall target="build.images" />
+
+		<available file="${help.dir}" property="help.exists" />
+		<antcall target="build.help" />
+
+		<antcall target="build.app.libs" />
+	</target>
+
+	<target name="build.images" depends="build.prepare" if="images.exists"
+			description="Copy image files if they exist.">
+		<!-- Copy image files -->
+		<copy todir="${target.images.dir}">
+			<fileset dir="${images.dir}" includes="**/*.gif" />
+			<fileset dir="${images.dir}" includes="**/*.jpg" />
+			<fileset dir="${images.dir}" includes="**/*.png" />
+		</copy>
+	</target>
+
+	<target name="build.help" depends="build.prepare" if="help.exists" description="Copy help files if they exist.">
+		<!-- Copy help files -->
+		<copy todir="${target.help.dir}">
+			<fileset dir="${help.dir}" />
+		</copy>
+	</target>
+
+	<target name="build.app.libs">
+		<!-- copy app specific dependencies to be included in project jar, projects may override -->
+	</target>
+
+	<target name="dist.prepare">
+		<antcall target="toplevel.dist.prepare" />
+		<mkdir dir="${dist.lib.dir}" />
+	</target>
+
+	<target name="dist.static" depends="dist.prepare" description="Copy static files (.txt/properties/xml/scripts) to dist directory.">
+		<available file="${bin.dir}" property="bin.exists" />
+		<antcall target="dist.bin" />
+
+		<available file="${conf.dir}" property="conf.exists" />
+		<antcall target="dist.conf" />
+
+		<antcall target="dist.dependencies" />
+	</target>
+
+	<target name="dist.bin" depends="dist.prepare" if="bin.exists" description="Copy startup scripts if they exist.">
+		<!-- Copy executable .bat files and .sh files -->
+		<copy todir="${dist.bin.dir}" filtering="on">
+			<fileset dir="${bin.dir}" includes="**/*.bat, **/*.sh" />
+		</copy>
+		<fixcrlf srcdir="${dist.dir}/bin" includes="**/*.sh" eol="lf" />
+		<fixcrlf srcdir="${dist.dir}/bin" includes="**/*.bat" eol="crlf" />
+		<chmod dir="${dist.dir}/bin" includes="**/*.sh" perm="+x" />
+	</target>
+
+	<target name="dist.conf" depends="dist.prepare" if="conf.exists" description="Copy config files if they exist.">
+		<!-- Copy text configuration files -->
+		<copy todir="${dist.conf.dir}" filtering="on">
+			<fileset dir="${conf.dir}" includes="**/*.properties, **/*.xml, **/*.txt" />
+		</copy>
+		<copy todir="${dist.conf.dir}" filtering="on">
+			<fileset dir="${target.conf.dir}" includes="**/*.properties, **/*.xml, **/*.txt" />
+		</copy>
+		<copy todir="${dist.conf.dir}" filtering="on">
+			<fileset dir="${templates.dir}/conf" includes="*.properties" />
+		</copy>
+	</target>
+
+	<target name="create.distfile" depends="compile,dist.prepare" description="Create project jar file.">
+		<mkdir dir="${target.classes.dir}/META-INF" />
+		<jar jarfile="${dist.dir}/${project.name}.jar" basedir="${target.classes.dir}" manifest="${project.manifest}">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${project.main.class}" />
+				<section name="${project.package}">
+					<attribute name="Specification-Title" value="${project.title}" />
+					<attribute name="Specification-Version" value="${project.version}" />
+					<attribute name="Specification-Vendor" value="${company.name}" />
+					<attribute name="Implementation-Vendor-Id" value="${company.package.prefix}" />
+					<attribute name="Implementation-Title" value="${project.title}" />
+					<attribute name="Implementation-Version" value="${project.version} ${TODAY}" />
+					<attribute name="Implementation-Vendor" value="${company.name}" />
+					<attribute name="sealed" value="true" />
+				</section>
+			</manifest>
+		</jar>
+	</target>
+
+	<!-- ===================== Runtime Targets ======================= -->
+	<target name="run.standalone" depends="dist" if="main.class" description="Runs the application.">
+		<echo message="----- Launching ${project.name} -----" />
+		<java classname="${main.class}" fork="yes" failonerror="true">
+			<classpath refid="run.classpath" />
+			<classpath refid="project.run.classpath" />
+		</java>
+	</target>
+
+</project>

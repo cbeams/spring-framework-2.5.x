@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+
+<!--
+	autobuilds-jetty5 project build file
+	
+	Targets to compile and build the sample apps and test server
+	environments and run various HttpUnit tests against them.
+	
+	$Id: jetty5-build.xml,v 1.3 2004-06-07 23:35:18 davison Exp $
+-->
+<project name="autobuilds-jetty5" basedir="." default="usage">
+
+	
+	<property name="appserver.distname" value="Jetty-${jetty5.version}" />
+	<property name="deploy.dir" value="webapps" />
+	
+	
+	<path id="server-classpath">
+		<fileset dir="${servers.install.dir}/${appserver.distname}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<!--
+		usage
+	-->
+	<target name="usage">        
+        <echo>
+Spring Framework
+=============================================================================
+
+${ant.file} 
+
+This file should not be called directly.  See the documentation in the
+autobuilds directory for information.
+=============================================================================
+        </echo>
+
+	</target>
+			
+	
+	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server" unless="server.binary.present">
+		<echo message="Downloading ${jetty5.url} to ${tarballs.dir}/${jetty5.tarball}" />
+		<get
+			src="${jetty5.url}"
+			dest="${tarballs.dir}/${jetty5.tarball}" />	
+	</target>
+		
+		
+		
+	<!--
+		extract-server
+		
+		extract server to installs area and configure from
+		local config files
+	-->
+	<target name="extract-server">
+		<!-- check latest d/l available -->
+		<available file="${tarballs.dir}/${jetty5.tarball}" property="server.binary.present"/>
+		<antcall target="get-server"/>
+		
+		<untar 
+			compression="gzip" 
+			src="${tarballs.dir}/${jetty5.tarball}"
+			dest="${servers.install.dir}" />
+			
+		<copy todir="${servers.install.dir}/${appserver.distname}" overwrite="true">
+			<fileset dir="${servers.conf.dir}/${target.server}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+	
+	
+	<!--
+		deploy
+		
+		based on a system or other property (often set in the batch file / shell script
+		calling this target) deploy to the target server
+	-->
+	<target name="deploy" depends="extract-server">
+		<copy todir="${servers.install.dir}/${appserver.distname}/${deploy.dir}">
+			<fileset dir="${autobuilds.samples.dir}/${target.app}/dist">
+				<include name="*" />
+				<exclude name="**/autobuild*" />
+			</fileset>
+		</copy>
+	</target>
+	
+	
+	<!--
+		start-server
+		
+		start the target server
+	-->
+	<target name="start-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Starting server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<java 
+			jar="${servers.install.dir}/${appserver.distname}/start.jar"
+			output="${reports.dir}/${target.server}_server.log"
+			dir="${servers.install.dir}/${appserver.distname}"
+			fork="true">
+				
+			<jvmarg value="-Djetty.port=${autobuilds.server.http.port}" />
+    	  	<jvmarg value="-Djetty.home=${servers.install.dir}/${appserver.distname}" />
+    	  	<arg value="etc/${target.app}.xml" />
+			
+			<classpath refid="server-classpath" />
+
+      	</java>
+	</target>
+	
+	
+	<!--
+		stop-server
+		
+		stop the target server
+	-->
+	<target name="stop-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Stopping server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<java 
+			jar="${servers.install.dir}/${appserver.distname}/stop.jar"
+			dir="${servers.install.dir}/${appserver.distname}"
+			fork="true">			
+      		
+      	</java>
+	</target>
+	
+</project>

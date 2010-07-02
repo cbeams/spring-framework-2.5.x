@@ -1,0 +1,194 @@
+<?xml version="1.0"?>
+
+<project name="jpetstore" basedir="." default="usage">
+
+	<property name="name" value="jpetstore"/>
+
+	<property name="war.dir" value="war"/>
+	<property name="src.dir" value="src"/>
+	<property name="client.dir" value="client"/>
+	<property name="build.dir" value=".classes"/>
+	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
+	<property name="dist.dir" value="dist"/>
+	<property name="lib" value="lib"/>
+	<property name="spring.root" value="../../.."/>
+
+
+	<path id="master-classpath">
+
+		<fileset dir="${spring.root}/lib/aopalliance">
+			<include name="aopalliance.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/axis">
+			<include name="axis.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/ibatis">
+			<include name="ibatis-sqlmap.jar"/>
+			<include name="ibatis-common.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="jaxrpc.jar"/>
+			<include name="jdbc2_0-stdext.jar"/>
+			<include name="servlet-api.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-logging.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/struts">
+			<include name="struts-1.1.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist">
+			<include name="spring.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jdom">
+			<include name="jdom.jar"/>
+		</fileset>
+		<fileset dir="${lib}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+
+	<target name="usage">
+
+		<echo message="************************* ${spring.root}/lib/ibatis"/>
+
+		<echo message=""/>
+		<echo message="Spring JPetStore build file"/>
+		<echo message="------------------------------------------------------"/>
+		<echo message=""/>
+		<echo message="Available targets are:"/>
+		<echo message=""/>
+		<echo message="clean    --> Clean output dirs"/>
+		<echo message="build    --> Compile main Java sources and copy libraries"/>
+		<echo message="warfile  --> Build the web application archive"/>
+		<echo message="all      --> Clean, build, warfile"/>
+		<echo message=""/>
+
+	</target>
+
+
+	<target name="clean" description="Clean output dirs (build, weblib, dist)">
+
+		<delete dir="${build.dir}"/>
+		<delete dir="${weblib.dir}"/>
+		<delete dir="${dist.dir}"/>
+		<delete file="client/jpetstore.jar"/>
+
+	</target>
+
+
+	<target name="build" description="Compile main source tree java files into class files, generate jar files">
+
+		<mkdir dir="${build.dir}"/>
+
+		<javac destdir="${build.dir}" target="1.5" debug="true"
+			deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.xsl*"/>
+			</fileset>
+		</copy>
+
+		<mkdir dir="${weblib.dir}"/>
+
+		<jar jarfile="${weblib.dir}/jpetstore.jar" compress="true" basedir="${build.dir}"/>
+
+		<copy todir="${weblib.dir}" preservelastmodified="true">
+			<fileset dir="${spring.root}/lib/aopalliance">
+				<include name="aopalliance.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/axis">
+				<include name="axis.jar"/>
+				<include name="saaj.jar"/>
+				<include name="wsdl4j.jar"/>
+			</fileset>
+			
+			<fileset dir="${spring.root}/lib/caucho">
+				<include name="burlap*.jar"/>
+				<include name="hessian*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/hsqldb">
+				<include name="hsqldb.jar"/>
+			</fileset>
+			
+			<fileset dir="${spring.root}/lib/j2ee">
+				<include name="jaxrpc.jar"/>
+				<include name="jstl.jar"/>
+				<include name="jta.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-beanutils.jar"/>
+				<include name="commons-collections.jar"/>
+				<include name="commons-dbcp.jar"/>
+				<include name="commons-digester.jar"/>
+				<include name="commons-discovery.jar"/>
+				<include name="commons-lang.jar"/>
+				<include name="commons-logging.jar"/>
+				<include name="commons-pool.jar"/>
+				<include name="commons-validator.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jakarta-taglibs">
+				<include name="standard.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/ibatis">
+				<include name="ibatis-sqlmap.jar"/>
+				<include name="ibatis-common.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jdom">
+				<include name="jdom.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/dist">
+				<include name="spring.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/velocity">
+				<include name="*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/freemarker">
+				<include name="*.jar"/>
+			</fileset>	
+			<fileset dir="${lib}">
+				<include name="*.jar"/>
+			</fileset>	
+		</copy>
+
+		<copy file="${weblib.dir}/jpetstore.jar" tofile="${client.dir}/jpetstore.jar"/>
+
+	</target>
+
+
+	<target name="dist" depends="build" description="Build the web application archive">
+
+		<mkdir dir="${dist.dir}"/>
+		
+		<!-- parameterise eventually, for now, use local data access web.xml-->
+		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web-local.xml">
+			<include name="*"/>
+			<include name="images/**"/>
+			<include name="WEB-INF/dataAccessContext*.xml"/>
+			<include name="WEB-INF/applicationContext.xml"/>
+			<include name="WEB-INF/petstore-servlet.xml"/>
+			<include name="WEB-INF/caucho-servlet.xml"/>
+			<include name="WEB-INF/server-config.wsdd"/>
+			<include name="WEB-INF/*.properties"/>
+			<include name="WEB-INF/classes/*.properties"/>
+			<include name="WEB-INF/classes/*.xml"/>
+			<include name="WEB-INF/classes/*.xsl*"/>
+			<include name="WEB-INF/lib/**"/>
+			<include name="WEB-INF/jsp/**"/>
+			<include name="WEB-INF/velocity/**"/>
+			<include name="WEB-INF/freemarker/**"/>
+			<exclude name="**/.*"/>
+		</war>
+
+	</target>
+
+
+	<target name="all" depends="clean,build,dist" description="Clean,build,dist"/>
+
+</project>

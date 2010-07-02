@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter>
+    <title>Services</title>
+    <sect1>
+        <title>Introduction</title>
+        <para>There are still many Java applications that are not run inside a J2EE or Web container.  For such cases having a simple server lifecycle
+        is useful for organizing the server implementation.  The JBoss application server is itself organized around such a principle, though is significantly
+        more complex than the classes in this package.  The existing Spring configuration mechanisms do not apply when writing stand alone applications
+        since there is no ordering to the creation and initialization of beans. 
+        </para>
+        <para>
+        The server package introduces a ServiceBean interface that contains intialize, start, stop, and
+        destory lifecycle methods.  Classes that implement this interface can register with a ServiceManager using the normal Spring configuration mechanism.
+        The ServiceManager is a composite ServiceBean.  Calling a lifecycle method on the ServiceManager will call the lifecycle method on all its
+        registered ServiceBeans.  The order in which ServiceBeans are called is the order in which they are listed in the spring application configuration file.
+        </para>
+    </sect1>
+    
+</chapter>

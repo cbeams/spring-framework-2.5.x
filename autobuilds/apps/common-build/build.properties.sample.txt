@@ -1,0 +1,13 @@
+# ----------------------------------------------------------------------------- 
+# build.properties.sample.txt #
+#
+# This is a sample "build.properties" file, used to customize building the 
+# project in your local environment. Make any changes you need, and rename this 
+# file "build.properties" in the same directory that contains the project 
+#
+# Properties here will take precedence over any properties in a build.properies
+# file located inside your user directory
+#
+# $Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/common-build/build.properties.sample.txt,v 1.1 2004-11-14 17:19:16 colins Exp $
+# -----------------------------------------------------------------------------
+

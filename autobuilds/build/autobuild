@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# autobuild
+#
+# run with params:
+#    -u [optional]  - to force a CVS update of Spring source
+#    -k [optional]  - to keep the servers alive after tests end
+#    application    - the sample app to build and test
+#    server         - the target server to deploy upon
+#
+# $Id: autobuild,v 1.5 2004-11-30 19:21:01 davison Exp $
+#
+# ---------------------------------------------------------------------------
+
+ANT=$ANT_HOME/bin/ant
+USAGE="Usage: $0 [-u] sample-app target-server"
+PARAMS=$@
+
+# ---------------------------------------------------------------------------
+
+# get opts
+for p in $PARAMS; do
+    GOTOP=0
+    if [ $p = "-u" ]; then
+        DOCVS="-Dcvs.update=yes"
+        GOTOP=1
+    fi
+    if [ $p = "-k" ]; then
+        KEEPALIVE="-Dautobuilds.keepalive=yes"
+        GOTOP=1
+    fi
+    if [[ $GOTOP = 0 ]]; then
+        if [[ $APP = "" ]]; then
+            APP=$p
+        elif [[ $SERVER = "" ]]; then
+            SERVER=$p
+        fi
+    fi
+done
+
+if [ ! -f build.properties ]; then
+	echo "*** NO build.properties FILE!  DEFAULT VALUES WILL BE USED ***"
+fi
+
+if [ ! -f $SERVER-build.xml ]; then
+	echo "Don't know about server $SERVER"
+	exit 2
+fi
+
+if [ ! -d ../apps/$APP ]; then
+    echo "Don't know about application $APP or application is not configured for autobuilds"
+    exit 3
+fi
+
+# ensure environment exists for 1st use
+$ANT -q setup > /dev/null
+$ANT $DOCVS $KEEPALIVE -Dtarget.app=$APP -Dtarget.server=$SERVER main
+
+exit 0

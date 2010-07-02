@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+
+<project name="spring-jca-sample" basedir="." default="usage">
+
+	<property name="name" value="spring-jca-sample"/>
+
+	<property name="src.dir" value="src"/>
+	<property name="build.dir" value=".classes"/>
+	<property name="dist.dir" value="dist"/>
+
+	<property name="spring.root" value="../.."/>
+	<property name="spring.dist" value="${spring.root}/dist"/>
+	<property name="sample.jca.root" value="${basedir}"/>
+
+	<property name="main.class" value="org.springframework.samples.jca.standalone.StandaloneJca"/>
+	<property name="server.hsqldb.class" value="org.hsqldb.Server"/>
+	<property name="admin.hsqldb.class" value="org.hsqldb.util.DatabaseManager"/>
+
+
+	<path id="lib-classpath">
+
+		<fileset dir="${spring.dist}">
+			<include name="spring.jar"/>
+		</fileset>
+		<fileset dir="${spring.dist}">
+			<include name="spring-sandbox.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/aopalliance">
+			<include name="aopalliance.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/hsqldb">
+			<include name="hsqldb.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-logging.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="connector-api.jar"/>
+		</fileset>
+		<fileset dir="${sample.jca.root}/lib">
+			<include name="spring-cciblackbox-tx.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="rowset.jar"/>
+		</fileset>
+
+	</path>
+
+	<path id="dist-classpath">
+
+		<fileset dir="${sample.jca.root}">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/log4j">
+			<include name="log4j-1.2.9.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="connector-api.jar"/>
+		</fileset>
+
+	</path>
+
+	<path id="hsqldb-classpath">
+
+		<fileset dir="${spring.root}/lib/hsqldb">
+			<include name="hsqldb.jar"/>
+		</fileset>
+
+	</path>
+
+	<target name="usage">
+
+		<echo message=""/>
+		<echo message="Spring JCA build file"/>
+		<echo message="------------------------------------------------------"/>
+		<echo message=""/>
+		<echo message="Available targets are:"/>
+		<echo message=""/>
+		<echo message="clean       --> Clean output dirs"/>
+		<echo message="build       --> Compile main Java sources and copy libraries"/>
+		<echo message="launch      --> Launch the sample application"/>
+		<echo message="starthsqldb --> Launch the sample db"/>
+		<echo message="adminhsqldb --> Administer the sample db"/>
+		<echo message="all         --> Clean, build"/>
+		<echo message=""/>
+
+	</target>
+
+
+	<target name="clean" description="Clean output dirs (build, dist)">
+
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+
+	</target>
+
+	<target name="build" description="Compile main source tree java files into class files, generate jar files">
+
+		<mkdir dir="${build.dir}"/>
+
+		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="lib-classpath"/>
+		</javac>
+
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+
+		<mkdir dir="${dist.dir}"/>
+
+		<jar jarfile="${dist.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
+
+	</target>
+
+	<target name="launch" description="Launch the sample application">
+
+		<java classname="${main.class}" fork="yes" failonerror="true">
+			<classpath refid="lib-classpath" />
+			<classpath refid="dist-classpath" />
+		</java>
+
+	</target>
+
+	<target name="starthsqldb" description="Launch the sample db">
+
+		<java classname="${server.hsqldb.class}" fork="yes" failonerror="true">
+			<arg line="-port 9001 -database db/test"/>
+			<classpath refid="hsqldb-classpath" />
+		</java>
+
+	</target>
+
+	<target name="adminhsqldb" description="Administer the sample db">
+
+		<java classname="${admin.hsqldb.class}" fork="yes" failonerror="true">
+			<classpath refid="hsqldb-classpath" />
+		</java>
+
+	</target>
+
+	<target name="dist" depends="build">
+		<!-- 
+			Delegate to build target by depending on it. dist is just to offer
+			a generic target name across all Spring sample apps that may be used
+			for autobuilds testing.
+		-->
+	</target>
+
+
+	<target name="all" depends="clean,build" description="Clean,build"/>
+
+</project>

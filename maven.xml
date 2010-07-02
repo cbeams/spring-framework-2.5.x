@@ -1,0 +1,55 @@
+<project
+   xmlns:j="jelly:core"
+   xmlns:maven="jelly:maven"
+   xmlns:ant="jelly:ant"
+  >
+
+   <!--
+    | Hack to get the Mock source tree included
+    -->
+   <preGoal name="java:compile">
+      <ant:path id="maven.compile.src.set">
+         <ant:pathelement location="${pom.build.sourceDirectory}" />
+         <ant:pathelement location="${mock.dir}" />
+      </ant:path>
+   </preGoal>
+
+   <postGoal name="java:compile">
+      <!-- Compile RMI stubs  -->
+      <rmic base="${maven.build.dest}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper"/>
+
+      <copy todir="${maven.build.dest}">
+         <fileset dir="${pom.build.sourceDirectory}">
+            <include name="**/*.xml"/>
+            <include name="**/*.dtd"/>
+         </fileset>
+      </copy>
+   </postGoal>
+
+   <postGoal name="test:compile">
+      <echo>Copying test files from ${pom.build.unitTestSourceDirectory}</echo>
+      <copy todir="${maven.test.dest}">
+         <fileset dir="${pom.build.unitTestSourceDirectory}">
+            <include name="**/*.xml"/>
+            <include name="**/*.properties"/>
+         </fileset>
+      </copy>
+   </postGoal>
+
+
+   <!--
+    | Copy the additional jars to the distribution binary directory
+    -->
+   <preGoal name="dist:prepare-bin-filesystem">
+      <!-- TODO -->
+   </preGoal>
+
+
+   <goal name="preparedocs" description="Extra preparation for the documentation">
+   </goal>
+
+   <preGoal name="site">
+      <attainGoal name="sdocbook"/>
+   </preGoal>
+
+</project>

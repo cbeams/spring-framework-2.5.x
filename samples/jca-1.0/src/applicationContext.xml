@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+	<bean id="managedConnectionFactory" class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory">
+		<property name="connectionURL"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
+		<property name="driverName"><value>org.hsqldb.jdbcDriver</value></property>
+	</bean>
+
+	<bean id="targetConnectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean">
+		<property name="managedConnectionFactory">
+			<ref local="managedConnectionFactory"/>
+		</property>
+	</bean>
+
+	<bean id="connectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter">
+     <property name="targetConnectionFactory"><ref bean="targetConnectionFactory"/></property>
+     <property name="connectionSpec">
+       <bean class="com.sun.connector.cciblackbox.CciConnectionSpec">
+         <property name="user"><value>sa</value></property>
+         <property name="password"><value/></property>
+       </bean>
+     </property>
+    </bean>
+
+	<bean id="personDao" class="org.springframework.samples.jca.dao.PersonDaoImpl">
+		<property name="connectionFactory"><ref local="connectionFactory"/></property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jca.cci.connection.CciLocalTransactionManager">
+		<property name="connectionFactory">
+			<ref local="connectionFactory" />
+		</property>
+	</bean>
+
+	<bean id="personServiceTarget" class="org.springframework.samples.jca.service.PersonServiceImpl">
+		<property name="personDao"><ref local="personDao"/></property>
+		<!--property name="enterpriseDao"><ref local="enterpriseDao"/></property-->
+	</bean>
+
+	<bean id="personService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="target">
+			<ref bean="personServiceTarget" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="insert*">PROPAGATION_REQUIRED</prop>
+				<prop key="update*">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

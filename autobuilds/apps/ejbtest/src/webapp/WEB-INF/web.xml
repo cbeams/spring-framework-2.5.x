@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+	
+	<!--
+	  - Location of the XML file that defines the root application context.
+	  - Applied by ContextLoaderServlet.
+		-
+		- Can be set to "/WEB-INF/applicationContext-hibernate.xml" for the Hibernate
+		- implementation, or "/WEB-INF/applicationContext-jdbc.xml" for the JDBC one.
+	  -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/applicationContext.xml</param-value>
+	</context-param>
+	
+    <!--  load a shared service layer parent application context -->
+	<context-param>
+		<param-name>locatorFactorySelector</param-name>
+		<param-value>beanRefContext.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>parentContextKey</param-name>
+		<param-value>servicelayer-context</param-value>
+	</context-param>
+
+	<!--
+	   - Loads the root application context of this web app at startup,
+	   - by default from "/WEB-INF/applicationContext.xml".
+	   - Use WebApplicationContextUtils.getWebApplicationContext(servletContext)
+	   - to access it anywhere in the web application, outside of the framework.
+	   -
+	   - Use Spring's ContextLoaderServlet to load ApplicationContexts in 
+	   - Servlet 2.3 containers which do not have the same ordering for 
+	   - servlet initialization as clarified in the Servlet 2.4 spec (most do)
+	 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+    <ejb-local-ref>
+      <ejb-ref-name>ejb/SimpleWithCmtAndSpringTxLocalHome</ejb-ref-name>
+      <ejb-ref-type>Session</ejb-ref-type>
+      <local-home>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleHomeLocal</local-home>
+      <local>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleLocal</local>
+      <ejb-link>SimpleWithCmtAndSpringTx</ejb-link>
+    </ejb-local-ref>
+    <ejb-local-ref>
+      <ejb-ref-name>ejb/SimpleWithCmtAndNoSpringTxLocalHome</ejb-ref-name>
+      <ejb-ref-type>Session</ejb-ref-type>
+      <local-home>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleHomeLocal</local-home>
+      <local>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleLocal</local>
+      <ejb-link>SimpleWithCmtAndNoSpringTx</ejb-link>
+    </ejb-local-ref>
+    <ejb-local-ref>
+      <ejb-ref-name>ejb/SimpleWithNoCmtAndSpringTxLocalHome</ejb-ref-name>
+      <ejb-ref-type>Session</ejb-ref-type>
+      <local-home>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleHomeLocal</local-home>
+      <local>org.springframework.autobuilds.ejbtest.simple.ejb.SimpleLocal</local>
+      <ejb-link>SimpleWithNoCmtAndSpringTx</ejb-link>
+    </ejb-local-ref>
+	
+</web-app>

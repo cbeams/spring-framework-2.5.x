@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql-map-config
+    PUBLIC "-//iBATIS.com//DTD SQL Map Config 1.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config.dtd">
+
+<sql-map-config>
+
+  <settings
+    maxExecute="0"
+    maxExecutePerConnection="0"
+		statementCacheSize="175"
+    cacheModelsEnabled="true"
+    useBeansMetaClasses="true"
+  />
+
+  <sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/Account.xml"/>
+  <sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/Category.xml"/>
+	<sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/Product.xml"/>
+  <sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/Item.xml"/>
+  <sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/Order.xml"/>
+	<sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/LineItem.xml"/>
+	<sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/Sequence.xml"/>
+
+</sql-map-config>

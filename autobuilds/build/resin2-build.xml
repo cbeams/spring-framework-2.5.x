@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+
+<!--
+	autobuilds-resin2 project build file
+	
+	Targets to compile and build the sample apps and test server
+	environments and run various HttpUnit tests against them.
+	
+	$Id: resin2-build.xml,v 1.5 2004-06-07 23:35:18 davison Exp $
+-->
+<project name="autobuilds-resin2" basedir="." default="usage">
+
+	
+	<property name="appserver.distname" value="resin-${resin2.version}" />
+	<property name="deploy.dir" value="webapps" />
+	
+
+	<path id="server-classpath">
+		<fileset dir="${servers.install.dir}/${appserver.distname}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${java.home}/../lib">
+			<include name="**/tools.jar" />
+		</fileset>
+	</path>
+	
+
+
+	<!--
+		usage
+	-->
+	<target name="usage">        
+        <echo>
+Spring Framework
+=============================================================================
+
+${ant.file} 
+
+This file should not be called directly.  See the documentation in the
+autobuilds directory for information.
+=============================================================================
+        </echo>
+
+	</target>
+		
+	
+	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server" unless="server.binary.present">
+		<echo message="Downloading ${resin2.url} to ${tarballs.dir}/${resin2.tarball}" />
+		<get
+			src="${resin2.url}"
+			dest="${tarballs.dir}/${resin2.tarball}" />	
+	</target>
+		
+		
+		
+	<!--
+		extract-server
+		
+		extract server to installs area and configure from
+		local config files
+	-->
+	<target name="extract-server">
+		<!-- check latest d/l available -->
+		<available file="${tarballs.dir}/${resin2.tarball}" property="server.binary.present"/>
+		<antcall target="get-server"/>
+		
+		<untar 
+			compression="gzip" 
+			src="${tarballs.dir}/${resin2.tarball}"
+			dest="${servers.install.dir}" />
+			
+		<copy todir="${servers.install.dir}/${appserver.distname}" overwrite="true">
+			<fileset dir="${servers.conf.dir}/${target.server}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+	
+	
+	<!--
+		deploy
+		
+		based on a system or other property (often set in the batch file / shell script
+		calling this target) deploy to the target server
+	-->
+	<target name="deploy" depends="extract-server">
+		<copy todir="${servers.install.dir}/${appserver.distname}/${deploy.dir}">
+			<fileset dir="${autobuilds.samples.dir}/${target.app}/dist">
+				<include name="*" />
+				<exclude name="**/autobuild*" />
+			</fileset>
+		</copy>
+		<mkdir dir="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}"/>
+		<unwar src="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}.war"
+			   dest="${servers.install.dir}/${appserver.distname}/${deploy.dir}/${target.app}" />
+	</target>
+	
+	
+	<!--
+		start-server
+		
+		start the tomcat server if it's a current target appserver
+	-->
+	<target name="start-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Starting server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<java 
+			classname="com.caucho.server.http.HttpServer"
+			output="${reports.dir}/${target.server}_server.log"
+			fork="true">
+		
+			<jvmarg value="-Dresin.home=${servers.install.dir}/${appserver.distname}" />
+      		
+      		<classpath refid="server-classpath" />
+      		
+      	</java>
+	</target>
+	
+	
+	<!--
+		stop-server
+		
+		stop the target server
+	-->
+	<target name="stop-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Stopping server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		
+		<echo message="Unable to automatically stop resin servers.  Please Ctrl-C in the command window that started the build"/>
+	</target>
+	
+</project>

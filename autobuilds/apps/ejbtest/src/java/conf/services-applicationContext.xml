@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!--
+  Service layer ApplicationContext definition for ejbtest project. Defines beans belonging
+  to service layer. This context will normally be shared by all EJBs, and will be made the
+  parent of the web-app's ApplicationContext, in a demand-load fashion.
+  
+  IMPORTANT: the names in here reflect all the various options (transactions, mostly) that are
+  being tested, so bean names have transaction settings and the like in them. This is just so
+  we don't get confused with all the variations.
+  Do not use this style in your own applications! Bean names should not normally reflect
+  something like transaction settings, since the whole point of IOC is to be able to switch thing
+  around without affecting most other code. This is specially the case if the beans in question
+  are programmatically requested by user code.
+  
+ -->
+	
+<beans>
+
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+	</bean>
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+  
+	<!-- JNDI DataSource for J2EE environments -->
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName"><value>java:ejbtestDS</value></property>
+	</bean>
+
+	<!-- Hibernate SessionFactory -->
+	<bean id="hibSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="mappingResources">
+      <list>
+  			<value>ejbtest.hbm.xml</value>
+        <value>org/springframework/autobuilds/ejbtest/domain/User1.hbm.xml</value>
+		  </list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+        <prop key="hibernate.show_sql">true</prop>
+        <!-- the transaction manager lookup is needed to allow a Hibernate Session to be bound to the
+             CMT transaction (through JTA) when no Spring transaction is present -->
+				<prop key="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JBossTransactionManagerLookup</prop>
+			</props>
+		</property>
+	</bean>
+
+  <!-- define a HibernateInterceptor instance -->
+  <bean id="hibInterceptor"
+        class="org.springframework.orm.hibernate3.HibernateInterceptor">
+    <property name="sessionFactory"><ref local="hibSessionFactory"/></property>
+  </bean>
+
+	<!-- Transaction manager that delegates to JTA for ultimate coordinate of transactions -->
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+  
+  <!-- ========================= PERSISTENCE DEFINITIONS ========================= -->
+  
+  <bean id="root-mapper" class="org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate.MapperImpl">
+    <property name="sessionFactory"><ref bean="hibSessionFactory"/></property>
+  </bean>
+  
+  <bean id="mapperFactory" class="org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate.MapperFactoryImpl">
+    <property name="sessionFactory"><ref bean="hibSessionFactory"/></property>
+    <property name="rootMapper"><ref bean="root-mapper"/></property>
+    <property name="mappers">
+      <list>
+      	<!--list>
+      	  <ref bean="userMapper"/>
+      	  <value>com.whatever.User1Mapper</value>
+      	</list-->
+      </list>
+    </property>
+  </bean>
+  
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+  
+  <!-- a parent bean definition which is a 'template' or base definition for transaction
+       proxies. It is set as lazy-init, since it is never supposed to be instantiated
+       itself. Children can override the transaction attributes. Note that it also 
+       specifies insertion of a HibernateInterceptor after the TransactionInterceptor,
+       to ensure that a Hibernate Session is bound to the thread/transaction as soon as
+       the tx is created, instead of later -->
+	<bean id="baseTxProxy" lazy-init="true"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="transactionManager"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+    <property name="postInterceptors">
+      <list>
+        <ref local="hibInterceptor"/>
+      </list>
+    </property>
+	</bean>
+  
+  <!-- POJO SimpleService bean, wrapped in a tx proxy
+       This would be suitable for use in a Spring TX only scenario (with or without JTA), or
+       CMT+Spring TX in JTA environment scenario -->
+  <bean id="delegatingSimpleService" parent="baseTxProxy">
+    <property name="target">
+    	<bean class="org.springframework.autobuilds.ejbtest.simple.DelegatingSimpleServiceImpl">
+        <property name="delegate"><ref bean="mapperUsingSimpleService"/></property>
+    	</bean>
+    </property>
+  </bean>
+  
+  <!-- another POJO SimpleService bean and tx proxy. As opposed to the previous bean, this one
+       doesn't use the inner bean technique for wrapping, but keeps the target separate. This
+       allows one user of this bean (above) to use it via the proxy, but another user (below)
+       that doesn't need the transactional wrapping just uses the target directly -->
+	<bean id="mapperUsingSimpleServiceTarget" class="org.springframework.autobuilds.ejbtest.simple.MapperUsingSimpleService">
+    <property name="mapper"><ref bean="root-mapper"/></property>
+	</bean>
+  <bean id="mapperUsingSimpleService" parent="baseTxProxy">
+    <property name="target"><ref bean="mapperUsingSimpleServiceTarget"/></property>
+  </bean>
+
+  <!-- a POJO SimpleService bean which is not wrapped in any way. It also uses via a dependency,
+       the non-wrapped mapperUsingSimpleServiceTarget above -->
+	<bean id="delegatingSimpleService2" class="org.springframework.autobuilds.ejbtest.simple.DelegatingSimpleServiceImpl">
+    <property name="delegate"><ref bean="mapperUsingSimpleService"/></property>
+	</bean>
+
+  <!-- don't forget that while we are using TransactionProxyFactoryBean here, you could
+       also use BeanNameAutoProxyCreator to do transactional proxying, which can be very
+       concise when there are a large number of identically wrapped proxies. See the
+       manual for details. Also note that if you need to wrap prototypes,
+       TransactionProxyFactoryBean can not handle this, you need to use ProxyFactoryBean
+       with a manually specified TransactionInterceptor, or use BeanNameAutoProxyCreator -->
+
+
+	<!-- a proxy to remote EJB, with the cached home flag on, to test home caching -->
+	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>SimpleWithCmtAndSpringTx</value>
+		</property>
+		<property name="cacheHome">
+			<value>true</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
+		</property>
+	</bean>
+
+	<!-- now another instance with the cached home flag off, to test home lookup every time -->  
+	<bean id="noCachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>SimpleWithCmtAndSpringTx</value>
+		</property>
+		<property name="cacheHome">
+			<value>false</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
+		</property>
+	</bean>
+  
+	<!-- now a local EJB (with cache on, although the test which uses this is mainly for testing local proxies -->
+	<bean id="simpleWithCmtAndSpringTx" lazy-init="true"
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/ejb/SimpleWithCmtAndSpringTxLocalHome</value>
+		</property>
+		<property name="cacheHome">
+			<value>false</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
+		</property>
+	</bean>
+  
+	<!-- now a local EJB proxy pointing to an EJB that uses CMT, but which will delegate to
+       a POJO that itself is not wrapped with Spring transactions -->
+	<bean id="simpleWithCmtAndNoSpringTx" lazy-init="true" 
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/ejb/SimpleWithCmtAndNoSpringTxLocalHome</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
+		</property>
+	</bean>
+  
+	<!-- now a local EJB proxy pointing to an EJB that uses no CMT, but which will delegate to
+       a POJO that itself is wrapped by Spring transactions -->
+	<bean id="simpleWithNoCmtAndSpringTx" lazy-init="true"
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/ejb/SimpleWithNoCmtAndSpringTxLocalHome</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
+		</property>
+	</bean>
+
+	<!-- stateless session bean proxy for test of proper Hibernate Session binding and unbinding, when
+       no spring TX is used at the same time, but only CMT transaction (accessed via JTA)  -->
+	<bean id="cmtJtaNoSpringTx" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>CmtJtaNoSpringTx</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.autobuilds.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx</value>
+		</property>
+	</bean>
+
+</beans>

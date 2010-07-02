@@ -1,0 +1,257 @@
+<?xml version="1.0"?>
+
+<!--
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/build.xml,v 1.12 2005-11-26 18:34:12 colins Exp $"
+  =======================================================================
+  Build definition file for the 'ejbtest' project.
+
+  This build uses ant, but rather than reinventing the wheel, it actually
+  relies on loading pre-made, common targets from a common build system,
+  using Ant 1.6.x's import functionality. This means that common tasks do
+  not have to be defined at all in this file.
+
+  It is still easy to add onto default behavior, and this file does do
+  that to do some ejb and cactus related work.
+
+  Dependencies needed for various build artifacts must be set in the
+  deps.xml file.
+  =======================================================================
+-->
+
+<project name="ejbtest" default="dist">
+
+  <!-- Load local and user build preferences -->
+  <property file="build.properties"/>
+  <property file="project.properties"/>
+  <property file="${basedef.dir}/build.properties"/>
+  <property file="${basedef.dir}/project.properties"/>
+  <property file="${user.home}/build.properties"/>
+  
+  <!-- Default values for unspecified properties -->
+  <!-- Anything passed in or specified in property file will override these -->
+
+  <property name="project.name" value="ejbtest"/>
+  <property name="Name" value="Ejbtest"/>
+  <property name="name" value="ejbtest"/>
+  <property name="project.version" value="0.0.1"/>
+
+  <property name="optimize" value="false"/>
+  <property name="debug" value="true"/>
+  <property name="deprecation" value="false"/>
+
+  <!-- Note that most properties are defined in init_post! -->
+  
+  <import file="${basedef.dir}/common-targets.xml"/>
+  <import file="deps.xml" />
+
+  <!-- tell common build we want to build some optional artifacts too -->
+  <property name="build.web" value="true"/>
+  <property name="build.j2eeapp" value="true"/>
+
+  <!-- override normal build behaviour so that classes don't go into
+       WEB-INF/classes, since the EAR file is going to include a jar
+	   with them anyway -->
+  <fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
+    <include name="*!!!empty!!!" />
+  </fileset>
+
+  <!-- override normal init so cactus related setup can happen -->
+  <target name="init" depends="common-targets.init">
+
+    <property name="src.cactus.dir" location="${src.dir}/test-cactus"/>
+    <property name="target.cactusclasses.dir" location="${target.dir}/cactus-classes"/>
+
+    <path id="cactus.runtime.classpath">
+        <pathelement location="${ASPECTJRT_JAR}"/>
+        <pathelement location="${CACTUS_JAR}"/>
+        <pathelement location="${CARGO_JAR}"/>
+        <pathelement location="${COMMONS_HTTPCLIENT_JAR}"/>
+        <pathelement location="${COMMONS_LOGGING_JAR}"/>
+        <pathelement location="${JUNIT_JAR}"/>
+    </path>
+    <path id="cactus.build.classpath">
+	  <path refid="cactus.runtime.classpath"/>
+      <pathelement location="${CACTUS_ANT_JAR}"/>
+    </path>
+    <!-- Define the Cactus tasks -->
+    <taskdef resource="cactus.tasks">
+      <classpath refid="cactus.build.classpath"/>
+    </taskdef>
+  </target>
+
+  <!-- hook into statics for cactus artifacts -->
+  <target name="statics-reg" depends="common-targets.statics-reg">
+    <!-- copy ejb manifest file. if XDoclet is brought in, then it will
+	     generate the manifest -->
+    <copy file="${src.dir}/ejb/ejb-jar.xml"
+          todir="${target.expejb.primary.dd.dir}"/>
+	<!-- copy everything from cactus source dir, except java files.
+	     Do not filter, to match IDE behavior. Files that need filtering
+		 need separate tree -->
+	<copy todir="${target.cactusclasses.dir}">
+      <fileset dir="${src.cactus.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+  </target>
+
+  <!-- hook into "compile", to compile cactus source too -->
+  <target name="compile" depends="common-targets.compile">
+  
+    <mkdir dir="${target.cactusclasses.dir}"/>
+    <javac destdir="${target.cactusclasses.dir}"
+           debug="${debug}"
+           deprecation="${deprecation}"
+           optimize="${optimize}" >
+	      <src path="${src.cactus.dir}"/>
+      <classpath>
+        <path refid="cactus.build.classpath"/>
+        <pathelement location="${target.classes.dir}"/>
+		<pathelement path="${project.classpath}"/>
+      </classpath>
+    </javac>
+
+  </target>
+
+  <target name="ejb-jars-pre" depends="compile">
+  </target>
+
+  <target name="main-jar" depends="common-targets.main-jar, ejb-jars"
+          description="creates main jar containing utility and other classes">
+  </target>
+  
+  <!--
+    generates JBoss-compliant EJB jars
+  -->
+  <target name="ejb-jars-jboss" if="target.appserver.jboss">
+
+	<mkdir dir="${target.ejb.dir}"/>
+
+    <ejbjar  srcdir="${target.classes.dir}"
+             flatdestdir="true"
+             descriptordir="${target.expejb.primary.dd.dir}"
+ 	         naming="basejarname"
+             dependency="full"
+             manifest="${src.etc.dir}/ejb/primary/Manifest.mf"
+			 basejarname="${project.name}-ejb">
+
+	  <include name="**/ejb-jar.xml"/>
+      <exclude name="**/weblogic-ejb-jar.xml"/>
+      <dtd publicId="-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN"
+           location="${src.dtd.dir}/ejb-jar_2_0.dtd"/>
+      <jboss destdir="${target.ejb.dir}">
+      </jboss>
+    </ejbjar>
+  </target>
+
+  <!--
+    generates EJB jars for the configured app server
+  -->
+  <target name="ejb-jars" depends="ejb-jars-pre,
+                                   ejb-jars-jboss"
+          description="generates EJB jars for the configured app server">
+  </target>
+
+  <!-- hook into "war", to handle cactus -->
+  <target name="war-post" depends="common-targets.war-post">
+	
+	<condition property="perform.cactify">
+	  <and>
+	    <istrue value="${cactify.project}"/>
+        <or>
+	      <not>
+            <available file="${target.modules.dir}/war/${primary.webapp.name}-cactified.war"/>
+          </not>
+          <not>
+            <uptodate srcfile="${target.modules.dir}/war/${primary.webapp.name}.war"
+                      targetfile="${target.modules.dir}/war/${primary.webapp.name}-cactified.war"/>
+          </not>
+        </or>
+	  </and>
+    </condition>
+	<echo>cactify.project=${cactify.project}</echo>
+	<echo>perform.cactify=${perform.cactify}</echo>
+	<antcall target="cactify-war">
+    </antcall>
+
+  </target>
+
+  <!-- worker target to do actual cactify work -->
+  <target name="cactify-war" if="perform.cactify">
+	<cactifywar srcfile="${target.modules.dir}/war/${primary.webapp.name}.war"
+	            destfile="${target.modules.dir}/war/${primary.webapp.name}-cactified.war">
+      <servletredirector/>
+      <classes dir="${target.cactusclasses.dir}"/>
+    </cactifywar>
+
+    <move file="${target.modules.dir}/war/${primary.webapp.name}.war"
+          tofile="${target.modules.dir}/war/${primary.webapp.name}-orig.war"/>
+    <copy file="${target.modules.dir}/war/${primary.webapp.name}-cactified.war"
+          tofile="${target.modules.dir}/war/${primary.webapp.name}.war"/>
+    <touch file="${target.modules.dir}/war/${primary.webapp.name}-cactified.war"/>
+  </target>
+
+  <!-- run cactus tests. these presume the container is actually up
+       note that cactus can actually start the container, if told what kind -->
+  <target name="manual-inttests" depends="init">
+
+    <cactus earfile="${target.modules.ear.dir}/${name}.ear"
+            printsummary="yes" failureproperty="tests.failed">
+      <classpath>
+        <path refid="cactus.runtime.classpath"/>
+        <path refid="project.classpath"/>
+        <path location="${target.classes.dir}"/>
+        <path location="${target.cactusclasses.dir}"/>
+        <path location="${target.testclasses.dir}"/>
+      </classpath>
+      <containerset>
+        <generic name="My Container" port="8080">
+        </generic>
+      </containerset>
+      <formatter type="xml"/>
+      <formatter type="plain" />
+      <batchtest todir="${target.testresults.dir}">
+        <fileset dir="${src.cactus.dir}">
+          <include name="**/*Tests.java"/>
+          <include name="**/*Test.java"/>
+          <exclude name="**/Test*All.java"/>
+        </fileset>
+      </batchtest>
+    </cactus>
+
+    <fail if="tests.failed">At least one test failed!</fail>
+
+  </target>
+	
+  <!-- run one cactus test -->
+  <target name="manual-inttest" depends="init">
+    <cactus earfile="${target.modules.ear.dir}/${name}.ear"
+            printsummary="yes" failureproperty="tests.failed">
+      <classpath>
+        <path refid="cactus.runtime.classpath"/>
+        <path refid="project.classpath"/>
+        <path location="${target.cactusclasses.dir}"/>
+      </classpath>
+      <containerset>
+        <generic name="My Container" port="8080">
+        </generic>
+      </containerset>
+      <formatter type="xml"/>
+      <formatter type="plain" />
+      <test name="${test.class}" todir="${target.testresults.dir}"/>
+    </cactus>
+
+    <fail if="tests.failed">At least one test failed!</fail>
+
+  </target>
+
+  <!-- manual jboss deploy target -->
+  <target name="jboss-deploy" depends="init" if="cactus.home.jboss3x"
+  		description="copy the app to the jboss server">
+    <property name="jboss.deploy.dir" value="${cactus.home.jboss3x}/server/default/deploy"/>
+	<echo>jboss.deploy.dir=${jboss.deploy.dir}</echo>
+  	<copy file="${target.modules.dir}/ear/${name}.ear" todir="${jboss.deploy.dir}"/>
+  		
+  </target>
+
+</project>

@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<!--
+  =======================================================================
+  Build file containing targets for continuously integrating build
+  =======================================================================
+-->
+<project name="build-spring-continuous" default="snapshot" xmlns:aws="antlib:org.springframework.aws"
+		xmlns:maven="antlib:org.apache.maven.artifact.ant">
+
+	<import file="${basedir}/build.xml"/>
+	
+	<property name="build.number" value="SNAPSHOT"/>
+    	
+	<target name="automated-build" depends="clean,testsummary,release"/>
+
+    <target name="upload" depends="upload-s3"/>
+
+	<target name="upload-s3" depends="s3.tasks, guard.s3.accessKey, guard.s3.secretKey">
+		<tstamp>
+			<format property="tstamp" pattern="yyyyMMdd"/>
+		</tstamp>
+		<aws:s3 accessKey="${s3.accessKey}" secretKey="${s3.secretKey}">
+			<upload bucketName="dist.springframework.org"
+			        file="${target.release.dir}/${release-with-dependencies.zip}"
+			        toFile="snapshot/SPR/spring-framework-${spring-version}-with-dependencies-${tstamp}-${build.number}.zip"
+					publicRead="true"/>
+			<upload bucketName="dist.springframework.org"
+			        file="${target.release.dir}/${release-with-docs.zip}"
+			        toFile="snapshot/SPR/spring-framework-${spring-version}-with-docs-${tstamp}-${build.number}.zip"
+					publicRead="true"/>
+			<upload bucketName="dist.springframework.org"
+			        file="${target.release.dir}/${release.zip}"
+			        toFile="snapshot/SPR/spring-framework-${spring-version}-${tstamp}-${build.number}.zip"
+					publicRead="true"/>
+		</aws:s3>
+	</target>
+
+    <target name="guard.s3.accessKey" unless ="s3.accessKey">
+		<fail message="This target requires the s3.accesskey property to be set"/>
+	</target>
+
+	<target name="guard.s3.secretKey" unless ="s3.secretKey">
+		<fail message="This target requires the s3.secretKey property to be set"/>
+	</target>
+	
+	<target name="s3.tasks">
+		<path id="aws.lib.path">
+			<fileset dir="${basedir}/lib">
+				<include name="aws/spring-aws-ant.jar"/>
+				<include name="jets3t/jets3t.jar"/>
+				<include name="jakarta-commons/commons-codec.jar"/>
+				<include name="jakarta-commons/commons-httpclient.jar"/>
+				<include name="jakarta-commons/commons-logging.jar"/>
+			</fileset>
+		</path>
+		<taskdef resource="org/springframework/aws/antlib.xml" uri="antlib:org.springframework.aws"
+			classpathref="aws.lib.path" />
+	</target>
+
+	<target name="mavendeploy" depends="maventasks"
+			description="Uploads all jars,sources, and POMs to a remote m2 repository">
+
+		<maven:remoteRepository id="spring-release" url="http://s3.amazonaws.com/maven.springframework.org/release"/>
+		<maven:remoteRepository id="spring-external" url="http://s3.amazonaws.com/maven.springframework.org/external"/>
+		<maven:remoteRepository id="central" url="http://repo1.maven.org/maven2"/>
+
+		<maven:install-provider groupId="org.springframework.aws" artifactId="spring-aws-maven" version="1.2.2">
+			<remoteRepository refid="spring-release"/>
+			<remoteRepository refid="spring-external"/>
+			<remoteRepository refid="central"/>
+		</maven:install-provider>
+
+		<maven:deploy file="${dist.dir}/spring.jar">
+			<pom file="${dist.dir}/maven/spring.pom" />
+			<attach file="${dist.dir}/spring-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-aop.jar">
+			<pom file="${dist.dir}/maven/spring-aop.pom" />
+			<attach file="${dist.dir}/module-sources/spring-aop-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-beans.jar">
+			<pom file="${dist.dir}/maven/spring-beans.pom" />
+			<attach file="${dist.dir}/module-sources/spring-beans-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-context-support.jar">
+			<pom file="${dist.dir}/maven/spring-context-support.pom" />
+			<attach file="${dist.dir}/module-sources/spring-context-support-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-context.jar">
+			<pom file="${dist.dir}/maven/spring-context.pom" />
+			<attach file="${dist.dir}/module-sources/spring-context-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-core.jar">
+			<pom file="${dist.dir}/maven/spring-core.pom" />
+			<attach file="${dist.dir}/module-sources/spring-core-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-jdbc.jar">
+			<pom file="${dist.dir}/maven/spring-jdbc.pom" />
+			<attach file="${dist.dir}/module-sources/spring-jdbc-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-jms.jar">
+			<pom file="${dist.dir}/maven/spring-jms.pom" />
+			<attach file="${dist.dir}/module-sources/spring-jms-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-orm.jar">
+			<pom file="${dist.dir}/maven/spring-orm.pom" />
+			<attach file="${dist.dir}/module-sources/spring-orm-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-test.jar">
+			<pom file="${dist.dir}/maven/spring-test.pom" />
+			<attach file="${dist.dir}/module-sources/spring-test-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-tx.jar">
+			<pom file="${dist.dir}/maven/spring-tx.pom" />
+			<attach file="${dist.dir}/module-sources/spring-tx-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-web.jar">
+			<pom file="${dist.dir}/maven/spring-web.pom" />
+			<attach file="${dist.dir}/module-sources/spring-web-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-webmvc-portlet.jar">
+			<pom file="${dist.dir}/maven/spring-webmvc-portlet.pom" />
+			<attach file="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-webmvc-struts.jar">
+			<pom file="${dist.dir}/maven/spring-webmvc-struts.pom" />
+			<attach file="${dist.dir}/module-sources/spring-webmvc-struts-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/modules/spring-webmvc.jar">
+			<pom file="${dist.dir}/maven/spring-webmvc.pom" />
+			<attach file="${dist.dir}/module-sources/spring-webmvc-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/weaving/spring-agent.jar">
+			<pom file="${dist.dir}/maven/spring-agent.pom" />
+			<attach file="${dist.dir}/weaving-sources/spring-agent-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/weaving/spring-aspects.jar">
+			<pom file="${dist.dir}/maven/spring-aspects.pom" />
+			<attach file="${dist.dir}/weaving-sources/spring-aspects-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+		<maven:deploy file="${dist.dir}/weaving/spring-tomcat-weaver.jar">
+			<pom file="${dist.dir}/maven/spring-tomcat-weaver.pom" />
+			<attach file="${dist.dir}/weaving-sources/spring-tomcat-weaver-sources.jar" classifier="sources"/>
+		</maven:deploy>
+
+	</target>
+
+</project>

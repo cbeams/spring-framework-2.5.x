@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "file:/C:/Program%20Files/Oxygen3.1/docbook/dtd/docbookx.dtd"
+[
+<!ENTITY selector SYSTEM "selector.xml">
+<!ENTITY service SYSTEM "service.xml">
+
+]>
+<book>
+    <bookinfo>
+        <title>Spring Framework - J2EE Made Easy</title>
+        <subtitle>Sandbox Documentation</subtitle>
+    </bookinfo>
+    <toc/>
+    
+    &selector;
+    
+    &service;
+</book>

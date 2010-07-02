@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+  - Root application context for the Countries application.
+  - Web-specific beans are defined in "countries-servlet.xml".
+  -->
+<beans>
+
+	<!--
+	  - The message source for this context, loaded from localized "messages_xx" files
+	  - in the classpath, i.e. "/WEB-INF/classes/messages.properties" or
+	  - "/WEB-INF/classes/messages_fr.properties".
+	  -
+	  - "getMessage" calls to this context will use this source.
+	  - Child contexts can have their own message sources, inheriting all messages from this
+	  - source, being able to define new messages and override ones defined in this source.
+	  -
+	  - We have no need for application messages in this tiny application, so this
+		- definition will simply be used by the next level (countries-servlet.xml).
+	  -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">	
+		<property name="basename" value="messages"/>
+	</bean>
+
+	<!-- The central service facade of this application -->
+	<bean id="countryService" class="org.springframework.samples.countries.DefaultCountryService"/>
+
+</beans>

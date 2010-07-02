@@ -1,0 +1,104 @@
+<project name="jasperdemo" default="war">
+
+	<property name="spring.root" value="../../"/>
+	<property name="dir.src.java" value="src/java"/>
+	<property name="dir.src.war" value="src/war"/>
+	<property name="dir.dist" value="dist"/>
+	<property name="dir.build" value="target/classes"/>
+	<property name="dir.war.expanded" value="target/war-expanded"/>
+
+	<fileset id="libs" dir="${spring.root}/lib">
+		<include name="jasperreports/jasperreports*.jar"/>
+		<include name="j2ee/servlet-api.jar"/>
+		<include name="jakarta-commons/commons-logging.jar"/>
+	</fileset>
+
+	<path id="project.classpath">
+		<fileset refid="libs"/>
+		<path path="${spring.root}/dist/spring.jar"/>
+	</path>
+
+	<target name="clean">
+		<delete dir="${dir.dist}"/>
+		<delete dir="${dir.build}"/>
+		<delete dir="${dir.war.expanded}"/>
+		<mkdir dir="${dir.dist}"/>
+		<mkdir dir="${dir.build}"/>
+		<mkdir dir="${dir.war.expanded}"/>
+	</target>
+
+	<target name="compile-jasper-reports">
+		<delete>
+			<fileset dir="${dir.src.war}">
+				<include name="**/*.jasper"/>
+			</fileset>
+		</delete>
+		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
+			<classpath>
+				<fileset dir="${spring.root}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</taskdef>
+		<jrc>
+			<src location="${dir.src.war}/WEB-INF/reports/simpleReport.jrxml"/>
+			<src location="${dir.src.war}/WEB-INF/reports/subReportParent.jrxml"/>
+			<src location="${dir.src.war}/WEB-INF/reports/subReportChild.jrxml"/>
+		</jrc>
+	</target>
+
+	<target name="compile" depends="clean">
+		<javac srcdir="${dir.src.java}"
+			   destdir="${dir.build}"
+			   classpathref="project.classpath"
+			   includes="**/*.java"/>
+	</target>
+
+	<target name="expand-war" depends="war">
+		<mkdir dir="${dir.war.expanded}"/>
+		<unzip src="${dir.dist}/jasperdemo.war" dest="${dir.war.expanded}"/>
+	</target>
+
+	<target name="war" depends="compile-jasper-reports, compile">
+		<war destfile="${dir.dist}/jasperdemo.war" webxml="${dir.src.war}/WEB-INF/web.xml">
+			<classes dir="${dir.build}">
+				<include name="**/*.class"/>
+			</classes>
+			<webinf dir="${dir.src.war}/WEB-INF">
+				<include name="**/*.xml"/>
+				<include name="**/*.jsp"/>
+				<include name="**/*.properties"/>
+				<include name="**/*.jasper"/>
+				<include name="**/*.jrxml"/>
+				<exclude name="web.xml"/>
+			</webinf>
+			<lib dir="${spring.root}/lib/itext">
+				<include name="itext*.jar"/>
+			</lib>
+			<lib dir="${spring.root}/dist">
+				<include name="spring.jar"/>
+			</lib>
+			<lib dir="${spring.root}/lib/jasperreports">
+				<include name="jasperreports*.jar"/>
+			</lib>
+			<lib dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-digester.jar"/>
+				<include name="commons-beanutils.jar"/>
+				<include name="commons-logging.jar"/>
+			</lib>
+			<lib dir="${spring.root}/lib/jdt">
+				<include name="jdt*.jar"/>
+			</lib>
+			<lib dir="${spring.root}/lib/bsh">
+				<include name="bsh*.jar"/>
+			</lib>
+			<lib dir="${spring.root}/lib/poi">
+				<include name="poi*.jar"/>
+			</lib>
+			<fileset dir="${dir.src.war}">
+				<include name="index.jsp"/>
+			</fileset>
+		</war>
+	</target>
+
+</project>

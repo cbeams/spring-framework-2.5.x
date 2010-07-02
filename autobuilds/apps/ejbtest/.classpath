@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry output="target/classes" kind="src" path="src/java"/>
+	<classpathentry output="target/test-classes" kind="src" path="src/test"/>
+	<classpathentry output="target/cactus-classes" kind="src" path="src/test-cactus"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/aopalliance/aopalliance.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/jakarta-commons/commons-logging.jar"/>
+	<classpathentry sourcepath="/SPRINGFRAMEWORK_SRC" kind="var" path="SPRING_BASE/dist/spring.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/autobuilds/lib/jakarta-commons/commons-httpclient-2.0.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/j2ee/ejb.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/junit/junit.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/autobuilds/lib/junit-addons/junit-addons-1.4.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/jakarta-commons/commons-dbcp.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/jakarta-commons/commons-collections.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/jakarta-commons/commons-pool.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/xerces/xercesImpl.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/j2ee/xml-apis.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/j2ee/jta.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/hsqldb/hsqldb.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/ehcache/ehcache-1.1.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/hibernate/hibernate3.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/dom4j/dom4j-1.6.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/cglib/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/dist/spring-hibernate3.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/autobuilds/lib/aspectj/aspectjrt-1.2.1.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/autobuilds/lib/cactus/cactus-1.7.1.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/autobuilds/lib/cactus/cactus-ant-1.7.1.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

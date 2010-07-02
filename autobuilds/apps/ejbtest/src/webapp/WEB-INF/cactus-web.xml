@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+    <!-- Put Cactus specific definitions here. Note that by default
+         the <cactifywar> Ant task automatically adds Servlet, Filter
+         and JSP redirector definitions and mappings. You only need
+         to edit this file if you want to change these defaults or 
+         add other definitions required for Cactus testing. -->
+
+</web-app>

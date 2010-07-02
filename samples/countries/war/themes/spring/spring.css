@@ -1,0 +1,42 @@
+html { padding: 0; margin: 0px; background-color: rgb(228,239,243); text-align: center; font-family: Verdana, Arial, Helvetica, sans; }
+body { width: 719px; margin: auto; margin-top:20px; background: url(header.gif) no-repeat; padding: 74px 0 0 0; position:relative;}
+h1 { font-size: 14px; font-weight: normal; color: #90A720; margin:0 0 10px 0; }
+h2 { font-size: 14px; font-weight: bold; color: gray; margin:0 0 10px 0; }
+h3 { font-size: 13px; font-style: italic; color: #90A720; margin:5px 0; }
+h4 { font-size: 13px; font-style: italic; color: gray; margin:5px 0; }
+p { margin: 2px 0 0 0; padding:0; }
+img { border:0; }
+table {width:98%; border:0; margin:auto; padding:0; border-collapse: collapse;}
+form div { display:none; }
+form .pager, form .psize, form .pagernav { display:block; }
+.odd { background:#F5F5F5; }
+.even {background:white; }
+tr.ruled { cursor: pointer; background: #90A720; }
+#pageContent { margin: 0; padding:0; background: white url(bgContent.gif) ; text-align:left; }
+#inContent { padding:20px 0 0 0; margin:0; }
+#nav { float: left; width:140px; padding: 0 5px 0 30px; background: none; font-size: 12px; color: #000000; }
+#nav ul { padding: 10px 0; 0; margin:0; width: 120px; }
+#nav ul li {display: inline; padding:0; margin: 0; }
+#nav ul li a {text-decoration:none; display:block; color: gray; background: none transparent; }
+#nav ul li a img { display:block; width:20px; margin:auto; padding:10px 0 0 0;} 
+#nav ul li a span { display:none;} 
+#nav ul li a:hover { color:black; }
+#nav ul li a:hover span { 
+  position: absolute; top:280px; left:20px; display: block; 
+  width:140px; margin: 0; padding: 2px; border: #90A720 1px solid; 
+  font-size: 10px; color: #90A720; background: none #F5F5F5; text-align:center;
+}
+#content { margin: 0 25px 10px 200px; background: none; font-size: 12px; color: #000000; text-align:left; }
+#footer { margin:0; padding:0; height:29px; background: url(footer.gif); }
+#footer ul { display: none; }
+.news { border: #C9C9C9 1px solid; padding: 12px; margin: 20px 0; font-size: 12px; color: #606060; background-color: #F5F5F5; }
+.title { width: 100%; text-align: center; }
+.title, .title select, .title input, .title a {color: #90A720; background: #E5E5E5; }
+.title select, .title input { font-size:9px; width: auto; }
+.title th a { text-decoration:none; padding: 0 1em;}
+.pagernav { float:left; }
+.pagernav a { text-decoration: none; color: #90A720; }
+.psize { float: right; font-size: 9px;}
+.psize select { font-size: 9px; color:gray; }
+.pager { clear:both; margin:5px 0 0 0; color:gray; font-size: 9px; }
+.back { position: absolute; width:20px; height:29px; top: 212px; }

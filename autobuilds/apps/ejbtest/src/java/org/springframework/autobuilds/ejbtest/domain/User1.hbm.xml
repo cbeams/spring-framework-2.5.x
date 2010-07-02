@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD//EN" 
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class
+        name="org.springframework.autobuilds.ejbtest.domain.User1"
+        table="USERS1"
+        dynamic-update="true"
+        dynamic-insert="false"
+    >
+
+        <id
+            name="id"
+            column="USER_ID"
+            type="java.lang.Long"
+            unsaved-value="null"
+        >
+            <generator class="identity">
+            </generator>
+        </id>
+
+        <property
+            name="username"
+            type="java.lang.String"
+            update="true"
+            insert="true"
+            access="property"
+            column="username"
+            not-null="true"
+        />
+
+        <property
+            name="password"
+            type="java.lang.String"
+            update="true"
+            insert="true"
+            access="property"
+            column="password"
+            not-null="false"
+        />
+    </class>
+
+</hibernate-mapping>

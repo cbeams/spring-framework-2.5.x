@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+
+<!--
+  - Application context definition for "example" DispatcherServlet.
+  -->
+
+<beans>
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName"><value>oracle.jdbc.driver.OracleDriver</value></property>
+		<property name="url"><value>jdbc:oracle:thin:@ 192.168.0.233:1521:rj</value></property>
+		<property name="username"><value>SYSTEM</value></property> <!--  Change this! -->
+		<property name="password"><value>MANAGER</value></property> <!-- TODO Change this! -->
+		<property name="maxActive"><value>50</value></property>
+	</bean>
+
+
+
+<!-- ALSO NEED LOW OVERHEAD POJO FACTORY THAT USES TRANSACTION INTERCEPTOR OR SIMILAR -->
+
+	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
+		<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource"><ref local="dataSource"/></property>
+	</bean>
+		
+	<!-- The bean to speak to the TokenDB -->
+    <bean id="dao" class="org.springframework.benchmark.cmt.server.dao.JdbcBenchmarkDao"
+    				autowire="constructor">
+    </bean>
+
+	<!-- prototype stuff -->
+	
+	
+	<bean id="bmPrototype" 
+		autowire="constructor" class="org.springframework.benchmark.cmt.server.pojo.PojoBenchmark"
+		singleton="false"
+	/>
+	
+	<bean id="prototypeBmInvokerInterceptor" 
+		class="org.springframework.aop.interceptor.PrototypeInvokerInterceptor">	
+		<property name="targetBeanName"><value>bmPrototype</value></property>
+	</bean>
+	
+	
+	<bean id="apartmentBmInvokerInterceptor" 
+		class="org.springframework.aop.interceptor.ApartmentInvokerInterceptor">	
+		<property name="targetBeanName"><value>bmPrototype</value></property>
+	</bean>
+	
+	<bean id="prototypeBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="prototypeBmInvokerInterceptor"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+
+	<bean id="apartmentBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="apartmentBmInvokerInterceptor"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+
+
+
+	<!-- Petclinic primary business object: HSQL JDBC implementation -->
+	<bean id="bmTarget" autowire="constructor" class="org.springframework.benchmark.cmt.server.pojo.PojoBenchmark">
+	</bean>
+	
+	
+
+</beans>

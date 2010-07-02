@@ -1,0 +1,151 @@
+An overview of the current thinking for implementing JMS functionality in Spring.
+
+Andre submitted the first code.  The work is to refine his initial upload to the 
+sandbox.
+
+At the high level send and recieve functionality are handled seprately, as
+they are currently in the sandbox code Andre. This makes sense especially in
+the case of J2EE usage since all J2EE users are interested in doing in
+client code is sending since the container creates the receiving
+infrastructure.  Since spring is mainly focused on J2EE users, sending should
+be made as easily as possible.  Also since app servers provide advanced 
+implementations of the ConnectionFactory, spring jms should be able to
+leverage this just as in the case of jdbc datasources provided by vendors.  
+The listening side would primarily be for creating stand-alone JMS apps, 
+that is, outside the J2EE container that uses MDBs.
+
+Another goal is to hide as much as possible the difference between the 
+two messaging domain, point-to-point (queues) and publish/subscribe (topics)
+JMS 1.0.2 API has similar but seperate class heirarchies for the two domain which
+results in alot of reduntant code.  The JMS 1.1 API fixes this and also adds
+functionality such as the ability to use both domains on the same JMS session,
+
+JMS 1.1 is part of the next J2EE spec and has in fact been available in many
+JMS implementations for many years.  The switch for users from a 1.0.2 API to
+1.1 api should be transparent.
+
+
+JmsSender
+-----------
+
+I was thinking that the JmsTemplate class/classes should be changed to an
+interface.  The main motivation for this right now is because of the
+changes between JMS 1.0.2 and 1.1. Not only has the api changed, which in
+itself maybe isn't so important, but the new API adds news functionality
+such as the ability to mix sending on topics and queues using the same
+session and within the same transaction.  Other reasons relate to more
+advanced usage of how we might handle session management - more on that
+later.
+
+I was also thinking of a name change, to JmsSender or JmsProducer, to have
+commonality with the existing spring mail package and it seems to express
+better what functionality the class offers.  This interface would offer
+methods much like those in the JMS 1.1 MessageProducer interface, various
+send methods and also provide methods for use with a MessageCreator and
+do perform a sync request/reply.  The reason a Destination object should
+be in the signatures is in the case of sending to a destination defined in
+an incoming messages Message.getJMSReplyTo() It will also be possible to
+send to a destination specifying the jndi string of the destinaton,
+probably the most common usage.  There should also be some accomdation to
+allow transactional sending of multiple messages.
+
+
+MDB Helper Classes
+------------------
+The most basic of which would make it easy to get at the spring app context.
+
+
+Connection and Session management.
+----------------------------------
+Just like in the case of jdbc, you really don't want to actually create
+and close a connection for each send operation, so a JMS connection pool
+is necessary.  One straightforward way to do this is to provide
+implementations of the ConnectionFactory interface that perform the
+pooling, much like how connection pooling is done is jdbc using the
+Datasource interface.
+
+There is definetly value for us to provide implementations of the
+ConnectionFactory that will perform connection/session pooling for any
+vendors JMS impl.  The Weblogic JMS impl provides JMS connections/session
+pooling features as do others.  However, some don't and support varies in
+the details.  I need to look into this more.
+
+Session pooling is more significantly more complicated and I need to look
+into it more. Unlike JDBC, JMS connections are thread safe and not the
+focal point of JMS functionality. JMS sessions are where all the action
+occurs are not thread safe.  Sessions are considered to be 'lightweight'
+objects, as mentioned in the JMS spec, but Weblogic considers them to
+be 'heavyweight', and so they are reused.  Other reasons to reuse the same
+session over and over again is to ensure message ordering and to group
+multiple sends in the same transaction. The JMS spec states that ordering
+is only done if sending from the same session. This is where some other
+JmsTemplate/JmsProducer implementation might be necessary.  This case
+could also potentially be handled by a SessionFactory or strategy pattern
+inside
+an existing impl.  Session pooling would then be on a per thread and
+destination basis.
+
+
+XA Connections
+--------------
+Accomodate enlistment in a distributed transaction...
+
+
+
+Exceptions
+----------
+I guess it is a spring mandate to use runtime exceptions, though the
+existing exception heirarchy is much better than in the case of jdbc. 
+There is a vendor code, but I've really seen it used much to classify
+errors.  The work here would be to either just have a single runtime 
+spring JmsException that wrapps all underlying JMSExectpions or to 
+preserve the existing heirarchy but switch them all to runtime.... 
+
+
+
+Stand-alone Usage
+-----------------
+This relates to the creation of message listeners and also the
+'mini-container' or JmsService that would be used to set it all up.  More
+on this another time.
+
+Client Side Selector
+--------------------
+Use the client side selector in a MDB or stand-alone message listener to
+aid in message routing/processing.
+
+
+JMS Marshalling
+----------------
+I have robust JMS<->Bean converter which we have found to be incredibly
+useful.  Might add some send methods to the JmsProducer in order to
+automatically convert....
+
+
+Misc
+----
+A pretty printer for messges, always nice for debugging purposes.
+
+
+
+Why not to use commons-messenger.
+---------------------------------
+
+I reviewed the commons-messenger API and while it does offer 'domain
+unfication' it falls short in other areas.
+
+1) The approach they took in managing/caching the connections/sessions
+does not use the approach of using a different implementation of the
+ConnectionFactory interface. Instead is done inside each 'messenger'
+instance with their own custom classes. This means that people could not
+leverage advanced features offered by weblogic and other vendors
+since that use the ConnectionFactory approach to pooling resources.
+
+However, for advanced usage, we might need to do something similar, though
+I'd like to see how far we can go with the ConnectionFactory approach.
+
+2) Use of checked exceptions.
+
+3) Combines in one class the send and receive stuff, which I think is more
+naturally done in seperate clasess/interfaces.
+

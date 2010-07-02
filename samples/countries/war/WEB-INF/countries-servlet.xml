@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+  - DispatcherServlet application context for the Countries web tier.
+  -->
+<beans>
+
+	<!-- ========================= MAPPING DEFINITIONS ========================= -->
+
+	<!--
+		- Explicit view mappings in bundle instead of default InternalResourceViewResolver.
+	  - Fetches the view mappings from localized "views_xx" classpath files, i.e.
+	  - "/WEB-INF/classes/views-countries.properties" or "/WEB-INF/classes/views-countries_fr.properties".
+	  -
+	  - Symbolic view names returned by controllers will be resolved in the respective
+	  - properties file, allowing for arbitrary mappings between names and resources.
+	  -
+	  - We use the "defaultParentView" property. All views defined will by default inherit
+		- the properties defined in the "modelView" view.
+	  -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+		<property name="basename" value="views-countries"/>
+		<property name="defaultParentView" value="modelView"/>
+	</bean>
+
+	<!--
+		- We specify here that Locale and theme are stored in cookies.
+	  - They could be stored in a Session. Default resolvers don't allow changing them on the fly.
+		-->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>
+
+	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+		<property name="defaultThemeName" value="spring"/>
+	</bean>
+
+	<!--
+	 - Explicit URL handler mapping instead of default BeanNameUrlHandlerMapping.
+	 -->
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="localeChangeInterceptor"/>
+				<ref bean="themeChangeInterceptor"/>
+			</list>
+		</property>
+		<property name="mappings">
+			<props>
+				<prop key="/home.htm">countriesController</prop>
+				<prop key="/config.htm">countriesController</prop>
+				<prop key="/copy.htm">countriesController</prop>
+				<prop key="/main/home.htm">countriesController</prop>
+				<prop key="/main/detail.htm">countriesController</prop>
+				<prop key="/main/countries.xls">countriesController</prop>
+				<prop key="/main/countries.pdf">countriesController</prop>
+				<prop key="/notfound.htm">errorsController</prop>
+			</props>
+		</property>
+	</bean>
+
+
+	<!-- ========================= CONTROLLER DEFINITIONS ========================= -->
+
+	<!--
+		- Interceptors will pre-handle any request in this servlet, no matter which controller
+		- is mapped for a request.
+		-
+		- We use two built-in interceptors to detect user locale or theme change requests.
+		- The third interceptor is specific to this Demo. It allows views to easily be aware
+		- about the configuration detected. Precisely to know if a copy data to database can be
+		- proposed to the user.
+	-->
+	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+
+	<bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
+
+	<!-- General use multi-action controller for errors -->
+	<bean id="errorsController" class="org.springframework.samples.countries.web.ErrorsController">
+		<property name="methodNameResolver">
+			<bean class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
+				<property name="mappings">
+					<props>
+						<prop key="/notfound.htm">handleHttp404</prop>
+					</props>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- Application specific multi-action controller -->
+	<bean id="countriesController" class="org.springframework.samples.countries.web.CountriesController">
+		<property name="methodNameResolver">
+			<bean class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
+				<property name="mappings">
+					<props>
+						<prop key="/home.htm">handleHome</prop>
+						<prop key="/config.htm">handleConfig</prop>
+						<prop key="/copy.htm">handleCopy</prop>
+						<prop key="/main/home.htm">handleMain</prop>
+						<prop key="/main/detail.htm">handleDetail</prop>
+						<prop key="/main/countries.xls">handleExcel</prop>
+						<prop key="/main/countries.pdf">handlePdf</prop>
+					</props>
+				</property>
+			</bean>
+		</property>
+		<property name="countryService" ref="countryService"/>
+	</bean>
+
+</beans>

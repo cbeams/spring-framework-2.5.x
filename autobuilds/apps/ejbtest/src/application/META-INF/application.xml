@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE application
+  PUBLIC '-//Sun Microsystems, Inc.//DTD J2EE Application 1.3//EN'
+  'http://java.sun.com/j2ee/dtds/application_1_3.dtd'>
+
+<application>
+  <display-name>ejbtest</display-name>
+  <description>Spring and EJB Sample</description>
+
+  <module>
+    <java>ejbtest.jar</java>
+  </module>
+  <module>
+    <java>aopalliance.jar</java>
+  </module>
+  <module>
+    <java>cglib-nodep-2.1_3.jar</java>
+  </module>
+  <module>
+    <java>commons-codec.jar</java>
+  </module>
+  <module>
+    <java>commons-collections.jar</java>
+  </module>
+  <module>
+    <java>commons-logging.jar</java>
+  </module>
+  <module>
+    <java>dom4j-1.6.jar</java>
+  </module>
+  <module>
+    <java>ehcache-1.1.jar</java>
+  </module>
+  <module>
+    <java>hibernate3.jar</java>
+  </module>
+  <module>
+    <java>spring.jar</java>
+  </module>
+  <module>
+    <java>spring-hibernate3.jar</java>
+  </module>
+
+  <module>
+    <ejb>ejbtest-ejb.jar</ejb>
+  </module>
+
+  <module>
+    <web>
+      <web-uri>ejbtest.war</web-uri>
+      <context-root>ejbtest</context-root>
+    </web>
+  </module>
+
+</application>

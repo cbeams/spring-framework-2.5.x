@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<project name="@COMPLETE" default="usage" basedir=".">
+	<property id="build properties" file="build.properties" />
+	<property id="project properties" file="project.properties" />
+	<property file="${toplevel.build.properties}" />
+	
+	<import id="web" file="${webapp.build.xml}" />
+
+	<!-- The default project compile classpath -->
+	<path id="project.compile.classpath">
+		<path refid="base.compile.classpath" />
+		<path refid="all.libs.classpath" />
+	</path>
+
+	<target name="build.webapp.libs">
+		<copy todir="${target.weblib.dir}">
+			<fileset file="${commons.logging.jar}" />
+			<fileset file="${log4j.jar}" />
+			<fileset file="${jakarta.taglibs.jar}" />
+			<fileset file="${jstl.jar}" />
+			<fileset file="${spring.jar}" />
+		</copy>
+	</target>
+</project>

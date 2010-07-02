@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/mvc"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.springframework.org/schema/mvc"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+	
+	<xsd:element name="url-mappings">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="url-mapping" type="urlMappingType" minOccurs="1" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:complexType name="urlMappingType">
+		<xsd:sequence>
+			<xsd:element name="handler" type="handlerType" minOccurs="1" maxOccurs="unbounded"/>
+			<xsd:element name="interceptor" type="interceptorType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="always-use-full-path" default="false">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="true"/>
+					<xsd:enumeration value="false"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="lazy-init-handlers" default="false">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="true"/>
+					<xsd:enumeration value="false"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="url-decode" default="false">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="true"/>
+					<xsd:enumeration value="false"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="default-handler" type="xsd:string">
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="handlerType">
+		<xsd:attribute name="path" use="required" type="xsd:string"/>
+		<xsd:attribute name="controller-ref" use="required" type="xsd:string"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="interceptorType">
+		<xsd:attribute name="interceptor-ref" use="required" type="xsd:string"/>
+	</xsd:complexType>
+	
+	<xsd:element name="view-resolvers">
+		<xsd:complexType>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="internal-resource-view-resolver" type="internalResourceViewResolverType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="bean-name-view-resolver" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:choice>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:complexType name="internalResourceViewResolverType">
+		<xsd:attribute name="type" default="default">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="default"/>
+					<xsd:enumeration value="jstl"/>
+					<xsd:enumeration value="tiles"/>
+					<xsd:enumeration value="tiles-jstl"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>		
+		<xsd:attributeGroup ref="urlBasedViewResolverAttributes"/>
+		<xsd:attributeGroup ref="abstractCachingViewResolverAttributes"/>
+		<!-- TODO possibly add static attributes to the options here -->
+	</xsd:complexType>
+	
+	<xsd:attributeGroup name="urlBasedViewResolverAttributes">
+		<xsd:attribute name="prefix" type="xsd:string" default="/WEB-INF/jsp/"/>
+		<xsd:attribute name="suffix" type="xsd:string" default=".jsp"/>
+		<xsd:attribute name="content-type" type="xsd:string"/>
+		<xsd:attribute name="request-context-attribute" type="xsd:string"/>
+		<xsd:attribute name="redirect-context-relative" default="true">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="true"/>
+					<xsd:enumeration value="false"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>		
+		<xsd:attribute name="redirect-http10-compatible" default="true">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="true"/>
+					<xsd:enumeration value="false"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	
+	<xsd:attributeGroup name="abstractCachingViewResolverAttributes">
+		<xsd:attribute name="enable-caching" default="true">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="true"/>
+					<xsd:enumeration value="false"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>		
+	</xsd:attributeGroup>
+
+</xsd:schema>
